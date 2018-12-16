@@ -9,6 +9,6 @@ Most of these algorithms are sourced from other projects, especially the STK (So
 
 Other interesting projects to check out that similarly target embedded applicatons are: TeensyAudio (C++), Hoxton Owl (C++), Axoloti (C), and Mutable Instruments (C++). 
 
-(1) Dynamic allocation is avoided to meet the needs of a larger number of embedded applications. Embedded developers often utilize architectures that don't fully support stdlib memory allocation functions like calloc, malloc, and free.
+(1) Use of standard malloc and calloc are avoided, and a custom memory pool implementation is included instead, allowing dynamic memory allocation/deallocation within a fixed block size.
 
 (2) The template features an easily reconfigurable UI and simple block and tick setup to test the library components. Of course, if you intend to use the provided JUCE plugin project, you need to get JUCE and the Projucer ( https://www.juce.com/get-juce ). Check out the first tutorial to get started - it's fun an easy! If you intend to include the LEAF framework in your own C++ project using JUCE or other platforms, you will probably need to rename each source file from .c to .cpp. This should be straightforward. Contact the developer if you have any troubles (mrmulshine@gmail.com).
