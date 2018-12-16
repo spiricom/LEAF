@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="ArQetv" name="LEAF" projectType="audioplug" version="1.0.0"
+              bundleIdentifier="com.pumusic.LEAF" includeBinaryInAppConfig="1"
+              buildVST="1" buildVST3="0" buildAU="1" buildAUv3="0" buildRTAS="0"
+              buildAAX="0" pluginName="LEAF" pluginDesc="LEAF" pluginManufacturer="pumusic"
+              pluginManufacturerCode="Manu" pluginCode="Arqe" pluginChannelConfigs="{2,2}"
+              pluginIsSynth="0" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
+              pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="LEAFAU"
+              pluginRTASCategory="" aaxIdentifier="com.pumusic.LEAF" pluginAAXCategory="2"
+              jucerVersion="5.4.1" companyName="Princeton University" companyEmail="mrmulshine@gmail.com"
+              displaySplashScreen="1" reportAppUsage="1" splashScreenColour="Dark"
+              buildStandalone="1" enableIAA="0" cppLanguageStandard="11" companyCopyright="Princeton University"
+              pluginFormats="buildVST,buildAU,buildStandalone" pluginCharacteristicsValue="pluginWantsMidiIn">
+  <MAINGROUP id="F7Bywq" name="LEAF">
+    <GROUP id="{14C5E2CD-5D51-3FD3-5677-28BECA29E95E}" name="Source">
+      <GROUP id="{C9F79DF0-2C57-F2B0-7B1B-78A14937E038}" name="LEAF">
+        <GROUP id="{B591B686-9726-94F1-28CD-B08349461C76}" name="Externals">
+          <FILE id="oBE37z" name="atkdetect.c" compile="1" resource="0" file="../LEAF/Externals/atkdetect.c"/>
+          <FILE id="MchITp" name="atkdetect.h" compile="0" resource="0" file="../LEAF/Externals/atkdetect.h"/>
+          <FILE id="O0YJRY" name="d_fft_mayer.c" compile="1" resource="0" file="../LEAF/Externals/d_fft_mayer.c"/>
+          <FILE id="L7c1sT" name="d_fft_mayer.cpp" compile="1" resource="0" file="../LEAF/Externals/d_fft_mayer.cpp"/>
+          <FILE id="HdG3WV" name="d_fft_mayer.h" compile="0" resource="0" file="../LEAF/Externals/d_fft_mayer.h"/>
+          <FILE id="E7GkIZ" name="mpool.cpp" compile="1" resource="0" file="../LEAF/Externals/mpool.cpp"/>
+          <FILE id="udMePt" name="mpool.h" compile="0" resource="0" file="../LEAF/Externals/mpool.h"/>
+          <FILE id="Hu4b98" name="trigtbl.h" compile="0" resource="0" file="../LEAF/Externals/trigtbl.h"/>
+        </GROUP>
+        <GROUP id="{0E2E673D-2AE5-AECB-4E28-A1EE29180BD2}" name="Inc">
+          <FILE id="xaaxl7" name="leaf-globals.h" compile="0" resource="0" file="../LEAF/Inc/leaf-globals.h"/>
+          <FILE id="cmehFw" name="leaf-math.h" compile="0" resource="0" file="../LEAF/Inc/leaf-math.h"/>
+          <FILE id="XQTGHV" name="leaf-mempool.h" compile="0" resource="0" file="../LEAF/Inc/leaf-mempool.h"/>
+          <FILE id="k0yQ8k" name="leaf-808.h" compile="0" resource="0" file="../LEAF/Inc/leaf-808.h"/>
+          <FILE id="wn8tAr" name="leaf-delay.h" compile="0" resource="0" file="../LEAF/Inc/leaf-delay.h"/>
+          <FILE id="EnRmjE" name="leaf-filter.h" compile="0" resource="0" file="../LEAF/Inc/leaf-filter.h"/>
+          <FILE id="dWHebV" name="leaf-formant.h" compile="0" resource="0" file="../LEAF/Inc/leaf-formant.h"/>
+          <FILE id="pXe6b5" name="leaf-midi.h" compile="0" resource="0" file="../LEAF/Inc/leaf-midi.h"/>
+          <FILE id="ZBcTKF" name="leaf-oscillator.h" compile="0" resource="0"
+                file="../LEAF/Inc/leaf-oscillator.h"/>
+          <FILE id="NekKkK" name="leaf-pitch.h" compile="0" resource="0" file="../LEAF/Inc/leaf-pitch.h"/>
+          <FILE id="XmL4ZE" name="leaf-reverb.h" compile="0" resource="0" file="../LEAF/Inc/leaf-reverb.h"/>
+          <FILE id="KQca5l" name="leaf-string.h" compile="0" resource="0" file="../LEAF/Inc/leaf-string.h"/>
+          <FILE id="OS2D83" name="leaf-utilities.h" compile="0" resource="0"
+                file="../LEAF/Inc/leaf-utilities.h"/>
+          <FILE id="Szb5LP" name="leaf-vocoder.h" compile="0" resource="0" file="../LEAF/Inc/leaf-vocoder.h"/>
+          <FILE id="PRkOp2" name="leaf-wavefolder.h" compile="0" resource="0"
+                file="../LEAF/Inc/leaf-wavefolder.h"/>
+          <FILE id="KpGzKv" name="leaf-wavetables.h" compile="0" resource="0"
+                file="../LEAF/Inc/leaf-wavetables.h"/>
+        </GROUP>
+        <GROUP id="{485F7F89-F4AE-BE19-9CCC-E49CEB2C94E7}" name="Src_cpp">
+          <FILE id="m60NC2" name="leaf.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf.cpp"/>
+          <FILE id="YwxbHS" name="leaf-math.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-math.cpp"/>
+          <FILE id="Dtv6lt" name="leaf-mempool.cpp" compile="1" resource="0"
+                file="../LEAF/Src_cpp/leaf-mempool.cpp"/>
+          <FILE id="eu1hdg" name="leaf-808.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-808.cpp"/>
+          <FILE id="LXRk8F" name="leaf-delay.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-delay.cpp"/>
+          <FILE id="Bs8bkI" name="leaf-filter.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-filter.cpp"/>
+          <FILE id="WQDiFn" name="leaf-formant.cpp" compile="1" resource="0"
+                file="../LEAF/Src_cpp/leaf-formant.cpp"/>
+          <FILE id="qONgQY" name="leaf-midi.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-midi.cpp"/>
+          <FILE id="uehwiI" name="leaf-oscillator.cpp" compile="1" resource="0"
+                file="../LEAF/Src_cpp/leaf-oscillator.cpp"/>
+          <FILE id="bJ0ejw" name="leaf-pitch.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-pitch.cpp"/>
+          <FILE id="GingNU" name="leaf-reverb.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-reverb.cpp"/>
+          <FILE id="rbdzdY" name="leaf-string.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-string.cpp"/>
+          <FILE id="mDtjTw" name="leaf-utilities.cpp" compile="1" resource="0"
+                file="../LEAF/Src_cpp/leaf-utilities.cpp"/>
+          <FILE id="dJ4Ogf" name="leaf-vocoder.cpp" compile="1" resource="0"
+                file="../LEAF/Src_cpp/leaf-vocoder.cpp"/>
+          <FILE id="g57PTt" name="leaf-wavefolder.cpp" compile="1" resource="0"
+                file="../LEAF/Src_cpp/leaf-wavefolder.cpp"/>
+          <FILE id="bSQwBo" name="leaf-wavetables.cpp" compile="1" resource="0"
+                file="../LEAF/Src_cpp/leaf-wavetables.cpp"/>
+        </GROUP>
+        <FILE id="dmljDQ" name="leaf.h" compile="0" resource="0" file="../LEAF/leaf.h"/>
+      </GROUP>
+      <GROUP id="{FFA9F0EC-F45A-74FC-5A10-9B3CAA731E7C}" name="External">
+        <FILE id="ixwZea" name="Yin.h" compile="0" resource="0" file="Source/Yin.h"/>
+        <FILE id="wbnjmF" name="Yin.cpp" compile="1" resource="0" file="Source/Yin.cpp"/>
+      </GROUP>
+      <GROUP id="{5EAA8994-9CCF-AFE1-27F3-6B2132200B97}" name="Test">
+        <FILE id="XkflAI" name="LEAFLink.h" compile="0" resource="0" file="Source/LEAFLink.h"/>
+        <FILE id="O9woHe" name="LEAFLink.cpp" compile="1" resource="0" file="Source/LEAFLink.cpp"/>
+        <FILE id="xGEfAX" name="LEAFTest.h" compile="0" resource="0" file="Source/LEAFTest.h"/>
+        <FILE id="xRGWtb" name="MyTest.h" compile="0" resource="0" file="Source/MyTest.h"/>
+        <FILE id="PGmAOc" name="MyTest.cpp" compile="1" resource="0" file="Source/MyTest.cpp"/>
+      </GROUP>
+      <GROUP id="{A89F40A7-55BD-BADE-F6FC-0813ECB90B8B}" name="Wrapper">
+        <FILE id="R9R9N2" name="Globals.h" compile="0" resource="0" file="Source/Globals.h"/>
+        <FILE id="oQ7Hdj" name="UIComponent.h" compile="0" resource="0" file="Source/UIComponent.h"/>
+        <FILE id="ONd1SP" name="UIComponent.cpp" compile="1" resource="0" file="Source/UIComponent.cpp"/>
+        <FILE id="EnmsIi" name="PluginProcessor.h" compile="0" resource="0"
+              file="Source/PluginProcessor.h"/>
+        <FILE id="xwxe1U" name="PluginProcessor.cpp" compile="1" resource="0"
+              file="Source/PluginProcessor.cpp"/>
+        <FILE id="L2MQTe" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+        <FILE id="euDngN" name="PluginEditor.cpp" compile="1" resource="0"
+              file="Source/PluginEditor.cpp"/>
+      </GROUP>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="OOPS" osxArchitecture="64BitUniversal"
+                       enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="OOPS"
+                       enablePluginBinaryCopyStep="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
+                  iosDevelopmentTeamID="QY96HSP2FJ" microphonePermissionNeeded="1"
+                  iosBackgroundAudio="1" iPadScreenOrientation="portraitlandscape"
+                  iosDeviceFamily="1,2">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="OOPS" enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="OOPS"
+                       enablePluginBinaryCopyStep="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_video" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
+      </MODULEPATHS>
+    </XCODE_IPHONE>
+    <VS2017 targetFolder="Builds/VisualStudio2017">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="OOPS" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="OOPS" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0" linkTimeOptimisation="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_opengl" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_cryptography" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_utils" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_basics" path="..\..\..\JUCE\modules"/>
+      </MODULEPATHS>
+    </VS2017>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0"/>
+  </MODULES>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+  <LIVE_SETTINGS>
+    <OSX/>
+  </LIVE_SETTINGS>
+</JUCERPROJECT>
