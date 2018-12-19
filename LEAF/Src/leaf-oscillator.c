@@ -307,6 +307,7 @@ void    tPhasor_init(tPhasor* const p)
 {
     p->phase = 0.0f;
     p->inc = 0.0f;
+
 }
 
 void    tPhasor_free(tPhasor* const p)
@@ -450,6 +451,9 @@ void   tTriangle_init(tTriangle* const c)
 {
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+    c->tsize     = 2048;
+
+    tTriangle_setTableSize(c, c->tsize);
 }
 
 void   tTriangle_free(tTriangle* const c)
@@ -575,6 +579,9 @@ void   tSquare_init(tSquare* const c)
 {
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+    c->tsize     = 2048;
+
+    tSquare_setTableSize(c, c->tsize);
 }
 
 void   tSquare_free(tSquare* const c)
