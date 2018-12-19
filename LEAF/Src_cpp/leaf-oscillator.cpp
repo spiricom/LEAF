@@ -307,6 +307,7 @@ void    tPhasor_init(tPhasor* const p)
 {
     p->phase = 0.0f;
     p->inc = 0.0f;
+
 }
 
 void    tPhasor_free(tPhasor* const p)
@@ -427,7 +428,7 @@ float   tSawtooth_tick(tSawtooth* const c)
         w = ((20480.0f - c->freq) * INV_10240);
         out = (c->table[T10240][idx] * w) + (c->table[T20480][idx] * (1.0f - w));
     }
-    else
+    else if (c->freq <= 24000.0f)
     {
         out = c->table[T20480][idx];
     }
@@ -450,6 +451,9 @@ void   tTriangle_init(tTriangle* const c)
 {
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+    c->tsize     = 2048;
+
+    tTriangle_setTableSize(c, c->tsize);
 }
 
 void   tTriangle_free(tTriangle* const c)
@@ -557,7 +561,7 @@ float   tTriangle_tick(tTriangle* const c)
         w = ((20480.0f - c->freq) * INV_10240);
         out = (c->table[T10240][idx] * w) + (c->table[T20480][idx] * (1.0f - w));
     }
-    else
+    else if (c->freq <= 24000.0f)
     {
         out = c->table[T20480][idx];
     }
@@ -575,6 +579,9 @@ void   tSquare_init(tSquare* const c)
 {
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+    c->tsize     = 2048;
+
+    tSquare_setTableSize(c, c->tsize);
 }
 
 void   tSquare_free(tSquare* const c)
@@ -622,8 +629,9 @@ float   tSquare_tick(tSquare* const c)
     
     float out = 0.0f;
     float w = 0.0f;
+
     int idx = (int)(c->phase * c->tsize);
-    
+
     // Wavetable synthesis
     
     if (c->freq <= 20.0f)
@@ -680,7 +688,7 @@ float   tSquare_tick(tSquare* const c)
         w = ((20480.0f - c->freq) * INV_10240);
         out = (c->table[T10240][idx] * w) + (c->table[T20480][idx] * (1.0f - w));
     }
-    else
+    else if (c->freq <= 24000.0f)
     {
         out = c->table[T20480][idx];
     }
