@@ -43,7 +43,7 @@ typedef enum TableName
     T5120,
     T10240,
     T20480,
-    TableNameNil
+    NUM_TABLES
 } TableName;
 
 // mtof lookup table based on input range [0.0,1.0) in 4096 increments - midi frequency values scaled between m25 and m134 (as done in previous code)
@@ -57,17 +57,6 @@ extern const float mtof1[MTOF1_TABLE_SIZE];
 extern const float decayCoeffTable[DECAY_COEFF_TABLE_SIZE];
 
 extern const float tanh1[TANH1_TABLE_SIZE];
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
-/* Sine wave table ripped from http://aquaticus.info/pwm-sine-wave. */
-extern const float sinewave[SINE_TABLE_SIZE];
-
-extern const float sawtooth[11][SAW_TABLE_SIZE];
-
-extern const float triangle[11][TRI_TABLE_SIZE];
-
-extern const float squarewave[11][SQR_TABLE_SIZE];
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 

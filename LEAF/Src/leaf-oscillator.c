@@ -224,11 +224,27 @@ void    tCycle_init(tCycle* const c)
 {
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+    c->tsize     = 2048;
+    
+    tCycle_setTableSize(c, c->tsize);
 }
 
 void    tCycle_free(tCycle* const c)
 {
+    leaf_free(c->table);
+    
     leaf_free(c);
+}
+
+void    tCycle_setTableSize(tCycle* const c, int size)
+{
+    leaf_free(c->table);
+    
+    c->tsize = size;
+    
+    c->table = (float*) leaf_alloc(c->tsize * sizeof(float));
+    
+    LEAF_generate_sine(c->table, c->tsize);
 }
 
 int     tCycle_setFreq(tCycle* const c, float freq)
@@ -248,12 +264,12 @@ float   tCycle_tick(tCycle* const c)
     if (c->phase >= 1.0f) c->phase -= 1.0f;
     
     // Wavetable synthesis
-    float temp = SINE_TABLE_SIZE * c->phase;
+    float temp = c->tsize * c->phase;
     int intPart = (int)temp;
     float fracPart = temp - (float)intPart;
-    float samp0 = sinewave[intPart];
-    if (++intPart >= SINE_TABLE_SIZE) intPart = 0;
-    float samp1 = sinewave[intPart];
+    float samp0 = c->table[intPart];
+    if (++intPart >= c->tsize) intPart = 0;
+    float samp1 = c->table[intPart];
     return (samp0 + (samp1 - samp0) * fracPart);
 }
 
@@ -302,11 +318,36 @@ void    tSawtooth_init(tSawtooth* const c)
 {
     c->inc      = 0.0f;
     c->phase    = 0.0f;
+    c->tsize    = 2048;
+    
+    tSawtooth_setTableSize(c, c->tsize);
 }
 
 void    tSawtooth_free(tSawtooth* const c)
 {
+    for (int i = 0; i < NUM_TABLES; i++)
+    {
+        leaf_free(c->table[i]);
+    }
+    
     leaf_free(c);
+}
+
+void    tSawtooth_setTableSize  (tSawtooth*  const c, int size)
+{
+    c->tsize = size;
+    
+    float freq = 20.0f;
+    for (int i = 0; i < NUM_TABLES; i++)
+    {
+        leaf_free(c->table[i]);
+        
+        c->table[i] = (float*) leaf_alloc(c->tsize * sizeof(float));
+        
+        LEAF_generate_sawtooth(c->table[i], freq, c->tsize);
+        
+        freq *= 2.0f;
+    }
 }
 
 int     tSawtooth_setFreq(tSawtooth* const c, float freq)
@@ -328,67 +369,67 @@ float   tSawtooth_tick(tSawtooth* const c)
     float out = 0.0f;
     float w;
     
-    int idx = (int)(c->phase * TRI_TABLE_SIZE);
+    int idx = (int)(c->phase * c->tsize);
     
     // Wavetable synthesis
     
     if (c->freq <= 20.0f)
     {
-        out = sawtooth[T20][idx];
+        out = c->table[T20][idx];
     }
     else if (c->freq <= 40.0f)
     {
         w = ((40.0f - c->freq) * INV_20);
-        out = (sawtooth[T20][idx] * w) + (sawtooth[T40][idx] * (1.0f - w));
+        out = (c->table[T20][idx] * w) + (c->table[T40][idx] * (1.0f - w));
     }
     else if (c->freq <= 80.0f)
     {
         w = ((80.0f - c->freq) * INV_40);
-        out = (sawtooth[T40][idx] * w) + (sawtooth[T80][idx] * (1.0f - w));
+        out = (c->table[T40][idx] * w) + (c->table[T80][idx] * (1.0f - w));
     }
     else if (c->freq <= 160.0f)
     {
         w = ((160.0f - c->freq) * INV_80);
-        out = (sawtooth[T80][idx] * w) + (sawtooth[T160][idx] * (1.0f - w));
+        out = (c->table[T80][idx] * w) + (c->table[T160][idx] * (1.0f - w));
     }
     else if (c->freq <= 320.0f)
     {
         w = ((320.0f - c->freq) * INV_160);
-        out = (sawtooth[T160][idx] * w) + (sawtooth[T320][idx] * (1.0f - w));
+        out = (c->table[T160][idx] * w) + (c->table[T320][idx] * (1.0f - w));
     }
     else if (c->freq <= 640.0f)
     {
         w = ((640.0f - c->freq) * INV_320);
-        out = (sawtooth[T320][idx] * w) + (sawtooth[T640][idx] * (1.0f - w));
+        out = (c->table[T320][idx] * w) + (c->table[T640][idx] * (1.0f - w));
     }
     else if (c->freq <= 1280.0f)
     {
         w = ((1280.0f - c->freq) * INV_640);
-        out = (sawtooth[T640][idx] * w) + (sawtooth[T1280][idx] * (1.0f - w));
+        out = (c->table[T640][idx] * w) + (c->table[T1280][idx] * (1.0f - w));
     }
     else if (c->freq <= 2560.0f)
     {
         w = ((2560.0f - c->freq) * INV_1280);
-        out = (sawtooth[T1280][idx] * w) + (sawtooth[T2560][idx] * (1.0f - w));
+        out = (c->table[T1280][idx] * w) + (c->table[T2560][idx] * (1.0f - w));
     }
     else if (c->freq <= 5120.0f)
     {
         w = ((5120.0f - c->freq) * INV_2560);
-        out = (sawtooth[T2560][idx] * w) + (sawtooth[T5120][idx] * (1.0f - w));
+        out = (c->table[T2560][idx] * w) + (c->table[T5120][idx] * (1.0f - w));
     }
     else if (c->freq <= 10240.0f)
     {
         w = ((10240.0f - c->freq) * INV_5120);
-        out = (sawtooth[T5120][idx] * w) + (sawtooth[T10240][idx] * (1.0f - w));
+        out = (c->table[T5120][idx] * w) + (c->table[T10240][idx] * (1.0f - w));
     }
     else if (c->freq <= 20480.0f)
     {
         w = ((20480.0f - c->freq) * INV_10240);
-        out = (sawtooth[T10240][idx] * w) + (sawtooth[T20480][idx] * (1.0f - w));
+        out = (c->table[T10240][idx] * w) + (c->table[T20480][idx] * (1.0f - w));
     }
     else
     {
-        out = sawtooth[T20480][idx];
+        out = c->table[T20480][idx];
     }
     
     return out;
@@ -413,7 +454,30 @@ void   tTriangle_init(tTriangle* const c)
 
 void   tTriangle_free(tTriangle* const c)
 {
-    leaf_free(c);}
+    for (int i = 0; i < NUM_TABLES; i++)
+    {
+        leaf_free(c->table[i]);
+    }
+    
+    leaf_free(c);
+}
+
+void    tTriangle_setTableSize  (tTriangle*  const c, int size)
+{
+    c->tsize = size;
+    
+    float freq = 20.0f;
+    for (int i = 0; i < NUM_TABLES; i++)
+    {
+        leaf_free(c->table[i]);
+        
+        c->table[i] = (float*) leaf_alloc(c->tsize * sizeof(float));
+        
+        LEAF_generate_triangle(c->table[i], freq, c->tsize);
+        
+        freq *= 2.0f;
+    }
+}
 
 int tTriangle_setFreq(tTriangle* const c, float freq)
 {
@@ -435,67 +499,67 @@ float   tTriangle_tick(tTriangle* const c)
     float out = 0.0f;
     float w;
     
-    int idx = (int)(c->phase * TRI_TABLE_SIZE);
+    int idx = (int)(c->phase * c->tsize);
     
     // Wavetable synthesis
     
     if (c->freq <= 20.0f)
     {
-        out = triangle[T20][idx];
+        out = c->table[T20][idx];
     }
     else if (c->freq <= 40.0f)
     {
         w = ((40.0f - c->freq) * INV_20);
-        out = (triangle[T20][idx] * w) + (triangle[T40][idx] * (1.0f - w));
+        out = (c->table[T20][idx] * w) + (c->table[T40][idx] * (1.0f - w));
     }
     else if (c->freq <= 80.0f)
     {
         w = ((80.0f - c->freq) * INV_40);
-        out = (triangle[T40][idx] * w) + (triangle[T80][idx] * (1.0f - w));
+        out = (c->table[T40][idx] * w) + (c->table[T80][idx] * (1.0f - w));
     }
     else if (c->freq <= 160.0f)
     {
         w = ((160.0f - c->freq) * INV_80);
-        out = (triangle[T80][idx] * w) + (triangle[T160][idx] * (1.0f - w));
+        out = (c->table[T80][idx] * w) + (c->table[T160][idx] * (1.0f - w));
     }
     else if (c->freq <= 320.0f)
     {
         w = ((320.0f - c->freq) * INV_160);
-        out = (triangle[T160][idx] * w) + (triangle[T320][idx] * (1.0f - w));
+        out = (c->table[T160][idx] * w) + (c->table[T320][idx] * (1.0f - w));
     }
     else if (c->freq <= 640.0f)
     {
         w = ((640.0f - c->freq) * INV_320);
-        out = (triangle[T320][idx] * w) + (triangle[T640][idx] * (1.0f - w));
+        out = (c->table[T320][idx] * w) + (c->table[T640][idx] * (1.0f - w));
     }
     else if (c->freq <= 1280.0f)
     {
         w = ((1280.0f - c->freq) * INV_640);
-        out = (triangle[T640][idx] * w) + (triangle[T1280][idx] * (1.0f - w));
+        out = (c->table[T640][idx] * w) + (c->table[T1280][idx] * (1.0f - w));
     }
     else if (c->freq <= 2560.0f)
     {
         w = ((2560.0f - c->freq) * INV_1280);
-        out = (triangle[T1280][idx] * w) + (triangle[T2560][idx] * (1.0f - w));
+        out = (c->table[T1280][idx] * w) + (c->table[T2560][idx] * (1.0f - w));
     }
     else if (c->freq <= 5120.0f)
     {
         w = ((5120.0f - c->freq) * INV_2560);
-        out = (triangle[T2560][idx] * w) + (triangle[T5120][idx] * (1.0f - w));
+        out = (c->table[T2560][idx] * w) + (c->table[T5120][idx] * (1.0f - w));
     }
     else if (c->freq <= 10240.0f)
     {
         w = ((10240.0f - c->freq) * INV_5120);
-        out = (triangle[T5120][idx] * w) + (triangle[T10240][idx] * (1.0f - w));
+        out = (c->table[T5120][idx] * w) + (c->table[T10240][idx] * (1.0f - w));
     }
     else if (c->freq <= 20480.0f)
     {
         w = ((20480.0f - c->freq) * INV_10240);
-        out = (triangle[T10240][idx] * w) + (triangle[T20480][idx] * (1.0f - w));
+        out = (c->table[T10240][idx] * w) + (c->table[T20480][idx] * (1.0f - w));
     }
     else
     {
-        out = triangle[T20480][idx];
+        out = c->table[T20480][idx];
     }
     
     return out;
@@ -515,7 +579,29 @@ void   tSquare_init(tSquare* const c)
 
 void   tSquare_free(tSquare* const c)
 {
+    for (int i = 0; i < NUM_TABLES; i++)
+    {
+        leaf_free(c->table[i]);
+    }
+    
     leaf_free(c);
+}
+
+void    tSquare_setTableSize  (tSquare*  const c, int size)
+{
+    c->tsize = size;
+    
+    float freq = 20.0f;
+    for (int i = 0; i < NUM_TABLES; i++)
+    {
+        leaf_free(c->table[i]);
+        
+        c->table[i] = (float*) leaf_alloc(c->tsize * sizeof(float));
+        
+        LEAF_generate_square(c->table[i], freq, c->tsize);
+        
+        freq *= 2.0f;
+    }
 }
 
 int     tSquare_setFreq(tSquare*  const c, float freq)
@@ -536,67 +622,67 @@ float   tSquare_tick(tSquare* const c)
     
     float out = 0.0f;
     float w = 0.0f;
-    int idx = (int)(c->phase * TRI_TABLE_SIZE);
+    int idx = (int)(c->phase * c->tsize);
     
     // Wavetable synthesis
     
     if (c->freq <= 20.0f)
     {
-        out = squarewave[T20][idx];
+        out = c->table[T20][idx];
     }
     else if (c->freq <= 40.0f)
     {
         w = ((40.0f - c->freq) * INV_20);
-        out = (squarewave[T20][idx] * w) + (squarewave[T40][idx] * (1.0f - w));
+        out = (c->table[T20][idx] * w) + (c->table[T40][idx] * (1.0f - w));
     }
     else if (c->freq <= 80.0f)
     {
         w = ((80.0f - c->freq) * INV_40);
-        out = (squarewave[T40][idx] * w) + (squarewave[T80][idx] * (1.0f - w));
+        out = (c->table[T40][idx] * w) + (c->table[T80][idx] * (1.0f - w));
     }
     else if (c->freq <= 160.0f)
     {
         w = ((160.0f - c->freq) * INV_80);
-        out = (squarewave[T80][idx] * w) + (squarewave[T160][idx] * (1.0f - w));
+        out = (c->table[T80][idx] * w) + (c->table[T160][idx] * (1.0f - w));
     }
     else if (c->freq <= 320.0f)
     {
         w = ((320.0f - c->freq) * INV_160);
-        out = (squarewave[T160][idx] * w) + (squarewave[T320][idx] * (1.0f - w));
+        out = (c->table[T160][idx] * w) + (c->table[T320][idx] * (1.0f - w));
     }
     else if (c->freq <= 640.0f)
     {
         w = ((640.0f - c->freq) * INV_320);
-        out = (squarewave[T320][idx] * w) + (squarewave[T640][idx] * (1.0f - w));
+        out = (c->table[T320][idx] * w) + (c->table[T640][idx] * (1.0f - w));
     }
     else if (c->freq <= 1280.0f)
     {
         w = ((1280.0f - c->freq) * INV_640);
-        out = (squarewave[T640][idx] * w) + (squarewave[T1280][idx] * (1.0f - w));
+        out = (c->table[T640][idx] * w) + (c->table[T1280][idx] * (1.0f - w));
     }
     else if (c->freq <= 2560.0f)
     {
         w = ((2560.0f - c->freq) * INV_1280);
-        out = (squarewave[T1280][idx] * w) + (squarewave[T2560][idx] * (1.0f - w));
+        out = (c->table[T1280][idx] * w) + (c->table[T2560][idx] * (1.0f - w));
     }
     else if (c->freq <= 5120.0f)
     {
         w = ((5120.0f - c->freq) * INV_2560);
-        out = (squarewave[T2560][idx] * w) + (squarewave[T5120][idx] * (1.0f - w));
+        out = (c->table[T2560][idx] * w) + (c->table[T5120][idx] * (1.0f - w));
     }
     else if (c->freq <= 10240.0f)
     {
         w = ((10240.0f - c->freq) * INV_5120);
-        out = (squarewave[T5120][idx] * w) + (squarewave[T10240][idx] * (1.0f - w));
+        out = (c->table[T5120][idx] * w) + (c->table[T10240][idx] * (1.0f - w));
     }
     else if (c->freq <= 20480.0f)
     {
         w = ((20480.0f - c->freq) * INV_10240);
-        out = (squarewave[T10240][idx] * w) + (squarewave[T20480][idx] * (1.0f - w));
+        out = (c->table[T10240][idx] * w) + (c->table[T20480][idx] * (1.0f - w));
     }
     else
     {
-        out = squarewave[T20480][idx];
+        out = c->table[T20480][idx];
     }
     
     return out;

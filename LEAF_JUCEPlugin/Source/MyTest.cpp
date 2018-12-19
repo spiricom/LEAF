@@ -16,14 +16,17 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-t808Snare snare;
+tSquare osc;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
-    LEAFInit(sampleRate, blockSize, &randomNumberGenerator);
+    LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
     
-    t808Snare_init(&snare);
+    tSquare_init(&osc);
+    tSquare_setFreq(&osc, 110.0f);
     
+    tSquare_setTableSize(&osc, 4000);
+
     leaf_pool_report();
 }
 
@@ -39,10 +42,9 @@ float   LEAFTest_tick            (float input)
     if (timer == (1 * leaf.sampleRate))
     {
         timer = 0;
-        t808Snare_on(&snare, 1.0);
     }
-
-    sample = t808Snare_tick(&snare);
+    
+    sample = 0.5 * tSquare_tick(&osc);
     
     return sample;
      

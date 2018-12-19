@@ -79,6 +79,11 @@ float   	LEAF_softClip						(float val, float thresh);
 oBool       LEAF_isPrime            (uint64_t number );
 float       LEAF_midiToFrequency    (float f);
 
+void LEAF_generate_sine(float* buffer, int size);
+void LEAF_generate_sawtooth(float* buffer, float basefreq, int size);
+void LEAF_generate_triangle(float* buffer, float basefreq, int size);
+void LEAF_generate_square(float* buffer, float basefreq, int size);
+
 // dope af
 float LEAF_chebyshevT(float in, int n);
 float LEAF_CompoundChebyshevT(float in, int n, float* amps);
