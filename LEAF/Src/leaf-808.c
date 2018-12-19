@@ -121,7 +121,7 @@ void t808Hihat_setOscNoiseMix(t808Hihat* const hihat, float oscNoiseMix) {
 float t808Hihat_tick(t808Hihat* const hihat) {
     
     float sample = 0.0f;
-    float gainScale = 0.1666f;
+    float gainScale = 0.3f;
     
     for (int i = 0; i < 6; i++)
     {
@@ -130,16 +130,15 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     
     sample *= gainScale;
     
-    sample = (hihat->oscNoiseMix * sample) + ((1.0f-hihat->oscNoiseMix) * (0.8f * tNoise_tick(&hihat->n)));
+    sample = (hihat->oscNoiseMix * sample) + ((1.0f-hihat->oscNoiseMix) * (tNoise_tick(&hihat->n)));
     
     sample = tSVF_tick(&hihat->bandpassOsc, sample);
     
-    sample *= tEnvelope_tick(&hihat->envGain);
-    
-    sample = 0.85f * LEAF_clip(0.0f, tHighpass_tick(&hihat->highpass, sample), 1.0f);
-    
-    sample += 0.15f * tEnvelope_tick(&hihat->envStick) * tSVF_tick(&hihat->bandpassStick, tNoise_tick(&hihat->stick));
-    
+    float myGain = tEnvelope_tick(&hihat->envGain);
+    sample *= (myGain*myGain);//square the output gain envelope
+    sample = tHighpass_tick(&hihat->highpass, sample);
+    sample += ((0.5f * tEnvelope_tick(&hihat->envStick)) * tSVF_tick(&hihat->bandpassStick, tNoise_tick(&hihat->stick)));
+
     return sample;
 }
 
@@ -158,16 +157,23 @@ void t808Hihat_setOscBandpassFreq(t808Hihat* const hihat, float freq)
     tSVF_setFreq(&hihat->bandpassOsc,freq);
 }
 
+void t808Hihat_setStickBandPassFreq(t808Hihat* const hihat, float freq)
+{
+    tSVF_setFreq(&hihat->bandpassStick,freq);
+}
+
 
 void t808Hihat_setOscFreq(t808Hihat* const hihat, float freq)
 {
-    tSquare_setFreq(&hihat->p[0], 2.0f * freq);
-    tSquare_setFreq(&hihat->p[1], 3.00f * freq);
-    tSquare_setFreq(&hihat->p[2], 4.16f * freq);
-    tSquare_setFreq(&hihat->p[3], 5.43f * freq);
-    tSquare_setFreq(&hihat->p[4], 6.79f * freq);
-    tSquare_setFreq(&hihat->p[5], 8.21f * freq);
-    
+	//if (freq < 5600.0f) //to avoid aliasing (for some reason high frequency settings here cause hard faults)
+	{
+		tSquare_setFreq(&hihat->p[0], 2.0f * freq);
+		tSquare_setFreq(&hihat->p[1], 3.00f * freq);
+		tSquare_setFreq(&hihat->p[2], 4.16f * freq);
+		tSquare_setFreq(&hihat->p[3], 5.43f * freq);
+		tSquare_setFreq(&hihat->p[4], 6.79f * freq);
+		tSquare_setFreq(&hihat->p[5], 8.21f * freq);
+	}
 }
 
 void t808Hihat_init(t808Hihat* const hihat)
@@ -181,11 +187,11 @@ void t808Hihat_init(t808Hihat* const hihat)
     tNoise_init(&hihat->n, WhiteNoise);
     
     // need to fix SVF to be generic
-    tSVF_init(&hihat->bandpassStick, SVFTypeBandpass,2500.0,1.5f);
-    tSVF_init(&hihat->bandpassOsc, SVFTypeBandpass,3500,0.5f);
+    tSVF_init(&hihat->bandpassStick, SVFTypeBandpass,2500.0,1.2f);
+    tSVF_init(&hihat->bandpassOsc, SVFTypeBandpass,3500,0.3f);
     
-    tEnvelope_init(&hihat->envGain, 5.0f, 50.0f, OFALSE);
-    tEnvelope_init(&hihat->envStick, 5.0f, 15.0f, OFALSE);
+    tEnvelope_init(&hihat->envGain, 0.0f, 50.0f, OFALSE);
+    tEnvelope_init(&hihat->envStick, 0.0f, 4.0f, OFALSE);
     
     tHighpass_init(&hihat->highpass, 7000.0f);
     

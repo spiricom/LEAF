@@ -46,7 +46,7 @@ typedef enum TableName
     NUM_TABLES
 } TableName;
 
-// mtof lookup table based on input range [0.0,1.0) in 4096 increments - midi frequency values scaled between m25 and m134 (as done in previous code)
+// mtof lookup table based on input range [0.0,1.0) in 4096 increments - midi frequency values scaled between m25 and m134 (from the Snyderphonics DrumBox code)
 
 extern const float exp_decay[EXP_DECAY_TABLE_SIZE];
 extern const float attack_decay_inc[ATTACK_DECAY_INC_TABLE_SIZE];
