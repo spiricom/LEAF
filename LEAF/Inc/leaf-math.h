@@ -70,7 +70,7 @@ typedef enum oBool
 #define TWO_TO_31		2147483648.0f
 #define INV_TWO_TO_31	0.000000000465661f
 
-// Erbe shaper
+// Jones shaper
 float LEAF_shaper     (float input, float m_drive);
 float LEAF_reedTable  (float input, float offset, float slope);
 

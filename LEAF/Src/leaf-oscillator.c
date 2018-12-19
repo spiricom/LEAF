@@ -328,7 +328,7 @@ float   tSawtooth_tick(tSawtooth* const c)
     float out = 0.0f;
     float w;
     
-    int idx = (int)(c->phase * TRI_TABLE_SIZE);
+    int idx = (int)(c->phase * SAW_TABLE_SIZE);
     
     // Wavetable synthesis
     
@@ -386,7 +386,7 @@ float   tSawtooth_tick(tSawtooth* const c)
         w = ((20480.0f - c->freq) * INV_10240);
         out = (sawtooth[T10240][idx] * w) + (sawtooth[T20480][idx] * (1.0f - w));
     }
-    else
+    else if (c->freq <= 24000.0f)
     {
         out = sawtooth[T20480][idx];
     }
@@ -493,7 +493,7 @@ float   tTriangle_tick(tTriangle* const c)
         w = ((20480.0f - c->freq) * INV_10240);
         out = (triangle[T10240][idx] * w) + (triangle[T20480][idx] * (1.0f - w));
     }
-    else
+    else if (c->freq <= 24000.0f)
     {
         out = triangle[T20480][idx];
     }
@@ -536,7 +536,7 @@ float   tSquare_tick(tSquare* const c)
     
     float out = 0.0f;
     float w = 0.0f;
-    int idx = (int)(c->phase * TRI_TABLE_SIZE);
+    int idx = (int)(c->phase * SQR_TABLE_SIZE);
     
     // Wavetable synthesis
     
@@ -594,7 +594,7 @@ float   tSquare_tick(tSquare* const c)
         w = ((20480.0f - c->freq) * INV_10240);
         out = (squarewave[T10240][idx] * w) + (squarewave[T20480][idx] * (1.0f - w));
     }
-    else
+    else if (c->freq <= 24000.0f)
     {
         out = squarewave[T20480][idx];
     }
