@@ -135,9 +135,10 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     sample = tSVF_tick(&hihat->bandpassOsc, sample);
     
     float myGain = tEnvelope_tick(&hihat->envGain);
-    sample *= myGain*myGain;//square the output
+    sample *= (myGain*myGain);//square the output gain envelope
     sample = tHighpass_tick(&hihat->highpass, sample);
     sample += ((0.5f * tEnvelope_tick(&hihat->envStick)) * tSVF_tick(&hihat->bandpassStick, tNoise_tick(&hihat->stick)));
+
     return sample;
 }
 
