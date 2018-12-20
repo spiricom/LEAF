@@ -157,6 +157,11 @@ void t808Hihat_setOscBandpassFreq(t808Hihat* const hihat, float freq)
     tSVF_setFreq(&hihat->bandpassOsc,freq);
 }
 
+void t808Hihat_setOscBandpassQ(t808Hihat* const hihat, float Q)
+{
+    tSVF_setQ(&hihat->bandpassOsc,Q);
+}
+
 void t808Hihat_setStickBandPassFreq(t808Hihat* const hihat, float freq)
 {
     tSVF_setFreq(&hihat->bandpassStick,freq);
@@ -165,15 +170,12 @@ void t808Hihat_setStickBandPassFreq(t808Hihat* const hihat, float freq)
 
 void t808Hihat_setOscFreq(t808Hihat* const hihat, float freq)
 {
-	//if (freq < 5600.0f) //to avoid aliasing (for some reason high frequency settings here cause hard faults)
-	{
 		tSquare_setFreq(&hihat->p[0], 2.0f * freq);
 		tSquare_setFreq(&hihat->p[1], 3.00f * freq);
 		tSquare_setFreq(&hihat->p[2], 4.16f * freq);
 		tSquare_setFreq(&hihat->p[3], 5.43f * freq);
 		tSquare_setFreq(&hihat->p[4], 6.79f * freq);
 		tSquare_setFreq(&hihat->p[5], 8.21f * freq);
-	}
 }
 
 void t808Hihat_init(t808Hihat* const hihat)
