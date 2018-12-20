@@ -123,3 +123,43 @@ void        t808Snare_setNoiseFilterQ       (t808Snare* const, float noiseFilter
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
+// 808 Kick
+typedef struct _t808Kick {
+
+
+    tCycle tone; // Tri
+    tNoise noiseOsc;
+    tSVF toneLowpass;
+    tEnvelope toneEnvOscChirp;
+    tEnvelope toneEnvOscSigh;
+    tEnvelope toneEnvGain;
+    tEnvelope noiseEnvGain;
+    tEnvelope toneEnvFilter;
+
+    float toneGain;
+    float noiseGain;
+
+    float toneInitialFreq;
+    float sighAmountInHz;
+    float chirpRatioMinusOne;
+    float noiseFilterFreq;
+
+
+} t808Kick;
+
+void        t808Kick_init                  (t808Kick* const);
+void        t808Kick_free                  (t808Kick* const);
+
+float       t808Kick_tick                  (t808Kick* const);
+void        t808Kick_on                    (t808Kick* const, float vel);
+void        t808Kick_setToneFreq          (t808Kick* const, float freq);
+void        t808Kick_setToneDecay         (t808Kick* const, float decay);
+void        t808Kick_setNoiseDecay         (t808Kick* const, float decay);
+void        t808Kick_setSighAmount         (t808Kick* const, float sigh);
+void        t808Kick_setChirpAmount         (t808Kick* const, float chirp);
+void        t808Kick_setToneNoiseMix       (t808Kick* const, float toneNoiseMix);
+void        t808Kick_setNoiseFilterFreq    (t808Kick* const, float noiseFilterFreq);
+void        t808Kick_setNoiseFilterQ       (t808Kick* const, float noiseFilterQ);
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+

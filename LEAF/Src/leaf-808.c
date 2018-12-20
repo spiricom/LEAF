@@ -292,20 +292,22 @@ void t808Snare_init(t808Snare* const snare)
     for (int i = 0; i < 2; i++)
     {
         tTriangle_init(&snare->tone[i]);
+
         tTriangle_setFreq(&snare->tone[i], ratio[i] * 400.0f);
         tSVF_init(&snare->toneLowpass[i], SVFTypeLowpass, 2000, 1.0f);
         tEnvelope_init(&snare->toneEnvOsc[i], 3.0f, 20.0f, OFALSE);
-        tEnvelope_init(&snare->toneEnvGain[i], 10.0f, 200.0f, OFALSE);
-        tEnvelope_init(&snare->toneEnvFilter[i], 3.0f, 200.0f, OFALSE);
+        tEnvelope_init(&snare->toneEnvGain[i], 3.0f, 200.0f, OFALSE);
+        tEnvelope_init(&snare->toneEnvFilter[i], 3.0f, 2000.0f, OFALSE);
         
         snare->toneGain[i] = 0.5f;
     }
     
-    
+    snare->tone1Freq = ratio[0] * 400.0f;
+    snare->tone2Freq = ratio[1] * 400.0f;
     tNoise_init(&snare->noiseOsc, WhiteNoise);
-    tSVF_init(&snare->noiseLowpass, SVFTypeLowpass, 2000, 3.0f);
-    tEnvelope_init(&snare->noiseEnvGain, 10.0f, 125.0f, OFALSE);
-    tEnvelope_init(&snare->noiseEnvFilter, 3.0f, 100.0f, OFALSE);
+    tSVF_init(&snare->noiseLowpass, SVFTypeLowpass, 12000.0f, 3.0f);
+    tEnvelope_init(&snare->noiseEnvGain, 3.0f, 125.0f, OFALSE);
+    tEnvelope_init(&snare->noiseEnvFilter, 3.0f, 1000.0f, OFALSE);
     snare->noiseGain = 0.3f;
 }
 
@@ -326,5 +328,61 @@ void        t808Snare_free                  (t808Snare* const snare)
     tEnvelope_free(&snare->noiseEnvGain);
     tEnvelope_free(&snare->noiseEnvFilter);
 }
+
+
+void        t808Kick_init        			(t808Kick* const kick)
+{
+	tCycle_init(&kick->tone);
+	kick->toneInitialFreq = 40.0f;
+	kick->sighAmountInHz = 7.0f;
+	kick->chirpRatioMinusOne = 2.2f;
+	tCycle_setFreq(&kick->tone, 50.0f);
+	tSVF_init(&kick->toneLowpass, SVFTypeLowpass, 2000.0f, 0.5f);
+	tEnvelope_init(&kick->toneEnvOscChirp, 0.0f, 20.0f, OFALSE);
+	tEnvelope_init(&kick->toneEnvOscSigh, 0.0f, 2000.0f, OFALSE);
+	tEnvelope_init(&kick->toneEnvGain, 0.0f, 800.0f, OFALSE);
+	tNoise_init(&kick->noiseOsc, PinkNoise);
+	tEnvelope_init(&kick->noiseEnvGain, 0.0f, 1.0f, OFALSE);
+	kick->noiseGain = 0.3f;
+}
+
+
+void        t808Kick_free                  (t808Kick* const kick)
+{
+	tCycle_free(&kick->tone);
+	tSVF_free(&kick->toneLowpass);
+	tEnvelope_free(&kick->toneEnvOscChirp);
+	tEnvelope_free(&kick->toneEnvOscSigh);
+	tEnvelope_free(&kick->toneEnvGain);
+	tNoise_free(&kick->noiseOsc);
+	tEnvelope_free(&kick->noiseEnvGain);
+}
+
+float       t808Kick_tick                  (t808Kick* const kick)
+{
+	tCycle_setFreq(&kick->tone, (kick->toneInitialFreq * (1.0f + (kick->chirpRatioMinusOne * tEnvelope_tick(&kick->toneEnvOscChirp)))) + (kick->sighAmountInHz * tEnvelope_tick(&kick->toneEnvOscSigh)));
+	float sample = tCycle_tick(&kick->tone) * tEnvelope_tick(&kick->toneEnvGain);
+	sample+= tNoise_tick(&kick->noiseOsc) * tEnvelope_tick(&kick->noiseEnvGain);
+	//add distortion here
+	sample = tSVF_tick(&kick->toneLowpass, sample);
+	return sample;
+}
+
+void        t808Kick_on                    (t808Kick* const kick, float vel)
+{
+	tEnvelope_on(&kick->toneEnvOscChirp, vel);
+	tEnvelope_on(&kick->toneEnvOscSigh, vel);
+	tEnvelope_on(&kick->toneEnvGain, vel);
+	tEnvelope_on(&kick->noiseEnvGain, vel);
+
+}
+void        t808Kick_setToneFreq          (t808Kick* const kick, float freq);
+void        t808Kick_setToneDecay         (t808Kick* const kick, float decay);
+void        t808Kick_setNoiseDecay         (t808Kick* const kick, float decay);
+void        t808Kick_setSighAmount         (t808Kick* const kick, float sigh);
+void        t808Kick_setChirpAmount         (t808Kick* const kick, float chirp);
+void        t808Kick_setToneNoiseMix       (t808Kick* const kick, float toneNoiseMix);
+void        t808Kick_setNoiseFilterFreq    (t808Kick* const kick, float noiseFilterFreq);
+void        t808Kick_setNoiseFilterQ       (t808Kick* const kick, float noiseFilterQ);
 
 
