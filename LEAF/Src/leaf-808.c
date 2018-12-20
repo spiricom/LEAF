@@ -270,15 +270,15 @@ float t808Snare_tick(t808Snare* const snare)
 {
     for (int i = 0; i < 2; i++)
     {
-        tTriangle_setFreq(&snare->tone[i], snare->tone1Freq + (50.0f * tEnvelope_tick(&snare->toneEnvOsc[i])));
+        tTriangle_setFreq(&snare->tone[i], snare->tone1Freq + (20.0f * tEnvelope_tick(&snare->toneEnvOsc[i])));
         tone[i] = tTriangle_tick(&snare->tone[i]);
         
-        tSVF_setFreq(&snare->toneLowpass[i], 2000 + (500 * tEnvelope_tick(&snare->toneEnvFilter[i])));
+        tSVF_setFreq(&snare->toneLowpass[i], 2000.0f + (500.0f * tEnvelope_tick(&snare->toneEnvFilter[i])));
         tone[i] = tSVF_tick(&snare->toneLowpass[i], tone[i]) * tEnvelope_tick(&snare->toneEnvGain[i]);
     }
     
     float noise = tNoise_tick(&snare->noiseOsc);
-    tSVF_setFreq(&snare->noiseLowpass, snare->noiseFilterFreq +(500 * tEnvelope_tick(&snare->noiseEnvFilter)));
+    tSVF_setFreq(&snare->noiseLowpass, snare->noiseFilterFreq + (1000.0f * tEnvelope_tick(&snare->noiseEnvFilter)));
     noise = tSVF_tick(&snare->noiseLowpass, noise) * tEnvelope_tick(&snare->noiseEnvGain);
     
     float sample = (snare->toneNoiseMix)*(tone[0] * snare->toneGain[0] + tone[1] * snare->toneGain[1]) + (1.0f-snare->toneNoiseMix) * (noise * snare->noiseGain);
@@ -294,20 +294,21 @@ void t808Snare_init(t808Snare* const snare)
         tTriangle_init(&snare->tone[i]);
 
         tTriangle_setFreq(&snare->tone[i], ratio[i] * 400.0f);
-        tSVF_init(&snare->toneLowpass[i], SVFTypeLowpass, 2000, 1.0f);
-        tEnvelope_init(&snare->toneEnvOsc[i], 3.0f, 20.0f, OFALSE);
-        tEnvelope_init(&snare->toneEnvGain[i], 3.0f, 200.0f, OFALSE);
-        tEnvelope_init(&snare->toneEnvFilter[i], 3.0f, 2000.0f, OFALSE);
+        tSVF_init(&snare->toneLowpass[i], SVFTypeLowpass, 4000, 1.0f);
+        tEnvelope_init(&snare->toneEnvOsc[i], 0.0f, 20.0f, OFALSE);
+        tEnvelope_init(&snare->toneEnvGain[i], 1.0f, 200.0f, OFALSE);
+        tEnvelope_init(&snare->toneEnvFilter[i], 1.0f, 2000.0f, OFALSE);
         
         snare->toneGain[i] = 0.5f;
     }
     
-    snare->tone1Freq = ratio[0] * 400.0f;
-    snare->tone2Freq = ratio[1] * 400.0f;
+    snare->tone1Freq = ratio[0] * 150.0f;
+    snare->tone2Freq = ratio[1] * 150.0f;
+    snare->noiseFilterFreq = 3000.0f;
     tNoise_init(&snare->noiseOsc, WhiteNoise);
-    tSVF_init(&snare->noiseLowpass, SVFTypeLowpass, 12000.0f, 3.0f);
-    tEnvelope_init(&snare->noiseEnvGain, 3.0f, 125.0f, OFALSE);
-    tEnvelope_init(&snare->noiseEnvFilter, 3.0f, 1000.0f, OFALSE);
+    tSVF_init(&snare->noiseLowpass, SVFTypeLowpass, 12000.0f, 0.8f);
+    tEnvelope_init(&snare->noiseEnvGain, 1.0f, 125.0f, OFALSE);
+    tEnvelope_init(&snare->noiseEnvFilter, 1.0f, 1000.0f, OFALSE);
     snare->noiseGain = 0.3f;
 }
 
