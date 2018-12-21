@@ -58,9 +58,13 @@ typedef struct _t808Hihat {
     tSVF bandpassStick;
     tEnvelope envGain;
     tEnvelope envStick;
+    tEnvelope noiseFMGain;
     tHighpass highpass;
     tNoise stick;
-    
+
+    float freq;
+    float stretch;
+    float FM_amount;
     float oscNoiseMix;
     
 } t808Hihat;
@@ -77,7 +81,8 @@ void        t808Hihat_setOscBandpassFreq  (t808Hihat* const, float freq);
 void 		t808Hihat_setOscBandpassQ		(t808Hihat* const hihat, float Q);
 void        t808Hihat_setStickBandPassFreq  (t808Hihat* const, float freq);
 void        t808Hihat_setOscFreq         (t808Hihat* const, float freq);
-
+void 		t808Hihat_setStretch				(t808Hihat* const hihat, float stretch);
+void 		t808Hihat_setFM					(t808Hihat* const hihat, float FM_amount);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 

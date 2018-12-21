@@ -108,6 +108,7 @@ void t808Cowbell_init(t808Cowbell* const cowbell) {
 void t808Hihat_on(t808Hihat* const hihat, float vel) {
     
     tEnvelope_on(&hihat->envGain, vel);
+    tEnvelope_on(&hihat->noiseFMGain, vel);
     tEnvelope_on(&hihat->envStick, vel);
     
 }
@@ -123,6 +124,18 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     float sample = 0.0f;
     float gainScale = 0.3f;
     
+
+    float myNoise = tNoise_tick(&hihat->n);
+    //float FM_Noise = myNoise * tEnvelope_tick(&hihat->noiseFMGain);
+    float FM_Noise = myNoise;
+    //FM the hat with the noise
+	tSquare_setFreq(&hihat->p[0], (2.0f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
+	tSquare_setFreq(&hihat->p[1], (3.00f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
+	tSquare_setFreq(&hihat->p[2], (4.16f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
+	tSquare_setFreq(&hihat->p[3], (5.43f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
+	tSquare_setFreq(&hihat->p[4], (6.79f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
+	tSquare_setFreq(&hihat->p[5], (8.21f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
+
     for (int i = 0; i < 6; i++)
     {
         sample += tSquare_tick(&hihat->p[i]);
@@ -130,7 +143,7 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     
     sample *= gainScale;
     
-    sample = (hihat->oscNoiseMix * sample) + ((1.0f-hihat->oscNoiseMix) * (tNoise_tick(&hihat->n)));
+    sample = (hihat->oscNoiseMix * sample) + ((1.0f-hihat->oscNoiseMix) * myNoise);
     
     sample = tSVF_tick(&hihat->bandpassOsc, sample);
     
@@ -138,18 +151,29 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     sample *= (myGain*myGain);//square the output gain envelope
     sample = tHighpass_tick(&hihat->highpass, sample);
     sample += ((0.5f * tEnvelope_tick(&hihat->envStick)) * tSVF_tick(&hihat->bandpassStick, tNoise_tick(&hihat->stick)));
-
+    sample = tanhf(sample * 2.0f);
     return sample;
 }
 
 void t808Hihat_setDecay(t808Hihat* const hihat, float decay)
 {
     tEnvelope_setDecay(&hihat->envGain,decay);
+    tEnvelope_setDecay(&hihat->noiseFMGain,decay);
 }
 
 void t808Hihat_setHighpassFreq(t808Hihat* const hihat, float freq)
 {
     tHighpass_setFreq(&hihat->highpass,freq);
+}
+
+void t808Hihat_setStretch(t808Hihat* const hihat, float stretch)
+{
+    hihat->stretch = stretch;
+}
+
+void t808Hihat_setFM(t808Hihat* const hihat, float FM_amount)
+{
+    hihat->FM_amount = FM_amount;
 }
 
 void t808Hihat_setOscBandpassFreq(t808Hihat* const hihat, float freq)
@@ -170,12 +194,7 @@ void t808Hihat_setStickBandPassFreq(t808Hihat* const hihat, float freq)
 
 void t808Hihat_setOscFreq(t808Hihat* const hihat, float freq)
 {
-		tSquare_setFreq(&hihat->p[0], 2.0f * freq);
-		tSquare_setFreq(&hihat->p[1], 3.00f * freq);
-		tSquare_setFreq(&hihat->p[2], 4.16f * freq);
-		tSquare_setFreq(&hihat->p[3], 5.43f * freq);
-		tSquare_setFreq(&hihat->p[4], 6.79f * freq);
-		tSquare_setFreq(&hihat->p[5], 8.21f * freq);
+		hihat->freq = freq;
 }
 
 void t808Hihat_init(t808Hihat* const hihat)
@@ -193,18 +212,21 @@ void t808Hihat_init(t808Hihat* const hihat)
     tSVF_init(&hihat->bandpassOsc, SVFTypeBandpass,3500,0.3f);
     
     tEnvelope_init(&hihat->envGain, 0.0f, 50.0f, OFALSE);
+    tEnvelope_init(&hihat->noiseFMGain, 0.0f, 500.0f, OFALSE);
     tEnvelope_init(&hihat->envStick, 0.0f, 4.0f, OFALSE);
     
     tHighpass_init(&hihat->highpass, 7000.0f);
     
-    float freq = 40.0f;
+    hihat->freq = 40.0f;
+    hihat->stretch = 0.0f;
+    hihat->FM_amount = 1000.0f;
     
-    tSquare_setFreq(&hihat->p[0], 2.0f * freq);
-    tSquare_setFreq(&hihat->p[1], 3.00f * freq);
-    tSquare_setFreq(&hihat->p[2], 4.16f * freq);
-    tSquare_setFreq(&hihat->p[3], 5.43f * freq);
-    tSquare_setFreq(&hihat->p[4], 6.79f * freq);
-    tSquare_setFreq(&hihat->p[5], 8.21f * freq);
+    tSquare_setFreq(&hihat->p[0], 2.0f * hihat->freq);
+    tSquare_setFreq(&hihat->p[1], 3.00f * hihat->freq);
+    tSquare_setFreq(&hihat->p[2], 4.16f * hihat->freq);
+    tSquare_setFreq(&hihat->p[3], 5.43f * hihat->freq);
+    tSquare_setFreq(&hihat->p[4], 6.79f * hihat->freq);
+    tSquare_setFreq(&hihat->p[5], 8.21f * hihat->freq);
 }
 
 void t808Snare_on(t808Snare* const snare, float vel)
