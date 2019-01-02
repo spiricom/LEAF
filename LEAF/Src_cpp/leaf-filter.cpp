@@ -278,6 +278,12 @@ void    tOnePole_setPole(tOnePole* const f, float thePole)
     f->a1 = -thePole;
 }
 
+void        tOnePole_setFreq        (tOnePole* const f, float freq)
+{
+    f->a1 = expf(-2.0 * PI * freq);
+    f->b0 = 1.0f - f->a1;
+}
+
 void    tOnePole_setCoefficients(tOnePole* const f, float b0, float a1)
 {
     if (a1 >= 1.0f)     a1 = 0.999999f;
@@ -679,7 +685,7 @@ void tSVF_init(tSVF* const svf, SVFType type, float freq, float Q)
     
     float a1,a2,a3,g,k;
     g = tanf(PI * freq * leaf.invSampleRate);
-    k = 1.0f/LEAF_clip(0.01f,Q,10.0f);
+    k = 1.0f/Q;
     a1 = 1.0f/(1.0f+g*(g+k));
     a2 = g*a1;
     a3 = g*a2;
@@ -708,7 +714,7 @@ int     tSVF_setFreq(tSVF* const svf, float freq)
 
 int     tSVF_setQ(tSVF* const svf, float Q)
 {
-    svf->k = 1.0f/LEAF_clip(0.01f,Q,10.0f);
+    svf->k = 1.0f/Q;
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;

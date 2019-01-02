@@ -110,6 +110,9 @@ float       tDelayA_addTo       (tDelayA*  const, float value, uint32_t tapDelay
 float       tDelayA_tick        (tDelayA*  const, float sample);
 float       tDelayA_getLastOut  (tDelayA*  const);
 float       tDelayA_getLastIn   (tDelayA*  const);
+void        tDelayA_setGain     (tDelayA*  const, float gain);
+float       tDelayA_getGain     (tDelayA*  const);
+
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 

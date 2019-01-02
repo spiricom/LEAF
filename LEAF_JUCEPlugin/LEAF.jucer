@@ -21,8 +21,6 @@
           <FILE id="O0YJRY" name="d_fft_mayer.c" compile="1" resource="0" file="../LEAF/Externals/d_fft_mayer.c"/>
           <FILE id="L7c1sT" name="d_fft_mayer.cpp" compile="1" resource="0" file="../LEAF/Externals/d_fft_mayer.cpp"/>
           <FILE id="HdG3WV" name="d_fft_mayer.h" compile="0" resource="0" file="../LEAF/Externals/d_fft_mayer.h"/>
-          <FILE id="E7GkIZ" name="mpool.cpp" compile="1" resource="0" file="../LEAF/Externals/mpool.cpp"/>
-          <FILE id="udMePt" name="mpool.h" compile="0" resource="0" file="../LEAF/Externals/mpool.h"/>
           <FILE id="Hu4b98" name="trigtbl.h" compile="0" resource="0" file="../LEAF/Externals/trigtbl.h"/>
         </GROUP>
         <GROUP id="{0E2E673D-2AE5-AECB-4E28-A1EE29180BD2}" name="Inc">

@@ -26,6 +26,7 @@ typedef struct _tOnePole
     float gain;
     float a0,a1;
     float b0,b1;
+    float freq;
     
     float lastIn, lastOut;
     
@@ -38,6 +39,7 @@ float       tOnePole_tick           (tOnePole* const, float input);
 void        tOnePole_setB0          (tOnePole* const, float b0);
 void        tOnePole_setA1          (tOnePole* const, float a1);
 void        tOnePole_setPole        (tOnePole* const, float thePole);
+void        tOnePole_setFreq        (tOnePole* const, float freq);
 void        tOnePole_setCoefficients(tOnePole* const, float b0, float a1);
 void        tOnePole_setGain        (tOnePole* const, float gain);
 
