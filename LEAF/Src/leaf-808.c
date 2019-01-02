@@ -108,7 +108,6 @@ void t808Cowbell_init(t808Cowbell* const cowbell) {
 void t808Hihat_on(t808Hihat* const hihat, float vel) {
     
     tEnvelope_on(&hihat->envGain, vel);
-    tEnvelope_on(&hihat->noiseFMGain, vel);
     tEnvelope_on(&hihat->envStick, vel);
     
 }
@@ -126,15 +125,13 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     
 
     float myNoise = tNoise_tick(&hihat->n);
-    //float FM_Noise = myNoise * tEnvelope_tick(&hihat->noiseFMGain);
-    float FM_Noise = myNoise;
-    //FM the hat with the noise
-	tSquare_setFreq(&hihat->p[0], (2.0f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
-	tSquare_setFreq(&hihat->p[1], (3.00f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
-	tSquare_setFreq(&hihat->p[2], (4.16f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
-	tSquare_setFreq(&hihat->p[3], (5.43f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
-	tSquare_setFreq(&hihat->p[4], (6.79f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
-	tSquare_setFreq(&hihat->p[5], (8.21f * hihat->freq + hihat->stretch) + (FM_Noise * hihat->FM_amount));
+
+	tSquare_setFreq(&hihat->p[0], ((2.0f + hihat->stretch) * hihat->freq));
+	tSquare_setFreq(&hihat->p[1], ((3.00f + hihat->stretch) * hihat->freq));
+	tSquare_setFreq(&hihat->p[2], ((4.16f + hihat->stretch) * hihat->freq));
+	tSquare_setFreq(&hihat->p[3], ((5.43f + hihat->stretch) * hihat->freq));
+	tSquare_setFreq(&hihat->p[4], ((6.79f + hihat->stretch) * hihat->freq));
+	tSquare_setFreq(&hihat->p[5], ((8.21f + hihat->stretch) * hihat->freq));
 
     for (int i = 0; i < 6; i++)
     {
