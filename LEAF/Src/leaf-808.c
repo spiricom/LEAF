@@ -140,7 +140,6 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     
     sample *= gainScale;
     
-<<<<<<< HEAD
     sample = (hihat->oscNoiseMix * sample) + ((1.0f-hihat->oscNoiseMix) * myNoise);
     
     sample = tSVF_tick(&hihat->bandpassOsc, sample);
@@ -150,18 +149,7 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     sample = tHighpass_tick(&hihat->highpass, sample);
     sample += ((0.5f * tEnvelope_tick(&hihat->envStick)) * tSVF_tick(&hihat->bandpassStick, tNoise_tick(&hihat->stick)));
     sample = tanhf(sample * 2.0f);
-=======
-    sample = (hihat->oscNoiseMix * sample) + ((1.0f-hihat->oscNoiseMix) * (0.8f * tNoise_tick(&hihat->n)));
-    
-    sample = tSVF_tick(&hihat->bandpassOsc, sample);
-    
-    sample *= tEnvelope_tick(&hihat->envGain);
-    
-    sample = 0.85f * LEAF_clip(0.0f, tHighpass_tick(&hihat->highpass, sample), 1.0f);
-    
-    sample += 0.15f * tEnvelope_tick(&hihat->envStick) * tSVF_tick(&hihat->bandpassStick, tNoise_tick(&hihat->stick));
-    
->>>>>>> dattorro
+
     return sample;
 }
 
@@ -191,7 +179,6 @@ void t808Hihat_setOscBandpassFreq(t808Hihat* const hihat, float freq)
     tSVF_setFreq(&hihat->bandpassOsc,freq);
 }
 
-<<<<<<< HEAD
 void t808Hihat_setOscBandpassQ(t808Hihat* const hihat, float Q)
 {
     tSVF_setQ(&hihat->bandpassOsc,Q);
@@ -206,18 +193,7 @@ void t808Hihat_setStickBandPassFreq(t808Hihat* const hihat, float freq)
 void t808Hihat_setOscFreq(t808Hihat* const hihat, float freq)
 {
 		hihat->freq = freq;
-=======
 
-void t808Hihat_setOscFreq(t808Hihat* const hihat, float freq)
-{
-    tSquare_setFreq(&hihat->p[0], 2.0f * freq);
-    tSquare_setFreq(&hihat->p[1], 3.00f * freq);
-    tSquare_setFreq(&hihat->p[2], 4.16f * freq);
-    tSquare_setFreq(&hihat->p[3], 5.43f * freq);
-    tSquare_setFreq(&hihat->p[4], 6.79f * freq);
-    tSquare_setFreq(&hihat->p[5], 8.21f * freq);
-    
->>>>>>> dattorro
 }
 
 void t808Hihat_init(t808Hihat* const hihat)
@@ -234,15 +210,10 @@ void t808Hihat_init(t808Hihat* const hihat)
     tSVF_init(&hihat->bandpassStick, SVFTypeBandpass,2500.0,1.5f);
     tSVF_init(&hihat->bandpassOsc, SVFTypeBandpass,3500,0.5f);
     
-<<<<<<< HEAD
     tEnvelope_init(&hihat->envGain, 0.0f, 50.0f, OFALSE);
     tEnvelope_init(&hihat->noiseFMGain, 0.0f, 500.0f, OFALSE);
     tEnvelope_init(&hihat->envStick, 0.0f, 4.0f, OFALSE);
-=======
-    tEnvelope_init(&hihat->envGain, 5.0f, 50.0f, OFALSE);
-    tEnvelope_init(&hihat->envStick, 5.0f, 15.0f, OFALSE);
->>>>>>> dattorro
-    
+
     tHighpass_init(&hihat->highpass, 7000.0f);
     
     hihat->freq = 40.0f;
