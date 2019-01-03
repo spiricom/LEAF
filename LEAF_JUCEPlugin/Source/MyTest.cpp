@@ -44,52 +44,10 @@ tCycle      f2_lfo;
 
 float t;
 
-
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
-    
-    t = leaf.sampleRate * 0.001f;
-    
-    // ==================DATTORRO===================
-    // INPUT
-    tDelayL_init(&in_delay, 0.f, 200.f*t);
-    tOnePole_init(&in_filter, 1.f);
-    
-    for (int i = 0; i < 4; i++)
-    {
-        tDelayA_init(&in_allpass[i], in_allpass_delays[i], 20.f*t);
-        tDelayA_setGain(&in_allpass[i], in_allpass_gains[i]);
-    }
-    
-    // FEEDBACK 1
-    tDelayA_init(&f1_allpass, 30.51f*t, 100.f*t);
-    tDelayA_setGain(&f1_allpass, 0.7f);
-    
-    tDelayL_init(&f1_delay_1, 141.69f*t, 200.0f*t);
-    tDelayL_init(&f1_delay_2, 89.24f*t, 100.0f*t);
-    tDelayL_init(&f1_delay_3, 125.f*t, 200.0f*t);
-    
-    tOnePole_init(&f1_filter, 1.f);
-    
-    tCycle_init(&f1_lfo);
-    tCycle_setFreq(&f1_lfo, 0.1f);
-    
-    // FEEDBACK 2
-    tDelayA_init(&f2_allpass, 22.58f*t, 100.f*t);
-    tDelayA_setGain(&f2_allpass, 0.7f);
-    
-    tDelayL_init(&f2_delay_1, 149.62f*t, 200.0f*t);
-    tDelayL_init(&f2_delay_2, 60.48f*t, 100.0f*t);
-    tDelayL_init(&f2_delay_3, 106.28f*t, 200.0f*t);
-    
-    tOnePole_init(&f2_filter, 1.f);
-    
-    tCycle_init(&f2_lfo);
-    tCycle_setFreq(&f2_lfo, 0.07f);
-    
-    // =============================================
-    
+
     leaf_pool_report();
 }
 
@@ -113,101 +71,8 @@ float feedback_gain = 0.0f;
 
 float   LEAFTest_tick            (float input)
 {
-    // ==================DATTORRO===================
-    
-    // INPUT
-    float in_sample = tDelayL_tick(&in_delay, input);
-    
-    in_sample = tOnePole_tick(&in_filter, in_sample);
-    
-    for (int i = 0; i < 4; i++)
-    {
-        in_sample = tDelayA_tick(&in_allpass[i], in_sample);
-    }
 
-    // FEEDBACK 1
-    float f1_sample = in_sample + f2_last; // + f2_last_out;
-    
-    tDelayA_setDelay(&f1_allpass, 30.51f*t + tCycle_tick(&f1_lfo) * 4.0f);
-    
-    f1_sample = tDelayA_tick(&f1_allpass, f1_sample);
-    
-    f1_sample = tDelayL_tick(&f1_delay_1, f1_sample);
-    
-    f1_sample = tOnePole_tick(&f1_filter, f1_sample);
-    
-    f1_sample = f1_sample + f1_delay_2_last * 0.5f;
-    
-    float f1_delay_2_sample = tDelayL_tick(&f1_delay_2, f1_sample * 0.5f);
-    
-    f1_delay_2_last = f1_delay_2_sample;
-    
-    f1_sample = f1_delay_2_last + f1_sample;
-    
-    f1_sample *= feedback_gain;
-    
-    f1_last = tDelayL_tick(&f1_delay_3, f1_sample);
-
-    // FEEDBACK 2
-    float f2_sample = in_sample + f1_last;
-    
-    tDelayA_setDelay(&f2_allpass, 22.58f*t + tCycle_tick(&f2_lfo) * 4.0f);
-    
-    f2_sample = tDelayA_tick(&f2_allpass, f2_sample);
-    
-    f2_sample = tDelayL_tick(&f2_delay_1, f2_sample);
-    
-    f2_sample = tOnePole_tick(&f2_filter, f2_sample);
-    
-    f2_sample = f2_sample + f2_delay_2_last * 0.5f;
-    
-    float f2_delay_2_sample = tDelayL_tick(&f2_delay_2, f2_sample * 0.5f);
-    
-    f2_delay_2_last = f2_delay_2_sample;
-    
-    f2_sample = f2_delay_2_last + f2_sample;
-    
-    f2_sample *= feedback_gain;
-    
-    f2_last = tDelayL_tick(&f2_delay_3, f2_sample);
-    
-    // TAP OUT 1
-    f1_sample =     tDelayL_tapOut(&f1_delay_1, 8.9f*t) +
-                    tDelayL_tapOut(&f1_delay_1, 99.8f*t);
-    
-    f1_sample -=    tDelayL_tapOut(&f1_delay_2, 64.2f*t);
-    
-    f1_sample +=    tDelayL_tapOut(&f1_delay_3, 67.f*t);
-    
-    f1_sample -=    tDelayL_tapOut(&f2_delay_1, 66.8f*t);
-    
-    f1_sample -=    tDelayL_tapOut(&f2_delay_2, 6.3f*t);
-    
-    f1_sample -=    tDelayL_tapOut(&f2_delay_3, 35.8f*t);
-    
-    f1_sample *=    0.14;
-    
-    // TAP OUT 2
-    f2_sample =     tDelayL_tapOut(&f2_delay_1, 11.8f*t) +
-                    tDelayL_tapOut(&f2_delay_1, 121.7f*t);
-    
-    f2_sample -=    tDelayL_tapOut(&f2_delay_2, 6.3f*t);
-    
-    f2_sample +=    tDelayL_tapOut(&f2_delay_3, 89.7f*t);
-    
-    f2_sample -=    tDelayL_tapOut(&f1_delay_1, 70.8f*t);
-    
-    f2_sample -=    tDelayL_tapOut(&f1_delay_2, 11.2f*t);
-    
-    f2_sample -=    tDelayL_tapOut(&f1_delay_3, 4.1f*t);
-    
-    f2_sample *=    0.14f;
-    
-    float sample = (f1_sample + f2_sample) * 0.5f;
-    
-    // =============================================
-    
-    return (input * (1.0f - mix) + sample * mix);
+    return 0.0f;
      
 }
 

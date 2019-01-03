@@ -18,16 +18,6 @@
 
 #include "leaf-filter.h"
 
-/*
-extern const float* sinewave;
-
-extern const float* sawtooth[11];
-
-extern const float* triangle[11];
-
-extern const float* squarewave[11];
- */
-
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 /* tNeuron */
@@ -97,8 +87,6 @@ typedef struct _tCycle
     float phase;
     float inc,freq;
     
-    int tsize;
-    float* table;
 } tCycle;
 
 void        tCycle_init         (tCycle*  const);
@@ -106,7 +94,6 @@ void        tCycle_free         (tCycle*  const);
 
 float       tCycle_tick         (tCycle*  const);
 int         tCycle_setFreq      (tCycle*  const, float freq);
-void        tCycle_setTableSize (tCycle*  const c, int size);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -117,18 +104,13 @@ typedef struct _tSawtooth
     float phase;
     float inc,freq;
     
-    int tsize;
-    
-    float* table[NUM_TABLES];
-    
 } tSawtooth;
 
-void        tSawtooth_init          (tSawtooth*  const);
-void        tSawtooth_free          (tSawtooth*  const);
+void        tSawtooth_init      (tSawtooth*  const);
+void        tSawtooth_free      (tSawtooth*  const);
 
-float       tSawtooth_tick          (tSawtooth*  const);
-int         tSawtooth_setFreq       (tSawtooth*  const, float freq);
-void        tSawtooth_setTableSize  (tSawtooth*  const c, int size);
+float       tSawtooth_tick      (tSawtooth*  const);
+int         tSawtooth_setFreq   (tSawtooth*  const, float freq);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -139,18 +121,13 @@ typedef struct _tTriangle
     float phase;
     float inc,freq;
     
-    int tsize;
-    
-    float* table[NUM_TABLES];
-    
 } tTriangle;
 
-void        tTriangle_init          (tTriangle*  const);
-void        tTriangle_free          (tTriangle*  const);
+void        tTriangle_init      (tTriangle*  const);
+void        tTriangle_free      (tTriangle*  const);
 
-float       tTriangle_tick          (tTriangle*  const);
-int         tTriangle_setFreq       (tTriangle*  const, float freq);
-void        tTriangle_setTableSize  (tTriangle*  const c, int size);
+float       tTriangle_tick      (tTriangle*  const);
+int         tTriangle_setFreq   (tTriangle*  const, float freq);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -161,18 +138,13 @@ typedef struct _tSquare
     float phase;
     float inc,freq;
     
-    int tsize;
-    
-    float* table[NUM_TABLES];
-    
 } tSquare;
 
-void        tSquare_init            (tSquare*  const);
-void        tSquare_free            (tSquare*  const);
+void        tSquare_init        (tSquare*  const);
+void        tSquare_free        (tSquare*  const);
 
-float       tSquare_tick            (tSquare*  const);
-int         tSquare_setFreq         (tSquare*  const, float freq);
-void        tSquare_setTableSize    (tSquare*  const c, int size);
+float       tSquare_tick        (tSquare*  const);
+int         tSquare_setFreq     (tSquare*  const, float freq);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
