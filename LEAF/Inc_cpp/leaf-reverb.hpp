@@ -11,14 +11,16 @@
 #ifndef LEAFREVERB_H_INCLUDED
 #define LEAFREVERB_H_INCLUDED
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
 #include "leaf-delay.h"
+#include "leaf-filter.h"
+#include "leaf-oscillator.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 /* PRCRev: Reverb, reimplemented from STK (Cook and Scavone). */
 typedef struct _tPRCRev
@@ -47,7 +49,7 @@ void    tPRCRev_setT60  (tPRCRev* const, float t60);
 // Set mix between dry input and wet output signal.
 void    tPRCRev_setMix  (tPRCRev* const, float mix);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 /* NRev: Reverb, reimplemented from STK (Cook and Scavone). */
 typedef struct _tNRev
@@ -77,6 +79,61 @@ void    tNRev_setT60    (tNRev* const, float t60);
 // Set mix between dry input and wet output signal.
 void    tNRev_setMix    (tNRev*  const, float mix);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+
+typedef struct _tDattorro
+{
+    float   predelay;
+    float   input_filter;
+    float   feedback_filter;
+    float   feedback_gain;
+    float   mix;
+    
+    float   size, t;
+    
+    float   f1_delay_2_last,
+            f2_delay_2_last;
+    
+    float   f1_last,
+            f2_last;
+    
+    // INPUT
+    tDelayL     in_delay;
+    tOnePole    in_filter;
+    tAllpass    in_allpass[4];
+    
+    // FEEDBACK 1
+    tAllpass    f1_allpass;
+    tDelayL     f1_delay_1;
+    tOnePole    f1_filter;
+    tDelayL     f1_delay_2;
+    tDelayL     f1_delay_3;
+    
+    tCycle      f1_lfo;
+    
+    // FEEDBACK 2
+    tAllpass    f2_allpass;
+    tDelayL     f2_delay_1;
+    tOnePole    f2_filter;
+    tDelayL     f2_delay_2;
+    tDelayL     f2_delay_3;
+    
+    tCycle      f2_lfo;
+
+} tDattorro;
+
+void    tDattorro_init              (tDattorro* const);
+void    tDattorro_free              (tDattorro* const);
+
+float   tDattorro_tick              (tDattorro* const, float input);
+
+void    tDattorro_setMix            (tDattorro* const, float mix);
+void    tDattorro_setSize           (tDattorro* const, float size);
+void    tDattorro_setInputDelay     (tDattorro* const, float preDelay);
+void    tDattorro_setInputFilter    (tDattorro* const, float freq);
+void    tDattorro_setFeedbackFilter (tDattorro* const, float freq);
+void    tDattorro_setFeedbackGain   (tDattorro* const, float gain);
+
 
 #endif  // LEAFREVERB_H_INCLUDED

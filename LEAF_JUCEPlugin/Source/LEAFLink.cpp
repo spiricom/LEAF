@@ -24,7 +24,8 @@ std::vector<juce::String> cSliderNames =  std::vector<juce::String>
     "predelay",
     "input filter",
     "feedback filter",
-    "feedback gain"
+    "feedback gain",
+    "size"
 };
 
 std::vector<juce::String> cComboBoxNames =  std::vector<juce::String>

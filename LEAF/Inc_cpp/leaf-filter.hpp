@@ -16,7 +16,30 @@
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
+#include "leaf-delay.h"
+
 #include "leaf-wavetables.h"
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+/* tAllpass: Schroeder allpass. Comb-filter with feedforward and feedback. */
+typedef struct _tAllpass
+{
+    float gain;
+    
+    tDelayL delay;
+    
+    float lastOut;
+    
+} tAllpass;
+
+void        tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay);
+void        tAllpass_free           (tAllpass* const);
+
+float       tAllpass_tick           (tAllpass* const, float input);
+void        tAllpass_setGain        (tAllpass* const, float gain);
+void        tAllpass_setDelay       (tAllpass* const f, float delay);
+
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -26,6 +49,10 @@ typedef struct _tOnePole
     float gain;
     float a0,a1;
     float b0,b1;
+    
+    float coef;
+    
+    float freq;
     
     float lastIn, lastOut;
     
@@ -38,6 +65,7 @@ float       tOnePole_tick           (tOnePole* const, float input);
 void        tOnePole_setB0          (tOnePole* const, float b0);
 void        tOnePole_setA1          (tOnePole* const, float a1);
 void        tOnePole_setPole        (tOnePole* const, float thePole);
+void        tOnePole_setFreq        (tOnePole* const, float freq);
 void        tOnePole_setCoefficients(tOnePole* const, float b0, float a1);
 void        tOnePole_setGain        (tOnePole* const, float gain);
 

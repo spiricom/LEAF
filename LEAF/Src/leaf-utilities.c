@@ -330,8 +330,8 @@ int     tEnvelope_setDecay(tEnvelope* const env, float decay)
 {
     int32_t decayIndex;
     
-    if (decay <= 1.0f) {
-        decayIndex = 1;
+    if (decay < 0.0f) {
+        decayIndex = 0.0f;
     } else if (decay < 8192.0f) {
         decayIndex = ((int32_t)(decay * 8.0f)) - 1;
     } else {
