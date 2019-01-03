@@ -70,7 +70,7 @@ typedef enum oBool
 #define TWO_TO_31		2147483648.0f
 #define INV_TWO_TO_31	0.000000000465661f
 
-// Erbe shaper
+// Jones shaper
 float LEAF_shaper     (float input, float m_drive);
 float LEAF_reedTable  (float input, float offset, float slope);
 
@@ -78,6 +78,11 @@ float       LEAF_clip               (float min, float val, float max);
 float   	LEAF_softClip						(float val, float thresh);
 oBool       LEAF_isPrime            (uint64_t number );
 float       LEAF_midiToFrequency    (float f);
+
+void LEAF_generate_sine(float* buffer, int size);
+void LEAF_generate_sawtooth(float* buffer, float basefreq, int size);
+void LEAF_generate_triangle(float* buffer, float basefreq, int size);
+void LEAF_generate_square(float* buffer, float basefreq, int size);
 
 // dope af
 float LEAF_chebyshevT(float in, int n);

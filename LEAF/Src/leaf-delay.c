@@ -29,8 +29,6 @@ void    tDelay_init (tDelay*  const d, uint32_t delay, uint32_t maxDelay)
     
     d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
     
-    d->delay = 0.0f;
-    
     d->inPoint = 0;
     d->outPoint = 0;
     
@@ -143,8 +141,6 @@ void   tDelayL_init (tDelayL* const d, float delay, uint32_t maxDelay)
     
     d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
     
-    d->delay = 0.0f;
-    
     d->gain = 1.0f;
     
     d->lastIn = 0.0f;
@@ -206,14 +202,28 @@ int     tDelayL_setDelay (tDelayL* const d, float delay)
     return 0;
 }
 
-float tDelayL_tapOut (tDelayL* const d, uint32_t tapDelay)
+float tDelayL_tapOut (tDelayL* const d, float tapDelay)
 {
-    int32_t tap = d->inPoint - tapDelay - 1;
+    float tap = (float) d->inPoint - tapDelay - 1.f;
     
     // Check for wraparound.
-    while ( tap < 0 )   tap += d->maxDelay;
+    while ( tap < 0.f )   tap += (float)d->maxDelay;
+
+    float alpha = tap - (int)tap;
+    float omAlpha = 1.f - alpha;
+
+    int ptx = (int) tap;
     
-    return d->buff[tap];
+    // First 1/2 of interpolation
+    float samp = d->buff[ptx] * omAlpha;
+    
+    // Second 1/2 of interpolation
+    if ((ptx + 1) < d->maxDelay)
+        samp += d->buff[ptx+1] * d->alpha;
+    else
+        samp += d->buff[0] * d->alpha;
+    
+    return samp;
     
 }
 
@@ -273,8 +283,6 @@ void  tDelayA_init (tDelayA* const d, float delay, uint32_t maxDelay)
     else                    d->delay = delay;
     
     d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
-    
-    d->delay = 0.0f;
     
     d->gain = 1.0f;
     
