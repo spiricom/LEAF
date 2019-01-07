@@ -264,16 +264,6 @@ float       in_allpass_gains[4] = { 0.75f, 0.75f, 0.625f, 0.625f };
 
 void    tDattorro_init              (tDattorro* const r)
 {
-    tDattorro_setMix(r, 0.5f);
-    
-    tDattorro_setInputDelay(r,  5.f);
-    
-    tDattorro_setInputFilter(r, 1000.f);
-    
-    tDattorro_setFeedbackFilter(r, 1000.f);
-    
-    tDattorro_setFeedbackGain(r, 0.25f);
-    
     tDattorro_setSize(r, 1.0f);
     
     // INPUT
@@ -311,6 +301,18 @@ void    tDattorro_init              (tDattorro* const r)
     
     tCycle_init(&r->f2_lfo);
     tCycle_setFreq(&r->f2_lfo, 0.07f);
+    
+    
+    // PARAMETERS
+    tDattorro_setMix(r, 0.5f);
+    
+    tDattorro_setInputDelay(r,  0.f);
+    
+    tDattorro_setInputFilter(r, 10000.f);
+    
+    tDattorro_setFeedbackFilter(r, 5000.f);
+    
+    tDattorro_setFeedbackGain(r, 0.4f);
 }
 
 void    tDattorro_free              (tDattorro* const r)

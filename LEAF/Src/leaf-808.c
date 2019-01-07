@@ -193,7 +193,6 @@ void t808Hihat_setStickBandPassFreq(t808Hihat* const hihat, float freq)
 void t808Hihat_setOscFreq(t808Hihat* const hihat, float freq)
 {
 		hihat->freq = freq;
-
 }
 
 void t808Hihat_init(t808Hihat* const hihat)
