@@ -137,6 +137,91 @@ float LEAF_tanh(float x)
         return x * ( 27 + x * x ) / ( 27 + 9 * x * x );
 }
 
+
+void LEAF_generate_sine(float* buffer, int size)
+{
+    float phase;
+    for (int i = 0; i < size; i++)
+    {
+        phase = (float) i / (float) size;
+        buffer[i] = sinf(phase * TWO_PI);
+    }
+}
+
+void LEAF_generate_sawtooth(float* buffer, float basefreq, int size)
+{
+    int harmonic = 1;
+    float phase = 0.0f;
+    float freq = harmonic * basefreq;
+    float amp;
+    
+    while (freq < (leaf.sampleRate * 0.5))
+    {
+        amp = 1.0f / harmonic;
+        for (int i = 0; i < size; i++)
+        {
+            phase = (float) i / (float) size;
+            buffer[i] += (amp * sinf(harmonic * phase * TWO_PI));
+        }
+        
+        harmonic++;
+        freq = harmonic * basefreq;
+    }
+}
+
+
+void LEAF_generate_triangle(float* buffer, float basefreq, int size)
+{
+    int harmonic = 1;
+    float phase = 0.0f;
+    float freq = harmonic * basefreq;
+    float amp = 1.0f;
+    
+    int count = 0;
+    float mult = 1.0f;
+    
+    while (freq < (leaf.sampleRate * 0.5))
+    {
+        amp = 1.0f / (float)(harmonic * harmonic);
+        
+        if (count % 2)  mult = -1.0f;
+        else            mult =  1.0f;
+        
+        for (int i = 0; i < size; i++)
+        {
+            phase = (float) i / (float) size;
+            buffer[i] += (mult * amp * sinf(harmonic * phase * TWO_PI));
+        }
+        
+        count++;
+        harmonic += 2;
+        freq = harmonic * basefreq;
+    }
+}
+
+void LEAF_generate_square(float* buffer, float basefreq, int size)
+{
+    int harmonic = 1;
+    float phase = 0.0f;
+    float freq = harmonic * basefreq;
+    float amp = 1.0f;
+    
+    while (freq < (leaf.sampleRate * 0.5))
+    {
+        amp = 1.0f / (float)(harmonic);
+        
+        for (int i = 0; i < size; i++)
+        {
+            phase = (float) i / (float) size;
+            buffer[i] += (amp * sinf(harmonic * phase * TWO_PI));
+        }
+        
+        harmonic += 2;
+        freq = harmonic * basefreq;
+    }
+}
+
+
 //-----------------------------------------------------------------------------
 // name: mtof()
 // desc: midi to freq, from PD source

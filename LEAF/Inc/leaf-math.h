@@ -77,12 +77,18 @@ float LEAF_reedTable  (float input, float offset, float slope);
 float       LEAF_clip               (float min, float val, float max);
 float   	LEAF_softClip						(float val, float thresh);
 oBool       LEAF_isPrime            (uint64_t number );
+
 float       LEAF_midiToFrequency    (float f);
+float       LEAF_frequencyToMidi(float f);
+
+void        LEAF_generate_sine     (float* buffer, int size);
+void        LEAF_generate_sawtooth (float* buffer, float basefreq, int size);
+void        LEAF_generate_triangle (float* buffer, float basefreq, int size);
+void        LEAF_generate_square   (float* buffer, float basefreq, int size);
 
 // dope af
-float LEAF_chebyshevT(float in, int n);
-float LEAF_CompoundChebyshevT(float in, int n, float* amps);
-float LEAF_frequencyToMidi(float f);
+float       LEAF_chebyshevT(float in, int n);
+float       LEAF_CompoundChebyshevT(float in, int n, float* amps);
 
 static inline float interpolate3max(float *buf, const int peakindex)
 {
