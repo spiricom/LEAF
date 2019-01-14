@@ -80,6 +80,7 @@ void        t808Hihat_setHighpassFreq    (t808Hihat* const, float freq);
 void        t808Hihat_setOscBandpassFreq  (t808Hihat* const, float freq);
 void 		t808Hihat_setOscBandpassQ		(t808Hihat* const hihat, float Q);
 void        t808Hihat_setStickBandPassFreq  (t808Hihat* const, float freq);
+void 		t808Hihat_setStickBandPassQ		(t808Hihat* const hihat, float Q);
 void        t808Hihat_setOscFreq         (t808Hihat* const, float freq);
 void 		t808Hihat_setStretch				(t808Hihat* const hihat, float stretch);
 void 		t808Hihat_setFM					(t808Hihat* const hihat, float FM_amount);

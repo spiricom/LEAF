@@ -155,7 +155,6 @@ float t808Hihat_tick(t808Hihat* const hihat) {
 void t808Hihat_setDecay(t808Hihat* const hihat, float decay)
 {
     tEnvelope_setDecay(&hihat->envGain,decay);
-    tEnvelope_setDecay(&hihat->noiseFMGain,decay);
 }
 
 void t808Hihat_setHighpassFreq(t808Hihat* const hihat, float freq)
@@ -188,6 +187,12 @@ void t808Hihat_setStickBandPassFreq(t808Hihat* const hihat, float freq)
     tSVF_setFreq(&hihat->bandpassStick,freq);
 }
 
+void t808Hihat_setStickBandPassQ(t808Hihat* const hihat, float Q)
+{
+    tSVF_setQ(&hihat->bandpassStick,Q);
+}
+
+
 
 void t808Hihat_setOscFreq(t808Hihat* const hihat, float freq)
 {
@@ -201,23 +206,21 @@ void t808Hihat_init(t808Hihat* const hihat)
         tSquare_init(&hihat->p[i]);
     }
     
-    tNoise_init(&hihat->stick, WhiteNoise);
+    tNoise_init(&hihat->stick, PinkNoise);
     tNoise_init(&hihat->n, WhiteNoise);
     
     // need to fix SVF to be generic
-    tSVF_init(&hihat->bandpassStick, SVFTypeBandpass,2500.0,1.2f);
-    tSVF_init(&hihat->bandpassOsc, SVFTypeBandpass,3500,0.3f);
+    tSVF_init(&hihat->bandpassStick, SVFTypeBandpass,2500.0f,1.2f);
+    tSVF_init(&hihat->bandpassOsc, SVFTypeBandpass,3500.0f,0.3f);
     
     tEnvelope_init(&hihat->envGain, 0.0f, 50.0f, OFALSE);
-    tEnvelope_init(&hihat->noiseFMGain, 0.0f, 500.0f, OFALSE);
-    tEnvelope_init(&hihat->envStick, 0.0f, 4.0f, OFALSE);
+    tEnvelope_init(&hihat->envStick, 0.0f, 7.0f, OFALSE);
     
     tHighpass_init(&hihat->highpass, 7000.0f);
     
     hihat->freq = 40.0f;
     hihat->stretch = 0.0f;
-    hihat->FM_amount = 1000.0f;
-    
+
     tSquare_setFreq(&hihat->p[0], 2.0f * hihat->freq);
     tSquare_setFreq(&hihat->p[1], 3.00f * hihat->freq);
     tSquare_setFreq(&hihat->p[2], 4.16f * hihat->freq);
