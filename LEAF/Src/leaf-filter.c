@@ -22,6 +22,43 @@
 
 #endif
 
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+void    tAllpass_init(tAllpass* const f, float initDelay, uint32_t maxDelay)
+{
+    f->gain = 0.7f;
+    
+    f->lastOut = 0.0f;
+    
+    tDelayL_init(&f->delay, initDelay, maxDelay);
+}
+
+void    tAllpass_setDelay(tAllpass* const f, float delay)
+{
+    tDelayL_setDelay(&f->delay, delay);
+}
+
+void    tAllpass_free(tAllpass* const f)
+{
+    leaf_free(&f->delay);
+    leaf_free(f);
+}
+
+void    tAllpass_setGain(tAllpass* const f, float gain)
+{
+    f->gain = gain;
+}
+
+float   tAllpass_tick(tAllpass* const f, float input)
+{
+    float s1 = (-f->gain) * f->lastOut + input;
+    
+    float s2 = tDelayL_tick(&f->delay, s1) + (f->gain) * input;
+    
+    f->lastOut = s2;
+    
+    return f->lastOut;
+}
+
 void tButterworth_init(tButterworth* const f, int N, float f1, float f2)
 {
 	f->f1 = f1;
@@ -239,12 +276,12 @@ void tTwoZeroSampleRateChanged(tTwoZero* const f)
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tOnePole_init(tOnePole* const f, float thePole)
+void    tOnePole_init(tOnePole* const f, float freq)
 {
     f->gain = 1.0f;
     f->a0 = 1.0;
     
-    tOnePole_setPole(f, thePole);
+    tOnePole_setFreq(f, freq);
     
     f->lastIn = 0.0f;
     f->lastOut = 0.0f;
@@ -278,6 +315,15 @@ void    tOnePole_setPole(tOnePole* const f, float thePole)
     f->a1 = -thePole;
 }
 
+void        tOnePole_setFreq        (tOnePole* const f, float freq)
+{
+    f->b0 = freq * TWO_PI * leaf.invSampleRate;
+    
+    f->b0 = LEAF_clip(0.0f, f->b0, 1.0f);
+    
+    f->a1 = 1.0f - f->b0;
+}
+
 void    tOnePole_setCoefficients(tOnePole* const f, float b0, float a1)
 {
     if (a1 >= 1.0f)     a1 = 0.999999f;
@@ -294,7 +340,7 @@ void    tOnePole_setGain(tOnePole* const f, float gain)
 float   tOnePole_tick(tOnePole* const f, float input)
 {
     float in = input * f->gain;
-    float out = (f->b0 * in) - (f->a1 * f->lastOut);
+    float out = (f->b0 * in) + (f->a1 * f->lastOut);
     
     f->lastIn = in;
     f->lastOut = out;
@@ -679,7 +725,7 @@ void tSVF_init(tSVF* const svf, SVFType type, float freq, float Q)
     
     float a1,a2,a3,g,k;
     g = tanf(PI * freq * leaf.invSampleRate);
-    k = 1.0f/LEAF_clip(0.01f,Q,10.0f);
+    k = 1.0f/Q;
     a1 = 1.0f/(1.0f+g*(g+k));
     a2 = g*a1;
     a3 = g*a2;
@@ -708,7 +754,7 @@ int     tSVF_setFreq(tSVF* const svf, float freq)
 
 int     tSVF_setQ(tSVF* const svf, float Q)
 {
-    svf->k = 1.0f/LEAF_clip(0.01f,Q,10.0f);
+    svf->k = 1.0f/Q;
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;

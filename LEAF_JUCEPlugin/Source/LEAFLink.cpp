@@ -20,7 +20,12 @@ std::vector<juce::String> cButtonNames =  std::vector<juce::String>
 
 std::vector<juce::String> cSliderNames =  std::vector<juce::String>
 {
-    "mix"
+    "mix",
+    "predelay",
+    "input filter",
+    "feedback filter",
+    "feedback gain",
+    "size"
 };
 
 std::vector<juce::String> cComboBoxNames =  std::vector<juce::String>

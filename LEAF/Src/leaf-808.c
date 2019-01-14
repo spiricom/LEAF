@@ -121,7 +121,7 @@ void t808Hihat_setOscNoiseMix(t808Hihat* const hihat, float oscNoiseMix) {
 float t808Hihat_tick(t808Hihat* const hihat) {
     
     float sample = 0.0f;
-    float gainScale = 0.3f;
+    float gainScale = 0.1666f;
     
 
     float myNoise = tNoise_tick(&hihat->n);
@@ -149,6 +149,7 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     sample = tHighpass_tick(&hihat->highpass, sample);
     sample += ((0.5f * tEnvelope_tick(&hihat->envStick)) * tSVF_tick(&hihat->bandpassStick, tNoise_tick(&hihat->stick)));
     sample = tanhf(sample * 2.0f);
+
     return sample;
 }
 
@@ -216,6 +217,7 @@ void t808Hihat_init(t808Hihat* const hihat)
     tEnvelope_init(&hihat->envGain, 0.0f, 50.0f, OFALSE);
     tEnvelope_init(&hihat->envStick, 0.0f, 7.0f, OFALSE);
     
+
     tHighpass_init(&hihat->highpass, 7000.0f);
     
     hihat->freq = 40.0f;

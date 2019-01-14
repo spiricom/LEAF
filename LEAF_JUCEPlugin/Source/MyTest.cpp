@@ -16,41 +16,66 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-t808Snare snare;
+tDattorro reverb;
+
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
-    LEAFInit(sampleRate, blockSize, &randomNumberGenerator);
+    LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
+
+    tDattorro_init(&reverb);
     
-    t808Snare_init(&snare);
+    setSliderValue("mix", reverb.mix);
+    setSliderValue("predelay", reverb.predelay / 200.0f);
+    setSliderValue("input filter", reverb.input_filter / 20000.0f);
+    setSliderValue("feedback filter", reverb.feedback_filter / 20000.0f);
+    setSliderValue("feedback gain", reverb.feedback_gain);
+    //setSliderValue("size", reverb.size / 4.0f);
     
     leaf_pool_report();
 }
 
 int timer = 0;
 
-float prev = 0.0;
+
+#define CLICK 0
 
 float   LEAFTest_tick            (float input)
 {
-    float sample = 0.0f;
+#if CLICK
+    input = 0.0f;
     
     timer++;
     if (timer == (1 * leaf.sampleRate))
     {
         timer = 0;
-        t808Snare_on(&snare, 1.0);
+        
+        input = 1.0f;
     }
-
-    sample = t808Snare_tick(&snare);
+#endif
     
-    return sample;
-     
+    return tDattorro_tick(&reverb, input);
 }
 
 void    LEAFTest_block           (void)
 {
     float val = getSliderValue("mix");
+    tDattorro_setMix(&reverb, val);
+    
+    val = getSliderValue("predelay");
+    tDattorro_setInputDelay(&reverb, val * 200.0f);
+    
+    val = getSliderValue("input filter");
+    tDattorro_setInputFilter(&reverb, val * 20000.0f);
+    
+    val = getSliderValue("feedback filter");
+    tDattorro_setFeedbackFilter(&reverb, val * 20000.0f);
+    
+    val = getSliderValue("feedback gain");
+    tDattorro_setFeedbackGain(&reverb, val);
+    
+    //val = getSliderValue("size");
+    //tDattorro_setSize(&reverb, val * 4.0f);
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

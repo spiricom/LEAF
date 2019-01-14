@@ -71,7 +71,7 @@ void        tDelayL_free        (tDelayL* const);
 int         tDelayL_setDelay    (tDelayL*  const, float delay);
 float       tDelayL_getDelay    (tDelayL*  const);
 void        tDelayL_tapIn       (tDelayL*  const, float in, uint32_t tapDelay);
-float       tDelayL_tapOut      (tDelayL*  const, uint32_t tapDelay);
+float       tDelayL_tapOut      (tDelayL*  const, float tapDelay);
 float       tDelayL_addTo       (tDelayL*  const, float value, uint32_t tapDelay);
 float       tDelayL_tick        (tDelayL*  const, float sample);
 float       tDelayL_getLastOut  (tDelayL*  const);
