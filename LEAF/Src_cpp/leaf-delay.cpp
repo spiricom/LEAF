@@ -63,8 +63,8 @@ float   tDelay_tick (tDelay* const d, float input)
 
 int     tDelay_setDelay (tDelay* const d, uint32_t delay)
 {
-    if (delay >= d->maxDelay)    d->delay = d->maxDelay;
-    else                         d->delay = delay;
+    d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
+    
     
     // read chases write
     if ( d->inPoint >= delay )  d->outPoint = d->inPoint - d->delay;
@@ -164,28 +164,25 @@ float   tDelayL_tick (tDelayL* const d, float input)
     
     // Increment input pointer modulo length.
     if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
+
     
+    uint32_t idx = (uint32_t) d->outPoint;
     
-    // First 1/2 of interpolation
-    d->lastOut = d->buff[d->outPoint] * d->omAlpha;
+    d->lastOut =    LEAF_interpolate_hermite (d->buff[((idx - 1) + d->maxDelay) % d->maxDelay],
+                                              d->buff[idx],
+                                              d->buff[(idx + 1) % d->maxDelay],
+                                              d->buff[(idx + 2) % d->maxDelay],
+                                              d->alpha);
     
-    // Second 1/2 of interpolation
-    if (d->outPoint + 1 < d->maxDelay)
-        d->lastOut += d->buff[d->outPoint+1] * d->alpha;
-    else
-        d->lastOut += d->buff[0] * d->alpha;
-    
-    // Increment output pointer modulo length.
-    if ( ++(d->outPoint) == d->maxDelay )   d->outPoint = 0;
+    // Increment output pointer modulo length
+    if ( (++d->outPoint) >= d->maxDelay )   d->outPoint = 0;
     
     return d->lastOut;
 }
 
 int     tDelayL_setDelay (tDelayL* const d, float delay)
 {
-    if (delay < 0.0f)               d->delay = 0.0f;
-    else if (delay <= d->maxDelay)  d->delay = delay;
-    else                            d->delay = d->maxDelay;
+    d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
     
     float outPointer = d->inPoint - d->delay;
     
@@ -326,9 +323,8 @@ float   tDelayA_tick (tDelayA* const d, float input)
 
 int     tDelayA_setDelay (tDelayA* const d, float delay)
 {
-    if (delay < 0.5f)               d->delay = 0.5f;
-    else if (delay <= d->maxDelay)  d->delay = delay;
-    else                            d->delay = d->maxDelay;
+    d->delay = LEAF_clip(0.5f, delay,  d->maxDelay);
+    
     
     // outPoint chases inPoint
     float outPointer = (float)d->inPoint - d->delay + 1.0f;
@@ -411,6 +407,157 @@ void tDelayA_setGain (tDelayA* const d, float gain)
 }
 
 float tDelayA_getGain (tDelayA* const d)
+{
+    return d->gain;
+}
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ TapeDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+void   tTapeDelay_init (tTapeDelay* const d, float delay, uint32_t maxDelay)
+{
+    d->maxDelay = maxDelay;
+    
+    d->delay = LEAF_clip(0.0f, delay, d->maxDelay);
+
+    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
+    
+    d->gain = 1.0f;
+    
+    d->lastIn = 0.0f;
+    d->lastOut = 0.0f;
+    
+    d->idx = 0.0f;
+    d->inc = 1.0f;
+    d->inPoint = 0;
+    d->outPoint = 0;
+    
+    tTapeDelay_setDelay(d, 1);
+}
+
+void tTapeDelay_free(tTapeDelay* const d)
+{
+    leaf_free(d->buff);
+    leaf_free(d);
+}
+
+int count = 0;
+
+#define SMOOTH_FACTOR 10.f
+
+float   tTapeDelay_tick (tTapeDelay* const d, float input)
+{
+    d->buff[d->inPoint] = input * d->gain;
+    
+    // Increment input pointer modulo length.
+    if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
+
+    int idx =  (int) d->idx;
+    d->alpha = d->idx - idx;
+    
+    d->lastOut =    LEAF_interpolate_hermite (d->buff[((idx - 1) + d->maxDelay) % d->maxDelay],
+                                              d->buff[idx],
+                                              d->buff[(idx + 1) % d->maxDelay],
+                                              d->buff[(idx + 2) % d->maxDelay],
+                                              d->alpha);
+    
+    float diff = (d->inPoint - d->idx);
+    while (diff < 0.f) diff += d->maxDelay;
+    
+    d->inc = 1.0f + (diff - d->delay) / d->delay * SMOOTH_FACTOR;
+
+    d->idx += d->inc;
+    
+    if (d->idx >= d->maxDelay) d->idx = 0.f;
+    
+    if ( ++(d->outPoint) >= d->maxDelay ) d->outPoint -= d->maxDelay;
+
+    return d->lastOut;
+}
+
+
+void tTapeDelay_setRate(tTapeDelay* const d, float rate)
+{
+    d->inc = rate;
+}
+
+int     tTapeDelay_setDelay (tTapeDelay* const d, float delay)
+{
+    d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
+    
+    
+    float outPointer = d->inPoint - d->delay;
+    
+    while ( outPointer < 0 )
+        outPointer += d->maxDelay; // modulo maximum length
+    
+    d->outPoint = (uint32_t) outPointer;   // integer part
+    
+    
+    return 0;
+}
+
+float tTapeDelay_tapOut (tTapeDelay* const d, float tapDelay)
+{
+    float tap = (float) d->inPoint - tapDelay - 1.f;
+    
+    // Check for wraparound.
+    while ( tap < 0.f )   tap += (float)d->maxDelay;
+    
+    int idx =  (int) tap;
+    
+    float alpha = tap - idx;
+    
+    float samp =    LEAF_interpolate_hermite (d->buff[((idx - 1) + d->maxDelay) % d->maxDelay],
+                                              d->buff[idx],
+                                              d->buff[(idx + 1) % d->maxDelay],
+                                              d->buff[(idx + 2) % d->maxDelay],
+                                              d->alpha);
+    
+    return samp;
+    
+}
+
+void tTapeDelay_tapIn (tTapeDelay* const d, float value, uint32_t tapDelay)
+{
+    int32_t tap = d->inPoint - tapDelay - 1;
+    
+    // Check for wraparound.
+    while ( tap < 0 )   tap += d->maxDelay;
+    
+    d->buff[tap] = value;
+}
+
+float tTapeDelay_addTo (tTapeDelay* const d, float value, uint32_t tapDelay)
+{
+    int32_t tap = d->inPoint - tapDelay - 1;
+    
+    // Check for wraparound.
+    while ( tap < 0 )   tap += d->maxDelay;
+    
+    return (d->buff[tap] += value);
+}
+
+float   tTapeDelay_getDelay (tTapeDelay *d)
+{
+    return d->delay;
+}
+
+float   tTapeDelay_getLastOut (tTapeDelay* const d)
+{
+    return d->lastOut;
+}
+
+float   tTapeDelay_getLastIn (tTapeDelay* const d)
+{
+    return d->lastIn;
+}
+
+void tTapeDelay_setGain (tTapeDelay* const d, float gain)
+{
+    if (gain < 0.0f)    d->gain = 0.0f;
+    else                d->gain = gain;
+}
+
+float tTapeDelay_getGain (tTapeDelay* const d)
 {
     return d->gain;
 }

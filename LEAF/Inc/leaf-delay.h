@@ -113,4 +113,37 @@ float       tDelayA_getLastIn   (tDelayA*  const);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
+/* Linear interpolating delay with fixed read and write pointers, variable rate. */
+typedef struct _tTapeDelay
+{
+    float gain;
+    float* buff;
+    
+    float lastOut, lastIn;
+    
+    uint32_t inPoint;
+    uint32_t outPoint;
+    
+    uint32_t maxDelay;
+    
+    float delay, inc, idx;
+    
+    float alpha, omAlpha, coeff;
+    
+    float apInput;
+    
+} tTapeDelay;
+
+void        tTapeDelay_init        (tTapeDelay*  const, float delay, uint32_t maxDelay);
+void        tTapeDelay_free        (tTapeDelay* const);
+
+int         tTapeDelay_setDelay    (tTapeDelay*  const, float delay);
+float       tTapeDelay_getDelay    (tTapeDelay*  const);
+void        tTapeDelay_tapIn       (tTapeDelay*  const, float in, uint32_t tapDelay);
+float       tTapeDelay_tapOut      (tTapeDelay*  const, uint32_t tapDelay);
+float       tTapeDelay_addTo       (tTapeDelay*  const, float value, uint32_t tapDelay);
+float       tTapeDelay_tick        (tTapeDelay*  const, float sample);
+float       tTapeDelay_getLastOut  (tTapeDelay*  const);
+float       tTapeDelay_getLastIn   (tTapeDelay*  const);
+
 #endif  // LEAFDELAY_H_INCLUDED

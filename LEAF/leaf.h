@@ -11,6 +11,12 @@
 #ifndef LEAF_H_INCLUDED
 #define LEAF_H_INCLUDED
 
+#define DEBUG 1
+
+#if DEBUG
+#include "../JuceLibraryCode/JuceHeader.h"
+#endif
+
 #if _WIN32 || _WIN64
 
 #include ".\Inc\leaf-globals.h"
