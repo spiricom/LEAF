@@ -463,12 +463,6 @@ float   tTapeDelay_tick (tTapeDelay* const d, float input)
     while (diff < 0.f) diff += d->maxDelay;
     
     d->inc = 1.0f + (diff - d->delay) / d->delay * SMOOTH_FACTOR;
-    
-    if (++count >= 5000)
-    {
-        count = 0;
-        DBG(String(d->inc));
-    }
 
     d->idx += d->inc;
     

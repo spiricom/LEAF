@@ -11,7 +11,7 @@
 #ifndef LEAF_H_INCLUDED
 #define LEAF_H_INCLUDED
 
-#define DEBUG 1
+#define DEBUG 0
 
 #if DEBUG
 #include "../JuceLibraryCode/JuceHeader.h"
