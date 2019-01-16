@@ -122,13 +122,10 @@ typedef struct _tTapeDelay
     float lastOut, lastIn;
     
     uint32_t inPoint;
-    uint32_t outPoint;
     
     uint32_t maxDelay;
     
     float delay, inc, idx;
-    
-    float alpha, omAlpha, coeff;
     
     float apInput;
     

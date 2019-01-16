@@ -428,7 +428,6 @@ void   tTapeDelay_init (tTapeDelay* const d, float delay, uint32_t maxDelay)
     d->idx = 0.0f;
     d->inc = 1.0f;
     d->inPoint = 0;
-    d->outPoint = 0;
     
     tTapeDelay_setDelay(d, 1.f);
 }
@@ -451,13 +450,13 @@ float   tTapeDelay_tick (tTapeDelay* const d, float input)
     if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
 
     int idx =  (int) d->idx;
-    d->alpha = d->idx - idx;
+    float alpha = d->idx - idx;
     
     d->lastOut =    LEAF_interpolate_hermite (d->buff[((idx - 1) + d->maxDelay) % d->maxDelay],
                                               d->buff[idx],
                                               d->buff[(idx + 1) % d->maxDelay],
                                               d->buff[(idx + 2) % d->maxDelay],
-                                              d->alpha);
+                                              alpha);
     
     float diff = (d->inPoint - d->idx);
     while (diff < 0.f) diff += d->maxDelay;
@@ -467,8 +466,6 @@ float   tTapeDelay_tick (tTapeDelay* const d, float input)
     d->idx += d->inc;
     
     if (d->idx >= d->maxDelay) d->idx = 0.f;
-    
-    if ( ++(d->outPoint) >= d->maxDelay ) d->outPoint -= d->maxDelay;
 
     return d->lastOut;
 }
@@ -482,14 +479,6 @@ void tTapeDelay_setRate(tTapeDelay* const d, float rate)
 int     tTapeDelay_setDelay (tTapeDelay* const d, float delay)
 {
     d->delay = LEAF_clip(1.f, delay,  d->maxDelay);
-    
-    float outPointer = d->inPoint - d->delay;
-    
-    while ( outPointer < 0 )
-        outPointer += d->maxDelay; // modulo maximum length
-    
-    d->outPoint = (uint32_t) outPointer;   // integer part
-    
     
     return 0;
 }
@@ -509,7 +498,7 @@ float tTapeDelay_tapOut (tTapeDelay* const d, float tapDelay)
                                               d->buff[idx],
                                               d->buff[(idx + 1) % d->maxDelay],
                                               d->buff[(idx + 2) % d->maxDelay],
-                                              d->alpha);
+                                              alpha);
     
     return samp;
     
