@@ -232,3 +232,33 @@ float LEAF_midiToFrequency(float f)
     else if( f > 1499.0f ) return (LEAF_midiToFrequency(1499.0f));
     else return ( powf(2.0f, (f - 69.0f) / 12.0f) * 440.0f );
 }
+
+
+// alpha, [0.0, 1.0]
+float LEAF_interpolate_hermite (float A, float B, float C, float D, float alpha)
+{
+    alpha = LEAF_clip(0.0f, alpha, 1.0f);
+    
+    float a = -A/2.0f + (3.0f*B)/2.0f - (3.0f*C)/2.0f + D/2.0f;
+    float b = A - (5.0f*B)/2.0f + 2.0f*C - D / 2.0f;
+    float c = -A/2.0f + C/2.0f;
+    float d = B;
+    
+    return a*alpha*alpha*alpha + b*alpha*alpha + c*alpha + d;
+}
+
+// alpha, [0.0, 1.0]
+float LEAF_interpolation_linear (float A, float B, float alpha)
+{
+    alpha = LEAF_clip(0.0f, alpha, 1.0f);
+    
+    float omAlpha = 1.0f - alpha;
+    
+    // First 1/2 of interpolation
+    float out = A * omAlpha;
+    
+    out += B * alpha;
+    
+    return out;
+}
+
