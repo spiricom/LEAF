@@ -416,7 +416,7 @@ void   tTapeDelay_init (tTapeDelay* const d, float delay, uint32_t maxDelay)
 {
     d->maxDelay = maxDelay;
     
-    d->delay = LEAF_clip(0.0f, delay, d->maxDelay);
+    d->delay = LEAF_clip(1.f, delay, d->maxDelay);
 
     d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
     
@@ -430,7 +430,7 @@ void   tTapeDelay_init (tTapeDelay* const d, float delay, uint32_t maxDelay)
     d->inPoint = 0;
     d->outPoint = 0;
     
-    tTapeDelay_setDelay(d, 1);
+    tTapeDelay_setDelay(d, 1.f);
 }
 
 void tTapeDelay_free(tTapeDelay* const d)
@@ -481,8 +481,7 @@ void tTapeDelay_setRate(tTapeDelay* const d, float rate)
 
 int     tTapeDelay_setDelay (tTapeDelay* const d, float delay)
 {
-    d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
-    
+    d->delay = LEAF_clip(1.f, delay,  d->maxDelay);
     
     float outPointer = d->inPoint - d->delay;
     

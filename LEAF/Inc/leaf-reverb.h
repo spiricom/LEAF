@@ -99,26 +99,26 @@ typedef struct _tDattorro
     f2_last;
     
     // INPUT
-    tDelayL     in_delay;
+    tTapeDelay  in_delay;
     tOnePole    in_filter;
     tAllpass    in_allpass[4];
     
     // FEEDBACK 1
     tAllpass    f1_allpass;
-    tDelayL     f1_delay_1;
+    tTapeDelay  f1_delay_1;
     tOnePole    f1_filter;
-    tDelayL     f1_delay_2;
-    tDelayL     f1_delay_3;
+    tTapeDelay  f1_delay_2;
+    tTapeDelay  f1_delay_3;
     tHighpass   f1_hp;
     
     tCycle      f1_lfo;
     
     // FEEDBACK 2
     tAllpass    f2_allpass;
-    tDelayL     f2_delay_1;
+    tTapeDelay  f2_delay_1;
     tOnePole    f2_filter;
-    tDelayL     f2_delay_2;
-    tDelayL     f2_delay_3;
+    tTapeDelay  f2_delay_2;
+    tTapeDelay  f2_delay_3;
     tHighpass   f2_hp;
     
     tCycle      f2_lfo;

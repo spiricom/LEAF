@@ -140,7 +140,7 @@ void        tTapeDelay_free        (tTapeDelay* const);
 int         tTapeDelay_setDelay    (tTapeDelay*  const, float delay);
 float       tTapeDelay_getDelay    (tTapeDelay*  const);
 void        tTapeDelay_tapIn       (tTapeDelay*  const, float in, uint32_t tapDelay);
-float       tTapeDelay_tapOut      (tTapeDelay*  const, uint32_t tapDelay);
+float       tTapeDelay_tapOut      (tTapeDelay* const d, float tapDelay);
 float       tTapeDelay_addTo       (tTapeDelay*  const, float value, uint32_t tapDelay);
 float       tTapeDelay_tick        (tTapeDelay*  const, float sample);
 float       tTapeDelay_getLastOut  (tTapeDelay*  const);

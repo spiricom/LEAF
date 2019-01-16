@@ -270,7 +270,7 @@ void    tDattorro_init              (tDattorro* const r)
     r->t = r->size * leaf.sampleRate * 0.001f;
     
     // INPUT
-    tDelayL_init(&r->in_delay, 0.f, SAMP(200.f));
+    tTapeDelay_init(&r->in_delay, 0.f, SAMP(200.f));
     tOnePole_init(&r->in_filter, 1.f);
     
     for (int i = 0; i < 4; i++)
@@ -283,9 +283,9 @@ void    tDattorro_init              (tDattorro* const r)
     tAllpass_init(&r->f1_allpass, SAMP(30.51f), SAMP(100.f)); // * r->size_max
     tAllpass_setGain(&r->f1_allpass, 0.7f);
     
-    tDelayL_init(&r->f1_delay_1, SAMP(141.69f), SAMP(200.0f) * r->size_max + 1);
-    tDelayL_init(&r->f1_delay_2, SAMP(89.24f), SAMP(100.0f) * r->size_max + 1);
-    tDelayL_init(&r->f1_delay_3, SAMP(125.f), SAMP(200.0f) * r->size_max + 1);
+    tTapeDelay_init(&r->f1_delay_1, SAMP(141.69f), SAMP(200.0f) * r->size_max + 1);
+    tTapeDelay_init(&r->f1_delay_2, SAMP(89.24f), SAMP(100.0f) * r->size_max + 1);
+    tTapeDelay_init(&r->f1_delay_3, SAMP(125.f), SAMP(200.0f) * r->size_max + 1);
     
     tOnePole_init(&r->f1_filter, 1.f);
     
@@ -298,9 +298,9 @@ void    tDattorro_init              (tDattorro* const r)
     tAllpass_init(&r->f2_allpass, SAMP(22.58f), SAMP(100.f)); // * r->size_max
     tAllpass_setGain(&r->f2_allpass, 0.7f);
     
-    tDelayL_init(&r->f2_delay_1, SAMP(149.62f), SAMP(200.f) * r->size_max + 1);
-    tDelayL_init(&r->f2_delay_2, SAMP(60.48f), SAMP(100.f) * r->size_max + 1);
-    tDelayL_init(&r->f2_delay_3, SAMP(106.28f), SAMP(200.f) * r->size_max + 1);
+    tTapeDelay_init(&r->f2_delay_1, SAMP(149.62f), SAMP(200.f) * r->size_max + 1);
+    tTapeDelay_init(&r->f2_delay_2, SAMP(60.48f), SAMP(100.f) * r->size_max + 1);
+    tTapeDelay_init(&r->f2_delay_3, SAMP(106.28f), SAMP(200.f) * r->size_max + 1);
     
     tOnePole_init(&r->f2_filter, 1.f);
     
@@ -327,7 +327,7 @@ void    tDattorro_init              (tDattorro* const r)
 void    tDattorro_free              (tDattorro* const r)
 {
     // INPUT
-    tDelayL_free(&r->in_delay);
+    tTapeDelay_free(&r->in_delay);
     tOnePole_free(&r->in_filter);
     
     for (int i = 0; i < 4; i++)
@@ -338,9 +338,9 @@ void    tDattorro_free              (tDattorro* const r)
     // FEEDBACK 1
     tAllpass_free(&r->f1_allpass);
     
-    tDelayL_free(&r->f1_delay_1);
-    tDelayL_free(&r->f1_delay_2);
-    tDelayL_free(&r->f1_delay_3);
+    tTapeDelay_free(&r->f1_delay_1);
+    tTapeDelay_free(&r->f1_delay_2);
+    tTapeDelay_free(&r->f1_delay_3);
     
     tOnePole_free(&r->f1_filter);
     
@@ -349,9 +349,9 @@ void    tDattorro_free              (tDattorro* const r)
     // FEEDBACK 2
     tAllpass_free(&r->f2_allpass);
     
-    tDelayL_free(&r->f2_delay_1);
-    tDelayL_free(&r->f2_delay_2);
-    tDelayL_free(&r->f2_delay_3);
+    tTapeDelay_free(&r->f2_delay_1);
+    tTapeDelay_free(&r->f2_delay_2);
+    tTapeDelay_free(&r->f2_delay_3);
     
     tOnePole_free(&r->f2_filter);
     
@@ -363,7 +363,7 @@ void    tDattorro_free              (tDattorro* const r)
 float   tDattorro_tick              (tDattorro* const r, float input)
 {
     // INPUT
-    float in_sample = tDelayL_tick(&r->in_delay, input);
+    float in_sample = tTapeDelay_tick(&r->in_delay, input);
     
     in_sample = tOnePole_tick(&r->in_filter, in_sample);
     
@@ -379,13 +379,13 @@ float   tDattorro_tick              (tDattorro* const r, float input)
     
     f1_sample = tAllpass_tick(&r->f1_allpass, f1_sample);
     
-    f1_sample = tDelayL_tick(&r->f1_delay_1, f1_sample);
+    f1_sample = tTapeDelay_tick(&r->f1_delay_1, f1_sample);
     
     f1_sample = tOnePole_tick(&r->f1_filter, f1_sample);
     
     f1_sample = f1_sample + r->f1_delay_2_last * 0.5f;
     
-    float f1_delay_2_sample = tDelayL_tick(&r->f1_delay_2, f1_sample * 0.5f);
+    float f1_delay_2_sample = tTapeDelay_tick(&r->f1_delay_2, f1_sample * 0.5f);
     
     r->f1_delay_2_last = f1_delay_2_sample;
     
@@ -395,7 +395,7 @@ float   tDattorro_tick              (tDattorro* const r, float input)
     
     f1_sample *= r->feedback_gain;
     
-    r->f1_last = tDelayL_tick(&r->f1_delay_3, f1_sample);
+    r->f1_last = tTapeDelay_tick(&r->f1_delay_3, f1_sample);
     
     // FEEDBACK 2
     float f2_sample = in_sample + r->f1_last;
@@ -404,13 +404,13 @@ float   tDattorro_tick              (tDattorro* const r, float input)
     
     f2_sample = tAllpass_tick(&r->f2_allpass, f2_sample);
     
-    f2_sample = tDelayL_tick(&r->f2_delay_1, f2_sample);
+    f2_sample = tTapeDelay_tick(&r->f2_delay_1, f2_sample);
     
     f2_sample = tOnePole_tick(&r->f2_filter, f2_sample);
     
     f2_sample = f2_sample + r->f2_delay_2_last * 0.5f;
     
-    float f2_delay_2_sample = tDelayL_tick(&r->f2_delay_2, f2_sample * 0.5f);
+    float f2_delay_2_sample = tTapeDelay_tick(&r->f2_delay_2, f2_sample * 0.5f);
     
     r->f2_delay_2_last = f2_delay_2_sample;
     
@@ -420,38 +420,38 @@ float   tDattorro_tick              (tDattorro* const r, float input)
     
     f2_sample *= r->feedback_gain;
     
-    r->f2_last = tDelayL_tick(&r->f2_delay_3, f2_sample);
+    r->f2_last = tTapeDelay_tick(&r->f2_delay_3, f2_sample);
     
     
     // TAP OUT 1
-    f1_sample =     tDelayL_tapOut(&r->f1_delay_1, SAMP(8.9f)) +
-    tDelayL_tapOut(&r->f1_delay_1, SAMP(99.8f));
+    f1_sample =     tTapeDelay_tapOut(&r->f1_delay_1, SAMP(8.9f)) +
+    tTapeDelay_tapOut(&r->f1_delay_1, SAMP(99.8f));
     
-    f1_sample -=    tDelayL_tapOut(&r->f1_delay_2, SAMP(64.2f));
+    f1_sample -=    tTapeDelay_tapOut(&r->f1_delay_2, SAMP(64.2f));
     
-    f1_sample +=    tDelayL_tapOut(&r->f1_delay_3, SAMP(67.f));
+    f1_sample +=    tTapeDelay_tapOut(&r->f1_delay_3, SAMP(67.f));
     
-    f1_sample -=    tDelayL_tapOut(&r->f2_delay_1, SAMP(66.8f));
+    f1_sample -=    tTapeDelay_tapOut(&r->f2_delay_1, SAMP(66.8f));
     
-    f1_sample -=    tDelayL_tapOut(&r->f2_delay_2, SAMP(6.3f));
+    f1_sample -=    tTapeDelay_tapOut(&r->f2_delay_2, SAMP(6.3f));
     
-    f1_sample -=    tDelayL_tapOut(&r->f2_delay_3, SAMP(35.8f));
+    f1_sample -=    tTapeDelay_tapOut(&r->f2_delay_3, SAMP(35.8f));
     
     f1_sample *=    0.14f;
     
     // TAP OUT 2
-    f2_sample =     tDelayL_tapOut(&r->f2_delay_1, SAMP(11.8f)) +
-    tDelayL_tapOut(&r->f2_delay_1, SAMP(121.7f));
+    f2_sample =     tTapeDelay_tapOut(&r->f2_delay_1, SAMP(11.8f)) +
+    tTapeDelay_tapOut(&r->f2_delay_1, SAMP(121.7f));
     
-    f2_sample -=    tDelayL_tapOut(&r->f2_delay_2, SAMP(6.3f));
+    f2_sample -=    tTapeDelay_tapOut(&r->f2_delay_2, SAMP(6.3f));
     
-    f2_sample +=    tDelayL_tapOut(&r->f2_delay_3, SAMP(89.7f));
+    f2_sample +=    tTapeDelay_tapOut(&r->f2_delay_3, SAMP(89.7f));
     
-    f2_sample -=    tDelayL_tapOut(&r->f1_delay_1, SAMP(70.8f));
+    f2_sample -=    tTapeDelay_tapOut(&r->f1_delay_1, SAMP(70.8f));
     
-    f2_sample -=    tDelayL_tapOut(&r->f1_delay_2, SAMP(11.2f));
+    f2_sample -=    tTapeDelay_tapOut(&r->f1_delay_2, SAMP(11.2f));
     
-    f2_sample -=    tDelayL_tapOut(&r->f1_delay_3, SAMP(4.1f));
+    f2_sample -=    tTapeDelay_tapOut(&r->f1_delay_3, SAMP(4.1f));
     
     f2_sample *=    0.14f;
     
@@ -480,25 +480,25 @@ void    tDattorro_setSize           (tDattorro* const r, float size)
     // FEEDBACK 1
     //tAllpass_setDelay(&r->f1_allpass, SAMP(30.51f));
     
-    tDelayL_setDelay(&r->f1_delay_1, SAMP(141.69f));
-    tDelayL_setDelay(&r->f1_delay_2, SAMP(89.24f));
-    tDelayL_setDelay(&r->f1_delay_3, SAMP(125.f));
+    tTapeDelay_setDelay(&r->f1_delay_1, SAMP(141.69f));
+    tTapeDelay_setDelay(&r->f1_delay_2, SAMP(89.24f));
+    tTapeDelay_setDelay(&r->f1_delay_3, SAMP(125.f));
     
     // maybe change rate of SINE LFO's when size changes?
     
     // FEEDBACK 2
     //tAllpass_setDelay(&r->f2_allpass, SAMP(22.58f));
     
-    tDelayL_setDelay(&r->f2_delay_1, SAMP(149.62f));
-    tDelayL_setDelay(&r->f2_delay_2, SAMP(60.48f));
-    tDelayL_setDelay(&r->f2_delay_3, SAMP(106.28f));
+    tTapeDelay_setDelay(&r->f2_delay_1, SAMP(149.62f));
+    tTapeDelay_setDelay(&r->f2_delay_2, SAMP(60.48f));
+    tTapeDelay_setDelay(&r->f2_delay_3, SAMP(106.28f));
 }
 
 void    tDattorro_setInputDelay     (tDattorro* const r, float preDelay)
 {
     r->predelay = LEAF_clip(0.0f, preDelay, 200.0f);
     
-    tDelayL_setDelay(&r->in_delay, SAMP(r->predelay));
+    tTapeDelay_setDelay(&r->in_delay, SAMP(r->predelay));
 }
 
 void    tDattorro_setInputFilter    (tDattorro* const r, float freq)
