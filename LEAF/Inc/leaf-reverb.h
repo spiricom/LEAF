@@ -11,6 +11,10 @@
 #ifndef LEAFREVERB_H_INCLUDED
 #define LEAFREVERB_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 #include "leaf-globals.h"
@@ -136,5 +140,9 @@ void    tDattorro_setInputDelay     (tDattorro* const, float preDelay);
 void    tDattorro_setInputFilter    (tDattorro* const, float freq);
 void    tDattorro_setFeedbackFilter (tDattorro* const, float freq);
 void    tDattorro_setFeedbackGain   (tDattorro* const, float gain);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // LEAFREVERB_H_INCLUDED

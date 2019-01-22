@@ -11,6 +11,10 @@
 #ifndef LEAFUTILITIES_H_INCLUDED
 #define LEAFUTILITIES_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 #include "leaf-globals.h"
@@ -243,6 +247,10 @@ float   tEnv_tick           (tEnv* const);
 void    tEnv_processBlock   (tEnv* const, float* in);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // LEAFUTILITIES_H_INCLUDED
 

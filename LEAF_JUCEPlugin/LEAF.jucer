@@ -19,7 +19,6 @@
           <FILE id="oBE37z" name="atkdetect.c" compile="1" resource="0" file="../LEAF/Externals/atkdetect.c"/>
           <FILE id="MchITp" name="atkdetect.h" compile="0" resource="0" file="../LEAF/Externals/atkdetect.h"/>
           <FILE id="O0YJRY" name="d_fft_mayer.c" compile="1" resource="0" file="../LEAF/Externals/d_fft_mayer.c"/>
-          <FILE id="L7c1sT" name="d_fft_mayer.cpp" compile="1" resource="0" file="../LEAF/Externals/d_fft_mayer.cpp"/>
           <FILE id="HdG3WV" name="d_fft_mayer.h" compile="0" resource="0" file="../LEAF/Externals/d_fft_mayer.h"/>
           <FILE id="Hu4b98" name="trigtbl.h" compile="0" resource="0" file="../LEAF/Externals/trigtbl.h"/>
         </GROUP>
@@ -45,30 +44,27 @@
           <FILE id="KpGzKv" name="leaf-wavetables.h" compile="0" resource="0"
                 file="../LEAF/Inc/leaf-wavetables.h"/>
         </GROUP>
-        <GROUP id="{485F7F89-F4AE-BE19-9CCC-E49CEB2C94E7}" name="Src_cpp">
-          <FILE id="m60NC2" name="leaf.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf.cpp"/>
-          <FILE id="YwxbHS" name="leaf-math.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-math.cpp"/>
-          <FILE id="Dtv6lt" name="leaf-mempool.cpp" compile="1" resource="0"
-                file="../LEAF/Src_cpp/leaf-mempool.cpp"/>
-          <FILE id="eu1hdg" name="leaf-808.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-808.cpp"/>
-          <FILE id="LXRk8F" name="leaf-delay.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-delay.cpp"/>
-          <FILE id="Bs8bkI" name="leaf-filter.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-filter.cpp"/>
-          <FILE id="WQDiFn" name="leaf-formant.cpp" compile="1" resource="0"
-                file="../LEAF/Src_cpp/leaf-formant.cpp"/>
-          <FILE id="qONgQY" name="leaf-midi.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-midi.cpp"/>
-          <FILE id="uehwiI" name="leaf-oscillator.cpp" compile="1" resource="0"
-                file="../LEAF/Src_cpp/leaf-oscillator.cpp"/>
-          <FILE id="bJ0ejw" name="leaf-pitch.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-pitch.cpp"/>
-          <FILE id="GingNU" name="leaf-reverb.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-reverb.cpp"/>
-          <FILE id="rbdzdY" name="leaf-string.cpp" compile="1" resource="0" file="../LEAF/Src_cpp/leaf-string.cpp"/>
-          <FILE id="mDtjTw" name="leaf-utilities.cpp" compile="1" resource="0"
-                file="../LEAF/Src_cpp/leaf-utilities.cpp"/>
-          <FILE id="dJ4Ogf" name="leaf-vocoder.cpp" compile="1" resource="0"
-                file="../LEAF/Src_cpp/leaf-vocoder.cpp"/>
-          <FILE id="g57PTt" name="leaf-wavefolder.cpp" compile="1" resource="0"
-                file="../LEAF/Src_cpp/leaf-wavefolder.cpp"/>
-          <FILE id="bSQwBo" name="leaf-wavetables.cpp" compile="1" resource="0"
-                file="../LEAF/Src_cpp/leaf-wavetables.cpp"/>
+        <GROUP id="{A3AE8C8C-29BA-ADB3-DD7D-EEDC2F7B58F3}" name="Src">
+          <FILE id="HbG7LO" name="leaf-808.c" compile="1" resource="0" file="../LEAF/Src/leaf-808.c"/>
+          <FILE id="lLb7eq" name="leaf-delay.c" compile="1" resource="0" file="../LEAF/Src/leaf-delay.c"/>
+          <FILE id="nh9xAo" name="leaf-filter.c" compile="1" resource="0" file="../LEAF/Src/leaf-filter.c"/>
+          <FILE id="DPGZGc" name="leaf-formant.c" compile="1" resource="0" file="../LEAF/Src/leaf-formant.c"/>
+          <FILE id="g41P2E" name="leaf-math.c" compile="1" resource="0" file="../LEAF/Src/leaf-math.c"/>
+          <FILE id="Uc4jO6" name="leaf-mempool.c" compile="1" resource="0" file="../LEAF/Src/leaf-mempool.c"/>
+          <FILE id="LuoIDh" name="leaf-midi.c" compile="1" resource="0" file="../LEAF/Src/leaf-midi.c"/>
+          <FILE id="q5y59A" name="leaf-oscillator.c" compile="1" resource="0"
+                file="../LEAF/Src/leaf-oscillator.c"/>
+          <FILE id="eHUTvP" name="leaf-pitch.c" compile="1" resource="0" file="../LEAF/Src/leaf-pitch.c"/>
+          <FILE id="uyYwEd" name="leaf-reverb.c" compile="1" resource="0" file="../LEAF/Src/leaf-reverb.c"/>
+          <FILE id="dgAVr5" name="leaf-string.c" compile="1" resource="0" file="../LEAF/Src/leaf-string.c"/>
+          <FILE id="uKHzgz" name="leaf-utilities.c" compile="1" resource="0"
+                file="../LEAF/Src/leaf-utilities.c"/>
+          <FILE id="u1aLLR" name="leaf-vocoder.c" compile="1" resource="0" file="../LEAF/Src/leaf-vocoder.c"/>
+          <FILE id="LVoaGm" name="leaf-wavefolder.c" compile="1" resource="0"
+                file="../LEAF/Src/leaf-wavefolder.c"/>
+          <FILE id="HRk07h" name="leaf-wavetables.c" compile="1" resource="0"
+                file="../LEAF/Src/leaf-wavetables.c"/>
+          <FILE id="BFkVGu" name="leaf.c" compile="1" resource="0" file="../LEAF/Src/leaf.c"/>
         </GROUP>
         <FILE id="dmljDQ" name="leaf.h" compile="0" resource="0" file="../LEAF/leaf.h"/>
       </GROUP>

@@ -11,6 +11,10 @@
 #ifndef LEAFDELAY_H_INCLUDED
 #define LEAFDELAY_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 #include "leaf-globals.h"
@@ -142,5 +146,9 @@ float       tTapeDelay_addTo       (tTapeDelay*  const, float value, uint32_t ta
 float       tTapeDelay_tick        (tTapeDelay*  const, float sample);
 float       tTapeDelay_getLastOut  (tTapeDelay*  const);
 float       tTapeDelay_getLastIn   (tTapeDelay*  const);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // LEAFDELAY_H_INCLUDED

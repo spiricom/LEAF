@@ -8,6 +8,10 @@
   ==============================================================================
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 #include "leaf-globals.h"
@@ -226,3 +230,7 @@ float       tPitchShift_shiftToFreq         (tPitchShift* const, float freq);
 void        tPitchShift_setPitchFactor      (tPitchShift* const, float pf);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    
+#ifdef __cplusplus
+}
+#endif

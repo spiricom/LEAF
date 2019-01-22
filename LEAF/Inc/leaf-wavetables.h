@@ -11,6 +11,10 @@
 #ifndef WAVETABLES_H_INCLUDED
 #define WAVETABLES_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 #include "leaf-globals.h"
@@ -70,5 +74,9 @@ extern const float triangle[11][TRI_TABLE_SIZE];
 extern const float squarewave[11][SQR_TABLE_SIZE];
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // WAVETABLES_H_INCLUDED

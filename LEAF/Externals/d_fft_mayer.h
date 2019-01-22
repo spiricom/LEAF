@@ -9,6 +9,10 @@
 #ifndef D_FFT_MAYER_H_
 #define D_FFT_MAYER_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef float t_sample;       /* a float type at most the same size */
 
 #define REAL t_sample
@@ -20,6 +24,8 @@ void mayer_realfft(int n, REAL *real);
 void mayer_realifft(int n, REAL *real);
 
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* D_FFT_MAYER_H_ */

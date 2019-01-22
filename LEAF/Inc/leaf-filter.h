@@ -11,6 +11,10 @@
 #ifndef LEAFFILTER_H_INCLUDED
 #define LEAFFILTER_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 #include "leaf-globals.h"
@@ -296,5 +300,9 @@ void        tButterworth_setF2      (tButterworth* const, float in);
 void        tButterworth_setFreqs   (tButterworth* const, float f1, float f2);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // LEAFFILTER_H_INCLUDED

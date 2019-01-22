@@ -8,6 +8,10 @@
   ==============================================================================
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 #include "leaf-globals.h"
@@ -107,4 +111,8 @@ int     tMPoly_getVelocity(tMPoly* const, uint8_t voice);
 int     tMPoly_isOn(tMPoly* const, uint8_t voice);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    
+#ifdef __cplusplus
+}
+#endif
 

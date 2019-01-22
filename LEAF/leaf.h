@@ -55,8 +55,16 @@
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 void        LEAF_init            (float sampleRate, int blocksize, float(*randomNumberFunction)(void));
 void        LEAF_setSampleRate   (float sampleRate);
 float       LEAF_getSampleRate   (void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // LEAF_H_INCLUDED

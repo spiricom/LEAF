@@ -26,8 +26,55 @@
 #define EXPONENTIAL_TABLE_SIZE 65536
 
 
+float interpolate3max(float *buf, const int peakindex)
+{
+    float a = buf[peakindex-1];
+    float b = buf[peakindex];
+    float c = buf[peakindex+1];
+    float realpeak;
+    
+    realpeak = b + (float)0.125 * (c - a) * (c - a) / ((float)2. * b - a - c);
+    
+    return(realpeak);
+}
 
+float interpolate3phase(float *buf, const int peakindex)
+{
+    float a = buf[peakindex-1];
+    float b = buf[peakindex];
+    float c = buf[peakindex+1];
+    float fraction;
+    
+    fraction = ((float)0.5 * (c - a)) / ((float)2. * b - a - c);
+    
+    return(fraction);
+}
 
+// alternative implementation for abs()
+// REQUIRES: 32 bit integers
+int fastabs_int(int in){
+    unsigned int r;
+    int const mask = in >> 31;
+    
+    r = (in ^ mask) - mask;
+    
+    return (r);
+}
+
+// alternative implementation for abs()
+// REQUIRES: 32 bit floats
+float fastabs(float f)
+{
+    union
+    {
+        float f;
+        unsigned int ui;
+    }alias;
+    
+    alias.f = f;
+    alias.ui &= 0x7fffffff;
+    return alias.f;
+}
 
 // dope af
 float LEAF_chebyshevT(float in, int n){

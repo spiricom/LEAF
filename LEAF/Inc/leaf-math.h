@@ -15,6 +15,10 @@
 #include "stdint.h"
 #include "stdlib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum oBool
 {
     OTRUE  = 1,
@@ -95,54 +99,20 @@ float       LEAF_CompoundChebyshevT(float in, int n, float* amps);
 float LEAF_interpolate_hermite (float A, float B, float C, float D, float t);
 float LEAF_interpolation_linear (float A, float B, float t);
 
-static inline float interpolate3max(float *buf, const int peakindex)
-{
-    float a = buf[peakindex-1];
-    float b = buf[peakindex];
-    float c = buf[peakindex+1];
-    float realpeak;
-    
-    realpeak = b + (float)0.125 * (c - a) * (c - a) / ((float)2. * b - a - c);
-    
-    return(realpeak);
-}
-
-static inline float interpolate3phase(float *buf, const int peakindex)
-{
-    float a = buf[peakindex-1];
-    float b = buf[peakindex];
-    float c = buf[peakindex+1];
-    float fraction;
-    
-    fraction = ((float)0.5 * (c - a)) / ((float)2. * b - a - c);
-    
-    return(fraction);
-}
+float interpolate3max(float *buf, const int peakindex);
+float interpolate3phase(float *buf, const int peakindex);
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit integers
-static inline int fastabs_int(int in){
-    unsigned int r;
-    int const mask = in >> 31;
-    
-    r = (in ^ mask) - mask;
-    
-    return (r);
-}
+int fastabs_int(int in);
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit floats
-static inline float fastabs(float f)
-{
-    union
-    {
-        float f;
-        unsigned int ui;
-    }alias;
+float fastabs(float f);
+
     
-    alias.f = f;
-    alias.ui &= 0x7fffffff;
-    return alias.f;
+#ifdef __cplusplus
 }
+#endif
 
 #endif  // LEAFMATH_H_INCLUDED

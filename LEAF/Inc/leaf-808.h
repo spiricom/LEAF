@@ -10,12 +10,18 @@
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
 #include "leaf-oscillator.h"
 #include "leaf-utilities.h"
 #include "leaf-filter.h"
+
+
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -166,6 +172,10 @@ void        t808Kick_setChirpAmount         (t808Kick* const, float chirp);
 void        t808Kick_setToneNoiseMix       (t808Kick* const, float toneNoiseMix);
 void        t808Kick_setNoiseFilterFreq    (t808Kick* const, float noiseFilterFreq);
 void        t808Kick_setNoiseFilterQ       (t808Kick* const, float noiseFilterQ);
+    
+#ifdef __cplusplus
+}
+#endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 

@@ -21,6 +21,10 @@
 
 #include "leaf-mempool.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct _LEAF
 {
     float   sampleRate;
@@ -50,4 +54,8 @@ extern const float shaper1[SHAPER1_TABLE_SIZE];
 
 #define TALKBOX_BUFFER_LENGTH   1600    // Every talkbox instance introduces 5 buffers of this size
 
+#ifdef __cplusplus
+}
+#endif
+    
 #endif  // OPPSGLOBALS_H_INCLUDED
