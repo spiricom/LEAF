@@ -1,26 +1,27 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
     leaf-midi.h
     Created: 30 Nov 2018 11:29:26am
     Author:  airship
 
-  ==============================================================================
-*/
+==============================================================================*/
+
+#ifndef LEAF_MIDI_H_INCLUDED
+#define LEAF_MIDI_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
     
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
 #include "leaf-utilities.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 typedef struct _tMidiNote
 {
     uint8_t pitch;
@@ -38,8 +39,8 @@ typedef struct _tMidiNode
     
 } tMidiNode;
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* Polyphonic Handler */
 typedef struct _tPoly
 {
@@ -56,8 +57,8 @@ tMidiNote*  tPoly_getMidiNote(tPoly* const, int8_t voiceIndex);
 void        tPoly_noteOn(tPoly* poly, int midiNoteNumber, float velocity);
 void        tPoly_noteOff(tPoly* poly, int midiNoteNumber);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* tMPoly */
 typedef struct _tMPoly
 {
@@ -110,9 +111,13 @@ float   tMPoly_getPitch(tMPoly* const, uint8_t voice);
 int     tMPoly_getVelocity(tMPoly* const, uint8_t voice);
 int     tMPoly_isOn(tMPoly* const, uint8_t voice);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
     
 #ifdef __cplusplus
 }
 #endif
+
+#endif // LEAF_MIDI_H_INCLUDED
+
+//==============================================================================
 

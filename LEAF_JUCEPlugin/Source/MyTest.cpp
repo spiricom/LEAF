@@ -16,91 +16,67 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-tDattorro reverb;
+tSample sample;
 
-
-tTapeDelay delay;
-
-float size;
-tRamp dtime;
-
+tSamplePlayer player;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
 
-    tDattorro_init(&reverb);
-
-    //tTapeDelay_init(&delay, 0.5f * leaf.sampleRate, leaf.sampleRate);
+    tSample_init(&sample, leaf.sampleRate * 4);
     
-    tRamp_init(&dtime, 500.0f, 1);
-    
-
-    setSliderValue("mix", reverb.mix);
-    setSliderValue("predelay", reverb.predelay / 200.0f);
-    setSliderValue("input filter", reverb.input_filter / 20000.0f);
-    setSliderValue("feedback filter", reverb.feedback_filter / 20000.0f);
-    setSliderValue("feedback gain", reverb.feedback_gain);
-    setSliderValue("size", reverb.size / 4.0f);
-    
+    tSamplePlayer_init(&player, &sample);
+    tSamplePlayer_setMode(&player, Loop);
     
     leaf_pool_report();
+    
+    tSample_start(&sample);
 }
 
 int timer = 0;
 
-
-#define CLICK 0
-
 float   LEAFTest_tick            (float input)
 {
-#if CLICK
-    input = 0.0f;
+    tSample_tick(&sample, input);
     
     timer++;
-    if (timer == (1 * leaf.sampleRate))
+    
+    if (timer >= leaf.sampleRate * 4)
     {
-        timer = 0;
-        
-        input = 1.0f;
+        tSamplePlayer_play(&player);
     }
-#endif
-    //tTapeDelay_setDelay(&delay, tRamp_tick(&dtime));
     
-    //return tTapeDelay_tick(&delay, input);
-    
-    
-    tDattorro_setSize(&reverb, tRamp_tick(&dtime));
-    
-    return tDattorro_tick(&reverb, input);
-    
+    return tSamplePlayer_tick(&player);
 }
 
+bool lastState = false;
 void    LEAFTest_block           (void)
 {
-  
-    float val = getSliderValue("mix");
-    tDattorro_setMix(&reverb, val);
+    float val = getSliderValue("rate");
     
-    val = getSliderValue("predelay");
-    tDattorro_setInputDelay(&reverb, val * 200.0f);
+    tSamplePlayer_setRate(&player, val * 16.0f - 8.0f);
     
-    val = getSliderValue("input filter");
-    tDattorro_setInputFilter(&reverb, val * 20000.0f);
+    val = getSliderValue("start");
+    float start = val * sample.length;
+    tSamplePlayer_setStart(&player,  start);
+    DBG("start: " + String(start));
     
-    val = getSliderValue("feedback filter");
-    tDattorro_setFeedbackFilter(&reverb, val * 20000.0f);
+    val = getSliderValue("end");
+    float end = val * sample.length;
+    tSamplePlayer_setEnd(&player, end);
+    DBG("end: " + String(end));
     
-    val = getSliderValue("feedback gain");
-    tDattorro_setFeedbackGain(&reverb, val);
+    bool state = getButtonState("sample");
     
-    val = getSliderValue("size");
-    tRamp_setDest(&dtime, val * reverb.size_max);
+    if (state && !lastState)
+    {
+        timer = 0;
+        tSamplePlayer_stop(&player);
+        tSample_start(&sample);
+    }
     
-    
-    //float val = getSliderValue("size");
-    //tRamp_setDest(&dtime, val * leaf.sampleRate + 1);
-    
+    lastState = state;
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

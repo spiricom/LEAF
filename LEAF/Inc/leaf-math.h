@@ -1,23 +1,23 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
     LEAFMath.h
     Created: 22 Jan 2017 7:02:56pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-#ifndef LEAFMATH_H_INCLUDED
-#define LEAFMATH_H_INCLUDED
+#ifndef LEAF_MATH_H_INCLUDED
+#define LEAF_MATH_H_INCLUDED
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "math.h"
 #include "stdint.h"
 #include "stdlib.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+//==============================================================================
 
 typedef enum oBool
 {
@@ -79,7 +79,8 @@ float LEAF_shaper     (float input, float m_drive);
 float LEAF_reedTable  (float input, float offset, float slope);
 
 float       LEAF_clip               (float min, float val, float max);
-float   	LEAF_softClip						(float val, float thresh);
+int         LEAF_clipInt            (int min, int val, int max);
+float   	LEAF_softClip		    (float val, float thresh);
 oBool       LEAF_isPrime            (uint64_t number );
 
 float       LEAF_midiToFrequency    (float f);
@@ -110,9 +111,12 @@ int fastabs_int(int in);
 // REQUIRES: 32 bit floats
 float fastabs(float f);
 
+//==============================================================================
     
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // LEAFMATH_H_INCLUDED
+#endif  // LEAF_MATH_H_INCLUDED
+
+//==============================================================================

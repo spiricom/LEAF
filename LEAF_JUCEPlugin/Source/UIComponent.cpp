@@ -144,9 +144,9 @@ void UIComponent::sliderValueChanged(Slider* s)
     setSliderValue(s->getName(), s->getValue());
 }
 
-void UIComponent::buttonClicked (Button* b)
+void UIComponent::buttonStateChanged (Button* b)
 {
-    setButtonState(b->getName(), true);
+    setButtonState(b->getName(), b->getState());
 }
 
 void UIComponent::comboBoxChanged (ComboBox* cb)

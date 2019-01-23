@@ -32,6 +32,7 @@
 #include ".\Inc\leaf-pitch.h"
 #include ".\Inc\leaf-formant.h"
 #include ".\Inc\leaf-midi.h"
+#include ".\Inc\leaf-sample.h"
 #include ".\Inc\leaf-wavefolder.h"
 #include ".\Inc\leaf-wavetables.h"
 
@@ -50,6 +51,7 @@
 #include "./Inc/leaf-pitch.h"
 #include "./Inc/leaf-formant.h"
 #include "./Inc/leaf-midi.h"
+#include "./Inc/leaf-sample.h"
 #include "./Inc/leaf-wavefolder.h"
 #include "./Inc/leaf-wavetables.h"
 

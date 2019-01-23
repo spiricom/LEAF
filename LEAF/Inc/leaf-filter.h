@@ -1,22 +1,20 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
     LEAFFilter.h
     Created: 20 Jan 2017 12:01:10pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-#ifndef LEAFFILTER_H_INCLUDED
-#define LEAFFILTER_H_INCLUDED
+#ifndef LEAF_FILTER_H_INCLUDED
+#define LEAF_FILTER_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
@@ -24,8 +22,8 @@ extern "C" {
 
 #include "leaf-wavetables.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* tAllpass: Schroeder allpass. Comb-filter with feedforward and feedback. */
 typedef struct _tAllpass
 {
@@ -45,8 +43,8 @@ void        tAllpass_setGain        (tAllpass* const, float gain);
 void        tAllpass_setDelay       (tAllpass* const f, float delay);
 
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* tOnePole: OnePole filter, reimplemented from STK (Cook and Scavone). */
 typedef struct _tOnePole
 {
@@ -73,9 +71,8 @@ void        tOnePole_setFreq        (tOnePole* const, float freq);
 void        tOnePole_setCoefficients(tOnePole* const, float b0, float a1);
 void        tOnePole_setGain        (tOnePole* const, float gain);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* TwoPole filter, reimplemented from STK (Cook and Scavone). */
 typedef struct _tTwoPole
 {
@@ -101,9 +98,8 @@ void        tTwoPole_setResonance   (tTwoPole*  const, float freq, float radius,
 void        tTwoPole_setCoefficients(tTwoPole*  const, float b0, float a1, float a2);
 void        tTwoPole_setGain        (tTwoPole*  const, float gain);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* OneZero filter, reimplemented from STK (Cook and Scavone). */
 typedef struct _tOneZero
 {
@@ -123,9 +119,8 @@ void        tOneZero_setCoefficients(tOneZero*  const, float b0, float b1);
 void        tOneZero_setGain        (tOneZero*  const, float gain);
 float       tOneZero_getPhaseDelay(tOneZero *f, float frequency );
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* TwoZero filter, reimplemented from STK (Cook and Scavone). */
 typedef struct _tTwoZero
 {
@@ -149,9 +144,8 @@ void        tTwoZero_setNotch       (tTwoZero*  const, float frequency, float ra
 void        tTwoZero_setCoefficients(tTwoZero*  const, float b0, float b1, float b2);
 void        tTwoZero_setGain        (tTwoZero*  const, float gain);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* PoleZero filter, reimplemented from STK (Cook and Scavone). */
 typedef struct _tPoleZero
 {
@@ -175,9 +169,8 @@ void        tPoleZero_setAllpass        (tPoleZero*  const, float coeff);
 void        tPoleZero_setBlockZero      (tPoleZero*  const, float thePole);
 void        tPoleZero_setGain           (tPoleZero*  const, float gain);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* BiQuad filter, reimplemented from STK (Cook and Scavone). */
 typedef struct _tBiQuad
 {
@@ -206,9 +199,8 @@ void        tBiQuad_setResonance   (tBiQuad*  const, float freq, float radius, o
 void        tBiQuad_setCoefficients(tBiQuad*  const, float b0, float b1, float b2, float a1, float a2);
 void        tBiQuad_setGain        (tBiQuad*  const, float gain);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* State Variable Filter, algorithm from Andy Simper. */
 typedef enum SVFType
 {
@@ -235,9 +227,8 @@ float       tSVF_tick       (tSVF*  const, float v0);
 int         tSVF_setFreq    (tSVF*  const, float freq);
 int         tSVF_setQ       (tSVF*  const, float Q);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* Efficient State Variable Filter for 14-bit control input, [0, 4096). */
 typedef struct _tSVFE
 {
@@ -255,9 +246,8 @@ float       tSVFE_tick      (tSVFE*  const, float v0);
 int         tSVFE_setFreq   (tSVFE*  const, uint16_t controlFreq);
 int         tSVFE_setQ      (tSVFE*  const, float Q);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* Simple Highpass filter. */
 typedef struct _tHighpass
 {
@@ -273,9 +263,8 @@ float       tHighpass_tick      (tHighpass*  const, float x);
 void        tHighpass_setFreq   (tHighpass*  const, float freq);
 float       tHighpass_getFreq   (tHighpass*  const);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 // Butterworth Filter
 #define NUM_SVF_BW 16
 typedef struct _tButterworth
@@ -299,10 +288,12 @@ void        tButterworth_setF1      (tButterworth* const, float in);
 void        tButterworth_setF2      (tButterworth* const, float in);
 void        tButterworth_setFreqs   (tButterworth* const, float f1, float f2);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
     
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // LEAFFILTER_H_INCLUDED
+#endif  // LEAF_FILTER_H_INCLUDED
+
+//==============================================================================

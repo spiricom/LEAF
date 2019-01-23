@@ -161,6 +161,18 @@ float   LEAF_clip(float min, float val, float max)
     }
 }
 
+int   LEAF_clipInt(int min, int val, int max)
+{
+    if (val < min) {
+        return min;
+    } else if (val > max) {
+        return max;
+    } else {
+        return val;
+    }
+}
+
+
 oBool     LEAF_isPrime(uint64_t number )
 {
     if ( number == 2 ) return OTRUE;

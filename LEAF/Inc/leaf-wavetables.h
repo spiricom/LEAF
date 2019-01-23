@@ -1,26 +1,24 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
     LEAFWavetables.h
     Created: 4 Dec 2016 9:42:41pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-#ifndef WAVETABLES_H_INCLUDED
-#define WAVETABLES_H_INCLUDED
+#ifndef LEAF_WAVETABLES_H_INCLUDED
+#define LEAF_WAVETABLES_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    
+//==============================================================================
 
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 
 #define SINE_TABLE_SIZE 2048
@@ -62,7 +60,7 @@ extern const float decayCoeffTable[DECAY_COEFF_TABLE_SIZE];
 
 extern const float tanh1[TANH1_TABLE_SIZE];
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* Sine wave table ripped from http://aquaticus.info/pwm-sine-wave. */
 extern const float sinewave[SINE_TABLE_SIZE];
@@ -73,10 +71,12 @@ extern const float triangle[11][TRI_TABLE_SIZE];
 
 extern const float squarewave[11][SQR_TABLE_SIZE];
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
     
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // WAVETABLES_H_INCLUDED
+#endif  // LEAF_WAVETABLES_H_INCLUDED
+
+//==============================================================================

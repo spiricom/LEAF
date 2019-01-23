@@ -8,11 +8,14 @@
   ==============================================================================
 */
 
+#ifndef LEAF_STRING_H_INCLUDED
+#define LEAF_STRING_H_INCLUDED
+
 #ifdef __cplusplus
 extern "C" {
 #endif
     
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 #include "leaf-globals.h"
 #include "leaf-math.h"
@@ -21,7 +24,7 @@ extern "C" {
 #include "leaf-filter.h"
 #include "leaf-oscillator.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* Karplus Strong model */
 typedef struct _tPluck
@@ -62,9 +65,8 @@ void        tPluck_controlChange (tPluck*  const, int number, float value);
 // tPluck Utilities.
 float       tPluck_getLastOut    (tPluck*  const);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* Stif Karplus Strong model */
 typedef struct _tStifKarp
 {
@@ -130,8 +132,12 @@ void        tStifKarp_setBaseLoopGain    (tStifKarp*  const, float aGain );
 // tStifKarp utilities.
 float       tStifKarp_getLastOut         (tStifKarp*  const);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
     
 #ifdef __cplusplus
 }
 #endif
+
+#endif // LEAF_STRING_H_INCLUDED
+
+//==============================================================================

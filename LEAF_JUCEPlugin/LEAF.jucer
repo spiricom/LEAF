@@ -39,6 +39,7 @@
           <FILE id="OS2D83" name="leaf-utilities.h" compile="0" resource="0"
                 file="../LEAF/Inc/leaf-utilities.h"/>
           <FILE id="Szb5LP" name="leaf-vocoder.h" compile="0" resource="0" file="../LEAF/Inc/leaf-vocoder.h"/>
+          <FILE id="T6KXi7" name="leaf-sample.h" compile="0" resource="0" file="../LEAF/Inc/leaf-sample.h"/>
           <FILE id="PRkOp2" name="leaf-wavefolder.h" compile="0" resource="0"
                 file="../LEAF/Inc/leaf-wavefolder.h"/>
           <FILE id="KpGzKv" name="leaf-wavetables.h" compile="0" resource="0"
@@ -60,6 +61,7 @@
           <FILE id="uKHzgz" name="leaf-utilities.c" compile="1" resource="0"
                 file="../LEAF/Src/leaf-utilities.c"/>
           <FILE id="u1aLLR" name="leaf-vocoder.c" compile="1" resource="0" file="../LEAF/Src/leaf-vocoder.c"/>
+          <FILE id="nmtoFJ" name="leaf-sample.c" compile="1" resource="0" file="../LEAF/Src/leaf-sample.c"/>
           <FILE id="LVoaGm" name="leaf-wavefolder.c" compile="1" resource="0"
                 file="../LEAF/Src/leaf-wavefolder.c"/>
           <FILE id="HRk07h" name="leaf-wavetables.c" compile="1" resource="0"

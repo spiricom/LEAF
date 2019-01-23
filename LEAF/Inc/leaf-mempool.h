@@ -1,4 +1,5 @@
-/**
+/*==============================================================================
+ 
    In short, mpool is distributed under so called "BSD license",
    
    Copyright (c) 2009-2010 Tatsuhiko Kubo <cubicdaiya@gmail.com>
@@ -29,24 +30,28 @@
    LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
    NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ 
+   written by C99 style
+==============================================================================*/
 
-/* written by C99 style */
+#ifndef LEAF_MPOOL_H_INCLUDED
+#define LEAF_MPOOL_H_INCLUDED
 
-#ifndef MPOOL_H
-#define MPOOL_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
+//==============================================================================
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+    
+//==============================================================================
 
-#define MPOOL_POOL_SIZE   500000
+#define MPOOL_POOL_SIZE   1000000
 #define MPOOL_ALIGN_SIZE (8)
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 //#define size_t unsigned long
       
@@ -68,7 +73,6 @@ typedef struct mpool_t {
     int next;
 } mpool_t;
 
-
 void mpool_create (size_t size, mpool_t* pool);
 
 void *mpool_alloc(size_t size, mpool_t* pool);
@@ -87,11 +91,15 @@ size_t leaf_pool_get_size(void);
 size_t leaf_pool_get_used(void);
 
 void* leaf_pool_get_pool(void);
+    
+//==============================================================================
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif // LEAF_MPOOL_H
+
+//==============================================================================
 
 
