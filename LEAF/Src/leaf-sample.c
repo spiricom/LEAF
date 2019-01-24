@@ -120,7 +120,7 @@ void tSamplePlayer_init         (tSamplePlayer* const p, tSample* s)
     p->idx = 0.f;
     p->inc = 1.f;
     p->dir = 1;
-    p->flip = 0;
+    p->flip = 1;
     
     p->mode = Normal;
 
@@ -143,22 +143,30 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
     
     float* buff = p->samp->buff;
     
-    int idx =  (int) p->idx;
+    int dir = p->dir * p->flip;
     
-    // Check dir (direction bit) to interpolate properly
-    if (p->dir > 0)
+    int idx =  (int) p->idx;
+    float alpha = p->idx - idx;
+    
+    uint32_t start = p->start, end = p->end;
+    if (p->flip < 0)
+    {
+        start = p->end;
+        end = p->start;
+    }
+    
+    // Check dir (direction) to interpolate properly
+    if (dir > 0)
     {
         // FORWARD
-        float alpha = p->idx - idx;
-        
         int i1 = idx-1;
         int i3 = idx+1;
         int i4 = idx+2;
         
-        if (i1 < p->start)  i1 += p->len;
-        if (i3 > p->end)    i3 -= p->len;
-        if (i4 > p->end)    i4 -= p->len;
-        
+        if (i1 < start)  i1 += p->len;
+        if (i3 > end)    i3 -= p->len;
+        if (i4 > end)    i4 -= p->len;
+
         sample =     LEAF_interpolate_hermite (buff[i1],
                                                buff[idx],
                                                buff[i3],
@@ -168,16 +176,14 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
     else
     {
         // REVERSE
-        float alpha = 1.0f - (p->idx - idx);
-        
         int i1 = idx+1;
         int i3 = idx-1;
         int i4 = idx-2;
         
-        if (i1 > p->start)  i1 -= p->len;
-        if (i3 < p->end)    i3 += p->len;
-        if (i4 < p->end)    i4 += p->len;
-        
+        if (i1 > end)    i1 -= p->len;
+        if (i3 < start)  i3 += p->len;
+        if (i4 < start)  i4 += p->len;
+
         sample =     LEAF_interpolate_hermite (buff[i1],
                                                buff[idx],
                                                buff[i3],
@@ -185,60 +191,33 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                alpha);
     }
     
-    
-    p->idx += (p->dir * p->inc);
+    p->idx += (dir * p->inc);
     
     if (p->mode != BackAndForth)
     {
         // Check flip bit to change loop test
-        if (p->flip > 0)
+        if (idx <= start)
         {
-            if (idx <= p->end)
-            {
-                p->idx += (float)(p->len);
-                p->cnt++;
-            }
-            else if (idx >= p->start)
-            {
-                p->idx -= (float)(p->len);
-                p->cnt++;
-            }
+            // -inc
+            p->idx += (float)(p->len);
+            p->cnt++;
         }
-        else
+        else if (idx >= end)
         {
-            if (idx <= p->start)
-            {
-                p->idx += (float)(p->len);
-                p->cnt++;
-            }
-            else if (idx >= p->end)
-            {
-                p->idx -= (float)(p->len);
-                p->cnt++;
-            }
+            // +inc
+            p->idx -= (float)(p->len);
+            p->cnt++;
         }
+
     }
     else // BackAndForth
     {
-        if (p->flip > 0)
+        if ((idx < start) || (idx > end))
         {
-            if ((idx < p->start) || (idx > p->end))
-            {
-                p->dir = -p->dir;
-                p->idx += (2*p->inc);
-                p->cnt++;
-            }
+            p->dir = -p->dir;
+            p->idx += (2*p->inc);
+            p->cnt++;
         }
-        else
-        {
-            if ((idx > p->start) || (idx < p->end))
-            {
-                p->dir = -p->dir;
-                p->idx += (2*p->inc);
-                p->cnt++;
-            }
-        }
-        
     }
     
     
@@ -270,13 +249,11 @@ static void handleStartEndChange(tSamplePlayer* const p)
 {
     if (p->start > p->end)
     {
-        p->dir = -1;
-        p->flip = 1;
+        p->flip = -1;
     }
     else
     {
-        p->dir = 1;
-        p->flip = 0;
+        p->flip = 1;
     }
 }
 

@@ -74,7 +74,7 @@ extern "C" {
         float idx;
         float inc;
         int8_t dir;
-        uint8_t flip;
+        int8_t flip;
         
         int32_t start;
         int32_t end;

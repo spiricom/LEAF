@@ -42,7 +42,7 @@ float   LEAFTest_tick            (float input)
     
     timer++;
     
-    if (timer >= leaf.sampleRate * 4)
+    if (player.active == 0 && timer >= leaf.sampleRate * 4)
     {
         tSamplePlayer_play(&player);
     }
@@ -55,7 +55,9 @@ void    LEAFTest_block           (void)
 {
     float val = getSliderValue("rate");
     
-    tSamplePlayer_setRate(&player, val * 16.0f - 8.0f);
+    float rate = val * 16.0f - 8.0f;
+    tSamplePlayer_setRate(&player, rate);
+    DBG("rate: " + String(rate));
     
     val = getSliderValue("start");
     float start = val * sample.length;
