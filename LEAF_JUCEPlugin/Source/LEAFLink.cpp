@@ -15,7 +15,8 @@
 
 std::vector<juce::String> cButtonNames =  std::vector<juce::String>
 {
-    "sample"
+    "sample",
+    "play"
 };
 
 std::vector<juce::String> cSliderNames =  std::vector<juce::String>

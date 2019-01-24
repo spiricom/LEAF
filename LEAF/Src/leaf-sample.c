@@ -119,6 +119,8 @@ void tSamplePlayer_init         (tSamplePlayer* const p, tSample* s)
     
     p->idx = 0.f;
     p->inc = 1.f;
+    p->dir = 1;
+    p->flip = 0;
     
     p->mode = Normal;
 
@@ -133,52 +135,110 @@ void tSamplePlayer_free         (tSamplePlayer* const p)
 
 float tSamplePlayer_tick        (tSamplePlayer* const p)
 {
-    if (p->active == 0 || (p->len < 4)) return 0.f;
+    if ((p->mode == Normal) && (p->cnt > 0))    p->active = 0;
+    
+    if (p->active == 0 || (p->len < 4))         return 0.f;
     
     float sample = 0.f;
     
     float* buff = p->samp->buff;
     
     int idx =  (int) p->idx;
-    float alpha = p->idx - idx;
     
-    int i1 = idx-1;
-    int i3 = idx+1;
-    int i4 = idx+2;
+    // Check dir (direction bit) to interpolate properly
+    if (p->dir > 0)
+    {
+        // FORWARD
+        float alpha = p->idx - idx;
+        
+        int i1 = idx-1;
+        int i3 = idx+1;
+        int i4 = idx+2;
+        
+        if (i1 < p->start)  i1 += p->len;
+        if (i3 > p->end)    i3 -= p->len;
+        if (i4 > p->end)    i4 -= p->len;
+        
+        sample =     LEAF_interpolate_hermite (buff[i1],
+                                               buff[idx],
+                                               buff[i3],
+                                               buff[i4],
+                                               alpha);
+    }
+    else
+    {
+        // REVERSE
+        float alpha = 1.0f - (p->idx - idx);
+        
+        int i1 = idx+1;
+        int i3 = idx-1;
+        int i4 = idx-2;
+        
+        if (i1 > p->start)  i1 -= p->len;
+        if (i3 < p->end)    i3 += p->len;
+        if (i4 < p->end)    i4 += p->len;
+        
+        sample =     LEAF_interpolate_hermite (buff[i1],
+                                               buff[idx],
+                                               buff[i3],
+                                               buff[i4],
+                                               alpha);
+    }
     
-    if (i1 < p->start)  i1 += p->len;
-    if (i3 > p->end)    i3 -= p->len;
-    if (i4 > p->end)    i4 -= p->len;
-    
-    sample =     LEAF_interpolate_hermite (buff[i1],
-                                           buff[idx],
-                                           buff[i3],
-                                           buff[i4],
-                                           alpha);
     
     p->idx += (p->dir * p->inc);
     
-    if (p->mode == Normal)
+    if (p->mode != BackAndForth)
     {
-        // FIX THIS: NORMAL MODE NOT IMPLEMENTED YET
-        if ((p->dir == 1) && (idx > p->end))
+        // Check flip bit to change loop test
+        if (p->flip > 0)
         {
-            p->active = 0;
+            if (idx <= p->end)
+            {
+                p->idx += (float)(p->len);
+                p->cnt++;
+            }
+            else if (idx >= p->start)
+            {
+                p->idx -= (float)(p->len);
+                p->cnt++;
+            }
+        }
+        else
+        {
+            if (idx <= p->start)
+            {
+                p->idx += (float)(p->len);
+                p->cnt++;
+            }
+            else if (idx >= p->end)
+            {
+                p->idx -= (float)(p->len);
+                p->cnt++;
+            }
         }
     }
-    else if (p->mode == Loop)
+    else // BackAndForth
     {
-        if (idx < p->start) p->idx += (float)(p->len);
+        if (p->flip > 0)
+        {
+            if ((idx < p->start) || (idx > p->end))
+            {
+                p->dir = -p->dir;
+                p->idx += (2*p->inc);
+                p->cnt++;
+            }
+        }
+        else
+        {
+            if ((idx > p->start) || (idx < p->end))
+            {
+                p->dir = -p->dir;
+                p->idx += (2*p->inc);
+                p->cnt++;
+            }
+        }
         
-        if (idx > p->end)   p->idx -= (float)(p->len);
-    }
-    else if (p->mode == BackAndForth)
-    {
-        if ((idx < p->start) || (idx > p->end))
-        {
-            p->dir = -p->dir;
-            p->idx += (2*p->inc);
-        }
     }
     
     
@@ -198,11 +258,26 @@ void tSamplePlayer_setMode      (tSamplePlayer* const p, Mode mode)
 void tSamplePlayer_play         (tSamplePlayer* const p)
 {
     p->active = 1;
+    p->cnt = 0;
 }
 
 void tSamplePlayer_stop         (tSamplePlayer* const p)
 {
     p->active = 0;
+}
+
+static void handleStartEndChange(tSamplePlayer* const p)
+{
+    if (p->start > p->end)
+    {
+        p->dir = -1;
+        p->flip = 1;
+    }
+    else
+    {
+        p->dir = 1;
+        p->flip = 0;
+    }
 }
 
 void tSamplePlayer_setStart     (tSamplePlayer* const p, int32_t start)
@@ -211,8 +286,7 @@ void tSamplePlayer_setStart     (tSamplePlayer* const p, int32_t start)
     
     p->len = abs(p->end - p->start);
     
-    if (p->start > p->end)  p->dir = -1;
-    else                    p->dir = 1;
+    handleStartEndChange(p);
 }
 
 void tSamplePlayer_setEnd       (tSamplePlayer* const p, int32_t end)
@@ -221,8 +295,7 @@ void tSamplePlayer_setEnd       (tSamplePlayer* const p, int32_t end)
 
     p->len = abs(p->end - p->start);
     
-    if (p->start > p->end)  p->dir = -1;
-    else                    p->dir = 1;
+    handleStartEndChange(p);
 }
 
 void tSamplePlayer_setRate      (tSamplePlayer* const p, float rate)

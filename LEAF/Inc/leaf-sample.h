@@ -73,11 +73,13 @@ extern "C" {
         
         float idx;
         float inc;
-        int dir;
+        int8_t dir;
+        uint8_t flip;
         
         int32_t start;
         int32_t end;
         uint32_t len;
+        uint32_t cnt;
     
         Mode mode;
         
