@@ -106,6 +106,8 @@ void  tSample_clear (tSample* const s)
 
 //==============================================================================
 
+#define CFX 50
+
 void tSamplePlayer_init         (tSamplePlayer* const p, tSample* s)
 {
     p->samp = s;
@@ -124,7 +126,8 @@ void tSamplePlayer_init         (tSamplePlayer* const p, tSample* s)
     
     p->mode = Normal;
 
-    p->gain = 1.;
+    p->g1 = 1.f;
+    p->g2 = 0.f;
 }
 
 void tSamplePlayer_free         (tSamplePlayer* const p)
@@ -140,6 +143,7 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
     if (p->active == 0 || (p->len < 4))         return 0.f;
     
     float sample = 0.f;
+    float cfxsample = 0.f;
     
     float* buff = p->samp->buff;
     
@@ -148,17 +152,20 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
     int idx =  (int) p->idx;
     float alpha = p->idx - idx;
     
-    uint32_t start = p->start, end = p->end;
+    int32_t start = p->start, end = p->end;
     if (p->flip < 0)
     {
         start = p->end;
         end = p->start;
     }
     
+    p->g1 = 1.f;
+    p->g2 = 0.f;
+    
     // Check dir (direction) to interpolate properly
     if (dir > 0)
     {
-        // FORWARD
+        // FORWARD NORMAL SAMPLE
         int i1 = idx-1;
         int i3 = idx+1;
         int i4 = idx+2;
@@ -172,6 +179,24 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                buff[i3],
                                                buff[i4],
                                                alpha);
+        if ((end - idx) <= CFX)
+        {
+            // CROSSFADE SAMPLE
+            int cdx = idx - p->len;
+    
+            i1 = cdx-1;
+            i3 = cdx+1;
+            i4 = cdx+2;
+            
+            cfxsample =     LEAF_interpolate_hermite (buff[i1],
+                                                      buff[idx],
+                                                      buff[i3],
+                                                      buff[i4],
+                                                      alpha);
+            
+            p->g2 = (float) (CFX - (end - idx - 1)) / (float) CFX;
+            p->g1 = 1.f - p->g2;
+        }
     }
     else
     {
@@ -188,40 +213,53 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                buff[idx],
                                                buff[i3],
                                                buff[i4],
-                                               alpha);
+                                               1.0f-alpha);
+        
+        if ((idx - start) <= CFX)
+        {
+            // CROSSFADE SAMPLE
+            int cdx = idx + p->len;
+    
+            i1 = cdx+1;
+            i3 = cdx-1;
+            i4 = cdx-2;
+            
+            cfxsample =     LEAF_interpolate_hermite (buff[i1],
+                                                      buff[idx],
+                                                      buff[i3],
+                                                      buff[i4],
+                                                      alpha);
+            
+            p->g2 = (float) (CFX - (idx - start - 1)) / (float) CFX;
+            p->g1 = 1.f - p->g2;
+        }
     }
     
     p->idx += (dir * p->inc);
     
-    if (p->mode != BackAndForth)
+    if (p->mode != BackAndForth ) // == Normal or Loop
     {
-        // Check flip bit to change loop test
         if (idx <= start)
         {
-            // -inc
             p->idx += (float)(p->len);
             p->cnt++;
         }
         else if (idx >= end)
         {
-            // +inc
             p->idx -= (float)(p->len);
             p->cnt++;
         }
-
     }
-    else // BackAndForth
+    else // == BackAndForth
     {
-        if ((idx < start) || (idx > end))
+        if ((idx <= start) || (idx >= end))
         {
             p->dir = -p->dir;
-            p->idx += (2*p->inc);
             p->cnt++;
         }
     }
     
-    
-    return sample * p->gain;
+    return sample * p->g1 + cfxsample * p->g2;
 }
 
 void tSamplePlayer_setSample    (tSamplePlayer* const p, tSample* s)
@@ -238,6 +276,17 @@ void tSamplePlayer_play         (tSamplePlayer* const p)
 {
     p->active = 1;
     p->cnt = 0;
+    
+    if (p->dir > 0)
+    {
+        if (p->flip > 0)    p->idx = p->start;
+        else                p->idx = p->end;
+    }
+    else
+    {
+        if (p->flip > 0)    p->idx = p->end;
+        else                p->idx = p->start;
+    }
 }
 
 void tSamplePlayer_stop         (tSamplePlayer* const p)

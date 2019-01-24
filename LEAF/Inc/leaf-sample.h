@@ -85,7 +85,8 @@ extern "C" {
         
         int active;
         
-        float gain;
+        float g1;
+        float g2;
     } tSamplePlayer;
     
     void    tSamplePlayer_init      (tSamplePlayer* const, tSample* s);

@@ -57,17 +57,17 @@ void    LEAFTest_block           (void)
     
     float rate = val * 16.0f - 8.0f;
     tSamplePlayer_setRate(&player, rate);
-    DBG("rate: " + String(rate));
+    //DBG("rate: " + String(rate));
     
     val = getSliderValue("start");
     float start = val * sample.length;
     tSamplePlayer_setStart(&player,  start);
-    DBG("start: " + String(start));
+    //DBG("start: " + String(start));
     
     val = getSliderValue("end");
     float end = val * sample.length;
     tSamplePlayer_setEnd(&player, end);
-    DBG("end: " + String(end));
+    //DBG("end: " + String(end));
     
     bool state = getButtonState("sample");
     
