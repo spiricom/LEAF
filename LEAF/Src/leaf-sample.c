@@ -106,7 +106,7 @@ void  tSample_clear (tSample* const s)
 
 //==============================================================================
 
-#define CFX 50
+#define CFX 10
 
 void tSamplePlayer_init         (tSamplePlayer* const p, tSample* s)
 {
@@ -144,6 +144,7 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
     
     float sample = 0.f;
     float cfxsample = 0.f;
+    int cfx = CFX;
     
     float* buff = p->samp->buff;
     
@@ -179,10 +180,15 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                buff[i3],
                                                buff[i4],
                                                alpha);
-        if ((end - idx) <= CFX)
+        
+        cfx = (end - idx) / p->inc;
+        
+        if (cfx <= CFX)
         {
             // CROSSFADE SAMPLE
-            int cdx = idx - p->len;
+            float idxx =  p->idx - p->len;
+            int cdx = (int)(idxx);
+            float alpha = idxx - cdx;
     
             i1 = cdx-1;
             i3 = cdx+1;
@@ -193,10 +199,8 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                       buff[i3],
                                                       buff[i4],
                                                       alpha);
-            
-            p->g2 = (float) (CFX - (end - idx - 1)) / (float) CFX;
-            p->g1 = 1.f - p->g2;
         }
+        else   cfx = CFX;
     }
     else
     {
@@ -215,7 +219,9 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                buff[i4],
                                                1.0f-alpha);
         
-        if ((idx - start) <= CFX)
+        cfx = (idx - start) / p->inc;
+        
+        if (cfx <= CFX)
         {
             // CROSSFADE SAMPLE
             int cdx = idx + p->len;
@@ -229,10 +235,8 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                       buff[i3],
                                                       buff[i4],
                                                       alpha);
-            
-            p->g2 = (float) (CFX - (idx - start - 1)) / (float) CFX;
-            p->g1 = 1.f - p->g2;
         }
+        else   cfx = CFX;
     }
     
     p->idx += (dir * p->inc);
@@ -259,7 +263,12 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
         }
     }
     
-    return sample * p->g1 + cfxsample * p->g2;
+    sample = sample * p->g1 + cfxsample * p->g2;
+    
+    p->g2 = (float) (CFX - cfx) / (float) CFX;
+    p->g1 = 1.f - p->g2;
+    
+    return sample;
 }
 
 void tSamplePlayer_setSample    (tSamplePlayer* const p, tSample* s)
