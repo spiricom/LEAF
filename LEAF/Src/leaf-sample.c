@@ -106,7 +106,7 @@ void  tSample_clear (tSample* const s)
 
 //==============================================================================
 
-#define CFX 10
+#define CFX 30
 
 void tSamplePlayer_init         (tSamplePlayer* const p, tSample* s)
 {
@@ -152,6 +152,7 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
     
     int idx =  (int) p->idx;
     float alpha = p->idx - idx;
+    float idxx;
     
     int32_t start = p->start, end = p->end;
     if (p->flip < 0)
@@ -159,9 +160,6 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
         start = p->end;
         end = p->start;
     }
-    
-    p->g1 = 1.f;
-    p->g2 = 0.f;
     
     // Check dir (direction) to interpolate properly
     if (dir > 0)
@@ -181,12 +179,14 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                buff[i4],
                                                alpha);
         
+        //printf("cidx: %d\n", idx);
+        
         cfx = (end - idx) / p->inc;
         
         if (cfx <= CFX)
         {
             // CROSSFADE SAMPLE
-            float idxx =  p->idx - p->len;
+            idxx =  p->idx - p->len;
             int cdx = (int)(idxx);
             float alpha = idxx - cdx;
     
@@ -195,10 +195,12 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
             i4 = cdx+2;
             
             cfxsample =     LEAF_interpolate_hermite (buff[i1],
-                                                      buff[idx],
+                                                      buff[cdx],
                                                       buff[i3],
                                                       buff[i4],
                                                       alpha);
+            
+            //rprintf("cidx: %d\n", cdx);
         }
         else   cfx = CFX;
     }
@@ -224,14 +226,16 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
         if (cfx <= CFX)
         {
             // CROSSFADE SAMPLE
-            int cdx = idx + p->len;
+            idxx =  p->idx + p->len;
+            int cdx = (int)(idxx);
+            float alpha = idxx - cdx;
     
             i1 = cdx+1;
             i3 = cdx-1;
             i4 = cdx-2;
             
             cfxsample =     LEAF_interpolate_hermite (buff[i1],
-                                                      buff[idx],
+                                                      buff[cdx],
                                                       buff[i3],
                                                       buff[i4],
                                                       alpha);
@@ -263,10 +267,10 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
         }
     }
     
-    sample = sample * p->g1 + cfxsample * p->g2;
-    
     p->g2 = (float) (CFX - cfx) / (float) CFX;
     p->g1 = 1.f - p->g2;
+    
+    sample = sample * p->g1 + cfxsample * p->g2;
     
     return sample;
 }

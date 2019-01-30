@@ -11,10 +11,10 @@
 #ifndef LEAF_H_INCLUDED
 #define LEAF_H_INCLUDED
 
-#define DEBUG 0
+#define LEAF_DEBUG 0
 
-#if DEBUG
-#include "../JuceLibraryCode/JuceHeader.h"
+#if LEAF_DEBUG
+#include "../LEAF_JUCEPlugin/JuceLibraryCode/JuceHeader.h"
 #endif
 
 #if _WIN32 || _WIN64
