@@ -106,7 +106,7 @@ void  tSample_clear (tSample* const s)
 
 //==============================================================================
 
-#define CFX 30
+#define CFX 300
 
 void tSamplePlayer_init         (tSamplePlayer* const p, tSample* s)
 {
@@ -144,15 +144,25 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
     
     float sample = 0.f;
     float cfxsample = 0.f;
-    int cfx = CFX;
+    int cfx = CFX; // make this part of class
     
     float* buff = p->samp->buff;
     
     int dir = p->dir * p->flip;
     
-    int idx =  (int) p->idx;
-    float alpha = p->idx - idx;
-    float idxx;
+    int idx;
+    float alpha;
+
+    if (dir > 0)
+    {
+    	idx = (int) p->idx;
+    	alpha = p->idx - idx;
+    }
+    else
+    {
+    	idx = (int) (p->idx + 1.f); // we think this is because flooring on int works different when reading backwards
+    	alpha = (p->idx+1.f) - idx;
+    }
     
     int32_t start = p->start, end = p->end;
     if (p->flip < 0)
@@ -179,16 +189,13 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                buff[i4],
                                                alpha);
         
-        //printf("cidx: %d\n", idx);
-        
-        cfx = (end - idx) / p->inc;
-        
+        cfx = (end - idx) / p->inc; // num samples to end of loop,  use inverse increment
+
         if (cfx <= CFX)
         {
             // CROSSFADE SAMPLE
-            idxx =  p->idx - p->len;
+            float idxx =  p->idx - p->len;
             int cdx = (int)(idxx);
-            float alpha = idxx - cdx;
     
             i1 = cdx-1;
             i3 = cdx+1;
@@ -226,9 +233,9 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
         if (cfx <= CFX)
         {
             // CROSSFADE SAMPLE
-            idxx =  p->idx + p->len;
+            float idxx =  p->idx + p->len + 1.f;
             int cdx = (int)(idxx);
-            float alpha = idxx - cdx;
+            alpha = idxx - cdx;
     
             i1 = cdx+1;
             i3 = cdx-1;
@@ -238,7 +245,7 @@ float tSamplePlayer_tick        (tSamplePlayer* const p)
                                                       buff[cdx],
                                                       buff[i3],
                                                       buff[i4],
-                                                      alpha);
+                                                      1.f-alpha);
         }
         else   cfx = CFX;
     }
