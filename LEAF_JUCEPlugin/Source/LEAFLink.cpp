@@ -23,7 +23,8 @@ std::vector<juce::String> cSliderNames =  std::vector<juce::String>
 {
     "rate",
     "start",
-    "end"
+    "end",
+    "cfxlen"
 };
 
 std::vector<juce::String> cComboBoxNames =  std::vector<juce::String>

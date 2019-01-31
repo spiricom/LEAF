@@ -28,7 +28,7 @@ extern "C" {
         RecordModeNil
     } RecordMode;
     
-    typedef struct _tSample
+    typedef struct _tBuffer
     {
         float* buff;
         
@@ -39,23 +39,23 @@ extern "C" {
         
         int active;
         
-    } tSample;
+    } tBuffer;
 
-    void  tSample_init (tSample* const, uint32_t length);
-    void  tSample_free (tSample* const);
+    void  tBuffer_init (tBuffer* const, uint32_t length);
+    void  tBuffer_free (tBuffer* const);
     
-    void  tSample_tick (tSample* const, float sample);
+    void  tBuffer_tick (tBuffer* const, float sample);
     
-    void  tSample_read(tSample* const, float* buff, uint32_t len);
+    void  tBuffer_read(tBuffer* const, float* buff, uint32_t len);
     
-    float tSample_get (tSample* const, int idx);
+    float tBuffer_get (tBuffer* const, int idx);
     
-    void  tSample_start (tSample* const);
-    void  tSample_stop (tSample* const);
+    void  tBuffer_record (tBuffer* const);
+    void  tBuffer_stop (tBuffer* const);
     
-    void  tSample_setRecordMode (tSample* const, RecordMode mode);
+    void  tBuffer_setRecordMode (tBuffer* const, RecordMode mode);
     
-    void  tSample_clear (tSample* const);
+    void  tBuffer_clear (tBuffer* const);
     
 //==============================================================================
     
@@ -67,44 +67,45 @@ extern "C" {
         SampleModeNil
     } Mode;
     
-    typedef struct _tSamplePlayer
+    typedef struct _tSampler
     {
-        tSample* samp;
+        tBuffer* samp;
         
         float idx;
         float inc;
+        float iinc;
         int8_t dir;
         int8_t flip;
         
         int32_t start;
         int32_t end;
         uint32_t len;
-        uint32_t cnt;
+        uint32_t cfxlen;
     
         Mode mode;
         
         int active;
-        
-        float g1;
-        float g2;
-    } tSamplePlayer;
-    
-    void    tSamplePlayer_init      (tSamplePlayer* const, tSample* s);
-    void    tSamplePlayer_free      (tSamplePlayer* const);
-    
-    float   tSamplePlayer_tick      (tSamplePlayer* const);
 
-    void    tSamplePlayer_setSample (tSamplePlayer* const, tSample* s);
+    } tSampler;
     
-    void    tSamplePlayer_setMode   (tSamplePlayer* const, Mode mode);
+    void    tSampler_init      (tSampler* const, tBuffer* s);
+    void    tSampler_free      (tSampler* const);
     
-    void    tSamplePlayer_play      (tSamplePlayer* const);
-    void    tSamplePlayer_stop      (tSamplePlayer* const);
+    float   tSampler_tick      (tSampler* const);
+
+    void    tSampler_setSample (tSampler* const, tBuffer* s);
     
-    void    tSamplePlayer_setStart  (tSamplePlayer* const, int32_t start);
-    void    tSamplePlayer_setEnd    (tSamplePlayer* const, int32_t end);
+    void    tSampler_setMode   (tSampler* const, Mode mode);
     
-    void    tSamplePlayer_setRate   (tSamplePlayer* const, float rate);
+    void    tSampler_play      (tSampler* const);
+    void    tSampler_stop      (tSampler* const);
+    
+    void    tSampler_setStart  (tSampler* const, int32_t start);
+    void    tSampler_setEnd    (tSampler* const, int32_t end);
+    
+    void    tSampler_setCrossfadeLength  (tSampler* const p, uint32_t length);
+    
+    void    tSampler_setRate   (tSampler* const, float rate);
     
 //==============================================================================
     

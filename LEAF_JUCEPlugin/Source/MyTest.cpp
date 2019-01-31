@@ -16,38 +16,33 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-tSample sample;
+tBuffer sample;
 
-tSamplePlayer player;
+tSampler player;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
 
-    tSample_init(&sample, leaf.sampleRate * 4);
+    tBuffer_init(&sample, leaf.sampleRate * 2);
     
-    tSamplePlayer_init(&player, &sample);
-    tSamplePlayer_setMode(&player, Loop);
+    tSampler_init(&player, &sample);
+    tSampler_setMode(&player, Loop);
     
     leaf_pool_report();
     
-    tSample_start(&sample);
+    tBuffer_record(&sample);
+    
+    tSampler_play(&player);
 }
 
 int timer = 0;
 
 float   LEAFTest_tick            (float input)
 {
-    tSample_tick(&sample, input);
+    tBuffer_tick(&sample, input);
     
-    timer++;
-    
-    if (player.active == 0 && timer >= leaf.sampleRate * 4)
-    {
-        tSamplePlayer_play(&player);
-    }
-    
-    return tSamplePlayer_tick(&player);
+    return tSampler_tick(&player);
 }
 
 bool lastState = false;
@@ -56,26 +51,30 @@ void    LEAFTest_block           (void)
     float val = getSliderValue("rate");
     
     float rate = val * 16.0f - 8.0f;
-    tSamplePlayer_setRate(&player, rate);
+    tSampler_setRate(&player, rate);
     //DBG("rate: " + String(rate));
     
     val = getSliderValue("start");
     float start = val * sample.length;
-    tSamplePlayer_setStart(&player,  start);
+    tSampler_setStart(&player,  start);
     //DBG("start: " + String(start));
     
     val = getSliderValue("end");
     float end = val * sample.length;
-    tSamplePlayer_setEnd(&player, end);
+    tSampler_setEnd(&player, end);
     //DBG("end: " + String(end));
+    
+    val = getSliderValue("cfxlen");
+    uint32_t cfxlen = val * 500;
+    tSampler_setCrossfadeLength(&player, cfxlen);
+    DBG("cfxlen: " + String(cfxlen));
     
     bool state = getButtonState("sample");
     
     if (state && !lastState)
     {
         timer = 0;
-        tSamplePlayer_stop(&player);
-        tSample_start(&sample);
+        tBuffer_record(&sample);
     }
     
     lastState = state;
@@ -154,8 +153,6 @@ static void run_pool_test(void)
     {
         buffer[i] = (float)(i*2);
     }
-    
-    DBG("FREE BUFFER 2");
     leaf_free(buffer);
     
     leaf_pool_report();
