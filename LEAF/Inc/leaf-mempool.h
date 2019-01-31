@@ -50,7 +50,7 @@ extern "C" {
     
 //==============================================================================
 
-#define MPOOL_POOL_SIZE   1000000
+#define MPOOL_POOL_SIZE   500000
 #define MPOOL_ALIGN_SIZE (8)
 
 //#define size_t unsigned long
@@ -91,6 +91,8 @@ size_t leaf_pool_get_size(void);
 size_t leaf_pool_get_used(void);
 
 void* leaf_pool_get_pool(void);
+
+void leaf_mempool_overrun(void);
     
 //==============================================================================
 

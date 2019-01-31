@@ -64,7 +64,7 @@ extern "C" {
         Normal,
         Loop,
         BackAndForth,
-        ModeNil
+        SampleModeNil
     } Mode;
     
     typedef struct _tSamplePlayer

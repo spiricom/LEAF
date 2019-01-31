@@ -121,7 +121,11 @@ void* mpool_alloc(size_t size, mpool_t* pool)
 
 void* leaf_alloc(size_t size)
 {
-    return mpool_alloc(size, &leaf_pool);
+	void* block = mpool_alloc(size, &leaf_pool);
+
+	if (block == NULL) leaf_mempool_overrun();
+
+    return block;
 }
 
 void mpool_free(void* ptr, mpool_t* pool)
@@ -189,5 +193,10 @@ void* leaf_pool_get_pool(void)
  */
 static inline size_t mpool_align(size_t size) {
     return (size + (MPOOL_ALIGN_SIZE - 1)) & ~(MPOOL_ALIGN_SIZE - 1);
+}
+
+void leaf_mempool_overrun(void)
+{
+
 }
 
