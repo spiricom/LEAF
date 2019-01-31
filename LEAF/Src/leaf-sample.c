@@ -126,6 +126,9 @@ void tSampler_init         (tSampler* const p, tBuffer* s)
     p->mode = Normal;
     
     p->cfxlen = 300; // default 300 sample crossfade
+    
+    tRamp_init(&p->gain, 7.0f, 1);
+    tRamp_setVal(&p->gain, 0.f);
 }
 
 void tSampler_free         (tSampler* const p)
@@ -186,25 +189,27 @@ float tSampler_tick        (tSampler* const p)
         numsamps = (dir > 0) ? (end - idx) : (idx - start);
         numsamps *= p->iinc;
         
-        if (numsamps <= p->cfxlen)
+        if (p->mode == Loop)
         {
-            // CROSSFADE SAMPLE
-            float idxx =  p->idx - p->len;
-            int cdx = (int)(idxx);
-    
-            i1 = cdx-1;
-            i3 = cdx+1;
-            i4 = cdx+2;
-            
-            cfxsample =     LEAF_interpolate_hermite (buff[i1],
-                                                      buff[cdx],
-                                                      buff[i3],
-                                                      buff[i4],
-                                                      alpha);
-            
-            g2 = (float) (p->cfxlen - numsamps) / (float) p->cfxlen;
+            if (numsamps <= p->cfxlen)
+            {
+                // CROSSFADE SAMPLE
+                float idxx =  p->idx - p->len;
+                int cdx = (int)(idxx);
+                
+                i1 = cdx-1;
+                i3 = cdx+1;
+                i4 = cdx+2;
+                
+                cfxsample =     LEAF_interpolate_hermite (buff[i1],
+                                                          buff[cdx],
+                                                          buff[i3],
+                                                          buff[i4],
+                                                          alpha);
+                
+                g2 = (float) (p->cfxlen - numsamps) / (float) p->cfxlen;
+            }
         }
-        else   g2 = 0.f;
     }
     else
     {
@@ -221,31 +226,37 @@ float tSampler_tick        (tSampler* const p)
         
         numsamps = (idx - start) / p->inc;
         
-        if (numsamps <= p->cfxlen)
+        if (p->mode == Loop)
         {
-            // CROSSFADE SAMPLE
-            float idxx =  p->idx + p->len + 1.f;
-            int cdx = (int)(idxx);
-            alpha = idxx - cdx;
-    
-            i1 = cdx+1;
-            i3 = cdx-1;
-            i4 = cdx-2;
-            
-            cfxsample =     LEAF_interpolate_hermite (buff[i1],
-                                                      buff[cdx],
-                                                      buff[i3],
-                                                      buff[i4],
-                                                      1.f-alpha);
-            
-            g2 = (float) (p->cfxlen - numsamps) / (float) p->cfxlen;
+            if (numsamps <= p->cfxlen)
+            {
+                // CROSSFADE SAMPLE
+                float idxx =  p->idx + p->len + 1.f;
+                int cdx = (int)(idxx);
+                alpha = idxx - cdx;
+                
+                i1 = cdx+1;
+                i3 = cdx-1;
+                i4 = cdx-2;
+                
+                cfxsample =     LEAF_interpolate_hermite (buff[i1],
+                                                          buff[cdx],
+                                                          buff[i3],
+                                                          buff[i4],
+                                                          1.f-alpha);
+                
+                g2 = (float) (p->cfxlen - numsamps) / (float) p->cfxlen;
+            }
         }
-        else   g2 = 0.f;
     }
     
     p->idx += (dir * p->inc);
     
-    if (p->mode != BackAndForth ) // == Normal or Loop
+    if (p->mode == Normal)
+    {
+        if (numsamps == 0) p->active = 0;
+    }
+    else if (p->mode == Loop ) // == Normal or Loop
     {
         if (idx <= start)
         {
@@ -261,11 +272,23 @@ float tSampler_tick        (tSampler* const p)
         if ((idx <= start) || (idx >= end))
         {
             p->dir = -p->dir;
+            p->idx += (p->dir * p->flip * p->inc);
         }
     }
     
     g1 = 1.f - g2;
+    
     sample = sample * g1 + cfxsample * g2;
+    
+    sample = sample * tRamp_tick(&p->gain);
+    
+    if (p->active < 0)
+    {
+        if (tRamp_sample(&p->gain) <= 0.00001f)
+        {
+            p->active = 0;
+        }
+    }
     
     return sample;
 }
@@ -303,11 +326,16 @@ void tSampler_play         (tSampler* const p)
         if (p->flip > 0)    p->idx = p->end;
         else                p->idx = p->start;
     }
+    
+    tRamp_setVal(&p->gain, 0.f);
+    tRamp_setDest(&p->gain, 1.f);
 }
 
 void tSampler_stop         (tSampler* const p)
 {
-    p->active = 0;
+    p->active = -1;
+    
+    tRamp_setDest(&p->gain, 0.f);
 }
 
 static void handleStartEndChange(tSampler* const p)

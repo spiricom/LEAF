@@ -19,6 +19,8 @@ extern "C" {
 #include "leaf-globals.h"
 #include "leaf-math.h"
     
+#include "leaf-utilities.h"
+    
 //==============================================================================
     
     typedef enum RecordMode
@@ -70,6 +72,8 @@ extern "C" {
     typedef struct _tSampler
     {
         tBuffer* samp;
+        
+        tRamp gain;
         
         float idx;
         float inc;
