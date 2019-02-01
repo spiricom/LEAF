@@ -27,7 +27,7 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tBuffer_init(&sample, leaf.sampleRate * 2);
     
     tSampler_init(&player, &sample);
-    tSampler_setMode(&player, BackAndForth);
+    tSampler_setMode(&player, Normal);
     
     leaf_pool_report();
     

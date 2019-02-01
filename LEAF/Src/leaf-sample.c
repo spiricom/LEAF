@@ -256,7 +256,11 @@ float tSampler_tick        (tSampler* const p)
     
     if (p->mode == Normal)
     {
-        if (numsamps == 0) p->active = 0;
+        if (numsamps < (0.007f * leaf.sampleRate))
+        {
+            tRamp_setDest(&p->gain, 0.f);
+            p->active = -1;
+        }
     }
     else if (p->mode == Loop ) // == Normal or Loop
     {
@@ -293,7 +297,28 @@ float tSampler_tick        (tSampler* const p)
     {
         if (tRamp_sample(&p->gain) <= 0.00001f)
         {
-            p->active = 0;
+            if (p->retrigger == 1)
+            {
+                p->active = 1;
+                p->retrigger = 0;
+                tRamp_setDest(&p->gain, 1.f);
+                
+                if (p->dir > 0)
+                {
+                    if (p->flip > 0)    p->idx = p->start;
+                    else                p->idx = p->end;
+                }
+                else
+                {
+                    if (p->flip > 0)    p->idx = p->end;
+                    else                p->idx = p->start;
+                }
+            }
+            else
+            {
+                p->active = 0;
+            }
+            
         }
     }
     
@@ -321,21 +346,31 @@ void tSampler_setCrossfadeLength  (tSampler* const p, uint32_t length)
 
 void tSampler_play         (tSampler* const p)
 {
-    p->active = 1;
-    
-    if (p->dir > 0)
+    if (p->active != 0)
     {
-        if (p->flip > 0)    p->idx = p->start;
-        else                p->idx = p->end;
+        p->active = -1;
+        p->retrigger = 1;
+        
+        tRamp_setDest(&p->gain, 0.f);
     }
     else
     {
-        if (p->flip > 0)    p->idx = p->end;
-        else                p->idx = p->start;
+        p->active = 1;
+        p->retrigger = 0;
+        
+        tRamp_setDest(&p->gain, 1.f);
+        
+        if (p->dir > 0)
+        {
+            if (p->flip > 0)    p->idx = p->start;
+            else                p->idx = p->end;
+        }
+        else
+        {
+            if (p->flip > 0)    p->idx = p->end;
+            else                p->idx = p->start;
+        }
     }
-    
-    tRamp_setVal(&p->gain, 0.f);
-    tRamp_setDest(&p->gain, 1.f);
 }
 
 void tSampler_stop         (tSampler* const p)

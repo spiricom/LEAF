@@ -88,6 +88,7 @@ extern "C" {
         uint32_t cfxlen;
     
         Mode mode;
+        int retrigger;
         
         int active;
 
