@@ -80,6 +80,7 @@ extern "C" {
         float iinc;
         int8_t dir;
         int8_t flip;
+        int8_t bnf;
         
         int32_t start;
         int32_t end;

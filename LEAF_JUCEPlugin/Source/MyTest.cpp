@@ -27,13 +27,11 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tBuffer_init(&sample, leaf.sampleRate * 2);
     
     tSampler_init(&player, &sample);
-    tSampler_setMode(&player, Loop);
+    tSampler_setMode(&player, BackAndForth);
     
     leaf_pool_report();
     
     tBuffer_record(&sample);
-    
-    tSampler_play(&player);
 }
 
 int timer = 0;
@@ -45,7 +43,7 @@ float   LEAFTest_tick            (float input)
     return tSampler_tick(&player);
 }
 
-bool lastState = false;
+bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
     float val = getSliderValue("rate");
@@ -78,6 +76,15 @@ void    LEAFTest_block           (void)
     }
     
     lastState = state;
+    
+    state = getButtonState("play");
+    
+    if (state && !lastPlayState)
+    {
+        tSampler_play(&player);
+    }
+    
+    lastPlayState = state;
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

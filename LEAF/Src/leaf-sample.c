@@ -120,8 +120,10 @@ void tSampler_init         (tSampler* const p, tBuffer* s)
     p->idx = 0.f;
     p->inc = 1.f;
     p->iinc = 1.f;
+    
     p->dir = 1;
     p->flip = 1;
+    p->bnf = 1;
     
     p->mode = Normal;
     
@@ -148,7 +150,7 @@ float tSampler_tick        (tSampler* const p)
     
     float* buff = p->samp->buff;
     
-    int dir = p->dir * p->flip;
+    int dir = p->bnf * p->dir * p->flip;
     
     int idx;
     float alpha;
@@ -269,13 +271,18 @@ float tSampler_tick        (tSampler* const p)
     }
     else // == BackAndForth
     {
-        if ((idx <= start) || (idx >= end))
+        if (p->idx < start)
         {
-            p->dir = -p->dir;
-            p->idx += (p->dir * p->flip * p->inc);
+            p->bnf = -p->bnf;
+            p->idx = start;
+        }
+        else if (p->idx > end)
+        {
+            p->bnf = -p->bnf;
+            p->idx = end;
         }
     }
-    
+
     g1 = 1.f - g2;
     
     sample = sample * g1 + cfxsample * g2;
