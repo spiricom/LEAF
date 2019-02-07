@@ -121,12 +121,12 @@ float LEAF_shaper(float input, float m_drive)
 
 // reduce sample resolution
 float hold = 0.f;
-int count = 0;
+int reduct_count = 0;
 
 float LEAF_reduct (float input, int st)
 {
-    count++;
-    if (count > st)
+    reduct_count++;
+    if (reduct_count > st)
     {
         hold = input;
         count = 0;
