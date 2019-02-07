@@ -129,7 +129,7 @@ float LEAF_reduct (float input, int st)
     if (reduct_count > st)
     {
         hold = input;
-        count = 0;
+        reduct_count = 0;
     }
     
     return hold;
