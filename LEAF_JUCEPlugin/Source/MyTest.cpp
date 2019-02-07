@@ -62,7 +62,7 @@ void    LEAFTest_block           (void)
     
     val = getSliderValue("op");
     
-    tCrusher_setOperation(&crusher, (int)(val * 8.0f));
+    tCrusher_setOperation(&crusher, val);
     
     /*
     float samp = -1.f + 2.f * val;

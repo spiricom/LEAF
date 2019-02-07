@@ -78,7 +78,7 @@ typedef enum oBool
 float LEAF_shaper     (float input, float m_drive);
 float LEAF_reedTable  (float input, float offset, float slope);
     
-float LEAF_reduct (float input, float srr);
+float LEAF_reduct (float input, int );
 float LEAF_round (float input, float rnd);
 float LEAF_bitwise_or(float input, uint32_t op);
 

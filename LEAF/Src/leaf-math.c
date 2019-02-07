@@ -120,25 +120,19 @@ float LEAF_shaper(float input, float m_drive)
 }
 
 // reduce sample resolution
-float LEAF_reduct (float input, float sr)
+float hold = 0.f;
+int count = 0;
+
+float LEAF_reduct (float input, int st)
 {
-    float samp = input;
+    count++;
+    if (count > st)
+    {
+        hold = input;
+        count = 0;
+    }
     
-    samp *= sr;
-    
-    // method 1 
-    samp = ceilf(samp);
-    
-    samp /= sr;
-    
-    /*
-    // method 2
-    samp = floorf(samp + 0.5f) - 0.5f;
-    
-    samp /= srr;
-    */
-    
-    return samp;
+    return hold;
 }
 
 // round input to nearest rnd
