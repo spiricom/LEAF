@@ -57,9 +57,9 @@ float   tCrusher_tick    (tCrusher* const c, float input)
     
 }
 
-void    tCrusher_setOperation (tCrusher* const c, uint32_t op)
+void    tCrusher_setOperation (tCrusher* const c, float op)
 {
-    c->op = op % 8;
+	c->op = (int) (op * 8.0f);
 }
 
 // 0.0 - 1.0
