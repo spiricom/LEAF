@@ -1,6 +1,6 @@
 /*==============================================================================
 
-    LEAFWavetables.h
+    leaf-wavetables.h
     Created: 4 Dec 2016 9:42:41pm
     Author:  Michael R Mulshine
 

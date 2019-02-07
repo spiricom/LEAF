@@ -16,75 +16,74 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-tBuffer sample;
+float mix = 0.f;
+float fx = 1.f;
 
-tSampler player;
+tCrusher crusher;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
 
-    tBuffer_init(&sample, leaf.sampleRate * 2);
-    
-    tSampler_init(&player, &sample);
-    tSampler_setMode(&player, Normal);
+    tCrusher_init(&crusher);
     
     leaf_pool_report();
-    
-    tBuffer_record(&sample);
 }
 
 int timer = 0;
 
 float   LEAFTest_tick            (float input)
 {
-    tBuffer_tick(&sample, input);
+    float sample = 0.f;
     
-    return tSampler_tick(&player);
+    sample = (mix * tCrusher_tick(&crusher, input)) + ((1.f - mix) * input);
+    
+    return sample;
 }
 
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-    float val = getSliderValue("rate");
+    float val = getSliderValue("mix");
     
-    float rate = val * 16.0f - 8.0f;
-    tSampler_setRate(&player, rate);
-    //DBG("rate: " + String(rate));
+    mix = val;
     
-    val = getSliderValue("start");
-    float start = val * sample.length;
-    tSampler_setStart(&player,  start);
-    //DBG("start: " + String(start));
+    val = getSliderValue("sr");
     
-    val = getSliderValue("end");
-    float end = val * sample.length;
-    tSampler_setEnd(&player, end);
-    //DBG("end: " + String(end));
+    tCrusher_setSamplingRatio(&crusher, val * 3.99f + 0.01f);
     
-    val = getSliderValue("cfxlen");
-    uint32_t cfxlen = val * 500;
-    tSampler_setCrossfadeLength(&player, cfxlen);
-    DBG("cfxlen: " + String(cfxlen));
+    val = getSliderValue("rnd");
     
-    bool state = getButtonState("sample");
+    tCrusher_setRound(&crusher, val);
     
-    if (state && !lastState)
-    {
-        timer = 0;
-        tBuffer_record(&sample);
-    }
+    val = getSliderValue("qual");
     
-    lastState = state;
+    tCrusher_setQuality(&crusher, val);
     
-    state = getButtonState("play");
+    val = getSliderValue("op");
     
-    if (state && !lastPlayState)
-    {
-        tSampler_play(&player);
-    }
+    tCrusher_setOperation(&crusher, (int)(val * 8.0f));
     
-    lastPlayState = state;
+    /*
+    float samp = -1.f + 2.f * val;
+    
+    union unholy_t bw;
+    bw.f = samp;
+    bw.i = (bw.i | (op << 23));
+    
+    DBG(String(samp) + " " + String(bw.f));
+     */
+    
+    // rounding test
+    /*
+    val = getSliderValue("rnd");
+    
+    float to_rnd = -1.f + 2.f * val;
+    
+    float rnd = LEAF_round(to_rnd, 0.3f);
+    
+    DBG("to_rnd: " + String(to_rnd) + " rnd: " + String(rnd));
+     */
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

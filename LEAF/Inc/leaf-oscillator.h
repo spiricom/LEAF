@@ -1,6 +1,6 @@
 /*==============================================================================
 
-    LEAFOscillator.h
+    leaf-oscillator.h
     Created: 20 Jan 2017 12:00:58pm
     Author:  Michael R Mulshine
 

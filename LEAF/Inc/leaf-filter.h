@@ -1,6 +1,6 @@
 /*==============================================================================
 
-    LEAFFilter.h
+    leaf-filter.h
     Created: 20 Jan 2017 12:01:10pm
     Author:  Michael R Mulshine
 

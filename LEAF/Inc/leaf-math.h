@@ -1,6 +1,6 @@
 /*==============================================================================
 
-    LEAFMath.h
+    leaf-math.h
     Created: 22 Jan 2017 7:02:56pm
     Author:  Michael R Mulshine
 
@@ -77,6 +77,10 @@ typedef enum oBool
 // Jones shaper
 float LEAF_shaper     (float input, float m_drive);
 float LEAF_reedTable  (float input, float offset, float slope);
+    
+float LEAF_reduct (float input, float srr);
+float LEAF_round (float input, float rnd);
+float LEAF_bitwise_or(float input, uint32_t op);
 
 float       LEAF_clip               (float min, float val, float max);
 int         LEAF_clipInt            (int min, int val, int max);

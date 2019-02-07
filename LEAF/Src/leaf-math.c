@@ -1,12 +1,10 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    LEAFMath.c
+    leaf-math.c
     Created: 22 Jan 2017 7:02:56pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
 #if _WIN32 || _WIN64
 
@@ -119,6 +117,50 @@ float LEAF_shaper(float input, float m_drive)
     float shaperOut = w*(c+ 0.05f*xc2)*(m_drive + 0.75f);
     shaperOut *= 0.5f;    // post_scale
     return shaperOut;
+}
+
+// reduce sample resolution
+float LEAF_reduct (float input, float sr)
+{
+    float samp = input;
+    
+    samp *= sr;
+    
+    // method 1 
+    samp = ceilf(samp);
+    
+    samp /= sr;
+    
+    /*
+    // method 2
+    samp = floorf(samp + 0.5f) - 0.5f;
+    
+    samp /= srr;
+    */
+    
+    return samp;
+}
+
+// round input to nearest rnd
+float LEAF_round (float input, float rnd)
+{
+    rnd = fabsf(rnd);
+    
+    if (rnd <= 0.0000001f) return input;
+    
+    float scale = 1.f / rnd;
+    
+    return roundf(input * scale) / scale;
+}
+
+union unholy_t unholy;
+
+float LEAF_bitwise_or(float input, uint32_t op)
+{
+    unholy.f = input;
+    unholy.i = (unholy.i | op);
+    
+    return unholy.f;
 }
 
 float LEAF_reedTable(float input, float offset, float slope) 

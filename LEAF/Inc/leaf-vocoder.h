@@ -1,6 +1,6 @@
 /*==============================================================================
 
-    LEAFInstrument.h
+    leaf-vocoder.h
     Created: 20 Jan 2017 12:01:54pm
     Author:  Michael R Mulshine
 

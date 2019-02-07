@@ -60,6 +60,11 @@ extern const float shaper1[SHAPER1_TABLE_SIZE];
 #define TALKBOX_BUFFER_LENGTH   1600    // Every talkbox instance introduces 5 buffers of this size
 
     
+union unholy_t { /* a union between a float and an integer */
+    float f;
+    int i;
+};
+    
 //==============================================================================
     
 #ifdef __cplusplus
