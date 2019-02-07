@@ -123,10 +123,11 @@ float LEAF_shaper(float input, float m_drive)
 float hold = 0.f;
 int reduct_count = 0;
 
-float LEAF_reduct (float input, int st)
+
+float LEAF_reduct (float input, float ratio)
 {
     reduct_count++;
-    if (reduct_count > st)
+    if (reduct_count > (leaf.sampleRate * (1.f - ratio)))
     {
         hold = input;
         reduct_count = 0;
