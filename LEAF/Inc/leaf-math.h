@@ -80,7 +80,7 @@ float LEAF_reedTable  (float input, float offset, float slope);
     
 float LEAF_reduct (float input, float ratio);
 float LEAF_round (float input, float rnd);
-float LEAF_bitwise_or(float input, uint32_t op);
+float LEAF_bitwise_xor(float input, uint32_t op);
 
 float       LEAF_clip               (float min, float val, float max);
 int         LEAF_clipInt            (int min, int val, int max);

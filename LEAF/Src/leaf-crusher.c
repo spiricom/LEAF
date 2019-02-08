@@ -41,11 +41,11 @@ float   tCrusher_tick    (tCrusher* const c, float input)
     
     sample *= SCALAR; // SCALAR is 5000 by default
     
-    sample = floorf(sample);
+    sample = (int32_t) sample;
     
     sample /= c->div;
 
-    sample = LEAF_bitwise_or(sample, c->op << 23);
+    sample = LEAF_bitwise_xor(sample, c->op << 23);
     
     sample = LEAF_clip(-1.f, sample, 1.f);
     
@@ -59,7 +59,7 @@ float   tCrusher_tick    (tCrusher* const c, float input)
 
 void    tCrusher_setOperation (tCrusher* const c, float op)
 {
-	c->op = (int) (op * 8.0f);
+	c->op = (uint32_t) (op * 8.0f);
 }
 
 // 0.0 - 1.0

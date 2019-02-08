@@ -127,7 +127,7 @@ int reduct_count = 0;
 float LEAF_reduct (float input, float ratio)
 {
     reduct_count++;
-    if (reduct_count > (leaf.sampleRate * (1.f - ratio)))
+    if (reduct_count > 1.f / ratio)
     {
         hold = input;
         reduct_count = 0;
@@ -150,10 +150,10 @@ float LEAF_round (float input, float rnd)
 
 union unholy_t unholy;
 
-float LEAF_bitwise_or(float input, uint32_t op)
+float LEAF_bitwise_xor(float input, uint32_t op)
 {
     unholy.f = input;
-    unholy.i = (unholy.i | op);
+    unholy.i = (unholy.i ^ op);
     
     return unholy.f;
 }
