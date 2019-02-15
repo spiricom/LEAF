@@ -125,9 +125,9 @@ void tSampler_init         (tSampler* const p, tBuffer* s)
     p->flip = 1;
     p->bnf = 1;
     
-    p->mode = Normal;
+    p->mode = PlayNormal;
     
-    p->cfxlen = 300; // default 300 sample crossfade
+    p->cfxlen = 500; // default 300 sample crossfade
     
     tRamp_init(&p->gain, 7.0f, 1);
     tRamp_setVal(&p->gain, 0.f);
@@ -191,7 +191,7 @@ float tSampler_tick        (tSampler* const p)
         numsamps = (dir > 0) ? (end - idx) : (idx - start);
         numsamps *= p->iinc;
         
-        if (p->mode == Loop)
+        if (p->mode == PlayLoop)
         {
             if (numsamps <= p->cfxlen)
             {
@@ -228,7 +228,7 @@ float tSampler_tick        (tSampler* const p)
         
         numsamps = (idx - start) / p->inc;
         
-        if (p->mode == Loop)
+        if (p->mode == PlayLoop)
         {
             if (numsamps <= p->cfxlen)
             {
@@ -254,7 +254,7 @@ float tSampler_tick        (tSampler* const p)
     
     p->idx += (dir * p->inc);
     
-    if (p->mode == Normal)
+    if (p->mode == PlayNormal)
     {
         if (numsamps < (0.007f * leaf.sampleRate))
         {
@@ -262,7 +262,7 @@ float tSampler_tick        (tSampler* const p)
             p->active = -1;
         }
     }
-    else if (p->mode == Loop ) // == Normal or Loop
+    else if (p->mode == PlayLoop )
     {
         if (idx <= start)
         {
@@ -273,7 +273,7 @@ float tSampler_tick        (tSampler* const p)
             p->idx -= (float)(p->len);
         }
     }
-    else // == BackAndForth
+    else // == PlayBackAndForth
     {
         if (p->idx < start)
         {
@@ -330,7 +330,7 @@ void tSampler_setSample    (tSampler* const p, tBuffer* s)
     p->samp = s;
 }
 
-void tSampler_setMode      (tSampler* const p, Mode mode)
+void tSampler_setMode      (tSampler* const p, PlayMode mode)
 {
     p->mode = mode;
 }

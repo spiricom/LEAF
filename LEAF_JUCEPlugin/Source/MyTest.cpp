@@ -19,26 +19,72 @@ static void run_pool_test(void);
 float mix = 0.f;
 float fx = 1.f;
 
-tCrusher crusher;
+#define NUM_GRAINS 20
+
+tBuffer buff;
+tSampler samp[NUM_GRAINS];
+
+tTapeDelay delay;
+
+float feedback = 0.f;
+
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
-    LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
+    LEAF_init(sampleRate, blockSize, &getRandomFloat);
+    
+    // Init and set record loop
+    tBuffer_init (&buff, leaf.sampleRate * 1.f); // 0.5-second buffers
+    tBuffer_setRecordMode (&buff, RecordLoop);
+    tBuffer_record(&buff);
+    
+    for (int i = 0; i < NUM_GRAINS; i++)
+    {
+        // Init and set play loop
+        tSampler_init (&samp[i], &buff);
+        tSampler_setMode (&samp[i], PlayLoop);
 
-    tCrusher_init(&crusher);
+        /*
+        float speed = ((getRandomFloat() < 0.5f) ? 0.5f : 1.f);
+        float dir = (getRandomFloat() < 0.5f) ? -1 : 1;
+        
+        tSampler_setRate(&samp[i], speed * dir);
+         */
+        
+        tSampler_setRate(&samp[i], 1.f);
+        
+        // Record and play
+        tSampler_play(&samp[i]);
+    }
+    
+    tTapeDelay_init(&delay, leaf.sampleRate * 0.05f, leaf.sampleRate * 1.f); // 1 second delay, starts out at 50 ms
     
     leaf_pool_report();
 }
 
 int timer = 0;
 
+float lastOut;
+
 float   LEAFTest_tick            (float input)
 {
     float sample = 0.f;
     
-    sample = (mix * tCrusher_tick(&crusher, input)) + ((1.f - mix) * input);
+    tBuffer_tick(&buff, input);
     
-    return sample;
+    for (int i = 0; i < NUM_GRAINS; i++)
+    {
+        sample += tSampler_tick(&samp[i]);
+    }
+    
+    sample /= NUM_GRAINS;
+    
+    sample = tTapeDelay_tick(&delay, (1.f - feedback) * sample + feedback * lastOut);
+    
+    lastOut = sample;
+
+    return  (sample * mix) +
+            (input * (1.f - mix));
 }
 
 bool lastState = false, lastPlayState = false;
@@ -48,42 +94,26 @@ void    LEAFTest_block           (void)
     
     mix = val;
     
-    val = getSliderValue("sr");
+    val = getSliderValue("delay");
     
-    tCrusher_setSamplingRatio(&crusher, val * 3.99f + 0.01f);
+    tTapeDelay_setDelay(&delay, val * leaf.sampleRate);
     
-    val = getSliderValue("rnd");
+    val = getSliderValue("feedback");
     
-    tCrusher_setRound(&crusher, val);
+    feedback = val;
     
-    val = getSliderValue("qual");
+    for (int i = 0; i < NUM_GRAINS; i++)
+    {
+        if (getRandomFloat() < 0.01f)
+        {
+            tSampler_setStart(&samp[i], leaf.sampleRate * 0.05f + leaf.sampleRate * getRandomFloat() * 0.95f);
+            
+            uint64_t end = (leaf.sampleRate * 0.05f + getRandomFloat() * leaf.sampleRate * 0.45f + samp[i].start);
+            
+            tSampler_setEnd(&samp[i],  end % buff.length); // 10 - 1010 ms
+        }
+    }
     
-    tCrusher_setQuality(&crusher, val);
-    
-    val = getSliderValue("op");
-    
-    tCrusher_setOperation(&crusher, val);
-    
-    /*
-    float samp = -1.f + 2.f * val;
-    
-    union unholy_t bw;
-    bw.f = samp;
-    bw.i = (bw.i | (op << 23));
-    
-    DBG(String(samp) + " " + String(bw.f));
-     */
-    
-    // rounding test
-    /*
-    val = getSliderValue("rnd");
-    
-    float to_rnd = -1.f + 2.f * val;
-    
-    float rnd = LEAF_round(to_rnd, 0.3f);
-    
-    DBG("to_rnd: " + String(to_rnd) + " rnd: " + String(rnd));
-     */
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

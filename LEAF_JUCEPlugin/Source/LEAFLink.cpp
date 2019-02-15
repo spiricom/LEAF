@@ -20,10 +20,8 @@ std::vector<juce::String> cButtonNames =  std::vector<juce::String>
 
 std::vector<juce::String> cSliderNames =  std::vector<juce::String>
 {
-    "sr",
-    "rnd",
-    "qual",
-    "op",
+    "delay",
+    "feedback",
     "mix"
 };
 
@@ -139,7 +137,7 @@ float getSliderValue(String name)
     return value;
 }
 
-float randomNumberGenerator(void)
+float getRandomFloat(void)
 {
     return ((float)rand()/RAND_MAX);
 }
