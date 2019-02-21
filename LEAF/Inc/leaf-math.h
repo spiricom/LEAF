@@ -1,19 +1,23 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    LEAFMath.h
+    leaf-math.h
     Created: 22 Jan 2017 7:02:56pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-#ifndef LEAFMATH_H_INCLUDED
-#define LEAFMATH_H_INCLUDED
+#ifndef LEAF_MATH_H_INCLUDED
+#define LEAF_MATH_H_INCLUDED
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "math.h"
 #include "stdint.h"
 #include "stdlib.h"
+
+//==============================================================================
 
 typedef enum oBool
 {
@@ -74,8 +78,13 @@ typedef enum oBool
 float LEAF_shaper     (float input, float m_drive);
 float LEAF_reedTable  (float input, float offset, float slope);
 
+float LEAF_reduct (float input, float ratio);
+float LEAF_round (float input, float rnd);
+float LEAF_bitwise_xor(float input, uint32_t op);
+
 float       LEAF_clip               (float min, float val, float max);
-float   	LEAF_softClip						(float val, float thresh);
+int         LEAF_clipInt            (int min, int val, int max);
+float   	LEAF_softClip		    (float val, float thresh);
 oBool       LEAF_isPrime            (uint64_t number );
 
 float       LEAF_midiToFrequency    (float f);
@@ -90,54 +99,28 @@ void        LEAF_generate_square   (float* buffer, float basefreq, int size);
 float       LEAF_chebyshevT(float in, int n);
 float       LEAF_CompoundChebyshevT(float in, int n, float* amps);
 
-static inline float interpolate3max(float *buf, const int peakindex)
-{
-    float a = buf[peakindex-1];
-    float b = buf[peakindex];
-    float c = buf[peakindex+1];
-    float realpeak;
-    
-    realpeak = b + (float)0.125 * (c - a) * (c - a) / ((float)2. * b - a - c);
-    
-    return(realpeak);
-}
 
-static inline float interpolate3phase(float *buf, const int peakindex)
-{
-    float a = buf[peakindex-1];
-    float b = buf[peakindex];
-    float c = buf[peakindex+1];
-    float fraction;
-    
-    fraction = ((float)0.5 * (c - a)) / ((float)2. * b - a - c);
-    
-    return(fraction);
-}
+// Hermite interpolation
+float LEAF_interpolate_hermite (float A, float B, float C, float D, float t);
+float LEAF_interpolation_linear (float A, float B, float t);
+
+float interpolate3max(float *buf, const int peakindex);
+float interpolate3phase(float *buf, const int peakindex);
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit integers
-static inline int fastabs_int(int in){
-    unsigned int r;
-    int const mask = in >> 31;
-    
-    r = (in ^ mask) - mask;
-    
-    return (r);
-}
+int fastabs_int(int in);
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit floats
-static inline float fastabs(float f)
-{
-    union
-    {
-        float f;
-        unsigned int ui;
-    }alias;
-    
-    alias.f = f;
-    alias.ui &= 0x7fffffff;
-    return alias.f;
-}
+float fastabs(float f);
 
-#endif  // LEAFMATH_H_INCLUDED
+//==============================================================================
+    
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // LEAF_MATH_H_INCLUDED
+
+//==============================================================================

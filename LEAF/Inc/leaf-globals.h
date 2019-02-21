@@ -48,6 +48,13 @@ extern const float shaper1[SHAPER1_TABLE_SIZE];
 #define     DELAY_LENGTH        16000   // The maximum delay length of all Delay/DelayL/DelayA components.
                                             // Feel free to change to suit memory constraints or desired delay max length / functionality.
 
-#define TALKBOX_BUFFER_LENGTH   1600    // Every talkbox instance introduces 5 buffers of this size
+//#define TALKBOX_BUFFER_LENGTH   1600    // Every talkbox instance introduces 5 buffers of this size
+
+
+union unholy_t { /* a union between a float and an integer */
+    float f;
+    int i;
+};
+
 
 #endif  // OPPSGLOBALS_H_INCLUDED

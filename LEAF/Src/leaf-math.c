@@ -1,12 +1,10 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    LEAFMath.c
+    leaf-math.c
     Created: 22 Jan 2017 7:02:56pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
 #if _WIN32 || _WIN64
 
@@ -26,8 +24,55 @@
 #define EXPONENTIAL_TABLE_SIZE 65536
 
 
+float interpolate3max(float *buf, const int peakindex)
+{
+    float a = buf[peakindex-1];
+    float b = buf[peakindex];
+    float c = buf[peakindex+1];
+    float realpeak;
 
+    realpeak = b + (float)0.125 * (c - a) * (c - a) / ((float)2. * b - a - c);
 
+    return(realpeak);
+}
+
+float interpolate3phase(float *buf, const int peakindex)
+{
+    float a = buf[peakindex-1];
+    float b = buf[peakindex];
+    float c = buf[peakindex+1];
+    float fraction;
+
+    fraction = ((float)0.5 * (c - a)) / ((float)2. * b - a - c);
+
+    return(fraction);
+}
+
+// alternative implementation for abs()
+// REQUIRES: 32 bit integers
+int fastabs_int(int in){
+    unsigned int r;
+    int const mask = in >> 31;
+
+    r = (in ^ mask) - mask;
+
+    return (r);
+}
+
+// alternative implementation for abs()
+// REQUIRES: 32 bit floats
+float fastabs(float f)
+{
+    union
+    {
+        float f;
+        unsigned int ui;
+    }alias;
+
+    alias.f = f;
+    alias.ui &= 0x7fffffff;
+    return alias.f;
+}
 
 // dope af
 float LEAF_chebyshevT(float in, int n){
@@ -74,6 +119,45 @@ float LEAF_shaper(float input, float m_drive)
     return shaperOut;
 }
 
+// reduce sample resolution
+float hold = 0.f;
+int reduct_count = 0;
+
+
+float LEAF_reduct (float input, float ratio)
+{
+    reduct_count++;
+    if (reduct_count > 1.f / ratio)
+    {
+        hold = input;
+        reduct_count = 0;
+    }
+
+    return hold;
+}
+
+// round input to nearest rnd
+float LEAF_round (float input, float rnd)
+{
+    rnd = fabsf(rnd);
+
+    if (rnd <= 0.0000001f) return input;
+
+    float scale = 1.f / rnd;
+
+    return roundf(input * scale) / scale;
+}
+
+union unholy_t unholy;
+
+float LEAF_bitwise_xor(float input, uint32_t op)
+{
+    unholy.f = input;
+    unholy.i = (unholy.i ^ op);
+
+    return unholy.f;
+}
+
 float LEAF_reedTable(float input, float offset, float slope) 
 {
     float output = offset + (slope * input);
@@ -113,6 +197,18 @@ float   LEAF_clip(float min, float val, float max)
         return val;
     }
 }
+
+int   LEAF_clipInt(int min, int val, int max)
+{
+    if (val < min) {
+        return min;
+    } else if (val > max) {
+        return max;
+    } else {
+        return val;
+    }
+}
+
 
 oBool     LEAF_isPrime(uint64_t number )
 {
@@ -230,5 +326,34 @@ float LEAF_midiToFrequency(float f)
 {
     if( f <= -1500.0f ) return (0);
     else if( f > 1499.0f ) return (LEAF_midiToFrequency(1499.0f));
-    else return ( powf(2.0f, (f - 69.0f) / 12.0f) * 440.0f );
+    else return ( powf(2.0f, (f - 69.0f) * 0.083333333333333f) * 440.0f );
+}
+
+
+// alpha, [0.0, 1.0]
+float LEAF_interpolate_hermite (float A, float B, float C, float D, float alpha)
+{
+    alpha = LEAF_clip(0.0f, alpha, 1.0f);
+
+    float a = -A/2.0f + (3.0f*B)/2.0f - (3.0f*C)/2.0f + D/2.0f;
+    float b = A - (5.0f*B)/2.0f + 2.0f*C - D / 2.0f;
+    float c = -A/2.0f + C/2.0f;
+    float d = B;
+
+    return a*alpha*alpha*alpha + b*alpha*alpha + c*alpha + d;
+}
+
+// alpha, [0.0, 1.0]
+float LEAF_interpolation_linear (float A, float B, float alpha)
+{
+    alpha = LEAF_clip(0.0f, alpha, 1.0f);
+
+    float omAlpha = 1.0f - alpha;
+
+    // First 1/2 of interpolation
+    float out = A * omAlpha;
+
+    out += B * alpha;
+
+    return out;
 }
