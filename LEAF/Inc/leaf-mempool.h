@@ -44,6 +44,10 @@
 #define MPOOL_POOL_SIZE   500000
 #define MPOOL_ALIGN_SIZE (8)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //#define size_t unsigned long
       
 /**
@@ -84,6 +88,9 @@ size_t leaf_pool_get_used(void);
 
 void* leaf_pool_get_pool(void);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

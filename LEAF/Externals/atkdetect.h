@@ -1,6 +1,10 @@
 #ifndef atkdetect_h
 #define atkdetect_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*************************************
 
 atkdetect lib written for DSP2G project
@@ -96,5 +100,8 @@ void atkDetect_set_threshold(t_atkDetect *a, t_float thres);
 // find largest transient in input block, return index of attack
 int atkDetect_detect(t_atkDetect *a, t_float *in);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -7,6 +7,10 @@
 **   Ron Mayer
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef REAL
 #else
 #define REAL double
@@ -163,3 +167,7 @@ static REAL sinwrk[20]=
      .00009587379909597734587051721097647635118706561284,
      .00004793689960306688454900399049465887274686668768
     };
+    
+#ifdef __cplusplus
+}
+#endif

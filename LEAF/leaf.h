@@ -11,6 +11,12 @@
 #ifndef LEAF_H_INCLUDED
 #define LEAF_H_INCLUDED
 
+#define DEBUG 0
+
+#if DEBUG
+#include "../JuceLibraryCode/JuceHeader.h"
+#endif
+
 #if _WIN32 || _WIN64
 
 #include ".\Inc\leaf-globals.h"
@@ -51,8 +57,16 @@
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 void        LEAF_init            (float sampleRate, int blocksize, float(*randomNumberFunction)(void));
 void        LEAF_setSampleRate   (float sampleRate);
 float       LEAF_getSampleRate   (void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // LEAF_H_INCLUDED

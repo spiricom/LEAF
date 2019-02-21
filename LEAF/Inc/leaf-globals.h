@@ -21,6 +21,10 @@
 
 #include "leaf-mempool.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 typedef struct _LEAF
 {
     float   sampleRate;

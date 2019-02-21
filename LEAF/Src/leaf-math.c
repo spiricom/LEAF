@@ -23,7 +23,6 @@
 
 #define EXPONENTIAL_TABLE_SIZE 65536
 
-
 float interpolate3max(float *buf, const int peakindex)
 {
     float a = buf[peakindex-1];
@@ -72,6 +71,7 @@ float fastabs(float f)
     alias.f = f;
     alias.ui &= 0x7fffffff;
     return alias.f;
+
 }
 
 // dope af

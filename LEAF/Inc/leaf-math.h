@@ -17,6 +17,10 @@ extern "C" {
 #include "stdint.h"
 #include "stdlib.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //==============================================================================
 
 typedef enum oBool
@@ -99,6 +103,10 @@ void        LEAF_generate_square   (float* buffer, float basefreq, int size);
 float       LEAF_chebyshevT(float in, int n);
 float       LEAF_CompoundChebyshevT(float in, int n, float* amps);
 
+
+// Hermite interpolation
+float LEAF_interpolate_hermite (float A, float B, float C, float D, float t);
+float LEAF_interpolation_linear (float A, float B, float t);
 
 // Hermite interpolation
 float LEAF_interpolate_hermite (float A, float B, float C, float D, float t);
