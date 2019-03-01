@@ -40,6 +40,8 @@ float softClip(float sample)
     return LEAF_softClip(sample, clipThreshold);
 }
 
+float lastOut;
+
 float   LEAFTest_tick            (float input)
 {
     tCycle_setFreq(&test, freqVal);

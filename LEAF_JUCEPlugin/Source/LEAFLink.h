@@ -47,6 +47,6 @@ void setComboBoxState(String name, int idx);
 void setSliderModelValue(String name, float val);
 void setSliderValue(String name, float val);
 float getSliderValue(String name);
-float randomNumberGenerator(void);
+float getRandomFloat(void);
 
 #endif  // UTILITIES_H_INCLUDED

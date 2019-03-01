@@ -137,7 +137,7 @@ float getSliderValue(String name)
     return value;
 }
 
-float randomNumberGenerator(void)
+float getRandomFloat(void)
 {
     return ((float)rand()/RAND_MAX);
 }

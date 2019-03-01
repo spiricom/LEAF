@@ -41,7 +41,7 @@ void    tCrusher_free    (tCrusher* const);
 
 float   tCrusher_tick    (tCrusher* const, float input);
     
-// 0-7
+// 0.0 - 1.0
 void    tCrusher_setOperation (tCrusher* const, float op);
  
 // 0.0 - 1.0

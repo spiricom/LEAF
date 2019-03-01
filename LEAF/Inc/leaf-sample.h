@@ -61,13 +61,13 @@ extern "C" {
     
 //==============================================================================
     
-    typedef enum Mode
+    typedef enum PlayMode
     {
-        Normal,
-        Loop,
-        BackAndForth,
-        SampleModeNil
-    } Mode;
+        PlayNormal,
+        PlayLoop,
+        PlayBackAndForth,
+        PlayModeNil
+    } PlayMode;
     
     typedef struct _tSampler
     {
@@ -87,7 +87,7 @@ extern "C" {
         uint32_t len;
         uint32_t cfxlen;
     
-        Mode mode;
+        PlayMode mode;
         int retrigger;
         
         int active;
@@ -101,7 +101,7 @@ extern "C" {
 
     void    tSampler_setSample (tSampler* const, tBuffer* s);
     
-    void    tSampler_setMode   (tSampler* const, Mode mode);
+    void    tSampler_setMode   (tSampler* const, PlayMode mode);
     
     void    tSampler_play      (tSampler* const);
     void    tSampler_stop      (tSampler* const);
