@@ -16,74 +16,46 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-float mix = 0.f;
-float fx = 1.f;
+float gain, freqVal;
+float clipThreshold = 1.f;
 
-tCrusher crusher;
+tCycle test;
+tOversampler2x os2;
+tOversampler4x os4;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
 
-    tCrusher_init(&crusher);
+    tCycle_init(&test);
+    tOversampler2x_init(&os2);
+    tOversampler4x_init(&os4);
     
     leaf_pool_report();
 }
 
-int timer = 0;
+
+float softClip(float sample)
+{
+    return LEAF_softClip(sample, clipThreshold);
+}
 
 float   LEAFTest_tick            (float input)
 {
-    float sample = 0.f;
+    tCycle_setFreq(&test, freqVal);
+    float sample = tCycle_tick(&test);
     
-    sample = (mix * tCrusher_tick(&crusher, input)) + ((1.f - mix) * input);
+    sample = tOversampler4x_tick(&os4, sample, &softClip);
     
-    return sample;
+    return sample * gain;
 }
 
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-    float val = getSliderValue("mix");
-    
-    mix = val;
-    
-    val = getSliderValue("sr");
-    
-    tCrusher_setSamplingRatio(&crusher, val * 3.99f + 0.01f);
-    
-    val = getSliderValue("rnd");
-    
-    tCrusher_setRound(&crusher, val);
-    
-    val = getSliderValue("qual");
-    
-    tCrusher_setQuality(&crusher, val);
-    
-    val = getSliderValue("op");
-    
-    tCrusher_setOperation(&crusher, val);
-    
-    /*
-    float samp = -1.f + 2.f * val;
-    
-    union unholy_t bw;
-    bw.f = samp;
-    bw.i = (bw.i | (op << 23));
-    
-    DBG(String(samp) + " " + String(bw.f));
-     */
-    
-    // rounding test
-    /*
-    val = getSliderValue("rnd");
-    
-    float to_rnd = -1.f + 2.f * val;
-    
-    float rnd = LEAF_round(to_rnd, 0.3f);
-    
-    DBG("to_rnd: " + String(to_rnd) + " rnd: " + String(rnd));
-     */
+    clipThreshold = (1.f - getSliderValue("distortion")) * 0.3f;
+    gain = getSliderValue("gain") * 0.5f;
+    freqVal = getSliderValue("frequency") * 18000.f;
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

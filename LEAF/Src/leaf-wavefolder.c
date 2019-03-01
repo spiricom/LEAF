@@ -16,7 +16,7 @@
 
 #endif
 
-void tLockhartWavefolderInit(tLockhartWavefolder* const w)
+void tLockhartWavefolder_init(tLockhartWavefolder* const w)
 {
     w->Ln1 = 0.0;
     w->Fn1 = 0.0;
@@ -54,7 +54,7 @@ double tLockhartWavefolderLambert(double x, double ln)
     return w;
 }
 
-float tLockhartWavefolderTick(tLockhartWavefolder* const w, float samp)
+float tLockhartWavefolder_tick(tLockhartWavefolder* const w, float samp)
 {
     int l;
     double u, Ln, Fn, xn;
