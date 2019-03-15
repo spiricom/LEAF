@@ -22,6 +22,8 @@ std::vector<juce::String> cSliderNames =  std::vector<juce::String>
 {
     "delay",
     "feedback",
+    "density",
+    "makeup",
     "mix"
 };
 

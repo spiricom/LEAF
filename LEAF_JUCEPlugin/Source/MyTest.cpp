@@ -16,29 +16,29 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-float mix = 0.f;
-float fx = 1.f;
 
-#define NUM_GRAINS 20
+
+#define MAX_GRAINS 50
 
 tBuffer buff;
-tSampler samp[NUM_GRAINS];
+tSampler samp[MAX_GRAINS];
 
 tTapeDelay delay;
 
 float feedback = 0.f;
-
+float mix = 0.f;
+int numGrains = 10;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, &getRandomFloat);
     
     // Init and set record loop
-    tBuffer_init (&buff, leaf.sampleRate * 1.f); // 0.5-second buffers
+    tBuffer_init (&buff, leaf.sampleRate * 1.f); // 1.0-second buffers
     tBuffer_setRecordMode (&buff, RecordLoop);
     tBuffer_record(&buff);
     
-    for (int i = 0; i < NUM_GRAINS; i++)
+    for (int i = 0; i < MAX_GRAINS; i++)
     {
         // Init and set play loop
         tSampler_init (&samp[i], &buff);
@@ -65,21 +65,29 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 int timer = 0;
 
 float lastOut;
+float lastDelayOut;
+float makeup;
 
 float   LEAFTest_tick            (float input)
 {
+    float delaySample = input + lastDelayOut * feedback;
+    
+    delaySample = tTapeDelay_tick( &delay, 0.5f * delaySample);
+    
+    lastDelayOut = delaySample;
+    
+    tBuffer_tick(&buff, lastDelayOut); // read delayed samples in to buffer
+    
     float sample = 0.f;
     
-    tBuffer_tick(&buff, input);
-    
-    for (int i = 0; i < NUM_GRAINS; i++)
+    for (int i = 0; i < numGrains; i++)
     {
         sample += tSampler_tick(&samp[i]);
     }
     
-    sample /= NUM_GRAINS;
+    sample /= (float)numGrains;
     
-    sample = tTapeDelay_tick(&delay, (1.f - feedback) * sample + feedback * lastOut);
+    sample *= makeup;
     
     lastOut = sample;
 
@@ -91,18 +99,26 @@ bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
     float val = getSliderValue("mix");
-    
     mix = val;
     
-    val = getSliderValue("delay");
     
+    val = getSliderValue("delay");
     tTapeDelay_setDelay(&delay, val * leaf.sampleRate);
     
-    val = getSliderValue("feedback");
     
+    val = getSliderValue("feedback");
     feedback = val;
     
-    for (int i = 0; i < NUM_GRAINS; i++)
+    
+    val = getSliderValue("density");
+    numGrains = LEAF_clip(1, val * MAX_GRAINS, 50);
+
+    
+    val = getSliderValue("makeup");
+    makeup = 1.f + val * 3.f;
+    
+    
+    for (int i = 0; i < numGrains; i++)
     {
         if (getRandomFloat() < 0.01f)
         {
