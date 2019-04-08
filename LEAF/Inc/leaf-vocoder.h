@@ -1,26 +1,24 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    LEAFInstrument.h
+    leaf-vocoder.h
     Created: 20 Jan 2017 12:01:54pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-#ifndef LEAFINSTRUMENT_H_INCLUDED
-#define LEAFINSTRUMENT_H_INCLUDED
+#ifndef LEAF_VOCODER_H_INCLUDED
+#define LEAF_VOCODER_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tTalkbox */
 #define NUM_TALKBOX_PARAM 4
@@ -52,7 +50,7 @@ void        tTalkbox_lpcDurbin   (float *r, int p, float *k, float *g);
 void        tTalkbox_lpc         (float *buf, float *car, int32_t n, int32_t o);
 void		tTalkbox_setQuality  (tTalkbox* const, float quality);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tVocoder */
 #define NUM_VOCODER_PARAM 8
@@ -79,10 +77,12 @@ float       tVocoder_tick        (tVocoder* const, float synth, float voice);
 void        tVocoder_update      (tVocoder* const);
 void        tVocoder_suspend     (tVocoder* const);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 #ifdef __cplusplus
 }
 #endif
         
-#endif  // LEAFINSTRUMENT_H_INCLUDED
+#endif  // LEAF_VOCODER_H_INCLUDED
+
+//==============================================================================

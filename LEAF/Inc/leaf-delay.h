@@ -1,27 +1,25 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    LEAFDelay.h
+    leaf-delay.h
     Created: 20 Jan 2017 12:01:24pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-#ifndef LEAFDELAY_H_INCLUDED
-#define LEAFDELAY_H_INCLUDED
+#ifndef LEAF_DELAY_H_INCLUDED
+#define LEAF_DELAY_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* Non-interpolating delay, reimplemented from STK (Cook and Scavone). */
 typedef struct _tDelay
 {
@@ -48,9 +46,8 @@ float       tDelay_tick         (tDelay*  const, float sample);
 float       tDelay_getLastOut   (tDelay*  const);
 float       tDelay_getLastIn    (tDelay*  const);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* Linearly-interpolating delay, reimplemented from STK (Cook and Scavone). */
 typedef struct _tDelayL
 {
@@ -81,8 +78,8 @@ float       tDelayL_tick        (tDelayL*  const, float sample);
 float       tDelayL_getLastOut  (tDelayL*  const);
 float       tDelayL_getLastIn   (tDelayL*  const);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* Allpass-interpolating delay, reimplemented from STK (Cook and Scavone). */
 typedef struct _tDelayA
 {
@@ -115,8 +112,8 @@ float       tDelayA_tick        (tDelayA*  const, float sample);
 float       tDelayA_getLastOut  (tDelayA*  const);
 float       tDelayA_getLastIn   (tDelayA*  const);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* Linear interpolating delay with fixed read and write pointers, variable rate. */
 typedef struct _tTapeDelay
 {
@@ -147,8 +144,12 @@ float       tTapeDelay_tick        (tTapeDelay*  const, float sample);
 float       tTapeDelay_getLastOut  (tTapeDelay*  const);
 float       tTapeDelay_getLastIn   (tTapeDelay*  const);
     
+//==============================================================================
+    
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // LEAFDELAY_H_INCLUDED
+#endif  // LEAF_DELAY_H_INCLUDED
+
+//==============================================================================

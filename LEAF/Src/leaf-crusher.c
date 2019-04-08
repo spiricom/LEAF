@@ -26,7 +26,7 @@ void    tCrusher_init    (tCrusher* const c)
     c->div = SCALAR;
     c->rnd = 0.25f;
     c->srr = 0.25f;
-
+    
     c->gain = (c->div / SCALAR) * 0.7f + 0.3f;
 }
 
@@ -38,23 +38,23 @@ void    tCrusher_free    (tCrusher* const c)
 float   tCrusher_tick    (tCrusher* const c, float input)
 {
     float sample = input;
-
+    
     sample *= SCALAR; // SCALAR is 5000 by default
-
+    
     sample = (int32_t) sample;
-
+    
     sample /= c->div;
 
     sample = LEAF_bitwise_xor(sample, c->op << 23);
-
+    
     sample = LEAF_clip(-1.f, sample, 1.f);
-
+    
     sample = LEAF_round(sample, c->rnd);
-
+    
     sample = LEAF_reduct(sample, c->srr);
-
+    
     return sample * c->gain;
-
+    
 }
 
 void    tCrusher_setOperation (tCrusher* const c, float op)
@@ -66,9 +66,9 @@ void    tCrusher_setOperation (tCrusher* const c, float op)
 void    tCrusher_setQuality (tCrusher* const c, float val)
 {
     val = LEAF_clip(0.0f, val, 1.0f);
-
+    
     c->div = 0.01f + val * SCALAR;
-
+    
     c->gain = (c->div / SCALAR) * 0.7f + 0.3f;
 }
 

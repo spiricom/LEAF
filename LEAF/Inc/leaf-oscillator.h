@@ -1,28 +1,26 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    LEAFOscillator.h
+    leaf-oscillator.h
     Created: 20 Jan 2017 12:00:58pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-#ifndef LEAFOSCILLATOR_H_INCLUDED
-#define LEAFOSCILLATOR_H_INCLUDED
+#ifndef LEAF_OSCILLATOR_H_INCLUDED
+#define LEAF_OSCILLATOR_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
 #include "leaf-filter.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tNeuron */
 typedef enum NeuronMode
@@ -66,7 +64,7 @@ void        tNeuron_setV2       (tNeuron* const, float V2);
 void        tNeuron_setV3       (tNeuron* const, float V3);
 void        tNeuron_setTimeStep (tNeuron* const, float timestep);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tPhasor: Aliasing phasor [0.0, 1.0) */
 typedef struct _tPhasor
@@ -82,7 +80,7 @@ void        tPhasor_free        (tPhasor*  const);
 float       tPhasor_tick        (tPhasor*  const);
 int         tPhasor_setFreq     (tPhasor*  const, float freq);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tCycle: Cycle/Sine waveform. Wavetable synthesis.*/
 typedef struct _tCycle
@@ -99,7 +97,7 @@ void        tCycle_free         (tCycle*  const);
 float       tCycle_tick         (tCycle*  const);
 int         tCycle_setFreq      (tCycle*  const, float freq);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tSawtooth: Anti-aliased Sawtooth waveform using wavetable interpolation. Wavetables constructed from sine components. */
 typedef struct _tSawtooth
@@ -116,7 +114,7 @@ void        tSawtooth_free      (tSawtooth*  const);
 float       tSawtooth_tick      (tSawtooth*  const);
 int         tSawtooth_setFreq   (tSawtooth*  const, float freq);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tTriangle: Anti-aliased Triangle waveform using wavetable interpolation. Wavetables constructed from sine components. */
 typedef struct _tTriangle
@@ -133,7 +131,7 @@ void        tTriangle_free      (tTriangle*  const);
 float       tTriangle_tick      (tTriangle*  const);
 int         tTriangle_setFreq   (tTriangle*  const, float freq);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tSquare: Anti-aliased Square waveform using wavetable interpolation. Wavetables constructed from sine components. */
 typedef struct _tSquare
@@ -150,7 +148,7 @@ void        tSquare_free        (tSquare*  const);
 float       tSquare_tick        (tSquare*  const);
 int         tSquare_setFreq     (tSquare*  const, float freq);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tNoise. WhiteNoise, PinkNoise. */
 typedef enum NoiseType
@@ -173,10 +171,12 @@ void        tNoise_free          (tNoise* const);
 
 float       tNoise_tick          (tNoise*  const);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
     
 #ifdef __cplusplus
 }
 #endif
         
-#endif  // LEAFOSCILLATOR_H_INCLUDED
+#endif  // LEAF_OSCILLATOR_H_INCLUDED
+
+//==============================================================================

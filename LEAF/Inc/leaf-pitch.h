@@ -8,11 +8,14 @@
   ==============================================================================
 */
 
+#ifndef LEAF_PITCH_H_INCLUDED
+#define LEAF_PITCH_H_INCLUDED
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 #include "leaf-globals.h"
 #include "leaf-math.h"
@@ -20,8 +23,8 @@ extern "C" {
 #include "leaf-filter.h"
 #include "leaf-utilities.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 #define DEFPITCHRATIO 2.0f
 #define DEFTIMECONSTANT 100.0f
 #define DEFHOPSIZE 64
@@ -29,8 +32,8 @@ extern "C" {
 #define FBA 20
 #define HPFREQ 40.0f
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 /* tSOLAD : pitch shifting algorithm that underlies tPitchShifter etc */
 #define LOOPSIZE (2048*2)      // (4096*2) // loop size must be power of two
 #define LOOPMASK (LOOPSIZE - 1)
@@ -72,8 +75,8 @@ void    tSOLAD_setReadLag       (tSOLAD *w, float readlag);
 // reset state variables
 void    tSOLAD_resetState       (tSOLAD *w);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 // tSNAC: period detector
 #define SNAC_FRAME_SIZE 1024           // default analysis framesize // should be the same as (or smaller than?) PS_FRAME_SIZE
 #define DEFOVERLAP 1                // default overlap
@@ -112,8 +115,8 @@ void    tSNAC_setMinRMS     (tSNAC *s, float rms);
 float   tSNAC_getPeriod     (tSNAC *s);
 float   tSNAC_getfidelity   (tSNAC *s);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 // Pitch shifter 
 typedef struct _tPitchShifter
 {
@@ -159,8 +162,8 @@ void        tPitchShifter_setHopSize        (tPitchShifter* const, int hs);
 void        tPitchShifter_setWindowSize     (tPitchShifter* const, int ws);
 float       tPitchShifter_getPeriod         (tPitchShifter* const);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 // Period detection
 typedef struct _tPeriod
 {
@@ -198,8 +201,8 @@ float       tPeriod_findPeriod              (tPeriod* const, float sample);
 void        tPeriod_setHopSize              (tPeriod* p, int hs);
 void        tPeriod_setWindowSize           (tPeriod* p, int ws);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 // Pitch shift
 typedef struct _tPitchShift
 {
@@ -229,8 +232,12 @@ float       tPitchShift_shiftToFunc         (tPitchShift* const, float (*fun)(fl
 float       tPitchShift_shiftToFreq         (tPitchShift* const, float freq);
 void        tPitchShift_setPitchFactor      (tPitchShift* const, float pf);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
     
 #ifdef __cplusplus
 }
 #endif
+
+#endif // LEAF_PITCH_H_INCLUDED
+
+//==============================================================================

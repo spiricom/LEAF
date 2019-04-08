@@ -29,9 +29,9 @@ float interpolate3max(float *buf, const int peakindex)
     float b = buf[peakindex];
     float c = buf[peakindex+1];
     float realpeak;
-
+    
     realpeak = b + (float)0.125 * (c - a) * (c - a) / ((float)2. * b - a - c);
-
+    
     return(realpeak);
 }
 
@@ -41,9 +41,9 @@ float interpolate3phase(float *buf, const int peakindex)
     float b = buf[peakindex];
     float c = buf[peakindex+1];
     float fraction;
-
+    
     fraction = ((float)0.5 * (c - a)) / ((float)2. * b - a - c);
-
+    
     return(fraction);
 }
 
@@ -52,9 +52,9 @@ float interpolate3phase(float *buf, const int peakindex)
 int fastabs_int(int in){
     unsigned int r;
     int const mask = in >> 31;
-
+    
     r = (in ^ mask) - mask;
-
+    
     return (r);
 }
 
@@ -67,11 +67,10 @@ float fastabs(float f)
         float f;
         unsigned int ui;
     }alias;
-
+    
     alias.f = f;
     alias.ui &= 0x7fffffff;
     return alias.f;
-
 }
 
 // dope af
@@ -132,7 +131,7 @@ float LEAF_reduct (float input, float ratio)
         hold = input;
         reduct_count = 0;
     }
-
+    
     return hold;
 }
 
@@ -140,11 +139,11 @@ float LEAF_reduct (float input, float ratio)
 float LEAF_round (float input, float rnd)
 {
     rnd = fabsf(rnd);
-
+    
     if (rnd <= 0.0000001f) return input;
-
+    
     float scale = 1.f / rnd;
-
+    
     return roundf(input * scale) / scale;
 }
 
@@ -154,7 +153,7 @@ float LEAF_bitwise_xor(float input, uint32_t op)
 {
     unholy.f = input;
     unholy.i = (unholy.i ^ op);
-
+    
     return unholy.f;
 }
 
@@ -208,7 +207,6 @@ int   LEAF_clipInt(int min, int val, int max)
         return val;
     }
 }
-
 
 oBool     LEAF_isPrime(uint64_t number )
 {

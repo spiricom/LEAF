@@ -11,10 +11,10 @@
 #ifndef LEAF_H_INCLUDED
 #define LEAF_H_INCLUDED
 
-#define DEBUG 0
+#define LEAF_DEBUG 0
 
-#if DEBUG
-#include "../JuceLibraryCode/JuceHeader.h"
+#if LEAF_DEBUG
+#include "../LEAF_JUCEPlugin/JuceLibraryCode/JuceHeader.h"
 #endif
 
 #if _WIN32 || _WIN64
@@ -32,6 +32,8 @@
 #include ".\Inc\leaf-pitch.h"
 #include ".\Inc\leaf-formant.h"
 #include ".\Inc\leaf-midi.h"
+#include ".\Inc\leaf-sample.h"
+#include ".\Inc\leaf-crusher.h"
 #include ".\Inc\leaf-wavefolder.h"
 #include ".\Inc\leaf-wavetables.h"
 #include ".\Inc\leaf-crusher.h"
@@ -51,6 +53,8 @@
 #include "./Inc/leaf-pitch.h"
 #include "./Inc/leaf-formant.h"
 #include "./Inc/leaf-midi.h"
+#include "./Inc/leaf-sample.h"
+#include "./Inc/leaf-crusher.h"
 #include "./Inc/leaf-wavefolder.h"
 #include "./Inc/leaf-wavetables.h"
 #include "./Inc/leaf-crusher.h"

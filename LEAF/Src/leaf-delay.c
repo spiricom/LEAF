@@ -1,12 +1,10 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    LEAFDelay.c
+    leaf-delay.c
     Created: 20 Jan 2017 12:01:24pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
 #if _WIN32 || _WIN64
 
@@ -415,8 +413,6 @@ float tDelayA_getGain (tDelayA* const d)
 void   tTapeDelay_init (tTapeDelay* const d, float delay, uint32_t maxDelay)
 {
     d->maxDelay = maxDelay;
-    
-    d->delay = LEAF_clip(1.f, delay, d->maxDelay);
 
     d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
     
@@ -429,7 +425,7 @@ void   tTapeDelay_init (tTapeDelay* const d, float delay, uint32_t maxDelay)
     d->inc = 1.0f;
     d->inPoint = 0;
     
-    tTapeDelay_setDelay(d, 1.f);
+    tTapeDelay_setDelay(d, delay);
 }
 
 void tTapeDelay_free(tTapeDelay* const d)
@@ -440,7 +436,7 @@ void tTapeDelay_free(tTapeDelay* const d)
 
 int count = 0;
 
-#define SMOOTH_FACTOR 10.f
+//#define SMOOTH_FACTOR 10.f
 
 float   tTapeDelay_tick (tTapeDelay* const d, float input)
 {
@@ -461,11 +457,11 @@ float   tTapeDelay_tick (tTapeDelay* const d, float input)
     float diff = (d->inPoint - d->idx);
     while (diff < 0.f) diff += d->maxDelay;
     
-    d->inc = 1.0f + (diff - d->delay) / d->delay * SMOOTH_FACTOR;
+    d->inc = 1.0f + (diff - d->delay) / d->delay; //* SMOOTH_FACTOR;
 
     d->idx += d->inc;
     
-    if (d->idx >= d->maxDelay) d->idx = 0.f;
+    if (d->idx >= d->maxDelay) d->idx = 0.0f;
 
     return d->lastOut;
 }

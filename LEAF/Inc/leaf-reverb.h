@@ -1,22 +1,20 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    LEAFReverb.h
+    leaf-reverb.h
     Created: 20 Jan 2017 12:02:04pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-#ifndef LEAFREVERB_H_INCLUDED
-#define LEAFREVERB_H_INCLUDED
+#ifndef LEAF_REVERB_H_INCLUDED
+#define LEAF_REVERB_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
@@ -24,7 +22,7 @@ extern "C" {
 #include "leaf-filter.h"
 #include "leaf-oscillator.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* PRCRev: Reverb, reimplemented from STK (Cook and Scavone). */
 typedef struct _tPRCRev
@@ -53,7 +51,7 @@ void    tPRCRev_setT60  (tPRCRev* const, float t60);
 // Set mix between dry input and wet output signal.
 void    tPRCRev_setMix  (tPRCRev* const, float mix);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* NRev: Reverb, reimplemented from STK (Cook and Scavone). */
 typedef struct _tNRev
@@ -83,7 +81,7 @@ void    tNRev_setT60    (tNRev* const, float t60);
 // Set mix between dry input and wet output signal.
 void    tNRev_setMix    (tNRev*  const, float mix);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 typedef struct _tDattorro
 {
@@ -145,4 +143,6 @@ void    tDattorro_setFeedbackGain   (tDattorro* const, float gain);
 }
 #endif
 
-#endif  // LEAFREVERB_H_INCLUDED
+#endif  // LEAF_REVERB_H_INCLUDED
+
+//==============================================================================

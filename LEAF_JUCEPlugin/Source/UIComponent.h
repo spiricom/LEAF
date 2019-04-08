@@ -35,7 +35,8 @@ public:
     
     void sliderValueChanged(Slider* s) override;
     
-    void buttonClicked (Button* b) override;
+    void buttonClicked(Button*b) override {};
+    void buttonStateChanged(Button* b) override;
     
     void textEditorTextChanged (TextEditor&) override;
     

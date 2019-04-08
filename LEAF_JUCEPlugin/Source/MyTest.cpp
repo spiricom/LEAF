@@ -16,90 +16,103 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-tDattorro reverb;
+float mix = 0.f;
+float fx = 1.f;
 
+#define NUM_GRAINS 20
+
+tBuffer buff;
+tSampler samp[NUM_GRAINS];
 
 tTapeDelay delay;
 
-float size;
-tRamp dtime;
+float feedback = 0.f;
 
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
-    LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
-
-    tDattorro_init(&reverb);
-
-    //tTapeDelay_init(&delay, 0.5f * leaf.sampleRate, leaf.sampleRate);
+    LEAF_init(sampleRate, blockSize, &getRandomFloat);
     
-    tRamp_init(&dtime, 500.0f, 1);
+    // Init and set record loop
+    tBuffer_init (&buff, leaf.sampleRate * 1.f); // 0.5-second buffers
+    tBuffer_setRecordMode (&buff, RecordLoop);
+    tBuffer_record(&buff);
     
+    for (int i = 0; i < NUM_GRAINS; i++)
+    {
+        // Init and set play loop
+        tSampler_init (&samp[i], &buff);
+        tSampler_setMode (&samp[i], PlayLoop);
 
-    setSliderValue("mix", reverb.mix);
-    setSliderValue("predelay", reverb.predelay / 200.0f);
-    setSliderValue("input filter", reverb.input_filter / 20000.0f);
-    setSliderValue("feedback filter", reverb.feedback_filter / 20000.0f);
-    setSliderValue("feedback gain", reverb.feedback_gain);
-    setSliderValue("size", reverb.size / 4.0f);
+        /*
+        float speed = ((getRandomFloat() < 0.5f) ? 0.5f : 1.f);
+        float dir = (getRandomFloat() < 0.5f) ? -1 : 1;
+        
+        tSampler_setRate(&samp[i], speed * dir);
+         */
+        
+        tSampler_setRate(&samp[i], 1.f);
+        
+        // Record and play
+        tSampler_play(&samp[i]);
+    }
     
+    tTapeDelay_init(&delay, leaf.sampleRate * 0.05f, leaf.sampleRate * 1.f); // 1 second delay, starts out at 50 ms
     
     leaf_pool_report();
 }
 
 int timer = 0;
 
-
-#define CLICK 0
+float lastOut;
 
 float   LEAFTest_tick            (float input)
 {
-#if CLICK
-    input = 0.0f;
+    float sample = 0.f;
     
-    timer++;
-    if (timer == (1 * leaf.sampleRate))
+    tBuffer_tick(&buff, input);
+    
+    for (int i = 0; i < NUM_GRAINS; i++)
     {
-        timer = 0;
-        
-        input = 1.0f;
+        sample += tSampler_tick(&samp[i]);
     }
-#endif
-    //tTapeDelay_setDelay(&delay, tRamp_tick(&dtime));
     
-    //return tTapeDelay_tick(&delay, input);
+    sample /= NUM_GRAINS;
     
+    sample = tTapeDelay_tick(&delay, (1.f - feedback) * sample + feedback * lastOut);
     
-    tDattorro_setSize(&reverb, tRamp_tick(&dtime));
-    
-    return tDattorro_tick(&reverb, input);
-    
+    lastOut = sample;
+
+    return  (sample * mix) +
+            (input * (1.f - mix));
 }
 
+bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-  
     float val = getSliderValue("mix");
-    tDattorro_setMix(&reverb, val);
     
-    val = getSliderValue("predelay");
-    tDattorro_setInputDelay(&reverb, val * 200.0f);
+    mix = val;
     
-    val = getSliderValue("input filter");
-    tDattorro_setInputFilter(&reverb, val * 20000.0f);
+    val = getSliderValue("delay");
     
-    val = getSliderValue("feedback filter");
-    tDattorro_setFeedbackFilter(&reverb, val * 20000.0f);
+    tTapeDelay_setDelay(&delay, val * leaf.sampleRate);
     
-    val = getSliderValue("feedback gain");
-    tDattorro_setFeedbackGain(&reverb, val);
+    val = getSliderValue("feedback");
     
-    val = getSliderValue("size");
-    tRamp_setDest(&dtime, val * reverb.size_max);
+    feedback = val;
     
-    
-    //float val = getSliderValue("size");
-    //tRamp_setDest(&dtime, val * leaf.sampleRate + 1);
+    for (int i = 0; i < NUM_GRAINS; i++)
+    {
+        if (getRandomFloat() < 0.01f)
+        {
+            tSampler_setStart(&samp[i], leaf.sampleRate * 0.05f + leaf.sampleRate * getRandomFloat() * 0.95f);
+            
+            uint64_t end = (leaf.sampleRate * 0.05f + getRandomFloat() * leaf.sampleRate * 0.45f + samp[i].start);
+            
+            tSampler_setEnd(&samp[i],  end % buff.length); // 10 - 1010 ms
+        }
+    }
     
 }
 
@@ -176,8 +189,6 @@ static void run_pool_test(void)
     {
         buffer[i] = (float)(i*2);
     }
-    
-    DBG("FREE BUFFER 2");
     leaf_free(buffer);
     
     leaf_pool_report();

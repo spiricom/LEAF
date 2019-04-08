@@ -1,19 +1,20 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    leaf_808.h
+    leaf-808.h
     Created: 30 Nov 2018 10:24:44am
     Author:  airship
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+#ifndef LEAF_808_H_INCLUDED
+#define LEAF_808_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+//==============================================================================
+    
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
@@ -21,10 +22,8 @@ extern "C" {
 #include "leaf-utilities.h"
 #include "leaf-filter.h"
 
-
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 // 808 Cowbell
 typedef struct _t808Cowbell {
     
@@ -51,9 +50,8 @@ void    t808Cowbell_setBandpassFreq  (t808Cowbell* const, float freq);
 void    t808Cowbell_setFreq          (t808Cowbell* const, float freq);
 void    t808Cowbell_setOscMix        (t808Cowbell* const, float oscMix);
 
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 // 808 Hihat
 typedef struct _t808Hihat {
     
@@ -91,8 +89,8 @@ void        t808Hihat_setOscFreq         (t808Hihat* const, float freq);
 void 		t808Hihat_setStretch				(t808Hihat* const hihat, float stretch);
 void 		t808Hihat_setFM					(t808Hihat* const hihat, float FM_amount);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 // 808 Snare
 typedef struct _t808Snare {
     
@@ -133,8 +131,8 @@ void        t808Snare_setToneNoiseMix       (t808Snare* const, float toneNoiseMi
 void        t808Snare_setNoiseFilterFreq    (t808Snare* const, float noiseFilterFreq);
 void        t808Snare_setNoiseFilterQ       (t808Snare* const, float noiseFilterQ);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-
+//==============================================================================
+    
 // 808 Kick
 typedef struct _t808Kick {
 
@@ -173,9 +171,14 @@ void        t808Kick_setToneNoiseMix       (t808Kick* const, float toneNoiseMix)
 void        t808Kick_setNoiseFilterFreq    (t808Kick* const, float noiseFilterFreq);
 void        t808Kick_setNoiseFilterQ       (t808Kick* const, float noiseFilterQ);
     
+//==============================================================================
+    
 #ifdef __cplusplus
 }
 #endif
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+#endif // LEAF_808_H_INCLUDED
+
+//==============================================================================
+
 

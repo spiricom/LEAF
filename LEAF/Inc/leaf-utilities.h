@@ -1,26 +1,24 @@
-/*
-  ==============================================================================
+/*==============================================================================
 
-    LEAFUtilities.h
+    leaf-utilities.h
     Created: 20 Jan 2017 12:02:17pm
     Author:  Michael R Mulshine
 
-  ==============================================================================
-*/
+==============================================================================*/
 
-#ifndef LEAFUTILITIES_H_INCLUDED
-#define LEAFUTILITIES_H_INCLUDED
+#ifndef LEAF_UTILITIES_H_INCLUDED
+#define LEAF_UTILITIES_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 #include "leaf-globals.h"
 #include "leaf-math.h"
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 // STACK implementation (fixed size)
 #define STACK_SIZE 128
@@ -48,7 +46,7 @@ int     tStack_contains             (tStack* const, uint16_t item);
 int     tStack_next                 (tStack* const);
 int     tStack_get                  (tStack* const, int which);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* Ramp */
 typedef struct _tRamp {
@@ -70,7 +68,7 @@ int     tRamp_setTime   (tRamp* const, float time);
 int     tRamp_setDest   (tRamp* const, float dest);
 int     tRamp_setVal    (tRamp* const, float val);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* Compressor */
 typedef struct _tCompressor
@@ -88,7 +86,7 @@ void    tCompressor_init    (tCompressor* const);
 void    tCompressor_free    (tCompressor* const);
 float   tCompressor_tick    (tCompressor* const, float input);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* Attack-Decay envelope */
 typedef struct _tEnvelope {
@@ -120,7 +118,7 @@ int     tEnvelope_setDecay  (tEnvelope*  const, float decay);
 int     tEnvelope_loop      (tEnvelope*  const, oBool loop);
 int     tEnvelope_on        (tEnvelope*  const, float velocity);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* ADSR */
 typedef struct _tADSR
@@ -152,7 +150,7 @@ int     tADSR_setRelease(tADSR*  const, float release);
 int     tADSR_on        (tADSR*  const, float velocity);
 int     tADSR_off       (tADSR*  const);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* Envelope Follower */
 typedef struct _tEnvelopeFollower
@@ -170,7 +168,7 @@ float   tEnvelopeFollower_tick           (tEnvelopeFollower*  const, float x);
 int     tEnvelopeFollower_decayCoeff     (tEnvelopeFollower*  const, float decayCoeff);
 int     tEnvelopeFollower_attackThresh   (tEnvelopeFollower*  const, float attackThresh);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 /* tAtkDtk */
 #define DEFBLOCKSIZE 1024
@@ -221,7 +219,7 @@ void    tAtkDtk_setThreshold    (tAtkDtk* const, float thres);
 // find largest transient in input block, return index of attack
 int     tAtkDtk_detect          (tAtkDtk* const, float *in);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
 
 // ENV~ from PD, modified for LEAF
 #define MAXOVERLAP 32
@@ -246,12 +244,14 @@ void    tEnv_free           (tEnv* const);
 float   tEnv_tick           (tEnv* const);
 void    tEnv_processBlock   (tEnv* const, float* in);
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//==============================================================================
     
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // LEAFUTILITIES_H_INCLUDED
+#endif  // LEAF_UTILITIES_H_INCLUDED
+
+//==============================================================================
 
 
