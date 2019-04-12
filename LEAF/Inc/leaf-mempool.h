@@ -41,7 +41,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define MPOOL_POOL_SIZE   500000
+#define MPOOL_POOL_SIZE  100000
 #define MPOOL_ALIGN_SIZE (8)
 
 //#define size_t unsigned long
