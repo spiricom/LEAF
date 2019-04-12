@@ -401,7 +401,7 @@ int tMPoly_getNumVoices(tMPoly* const poly)
 float tMPoly_getPitch(tMPoly* const poly, uint8_t voice)
 {
     //float pitchBend = ((float)(poly->pitchBend - 8192) / 8192.0f) * poly->pitchBendAmount;
-    return tRamp_sample(poly->ramp[voice]);// + pitchBend;
+    //return tRamp_sample(poly->ramp[voice]);// + pitchBend;
     return poly->voices[voice][0];
 }
 
