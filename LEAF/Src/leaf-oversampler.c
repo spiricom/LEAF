@@ -77,10 +77,10 @@ float tOversampler2x_tick(tOversampler2x* const os, float input, float (*nonLine
 // 4X Oversampler
 void tOversampler4x_init(tOversampler4x* const os)
 {
-    tOversamplerFilter_init(&os->filters[0], leaf.sampleRate*0.5f, 0.1f, 2.f);
-    tOversamplerFilter_init(&os->filters[1], leaf.sampleRate*0.5f, 0.1f, 4.f);
-    tOversamplerFilter_init(&os->filters[2], leaf.sampleRate*0.5f, 0.1f, 4.f);
-    tOversamplerFilter_init(&os->filters[3] , leaf.sampleRate*0.5f, 0.1f, 2.f);
+    tOversamplerFilter_init(&os->filters[0], leaf.sampleRate*0.25f, 0.1f, 2.f); //sample rate was *0.5 but I assume that was copypaste mistake (copied from 2X filter) - JS
+    tOversamplerFilter_init(&os->filters[1], leaf.sampleRate*0.25f, 0.1f, 4.f);
+    tOversamplerFilter_init(&os->filters[2], leaf.sampleRate*0.25f, 0.1f, 4.f);
+    tOversamplerFilter_init(&os->filters[3] , leaf.sampleRate*0.25f, 0.1f, 2.f);
 }
 
 float tOversampler4x_tick(tOversampler4x* const os, float input, float (*nonLinearTick)(float))
