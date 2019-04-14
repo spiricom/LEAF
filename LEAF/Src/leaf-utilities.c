@@ -1,10 +1,12 @@
-/*==============================================================================
+/*
+  ==============================================================================
 
-    leaf-utilities.c
+    LEAFUtilities.c
     Created: 20 Jan 2017 12:02:17pm
     Author:  Michael R Mulshine
 
-==============================================================================*/
+  ==============================================================================
+*/
 
 
 #if _WIN32 || _WIN64
@@ -29,12 +31,12 @@ float mtof(float f)
 {
     if (f <= -1500.0f) return(0);
     else if (f > 1499.0f) return(mtof(1499.0f));
-    else return (8.17579891564f * exp(0.0577622650f * f));
+    else return (8.17579891564f * expf(0.0577622650f * f));
 }
 
 float ftom(float f)
 {
-    return (f > 0 ? 17.3123405046f * log(.12231220585f * f) : -1500.0f);
+    return (f > 0 ? 17.3123405046f * logf(.12231220585f * f) : -1500.0f);
 }
 
 float powtodb(float f)
@@ -42,7 +44,7 @@ float powtodb(float f)
     if (f <= 0) return (0);
     else
     {
-        float val = 100 + 10.f/LOGTEN * log(f);
+        float val = 100 + 10.f/LOGTEN * logf(f);
         return (val < 0 ? 0 : val);
     }
 }
@@ -65,7 +67,7 @@ float dbtopow(float f)
     {
         if (f > 870.0f)
             f = 870.0f;
-        return (exp((LOGTEN * 0.1f) * (f-100.0f)));
+        return (expf((LOGTEN * 0.1f) * (f-100.0f)));
     }
 }
 
@@ -78,7 +80,7 @@ float dbtorms(float f)
         if (f > 485.0f)
             f = 485.0f;
     }
-    return (exp((LOGTEN * 0.05f) * (f-100.0f)));
+    return (expf((LOGTEN * 0.05f) * (f-100.0f)));
 }
 
 /* ---------------- env~ - simple envelope follower. ----------------- */
@@ -103,7 +105,7 @@ void tEnv_init(tEnv* const x, int ws, int hs, int bs)
     
     for (i = 0; i < MAXOVERLAP; i++) x->x_sumbuf[i] = 0;
     for (i = 0; i < npoints; i++)
-        x->buf[i] = (1.0f - cos((2 * PI * i) / npoints))/npoints;
+        x->buf[i] = (1.0f - cosf((2 * PI * i) / npoints))/npoints;
     for (; i < npoints+INITVSTAKEN; i++) x->buf[i] = 0;
     
     x->x_f = 0;
@@ -761,6 +763,8 @@ float   tRamp_tick(tRamp* const r) {
     r->curr += r->inc;
     
     if (((r->curr >= r->dest) && (r->inc > 0.0f)) || ((r->curr <= r->dest) && (r->inc < 0.0f))) r->inc = 0.0f;
+    // Palle: There is a slight risk that you overshoot here and stay on dest+inc, which with a large inc value could be a real problem
+    // I suggest you add: r->curr=r->dest in the true if case
     
     return r->curr;
 }
@@ -775,6 +779,407 @@ void    tRampSampleRateChanged(tRamp* const r)
     r->inv_sr_ms = 1.0f / (leaf.sampleRate * 0.001f);
     r->inc = ((r->dest-r->curr)/r->time * r->inv_sr_ms)*((float)r->samples_per_tick);
 }
+
+
+/* Exponential Smoother */
+void    tExpSmooth_init(tExpSmooth* const smooth, float val, float factor)
+{	// factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
+	smooth->curr=val;
+	smooth->dest=val;
+	if (factor<0) factor=0;
+	if (factor>1) factor=1;
+	smooth->factor=factor;
+	smooth->oneminusfactor=1.0f-factor;
+}
+
+int     tExpSmooth_setFactor(tExpSmooth* const smooth, float factor)
+{	// factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
+	if (factor<0)
+		factor=0;
+	else
+		if (factor>1) factor=1;
+	smooth->factor=factor;
+	smooth->oneminusfactor=1.0f-factor;
+    return 0;
+}
+
+int     tExpSmooth_setDest(tExpSmooth* const smooth, float dest)
+{
+	smooth->dest=dest;
+    return 0;
+}
+
+int     tExpSmooth_setVal(tExpSmooth* const smooth, float val)
+{
+	smooth->curr=val;
+    return 0;
+}
+
+float   tExpSmooth_tick(tExpSmooth* const smooth)
+{
+    smooth->curr = smooth->factor*smooth->dest+smooth->oneminusfactor*smooth->curr;
+    return smooth->curr;
+}
+
+float   tExpSmooth_sample(tExpSmooth* const smooth)
+{
+    return smooth->curr;
+}
+
+
+/* Power Follower */
+
+void    tPwrFollow_init(tPwrFollow* const p, float factor)
+{
+	p->curr=0.0f;
+	p->factor=factor;
+	p->oneminusfactor=1.0f-factor;
+}
+
+int     tPwrFollow_setFactor(tPwrFollow* const p, float factor)
+{
+	if (factor<0) factor=0;
+	if (factor>1) factor=1;
+	p->factor=factor;
+	p->oneminusfactor=1.0f-factor;
+    return 0;
+}
+
+float   tPwrFollow_tick(tPwrFollow* const p, float input)
+{
+    p->curr = p->factor*input*input+p->oneminusfactor*p->curr;
+    return p->curr;
+}
+
+float   tPwrFollow_sample(tPwrFollow* const p)
+{
+    return p->curr;
+}
+
+/* Feedback Leveler */
+
+void    tFBleveller_init(tFBleveller* const p, float targetLevel, float factor, float strength, int mode)
+{
+	p->curr=0.0f;
+	p->targetLevel=targetLevel;
+	tPwrFollow_init(&p->pwrFlw,factor);
+	p->mode=mode;
+	p->strength=strength;
+}
+
+int     tFBleveller_setStrength(tFBleveller* const p, float strength)
+{	// strength is how strongly level diff is affecting the amp ratio
+	// try 0.125 for a start
+	p->strength=strength;
+    return 0;
+}
+
+int     tFBleveller_setFactor(tFBleveller* const p, float factor)
+{
+	tPwrFollow_setFactor(&p->pwrFlw,factor);
+    return 0;
+}
+
+int     tFBleveller_setMode(tFBleveller* const p, int mode)
+{	// 0 for decaying with upwards lev limiting, 1 for constrained absolute level (also downwards limiting)
+	p->mode=mode;
+    return 0;
+}
+
+float   tFBleveller_tick(tFBleveller* const p, float input)
+{
+	float levdiff=(tPwrFollow_tick(&p->pwrFlw, input)-p->targetLevel);
+	if (p->mode==0 && levdiff<0) levdiff=0;
+	p->curr=input*(1-p->strength*levdiff);
+	return p->curr;
+}
+
+float   tFBleveller_sample(tFBleveller* const p)
+{
+    return p->curr;
+}
+
+
+int     tFBleveller_setTargetLevel   (tFBleveller* const p, float TargetLevel)
+{
+	p->targetLevel=TargetLevel;
+}
+
+///Reed Table model
+//default values from STK are 0.6 offset and -0.8 slope
+
+void    tReedTable_init      (tReedTable* const p, float offset, float slope)
+{
+	p->offset = offset;
+	p->slope = slope;
+}
+
+void    tReedTable_free      (tReedTable* const p)
+{
+	;
+}
+
+float   tReedTable_tick      (tReedTable* const p, float input)
+{
+	// The input is differential pressure across the reed.
+	float output = p->offset + (p->slope * input);
+
+	// If output is > 1, the reed has slammed shut and the
+	// reflection function value saturates at 1.0.
+	if ( output > 1.0f) output = 1.0f;
+
+	// This is nearly impossible in a physical system, but
+	// a reflection function value of -1.0 corresponds to
+	// an open end (and no discontinuity in bore profile).
+	if ( output < -1.0f) output = -1.0f;
+
+	return output;
+}
+
+void     tReedTable_setOffset   (tReedTable* const p, float offset)
+{
+	p->offset = offset;
+}
+
+void     tReedTable_setSlope   (tReedTable* const p, float slope)
+{
+	p->slope = slope;
+}
+
+
+
+/* Simple Living String*/
+
+void    tSimpleLivingString_init(tSimpleLivingString* const p, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode)
+{
+	p->curr=0.0f;
+	tExpSmooth_init(&p->wlSmooth, leaf.sampleRate/freq, 0.01); // smoother for string wavelength (not freq, to avoid expensive divisions)
+	tSimpleLivingString_setFreq(p, freq);
+	tDelayL_init(&p->delayLine,p->waveLengthInSamples, 2400);
+	tOnePole_init(&p->bridgeFilter, dampFreq);
+	tHighpass_init(&p->DCblocker,13);
+	p->decay=decay;
+	tFBleveller_init(&p->fbLev, targetLev, levSmoothFactor, levStrength, levMode);
+	p->levMode=levMode;
+}
+
+int     tSimpleLivingString_setFreq(tSimpleLivingString* const p, float freq)
+{
+	if (freq<20) freq=20;
+	else if (freq>10000) freq=10000;
+	p->waveLengthInSamples = leaf.sampleRate/freq;
+	tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+    return 0;
+}
+
+int     tSimpleLivingString_setWaveLength(tSimpleLivingString* const p, float waveLength)
+{
+	if (waveLength<4.8) waveLength=4.8;
+	else if (waveLength>2400) waveLength=2400;
+	p->waveLengthInSamples = waveLength;
+	tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+    return 0;
+}
+
+int     tSimpleLivingString_setDampFreq(tSimpleLivingString* const p, float dampFreq)
+{
+	tOnePole_setFreq(&p->bridgeFilter, dampFreq);
+    return 0;
+}
+
+int     tSimpleLivingString_setDecay(tSimpleLivingString* const p, float decay)
+{
+	p->decay=decay;
+    return 0;
+}
+
+int     tSimpleLivingString_setTargetLev(tSimpleLivingString* const p, float targetLev)
+{
+	tFBleveller_setTargetLevel(&p->fbLev, targetLev);
+    return 0;
+}
+
+int     tSimpleLivingString_setLevSmoothFactor(tSimpleLivingString* const p, float levSmoothFactor)
+{
+	tFBleveller_setFactor(&p->fbLev, levSmoothFactor);
+    return 0;
+}
+
+int     tSimpleLivingString_setLevStrength(tSimpleLivingString* const p, float levStrength)
+{
+	tFBleveller_setStrength(&p->fbLev, levStrength);
+    return 0;
+}
+
+int     tSimpleLivingString_setLevMode(tSimpleLivingString* const p, int levMode)
+{
+	tFBleveller_setMode(&p->fbLev, levMode);
+	p->levMode=levMode;
+    return 0;
+}
+
+float   tSimpleLivingString_tick(tSimpleLivingString* const p, float input)
+{
+	float stringOut=tOnePole_tick(&p->bridgeFilter,tDelayL_tickOut(&p->delayLine));
+	float stringInput=tHighpass_tick(&p->DCblocker, tFBleveller_tick(&p->fbLev, (p->levMode==0?p->decay*stringOut:stringOut)+input));
+	tDelayL_tickIn(&p->delayLine, stringInput);
+	tDelayL_setDelay(&p->delayLine, tExpSmooth_tick(&p->wlSmooth));
+    p->curr = stringOut;
+    return p->curr;
+}
+
+float   tSimpleLivingString_sample(tSimpleLivingString* const p)
+{
+    return p->curr;
+}
+
+/* Living String*/
+
+void    tLivingString_init(tLivingString* const p, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode)
+{
+	p->curr=0.0f;
+	tExpSmooth_init(&p->wlSmooth, leaf.sampleRate/freq, 0.01); // smoother for string wavelength (not freq, to avoid expensive divisions)
+	tLivingString_setFreq(p, freq);
+	tExpSmooth_init(&p->ppSmooth, pickPos, 0.01); // smoother for pick position
+	tLivingString_setPickPos(p, pickPos);
+	p->prepIndex=prepIndex;
+	tDelayL_init(&p->delLF,p->waveLengthInSamples, 2400);
+	tDelayL_init(&p->delUF,p->waveLengthInSamples, 2400);
+	tDelayL_init(&p->delUB,p->waveLengthInSamples, 2400);
+	tDelayL_init(&p->delLB,p->waveLengthInSamples, 2400);
+	tOnePole_init(&p->bridgeFilter, dampFreq);
+	tOnePole_init(&p->nutFilter, dampFreq);
+	tOnePole_init(&p->prepFilterU, dampFreq);
+	tOnePole_init(&p->prepFilterL, dampFreq);
+	tHighpass_init(&p->DCblockerU,13);
+	tHighpass_init(&p->DCblockerL,13);
+	p->decay=decay;
+	tFBleveller_init(&p->fbLevU, targetLev, levSmoothFactor, levStrength, levMode);
+	tFBleveller_init(&p->fbLevL, targetLev, levSmoothFactor, levStrength, levMode);
+	p->levMode=levMode;
+}
+
+int     tLivingString_setFreq(tLivingString* const p, float freq)
+{	// NOTE: It is faster to set wavelength in samples directly
+	if (freq<20) freq=20;
+	else if (freq>10000) freq=10000;
+	p->waveLengthInSamples = leaf.sampleRate/freq;
+	tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+    return 0;
+}
+
+int     tLivingString_setWaveLength(tLivingString* const p, float waveLength)
+{
+	if (waveLength<4.8) waveLength=4.8;
+	else if (waveLength>2400) waveLength=2400;
+	p->waveLengthInSamples = waveLength;
+	tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+    return 0;
+}
+
+int     tLivingString_setPickPos(tLivingString* const p, float pickPos)
+{	// between 0 and 1
+	if (pickPos<0.f) pickPos=0.f;
+	else if (pickPos>1.f) pickPos=1.f;
+	p->pickPos = pickPos;
+	tExpSmooth_setDest(&p->ppSmooth, p->pickPos);
+    return 0;
+}
+
+int     tLivingString_setPrepIndex(tLivingString* const p, float prepIndex)
+{	// between 0 and 1
+	if (prepIndex<0.f) prepIndex=0.f;
+	else if (prepIndex>1.f) prepIndex=1.f;
+	p->prepIndex = prepIndex;
+    return 0;
+}
+
+int     tLivingString_setDampFreq(tLivingString* const p, float dampFreq)
+{
+	tOnePole_setFreq(&p->bridgeFilter, dampFreq);
+	tOnePole_setFreq(&p->nutFilter, dampFreq);
+	tOnePole_setFreq(&p->prepFilterU, dampFreq);
+	tOnePole_setFreq(&p->prepFilterL, dampFreq);
+    return 0;
+}
+
+int     tLivingString_setDecay(tLivingString* const p, float decay)
+{
+	p->decay=decay;
+    return 0;
+}
+
+int     tLivingString_setTargetLev(tLivingString* const p, float targetLev)
+{
+	tFBleveller_setTargetLevel(&p->fbLevU, targetLev);
+	tFBleveller_setTargetLevel(&p->fbLevL, targetLev);
+    return 0;
+}
+
+int     tLivingString_setLevSmoothFactor(tLivingString* const p, float levSmoothFactor)
+{
+	tFBleveller_setFactor(&p->fbLevU, levSmoothFactor);
+	tFBleveller_setFactor(&p->fbLevL, levSmoothFactor);
+    return 0;
+}
+
+int     tLivingString_setLevStrength(tLivingString* const p, float levStrength)
+{
+	tFBleveller_setStrength(&p->fbLevU, levStrength);
+	tFBleveller_setStrength(&p->fbLevL, levStrength);
+    return 0;
+}
+
+int     tLivingString_setLevMode(tLivingString* const p, int levMode)
+{
+	tFBleveller_setMode(&p->fbLevU, levMode);
+	tFBleveller_setMode(&p->fbLevL, levMode);
+	p->levMode=levMode;
+    return 0;
+}
+
+float   tLivingString_tick(tLivingString* const p, float input)
+{
+	// from pickPos upwards=forwards
+	float fromLF=tDelayL_tickOut(&p->delLF);
+	float fromUF=tDelayL_tickOut(&p->delUF);
+	float fromUB=tDelayL_tickOut(&p->delUB);
+	float fromLB=tDelayL_tickOut(&p->delLB);
+	// into upper half of string, from nut, going backwards
+	float fromNut=-tFBleveller_tick(&p->fbLevU, (p->levMode==0?p->decay:1)*tHighpass_tick(&p->DCblockerU, tOnePole_tick(&p->nutFilter, fromUF)));
+	tDelayL_tickIn(&p->delUB, fromNut);
+	// into lower half of string, from pickpoint, going backwards
+	float fromLowerPrep=-tOnePole_tick(&p->prepFilterL, fromLF);
+	float intoLower=p->prepIndex*fromLowerPrep+(1-p->prepIndex)*fromUB+input;
+	tDelayL_tickIn(&p->delLB, intoLower);
+	// into lower half of string, from bridge
+	float fromBridge=-tFBleveller_tick(&p->fbLevL, (p->levMode==0?p->decay:1)*tHighpass_tick(&p->DCblockerL, tOnePole_tick(&p->bridgeFilter, fromLB)));
+	tDelayL_tickIn(&p->delLF, fromBridge);
+	// into upper half of string, from pickpoint, going forwards/upwards
+	float fromUpperPrep=-tOnePole_tick(&p->prepFilterU, fromUB);
+	float intoUpper=p->prepIndex*fromUpperPrep+(1-p->prepIndex)*fromLF+input;
+	tDelayL_tickIn(&p->delUF, intoUpper);
+	// update all delay lengths
+	float pickP=tExpSmooth_tick(&p->ppSmooth);
+	float wLen=tExpSmooth_tick(&p->wlSmooth);
+	float lowLen=pickP*wLen;
+	float upLen=(1-pickP)*wLen;
+	tDelayL_setDelay(&p->delLF, lowLen);
+	tDelayL_setDelay(&p->delLB, lowLen);
+	tDelayL_setDelay(&p->delUF, upLen);
+	tDelayL_setDelay(&p->delUB, upLen);
+    p->curr = fromBridge;
+    return p->curr;
+}
+
+float   tLivingString_sample(tLivingString* const p)
+{
+    return p->curr;
+}
+
+
+/* Stack */
+
 // If stack contains note, returns index. Else returns -1;
 int tStack_contains(tStack* const ns, uint16_t noteVal)
 {

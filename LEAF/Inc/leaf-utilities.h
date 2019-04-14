@@ -1,24 +1,28 @@
-/*==============================================================================
+/*
+  ==============================================================================
 
-    leaf-utilities.h
+    LEAFUtilities.h
     Created: 20 Jan 2017 12:02:17pm
     Author:  Michael R Mulshine
 
-==============================================================================*/
+  ==============================================================================
+*/
 
-#ifndef LEAF_UTILITIES_H_INCLUDED
-#define LEAF_UTILITIES_H_INCLUDED
+#ifndef LEAFUTILITIES_H_INCLUDED
+#define LEAFUTILITIES_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 #include "leaf-globals.h"
 #include "leaf-math.h"
+#include "leaf-filter.h"
+#include "leaf-delay.h"
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 // STACK implementation (fixed size)
 #define STACK_SIZE 128
@@ -46,7 +50,7 @@ int     tStack_contains             (tStack* const, uint16_t item);
 int     tStack_next                 (tStack* const);
 int     tStack_get                  (tStack* const, int which);
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 /* Ramp */
 typedef struct _tRamp {
@@ -68,7 +72,147 @@ int     tRamp_setTime   (tRamp* const, float time);
 int     tRamp_setDest   (tRamp* const, float dest);
 int     tRamp_setVal    (tRamp* const, float val);
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+/* Exponential Smoother */
+typedef struct _tExpSmooth {
+    float factor, oneminusfactor;
+    float curr,dest;
+
+} tExpSmooth;
+
+void    tExpSmooth_init      (tExpSmooth* const, float val, float factor);
+void    tExpSmooth_free      (tExpSmooth* const);
+
+float   tExpSmooth_tick      (tExpSmooth* const);
+float   tExpSmooth_sample    (tExpSmooth* const);
+int     tExpSmooth_setFactor   (tExpSmooth* const, float factor);
+int     tExpSmooth_setDest   (tExpSmooth* const, float dest);
+int     tExpSmooth_setVal    (tExpSmooth* const, float val);
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+/* PowerEnvelopeFollower */
+typedef struct _tPwrFollow {
+    float factor, oneminusfactor;
+    float curr;
+
+} tPwrFollow;
+
+void    tPwrFollow_init      (tPwrFollow* const, float factor);
+void    tPwrFollow_free      (tPwrFollow* const);
+float   tPwrFollow_tick      (tPwrFollow* const, float input);
+float   tPwrFollow_sample    (tPwrFollow* const);
+int     tPwrFollow_setFactor   (tPwrFollow* const, float factor);
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+//Reed Table - borrowed from STK
+typedef struct _tReedTable {
+    float offset, slope;
+} tReedTable;
+
+void    tReedTable_init      (tReedTable* const, float offset, float slope);
+void    tReedTable_free      (tReedTable* const);
+float   tReedTable_tick      (tReedTable* const, float input);
+void     tReedTable_setOffset   (tReedTable* const, float offset);
+void     tReedTable_setSlope (tReedTable* const, float slope);
+
+
+
+///
+/* Feedback leveller */
+// An auto VCA that you put into a feedback circuit to make it stay at the same level.
+// It can enforce level bidirectionally (amplifying and attenuating as needed) or
+// just attenutating. The former option allows for infinite sustain strings, for example, while
+// The latter option allows for decaying strings, which can never exceed
+// a specific level.
+
+typedef struct _tFBleveller {
+    float targetLevel;	// target power level
+    float strength;		// how strongly level difference affects the VCA
+    int	  mode;			// 0 for upwards limiting only, 1 for biderctional limiting
+    float curr;
+    tPwrFollow pwrFlw;	// internal power follower needed for level tracking
+
+} tFBleveller;
+
+void    tFBleveller_init      (tFBleveller* const, float targetLevel, float factor, float strength, int mode);
+void    tFBleveller_free      (tFBleveller* const);
+
+float   tFBleveller_tick      (tFBleveller* const, float input);
+float   tFBleveller_sample    (tFBleveller* const);
+int     tFBleveller_setTargetLevel   (tFBleveller* const, float TargetLevel);
+int     tFBleveller_setFactor   (tFBleveller* const, float factor);
+int     tFBleveller_setMode   (tFBleveller* const, int mode); // 0 for upwards limiting only, 1 for biderctional limiting
+int     tFBleveller_setStrength   (tFBleveller* const, float strength);
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+/* Simple Living String */
+typedef struct _tSimpleLivingString {
+	float freq, waveLengthInSamples;		// the frequency of the string, determining delay length
+	float dampFreq;	// frequency for the bridge LP filter, in Hz
+	float decay; // amplitude damping factor for the string (only active in mode 0)
+	float levMode;
+	float curr;
+	tDelayL delayLine;
+	tOnePole bridgeFilter;
+	tHighpass DCblocker;
+	tFBleveller fbLev;
+	tExpSmooth wlSmooth;
+} tSimpleLivingString;
+
+void    tSimpleLivingString_init      (tSimpleLivingString* const, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode);
+void    tSimpleLivingString_free      (tSimpleLivingString* const);
+float   tSimpleLivingString_tick      (tSimpleLivingString* const, float input);
+float   tSimpleLivingString_sample    (tSimpleLivingString* const);
+int     tSimpleLivingString_setFreq   			(tSimpleLivingString* const, float freq);
+int     tSimpleLivingString_setWaveLength		(tSimpleLivingString* const, float waveLength); // in samples
+int     tSimpleLivingString_setDampFreq   		(tSimpleLivingString* const, float dampFreq);
+int     tSimpleLivingString_setDecay     		(tSimpleLivingString* const, float decay); // should be near 1.0
+int     tSimpleLivingString_setTargetLev		(tSimpleLivingString* const, float targetLev);
+int     tSimpleLivingString_setLevSmoothFactor  (tSimpleLivingString* const, float levSmoothFactor);
+int     tSimpleLivingString_setLevStrength		(tSimpleLivingString* const, float levStrength);
+int     tSimpleLivingString_setLevMode		(tSimpleLivingString* const, int levMode);
+
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+/* Living String */
+typedef struct _tLivingString {
+	float freq, waveLengthInSamples;		// the frequency of the whole string, determining delay length
+	float pickPos;	// the pick position, dividing the string in two, in ratio
+	float prepIndex;	// the amount of pressure on the pickpoint of the string (near 0=soft obj, near 1=hard obj)
+	float dampFreq;	// frequency for the bridge LP filter, in Hz
+	float decay; // amplitude damping factor for the string (only active in mode 0)
+	float levMode;
+	float curr;
+	tDelayL delLF,delUF,delUB,delLB;	// delay for lower/upper/forward/backward part of the waveguide model
+	tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
+	tHighpass DCblockerL, DCblockerU;
+	tFBleveller fbLevU, fbLevL;
+	tExpSmooth wlSmooth, ppSmooth;
+} tLivingString;
+
+void    tLivingString_init      (tLivingString* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay,
+												float targetLev, float levSmoothFactor, float levStrength, int levMode);
+void    tLivingString_free      (tLivingString* const);
+float   tLivingString_tick      (tLivingString* const, float input);
+float   tLivingString_sample    (tLivingString* const);
+int     tLivingString_setFreq   			(tLivingString* const, float freq);
+int     tLivingString_setWaveLength			(tLivingString* const, float waveLength); // in samples
+int     tLivingString_setPickPos   			(tLivingString* const, float pickPos);
+int     tLivingString_setPrepIndex 			(tLivingString* const, float prepIndex);
+int     tLivingString_setDampFreq   		(tLivingString* const, float dampFreq);
+int     tLivingString_setDecay     			(tLivingString* const, float decay); // should be near 1.0
+int     tLivingString_setTargetLev			(tLivingString* const, float targetLev);
+int     tLivingString_setLevSmoothFactor  	(tLivingString* const, float levSmoothFactor);
+int     tLivingString_setLevStrength		(tLivingString* const, float levStrength);
+int     tLivingString_setLevMode			(tLivingString* const, int levMode);
+
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 /* Compressor */
 typedef struct _tCompressor
@@ -86,7 +230,7 @@ void    tCompressor_init    (tCompressor* const);
 void    tCompressor_free    (tCompressor* const);
 float   tCompressor_tick    (tCompressor* const, float input);
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 /* Attack-Decay envelope */
 typedef struct _tEnvelope {
@@ -118,7 +262,7 @@ int     tEnvelope_setDecay  (tEnvelope*  const, float decay);
 int     tEnvelope_loop      (tEnvelope*  const, oBool loop);
 int     tEnvelope_on        (tEnvelope*  const, float velocity);
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 /* ADSR */
 typedef struct _tADSR
@@ -150,7 +294,7 @@ int     tADSR_setRelease(tADSR*  const, float release);
 int     tADSR_on        (tADSR*  const, float velocity);
 int     tADSR_off       (tADSR*  const);
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 /* Envelope Follower */
 typedef struct _tEnvelopeFollower
@@ -168,7 +312,7 @@ float   tEnvelopeFollower_tick           (tEnvelopeFollower*  const, float x);
 int     tEnvelopeFollower_decayCoeff     (tEnvelopeFollower*  const, float decayCoeff);
 int     tEnvelopeFollower_attackThresh   (tEnvelopeFollower*  const, float attackThresh);
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 /* tAtkDtk */
 #define DEFBLOCKSIZE 1024
@@ -219,7 +363,7 @@ void    tAtkDtk_setThreshold    (tAtkDtk* const, float thres);
 // find largest transient in input block, return index of attack
 int     tAtkDtk_detect          (tAtkDtk* const, float *in);
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 // ENV~ from PD, modified for LEAF
 #define MAXOVERLAP 32
@@ -244,14 +388,12 @@ void    tEnv_free           (tEnv* const);
 float   tEnv_tick           (tEnv* const);
 void    tEnv_processBlock   (tEnv* const, float* in);
 
-//==============================================================================
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // LEAF_UTILITIES_H_INCLUDED
-
-//==============================================================================
+#endif  // LEAFUTILITIES_H_INCLUDED
 
 

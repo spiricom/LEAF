@@ -178,6 +178,30 @@ float   tDelayL_tick (tDelayL* const d, float input)
     return d->lastOut;
 }
 
+void   tDelayL_tickIn (tDelayL* const d, float input)
+{
+    d->buff[d->inPoint] = input * d->gain;
+
+    // Increment input pointer modulo length.
+    if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
+}
+
+float   tDelayL_tickOut (tDelayL* const d)
+{
+    uint32_t idx = (uint32_t) d->outPoint;
+
+    d->lastOut =    LEAF_interpolate_hermite (d->buff[((idx - 1) + d->maxDelay) % d->maxDelay],
+                                              d->buff[idx],
+                                              d->buff[(idx + 1) % d->maxDelay],
+                                              d->buff[(idx + 2) % d->maxDelay],
+                                              d->alpha);
+
+    // Increment output pointer modulo length
+    if ( (++d->outPoint) >= d->maxDelay )   d->outPoint = 0;
+
+    return d->lastOut;
+}
+
 int     tDelayL_setDelay (tDelayL* const d, float delay)
 {
     d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
