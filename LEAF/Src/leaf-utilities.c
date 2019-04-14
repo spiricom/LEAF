@@ -936,6 +936,16 @@ float   tReedTable_tick      (tReedTable* const p, float input)
 	return output;
 }
 
+float   tReedTable_tanh_tick     (tReedTable* const p, float input)
+{
+	// The input is differential pressure across the reed.
+	float output = p->offset + (p->slope * input);
+
+	// If output is > 1, the reed has slammed shut and the
+	// reflection function value saturates at 1.0.
+	return tanhf(output);
+}
+
 void     tReedTable_setOffset   (tReedTable* const p, float offset)
 {
 	p->offset = offset;

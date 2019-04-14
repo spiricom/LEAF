@@ -115,6 +115,7 @@ typedef struct _tReedTable {
 void    tReedTable_init      (tReedTable* const, float offset, float slope);
 void    tReedTable_free      (tReedTable* const);
 float   tReedTable_tick      (tReedTable* const, float input);
+float   tReedTable_tanh_tick     (tReedTable* const p, float input); //tanh softclip version of reed table - replacing the hard clip in original stk code
 void     tReedTable_setOffset   (tReedTable* const, float offset);
 void     tReedTable_setSlope (tReedTable* const, float slope);
 

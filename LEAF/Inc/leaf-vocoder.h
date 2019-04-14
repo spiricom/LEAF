@@ -22,7 +22,7 @@ extern "C" {
 
 /* tTalkbox */
 #define NUM_TALKBOX_PARAM 4
-#define TALKBOX_BUFFER_LENGTH 1024 //1600
+#define TALKBOX_BUFFER_LENGTH   1024    // Every talkbox instance introduces 5 buffers of this size - was originally 1600
 
 typedef struct _tTalkbox
 {
