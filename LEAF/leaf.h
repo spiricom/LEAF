@@ -37,6 +37,7 @@
 #include ".\Inc\leaf-crusher.h"
 #include ".\Inc\leaf-wavefolder.h"
 #include ".\Inc\leaf-wavetables.h"
+#include ".\Inc\leaf-crusher.h"
 
 #else
 
@@ -58,6 +59,7 @@
 #include "./Inc/leaf-crusher.h"
 #include "./Inc/leaf-wavefolder.h"
 #include "./Inc/leaf-wavetables.h"
+#include "./Inc/leaf-crusher.h"
 
 #endif
 

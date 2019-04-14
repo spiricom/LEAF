@@ -19,6 +19,8 @@ extern "C" {
 
 //==============================================================================
 
+//==============================================================================
+
 typedef enum oBool
 {
     OTRUE  = 1,
@@ -82,6 +84,10 @@ float LEAF_reduct (float input, float ratio);
 float LEAF_round (float input, float rnd);
 float LEAF_bitwise_xor(float input, uint32_t op);
 
+float LEAF_reduct (float input, float ratio);
+float LEAF_round (float input, float rnd);
+float LEAF_bitwise_xor(float input, uint32_t op);
+
 float       LEAF_clip               (float min, float val, float max);
 int         LEAF_clipInt            (int min, int val, int max);
 float   	LEAF_softClip		    (float val, float thresh);
@@ -98,7 +104,6 @@ void        LEAF_generate_square   (float* buffer, float basefreq, int size);
 // dope af
 float       LEAF_chebyshevT(float in, int n);
 float       LEAF_CompoundChebyshevT(float in, int n, float* amps);
-
 
 // Hermite interpolation
 float LEAF_interpolate_hermite (float A, float B, float C, float D, float t);
