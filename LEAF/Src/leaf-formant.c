@@ -22,7 +22,7 @@ void tFormantShifter_init(tFormantShifter* const fs)
 {
     fs->ford = FORD;
     fs->falph = powf(0.001f, 80.0f / (leaf.sampleRate));
-    fs->flamb = -(0.8517f*sqrt(atanf(0.06583f*leaf.sampleRate))-0.1916f);
+    fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
     fs->fhp = 0.0f;
     fs->flp = 0.0f;
     fs->flpa = powf(0.001f, 10.0f / (leaf.sampleRate));

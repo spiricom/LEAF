@@ -1409,7 +1409,7 @@ static void snac_analyzeframe(tSNAC* const s)
     int n, tindex = s->timeindex;
     int framesize = s->framesize;
     int mask = framesize - 1;
-    float norm = 1. / sqrt((float)(framesize * 2));
+    float norm = 1.0f / sqrtf((float)(framesize * 2));
     
     float *inputbuf = s->inputbuf;
     float *processbuf = s->processbuf;
@@ -1480,11 +1480,11 @@ static void snac_normalize(tSNAC* const s)
     
     // minimum RMS implemented as minimum autocorrelation at index 0
     // functionally equivalent to white noise floor
-    float rms = s->minrms / sqrt(1.0f / (float)framesize);
+    float rms = s->minrms / sqrtf(1.0f / (float)framesize);
     float minrzero = rms * rms;
     float rzero = processbuf[0];
     if(rzero < minrzero) rzero = minrzero;
-    double normintegral = (double)rzero * 2.;
+    double normintegral = (double) rzero * 2.0f;
     
     // normalize biased autocorrelation function
     // inputbuf is circular buffer: timeindex may be non-zero when overlap > 1
@@ -1594,11 +1594,11 @@ static float snac_spectralpeak(tSNAC* const s, float periodlength)
     // calculate amplitudes in peak region
     for(n=(peakbin-1); n<(peakbin+2); n++)
     {
-        spectrumbuf[n] = sqrt(spectrumbuf[n]);
+        spectrumbuf[n] = sqrtf(spectrumbuf[n]);
     }
     
-    peaklocation = (float)peakbin + interpolate3phase(spectrumbuf, peakbin);
-    periodlength = (float)(s->framesize * 2.0f) / peaklocation;
+    peaklocation = (float) peakbin + interpolate3phase(spectrumbuf, peakbin);
+    periodlength = (float) (s->framesize * 2.0f) / peaklocation;
     
     return periodlength;
 }
@@ -1678,7 +1678,7 @@ void tAtkDtk_setThreshold(tAtkDtk* const a, float thres)
 void tAtkDtk_setAtk(tAtkDtk* const a, int inAtk)
 {
     a->atk = inAtk;
-    a->atk_coeff = pow(0.01, 1.0/(a->atk * a->samplerate * 0.001));
+    a->atk_coeff = powf(0.01f, 1.0f/(a->atk * a->samplerate * 0.001f));
     
     return;
 }
@@ -1686,7 +1686,7 @@ void tAtkDtk_setAtk(tAtkDtk* const a, int inAtk)
 void tAtkDtk_setRel(tAtkDtk* const a, int inRel)
 {
     a->rel = inRel;
-    a->rel_coeff = pow(0.01, 1.0/(a->rel * a->samplerate * 0.001));
+    a->rel_coeff = powf(0.01f, 1.0f/(a->rel * a->samplerate * 0.001f));
     
     return;
 }
