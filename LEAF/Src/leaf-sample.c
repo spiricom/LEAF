@@ -162,7 +162,7 @@ float tSampler_tick        (tSampler* const p)
     }
     else
     {
-    	idx = (int) (p->idx + 1.f); // we think this is because flooring on int works different when reading backwards
+    	idx = (int) (p->idx+1.f); // we think this is because flooring on int works different when reading backwards
     	alpha = (p->idx+1.f) - idx;
     }
     
@@ -188,8 +188,9 @@ float tSampler_tick        (tSampler* const p)
                                                alpha);
         
         // num samples to end of loop
-        numsamps = (dir > 0) ? (end - idx) : (idx - start);
-        numsamps *= p->iinc;
+        numsamps = (idx - start) / p->inc;
+        //numsamps = (dir > 0) ? (end - idx) : (idx - start);
+        //numsamps *= p->iinc;
         
         if (p->mode == PlayLoop)
         {

@@ -15,14 +15,13 @@
 
 std::vector<juce::String> cButtonNames =  std::vector<juce::String>
 {
-
+    "record"
 };
 
 std::vector<juce::String> cSliderNames =  std::vector<juce::String>
 {
-    "delay",
-    "feedback",
-    "mix"
+    "mod freq",
+    "mod depth"
 };
 
 std::vector<juce::String> cComboBoxNames =  std::vector<juce::String>

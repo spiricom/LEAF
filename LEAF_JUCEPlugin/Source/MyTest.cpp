@@ -21,99 +21,83 @@ float fx = 1.f;
 
 #define NUM_GRAINS 20
 
-tBuffer buff;
-tSampler samp[NUM_GRAINS];
+
 
 tTapeDelay delay;
 
 float feedback = 0.f;
 
+tBuffer buff;
+tSampler samp;
+
+tCycle osc;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, &getRandomFloat);
     
-    // Init and set record loop
-    tBuffer_init (&buff, leaf.sampleRate * 1.f); // 0.5-second buffers
-    tBuffer_setRecordMode (&buff, RecordLoop);
-    tBuffer_record(&buff);
-    
-    for (int i = 0; i < NUM_GRAINS; i++)
-    {
-        // Init and set play loop
-        tSampler_init (&samp[i], &buff);
-        tSampler_setMode (&samp[i], PlayLoop);
+    // Init and set record
+    tBuffer_init (&buff, leaf.sampleRate * 1.f); // init, 1 second buffer
+    tBuffer_setRecordMode (&buff, RecordOneShot); // RecordOneShot records once through
+    tBuffer_record(&buff); // starts recording
 
-        /*
-        float speed = ((getRandomFloat() < 0.5f) ? 0.5f : 1.f);
-        float dir = (getRandomFloat() < 0.5f) ? -1 : 1;
-        
-        tSampler_setRate(&samp[i], speed * dir);
-         */
-        
-        tSampler_setRate(&samp[i], 1.f);
-        
-        // Record and play
-        tSampler_play(&samp[i]);
-    }
+    // Init and set play
+    tSampler_init (&samp, &buff); // init, give address of record buffer
+    tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
+    tSampler_setRate(&samp, 1.f); // Rate of 1.0
+    tSampler_play(&samp); // start spitting samples out
     
-    tTapeDelay_init(&delay, leaf.sampleRate * 0.05f, leaf.sampleRate * 1.f); // 1 second delay, starts out at 50 ms
+    tCycle_init(&osc);
     
     leaf_pool_report();
 }
 
-int timer = 0;
-
-float lastOut;
+float depth = 1.0f;
 
 float   LEAFTest_tick            (float input)
 {
     float sample = 0.f;
     
-    tBuffer_tick(&buff, input);
+    tBuffer_tick(&buff, input); // ticking the buffer records in to buffer
     
-    for (int i = 0; i < NUM_GRAINS; i++)
+    tSampler_setRate(&samp, tCycle_tick(&osc) * depth);
+
+    // dont tick sampler if buffer not active (not recording)
+    if (buff.active == 0)
     {
-        sample += tSampler_tick(&samp[i]);
+        sample = tSampler_tick(&samp); // ticking sampler loops sample
     }
     
-    sample /= NUM_GRAINS;
     
-    sample = tTapeDelay_tick(&delay, (1.f - feedback) * sample + feedback * lastOut);
-    
-    lastOut = sample;
-
-    return  (sample * mix) +
-            (input * (1.f - mix));
+    return sample;
 }
 
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-    float val = getSliderValue("mix");
+    bool state = getButtonState("record");
     
-    mix = val;
-    
-    val = getSliderValue("delay");
-    
-    tTapeDelay_setDelay(&delay, val * leaf.sampleRate);
-    
-    val = getSliderValue("feedback");
-    
-    feedback = val;
-    
-    for (int i = 0; i < NUM_GRAINS; i++)
+    if (state)
     {
-        if (getRandomFloat() < 0.01f)
-        {
-            tSampler_setStart(&samp[i], leaf.sampleRate * 0.05f + leaf.sampleRate * getRandomFloat() * 0.95f);
-            
-            uint64_t end = (leaf.sampleRate * 0.05f + getRandomFloat() * leaf.sampleRate * 0.45f + samp[i].start);
-            
-            tSampler_setEnd(&samp[i],  end % buff.length); // 10 - 1010 ms
-        }
+        setButtonState("record", false);
+        tBuffer_record(&buff);
     }
     
+    float val = getSliderValue("mod freq");
+    
+    float freq = 0.1 + 999.9 * val;
+    
+    tCycle_setFreq(&osc, freq);
+    
+    DBG("mod freq: " + String(freq));
+    
+    val = getSliderValue("mod depth");
+    
+    depth = 0.1 + val * 15.9f;
+    
+    DBG("mod depth: " + String(depth));
+    
+
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)
