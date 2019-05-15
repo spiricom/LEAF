@@ -48,7 +48,7 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tSampler_play(&samp); // start spitting samples out
     
     tCycle_init(&osc);
-    
+    tCycle_setFreq(&osc, 110.0f);
     leaf_pool_report();
 }
 
@@ -58,9 +58,7 @@ float   LEAFTest_tick            (float input)
 {
     float sample = 0.f;
     
-    tBuffer_tick(&buff, input); // ticking the buffer records in to buffer
-    
-    tSampler_setRate(&samp, tCycle_tick(&osc) * depth);
+    tBuffer_tick(&buff, tCycle_tick(&osc)); // ticking the buffer records in to buffer
 
     // dont tick sampler if buffer not active (not recording)
     if (buff.active == 0)
@@ -83,21 +81,29 @@ void    LEAFTest_block           (void)
         tBuffer_record(&buff);
     }
     
-    float val = getSliderValue("mod freq");
+    float val = getSliderValue("rate");
     
-    float freq = 0.1 + 999.9 * val;
+    float rate = 8.0 * val - 4.0;
     
-    tCycle_setFreq(&osc, freq);
+    tSampler_setRate(&samp, rate);;
     
-    DBG("mod freq: " + String(freq));
+    DBG("rate: " + String(rate));
     
-    val = getSliderValue("mod depth");
+    val = getSliderValue("start");
     
-    depth = 0.1 + val * 15.9f;
+    float start = buff.length * val;
     
-    DBG("mod depth: " + String(depth));
+    tSampler_setStart(&samp, start);;
     
-
+    DBG("start: " + String(start));
+    
+    val = getSliderValue("end");
+    
+    float end = buff.length * val;
+    
+    tSampler_setEnd(&samp, end);;
+    
+    DBG("end: " + String(end));
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

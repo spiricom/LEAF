@@ -127,7 +127,9 @@ void tSampler_init         (tSampler* const p, tBuffer* s)
     
     p->mode = PlayNormal;
     
-    p->cfxlen = 500; // default 300 sample crossfade
+    p->cfxlen = 400; // default 300 sample crossfade
+    
+    p->last = 0.0f;
     
     tRamp_init(&p->gain, 7.0f, 1);
     tRamp_setVal(&p->gain, 0.f);
@@ -141,11 +143,19 @@ void tSampler_free         (tSampler* const p)
 
 float tSampler_tick        (tSampler* const p)
 {
-    if (p->active == 0 || (p->len < 4))         return 0.f;
+    if (p->active == 0)
+    {
+        return 0.0f;
+    }
+    
+    if ((p->inc == 0.0f) || (p->len < 4))
+    {
+        return p->last;
+    }
     
     float sample = 0.f;
     float cfxsample = 0.f;
-    int numsamps;
+    float numsamps;
     float g1 = 1.f, g2 = 0.f;
     
     float* buff = p->samp->buff;
@@ -180,7 +190,7 @@ float tSampler_tick        (tSampler* const p)
         int i1 = idx-1;
         int i3 = idx+1;
         int i4 = idx+2;
-
+    
         sample =     LEAF_interpolate_hermite (buff[i1],
                                                buff[idx],
                                                buff[i3],
@@ -188,13 +198,11 @@ float tSampler_tick        (tSampler* const p)
                                                alpha);
         
         // num samples to end of loop
-        numsamps = (idx - start) / p->inc;
-        //numsamps = (dir > 0) ? (end - idx) : (idx - start);
-        //numsamps *= p->iinc;
+        numsamps = ((float)(end - idx)) / p->inc;
         
         if (p->mode == PlayLoop)
         {
-            if (numsamps <= p->cfxlen)
+            if (numsamps < p->cfxlen)
             {
                 // CROSSFADE SAMPLE
                 float idxx =  p->idx - p->len;
@@ -208,7 +216,7 @@ float tSampler_tick        (tSampler* const p)
                                                           buff[cdx],
                                                           buff[i3],
                                                           buff[i4],
-                                                          alpha);
+                                                          1.0f-alpha);
                 
                 g2 = (float) (p->cfxlen - numsamps) / (float) p->cfxlen;
             }
@@ -227,11 +235,11 @@ float tSampler_tick        (tSampler* const p)
                                                buff[i4],
                                                1.0f-alpha);
         
-        numsamps = (idx - start) / p->inc;
+        numsamps = ((float)(idx - start)) / p->inc;
         
         if (p->mode == PlayLoop)
         {
-            if (numsamps <= p->cfxlen)
+            if (numsamps < p->cfxlen)
             {
                 // CROSSFADE SAMPLE
                 float idxx =  p->idx + p->len + 1.f;
@@ -241,7 +249,7 @@ float tSampler_tick        (tSampler* const p)
                 i1 = cdx+1;
                 i3 = cdx-1;
                 i4 = cdx-2;
-                
+
                 cfxsample =     LEAF_interpolate_hermite (buff[i1],
                                                           buff[cdx],
                                                           buff[i3],
@@ -323,7 +331,9 @@ float tSampler_tick        (tSampler* const p)
         }
     }
     
-    return sample;
+    p->last = sample;
+    
+    return p->last;
 }
 
 void tSampler_setSample    (tSampler* const p, tBuffer* s)
@@ -338,9 +348,9 @@ void tSampler_setMode      (tSampler* const p, PlayMode mode)
 
 void tSampler_setCrossfadeLength  (tSampler* const p, uint32_t length)
 {
-    uint32_t cfxlen = LEAF_clip(0, length, 1000);
+    uint32_t cfxlen = LEAF_clip(0, length, 10000);
     
-    //if (cfxlen > p->len)  cfxlen = p->len * 0.25f;
+    if (cfxlen > (p->len*0.5))  cfxlen = p->len * 0.5f;
     
     p->cfxlen = cfxlen;
 }
@@ -384,7 +394,7 @@ void tSampler_stop         (tSampler* const p)
 static void handleStartEndChange(tSampler* const p)
 {
     p->len = abs(p->end - p->start);
-    
+
     //if (p->len < p->cfxlen) p->cfxlen = p->len * 0.9f;
     
     if (p->start > p->end)

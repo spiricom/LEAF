@@ -86,11 +86,15 @@ extern "C" {
         int32_t end;
         uint32_t len;
         uint32_t cfxlen;
+        char incfx;
+        int cfxphase;
     
         PlayMode mode;
         int retrigger;
         
         int active;
+        
+        float last;
 
     } tSampler;
     
