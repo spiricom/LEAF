@@ -205,9 +205,10 @@ float tSampler_tick        (tSampler* const p)
             if (numsamps < p->cfxlen)
             {
                 // CROSSFADE SAMPLE
-                float idxx =  p->idx - p->len;
+                float idxx =  fabsf(p->idx - p->len);
+        
                 int cdx = (int)(idxx);
-                
+            
                 i1 = cdx-1;
                 i3 = cdx+1;
                 i4 = cdx+2;
@@ -243,7 +244,9 @@ float tSampler_tick        (tSampler* const p)
             {
                 // CROSSFADE SAMPLE
                 float idxx =  p->idx + p->len + 1.f;
+            
                 int cdx = (int)(idxx);
+                
                 alpha = idxx - cdx;
                 
                 i1 = cdx+1;
