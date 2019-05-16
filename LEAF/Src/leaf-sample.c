@@ -155,6 +155,7 @@ float tSampler_tick        (tSampler* const p)
     
     float sample = 0.f;
     float cfxsample = 0.f;
+    int length = p->samp->length;
     float numsamps;
     float g1 = 1.f, g2 = 0.f;
     
@@ -187,9 +188,9 @@ float tSampler_tick        (tSampler* const p)
     if (dir > 0)
     {
         // FORWARD NORMAL SAMPLE
-        int i1 = idx-1;
-        int i3 = idx+1;
-        int i4 = idx+2;
+        int i1 = LEAF_clip(0, idx-1, length);
+        int i3 = LEAF_clip(0, idx+1, length);
+        int i4 = LEAF_clip(0, idx+2, length);
     
         sample =     LEAF_interpolate_hermite (buff[i1],
                                                buff[idx],
@@ -226,9 +227,9 @@ float tSampler_tick        (tSampler* const p)
     else
     {
         // REVERSE
-        int i1 = idx+1;
-        int i3 = idx-1;
-        int i4 = idx-2;
+        int i1 = LEAF_clip(0, idx+1, length);
+        int i3 = LEAF_clip(0, idx-1, length);
+        int i4 = LEAF_clip(0, idx-2, length);
     
         sample =     LEAF_interpolate_hermite (buff[i1],
                                                buff[idx],
