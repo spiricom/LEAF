@@ -25,12 +25,12 @@ typedef struct _LEAF
     float   invSampleRate;
     int     blockSize;
     
-    /*
+
     float*  sinewave;
     float*  sawtooth[11];
     float*  square[11];
     float*  triangle[11];
-     */
+
 
     float   (*random)(void);
 } LEAF;
@@ -57,7 +57,7 @@ extern const float shaper1[SHAPER1_TABLE_SIZE];
                                             // Feel free to change to suit memory constraints or desired delay max length / functionality.
 
 
-
+#define TALKBOX_BUFFER_LENGTH   1600    // Every talkbox instance introduces 5 buffers of this size
     
 union unholy_t { /* a union between a float and an integer */
     float f;

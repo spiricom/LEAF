@@ -16,48 +16,88 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-float gain, freqVal;
-float clipThreshold = 1.f;
+float mix = 0.f;
+float fx = 1.f;
 
-tCycle test;
-tOversampler2x os2;
-tOversampler4x os4;
+#define NUM_GRAINS 20
+
+
+
+tTapeDelay delay;
+
+float feedback = 0.f;
+
+tBuffer buff;
+tSampler samp;
+
+tCycle osc;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
-    LEAF_init(sampleRate, blockSize, &randomNumberGenerator);
+    LEAF_init(sampleRate, blockSize, &getRandomFloat);
+    
+    // Init and set record
+    tBuffer_init (&buff, leaf.sampleRate * 1.f); // init, 1 second buffer
+    tBuffer_setRecordMode (&buff, RecordOneShot); // RecordOneShot records once through
+    tBuffer_record(&buff); // starts recording
 
-    tCycle_init(&test);
-    tOversampler2x_init(&os2);
-    tOversampler4x_init(&os4);
+    // Init and set play
+    tSampler_init (&samp, &buff); // init, give address of record buffer
+    tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
+    tSampler_setRate(&samp, 1.f); // Rate of 1.0
+    tSampler_play(&samp); // start spitting samples out
+    
+    tCycle_init(&osc);
     
     leaf_pool_report();
 }
 
-
-float softClip(float sample)
-{
-    return LEAF_softClip(sample, clipThreshold);
-}
-
-float lastOut;
+float depth = 1.0f;
 
 float   LEAFTest_tick            (float input)
 {
-    tCycle_setFreq(&test, freqVal);
-    float sample = tCycle_tick(&test);
+    float sample = 0.f;
     
-    sample = tOversampler4x_tick(&os4, sample, &softClip);
+    tBuffer_tick(&buff, input); // ticking the buffer records in to buffer
     
-    return sample * gain;
+    tSampler_setRate(&samp, tCycle_tick(&osc) * depth);
+
+    // dont tick sampler if buffer not active (not recording)
+    if (buff.active == 0)
+    {
+        sample = tSampler_tick(&samp); // ticking sampler loops sample
+    }
+    
+    
+    return sample;
 }
 
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-    clipThreshold = (1.f - getSliderValue("distortion")) * 0.3f;
-    gain = getSliderValue("gain") * 0.5f;
-    freqVal = getSliderValue("frequency") * 18000.f;
+    bool state = getButtonState("record");
+    
+    if (state)
+    {
+        setButtonState("record", false);
+        tBuffer_record(&buff);
+    }
+    
+    float val = getSliderValue("mod freq");
+    
+    float freq = 0.1 + 999.9 * val;
+    
+    tCycle_setFreq(&osc, freq);
+    
+    DBG("mod freq: " + String(freq));
+    
+    val = getSliderValue("mod depth");
+    
+    depth = 0.1 + val * 15.9f;
+    
+    DBG("mod depth: " + String(depth));
+    
+
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)
@@ -151,3 +191,4 @@ static void run_pool_test(void)
     
     leaf_pool_dump();
 }
+

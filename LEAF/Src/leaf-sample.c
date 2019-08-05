@@ -141,8 +141,13 @@ void tSampler_free         (tSampler* const p)
 
 float tSampler_tick        (tSampler* const p)
 {
-    if (p->active == 0 || (p->len < 4))         return 0.f;
-    
+    if (p->active == 0)         return 0.f;
+
+    if ((p->inc == 0.0f) || (p->len < 4))
+    {
+    	return p->last;
+    }
+
     float sample = 0.f;
     float cfxsample = 0.f;
     int numsamps;
@@ -162,7 +167,7 @@ float tSampler_tick        (tSampler* const p)
     }
     else
     {
-    	idx = (int) (p->idx + 1.f); // we think this is because flooring on int works different when reading backwards
+    	idx = (int) (p->idx+1.f); // we think this is because flooring on int works different when reading backwards
     	alpha = (p->idx+1.f) - idx;
     }
     
@@ -177,9 +182,9 @@ float tSampler_tick        (tSampler* const p)
     if (dir > 0)
     {
         // FORWARD NORMAL SAMPLE
-        int i1 = idx-1;
-        int i3 = idx+1;
-        int i4 = idx+2;
+        int i1 = ((idx-1) + p->len) % p->len;
+        int i3 = (idx+1) % p->len;
+        int i4 = (idx+2) % p->len;
 
         sample =     LEAF_interpolate_hermite (buff[i1],
                                                buff[idx],
@@ -188,8 +193,9 @@ float tSampler_tick        (tSampler* const p)
                                                alpha);
         
         // num samples to end of loop
-        numsamps = (dir > 0) ? (end - idx) : (idx - start);
-        numsamps *= p->iinc;
+        numsamps = (idx - start) / p->inc;
+        //numsamps = (dir > 0) ? (end - idx) : (idx - start);
+        //numsamps *= p->iinc;
         
         if (p->mode == PlayLoop)
         {
@@ -197,11 +203,11 @@ float tSampler_tick        (tSampler* const p)
             {
                 // CROSSFADE SAMPLE
                 float idxx =  p->idx - p->len;
-                int cdx = (int)(idxx);
+                int cdx = ((int)(idxx) + p->len) % p->len;
                 
-                i1 = cdx-1;
-                i3 = cdx+1;
-                i4 = cdx+2;
+                i1 = ((cdx-1) + p->len) % p->len;
+                i3 = (cdx+1) % p->len;
+                i4 = (cdx+2) % p->len;
                 
                 cfxsample =     LEAF_interpolate_hermite (buff[i1],
                                                           buff[cdx],
@@ -216,9 +222,9 @@ float tSampler_tick        (tSampler* const p)
     else
     {
         // REVERSE
-        int i1 = idx+1;
-        int i3 = idx-1;
-        int i4 = idx-2;
+        int i1 = (idx+1) % p->len;
+        int i3 = ((idx-1) + p->len) % p->len;
+        int i4 = ((idx-2) + p->len) % p->len;
     
         sample =     LEAF_interpolate_hermite (buff[i1],
                                                buff[idx],
@@ -234,12 +240,12 @@ float tSampler_tick        (tSampler* const p)
             {
                 // CROSSFADE SAMPLE
                 float idxx =  p->idx + p->len + 1.f;
-                int cdx = (int)(idxx);
+                int cdx = ((int)(idxx)) % p->len;
                 alpha = idxx - cdx;
                 
-                i1 = cdx+1;
-                i3 = cdx-1;
-                i4 = cdx-2;
+                i1 = (cdx+1) % p->len;
+                i3 = ((cdx-1) + p->len) % p->len;
+                i4 = ((cdx-2) + p->len) % p->len;
                 
                 cfxsample =     LEAF_interpolate_hermite (buff[i1],
                                                           buff[cdx],
@@ -322,7 +328,9 @@ float tSampler_tick        (tSampler* const p)
         }
     }
     
-    return sample;
+    p->last = sample;
+
+    return p->last;
 }
 
 void tSampler_setSample    (tSampler* const p, tBuffer* s)
