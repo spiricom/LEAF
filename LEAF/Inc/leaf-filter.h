@@ -290,6 +290,23 @@ void        tButterworth_setFreqs   (tButterworth* const, float f1, float f2);
 
 //==============================================================================
     
+#define NUM_TAPS 29
+typedef struct _tFIR
+{
+    float past[NUM_TAPS];
+
+    float* coeff;
+
+} tFIR;
+
+void        tFIR_init       (tFIR* const, float* coeffs);
+void        tFIR_free       (tFIR* const);
+
+float       tFIR_tick       (tFIR* const, float input);
+void        tFIR_coeffs      (tFIR* const, float in);
+
+//==============================================================================
+
 #ifdef __cplusplus
 }
 #endif

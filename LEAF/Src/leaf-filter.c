@@ -819,3 +819,18 @@ int     tSVFE_setQ(tSVFE* const svf, float Q)
     
     return 0;
 }
+
+void	tFIR_init(tFIR* const fir, float* coeffs){
+	fir->coeff = coeffs;
+	for (int i = 0; i < NUM_TAPS; ++i) fir->past[i] = 0.0f;
+}
+
+float	tFIR_tick(tFIR* const fir, float input){
+	fir->past[0] = input;
+	float y = 0.0f;
+	for (int i = 0; i < NUM_TAPS; ++i) y += fir->past[i]*fir->coeff[i];
+	for (int i = NUM_TAPS-1; i > 0; --i) fir->past[i] = fir->past[i-1];
+	return y;
+}
+
+void	tFIR_free(tFIR* const fir){}
