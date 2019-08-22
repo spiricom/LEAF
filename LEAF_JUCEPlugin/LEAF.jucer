@@ -33,6 +33,8 @@
           <FILE id="pXe6b5" name="leaf-midi.h" compile="0" resource="0" file="../LEAF/Inc/leaf-midi.h"/>
           <FILE id="ZBcTKF" name="leaf-oscillator.h" compile="0" resource="0"
                 file="../LEAF/Inc/leaf-oscillator.h"/>
+          <FILE id="LPMRGU" name="leaf-oversampler.h" compile="0" resource="0"
+                file="../LEAF/Inc/leaf-oversampler.h"/>
           <FILE id="NekKkK" name="leaf-pitch.h" compile="0" resource="0" file="../LEAF/Inc/leaf-pitch.h"/>
           <FILE id="XmL4ZE" name="leaf-reverb.h" compile="0" resource="0" file="../LEAF/Inc/leaf-reverb.h"/>
           <FILE id="KQca5l" name="leaf-string.h" compile="0" resource="0" file="../LEAF/Inc/leaf-string.h"/>
@@ -56,6 +58,8 @@
           <FILE id="LuoIDh" name="leaf-midi.c" compile="1" resource="0" file="../LEAF/Src/leaf-midi.c"/>
           <FILE id="q5y59A" name="leaf-oscillator.c" compile="1" resource="0"
                 file="../LEAF/Src/leaf-oscillator.c"/>
+          <FILE id="E8JjWS" name="leaf-oversampler.c" compile="1" resource="0"
+                file="../LEAF/Src/leaf-oversampler.c"/>
           <FILE id="eHUTvP" name="leaf-pitch.c" compile="1" resource="0" file="../LEAF/Src/leaf-pitch.c"/>
           <FILE id="uyYwEd" name="leaf-reverb.c" compile="1" resource="0" file="../LEAF/Src/leaf-reverb.c"/>
           <FILE id="dgAVr5" name="leaf-string.c" compile="1" resource="0" file="../LEAF/Src/leaf-string.c"/>
