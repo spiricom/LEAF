@@ -243,7 +243,7 @@ float   tCycle_tick(tCycle* const c)
 {
     // Phasor increment
     c->phase += c->inc;
-    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
     
     // Wavetable synthesis
     float temp = SINE_TABLE_SIZE * c->phase;
@@ -321,7 +321,7 @@ float   tSawtooth_tick(tSawtooth* const c)
 {
     // Phasor increment
     c->phase += c->inc;
-    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
     
     float out = 0.0f;
     float w;
@@ -428,7 +428,7 @@ float   tTriangle_tick(tTriangle* const c)
 {
     // Phasor increment
     c->phase += c->inc;
-    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
     
     float out = 0.0f;
     float w;
@@ -530,7 +530,7 @@ float   tSquare_tick(tSquare* const c)
 {
     // Phasor increment
     c->phase += c->inc;
-    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
     
     float out = 0.0f;
     float w = 0.0f;

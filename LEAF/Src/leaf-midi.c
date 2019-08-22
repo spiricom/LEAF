@@ -16,151 +16,8 @@
 
 #endif
 
-
-/* Poly Handler */
-static void nodeListInit(tPoly* poly)
-{
-    for (int16_t i = 0; i < 128; i++)
-    {
-        poly->midiNodes[i].midiNote.pitch = i;
-        poly->midiNodes[i].midiNote.velocity = 0;
-        poly->midiNodes[i].midiNote.on = OFALSE;
-    }
-}
-
-// Initially everything is off, init as such
-static void offListInit(tPoly* poly)
-{
-    tMidiNode* prevNode = NULL;
-    tMidiNode* curNode = &poly->midiNodes[0];
-    poly->offListFirst = curNode;
-    
-    for (int16_t i = 1; i < 128; i++)
-    {
-        curNode->prev = prevNode;
-        curNode->next = &poly->midiNodes[i];
-        
-        prevNode = curNode;
-        curNode = &poly->midiNodes[i];
-    }
-    // Set the final node
-    curNode->prev = prevNode;
-    curNode->next = NULL;
-}
-
-static void onListInit(tPoly* poly)
-{
-    poly->onListFirst = NULL;
-}
-
-void    tPoly_init(tPoly* const poly)
-{
-    nodeListInit(poly);
-    offListInit(poly);
-    onListInit(poly);
-}
-
-
-tMidiNote* tPoly_getMidiNote(tPoly* const poly, int8_t voiceIndex)
-{
-    tMidiNote* midiNote = NULL;
-    
-    tMidiNode* currNode = poly->onListFirst;
-    
-    int8_t i = 0;
-    while (i < voiceIndex && currNode != NULL)
-    {
-        currNode = currNode->next;
-        i++;
-    }
-    
-    if (currNode != NULL)
-        midiNote = &(currNode->midiNote);
-    
-    return midiNote;
-}
-
-static void removeNoteFromOffList(tPoly* const poly, int8_t midiNoteNumber)
-{
-    // If this has no prev, this is the first node on the OFF list
-    if (poly->midiNodes[midiNoteNumber].prev == NULL)
-        poly->offListFirst = poly->midiNodes[midiNoteNumber].next;
-    
-    // Awkward handling to avoid deref null pointers
-    if (poly->midiNodes[midiNoteNumber].prev != NULL)
-        poly->midiNodes[midiNoteNumber].prev->next = poly->midiNodes[midiNoteNumber].next;
-    
-    if (poly->midiNodes[midiNoteNumber].next != NULL)
-        poly->midiNodes[midiNoteNumber].next->prev = poly->midiNodes[midiNoteNumber].prev;
-    
-    poly->midiNodes[midiNoteNumber].next = NULL;
-    poly->midiNodes[midiNoteNumber].prev = NULL;
-}
-
-static void prependNoteToOnList(tPoly* poly, int midiNoteNumber)
-{
-    if (poly->onListFirst != NULL)
-    {
-        poly->midiNodes[midiNoteNumber].next = poly->onListFirst;
-        poly->onListFirst->prev = &poly->midiNodes[midiNoteNumber];
-    }
-    poly->onListFirst = &poly->midiNodes[midiNoteNumber];
-}
-
-
-// TODO: Fail gracefully on odd MIDI situations
-//       For example, getting a note off for an already on note and vice-versa
-void tPoly_noteOn(tPoly* const poly, int midiNoteNumber, float velocity)
-{
-    removeNoteFromOffList(poly, midiNoteNumber);
-    // Set the MIDI note on accordingly
-    poly->midiNodes[midiNoteNumber].midiNote.velocity = velocity;
-    poly->midiNodes[midiNoteNumber].midiNote.on = OTRUE;
-    prependNoteToOnList(poly, midiNoteNumber);
-}
-
-// Unfortunately similar code to removeNoteFromOffList without any clear way of factoring out to a helper function
-static void removeNoteFromOnList(tPoly* const poly, int8_t midiNoteNumber)
-{
-    // If this has no prev, this is the first node on the OFF list
-    if (poly->midiNodes[midiNoteNumber].prev == NULL)
-        poly->onListFirst = poly->midiNodes[midiNoteNumber].next;
-    
-    // Awkward handling to avoid deref null pointers
-    if (poly->midiNodes[midiNoteNumber].prev != NULL)
-        poly->midiNodes[midiNoteNumber].prev->next = poly->midiNodes[midiNoteNumber].next;
-    
-    if (poly->midiNodes[midiNoteNumber].next != NULL)
-        poly->midiNodes[midiNoteNumber].next->prev = poly->midiNodes[midiNoteNumber].prev;
-    
-    poly->midiNodes[midiNoteNumber].next = NULL;
-    poly->midiNodes[midiNoteNumber].prev = NULL;
-}
-
-// Unfortunately similar code to prependNoteToOnList without any clear way of factoring out to a helper function
-static void prependNoteToOffList(tPoly* const poly, int midiNoteNumber)
-{
-    if (poly->offListFirst != NULL)
-    {
-        poly->midiNodes[midiNoteNumber].next = poly->offListFirst;
-        poly->offListFirst->prev = &poly->midiNodes[midiNoteNumber];
-    }
-    poly->offListFirst = &poly->midiNodes[midiNoteNumber];
-}
-
-
-void tPoly_noteOff(tPoly* const poly, int midiNoteNumber)
-{
-    removeNoteFromOnList(poly, midiNoteNumber);
-    // Set the MIDI note on accordingly
-    poly->midiNodes[midiNoteNumber].midiNote.velocity = 0;
-    poly->midiNodes[midiNoteNumber].midiNote.on = OFALSE;
-    prependNoteToOffList(poly, midiNoteNumber);
-}
-
-
-// MPOLY
-void tMPoly_init(tMPoly* const poly, int numVoices)
+// POLY
+void tPoly_init(tPoly* const poly, int numVoices)
 {
     poly->numVoices = numVoices;
     poly->lastVoiceToChange = 0;
@@ -177,50 +34,63 @@ void tMPoly_init(tMPoly* const poly, int numVoices)
         poly->notes[i][1] = -1;
     }
     
-    for (int i = 0; i < MPOLY_NUM_MAX_VOICES; ++i)
+    poly->glideTime = 5.0f;
+    for (int i = 0; i < POLY_NUM_MAX_VOICES; ++i)
     {
         poly->voices[i][0] = -1;
-        poly->firstReceived[i] = 0;
+        poly->firstReceived[i] = OFALSE;
         
         poly->ramp[i] = (tRamp*) leaf_alloc(sizeof(tRamp));
         
-        tRamp_init(poly->ramp[i], 5.0f, 1);
+        tRamp_init(poly->ramp[i], poly->glideTime, 1);
     }
     
-    poly->glideTime = 5.0f;
-    
-    poly->pitchBend = 64;
-    poly->pitchBendAmount = 2.0f;
+    poly->pitchBend = 0.0f;
+    poly->pitchBendRamp = (tRamp*) leaf_alloc(sizeof(tRamp));
+    tRamp_init(poly->pitchBendRamp, 1.0f, 1);
     
     poly->stack = (tStack*) leaf_alloc(sizeof(tStack));
     tStack_init(poly->stack);
     
     poly->orderStack = (tStack*) leaf_alloc(sizeof(tStack));
     tStack_init(poly->orderStack);
+    
+    poly->pitchGlideIsActive = OFALSE;
 }
 
-// Only needs to be used for pitch glide
-void tMPoly_tick(tMPoly* poly)
+void tPoly_tickPitch(tPoly* poly)
 {
-    for (int i = 0; i < MPOLY_NUM_MAX_VOICES; ++i)
+    tPoly_tickPitchGlide(poly);
+    tPoly_tickPitchBend(poly);
+}
+
+void tPoly_tickPitchGlide(tPoly* poly)
+{
+    for (int i = 0; i < POLY_NUM_MAX_VOICES; ++i)
     {
         tRamp_tick(poly->ramp[i]);
     }
 }
 
-//instead of including in dacsend, should have a separate pitch bend ramp, that is added when the ramps are ticked and sent to DAC
-void tMPoly_pitchBend(tMPoly* const poly, int pitchBend)
+void tPoly_tickPitchBend(tPoly* poly)
 {
-    poly->pitchBend = pitchBend;
+    tRamp_tick(poly->pitchBendRamp);
 }
 
-int tMPoly_noteOn(tMPoly* const poly, int note, uint8_t vel)
+//instead of including in dacsend, should have a separate pitch bend ramp, that is added when the ramps are ticked and sent to DAC
+void tPoly_setPitchBend(tPoly* const poly, float pitchBend)
+{
+    poly->pitchBend = pitchBend;
+    tRamp_setDest(poly->pitchBendRamp, poly->pitchBend);
+}
+
+int tPoly_noteOn(tPoly* const poly, int note, uint8_t vel)
 {
     // if not in keymap or already on stack, dont do anything. else, add that note.
     if (tStack_contains(poly->stack, note) >= 0) return -1;
     else
     {
-        tMPoly_orderedAddToStack(poly, note);
+        tPoly_orderedAddToStack(poly, note);
         tStack_add(poly->stack, note);
         
         int alteredVoice = -1;
@@ -229,14 +99,10 @@ int tMPoly_noteOn(tMPoly* const poly, int note, uint8_t vel)
         {
             if (poly->voices[i][0] < 0)    // if inactive voice, give this note to voice
             {
-                if (poly->firstReceived[i] == 0)
+                if (!poly->firstReceived[i] || !poly->pitchGlideIsActive)
                 {
-                    tRamp_setVal(poly->ramp[i], note); // can't be 1.0f, causes first note to be off pitch
-                    poly->firstReceived[i] = 1;
-                }
-                else
-                {
-                    tRamp_setTime(poly->ramp[i], poly->glideTime);
+                    tRamp_setVal(poly->ramp[i], note);
+                    poly->firstReceived[i] = OTRUE;
                 }
                 
                 found = OTRUE;
@@ -287,7 +153,7 @@ int tMPoly_noteOn(tMPoly* const poly, int note, uint8_t vel)
 
 int16_t noteToTest = -1;
 
-int tMPoly_noteOff(tMPoly* const poly, uint8_t note)
+int tPoly_noteOff(tPoly* const poly, uint8_t note)
 {
     tStack_remove(poly->stack, note);
     tStack_remove(poly->orderStack, note);
@@ -337,7 +203,7 @@ int tMPoly_noteOff(tMPoly* const poly, uint8_t note)
     return deactivatedVoice;
 }
 
-void tMPoly_orderedAddToStack(tMPoly* const poly, uint8_t noteVal)
+void tPoly_orderedAddToStack(tPoly* const poly, uint8_t noteVal)
 {
     
     uint8_t j;
@@ -376,39 +242,46 @@ void tMPoly_orderedAddToStack(tMPoly* const poly, uint8_t noteVal)
     
 }
 
-void tMPoly_setNumVoices(tMPoly* const poly, uint8_t numVoices)
+void tPoly_setNumVoices(tPoly* const poly, uint8_t numVoices)
 {
-    poly->numVoices = (numVoices > MPOLY_NUM_MAX_VOICES) ? MPOLY_NUM_MAX_VOICES : numVoices;
+    poly->numVoices = (numVoices > POLY_NUM_MAX_VOICES) ? POLY_NUM_MAX_VOICES : numVoices;
 }
 
-void tMPoly_setPitchGlideTime(tMPoly* const poly, float t)
+void tPoly_setPitchGlideActive(tPoly* const poly, oBool isActive)
 {
-    if (poly->glideTime == t) return;
+    poly->pitchGlideIsActive = isActive;
+}
+
+void tPoly_setPitchGlideTime(tPoly* const poly, float t)
+{
     poly->glideTime = t;
-    for (int i = 0; i < MPOLY_NUM_MAX_VOICES; ++i)
+    for (int i = 0; i < POLY_NUM_MAX_VOICES; ++i)
     {
         tRamp_setTime(poly->ramp[i], poly->glideTime);
     }
 }
 
-int tMPoly_getNumVoices(tMPoly* const poly)
+int tPoly_getNumVoices(tPoly* const poly)
 {
     return poly->numVoices;
 }
 
-float tMPoly_getPitch(tMPoly* const poly, uint8_t voice)
+float tPoly_getPitch(tPoly* const poly, uint8_t voice)
 {
-    //float pitchBend = ((float)(poly->pitchBend - 8192) / 8192.0f) * poly->pitchBendAmount;
-    return tRamp_sample(poly->ramp[voice]);// + pitchBend;
+    return tRamp_sample(poly->ramp[voice]) + tRamp_sample(poly->pitchBendRamp);
+}
+
+int tPoly_getKey(tPoly* const poly, uint8_t voice)
+{
     return poly->voices[voice][0];
 }
 
-int tMPoly_getVelocity(tMPoly* const poly, uint8_t voice)
+int tPoly_getVelocity(tPoly* const poly, uint8_t voice)
 {
     return poly->voices[voice][1];
 }
 
-int tMPoly_isOn(tMPoly* const poly, uint8_t voice)
+int tPoly_isOn(tPoly* const poly, uint8_t voice)
 {
     return (poly->voices[voice][0] > 0) ? 1 : 0;
 }
