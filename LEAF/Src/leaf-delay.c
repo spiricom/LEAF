@@ -458,8 +458,6 @@ void tTapeDelay_free(tTapeDelay* const d)
     leaf_free(d);
 }
 
-int count = 0;
-
 //#define SMOOTH_FACTOR 10.f
 
 float   tTapeDelay_tick (tTapeDelay* const d, float input)
