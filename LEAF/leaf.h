@@ -36,7 +36,7 @@
 #include ".\Inc\leaf-sample.h"
 #include ".\Inc\leaf-crusher.h"
 #include ".\Inc\leaf-wavefolder.h"
-#include ".\Inc\leaf-wavetables.h"
+#include ".\Inc\leaf-tables.h"
 
 #else
 
@@ -57,7 +57,7 @@
 #include "./Inc/leaf-sample.h"
 #include "./Inc/leaf-crusher.h"
 #include "./Inc/leaf-wavefolder.h"
-#include "./Inc/leaf-wavetables.h"
+#include "./Inc/leaf-tables.h"
 
 #endif
 

@@ -20,7 +20,7 @@ extern "C" {
 
 #include "leaf-delay.h"
 
-#include "leaf-wavetables.h"
+#include "leaf-tables.h"
 
 //==============================================================================
     

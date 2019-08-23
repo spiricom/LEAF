@@ -12,14 +12,14 @@
 #if _WIN32 || _WIN64
 
 #include "..\Inc\leaf-utilities.h"
-#include "..\Inc\leaf-wavetables.h"
+#include "..\Inc\leaf-tables.h"
 #include "..\leaf.h"
 #include "..\Inc\d_fft_mayer.h"
 
 #else
 
 #include "../Inc/leaf-utilities.h"
-#include "../Inc/leaf-wavetables.h"
+#include "../Inc/leaf-tables.h"
 #include "../leaf.h"
 #include "../Externals/d_fft_mayer.h"
 

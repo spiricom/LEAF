@@ -21,29 +21,19 @@ extern "C" {
 #include "leaf-filter.h"
     
 //==============================================================================
-typedef struct _tOversamplerFilter
+
+typedef struct _tOversampler
 {
-    float cutoff, Q;
-    float ic1eq,ic2eq;
-    float g,k,a1,a2,a3;
-} tOversamplerFilter;
+    tFIR firUp;
+    tFIR firDown;
+    int ratio;
+} tOversampler;
 
-typedef struct _tOversampler2x
-{
-    tOversamplerFilter filters[2];
-} tOversampler2x;
+void        tOversampler_init(tOversampler* const, int order, oBool extraQuality);
+void        tOversampler_upsample(tOversampler* const, float input, float* output);
+float       tOversampler_downsample(tOversampler* const, float* input);
+float       tOversampler_tick(tOversampler* const, float input, float (*effectTick)(float));
 
-void        tOversampler2x_init(tOversampler2x* const);
-float       tOversampler2x_tick(tOversampler2x* const, float input, float (*nonLinearTick)(float));
-
-typedef struct _tOversampler4x
-{
-    tOversamplerFilter filters[4];
-} tOversampler4x;
-
-void        tOversampler4x_init(tOversampler4x* const);
-float       tOversampler4x_tick(tOversampler4x* const, float input, float (*nonLinearTick)(float));
-    
 //==============================================================================
     
 #ifdef __cplusplus

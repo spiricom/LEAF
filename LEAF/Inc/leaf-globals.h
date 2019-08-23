@@ -41,12 +41,9 @@ extern LEAF leaf; // The global instance of LEAF.
     
 //==============================================================================
 
-#define SHAPER1_TABLE_SIZE 65536
-extern const float shaper1[SHAPER1_TABLE_SIZE];
-
 #define NUM_VOICES 8
 #define NUM_SHIFTERS 4
-#define MPOLY_NUM_MAX_VOICES 8
+#define POLY_NUM_MAX_VOICES 8
 #define NUM_OSC 4
 #define INV_NUM_OSC (1.0f / NUM_OSC)
 #define PS_FRAME_SIZE 1024 // SNAC_FRAME_SIZE in leaf-pitch.h should match (or be smaller than?) this

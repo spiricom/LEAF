@@ -8,13 +8,13 @@
 
 #if _WIN32 || _WIN64
 
-#include "..\Inc\leaf-wavetables.h"
+#include "..\Inc\leaf-tables.h"
 #include "..\Inc\leaf-oscillator.h"
 #include "..\leaf.h"
 
 #else
 
-#include "../Inc/leaf-wavetables.h"
+#include "../Inc/leaf-tables.h"
 #include "../Inc/leaf-oscillator.h"
 #include "../leaf.h"
 

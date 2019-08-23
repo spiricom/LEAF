@@ -9,13 +9,13 @@
 #if _WIN32 || _WIN64
 
 #include "..\Inc\leaf-filter.h"
-#include "..\Inc\leaf-wavetables.h"
+#include "..\Inc\leaf-tables.h"
 #include "..\leaf.h"
 
 #else
 
 #include "../Inc/leaf-filter.h"
-#include "../Inc/leaf-wavetables.h"
+#include "../Inc/leaf-tables.h"
 #include "../leaf.h"
 
 #endif

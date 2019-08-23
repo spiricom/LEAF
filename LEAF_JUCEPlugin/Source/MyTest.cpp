@@ -16,86 +16,57 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-float mix = 0.f;
-float fx = 1.f;
+tOversampler os;
+tNoise noise;
+tCycle sine;
 
-#define NUM_GRAINS 20
-
-
-
-tTapeDelay delay;
-
-float feedback = 0.f;
-
-tBuffer buff;
-tSampler samp;
-
-tCycle osc;
+float gain;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, &getRandomFloat);
     
-    // Init and set record
-    tBuffer_init (&buff, leaf.sampleRate * 1.f); // init, 1 second buffer
-    tBuffer_setRecordMode (&buff, RecordOneShot); // RecordOneShot records once through
-    tBuffer_record(&buff); // starts recording
-
-    // Init and set play
-    tSampler_init (&samp, &buff); // init, give address of record buffer
-    tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
-    tSampler_setRate(&samp, 1.f); // Rate of 1.0
-    tSampler_play(&samp); // start spitting samples out
-    
-    tCycle_init(&osc);
+    tOversampler_init(&os, 2, OFALSE);
+    tNoise_init(&noise, WhiteNoise);
+    tCycle_init(&sine);
+    tCycle_setFreq(&sine, 220);
     
     leaf_pool_report();
 }
 
-float depth = 1.0f;
+float nothing(float val) {
+    return val;
+}
 
 float   LEAFTest_tick            (float input)
 {
-    float sample = 0.f;
+    float sample = tCycle_tick(&sine);
     
-    tBuffer_tick(&buff, input); // ticking the buffer records in to buffer
+    //sample *= gain*10.0f;
     
-    tSampler_setRate(&samp, tCycle_tick(&osc) * depth);
-
-    // dont tick sampler if buffer not active (not recording)
-    if (buff.active == 0)
-    {
-        sample = tSampler_tick(&samp); // ticking sampler loops sample
-    }
+    sample *= tOversampler_tick(&os, sample, nothing);
     
-    
-    return sample;
+    return sample * gain;
 }
+
+
 
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-    bool state = getButtonState("record");
-    
-    if (state)
-    {
-        setButtonState("record", false);
-        tBuffer_record(&buff);
-    }
-    
     float val = getSliderValue("mod freq");
     
-    float freq = 0.1 + 999.9 * val;
+    float freq = 200 + 1000 * val;
     
-    tCycle_setFreq(&osc, freq);
+    tCycle_setFreq(&sine, freq);
     
     DBG("mod freq: " + String(freq));
     
     val = getSliderValue("mod depth");
     
-    depth = 0.1 + val * 15.9f;
+    gain = val;
     
-    DBG("mod depth: " + String(depth));
+    
     
 
 }

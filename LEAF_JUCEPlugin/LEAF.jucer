@@ -45,8 +45,7 @@
           <FILE id="bpUZCA" name="leaf-crusher.h" compile="0" resource="0" file="../LEAF/Inc/leaf-crusher.h"/>
           <FILE id="PRkOp2" name="leaf-wavefolder.h" compile="0" resource="0"
                 file="../LEAF/Inc/leaf-wavefolder.h"/>
-          <FILE id="KpGzKv" name="leaf-wavetables.h" compile="0" resource="0"
-                file="../LEAF/Inc/leaf-wavetables.h"/>
+          <FILE id="JvZKsP" name="leaf-tables.h" compile="0" resource="0" file="../LEAF/Inc/leaf-tables.h"/>
         </GROUP>
         <GROUP id="{A3AE8C8C-29BA-ADB3-DD7D-EEDC2F7B58F3}" name="Src">
           <FILE id="HbG7LO" name="leaf-808.c" compile="1" resource="0" file="../LEAF/Src/leaf-808.c"/>
@@ -70,8 +69,7 @@
           <FILE id="Oymcac" name="leaf-crusher.c" compile="1" resource="0" file="../LEAF/Src/leaf-crusher.c"/>
           <FILE id="LVoaGm" name="leaf-wavefolder.c" compile="1" resource="0"
                 file="../LEAF/Src/leaf-wavefolder.c"/>
-          <FILE id="HRk07h" name="leaf-wavetables.c" compile="1" resource="0"
-                file="../LEAF/Src/leaf-wavetables.c"/>
+          <FILE id="TxA1Gg" name="leaf-tables.c" compile="1" resource="0" file="../LEAF/Src/leaf-tables.c"/>
           <FILE id="BFkVGu" name="leaf.c" compile="1" resource="0" file="../LEAF/Src/leaf.c"/>
         </GROUP>
         <FILE id="dmljDQ" name="leaf.h" compile="0" resource="0" file="../LEAF/leaf.h"/>
