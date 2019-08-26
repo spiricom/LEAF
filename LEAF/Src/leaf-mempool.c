@@ -121,6 +121,7 @@ void* mpool_alloc(size_t size, mpool_t* pool)
 
 void* leaf_alloc(size_t size)
 {
+    //printf("alloc %i\n", size);
 	void* block = mpool_alloc(size, &leaf_pool);
 
 	if (block == NULL) leaf_mempool_overrun();

@@ -37,6 +37,7 @@ extern const float shaper1[SHAPER1_TABLE_SIZE];
     
 #define COEFFS_SIZE 32
 extern const float* firCoeffs[COEFFS_SIZE];
+extern const float firNumTaps[COEFFS_SIZE];
 extern const float fir2XLow[32];
 extern const float fir4XLow[64];
 extern const float fir8XLow[64];
@@ -45,8 +46,8 @@ extern const float fir32XLow[256];
 extern const float fir64XLow[256];
 extern const float fir2XHigh[128];
 extern const float fir4XHigh[256];
-extern const float fir8XHigh[281];
-extern const float fir16XHigh[507];
+extern const float fir8XHigh[256];
+extern const float fir16XHigh[512];
 extern const float fir32XHigh[512];
 extern const float fir64XHigh[1024];
 

@@ -19,18 +19,20 @@ static void run_pool_test(void);
 tOversampler os;
 tNoise noise;
 tCycle sine;
+tFIR filter;
 
 float gain;
+bool buttonState;
+int ratio = 16;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, &getRandomFloat);
     
-    tOversampler_init(&os, 2, OFALSE);
+    tOversampler_init(&os, ratio, OTRUE);
     tNoise_init(&noise, WhiteNoise);
     tCycle_init(&sine);
     tCycle_setFreq(&sine, 220);
-    
     leaf_pool_report();
 }
 
@@ -41,11 +43,20 @@ float nothing(float val) {
 float   LEAFTest_tick            (float input)
 {
     float sample = tCycle_tick(&sine);
+    float output[ratio];
     
-    //sample *= gain*10.0f;
-    
-    sample *= tOversampler_tick(&os, sample, nothing);
-    
+    if (buttonState) {
+        tOversampler_upsample(&os, sample, output);
+        for (int i = 0; i < ratio; ++i) {
+            output[i] *= gain*10.0f;
+            output[i] = LEAF_clip(-1.0f, output[i], 1.0f);
+        }
+        sample = tOversampler_downsample(&os, output);
+    }
+    else {
+        sample *= gain*10.0f;
+        sample = LEAF_clip(-1.0f, sample, 1.0f);
+    }
     return sample * gain;
 }
 
@@ -54,13 +65,13 @@ float   LEAFTest_tick            (float input)
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
+    
+    buttonState = getSliderValue("on/off") > 0.5 ? true : false;
+    
     float val = getSliderValue("mod freq");
     
-    float freq = 200 + 1000 * val;
-    
+    float freq = 200 + 20000 * val;
     tCycle_setFreq(&sine, freq);
-    
-    DBG("mod freq: " + String(freq));
     
     val = getSliderValue("mod depth");
     

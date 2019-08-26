@@ -619,7 +619,7 @@ void    tNoise_free(tNoise* const n)
 
 float   tNoise_tick(tNoise* const n)
 {
-    float rand = n->rand();
+    float rand = (n->rand() * 2.0f) - 1.0f;
     
     if (n->type == PinkNoise)
     {

@@ -24,14 +24,19 @@ extern "C" {
 
 typedef struct _tOversampler
 {
-    tFIR firUp;
-    tFIR firDown;
+//    tFIR firUp;
+//    tFIR firDown;
     int ratio;
+    float* pCoeffs;
+    float* upState;
+    float* downState;
+    int numTaps;
+    int phaseLength;
 } tOversampler;
 
 void        tOversampler_init(tOversampler* const, int order, oBool extraQuality);
 void        tOversampler_upsample(tOversampler* const, float input, float* output);
-float       tOversampler_downsample(tOversampler* const, float* input);
+    float       tOversampler_downsample(tOversampler *const os, float* input);
 float       tOversampler_tick(tOversampler* const, float input, float (*effectTick)(float));
 
 //==============================================================================
