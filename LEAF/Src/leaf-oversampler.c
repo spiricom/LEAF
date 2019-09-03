@@ -19,6 +19,7 @@
 #endif
 
 // Oversampler
+// Latency is equal to the phase length (numTaps / ratio)
 void tOversampler_init(tOversampler* const os, int ratio, oBool extraQuality)
 {
     uint8_t offset = 0;
@@ -221,4 +222,9 @@ float tOversampler_downsample(tOversampler *const os, float* input)
     }
     
     return output;
+}
+
+int tOversampler_getLatency(tOversampler* const os)
+{
+    return os->phaseLength;
 }
