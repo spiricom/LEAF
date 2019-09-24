@@ -20,10 +20,11 @@ tOversampler os;
 tNoise noise;
 tCycle sine;
 tFIR filter;
+tLockhartWavefolder wf;
 
 float gain;
 bool buttonState;
-int ratio = 16;
+int ratio = 2;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
@@ -33,11 +34,8 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tNoise_init(&noise, WhiteNoise);
     tCycle_init(&sine);
     tCycle_setFreq(&sine, 220);
+    tLockhartWavefolder_init(&wf);
     leaf_pool_report();
-}
-
-float nothing(float val) {
-    return val;
 }
 
 float   LEAFTest_tick            (float input)
@@ -45,19 +43,21 @@ float   LEAFTest_tick            (float input)
     float sample = tCycle_tick(&sine);
     float output[ratio];
     
-    if (buttonState) {
-        tOversampler_upsample(&os, sample, output);
-        for (int i = 0; i < ratio; ++i) {
-            output[i] *= gain*10.0f;
-            output[i] = LEAF_clip(-1.0f, output[i], 1.0f);
-        }
-        sample = tOversampler_downsample(&os, output);
-    }
-    else {
-        sample *= gain*10.0f;
-        sample = LEAF_clip(-1.0f, sample, 1.0f);
-    }
-    return sample * gain;
+    sample *= gain*10.0f;
+    sample = tLockhartWavefolder_tick(&wf, sample);
+//    if (buttonState) {
+//        tOversampler_upsample(&os, sample, output);
+//        for (int i = 0; i < ratio; ++i) {
+//            output[i] *= gain*10.0f;
+//            output[i] = tLockhartWavefolder_tick(&wf, output[i]);
+//        }
+//        sample = tOversampler_downsample(&os, output);
+//    }
+//    else {
+//        sample *= gain*10.0f;
+//        sample = tLockhartWavefolder_tick(&wf, sample);
+//    }
+    return sample;
 }
 
 

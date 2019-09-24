@@ -37,7 +37,7 @@ typedef struct _tLockhartWavefolder
 {
     double Ln1;
     double Fn1;
-    double xn1;
+    float xn1;
     
 } tLockhartWavefolder;
 
