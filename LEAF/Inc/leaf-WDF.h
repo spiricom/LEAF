@@ -24,6 +24,7 @@ typedef struct _tWDFresistor
 
 void tWDFresistor_init(tWDFresistor* const r, float electrical_resistance);
 float tWDFresistor_getPortResistance(tWDFresistor* const r);
+void tWDFresistor_setElectricalResistance(tWDFresistor* const r, float electrical_resistance);
 void tWDFresistor_setIncidentWave(tWDFresistor* const r, float incident_wave);
 float tWDFresistor_getReflectedWave(tWDFresistor* const r);
 float tWDFresistor_getVoltage(tWDFresistor* const r);
@@ -95,7 +96,8 @@ typedef struct _tWDFseriesAdaptor
 
 void tWDFseriesAdaptor_init(tWDFseriesAdaptor* const r, tWDFresistor* const rL, tWDFcapacitor* const rR);
 float tWDFseriesAdaptor_getPortResistance(tWDFseriesAdaptor* const r);
-void tWDFseriesAdaptor_setIncidentWaves(tWDFseriesAdaptor* const r, float incident_wave);
+void tWDFseriesAdaptor_setPortResistances(tWDFseriesAdaptor* const r);
+void tWDFseriesAdaptor_setIncidentWave(tWDFseriesAdaptor* const r, float incident_wave);
 float tWDFseriesAdaptor_getReflectedWave(tWDFseriesAdaptor* const r);
 float tWDFseriesAdaptor_getVoltage(tWDFseriesAdaptor* const r);
 float tWDFseriesAdaptor_getCurrent(tWDFseriesAdaptor* const r);

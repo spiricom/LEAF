@@ -58,6 +58,7 @@
 #include "./Inc/leaf-crusher.h"
 #include "./Inc/leaf-wavefolder.h"
 #include "./Inc/leaf-tables.h"
+#include "./Inc/leaf-WDF.h"
 
 #endif
 
