@@ -143,18 +143,26 @@ struct _tWDF
 	float value;
 	tWDF* child_left;
 	tWDF* child_right;
+    tWDF* outpoint;
 	float (*get_port_resistance)(tWDF* const);
 	float (*get_reflected_wave)(tWDF* const);
 	void (*set_incident_wave)(tWDF* const, float);
 };
 
-void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, float sample_rate);
+void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR);
 float tWDF_tick(tWDF* const r, float sample, uint8_t paramsChanged);
+    
 void tWDF_setValue(tWDF* const r, float value);
+void tWDF_setSampleRate(tWDF* const r, float sample_rate);
+void tWDF_setOutputPoint(tWDF* const r, tWDF* const outpoint);
+uint8_t tWDF_isLeaf(tWDF* const r);
+    
+tWDF* tWDF_findOutputPoint(tWDF* const r);
+    
 float tWDF_getPortResistance(tWDF* const r);
-void tWDF_setPortResistances(tWDF* const r);
 float tWDF_getReflectedWave(tWDF* const r);
 void tWDF_setIncidentWave(tWDF* const r, float incident_wave);
+    
 float tWDF_getVoltage(tWDF* const r);
 float tWDF_getCurrent(tWDF* const r);
 
@@ -172,6 +180,10 @@ static float get_reflected_wave_for_capacitor(tWDF* const r);
 static float get_reflected_wave_for_series(tWDF* const r);
 static float get_reflected_wave_for_parallel(tWDF* const r);
 
-
+//==============================================================================
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LEAF_INC_LEAF_WDF_H_ */
