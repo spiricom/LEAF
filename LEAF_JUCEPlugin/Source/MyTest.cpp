@@ -24,8 +24,8 @@ tWDF rs1;
 tWDF p1;
 tWDF s1;
 tWDF s2;
-tWDFNonlinear i;
-tWDFNonlinear d;
+tWDF i;
+tWDF d;
 tNoise noise;
 tCycle sine;
 
@@ -65,22 +65,19 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 //    tWDFNonlinear_init(&i, IdealSource, &s2);
     
     tWDF_init(&r1, Resistor, 10000.0f, NULL, NULL);
-    tWDF_init(&rs1, ResistiveSource, 0.0f, NULL, NULL);
+    tWDF_init(&rs1, ResistiveSource, 1.0f, NULL, NULL);
     tWDF_init(&s1, SeriesAdaptor, 0.0f, &r1, &rs1);
-    
-    tWDF_setOutputPoint(&s1, &r1);
-    
-    tWDFNonlinear_init(&d, Diode, &r1);
+    tWDF_init(&d, Diode, 0.0f, &s1, NULL);
     
     leaf_pool_report();
 }
 
 float   LEAFTest_tick            (float input)
 {
-    float sample = tCycle_tick(&sine);
+    float sample = tCycle_tick(&sine) * gain;
     
-    tWDF_setValue(&rs1, sample*gain);
-    sample = tWDF_tick(&s1, &d, sample, 1);
+    //tWDF_setValue(&rs1, sample*gain);
+    sample = tWDF_tick(&d, sample, &d, 1);
     
     return sample;
 }
