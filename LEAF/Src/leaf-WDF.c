@@ -9,7 +9,6 @@
 #include "../Inc/leaf-WDF.h"
 
 //WDF
-
 void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
 {
 	r->type = type;
@@ -24,35 +23,7 @@ void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL
 	r->reflected_wave_right = 0.0f;
 	r->sample_rate = leaf.sampleRate;
 	r->value = value;
-	if (r->type == SeriesAdaptor)
-	{
-		r->port_resistance_left = tWDF_getPortResistance(rL);
-		r->port_resistance_right = tWDF_getPortResistance(rR);
-		r->port_resistance_up = r->port_resistance_left + r->port_resistance_right;
-		r->port_conductance_up  = 1.0f / r->port_resistance_up;
-		r->port_conductance_left = 1.0f / r->port_resistance_left;
-		r->port_conductance_right = 1.0f / r->port_resistance_right;
-		r->gamma_zero = 1.0f / (r->port_resistance_right + r->port_resistance_left);
-
-		r->get_port_resistance = &get_port_resistance_for_series;
-		r->get_reflected_wave = &get_reflected_wave_for_series;
-		r->set_incident_wave = &set_incident_wave_for_series;
-	}
-	else if (r->type == ParallelAdaptor)
-	{
-		r->port_resistance_left = tWDF_getPortResistance(rL);
-		r->port_resistance_right = tWDF_getPortResistance(rR);
-		r->port_resistance_up = (r->port_resistance_left * r->port_resistance_right) / (r->port_resistance_left + r->port_resistance_right);
-		r->port_conductance_up  = 1.0f / r->port_resistance_up;
-		r->port_conductance_left = 1.0f / r->port_resistance_left;
-		r->port_conductance_right = 1.0f / r->port_resistance_right;
-		r->gamma_zero = 1.0f / (r->port_resistance_right + r->port_resistance_left);
-
-		r->get_port_resistance = &get_port_resistance_for_parallel;
-		r->get_reflected_wave = &get_reflected_wave_for_parallel;
-		r->set_incident_wave = &set_incident_wave_for_parallel;
-	}
-	else if (r->type == Resistor)
+    if (r->type == Resistor)
 	{
 		r->port_resistance_up = r->value;
 		r->port_conductance_up = 1.0f / r->value;
@@ -63,20 +34,71 @@ void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL
 	}
 	else if (r->type == Capacitor)
 	{
-		r->port_resistance_up = 1.0f / (r->sample_rate * 2.0f * r->value); //based on trapezoidal discretization
-		r->port_conductance_up = (1.0f / r->port_resistance_up);
-
+        r->port_conductance_up = r->sample_rate * 2.0f * r->value;
+		r->port_resistance_up = 1.0f / r->port_conductance_up; //based on trapezoidal discretization
+    
 		r->get_port_resistance = &get_port_resistance_for_capacitor;
 		r->get_reflected_wave = &get_reflected_wave_for_capacitor;
 		r->set_incident_wave = &set_incident_wave_for_leaf;
 	}
+    else if (r->type == Inductor)
+    {
+        r->port_resistance_up = r->sample_rate * 2.0f * r->value; //based on trapezoidal discretization
+        r->port_conductance_up = 1.0f / r->port_resistance_up;
+        
+        r->get_port_resistance = &get_port_resistance_for_inductor;
+        r->get_reflected_wave = &get_reflected_wave_for_capacitor; // same as capacitor
+        r->set_incident_wave = &set_incident_wave_for_leaf_inverted;
+    }
 	else if (r->type == ResistiveSource)
 	{
-
+        r->port_resistance_up = 1.0f; // always use 1.0f for resistance
+        r->port_conductance_up = 1.0f / 1.0f;
+        // value is source voltage
+        r->get_port_resistance = &get_port_resistance_for_resistive;
+        r->get_reflected_wave = &get_reflected_wave_for_resistive;
+        r->set_incident_wave = &set_incident_wave_for_leaf;
 	}
+    else if (r->type == Inverter)
+    {
+        r->port_resistance_up = tWDF_getPortResistance(r->child_left);
+        r->port_conductance_up = 1.0f / r->port_resistance_up;
+        
+        r->get_port_resistance = &get_port_resistance_for_inverter;
+        r->get_reflected_wave = &get_reflected_wave_for_inverter;
+        r->set_incident_wave = &set_incident_wave_for_inverter;
+    }
+    else if (r->type == SeriesAdaptor)
+    {
+        r->port_resistance_left = tWDF_getPortResistance(r->child_left);
+        r->port_resistance_right = tWDF_getPortResistance(r->child_right);
+        r->port_resistance_up = r->port_resistance_left + r->port_resistance_right;
+        r->port_conductance_up  = 1.0f / r->port_resistance_up;
+        r->port_conductance_left = 1.0f / r->port_resistance_left;
+        r->port_conductance_right = 1.0f / r->port_resistance_right;
+        r->gamma_zero = 1.0f / (r->port_resistance_right + r->port_resistance_left);
+        
+        r->get_port_resistance = &get_port_resistance_for_series;
+        r->get_reflected_wave = &get_reflected_wave_for_series;
+        r->set_incident_wave = &set_incident_wave_for_series;
+    }
+    else if (r->type == ParallelAdaptor)
+    {
+        r->port_resistance_left = tWDF_getPortResistance(r->child_left);
+        r->port_resistance_right = tWDF_getPortResistance(r->child_right);
+        r->port_resistance_up = (r->port_resistance_left * r->port_resistance_right) / (r->port_resistance_left + r->port_resistance_right);
+        r->port_conductance_up  = 1.0f / r->port_resistance_up;
+        r->port_conductance_left = 1.0f / r->port_resistance_left;
+        r->port_conductance_right = 1.0f / r->port_resistance_right;
+        r->gamma_zero = 1.0f / (r->port_resistance_right + r->port_resistance_left);
+        
+        r->get_port_resistance = &get_port_resistance_for_parallel;
+        r->get_reflected_wave = &get_reflected_wave_for_parallel;
+        r->set_incident_wave = &set_incident_wave_for_parallel;
+    }
 }
 
-float tWDF_tick(tWDF* const r, float sample, uint8_t paramsChanged)
+float tWDF_tick(tWDF* const r, tWDFNonlinear* const n, float sample, uint8_t paramsChanged)
 {
 	//step 0 : update port resistances if something changed
 	if (paramsChanged) tWDF_getPortResistance(r);
@@ -88,13 +110,13 @@ float tWDF_tick(tWDF* const r, float sample, uint8_t paramsChanged)
 	float incident_wave = tWDF_getReflectedWave(r);
 
 	//step 3 : do root scattering computation
-	float reflected_wave = (2.0f * input) - incident_wave;
+	float reflected_wave = tWDFNonlinear_calculateReflectedWave(n, input, incident_wave);
 
-	//step 4 : propigate waves down the tree
+	//step 4 : propogate waves down the tree
 	tWDF_setIncidentWave(r, reflected_wave);
 
 	//step 5 : grab whatever voltages or currents we want as outputs
-	return -1.0f * tWDF_getVoltage(r->outpoint);
+    return reflected_wave*0.5f + incident_wave*0.5f;//tWDF_getVoltage(r->outpoint);
 }
 
 void tWDF_setValue(tWDF* const r, float value)
@@ -149,7 +171,10 @@ float tWDF_getCurrent(tWDF* const r)
 	return (((r->incident_wave_up * 0.5f) - (r->reflected_wave_up * 0.5f)) * r->port_conductance_up);
 }
 
-// static functions to be pointed to
+//============ Static Functions to be Pointed To ====================
+//===================================================================
+//============ Get and Calculate Port Resistances ===================
+
 static float get_port_resistance_for_resistor(tWDF* const r)
 {
 	r->port_resistance_up = r->value;
@@ -160,10 +185,31 @@ static float get_port_resistance_for_resistor(tWDF* const r)
 
 static float get_port_resistance_for_capacitor(tWDF* const r)
 {
-	r->port_resistance_up = 1.0f / (r->sample_rate * 2.0f * r->value); //based on trapezoidal discretization
-	r->port_conductance_up = (1.0f / r->port_resistance_up);
+	r->port_conductance_up = r->sample_rate * 2.0f * r->value; //based on trapezoidal discretization
+	r->port_resistance_up = (1.0f / r->port_conductance_up);
 
 	return r->port_resistance_up;
+}
+
+static float get_port_resistance_for_inductor(tWDF* const r)
+{
+    r->port_resistance_up = r->sample_rate * 2.0f * r->value; //based on trapezoidal discretization
+    r->port_conductance_up = (1.0f / r->port_resistance_up);
+    
+    return r->port_resistance_up;
+}
+
+static float get_port_resistance_for_resistive(tWDF* const r)
+{
+    return r->port_resistance_up;
+}
+
+static float get_port_resistance_for_inverter(tWDF* const r)
+{
+    r->port_resistance_up = tWDF_getPortResistance(r->child_left);
+    r->port_conductance_up = 1.0f / r->port_resistance_up;
+    
+    return r->port_resistance_up;
 }
 
 static float get_port_resistance_for_series(tWDF* const r)
@@ -192,9 +238,22 @@ static float get_port_resistance_for_parallel(tWDF* const r)
 	return r->port_resistance_up;
 }
 
+//===================================================================
+//================ Set Incident Waves ===============================
+
 static void set_incident_wave_for_leaf(tWDF* const r, float incident_wave)
 {
 	r->incident_wave_up = incident_wave;
+}
+
+static void set_incident_wave_for_leaf_inverted(tWDF* const r, float incident_wave)
+{
+    r->incident_wave_up = -1.0f * incident_wave;
+}
+
+static void set_incident_wave_for_inverter(tWDF* const r, float incident_wave)
+{
+    tWDF_setIncidentWave(r->child_left, -1.0f * incident_wave);
 }
 
 static void set_incident_wave_for_series(tWDF* const r, float incident_wave)
@@ -225,6 +284,9 @@ static void set_incident_wave_for_parallel(tWDF* const r, float incident_wave)
 	tWDF_setIncidentWave(r->child_right, gamma_left * left_wave + (gamma_right - 1.0f) * right_wave + incident_wave);
 }
 
+//===================================================================
+//================ Get Reflected Waves ==============================
+
 static float get_reflected_wave_for_resistor(tWDF* const r)
 {
 	r->reflected_wave_up = 0.0f;
@@ -235,6 +297,18 @@ static float get_reflected_wave_for_capacitor(tWDF* const r)
 {
 	r->reflected_wave_up = r->incident_wave_up;
 	return r->reflected_wave_up;
+}
+
+static float get_reflected_wave_for_resistive(tWDF* const r)
+{
+    r->reflected_wave_up = r->value;
+    return r->reflected_wave_up;
+}
+
+static float get_reflected_wave_for_inverter(tWDF* const r)
+{
+    r->reflected_wave_up = -1.0f * tWDF_getReflectedWave(r->child_left);
+    return r->reflected_wave_up;
 }
 
 static float get_reflected_wave_for_series(tWDF* const r)
@@ -249,6 +323,87 @@ static float get_reflected_wave_for_parallel(tWDF* const r)
 	float gamma_right = r->port_conductance_right * r->gamma_zero;
 	//return ( dl * downPorts[0]->a + dr * downPorts[1]->a );
 	return (gamma_left * tWDF_getReflectedWave(r->child_left) + gamma_right * tWDF_getReflectedWave(r->child_right));
+}
+
+// WDF Nonlinear
+void tWDFNonlinear_init(tWDFNonlinear* const n, WDFRootType type, tWDF* const child)
+{
+    n->type = type;
+    n->child = child;
+    if (n->type == IdealSource)
+    {
+        n->calculate_reflected_wave = &calculate_reflected_wave_for_ideal;
+    }
+    else if (n->type == Diode)
+    {
+        n->calculate_reflected_wave = &calculate_reflected_wave_for_diode;
+    }
+    else if (n->type == DiodePair)
+    {
+        //n->calculate_reflected_wave = &calculate_reflected_wave_for_ideal;
+    }
+}
+
+float tWDFNonlinear_calculateReflectedWave(tWDFNonlinear*  const n, float input, float incident_wave)
+{
+    return n->calculate_reflected_wave(n, input, incident_wave);
+}
+
+static float calculate_reflected_wave_for_ideal(tWDFNonlinear* const n, float input, float incident_wave)
+{
+    return (2.0f * input) - incident_wave;
+}
+
+static const float l2A = 0.1640425613334452f;
+static const float l2B = -1.098865286222744f;
+static const float l2Y = 3.148297929334117f;
+static const float l2K = -2.213475204444817f;
+static float log2Approximation(float x)
+{
+    return (l2A * x*x*x) + (l2B * x*x) + (l2Y * x) + l2K;
+}
+
+static const float wX1 = -3.684303659906469f;
+static const float wX2 = 1.972967391708859f;
+static const float wA = 0.009451797158780131f;
+static const float wB = 0.1126446405111627f;
+static const float wY = 0.4451353886588814f;
+static const float wK = 0.5836596684310648f;
+
+static float wrightOmega3(float x)
+{
+    if (x <= wX1)
+    {
+        return 0;
+    }
+    else if (x < wX2)
+    {
+        return (wA * x*x*x) + (wB * x*x) + (wY * x) + wK;
+    }
+    else
+    {
+        return x - logf(x);
+    }
+}
+
+static float wrightOmegaApproximation(float x)
+{
+    float w3 = wrightOmega3(x);
+    return w3 - ((w3 - expf(x - w3)) / (w3 + 1.0f));
+}
+
+static float lambertW(float a, float r, float I, float iVT)
+{
+    return wrightOmegaApproximation(((a + r*I) * iVT) + log((r * I) * iVT));
+}
+
+#define Is_DIODE    2.52e-9
+#define VT_DIODE    0.02585
+static float calculate_reflected_wave_for_diode(tWDFNonlinear* const n, float input, float incident_wave)
+{
+    float a = incident_wave;
+    float r = n->child->port_resistance_up;
+    return a + 2.0f*r*Is_DIODE - 2.0f*VT_DIODE*lambertW(a, r, Is_DIODE, 1.0f/VT_DIODE);
 }
 
 
