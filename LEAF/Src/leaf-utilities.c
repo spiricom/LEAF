@@ -1411,7 +1411,7 @@ static void pitchup(tSOLAD *w, float *out);
 void     tSOLAD_init(tSOLAD* const w)
 {
     w->pitchfactor = 1.;
-    
+    w->delaybuf = (float*) leaf_alloc(sizeof(float) * (LOOPSIZE+16));
     solad_init(w);
 }
 
@@ -1739,6 +1739,11 @@ void tSNAC_init(tSNAC* const s, int overlaparg)
     s->fidelity = 0.;
     s->minrms = DEFMINRMS;
     s->framesize = SNAC_FRAME_SIZE;
+
+    s->inputbuf = (float*) leaf_alloc(sizeof(float) * SNAC_FRAME_SIZE);
+    s->processbuf = (float*) leaf_alloc(sizeof(float) * (SNAC_FRAME_SIZE * 2));
+    s->spectrumbuf = (float*) leaf_alloc(sizeof(float) * (SNAC_FRAME_SIZE / 2));
+    s->biasbuf = (float*) leaf_alloc(sizeof(float) * SNAC_FRAME_SIZE);
     
     snac_biasbuf(s);
     tSNAC_setOverlap(s, overlaparg);

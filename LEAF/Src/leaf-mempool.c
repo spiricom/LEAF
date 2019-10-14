@@ -36,13 +36,24 @@
 
 /* written with C99 style */
 
+
 #include "../Inc/leaf-mempool.h"
-
-
+#include "leaf.h"
 #define NUM_BLOCKS 50
 
+#ifdef STM32
+
+char memory[MPOOL_POOL_SIZE] __ATTR_RAM_D2;
+
+#else
 char memory[MPOOL_POOL_SIZE];
-mpool_pool_t blocks[NUM_BLOCKS]; // 
+#endif
+
+
+mpool_pool_t blocks[NUM_BLOCKS];
+
+
+ //
 mpool_t leaf_pool;
 
 /**

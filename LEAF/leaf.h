@@ -60,7 +60,12 @@
 #include "./Inc/leaf-tables.h"
 #include "./Inc/leaf-WDF.h"
 
+#include "main.h"  // not sure this is a good idea. not all applications will have a main.h.  But doing this for now. It's so that there is a place to put the STM32 define -JS
+
+
 #endif
+
+
 
 #ifdef __cplusplus
 extern "C" {

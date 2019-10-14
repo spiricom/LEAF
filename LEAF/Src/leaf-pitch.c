@@ -31,7 +31,7 @@ void tPitchShifter_init(tPitchShifter* const ps, float* in, float* out, int bufS
     ps->hopSize = DEFHOPSIZE;
     ps->windowSize = DEFWINDOWSIZE;
     ps->fba = FBA;
-    
+
     tEnv_init(&ps->env, ps->windowSize, ps->hopSize, ps->frameSize);
     
     tSNAC_init(&ps->snac, DEFOVERLAP);

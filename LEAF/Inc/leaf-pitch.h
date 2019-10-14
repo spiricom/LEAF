@@ -22,7 +22,7 @@ extern "C" {
 
 #include "leaf-filter.h"
 #include "leaf-utilities.h"
-
+#include "leaf.h"
 //==============================================================================
     
 #define DEFPITCHRATIO 2.0f
@@ -52,8 +52,8 @@ typedef struct _tSOLAD
     float jump;               // read pointer jump length and direction
     float xfadelength;        // crossfade length expressed at input sample rate
     float xfadevalue;         // crossfade phase and value
-    
-    float delaybuf[LOOPSIZE+16];
+
+    float* delaybuf;
     
 } tSOLAD;
 
@@ -86,11 +86,10 @@ void    tSOLAD_resetState       (tSOLAD *w);
 
 typedef struct _tSNAC
 {
-    float inputbuf[SNAC_FRAME_SIZE];
-    float processbuf[SNAC_FRAME_SIZE * 2];
-    float spectrumbuf[SNAC_FRAME_SIZE / 2];
-    float biasbuf[SNAC_FRAME_SIZE];
-    
+	float* inputbuf;
+	float* processbuf;
+	float* spectrumbuf;
+	float* biasbuf;
     uint16_t timeindex;
     uint16_t framesize;
     uint16_t overlap;
@@ -102,6 +101,9 @@ typedef struct _tSNAC
     float minrms;
     
 } tSNAC;
+
+
+
 
 void    tSNAC_init          (tSNAC* const, int overlaparg);    // constructor
 void    tSNAC_free          (tSNAC* const);    // destructor
