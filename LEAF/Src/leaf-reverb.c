@@ -43,14 +43,9 @@ void    tPRCRev_init(tPRCRev* const r, float t60)
         }
     }
     
-    r->allpassDelays[0] = (tDelay*) leaf_alloc(sizeof(tDelay));
-    tDelay_init(r->allpassDelays[0], lengths[0], lengths[0] * 2);
-    
-    r->allpassDelays[1] = (tDelay*) leaf_alloc(sizeof(tDelay));
-    tDelay_init(r->allpassDelays[1], lengths[1], lengths[1] * 2);
-    
-    r->combDelay = (tDelay*) leaf_alloc(sizeof(tDelay));
-    tDelay_init(r->combDelay, lengths[2], lengths[2] * 2);
+    tDelay_init(&r->allpassDelays[0], lengths[0], lengths[0] * 2);
+    tDelay_init(&r->allpassDelays[1], lengths[1], lengths[1] * 2);
+    tDelay_init(&r->combDelay, lengths[2], lengths[2] * 2);
     
     tPRCRev_setT60(r, t60);
     
@@ -60,9 +55,9 @@ void    tPRCRev_init(tPRCRev* const r, float t60)
 
 void tPRCRev_free(tPRCRev* const r)
 {
-    tDelay_free(r->allpassDelays[0]);
-    tDelay_free(r->allpassDelays[1]);
-    tDelay_free(r->combDelay);
+    tDelay_free(&r->allpassDelays[0]);
+    tDelay_free(&r->allpassDelays[1]);
+    tDelay_free(&r->combDelay);
     leaf_free(r);
 }
 
@@ -72,7 +67,7 @@ void    tPRCRev_setT60(tPRCRev* const r, float t60)
     
     r->t60 = t60;
     
-    r->combCoeff = pow(10.0f, (-3.0f * tDelay_getDelay(r->combDelay) * leaf.invSampleRate / t60 ));
+    r->combCoeff = pow(10.0f, (-3.0f * tDelay_getDelay(&r->combDelay) * leaf.invSampleRate / t60 ));
     
 }
 
@@ -88,21 +83,21 @@ float   tPRCRev_tick(tPRCRev* const r, float input)
     
     r->lastIn = input;
     
-    temp = tDelay_getLastOut(r->allpassDelays[0]);
+    temp = tDelay_getLastOut(&r->allpassDelays[0]);
     temp0 = r->allpassCoeff * temp;
     temp0 += input;
-    tDelay_tick(r->allpassDelays[0], temp0);
+    tDelay_tick(&r->allpassDelays[0], temp0);
     temp0 = -( r->allpassCoeff * temp0) + temp;
     
-    temp = tDelay_getLastOut(r->allpassDelays[1]);
+    temp = tDelay_getLastOut(&r->allpassDelays[1]);
     temp1 = r->allpassCoeff * temp;
     temp1 += temp0;
-    tDelay_tick(r->allpassDelays[1], temp1);
+    tDelay_tick(&r->allpassDelays[1], temp1);
     temp1 = -(r->allpassCoeff * temp1) + temp;
     
-    temp2 = temp1 + ( r->combCoeff * tDelay_getLastOut(r->combDelay));
+    temp2 = temp1 + ( r->combCoeff * tDelay_getLastOut(&r->combDelay));
     
-    out = r->mix * tDelay_tick(r->combDelay, temp2);
+    out = r->mix * tDelay_tick(&r->combDelay, temp2);
     
     temp = (1.0f - r->mix) * input;
     
@@ -115,7 +110,7 @@ float   tPRCRev_tick(tPRCRev* const r, float input)
 
 void     tPRCRevSampleRateChanged (tPRCRev* const r)
 {
-    r->combCoeff = pow(10.0f, (-3.0f * tDelay_getDelay(r->combDelay) * leaf.invSampleRate / r->t60 ));
+    r->combCoeff = pow(10.0f, (-3.0f * tDelay_getDelay(&r->combDelay) * leaf.invSampleRate / r->t60 ));
 }
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ NRev ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
@@ -142,21 +137,18 @@ void    tNRev_init(tNRev* const r, float t60)
     
     for ( i=0; i<6; i++ )
     {
-        r->combDelays[i] = (tDelay*) leaf_alloc(sizeof(tDelay));
-        tDelay_init(r->combDelays[i], lengths[i], lengths[i] * 2.0f);
+        tDelay_init(&r->combDelays[i], lengths[i], lengths[i] * 2.0f);
         r->combCoeffs[i] = pow(10.0, (-3 * lengths[i] * leaf.invSampleRate / t60));
     }
     
     for ( i=0; i<8; i++ )
     {
-        r->allpassDelays[i] = (tDelay*) leaf_alloc(sizeof(tDelay));
-        tDelay_init(r->allpassDelays[i], lengths[i+6], lengths[i+6] * 2.0f);
+        tDelay_init(&r->allpassDelays[i], lengths[i+6], lengths[i+6] * 2.0f);
     }
     
     for ( i=0; i<2; i++ )
     {
-        tDelay_setDelay(r->allpassDelays[i], lengths[i]);
-        tDelay_setDelay(r->combDelays[i], lengths[i+2]);
+        tDelay_setDelay(&r->combDelays[i], lengths[i+2]);
     }
     
     tNRev_setT60(r, t60);
@@ -168,12 +160,12 @@ void    tNRev_free(tNRev* const r)
 {
     for (int i = 0; i < 6; i++)
     {
-        tDelay_free(r->combDelays[i]);
+        tDelay_free(&r->combDelays[i]);
     }
     
     for (int i = 0; i < 8; i++)
     {
-        tDelay_free(r->allpassDelays[i]);
+        tDelay_free(&r->allpassDelays[i]);
     }
     
     leaf_free(r);
@@ -185,7 +177,7 @@ void    tNRev_setT60(tNRev* const r, float t60)
     
     r->t60 = t60;
     
-    for (int i=0; i<6; i++)   r->combCoeffs[i] = pow(10.0, (-3.0 * tDelay_getDelay(r->combDelays[i]) * leaf.invSampleRate / t60 ));
+    for (int i=0; i<6; i++)   r->combCoeffs[i] = pow(10.0, (-3.0 * tDelay_getDelay(&r->combDelays[i]) * leaf.invSampleRate / t60 ));
     
 }
 
@@ -204,31 +196,31 @@ float   tNRev_tick(tNRev* const r, float input)
     temp0 = 0.0;
     for ( i=0; i<6; i++ )
     {
-        temp = input + (r->combCoeffs[i] * tDelay_getLastOut(r->combDelays[i]));
-        temp0 += tDelay_tick(r->combDelays[i],temp);
+        temp = input + (r->combCoeffs[i] * tDelay_getLastOut(&r->combDelays[i]));
+        temp0 += tDelay_tick(&r->combDelays[i],temp);
     }
     
     for ( i=0; i<3; i++ )
     {
-        temp = tDelay_getLastOut(r->allpassDelays[i]);
+        temp = tDelay_getLastOut(&r->allpassDelays[i]);
         temp1 = r->allpassCoeff * temp;
         temp1 += temp0;
-        tDelay_tick(r->allpassDelays[i], temp1);
+        tDelay_tick(&r->allpassDelays[i], temp1);
         temp0 = -(r->allpassCoeff * temp1) + temp;
     }
     
     // One-pole lowpass filter.
     r->lowpassState = 0.7f * r->lowpassState + 0.3f * temp0;
-    temp = tDelay_getLastOut(r->allpassDelays[3]);
+    temp = tDelay_getLastOut(&r->allpassDelays[3]);
     temp1 = r->allpassCoeff * temp;
     temp1 += r->lowpassState;
-    tDelay_tick(r->allpassDelays[3], temp1 );
+    tDelay_tick(&r->allpassDelays[3], temp1 );
     temp1 = -(r->allpassCoeff * temp1) + temp;
     
-    temp = tDelay_getLastOut(r->allpassDelays[4]);
+    temp = tDelay_getLastOut(&r->allpassDelays[4]);
     temp2 = r->allpassCoeff * temp;
     temp2 += temp1;
-    tDelay_tick(r->allpassDelays[4], temp2 );
+    tDelay_tick(&r->allpassDelays[4], temp2 );
     out = r->mix * ( -( r->allpassCoeff * temp2 ) + temp );
     
     /*
@@ -250,7 +242,7 @@ float   tNRev_tick(tNRev* const r, float input)
 
 void     tNRevSampleRateChanged (tNRev* const r)
 {
-    for (int i=0; i<6; i++)   r->combCoeffs[i] = pow(10.0, (-3.0 * tDelay_getDelay(r->combDelays[i]) * leaf.invSampleRate / r->t60 ));
+    for (int i=0; i<6; i++)   r->combCoeffs[i] = pow(10.0, (-3.0 * tDelay_getDelay(&r->combDelays[i]) * leaf.invSampleRate / r->t60 ));
 }
 
 // ======================================DATTORRO=========================================

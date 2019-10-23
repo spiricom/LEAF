@@ -20,9 +20,9 @@
 
 LEAF leaf;
 
-void LEAF_init(float sr, int blocksize, float(*random)(void))
+void LEAF_init(float sr, int blocksize, char* memory, size_t memorysize, float(*random)(void))
 {
-    leaf_pool_init(MPOOL_POOL_SIZE);
+    leaf_pool_init(memory, memorysize);
     
     leaf.sampleRate = sr;
     

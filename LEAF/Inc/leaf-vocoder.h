@@ -22,16 +22,17 @@ extern "C" {
 
 /* tTalkbox */
 #define NUM_TALKBOX_PARAM 4
-#define TALKBOX_BUFFER_LENGTH   1024    // Every talkbox instance introduces 5 buffers of this size - was originally 1600
 
 typedef struct _tTalkbox
 {
     float param[NUM_TALKBOX_PARAM];
     
-    ///global internal variables
-    float car0[TALKBOX_BUFFER_LENGTH], car1[TALKBOX_BUFFER_LENGTH];
-    float window[TALKBOX_BUFFER_LENGTH];
-    float buf0[TALKBOX_BUFFER_LENGTH], buf1[TALKBOX_BUFFER_LENGTH];
+    int bufsize;
+    float* car0;
+    float* car1;
+    float* window;
+    float* buf0;
+    float* buf1;
     
     float emphasis;
     int32_t K, N, O, pos;
@@ -41,7 +42,7 @@ typedef struct _tTalkbox
     
 } tTalkbox;
 
-void        tTalkbox_init        (tTalkbox* const);
+void        tTalkbox_init        (tTalkbox* const, int bufsize);
 void        tTalkbox_free        (tTalkbox* const);
 float       tTalkbox_tick        (tTalkbox* const, float synth, float voice);
 void        tTalkbox_update      (tTalkbox* const);

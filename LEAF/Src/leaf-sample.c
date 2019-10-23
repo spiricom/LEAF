@@ -106,7 +106,7 @@ void  tBuffer_clear (tBuffer* const s)
 
 //================================tSampler=====================================
 
-void tSampler_init         (tSampler* const p, tBuffer* s)
+void tSampler_init(tSampler* const p, tBuffer* const s)
 {
     p->samp = s;
     
@@ -135,7 +135,7 @@ void tSampler_init         (tSampler* const p, tBuffer* s)
 
 void tSampler_free         (tSampler* const p)
 {
-    leaf_free(p->samp);
+    tRamp_free(&p->gain);
     leaf_free(p);
 }
 

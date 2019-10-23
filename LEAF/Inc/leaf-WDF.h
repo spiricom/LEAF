@@ -64,6 +64,7 @@ struct _tWDF
 
 //WDF Linear Components
 void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR);
+void tWDF_free(tWDF* const r);
 float tWDF_tick(tWDF* const r, float sample, tWDF* const outputPoint, uint8_t paramsChanged);
 
 void tWDF_setValue(tWDF* const r, float value);

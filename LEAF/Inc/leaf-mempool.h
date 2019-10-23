@@ -75,7 +75,7 @@ typedef struct mpool_t {
     int next;
 } mpool_t;
 
-void mpool_create (size_t size, mpool_t* pool);
+void mpool_create (char* memory, size_t size, mpool_t* pool);
 
 void *mpool_alloc(size_t size, mpool_t* pool);
 void mpool_free(void* ptr, mpool_t* pool);
@@ -84,7 +84,7 @@ size_t mpool_get_size(mpool_t* pool);
 size_t mpool_get_used(mpool_t* pool);
 
 
-void leaf_pool_init(size_t size);
+void leaf_pool_init(char* memory, size_t size);
 
 void* leaf_alloc(size_t size);
 void leaf_free(void* ptr);

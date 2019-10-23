@@ -32,6 +32,7 @@ static float get_reflected_wave_for_parallel(tWDF* const r, float input);
 
 static float get_reflected_wave_for_ideal(tWDF* const n, float input, float incident_wave);
 static float get_reflected_wave_for_diode(tWDF* const n, float input, float incident_wave);
+static float get_reflected_wave_for_diode_pair(tWDF* const n, float input, float incident_wave);
 
 //WDF
 void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
@@ -143,8 +144,17 @@ void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL
     }
     else if (r->type == DiodePair)
     {
-        //n->calculate_reflected_wave = &calculate_reflected_wave_for_ideal;
+        r->port_resistance_up = tWDF_getPortResistance(child);
+        r->port_conductance_up = 1.0f / r->port_resistance_up;
+        
+        r->get_reflected_wave_down = &get_reflected_wave_for_diode_pair;
+        r->get_port_resistance = &get_port_resistance_for_root;
     }
+}
+
+void tWDF_free(tWDF* const r)
+{
+    leaf_free(r);
 }
 
 float tWDF_tick(tWDF* const r, float sample, tWDF* const outputPoint, uint8_t paramsChanged)
@@ -315,11 +325,13 @@ static void set_incident_wave_for_leaf_inverted(tWDF* const r, float incident_wa
 
 static void set_incident_wave_for_inverter(tWDF* const r, float incident_wave, float input)
 {
+    r->incident_wave_up = incident_wave;
     tWDF_setIncidentWave(r->child_left, -1.0f * incident_wave, input);
 }
 
 static void set_incident_wave_for_series(tWDF* const r, float incident_wave, float input)
 {
+    r->incident_wave_up = incident_wave;
 	float gamma_left = r->port_resistance_left * r->gamma_zero;
 	float gamma_right = r->port_resistance_right * r->gamma_zero;
 	float left_wave = tWDF_getReflectedWaveUp(r->child_left, input);
@@ -336,6 +348,7 @@ static void set_incident_wave_for_series(tWDF* const r, float incident_wave, flo
 
 static void set_incident_wave_for_parallel(tWDF* const r, float incident_wave, float input)
 {
+    r->incident_wave_up = incident_wave;
 	float gamma_left = r->port_conductance_left * r->gamma_zero;
 	float gamma_right = r->port_conductance_right * r->gamma_zero;
 	float left_wave = tWDF_getReflectedWaveUp(r->child_left, input);
@@ -376,7 +389,8 @@ static float get_reflected_wave_for_inverter(tWDF* const r, float input)
 static float get_reflected_wave_for_series(tWDF* const r, float input)
 {
 	//-( downPorts[0]->a + downPorts[1]->a );
-	return (-1.0f * (tWDF_getReflectedWaveUp(r->child_left, input) + tWDF_getReflectedWaveUp(r->child_right, input)));
+    r->reflected_wave_up = (-1.0f * (tWDF_getReflectedWaveUp(r->child_left, input) + tWDF_getReflectedWaveUp(r->child_right, input)));
+	return r->reflected_wave_up;
 }
 
 static float get_reflected_wave_for_parallel(tWDF* const r, float input)
@@ -384,12 +398,8 @@ static float get_reflected_wave_for_parallel(tWDF* const r, float input)
 	float gamma_left = r->port_conductance_left * r->gamma_zero;
 	float gamma_right = r->port_conductance_right * r->gamma_zero;
 	//return ( dl * downPorts[0]->a + dr * downPorts[1]->a );
-	return (gamma_left * tWDF_getReflectedWaveUp(r->child_left, input) + gamma_right * tWDF_getReflectedWaveUp(r->child_right, input));
-}
-
-float tWDFNonlinear_getReflectedWaveDown(tWDF*  const n, float input, float incident_wave)
-{
-    return n->get_reflected_wave_down(n, input, incident_wave);
+    r->reflected_wave_up = (gamma_left * tWDF_getReflectedWaveUp(r->child_left, input) + gamma_right * tWDF_getReflectedWaveUp(r->child_right, input));
+	return r->reflected_wave_up;
 }
 
 static float get_reflected_wave_for_ideal(tWDF* const n, float input, float incident_wave)
@@ -446,4 +456,14 @@ static float get_reflected_wave_for_diode(tWDF* const n, float input, float inci
     float a = incident_wave;
     float r = n->port_resistance_up;
     return a + 2.0f*r*Is_DIODE - 2.0f*VT_DIODE*lambertW(a, r, Is_DIODE, 1.0f/VT_DIODE);
+}
+
+static float get_reflected_wave_for_diode_pair(tWDF* const n, float input, float incident_wave)
+{
+    float a = incident_wave;
+    float sgn = 0.0f;
+    if (a > 0.0f) sgn = 1.0f;
+    else if (a < 0.0f) sgn = -1.0f;
+    float r = n->port_resistance_up;
+    return a + 2 * sgn * (r*Is_DIODE - VT_DIODE*lambertW(sgn*a, r, Is_DIODE, 1.0f/VT_DIODE));
 }

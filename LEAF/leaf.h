@@ -60,18 +60,13 @@
 #include "./Inc/leaf-tables.h"
 #include "./Inc/leaf-WDF.h"
 
-#include "main.h"  // not sure this is a good idea. not all applications will have a main.h.  But doing this for now. It's so that there is a place to put the STM32 define -JS
-
-
 #endif
-
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
     
-void        LEAF_init            (float sampleRate, int blocksize, float(*randomNumberFunction)(void));
+void        LEAF_init            (float sampleRate, int blocksize, char* memory, size_t memorysize, float(*randomNumberFunction)(void));
 void        LEAF_setSampleRate   (float sampleRate);
 float       LEAF_getSampleRate   (void);
 

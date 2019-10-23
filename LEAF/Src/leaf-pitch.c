@@ -374,7 +374,6 @@ void tPeriod_free (tPeriod* const p)
 
 float tPeriod_findPeriod (tPeriod* p, float sample)
 {
-    float period;
     int i, iLast;
     
     i = (p->curBlock*p->frameSize);

@@ -25,18 +25,20 @@ extern "C" {
 /* tPoly */
 typedef struct _tPoly
 {
-    tStack* stack;
-    tStack* orderStack;
+    tStack stack;
+    tStack orderStack;
     
-    tRamp* ramp[POLY_NUM_MAX_VOICES];
-    float rampVals[POLY_NUM_MAX_VOICES];
-    oBool firstReceived[POLY_NUM_MAX_VOICES];
+    tRamp* ramp;
+    float* rampVals;
+    oBool* firstReceived;
     float glideTime;
     oBool pitchGlideIsActive;
     
     int numVoices;
+    int maxNumVoices;
     
-    int voices[POLY_NUM_MAX_VOICES][2];
+    //int voices[POLY_NUM_MAX_VOICES][2];
+    int** voices;
     
     int notes[128][2];
     
@@ -47,7 +49,7 @@ typedef struct _tPoly
     int lastVoiceToChange;
     
     float pitchBend;
-    tRamp* pitchBendRamp;
+    tRamp pitchBendRamp;
     
     int currentNote;
     int currentVoice;
@@ -57,7 +59,7 @@ typedef struct _tPoly
 } tPoly;
 
 /* MPoly*/
-void    tPoly_init(tPoly* const, int numVoices);
+void    tPoly_init(tPoly* const, int maxNumVoices);
 void    tPoly_free(tPoly* const);
 
 //ADDING A NOTE

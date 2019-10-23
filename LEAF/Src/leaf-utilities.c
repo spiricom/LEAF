@@ -496,7 +496,6 @@ void    tADSR_init(tADSR* const adsr, float attack, float decay, float sustain, 
     adsr->decayInc = adsr->inc_buff[decayIndex];
     adsr->releaseInc = adsr->inc_buff[releaseIndex];
     adsr->rampInc = adsr->inc_buff[rampIndex];
-    
 }
 
 int     tADSR_setAttack(tADSR* const adsr, float attack)

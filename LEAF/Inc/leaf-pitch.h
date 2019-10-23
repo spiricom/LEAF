@@ -22,7 +22,7 @@ extern "C" {
 
 #include "leaf-filter.h"
 #include "leaf-utilities.h"
-#include "leaf.h"
+#include "../leaf.h"
 //==============================================================================
     
 #define DEFPITCHRATIO 2.0f
@@ -32,90 +32,6 @@ extern "C" {
 #define FBA 20
 #define HPFREQ 40.0f
 
-//==============================================================================
-    
-/* tSOLAD : pitch shifting algorithm that underlies tPitchShifter etc */
-#define LOOPSIZE (2048*2)      // (4096*2) // loop size must be power of two
-#define LOOPMASK (LOOPSIZE - 1)
-#define PITCHFACTORDEFAULT 1.0f
-#define INITPERIOD 64.0f
-#define MAXPERIOD (float)((LOOPSIZE - w->blocksize) * 0.8f)
-#define MINPERIOD 8.0f
-
-typedef struct _tSOLAD
-{
-    uint16_t timeindex;              // current reference time, write index
-    uint16_t blocksize;              // signal input / output block size
-    float pitchfactor;        // pitch factor between 0.25 and 4
-    float readlag;            // read pointer's lag behind write pointer
-    float period;             // period length in input signal
-    float jump;               // read pointer jump length and direction
-    float xfadelength;        // crossfade length expressed at input sample rate
-    float xfadevalue;         // crossfade phase and value
-
-    float* delaybuf;
-    
-} tSOLAD;
-
-void    tSOLAD_init             (tSOLAD* const);
-void    tSOLAD_free             (tSOLAD* const);
-
-// send one block of input samples, receive one block of output samples
-void    tSOLAD_ioSamples        (tSOLAD *w, float* in, float* out, int blocksize);
-
-// set periodicity analysis data
-void    tSOLAD_setPeriod        (tSOLAD *w, float period);
-
-// set pitch factor between 0.25 and 4
-void    tSOLAD_setPitchFactor   (tSOLAD *w, float pitchfactor);
-
-// force readpointer lag
-void    tSOLAD_setReadLag       (tSOLAD *w, float readlag);
-
-// reset state variables
-void    tSOLAD_resetState       (tSOLAD *w);
-
-//==============================================================================
-    
-// tSNAC: period detector
-#define SNAC_FRAME_SIZE 1024           // default analysis framesize // should be the same as (or smaller than?) PS_FRAME_SIZE
-#define DEFOVERLAP 1                // default overlap
-#define DEFBIAS 0.2f        // default bias
-#define DEFMINRMS 0.003f   // default minimum RMS
-#define SEEK 0.85f       // seek-length as ratio of framesize
-
-typedef struct _tSNAC
-{
-	float* inputbuf;
-	float* processbuf;
-	float* spectrumbuf;
-	float* biasbuf;
-    uint16_t timeindex;
-    uint16_t framesize;
-    uint16_t overlap;
-    uint16_t periodindex;
-    
-    float periodlength;
-    float fidelity;
-    float biasfactor;
-    float minrms;
-    
-} tSNAC;
-
-
-
-
-void    tSNAC_init          (tSNAC* const, int overlaparg);    // constructor
-void    tSNAC_free          (tSNAC* const);    // destructor
-
-void    tSNAC_ioSamples     (tSNAC *s, float *in, float *out, int size);
-void    tSNAC_setOverlap    (tSNAC *s, int lap);
-void    tSNAC_setBias       (tSNAC *s, float bias);
-void    tSNAC_setMinRMS     (tSNAC *s, float rms);
-
-/*To get freq, perform SAMPLE_RATE/snac_getperiod() */
-float   tSNAC_getPeriod     (tSNAC *s);
-float   tSNAC_getfidelity   (tSNAC *s);
 
 //==============================================================================
     

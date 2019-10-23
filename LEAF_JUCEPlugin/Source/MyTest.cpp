@@ -16,68 +16,35 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-tWDF r1;
-tWDF r2;
-tWDF c1;
-tWDF c2;
-tWDF rs1;
-tWDF p1;
-tWDF s1;
-tWDF s2;
-tWDF i;
-tWDF d;
 tNoise noise;
 tCycle sine;
+tDelay delay;
 
 float gain;
+float freq;
+float dtime;
 bool buttonState;
 int ratio = 2;
 
+#define MSIZE 500000
+char memory[MSIZE];
+
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
-    LEAF_init(sampleRate, blockSize, &getRandomFloat);
+    LEAF_init(sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
     tNoise_init(&noise, WhiteNoise);
     tCycle_init(&sine);
     tCycle_setFreq(&sine, 200);
-    
-    //Bandpass circuit 1
-    //use c1 for output voltage
-//    tWDF_init(&r1, Resistor, 10000.0f, NULL, NULL);
-//    tWDF_init(&r2, Resistor, 10000.0f, NULL, NULL);
-//    tWDF_init(&c1, Capacitor, 0.000000159154943f, NULL, NULL);
-//    tWDF_init(&c2, Capacitor, 0.000000159154943f, NULL, NULL);
-//    tWDF_init(&p1, ParallelAdaptor, 10000.0f, &r1, &c1);
-//    tWDF_init(&s1, SeriesAdaptor, 0.0f, &c2, &r2);
-//    tWDF_init(&s2, SeriesAdaptor, 0.0f, &s1, &p1);
-    
-    //Bandpass circuit 2
-//    tWDF_init(&r1, Resistor, 10000.0f, NULL, NULL);
-//    tWDF_init(&c1, Capacitor, 0.000000159154943f, NULL, NULL);
-//    tWDF_init(&s1, SeriesAdaptor, 0.0f, &c1, &r1);
-//    tWDF_init(&r2, Resistor, 10000.0f, NULL, NULL);
-//    tWDF_init(&p1, ParallelAdaptor, 10000.0f, &s1, &r2);
-//    tWDF_init(&c2, Capacitor, 0.000000159154943f, NULL, NULL);
-//    tWDF_init(&s2, SeriesAdaptor, 0.0f, &c2, &p1);
-    
-//    tWDF_setOutputPoint(&s2, &c1);
-    
-//    tWDFNonlinear_init(&i, IdealSource, &s2);
-    
-    tWDF_init(&r1, Resistor, 10000.0f, NULL, NULL);
-    tWDF_init(&rs1, ResistiveSource, 1.0f, NULL, NULL);
-    tWDF_init(&s1, SeriesAdaptor, 0.0f, &r1, &rs1);
-    tWDF_init(&d, Diode, 0.0f, &s1, NULL);
-    
-    leaf_pool_report();
+    tDelay_init(&delay, 44100, 44100);
 }
 
 float   LEAFTest_tick            (float input)
 {
-    float sample = tCycle_tick(&sine) * gain;
-    
-    //tWDF_setValue(&rs1, sample*gain);
-    sample = tWDF_tick(&d, sample, &d, 1);
+    tCycle_setFreq(&sine, freq);
+    float sample = tCycle_tick(&sine) * 0.1;
+    tDelay_setDelay(&delay, dtime);
+    sample += tDelay_tick(&delay, sample);
     
     return sample;
 }
@@ -88,14 +55,10 @@ bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
     float val = getSliderValue("mod freq");
-    val = 1.0f + 10000.0f * val;
-    
-    tWDF_setValue(&r1, val);
+    freq = val * 2000.f;
     
     val = getSliderValue("mod depth");
-    val = 10.0f * val;
-    gain = val;
-    //tWDF_setValue(&r2, val);
+    dtime = val * 40000.;
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

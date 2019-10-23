@@ -16,9 +16,26 @@
 #endif
 
 
-void tFormantShifter_init(tFormantShifter* const fs)
+void tFormantShifter_init(tFormantShifter* const fs, int bufsize, int order)
 {
-    fs->ford = FORD;
+    fs->ford = order;
+    fs->bufsize = bufsize;
+    fs->fk = (float*) leaf_alloc(sizeof(float) * fs->ford);
+    fs->fb = (float*) leaf_alloc(sizeof(float) * fs->ford);
+    fs->fc = (float*) leaf_alloc(sizeof(float) * fs->ford);
+    fs->frb = (float*) leaf_alloc(sizeof(float) * fs->ford);
+    fs->frc = (float*) leaf_alloc(sizeof(float) * fs->ford);
+    fs->fsig = (float*) leaf_alloc(sizeof(float) * fs->ford);
+    fs->fsmooth = (float*) leaf_alloc(sizeof(float) * fs->ford);
+    fs->ftvec = (float*) leaf_alloc(sizeof(float) * fs->ford);
+    
+    fs->fbuff = (float**) leaf_alloc(sizeof(float*) * fs->ford);
+    for (int i = 0; i < fs->ford; i++)
+    {
+        fs->fbuff[i] = (float*) leaf_alloc(sizeof(float) * fs->bufsize);
+    }
+    
+    
     fs->falph = powf(0.001f, 80.0f / (leaf.sampleRate));
     fs->flamb = -(0.8517f*sqrt(atanf(0.06583f*leaf.sampleRate))-0.1916f);
     fs->fhp = 0.0f;
@@ -31,6 +48,20 @@ void tFormantShifter_init(tFormantShifter* const fs)
 
 void tFormantShifter_free(tFormantShifter* const fs)
 {
+    leaf_free(fs->fk);
+    leaf_free(fs->fb);
+    leaf_free(fs->fc);
+    leaf_free(fs->frb);
+    leaf_free(fs->frc);
+    leaf_free(fs->fsig);
+    leaf_free(fs->fsmooth);
+    leaf_free(fs->ftvec);
+    for (int i = 0; i < fs->ford; i++)
+    {
+        leaf_free(fs->fbuff[i]);
+    }
+    leaf_free(fs->fbuff);
+    
     leaf_free(fs);
 }
 
@@ -42,8 +73,7 @@ float tFormantShifter_tick(tFormantShifter* fs, float in, float fwarp)
 
 float tFormantShifter_remove(tFormantShifter* fs, float in)
 {
-    float fa, fb, fc, foma, falph, ford, flpa, flamb, tf, fk, tf2, f0resp, f1resp, frlamb;
-    int outindex = 0;
+    float fa, fb, fc, foma, falph, ford, flpa, flamb, tf, fk;
     int ti4;
     ford = fs->ford;
     falph = fs->falph;
@@ -73,7 +103,7 @@ float tFormantShifter_remove(tFormantShifter* fs, float in)
         fa = fa - tf*fc;
     }
     fs->cbi++;
-    if(fs->cbi >= FORMANT_BUFFER_SIZE)
+    if(fs->cbi >= fs->bufsize)
     {
         fs->cbi = 0;
     }
@@ -83,8 +113,7 @@ float tFormantShifter_remove(tFormantShifter* fs, float in)
 
 float tFormantShifter_add(tFormantShifter* fs, float in, float fwarp)
 {
-    float fa, fb, fc, foma, falph, ford, flpa, flamb, tf, fk, tf2, f0resp, f1resp, frlamb;
-    int outindex = 0;
+    float fa, fb, fc, foma, falph, ford, flpa, flamb, tf, tf2, f0resp, f1resp, frlamb;
     int ti4;
     ford = fs->ford;
     falph = fs->falph;

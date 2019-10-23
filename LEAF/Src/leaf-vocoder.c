@@ -26,18 +26,32 @@
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-void tTalkbox_init(tTalkbox* const v)
+void tTalkbox_init(tTalkbox* const v, int bufsize)
 {
     v->param[0] = 0.5f;  //wet
     v->param[1] = 0.0f;  //dry
     v->param[2] = 0; // Swap
     v->param[3] = 1.0f;  //quality
     
+    v->bufsize = bufsize;
+    
+    v->car0 =   (float*) leaf_alloc(sizeof(float) * v->bufsize);
+    v->car1 =   (float*) leaf_alloc(sizeof(float) * v->bufsize);
+    v->window = (float*) leaf_alloc(sizeof(float) * v->bufsize);
+    v->buf0 =   (float*) leaf_alloc(sizeof(float) * v->bufsize);
+    v->buf1 =   (float*) leaf_alloc(sizeof(float) * v->bufsize);
+    
     tTalkbox_update(v);
 }
 
 void tTalkbox_free(tTalkbox* const v)
 {
+    leaf_free(v->car0);
+    leaf_free(v->car1);
+    leaf_free(v->window);
+    leaf_free(v->buf0);
+    leaf_free(v->buf1);
+    
     leaf_free(v);
 }
 
@@ -48,7 +62,7 @@ void tTalkbox_update(tTalkbox* const v) ///update internal parameters...
     if(fs > 96000.0f) fs = 96000.0f;
     
     int32_t n = (int32_t)(0.01633f * fs);
-    if(n > TALKBOX_BUFFER_LENGTH) n = TALKBOX_BUFFER_LENGTH;
+    if(n > v->bufsize) n = v->bufsize;
     
     //O = (VstInt32)(0.0005f * fs);
     v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * fs);
@@ -77,7 +91,7 @@ void tTalkbox_suspend(tTalkbox* const v) ///clear any buffers...
     v->u0 = v->u1 = v->u2 = v->u3 = v->u4 = 0.0f;
     v->d0 = v->d1 = v->d2 = v->d3 = v->d4 = 0.0f;
     
-    for (int32_t i = 0; i < TALKBOX_BUFFER_LENGTH; i++)
+    for (int32_t i = 0; i < v->bufsize; i++)
     {
         v->buf0[i] = 0;
         v->buf1[i] = 0;

@@ -36,24 +36,21 @@
 
 /* written with C99 style */
 
+#if _WIN32 || _WIN64
 
-#include "../Inc/leaf-mempool.h"
-#include "leaf.h"
-#define NUM_BLOCKS 50
-
-#ifdef STM32
-
-char memory[MPOOL_POOL_SIZE] __ATTR_RAM_D2;
+#include "..\Inc\leaf-mempool.h"
+#include "..\leaf.h"
 
 #else
-char memory[MPOOL_POOL_SIZE];
+
+#include "../Inc/leaf-mempool.h"
+#include "../leaf.h"
+
 #endif
 
+#define NUM_BLOCKS 50
 
 mpool_pool_t blocks[NUM_BLOCKS];
-
-
- //
 mpool_t leaf_pool;
 
 /**
@@ -65,10 +62,8 @@ static inline size_t mpool_align(size_t size);
 /**
  * create memory pool
  */
-void mpool_create (size_t size, mpool_t* pool)
+void mpool_create (char* memory, size_t size, mpool_t* pool)
 {
-    if (size > MPOOL_POOL_SIZE) size = MPOOL_POOL_SIZE;
-    
     pool->mpool = &blocks[0];
     
     pool->mpool->pool = (void*)memory;
@@ -78,12 +73,12 @@ void mpool_create (size_t size, mpool_t* pool)
     pool->usize  = 0;
     pool->msize  = size;
     
-    for (int i = 0; i < MPOOL_POOL_SIZE; i++) memory[i]=0;
+    for (int i = 0; i < size; i++) memory[i]=0;
 }
 
-void leaf_pool_init(size_t size)
+void leaf_pool_init(char* memory, size_t size)
 {
-    mpool_create(size, &leaf_pool);
+    mpool_create(memory, size, &leaf_pool);
 }
 
 /**
@@ -195,7 +190,7 @@ size_t leaf_pool_get_used(void)
 
 void* leaf_pool_get_pool(void)
 {
-    float* buff = (float*)memory;
+    float* buff = (float*)leaf_pool.mpool->pool;
     
     return buff;
 }

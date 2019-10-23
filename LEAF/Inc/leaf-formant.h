@@ -26,27 +26,28 @@ extern "C" {
 typedef struct _tFormantShifter
 {
     int ford;
+    int bufsize;
     float falph;
     float flamb;
-    float fk[FORD];
-    float fb[FORD];
-    float fc[FORD];
-    float frb[FORD];
-    float frc[FORD];
-    float fsig[FORD];
-    float fsmooth[FORD];
+    float* fk;
+    float* fb;
+    float* fc;
+    float* frb;
+    float* frc;
+    float* fsig;
+    float* fsmooth;
     float fhp;
     float flp;
     float flpa;
-    float fbuff[FORD][FORMANT_BUFFER_SIZE];
-    float ftvec[FORD];
+    float** fbuff;
+    float* ftvec;
     float fmute;
     float fmutealph;
     unsigned int cbi;
     
 } tFormantShifter;
 
-void        tFormantShifter_init            (tFormantShifter* const);
+void        tFormantShifter_init            (tFormantShifter* const, int bufsize, int order);
 void        tFormantShifter_free            (tFormantShifter* const);
 
 float       tFormantShifter_tick            (tFormantShifter* const, float input, float fwarp);

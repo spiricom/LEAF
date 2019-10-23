@@ -29,10 +29,10 @@ extern "C" {
 /* Karplus Strong model */
 typedef struct _tPluck
 {
-    tDelayA*     delayLine; // Allpass or Linear??  big difference...
-    tOneZero*    loopFilter;
-    tOnePole*    pickFilter;
-    tNoise*      noise;
+    tDelayA     delayLine; // Allpass or Linear??  big difference...
+    tOneZero    loopFilter;
+    tOnePole    pickFilter;
+    tNoise      noise;
     
     float lastOut;
     float loopGain;
@@ -70,11 +70,11 @@ float       tPluck_getLastOut    (tPluck*  const);
 /* Stif Karplus Strong model */
 typedef struct _tStifKarp
 {
-    tDelayA*  delayLine;
-    tDelayL* combDelay;
-    tOneZero* filter;
-    tNoise*   noise;
-    tBiQuad*  biquad[4];
+    tDelayA  delayLine;
+    tDelayL combDelay;
+    tOneZero filter;
+    tNoise   noise;
+    tBiQuad  biquad[4];
     
     
     

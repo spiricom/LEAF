@@ -33,6 +33,7 @@ typedef struct _tOversampler
 } tOversampler;
 
 void        tOversampler_init(tOversampler* const, int order, oBool extraQuality);
+void        tOversampler_free(tOversampler* const);
 void        tOversampler_upsample(tOversampler* const, float input, float* output);
 float       tOversampler_downsample(tOversampler *const os, float* input);
 float       tOversampler_tick(tOversampler* const, float input, float (*effectTick)(float));

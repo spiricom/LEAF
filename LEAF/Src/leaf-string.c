@@ -21,19 +21,25 @@ void    tPluck_init         (tPluck* const p, float lowestFrequency)
 {
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 10.0f;
     
-    p->noise = (tNoise*)leaf_alloc(sizeof(tNoise));
-    tNoise_init(p->noise, WhiteNoise);
+    tNoise_init(&p->noise, WhiteNoise);
     
-    p->pickFilter = (tOnePole*) leaf_alloc(sizeof(tOnePole));
-    tOnePole_init(p->pickFilter, 0.0f);
+    tOnePole_init(&p->pickFilter, 0.0f);
     
-    p->loopFilter = (tOneZero*) leaf_alloc(sizeof(tOneZero));
-    tOneZero_init(p->loopFilter, 0.0f);
+    tOneZero_init(&p->loopFilter, 0.0f);
     
-    p->delayLine = (tDelayA*) leaf_alloc(sizeof(tDelayA));
-    tDelayA_init(p->delayLine, 0.0f, leaf.sampleRate * 2);
+    tDelayA_init(&p->delayLine, 0.0f, leaf.sampleRate * 2);
     
     tPluck_setFrequency(p, 220.0f);
+}
+
+void tPluck_free (tPluck* const p)
+{
+    tNoise_free(&p->noise);
+    tOnePole_free(&p->pickFilter);
+    tOneZero_free(&p->loopFilter);
+    tDelayA_free(&p->delayLine);
+
+    leaf_free(p);
 }
 
 float   tPluck_getLastOut    (tPluck *p)
@@ -43,7 +49,7 @@ float   tPluck_getLastOut    (tPluck *p)
 
 float   tPluck_tick          (tPluck *p)
 {
-    return (p->lastOut = 3.0f * tDelayA_tick(p->delayLine, tOneZero_tick(p->loopFilter, tDelayA_getLastOut(p->delayLine) * p->loopGain ) ));
+    return (p->lastOut = 3.0f * tDelayA_tick(&p->delayLine, tOneZero_tick(&p->loopFilter, tDelayA_getLastOut(&p->delayLine) * p->loopGain ) ));
 }
 
 void    tPluck_pluck         (tPluck* const p, float amplitude)
@@ -51,12 +57,12 @@ void    tPluck_pluck         (tPluck* const p, float amplitude)
     if ( amplitude < 0.0f)      amplitude = 0.0f;
     else if (amplitude > 1.0f)  amplitude = 1.0f;
     
-    tOnePole_setPole(p->pickFilter, 0.999f - (amplitude * 0.15f));
-    tOnePole_setGain(p->pickFilter, amplitude * 0.5f );
+    tOnePole_setPole(&p->pickFilter, 0.999f - (amplitude * 0.15f));
+    tOnePole_setGain(&p->pickFilter, amplitude * 0.5f );
     
     // Fill delay with noise additively with current contents.
-    for ( uint32_t i = 0; i < (uint32_t)tDelayA_getDelay(p->delayLine); i++ )
-        tDelayA_tick(p->delayLine, 0.6f * tDelayA_getLastOut(p->delayLine) + tOnePole_tick(p->pickFilter, tNoise_tick(p->noise) ) );
+    for ( uint32_t i = 0; i < (uint32_t)tDelayA_getDelay(&p->delayLine); i++ )
+        tDelayA_tick(&p->delayLine, 0.6f * tDelayA_getLastOut(&p->delayLine) + tOnePole_tick(&p->pickFilter, tNoise_tick(&p->noise) ) );
 }
 
 // Start a note with the given frequency and amplitude.;
@@ -82,9 +88,9 @@ void    tPluck_setFrequency  (tPluck* const p, float frequency )
     if ( frequency <= 0.0f )   frequency = 0.001f;
     
     // Delay = length - filter delay.
-    float delay = ( leaf.sampleRate / frequency ) - tOneZero_getPhaseDelay(p->loopFilter, frequency );
+    float delay = ( leaf.sampleRate / frequency ) - tOneZero_getPhaseDelay(&p->loopFilter, frequency );
     
-    tDelayA_setDelay(p->delayLine, delay );
+    tDelayA_setDelay(&p->delayLine, delay );
     
     p->loopGain = 0.99f + (frequency * 0.000005f);
     
@@ -108,22 +114,17 @@ void    tStifKarp_init          (tStifKarp* const p, float lowestFrequency)
 {
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 8.0f;
     
-    p->delayLine = (tDelayA*) leaf_alloc(sizeof(tDelayA));
-    tDelayA_init(p->delayLine, 0.0f, leaf.sampleRate * 2);
+    tDelayA_init(&p->delayLine, 0.0f, leaf.sampleRate * 2);
+
+    tDelayL_init(&p->combDelay, 0.0f, leaf.sampleRate * 2);
     
-    p->combDelay = (tDelayL*) leaf_alloc(sizeof(tDelayL));
-    tDelayL_init(p->combDelay, 0.0f, leaf.sampleRate * 2);
+    tOneZero_init(&p->filter, 0.0f);
     
-    p->filter = (tOneZero*) leaf_alloc(sizeof(tOneZero));
-    tOneZero_init(p->filter, 0.0f);
-    
-    p->noise = (tNoise*) leaf_alloc(sizeof(tNoise));
-    tNoise_init(p->noise, WhiteNoise);
+    tNoise_init(&p->noise, WhiteNoise);
     
     for (int i = 0; i < 4; i++)
     {
-        p->biquad[i] = (tBiQuad*) leaf_alloc(sizeof(tBiQuad));
-        tBiQuad_init(p->biquad[i]);
+        tBiQuad_init(&p->biquad[i]);
     }
     
     p->pluckAmplitude = 0.3f;
@@ -139,14 +140,14 @@ void    tStifKarp_init          (tStifKarp* const p, float lowestFrequency)
 
 void tStifKarp_free (tStifKarp* const p)
 {
-    tDelayA_free(p->delayLine);
-    tDelayL_free(p->combDelay);
-    tOneZero_free(p->filter);
-    tNoise_free(p->noise);
+    tDelayA_free(&p->delayLine);
+    tDelayL_free(&p->combDelay);
+    tOneZero_free(&p->filter);
+    tNoise_free(&p->noise);
     
     for (int i = 0; i < 4; i++)
     {
-        tBiQuad_free(p->biquad[i]);
+        tBiQuad_free(&p->biquad[i]);
     }
     
     leaf_free(p);
@@ -159,16 +160,16 @@ float   tStifKarp_getLastOut    (tStifKarp* const p)
 
 float   tStifKarp_tick          (tStifKarp* const p)
 {
-    float temp = tDelayA_getLastOut(p->delayLine) * p->loopGain;
+    float temp = tDelayA_getLastOut(&p->delayLine) * p->loopGain;
     
     // Calculate allpass stretching.
-    for (int i=0; i<4; i++)     temp = tBiQuad_tick(p->biquad[i],temp);
+    for (int i=0; i<4; i++)     temp = tBiQuad_tick(&p->biquad[i],temp);
     
     // Moving average filter.
-    temp = tOneZero_tick(p->filter, temp);
+    temp = tOneZero_tick(&p->filter, temp);
     
-    float out = tDelayA_tick(p->delayLine, temp);
-    out = out - tDelayL_tick(p->combDelay, out);
+    float out = tDelayA_tick(&p->delayLine, temp);
+    out = out - tDelayL_tick(&p->combDelay, out);
     p->lastOut = out;
     
     return p->lastOut;
@@ -181,10 +182,10 @@ void    tStifKarp_pluck         (tStifKarp* const p, float amplitude)
     
     p->pluckAmplitude = amplitude;
     
-    for ( uint32_t i=0; i < (uint32_t)tDelayA_getDelay(p->delayLine); i++ )
+    for ( uint32_t i=0; i < (uint32_t)tDelayA_getDelay(&p->delayLine); i++ )
     {
         // Fill delay with noise additively with current contents.
-        tDelayA_tick(p->delayLine, (tDelayA_getLastOut(p->delayLine) * 0.6f) + 0.4f * tNoise_tick(p->noise) * p->pluckAmplitude );
+        tDelayA_tick(&p->delayLine, (tDelayA_getLastOut(&p->delayLine) * 0.6f) + 0.4f * tNoise_tick(&p->noise) * p->pluckAmplitude );
         //delayLine_.tick( combDelay_.tick((delayLine_.lastOut() * 0.6) + 0.4 * noise->tick() * pluckAmplitude_) );
     }
 }
@@ -213,7 +214,7 @@ void    tStifKarp_setFrequency  (tStifKarp* const p, float frequency )
     p->lastFrequency = frequency;
     p->lastLength = leaf.sampleRate / p->lastFrequency;
     float delay = p->lastLength - 0.5f;
-    tDelayA_setDelay(p->delayLine, delay );
+    tDelayA_setDelay(&p->delayLine, delay);
     
     // MAYBE MODIFY LOOP GAINS
     p->loopGain = p->baseLoopGain + (frequency * 0.000005f);
@@ -221,7 +222,7 @@ void    tStifKarp_setFrequency  (tStifKarp* const p, float frequency )
     
     tStifKarp_setStretch(p, p->stretching);
     
-    tDelayL_setDelay(p->combDelay, 0.5f * p->pickupPosition * p->lastLength );
+    tDelayL_setDelay(&p->combDelay, 0.5f * p->pickupPosition * p->lastLength );
     
 }
 
@@ -238,13 +239,13 @@ void    tStifKarp_setStretch         (tStifKarp* const p, float stretch )
     for ( int i=0; i<4; i++ )
     {
         coefficient = temp * temp;
-        tBiQuad_setA2(p->biquad[i], coefficient);
-        tBiQuad_setB0(p->biquad[i], coefficient);
-        tBiQuad_setB2(p->biquad[i], 1.0f);
+        tBiQuad_setA2(&p->biquad[i], coefficient);
+        tBiQuad_setB0(&p->biquad[i], coefficient);
+        tBiQuad_setB2(&p->biquad[i], 1.0f);
         
         coefficient = -2.0f * temp * cos(TWO_PI * freq / leaf.sampleRate);
-        tBiQuad_setA1(p->biquad[i], coefficient);
-        tBiQuad_setB1(p->biquad[i], coefficient);
+        tBiQuad_setA1(&p->biquad[i], coefficient);
+        tBiQuad_setB1(&p->biquad[i], coefficient);
         
         freq += dFreq;
     }
@@ -257,7 +258,7 @@ void    tStifKarp_setPickupPosition  (tStifKarp* const p, float position )
     else if (position <= 1.0f)  p->pickupPosition = position;
     else                        p->pickupPosition = 1.0f;
     
-    tDelayL_setDelay(p->combDelay, 0.5f * p->pickupPosition * p->lastLength);
+    tDelayL_setDelay(&p->combDelay, 0.5f * p->pickupPosition * p->lastLength);
 }
 
 // Set the base loop gain.

@@ -31,8 +31,8 @@ typedef struct _tPRCRev
     
     float inv_441;
     
-    tDelay* allpassDelays[2];
-    tDelay* combDelay;
+    tDelay allpassDelays[2];
+    tDelay combDelay;
     float allpassCoeff;
     float combCoeff;
     
@@ -60,8 +60,8 @@ typedef struct _tNRev
     
     float inv_sr, inv_441;
     
-    tDelay* allpassDelays[8];
-    tDelay* combDelays[6];
+    tDelay allpassDelays[8];
+    tDelay combDelays[6];
     float allpassCoeff;
     float combCoeffs[6];
     float lowpassState;

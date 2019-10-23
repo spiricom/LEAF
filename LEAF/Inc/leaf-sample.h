@@ -95,7 +95,7 @@ extern "C" {
 
     } tSampler;
     
-    void    tSampler_init      (tSampler* const, tBuffer* s);
+    void    tSampler_init      (tSampler* const, tBuffer* const);
     void    tSampler_free      (tSampler* const);
     
     float   tSampler_tick      (tSampler* const);

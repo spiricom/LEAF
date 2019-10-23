@@ -31,10 +31,17 @@ void tOversampler_init(tOversampler* const os, int ratio, oBool extraQuality)
         int idx = (int)(log2f(os->ratio))-1+offset;
         os->numTaps = firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
-        os->pCoeffs = firCoeffs[idx];
+        os->pCoeffs = (float*) firCoeffs[idx];
         os->upState = leaf_alloc(sizeof(float) * os->phaseLength);
         os->downState = leaf_alloc(sizeof(float) * os->phaseLength);
     }
+}
+
+void tOversampler_free(tOversampler* const os)
+{
+    leaf_free(os->upState);
+    leaf_free(os->downState);
+    leaf_free(os);
 }
 
 float tOversampler_tick(tOversampler* const os, float input, float (*effectTick)(float))

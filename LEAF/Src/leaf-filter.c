@@ -821,8 +821,8 @@ int     tSVFE_setQ(tSVFE* const svf, float Q)
 }
 
 void	tFIR_init(tFIR* const fir, float* coeffs, int numTaps){
-	fir->coeff = coeffs;
     fir->numTaps = numTaps;
+    fir->coeff = coeffs;
     fir->past = (float*)leaf_alloc(sizeof(float) * fir->numTaps);
     for (int i = 0; i < fir->numTaps; ++i) fir->past[i] = 0.0f;
 }
@@ -835,4 +835,8 @@ float	tFIR_tick(tFIR* const fir, float input){
 	return y;
 }
 
-void	tFIR_free(tFIR* const fir){}
+void	tFIR_free(tFIR* const fir)
+{
+    leaf_free(fir->past);
+    leaf_free(fir);
+}
