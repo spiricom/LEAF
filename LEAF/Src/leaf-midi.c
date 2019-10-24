@@ -37,7 +37,7 @@ void tPoly_init(tPoly* const poly, int maxNumVoices)
     
     poly->glideTime = 5.0f;
     
-    poly->ramp = (tRamp*) leaf_alloc(sizeof(tRamp) * poly->maxNumVoices);
+    poly->ramps = (tRamp*) leaf_alloc(sizeof(tRamp) * poly->maxNumVoices);
     poly->rampVals = (float*) leaf_alloc(sizeof(float) * poly->maxNumVoices);
     poly->firstReceived = (oBool*) leaf_alloc(sizeof(oBool) * poly->maxNumVoices);
     poly->voices = (int**) leaf_alloc(sizeof(int*) * poly->maxNumVoices);
@@ -48,7 +48,7 @@ void tPoly_init(tPoly* const poly, int maxNumVoices)
         poly->voices[i][0] = -1;
         poly->firstReceived[i] = OFALSE;
         
-        tRamp_init(&poly->ramp[i], poly->glideTime, 1);
+        tRamp_init(&poly->ramps[i], poly->glideTime, 1);
     }
     
     poly->pitchBend = 0.0f;
@@ -64,7 +64,7 @@ void tPoly_free(tPoly* const poly)
 {
     for (int i = 0; i < poly->maxNumVoices; i++)
     {
-        tRamp_free(&poly->ramp[i]);
+        tRamp_free(&poly->ramps[i]);
         leaf_free(poly->voices[i]);
     }
     tRamp_free(&poly->pitchBendRamp);
@@ -72,11 +72,9 @@ void tPoly_free(tPoly* const poly)
     tStack_free(&poly->orderStack);
     
     leaf_free(poly->voices);
-    leaf_free(poly->ramp);
+    leaf_free(poly->ramps);
     leaf_free(poly->rampVals);
     leaf_free(poly->firstReceived);
-
-    
 }
 
 void tPoly_tickPitch(tPoly* poly)
@@ -89,7 +87,7 @@ void tPoly_tickPitchGlide(tPoly* poly)
 {
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
-        tRamp_tick(&poly->ramp[i]);
+        tRamp_tick(&poly->ramps[i]);
     }
 }
 
@@ -122,7 +120,7 @@ int tPoly_noteOn(tPoly* const poly, int note, uint8_t vel)
             {
                 if (!poly->firstReceived[i] || !poly->pitchGlideIsActive)
                 {
-                    tRamp_setVal(&poly->ramp[i], note);
+                    tRamp_setVal(&poly->ramps[i], note);
                     poly->firstReceived[i] = OTRUE;
                 }
                 
@@ -134,7 +132,7 @@ int tPoly_noteOn(tPoly* const poly, int note, uint8_t vel)
                 poly->notes[note][0] = vel;
                 poly->notes[note][1] = i;
                 
-                tRamp_setDest(&poly->ramp[i], poly->voices[i][0]);
+                tRamp_setDest(&poly->ramps[i], poly->voices[i][0]);
                 
                 alteredVoice = i;
                 break;
@@ -158,8 +156,8 @@ int tPoly_noteOn(tPoly* const poly, int note, uint8_t vel)
                     poly->notes[note][0] = vel;
                     poly->notes[note][1] = whichVoice;
                     
-                    tRamp_setTime(&poly->ramp[whichVoice], poly->glideTime);
-                    tRamp_setDest(&poly->ramp[whichVoice], poly->voices[whichVoice][0]);
+                    tRamp_setTime(&poly->ramps[whichVoice], poly->glideTime);
+                    tRamp_setDest(&poly->ramps[whichVoice], poly->voices[whichVoice][0]);
                     
                     alteredVoice = whichVoice;
                     
@@ -214,7 +212,7 @@ int tPoly_noteOff(tPoly* const poly, uint8_t note)
             if (poly->notes[noteToTest][1] < 0) //if there is a stolen note waiting (marked inactive but on the stack)
             {
                 poly->voices[deactivatedVoice][0] = noteToTest; //set the newly free voice to use the old stolen note
-                tRamp_setDest(&poly->ramp[deactivatedVoice], poly->voices[deactivatedVoice][0]);
+                tRamp_setDest(&poly->ramps[deactivatedVoice], poly->voices[deactivatedVoice][0]);
                 poly->voices[deactivatedVoice][1] = poly->notes[noteToTest][0]; // set the velocity of the voice to be the velocity of that note
                 poly->notes[noteToTest][1] = deactivatedVoice; //mark that it is no longer stolen and is now active
                 return -1;
@@ -278,7 +276,7 @@ void tPoly_setPitchGlideTime(tPoly* const poly, float t)
     poly->glideTime = t;
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
-        tRamp_setTime(&poly->ramp[i], poly->glideTime);
+        tRamp_setTime(&poly->ramps[i], poly->glideTime);
     }
 }
 
@@ -289,7 +287,7 @@ int tPoly_getNumVoices(tPoly* const poly)
 
 float tPoly_getPitch(tPoly* const poly, uint8_t voice)
 {
-    return tRamp_sample(&poly->ramp[voice]) + tRamp_sample(&poly->pitchBendRamp);
+    return tRamp_sample(&poly->ramps[voice]) + tRamp_sample(&poly->pitchBendRamp);
 }
 
 int tPoly_getKey(tPoly* const poly, uint8_t voice)

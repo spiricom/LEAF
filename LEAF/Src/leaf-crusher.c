@@ -32,7 +32,7 @@ void    tCrusher_init    (tCrusher* const c)
 
 void    tCrusher_free    (tCrusher* const c)
 {
-    leaf_free(c);
+
 }
 
 float   tCrusher_tick    (tCrusher* const c, float input)

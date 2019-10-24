@@ -154,7 +154,7 @@ void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL
 
 void tWDF_free(tWDF* const r)
 {
-    leaf_free(r);
+
 }
 
 float tWDF_tick(tWDF* const r, float sample, tWDF* const outputPoint, uint8_t paramsChanged)

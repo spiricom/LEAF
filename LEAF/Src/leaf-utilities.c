@@ -126,7 +126,7 @@ void tEnv_init(tEnv* const x, int ws, int hs, int bs)
 
 void tEnv_free (tEnv* const x)
 {
-    leaf_free(x);
+
 }
 
 float tEnv_tick (tEnv* const x)
@@ -202,6 +202,11 @@ void    tCompressor_init(tCompressor* const c)
     c->R = 0.5f; // compression Ratio
     c->M = 3.0f; // decibel Width of knee transition
     c->W = 1.0f; // decibel Make-up gain
+}
+
+void tCompressor_free(tCompressor* const c)
+{
+    
 }
 
 int ccount = 0;
@@ -306,7 +311,7 @@ void    tEnvelope_init(tEnvelope* const env, float attack, float decay, oBool lo
 
 void tEnvelope_free(tEnvelope* const env)
 {
-    leaf_free(env);
+    
 }
 
 int     tEnvelope_setAttack(tEnvelope* const env, float attack)
@@ -498,6 +503,11 @@ void    tADSR_init(tADSR* const adsr, float attack, float decay, float sustain, 
     adsr->rampInc = adsr->inc_buff[rampIndex];
 }
 
+void tADSR_free(tADSR* const adsr)
+{
+    
+}
+
 int     tADSR_setAttack(tADSR* const adsr, float attack)
 {
     int32_t attackIndex;
@@ -683,6 +693,11 @@ void    tEnvelopeFollower_init(tEnvelopeFollower* const e, float attackThreshold
     e->d_coeff = decayCoeff;
 }
 
+void tEnvelopeFollower_free(tEnvelopeFollower* const e)
+{
+    
+}
+
 float   tEnvelopeFollower_tick(tEnvelopeFollower* const ef, float x)
 {
     if (x < 0.0f ) x = -x;  /* Absolute value. */
@@ -727,6 +742,11 @@ void    tRamp_init(tRamp* const ramp, float time, int samples_per_tick)
     
     ramp->samples_per_tick = samples_per_tick;
     ramp->inc = ((ramp->dest - ramp->curr) / ramp->time * ramp->inv_sr_ms) * (float)ramp->samples_per_tick;
+}
+
+void tRamp_free(tRamp* const ramp)
+{
+    
 }
 
 int     tRamp_setTime(tRamp* const r, float time)
@@ -791,6 +811,11 @@ void    tExpSmooth_init(tExpSmooth* const smooth, float val, float factor)
 	smooth->oneminusfactor=1.0f-factor;
 }
 
+void tExpSmooth_free(tExpSmooth* const smooth)
+{
+    
+}
+
 int     tExpSmooth_setFactor(tExpSmooth* const smooth, float factor)
 {	// factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
 	if (factor<0)
@@ -835,6 +860,11 @@ void    tPwrFollow_init(tPwrFollow* const p, float factor)
 	p->oneminusfactor=1.0f-factor;
 }
 
+void tPwrFollow_free(tPwrFollow* const p)
+{
+    
+}
+
 int     tPwrFollow_setFactor(tPwrFollow* const p, float factor)
 {
 	if (factor<0) factor=0;
@@ -864,6 +894,11 @@ void    tFBleveller_init(tFBleveller* const p, float targetLevel, float factor, 
 	tPwrFollow_init(&p->pwrFlw,factor);
 	p->mode=mode;
 	p->strength=strength;
+}
+
+void tFBleveller_free(tFBleveller* const p)
+{
+    tPwrFollow_free(&p->pwrFlw);
 }
 
 int     tFBleveller_setStrength(tFBleveller* const p, float strength)
@@ -972,6 +1007,15 @@ void    tSimpleLivingString_init(tSimpleLivingString* const p, float freq, float
 	p->levMode=levMode;
 }
 
+void tSimpleLivingString_free(tSimpleLivingString* const p)
+{
+    tExpSmooth_free(&p->wlSmooth);
+    tDelayL_free(&p->delayLine);
+    tOnePole_free(&p->bridgeFilter);
+    tHighpass_free(&p->DCblocker);
+    tFBleveller_free(&p->fbLev);
+}
+
 int     tSimpleLivingString_setFreq(tSimpleLivingString* const p, float freq)
 {
 	if (freq<20) freq=20;
@@ -1066,6 +1110,24 @@ void    tLivingString_init(tLivingString* const p, float freq, float pickPos, fl
 	tFBleveller_init(&p->fbLevU, targetLev, levSmoothFactor, levStrength, levMode);
 	tFBleveller_init(&p->fbLevL, targetLev, levSmoothFactor, levStrength, levMode);
 	p->levMode=levMode;
+}
+
+void tLivingString_free(tLivingString* const p)
+{
+    tExpSmooth_free(&p->wlSmooth);
+    tExpSmooth_free(&p->ppSmooth);
+    tDelayL_free(&p->delLF);
+    tDelayL_free(&p->delUF);
+    tDelayL_free(&p->delUB);
+    tDelayL_free(&p->delLB);
+    tOnePole_free(&p->bridgeFilter);
+    tOnePole_free(&p->nutFilter);
+    tOnePole_free(&p->prepFilterU);
+    tOnePole_free(&p->prepFilterL);
+    tHighpass_free(&p->DCblockerU);
+    tHighpass_free(&p->DCblockerL);
+    tFBleveller_free(&p->fbLevU);
+    tFBleveller_free(&p->fbLevL);
 }
 
 int     tLivingString_setFreq(tLivingString* const p, float freq)
@@ -1188,6 +1250,21 @@ float   tLivingString_sample(tLivingString* const p)
 
 
 /* Stack */
+
+void tStack_init(tStack* const ns)
+{
+    ns->ordered = OFALSE;
+    ns->size = 0;
+    ns->pos = 0;
+    ns->capacity = STACK_SIZE;
+    
+    for (int i = 0; i < STACK_SIZE; i++) ns->data[i] = -1;
+}
+
+void tStack_free(tStack* const ns)
+{
+    
+}
 
 // If stack contains note, returns index. Else returns -1;
 int tStack_contains(tStack* const ns, uint16_t noteVal)
@@ -1382,17 +1459,6 @@ int tStack_first(tStack* const ns)
 {
     return ns->data[0];
 }
-
-void tStack_init(tStack* const ns)
-{
-    ns->ordered = OFALSE;
-    ns->size = 0;
-    ns->pos = 0;
-    ns->capacity = STACK_SIZE;
-    
-    for (int i = 0; i < STACK_SIZE; i++) ns->data[i] = -1;
-}
-
 /******************************************************************************/
 /***************** static function declarations *******************************/
 /******************************************************************************/
@@ -1416,7 +1482,6 @@ void     tSOLAD_init(tSOLAD* const w)
 
 void tSOLAD_free(tSOLAD* const w)
 {
-    leaf_free(w);
 }
 
 // send one block of input samples, receive one block of output samples
@@ -1750,7 +1815,10 @@ void tSNAC_init(tSNAC* const s, int overlaparg)
 
 void tSNAC_free(tSNAC* const s)
 {
-    leaf_free(s);
+    leaf_free(s->inputbuf);
+    leaf_free(s->processbuf);
+    leaf_free(s->spectrumbuf);
+    leaf_free(s->biasbuf);
 }
 /******************************************************************************/
 /************************** public access functions****************************/
@@ -2058,7 +2126,7 @@ void tAtkDtk_init_expanded(tAtkDtk* const a, int blocksize, int atk, int rel)
 
 void tAtkDtk_free(tAtkDtk *a)
 {
-    leaf_free(a);
+    
 }
 
 /*******Public Functions***********/

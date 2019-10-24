@@ -3,11 +3,11 @@
 #if _WIN32 || _WIN64
 
 #include "..\Inc\leaf-tables.h"
-#include "..\Inc\leaf-globals.h"
+#include "..\Inc\leaf-global.h"
 #else
 
 #include "../Inc/leaf-tables.h"
-#include "../Inc/leaf-globals.h"
+#include "../Inc/leaf-global.h"
 
 #endif
 

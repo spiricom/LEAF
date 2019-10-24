@@ -30,15 +30,14 @@ void    tAllpass_init(tAllpass* const f, float initDelay, uint32_t maxDelay)
     tDelayL_init(&f->delay, initDelay, maxDelay);
 }
 
+void tAllpass_free(tAllpass* const f)
+{
+    tDelayL_free(&f->delay);
+}
+
 void    tAllpass_setDelay(tAllpass* const f, float delay)
 {
     tDelayL_setDelay(&f->delay, delay);
-}
-
-void    tAllpass_free(tAllpass* const f)
-{
-    leaf_free(&f->delay);
-    leaf_free(f);
 }
 
 void    tAllpass_setGain(tAllpass* const f, float gain)
@@ -81,8 +80,6 @@ void tButterworth_free(tButterworth* const f)
         tSVF_free(&f->low[i]);
         tSVF_free(&f->high[i]);
     }
-    
-    leaf_free(f);
 }
 
 float tButterworth_tick(tButterworth* const f, float samp)
@@ -129,7 +126,7 @@ void    tOneZero_init(tOneZero* const f, float theZero)
 
 void    tOneZero_free(tOneZero* const f)
 {
-    leaf_free(f);
+    
 }
 
 float   tOneZero_tick(tOneZero* const f, float input)
@@ -210,7 +207,7 @@ void    tTwoZero_init(tTwoZero* const f)
 
 void    tTwoZero_free(tTwoZero* const f)
 {
-    leaf_free(f);
+    
 }
 
 float   tTwoZero_tick(tTwoZero* const f, float input)
@@ -287,7 +284,7 @@ void    tOnePole_init(tOnePole* const f, float freq)
 
 void    tOnePole_free(tOnePole* const f)
 {
-    leaf_free(f);
+    
 }
 
 void    tOnePole_setB0(tOnePole* const f, float b0)
@@ -359,7 +356,7 @@ void    tTwoPole_init(tTwoPole* const f)
 
 void    tTwoPole_free(tTwoPole* const f)
 {
-    leaf_free(f);
+    
 }
 
 float   tTwoPole_tick(tTwoPole* const f, float input)
@@ -450,7 +447,7 @@ void   tPoleZero_init(tPoleZero* const f)
 
 void   tPoleZero_free(tPoleZero* const f)
 {
-    leaf_free(f);
+    
 }
 
 void    tPoleZero_setB0(tPoleZero* const pzf, float b0)
@@ -543,7 +540,7 @@ void    tBiQuad_init(tBiQuad* const f)
 
 void    tBiQuad_free(tBiQuad* const f)
 {
-    leaf_free(f);
+    
 }
 
 float   tBiQuad_tick(tBiQuad* const f, float input)
@@ -655,6 +652,20 @@ void    tBiQuadSampleRateChanged(tBiQuad* const f)
 }
 
 /* Highpass */
+void    tHighpass_init(tHighpass* const f, float freq)
+{
+    f->R = (1.0f-((freq * 2.0f * 3.14f)* leaf.invSampleRate));
+    f->ys = 0.0f;
+    f->xs = 0.0f;
+    
+    f->frequency = freq;
+}
+
+void    tHighpass_free(tHighpass* const f)
+{
+    
+}
+
 void     tHighpass_setFreq(tHighpass* const f, float freq)
 {
     f->frequency = freq;
@@ -673,20 +684,6 @@ float   tHighpass_tick(tHighpass* const f, float x)
     f->ys = x - f->xs + f->R * f->ys;
     f->xs = x;
     return f->ys;
-}
-
-void    tHighpass_init(tHighpass* const f, float freq)
-{
-    f->R = (1.0f-((freq * 2.0f * 3.14f)* leaf.invSampleRate));
-    f->ys = 0.0f;
-    f->xs = 0.0f;
-    
-    f->frequency = freq;
-}
-
-void    tHighpass_free(tHighpass* const f)
-{
-    leaf_free(f);
 }
 
 void tHighpassSampleRateChanged(tHighpass* const f)
@@ -737,7 +734,7 @@ void tSVF_init(tSVF* const svf, SVFType type, float freq, float Q)
 
 void tSVF_free(tSVF* const svf)
 {
-    leaf_free(svf);
+    
 }
 
 int     tSVF_setFreq(tSVF* const svf, float freq)
@@ -780,6 +777,11 @@ void   tSVFE_init(tSVFE* const svf, SVFType type, uint16_t input, float Q)
     svf->a1 = a1;
     svf->a2 = a2;
     svf->a3 = a3;
+}
+
+void tSVFE_free(tSVFE* const svf)
+{
+    
 }
 
 float   tSVFE_tick(tSVFE* const svf, float v0)
@@ -838,5 +840,4 @@ float	tFIR_tick(tFIR* const fir, float input){
 void	tFIR_free(tFIR* const fir)
 {
     leaf_free(fir->past);
-    leaf_free(fir);
 }

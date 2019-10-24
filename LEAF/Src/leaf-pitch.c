@@ -51,8 +51,6 @@ void tPitchShifter_free(tPitchShifter* const ps)
     tSNAC_free(&ps->snac);
     tSOLAD_free(&ps->sola);
     tHighpass_free(&ps->hp);
-    
-    leaf_free(ps);
 }
 
 float tPitchShifter_tick(tPitchShifter* ps, float sample)
@@ -93,7 +91,6 @@ float tPitchShifter_tick(tPitchShifter* ps, float sample)
         
         tSOLAD_setPitchFactor(&ps->sola, ps->pitchFactor);
         tSOLAD_ioSamples(&ps->sola, &(ps->inBuffer[i]), &(ps->outBuffer[i]), ps->frameSize);
-        
         
     }
     
@@ -368,8 +365,6 @@ void tPeriod_free (tPeriod* const p)
 {
     tEnv_free(&p->env);
     tSNAC_free(&p->snac);
-    
-    leaf_free(p);
 }
 
 float tPeriod_findPeriod (tPeriod* p, float sample)
@@ -470,8 +465,6 @@ void tPitchShift_free(tPitchShift* const ps)
 {
     tSOLAD_free(&ps->sola);
     tHighpass_free(&ps->hp);
-    
-    leaf_free(ps);
 }
 
 float tPitchShift_shift (tPitchShift* ps)

@@ -48,6 +48,7 @@
 
 #endif
 
+// This might be too low.
 #define NUM_BLOCKS 50
 
 mpool_pool_t blocks[NUM_BLOCKS];

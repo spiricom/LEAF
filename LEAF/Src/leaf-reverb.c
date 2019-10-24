@@ -58,7 +58,6 @@ void tPRCRev_free(tPRCRev* const r)
     tDelay_free(&r->allpassDelays[0]);
     tDelay_free(&r->allpassDelays[1]);
     tDelay_free(&r->combDelay);
-    leaf_free(r);
 }
 
 void    tPRCRev_setT60(tPRCRev* const r, float t60)
@@ -167,8 +166,6 @@ void    tNRev_free(tNRev* const r)
     {
         tDelay_free(&r->allpassDelays[i]);
     }
-    
-    leaf_free(r);
 }
 
 void    tNRev_setT60(tNRev* const r, float t60)
@@ -334,6 +331,8 @@ void    tDattorro_free              (tDattorro* const r)
     
     tOnePole_free(&r->f1_filter);
     
+    tHighpass_free(&r->f2_hp);
+    
     tCycle_free(&r->f1_lfo);
     
     // FEEDBACK 2
@@ -345,9 +344,9 @@ void    tDattorro_free              (tDattorro* const r)
     
     tOnePole_free(&r->f2_filter);
     
-    tCycle_free(&r->f2_lfo);
+    tHighpass_free(&r->f2_hp);
     
-    leaf_free(r);
+    tCycle_free(&r->f2_lfo);
 }
 
 float   tDattorro_tick              (tDattorro* const r, float input)

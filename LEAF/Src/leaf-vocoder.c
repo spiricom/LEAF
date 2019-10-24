@@ -51,8 +51,6 @@ void tTalkbox_free(tTalkbox* const v)
     leaf_free(v->window);
     leaf_free(v->buf0);
     leaf_free(v->buf1);
-    
-    leaf_free(v);
 }
 
 void tTalkbox_update(tTalkbox* const v) ///update internal parameters...
@@ -227,7 +225,6 @@ void tTalkbox_setQuality(tTalkbox* const v, float quality)
 	v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf.sampleRate);
 }
 
-
 void   tVocoder_init        (tVocoder* const v)
 {
     v->param[0] = 0.33f;  //input select
@@ -240,6 +237,11 @@ void   tVocoder_init        (tVocoder* const v)
     v->param[7] = 0.33f;  //num bands
     
     tVocoder_update(v);
+}
+
+void tVocoder_free (tVocoder* const v)
+{
+    
 }
 
 void        tVocoder_update      (tVocoder* const v)

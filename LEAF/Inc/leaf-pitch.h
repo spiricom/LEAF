@@ -17,12 +17,12 @@ extern "C" {
 
 //==============================================================================
 
-#include "leaf-globals.h"
+#include "leaf-global.h"
 #include "leaf-math.h"
 
 #include "leaf-filter.h"
 #include "leaf-utilities.h"
-#include "../leaf.h"
+
 //==============================================================================
     
 #define DEFPITCHRATIO 2.0f

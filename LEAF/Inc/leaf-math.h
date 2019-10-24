@@ -13,6 +13,7 @@
 extern "C" {
 #endif
 
+#include "leaf-global.h"
 #include "math.h"
 #include "stdint.h"
 #include "stdlib.h"
@@ -26,6 +27,12 @@ typedef enum oBool
     OTRUE  = 1,
     OFALSE = 0
 }oBool;
+    
+// Allows for bitwise operations on floats
+union unholy_t { /* a union between a float and an integer */
+    float f;
+    int i;
+};
 
 #define SQRT8 2.82842712475f
 #define WSCALE 1.30612244898f

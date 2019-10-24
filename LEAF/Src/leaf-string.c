@@ -38,8 +38,6 @@ void tPluck_free (tPluck* const p)
     tOnePole_free(&p->pickFilter);
     tOneZero_free(&p->loopFilter);
     tDelayA_free(&p->delayLine);
-
-    leaf_free(p);
 }
 
 float   tPluck_getLastOut    (tPluck *p)
@@ -149,8 +147,6 @@ void tStifKarp_free (tStifKarp* const p)
     {
         tBiQuad_free(&p->biquad[i]);
     }
-    
-    leaf_free(p);
 }
 
 float   tStifKarp_getLastOut    (tStifKarp* const p)

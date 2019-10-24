@@ -17,7 +17,7 @@ extern "C" {
     
 //==============================================================================
 
-#include "leaf-globals.h"
+#include "leaf-global.h"
 #include "leaf-math.h"
 
 #include "leaf-delay.h"

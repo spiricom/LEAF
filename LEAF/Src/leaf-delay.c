@@ -41,7 +41,6 @@ void    tDelay_init (tDelay*  const d, uint32_t delay, uint32_t maxDelay)
 void tDelay_free(tDelay* const d)
 {
     leaf_free(d->buff);
-    leaf_free(d);
 }
 
 float   tDelay_tick (tDelay* const d, float input)
@@ -153,7 +152,6 @@ void   tDelayL_init (tDelayL* const d, float delay, uint32_t maxDelay)
 void tDelayL_free(tDelayL* const d)
 {
     leaf_free(d->buff);
-    leaf_free(d);
 }
 
 float   tDelayL_tick (tDelayL* const d, float input)
@@ -319,7 +317,6 @@ void  tDelayA_init (tDelayA* const d, float delay, uint32_t maxDelay)
 void tDelayA_free(tDelayA* const d)
 {
     leaf_free(d->buff);
-    leaf_free(d);
 }
 
 float   tDelayA_tick (tDelayA* const d, float input)
@@ -455,7 +452,6 @@ void   tTapeDelay_init (tTapeDelay* const d, float delay, uint32_t maxDelay)
 void tTapeDelay_free(tTapeDelay* const d)
 {
     leaf_free(d->buff);
-    leaf_free(d);
 }
 
 //#define SMOOTH_FACTOR 10.f

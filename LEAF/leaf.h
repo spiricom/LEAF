@@ -19,8 +19,9 @@
 
 #if _WIN32 || _WIN64
 
-#include ".\Inc\leaf-globals.h"
+#include ".\Inc\leaf-global.h"
 #include ".\Inc\leaf-math.h"
+#include ".\Inc\leaf-mempool.h"
 #include ".\Inc\leaf-utilities.h"
 #include ".\Inc\leaf-delay.h"
 #include ".\Inc\leaf-filter.h"
@@ -40,8 +41,9 @@
 
 #else
 
-#include "./Inc/leaf-globals.h"
+#include "./Inc/leaf-global.h"
 #include "./Inc/leaf-math.h"
+#include "./Inc/leaf-mempool.h"
 #include "./Inc/leaf-utilities.h"
 #include "./Inc/leaf-delay.h"
 #include "./Inc/leaf-filter.h"

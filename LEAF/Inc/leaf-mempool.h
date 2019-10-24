@@ -50,9 +50,6 @@ extern "C" {
     
 //==============================================================================
 
-
-#define MPOOL_POOL_SIZE   50 000
-
 #define MPOOL_ALIGN_SIZE (8)
 
 //#define size_t unsigned long

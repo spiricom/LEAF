@@ -23,6 +23,11 @@ void tLockhartWavefolder_init(tLockhartWavefolder* const w)
     w->xn1 = 0.0f;
 }
 
+void tLockhardWavefolder_free(tLockhartWavefolder* const w)
+{
+    
+}
+
 double tLockhartWavefolderLambert(double x, double ln)
 {
     double thresh, w, expw, p, r, s, err;

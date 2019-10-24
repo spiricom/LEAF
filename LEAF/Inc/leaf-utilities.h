@@ -17,7 +17,6 @@ extern "C" {
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-#include "leaf-globals.h"
 #include "leaf-math.h"
 #include "leaf-filter.h"
 #include "leaf-delay.h"
@@ -369,6 +368,8 @@ int     tAtkDtk_detect          (tAtkDtk* const, float *in);
 // ENV~ from PD, modified for LEAF
 #define MAXOVERLAP 32
 #define INITVSTAKEN 64
+#define ENV_WINDOW_SIZE 1024
+#define ENV_HOP_SIZE 256
 
 typedef struct _tEnv
 {

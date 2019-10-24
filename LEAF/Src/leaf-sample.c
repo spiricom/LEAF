@@ -39,7 +39,6 @@ void  tBuffer_init (tBuffer* const s, uint32_t length)
 void  tBuffer_free (tBuffer* const s)
 {
     leaf_free(s->buff);
-    leaf_free(s);
 }
 
 void tBuffer_tick (tBuffer* const s, float sample)
@@ -136,7 +135,6 @@ void tSampler_init(tSampler* const p, tBuffer* const s)
 void tSampler_free         (tSampler* const p)
 {
     tRamp_free(&p->gain);
-    leaf_free(p);
 }
 
 float tSampler_tick        (tSampler* const p)

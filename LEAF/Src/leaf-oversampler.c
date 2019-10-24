@@ -41,7 +41,6 @@ void tOversampler_free(tOversampler* const os)
 {
     leaf_free(os->upState);
     leaf_free(os->downState);
-    leaf_free(os);
 }
 
 float tOversampler_tick(tOversampler* const os, float input, float (*effectTick)(float))

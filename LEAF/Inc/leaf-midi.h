@@ -15,9 +15,9 @@ extern "C" {
     
 //==============================================================================
     
-#include "leaf-globals.h"
+#include "leaf-global.h"
+#include "leaf-mempool.h"
 #include "leaf-math.h"
-
 #include "leaf-utilities.h"
 
 //==============================================================================
@@ -28,7 +28,7 @@ typedef struct _tPoly
     tStack stack;
     tStack orderStack;
     
-    tRamp* ramp;
+    tRamp* ramps;
     float* rampVals;
     oBool* firstReceived;
     float glideTime;

@@ -61,8 +61,6 @@ void tFormantShifter_free(tFormantShifter* const fs)
         leaf_free(fs->fbuff[i]);
     }
     leaf_free(fs->fbuff);
-    
-    leaf_free(fs);
 }
 
 

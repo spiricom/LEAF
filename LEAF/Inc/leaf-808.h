@@ -15,9 +15,7 @@ extern "C" {
 
 //==============================================================================
     
-#include "leaf-globals.h"
 #include "leaf-math.h"
-
 #include "leaf-oscillator.h"
 #include "leaf-utilities.h"
 #include "leaf-filter.h"
@@ -37,10 +35,11 @@ typedef struct _t808Cowbell {
     tHighpass highpass;
     float oscMix;
     float filterCutoff;
+    oBool useStick;
     
 } t808Cowbell;
 
-void    t808Cowbell_init             (t808Cowbell* const);
+void    t808Cowbell_init             (t808Cowbell* const, int useStick);
 void    t808Cowbell_free             (t808Cowbell* const);
 float   t808Cowbell_tick             (t808Cowbell* const);
 void    t808Cowbell_on               (t808Cowbell* const, float vel);
@@ -49,6 +48,7 @@ void    t808Cowbell_setHighpassFreq  (t808Cowbell* const, float freq);
 void    t808Cowbell_setBandpassFreq  (t808Cowbell* const, float freq);
 void    t808Cowbell_setFreq          (t808Cowbell* const, float freq);
 void    t808Cowbell_setOscMix        (t808Cowbell* const, float oscMix);
+void    t808Cowbell_setStick         (t808Cowbell* const, int useStick);
 
 //==============================================================================
     
