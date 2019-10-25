@@ -86,7 +86,7 @@ void        tVocoder_suspend     (tVocoder* const);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
-/* tSOLAD : pitch shifting algorithm that underlies tPitchShifter etc */
+/* tSOLAD : pitch shifting algorithm that underlies tRetune etc */
 #define LOOPSIZE (2048*2)      // (4096*2) // loop size must be power of two
 #define LOOPMASK (LOOPSIZE - 1)
 #define PITCHFACTORDEFAULT 1.0f
@@ -111,75 +111,23 @@ typedef struct _tSOLAD
 
 void    tSOLAD_init             (tSOLAD* const);
 void    tSOLAD_free             (tSOLAD* const);
-
 // send one block of input samples, receive one block of output samples
 void    tSOLAD_ioSamples        (tSOLAD *w, float* in, float* out, int blocksize);
-
 // set periodicity analysis data
 void    tSOLAD_setPeriod        (tSOLAD *w, float period);
-
 // set pitch factor between 0.25 and 4
 void    tSOLAD_setPitchFactor   (tSOLAD *w, float pitchfactor);
-
 // force readpointer lag
 void    tSOLAD_setReadLag       (tSOLAD *w, float readlag);
-
 // reset state variables
 void    tSOLAD_resetState       (tSOLAD *w);
     
-// Pitch shifter
-typedef struct _tPitchShifter
-{
-    tEnvPD env;
-    tSNAC snac;
-    tSOLAD sola;
-    tHighpass hp;
-    
-    float* inBuffer;
-    float* outBuffer;
-    int frameSize;
-    int bufSize;
-    int framesPerBuffer;
-    int curBlock;
-    int lastBlock;
-    int index;
-    
-    uint16_t hopSize;
-    uint16_t windowSize;
-    uint8_t fba;
-    
-    float pitchFactor;
-    float timeConstant;
-    float radius;
-    float max;
-    float lastmax;
-    float deltamax;
-    
-} tPitchShifter;
-
-void        tPitchShifter_init              (tPitchShifter* const, float* in, float* out, int bufSize, int frameSize);
-void        tPitchShifter_free              (tPitchShifter* const);
-
-float       tPitchShifter_tick              (tPitchShifter* const, float sample);
-float       tPitchShifterToFreq_tick        (tPitchShifter* const, float sample, float freq);
-float       tPitchShifterToFunc_tick        (tPitchShifter* const, float sample, float (*fun)(float));
-void        tPitchShifter_ioSamples_toFreq  (tPitchShifter* const, float* in, float* out, int size, float toFreq);
-void        tPitchShifter_ioSamples_toPeriod(tPitchShifter* const, float* in, float* out, int size, float toPeriod);
-void        tPitchShifter_ioSamples_toFunc  (tPitchShifter* const, float* in, float* out, int size, float (*fun)(float));
-void        tPitchShifter_setPitchFactor    (tPitchShifter* const, float pf);
-void        tPitchShifter_setTimeConstant   (tPitchShifter* const, float tc);
-void        tPitchShifter_setHopSize        (tPitchShifter* const, int hs);
-void        tPitchShifter_setWindowSize     (tPitchShifter* const, int ws);
-float       tPitchShifter_getPeriod         (tPitchShifter* const);
-
-//==============================================================================
-
 // Pitch shift
 typedef struct _tPitchShift
 {
     tSOLAD sola;
     tHighpass hp;
-   tPeriodDetection* p;
+    tPeriodDetection* p;
     
     float* outBuffer;
     int frameSize;
@@ -195,15 +143,90 @@ typedef struct _tPitchShift
     float radius;
 } tPitchShift;
 
-void        tPitchShift_init                (tPitchShift* const,tPeriodDetection* const, float* out, int bufSize);
+void        tPitchShift_init                (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize);
 void        tPitchShift_free                (tPitchShift* const);
-
 float       tPitchShift_shift               (tPitchShift* const);
 float       tPitchShift_shiftToFunc         (tPitchShift* const, float (*fun)(float));
 float       tPitchShift_shiftToFreq         (tPitchShift* const, float freq);
 void        tPitchShift_setPitchFactor      (tPitchShift* const, float pf);
+    
+// Retune
+typedef struct _tRetune
+{
+    tPeriodDetection pd;
+    tPitchShift* ps;
+    
+    float* inBuffer;
+    float** outBuffers;
+    float* tickOutput;
+    int frameSize;
+    int bufSize;
+    
+    uint16_t hopSize;
+    uint16_t windowSize;
+    uint8_t fba;
+    
+    float* pitchFactor;
+    float timeConstant;
+    float radius;
+    
+    float inputPeriod;
+    
+    int numVoices;
+} tRetune;
+
+void        tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize);
+void        tRetune_free                (tRetune* const);
+
+float*      tRetune_tick                (tRetune* const, float sample);
+void        tRetune_setNumVoices        (tRetune* const, int numVoices);
+void        tRetune_setPitchFactors     (tRetune* const, float pf);
+void        tRetune_setPitchFactor      (tRetune* const, float pf, int voice);
+void        tRetune_setTimeConstant     (tRetune* const, float tc);
+void        tRetune_setHopSize          (tRetune* const, int hs);
+void        tRetune_setWindowSize       (tRetune* const, int ws);
+float       tRetune_getInputPeriod      (tRetune* const);
+float       tRetune_getInputFreq        (tRetune* const);
+    
+// Autotune
+typedef struct _tAutotune
+{
+    tPeriodDetection pd;
+    tPitchShift* ps;
+    
+    float* inBuffer;
+    float** outBuffers;
+    float* tickOutput;
+    int frameSize;
+    int bufSize;
+    
+    uint16_t hopSize;
+    uint16_t windowSize;
+    uint8_t fba;
+    
+    float* freq;
+    float timeConstant;
+    float radius;
+    
+    float inputPeriod;
+    
+    int numVoices;
+} tAutotune;
+
+void        tAutotune_init                (tAutotune* const, int numVoices, int bufSize, int frameSize);
+void        tAutotune_free                (tAutotune* const);
+
+float*      tAutotune_tick                (tAutotune* const, float sample);
+void        tAutotune_setNumVoices        (tAutotune* const, int numVoices);
+void        tAutotune_setFreq             (tAutotune* const, float f, int voice);
+void        tAutotune_setTimeConstant     (tAutotune* const, float tc);
+void        tAutotune_setHopSize          (tAutotune* const, int hs);
+void        tAutotune_setWindowSize       (tAutotune* const, int ws);
+float       tAutotune_getInputPeriod      (tAutotune* const);
+float       tAutotune_getInputFreq        (tAutotune* const);
 
 //==============================================================================
+    
 
 #define FORD 7
 #define FORMANT_BUFFER_SIZE 2048
