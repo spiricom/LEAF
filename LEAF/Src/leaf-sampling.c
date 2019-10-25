@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    leaf-sample.c
+    leaf-sampling.c
     Created: 20 Jan 2017 12:02:17pm
     Author:  Michael R Mulshine
 
@@ -11,12 +11,12 @@
 
 #if _WIN32 || _WIN64
 
-#include "..\Inc\leaf-sample.h"
+#include "..\Inc\leaf-sampling.h"
 #include "..\leaf.h"
 
 #else
 
-#include "../Inc/leaf-sample.h"
+#include "../Inc/leaf-sampling.h"
 #include "../leaf.h"
 
 #endif

@@ -17,15 +17,14 @@ extern "C" {
     
 #include "leaf-global.h"
 #include "leaf-math.h"
-
 #include "leaf-delay.h"
-#include "leaf-filter.h"
-#include "leaf-oscillator.h"
+#include "leaf-filters.h"
+#include "leaf-oscillators.h"
 
 //==============================================================================
 
-/* PRCRev: Reverb, reimplemented from STK (Cook and Scavone). */
-typedef struct _tPRCRev
+/* PRCReverb: Reverb, reimplemented from STK (Cook and Scavone). */
+typedef struct _tPRCReverb
 {
     float mix, t60;
     
@@ -38,23 +37,23 @@ typedef struct _tPRCRev
     
     float lastIn, lastOut;
     
-} tPRCRev;
+} tPRCReverb;
 
-void    tPRCRev_init    (tPRCRev* const, float t60);
-void    tPRCRev_free    (tPRCRev* const);
+void    tPRCReverb_init    (tPRCReverb* const, float t60);
+void    tPRCReverb_free    (tPRCReverb* const);
 
-float   tPRCRev_tick    (tPRCRev* const, float input);
+float   tPRCReverb_tick    (tPRCReverb* const, float input);
 
 // Set reverb time in seconds.
-void    tPRCRev_setT60  (tPRCRev* const, float t60);
+void    tPRCReverb_setT60  (tPRCReverb* const, float t60);
 
 // Set mix between dry input and wet output signal.
-void    tPRCRev_setMix  (tPRCRev* const, float mix);
+void    tPRCReverb_setMix  (tPRCReverb* const, float mix);
 
 //==============================================================================
 
-/* NRev: Reverb, reimplemented from STK (Cook and Scavone). */
-typedef struct _tNRev
+/* NReverb: Reverb, reimplemented from STK (Cook and Scavone). */
+typedef struct _tNReverb
 {
     float mix, t60;
     
@@ -68,22 +67,22 @@ typedef struct _tNRev
     
     float lastIn, lastOut;
     
-} tNRev;
+} tNReverb;
 
-void    tNRev_init      (tNRev* const, float t60);
-void    tNRev_free      (tNRev* const);
+void    tNReverb_init      (tNReverb* const, float t60);
+void    tNReverb_free      (tNReverb* const);
 
-float   tNRev_tick      (tNRev* const, float input);
+float   tNReverb_tick      (tNReverb* const, float input);
 
 // Set reverb time in seconds.
-void    tNRev_setT60    (tNRev* const, float t60);
+void    tNReverb_setT60    (tNReverb* const, float t60);
 
 // Set mix between dry input and wet output signal.
-void    tNRev_setMix    (tNRev*  const, float mix);
+void    tNReverb_setMix    (tNReverb*  const, float mix);
 
 //==============================================================================
 
-typedef struct _tDattorro
+typedef struct _tDattorroReverb
 {
     float   predelay;
     float   input_filter;
@@ -125,19 +124,19 @@ typedef struct _tDattorro
     
     tCycle      f2_lfo;
     
-} tDattorro;
+} tDattorroReverb;
 
-void    tDattorro_init              (tDattorro* const);
-void    tDattorro_free              (tDattorro* const);
+void    tDattorroReverb_init              (tDattorroReverb* const);
+void    tDattorroReverb_free              (tDattorroReverb* const);
 
-float   tDattorro_tick              (tDattorro* const, float input);
+float   tDattorroReverb_tick              (tDattorroReverb* const, float input);
 
-void    tDattorro_setMix            (tDattorro* const, float mix);
-void    tDattorro_setSize           (tDattorro* const, float size);
-void    tDattorro_setInputDelay     (tDattorro* const, float preDelay);
-void    tDattorro_setInputFilter    (tDattorro* const, float freq);
-void    tDattorro_setFeedbackFilter (tDattorro* const, float freq);
-void    tDattorro_setFeedbackGain   (tDattorro* const, float gain);
+void    tDattorroReverb_setMix            (tDattorroReverb* const, float mix);
+void    tDattorroReverb_setSize           (tDattorroReverb* const, float size);
+void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, float preDelay);
+void    tDattorroReverb_setInputFilter    (tDattorroReverb* const, float freq);
+void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const, float freq);
+void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const, float gain);
     
 #ifdef __cplusplus
 }

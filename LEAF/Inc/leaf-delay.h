@@ -48,7 +48,7 @@ float       tDelay_getLastIn    (tDelay*  const);
 //==============================================================================
     
 /* Linearly-interpolating delay, reimplemented from STK (Cook and Scavone). */
-typedef struct _tDelayL
+typedef struct _tLinearDelay
 {
     float gain;
     float* buff;
@@ -63,26 +63,26 @@ typedef struct _tDelayL
     
     float alpha, omAlpha;
     
-} tDelayL;
+} tLinearDelay;
 
-void        tDelayL_init        (tDelayL*  const, float delay, uint32_t maxDelay);
-void        tDelayL_free        (tDelayL* const);
+void        tLinearDelay_init        (tLinearDelay*  const, float delay, uint32_t maxDelay);
+void        tLinearDelay_free        (tLinearDelay* const);
 
-int         tDelayL_setDelay    (tDelayL*  const, float delay);
-float       tDelayL_getDelay    (tDelayL*  const);
-void        tDelayL_tapIn       (tDelayL*  const, float in, uint32_t tapDelay);
-float       tDelayL_tapOut      (tDelayL*  const, float tapDelay);
-float       tDelayL_addTo       (tDelayL*  const, float value, uint32_t tapDelay);
-float       tDelayL_tick        (tDelayL*  const, float sample);
-void   		tDelayL_tickIn 		(tDelayL* const d, float input);
-float   	tDelayL_tickOut 	(tDelayL* const d);
-float       tDelayL_getLastOut  (tDelayL*  const);
-float       tDelayL_getLastIn   (tDelayL*  const);
+int         tLinearDelay_setDelay    (tLinearDelay*  const, float delay);
+float       tLinearDelay_getDelay    (tLinearDelay*  const);
+void        tLinearDelay_tapIn       (tLinearDelay*  const, float in, uint32_t tapDelay);
+float       tLinearDelay_tapOut      (tLinearDelay*  const, float tapDelay);
+float       tLinearDelay_addTo       (tLinearDelay*  const, float value, uint32_t tapDelay);
+float       tLinearDelay_tick        (tLinearDelay*  const, float sample);
+void   		tLinearDelay_tickIn 		(tLinearDelay* const d, float input);
+float   	tLinearDelay_tickOut 	(tLinearDelay* const d);
+float       tLinearDelay_getLastOut  (tLinearDelay*  const);
+float       tLinearDelay_getLastIn   (tLinearDelay*  const);
 
 //==============================================================================
     
 /* Allpass-interpolating delay, reimplemented from STK (Cook and Scavone). */
-typedef struct _tDelayA
+typedef struct _tAllpassDelay
 {
     float gain;
     float* buff;
@@ -99,19 +99,19 @@ typedef struct _tDelayA
     
     float apInput;
     
-} tDelayA;
+} tAllpassDelay;
 
-void        tDelayA_init        (tDelayA*  const, float delay, uint32_t maxDelay);
-void        tDelayA_free        (tDelayA* const);
+void        tAllpassDelay_init        (tAllpassDelay*  const, float delay, uint32_t maxDelay);
+void        tAllpassDelay_free        (tAllpassDelay* const);
 
-int         tDelayA_setDelay    (tDelayA*  const, float delay);
-float       tDelayA_getDelay    (tDelayA*  const);
-void        tDelayA_tapIn       (tDelayA*  const, float in, uint32_t tapDelay);
-float       tDelayA_tapOut      (tDelayA*  const, uint32_t tapDelay);
-float       tDelayA_addTo       (tDelayA*  const, float value, uint32_t tapDelay);
-float       tDelayA_tick        (tDelayA*  const, float sample);
-float       tDelayA_getLastOut  (tDelayA*  const);
-float       tDelayA_getLastIn   (tDelayA*  const);
+int         tAllpassDelay_setDelay    (tAllpassDelay*  const, float delay);
+float       tAllpassDelay_getDelay    (tAllpassDelay*  const);
+void        tAllpassDelay_tapIn       (tAllpassDelay*  const, float in, uint32_t tapDelay);
+float       tAllpassDelay_tapOut      (tAllpassDelay*  const, uint32_t tapDelay);
+float       tAllpassDelay_addTo       (tAllpassDelay*  const, float value, uint32_t tapDelay);
+float       tAllpassDelay_tick        (tAllpassDelay*  const, float sample);
+float       tAllpassDelay_getLastOut  (tAllpassDelay*  const);
+float       tAllpassDelay_getLastIn   (tAllpassDelay*  const);
 
 //==============================================================================
     

@@ -6,8 +6,8 @@
 
 ==============================================================================*/
 
-#ifndef LEAF_WAVETABLES_H_INCLUDED
-#define LEAF_WAVETABLES_H_INCLUDED
+#ifndef LEAF_TABLES_H_INCLUDED
+#define LEAF_TABLES_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
@@ -95,6 +95,6 @@ extern const float squarewave[11][SQR_TABLE_SIZE];
 }
 #endif
 
-#endif  // LEAF_WAVETABLES_H_INCLUDED
+#endif  // LEAF_TABLES_H_INCLUDED
 
 //==============================================================================

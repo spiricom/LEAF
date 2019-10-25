@@ -1,13 +1,13 @@
 /*==============================================================================
 
-    leaf-filter.h
+    leaf-filters.h
     Created: 20 Jan 2017 12:01:10pm
     Author:  Michael R Mulshine
 
 ==============================================================================*/
 
-#ifndef LEAF_FILTER_H_INCLUDED
-#define LEAF_FILTER_H_INCLUDED
+#ifndef LEAF_FILTERS_H_INCLUDED
+#define LEAF_FILTERS_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,7 +26,7 @@ typedef struct _tAllpass
 {
     float gain;
     
-    tDelayL delay;
+    tLinearDelay delay;
     
     float lastOut;
     
@@ -227,21 +227,21 @@ int         tSVF_setQ       (tSVF*  const, float Q);
 //==============================================================================
     
 /* Efficient State Variable Filter for 14-bit control input, [0, 4096). */
-typedef struct _tSVFE
+typedef struct _tEfficientSVF
 {
     SVFType type;
     float cutoff, Q;
     float ic1eq,ic2eq;
     float g,k,a1,a2,a3;
     
-} tSVFE;
+} tEfficientSVF;
 
-void        tSVFE_init      (tSVFE*  const, SVFType type, uint16_t controlFreq, float Q);
-void        tSVFE_free      (tSVFE*  const);
+void        tEfficientSVF_init      (tEfficientSVF*  const, SVFType type, uint16_t controlFreq, float Q);
+void        tEfficientSVF_free      (tEfficientSVF*  const);
 
-float       tSVFE_tick      (tSVFE*  const, float v0);
-int         tSVFE_setFreq   (tSVFE*  const, uint16_t controlFreq);
-int         tSVFE_setQ      (tSVFE*  const, float Q);
+float       tEfficientSVF_tick      (tEfficientSVF*  const, float v0);
+int         tEfficientSVF_setFreq   (tEfficientSVF*  const, uint16_t controlFreq);
+int         tEfficientSVF_setQ      (tEfficientSVF*  const, float Q);
 
 //==============================================================================
     
@@ -307,6 +307,6 @@ void        tFIR_coeffs      (tFIR* const, float in);
 }
 #endif
 
-#endif  // LEAF_FILTER_H_INCLUDED
+#endif  // LEAF_FILTERS_H_INCLUDED
 
 //==============================================================================

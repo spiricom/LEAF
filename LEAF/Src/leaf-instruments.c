@@ -1,6 +1,6 @@
 /*==============================================================================
 
-    leaf-808.c
+    leaf-instruments.c
     Created: 30 Nov 2018 10:24:21am
     Author:  airship
 
@@ -8,11 +8,11 @@
 
 #if _WIN32 || _WIN64
 
-#include "..\Inc\leaf-808.h"
+#include "..\Inc\leaf-instruments.h"
 
 #else
 
-#include "../Inc/leaf-808.h"
+#include "../Inc/leaf-instruments.h"
 
 #endif
 

@@ -18,9 +18,37 @@ extern "C" {
 #include "leaf-global.h"
 #include "leaf-mempool.h"
 #include "leaf-math.h"
-#include "leaf-utilities.h"
+#include "leaf-envelopes.h"
 
 //==============================================================================
+    
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+// STACK implementation (fixed size)
+#define STACK_SIZE 128
+typedef struct _tStack
+{
+    int data[STACK_SIZE];
+    uint16_t pos;
+    uint16_t size;
+    uint16_t capacity;
+    oBool ordered;
+    
+} tStack;
+
+void    tStack_init                 (tStack* const);
+void    tStack_free                 (tStack* const);
+
+void    tStack_setCapacity          (tStack* const, uint16_t cap);
+int     tStack_addIfNotAlreadyThere (tStack* const, uint16_t item);
+void    tStack_add                  (tStack* const, uint16_t item);
+int     tStack_remove               (tStack* const, uint16_t item);
+void    tStack_clear                (tStack* const);
+int     tStack_first                (tStack* const);
+int     tStack_getSize              (tStack* const);
+int     tStack_contains             (tStack* const, uint16_t item);
+int     tStack_next                 (tStack* const);
+int     tStack_get                  (tStack* const, int which);
     
 /* tPoly */
 typedef struct _tPoly

@@ -8,13 +8,13 @@
 
 #if _WIN32 || _WIN64
 
-#include "..\Inc\leaf-filter.h"
+#include "..\Inc\leaf-filters.h"
 #include "..\Inc\leaf-tables.h"
 #include "..\leaf.h"
 
 #else
 
-#include "../Inc/leaf-filter.h"
+#include "../Inc/leaf-filters.h"
 #include "../Inc/leaf-tables.h"
 #include "../leaf.h"
 
@@ -27,17 +27,17 @@ void    tAllpass_init(tAllpass* const f, float initDelay, uint32_t maxDelay)
     
     f->lastOut = 0.0f;
     
-    tDelayL_init(&f->delay, initDelay, maxDelay);
+    tLinearDelay_init(&f->delay, initDelay, maxDelay);
 }
 
 void tAllpass_free(tAllpass* const f)
 {
-    tDelayL_free(&f->delay);
+    tLinearDelay_free(&f->delay);
 }
 
 void    tAllpass_setDelay(tAllpass* const f, float delay)
 {
-    tDelayL_setDelay(&f->delay, delay);
+    tLinearDelay_setDelay(&f->delay, delay);
 }
 
 void    tAllpass_setGain(tAllpass* const f, float gain)
@@ -49,7 +49,7 @@ float   tAllpass_tick(tAllpass* const f, float input)
 {
     float s1 = (-f->gain) * f->lastOut + input;
     
-    float s2 = tDelayL_tick(&f->delay, s1) + (f->gain) * input;
+    float s2 = tLinearDelay_tick(&f->delay, s1) + (f->gain) * input;
     
     f->lastOut = s2;
     
@@ -758,7 +758,7 @@ int     tSVF_setQ(tSVF* const svf, float Q)
 }
 
 // Efficient version of tSVF where frequency is set based on 12-bit integer input for lookup in tanh wavetable.
-void   tSVFE_init(tSVFE* const svf, SVFType type, uint16_t input, float Q)
+void   tEfficientSVF_init(tEfficientSVF* const svf, SVFType type, uint16_t input, float Q)
 {
     svf->type = type;
     
@@ -779,12 +779,12 @@ void   tSVFE_init(tSVFE* const svf, SVFType type, uint16_t input, float Q)
     svf->a3 = a3;
 }
 
-void tSVFE_free(tSVFE* const svf)
+void tEfficientSVF_free(tEfficientSVF* const svf)
 {
     
 }
 
-float   tSVFE_tick(tSVFE* const svf, float v0)
+float   tEfficientSVF_tick(tEfficientSVF* const svf, float v0)
 {
     float v1,v2,v3;
     v3 = v0 - svf->ic2eq;
@@ -802,7 +802,7 @@ float   tSVFE_tick(tSVFE* const svf, float v0)
     
 }
 
-int     tSVFE_setFreq(tSVFE* const svf, uint16_t input)
+int     tEfficientSVF_setFreq(tEfficientSVF* const svf, uint16_t input)
 {
     svf->g = filtertan[input];
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
@@ -812,7 +812,7 @@ int     tSVFE_setFreq(tSVFE* const svf, uint16_t input)
     return 0;
 }
 
-int     tSVFE_setQ(tSVFE* const svf, float Q)
+int     tEfficientSVF_setQ(tEfficientSVF* const svf, float Q)
 {
     svf->k = 1.0f/Q;
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));

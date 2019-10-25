@@ -37,6 +37,8 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tCycle_init(&sine);
     tCycle_setFreq(&sine, 200);
     tDelay_init(&delay, 44100, 44100);
+    tDelay_free(&delay); //most basic free test
+    tDelay_init(&delay, 44100, 44100);
 }
 
 float   LEAFTest_tick            (float input)
@@ -98,7 +100,7 @@ void leaf_pool_report(void)
 void leaf_pool_dump(void)
 {
     float* buff = (float*)leaf_pool_get_pool();
-    int siz = leaf_pool_get_size();
+    unsigned long siz = leaf_pool_get_size();
     siz /= sizeof(float);
     for (int i = 0; i < siz; i++)
     {

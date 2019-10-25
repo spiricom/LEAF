@@ -1,13 +1,13 @@
 /*==============================================================================
 
-    leaf-808.h
+    leaf-instruments.h
     Created: 30 Nov 2018 10:24:44am
     Author:  airship
 
 ==============================================================================*/
 
-#ifndef LEAF_808_H_INCLUDED
-#define LEAF_808_H_INCLUDED
+#ifndef LEAF_INSTRUMENTS_H_INCLUDED
+#define LEAF_INSTRUMENTS_H_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,9 +16,9 @@ extern "C" {
 //==============================================================================
     
 #include "leaf-math.h"
-#include "leaf-oscillator.h"
-#include "leaf-utilities.h"
-#include "leaf-filter.h"
+#include "leaf-oscillators.h"
+#include "leaf-filters.h"
+#include "leaf-envelopes.h"
 
 //==============================================================================
     
@@ -177,7 +177,7 @@ void        t808Kick_setNoiseFilterQ       (t808Kick* const, float noiseFilterQ)
 }
 #endif
 
-#endif // LEAF_808_H_INCLUDED
+#endif // LEAF_INSTRUMENTS_H_INCLUDED
 
 //==============================================================================
 

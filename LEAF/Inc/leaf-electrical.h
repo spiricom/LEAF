@@ -1,12 +1,12 @@
 /*
- * leaf-WDF.h
+ * leaf-electrical.h
  *
  *  Created on: Sep 25, 2019
  *      Author: jeffsnyder
  */
 
-#ifndef LEAF_INC_LEAF_WDF_H_
-#define LEAF_INC_LEAF_WDF_H_
+#ifndef LEAF_INC_LEAF_ELECTRICAL_H_
+#define LEAF_INC_LEAF_ELECTRICAL_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,4 +86,4 @@ float tWDF_getCurrent(tWDF* const r);
 }
 #endif
 
-#endif /* LEAF_INC_LEAF_WDF_H_ */
+#endif /* LEAF_INC_LEAF_ELECTRICAL_H_ */

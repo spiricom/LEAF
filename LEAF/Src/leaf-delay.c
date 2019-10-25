@@ -127,8 +127,8 @@ float tDelay_getGain (tDelay* const d)
     return d->gain;
 }
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ DelayL ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void   tDelayL_init (tDelayL* const d, float delay, uint32_t maxDelay)
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ LinearDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+void   tLinearDelay_init (tLinearDelay* const d, float delay, uint32_t maxDelay)
 {
     d->maxDelay = maxDelay;
 
@@ -146,15 +146,15 @@ void   tDelayL_init (tDelayL* const d, float delay, uint32_t maxDelay)
     d->inPoint = 0;
     d->outPoint = 0;
     
-    tDelayL_setDelay(d, d->delay);
+    tLinearDelay_setDelay(d, d->delay);
 }
 
-void tDelayL_free(tDelayL* const d)
+void tLinearDelay_free(tLinearDelay* const d)
 {
     leaf_free(d->buff);
 }
 
-float   tDelayL_tick (tDelayL* const d, float input)
+float   tLinearDelay_tick (tLinearDelay* const d, float input)
 {
     d->buff[d->inPoint] = input * d->gain;
     
@@ -176,7 +176,7 @@ float   tDelayL_tick (tDelayL* const d, float input)
     return d->lastOut;
 }
 
-void   tDelayL_tickIn (tDelayL* const d, float input)
+void   tLinearDelay_tickIn (tLinearDelay* const d, float input)
 {
     d->buff[d->inPoint] = input * d->gain;
 
@@ -184,7 +184,7 @@ void   tDelayL_tickIn (tDelayL* const d, float input)
     if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
 }
 
-float   tDelayL_tickOut (tDelayL* const d)
+float   tLinearDelay_tickOut (tLinearDelay* const d)
 {
     uint32_t idx = (uint32_t) d->outPoint;
 
@@ -200,7 +200,7 @@ float   tDelayL_tickOut (tDelayL* const d)
     return d->lastOut;
 }
 
-int     tDelayL_setDelay (tDelayL* const d, float delay)
+int     tLinearDelay_setDelay (tLinearDelay* const d, float delay)
 {
     d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
     
@@ -219,7 +219,7 @@ int     tDelayL_setDelay (tDelayL* const d, float delay)
     return 0;
 }
 
-float tDelayL_tapOut (tDelayL* const d, float tapDelay)
+float tLinearDelay_tapOut (tLinearDelay* const d, float tapDelay)
 {
     float tap = (float) d->inPoint - tapDelay - 1.f;
     
@@ -244,7 +244,7 @@ float tDelayL_tapOut (tDelayL* const d, float tapDelay)
     
 }
 
-void tDelayL_tapIn (tDelayL* const d, float value, uint32_t tapDelay)
+void tLinearDelay_tapIn (tLinearDelay* const d, float value, uint32_t tapDelay)
 {
     int32_t tap = d->inPoint - tapDelay - 1;
     
@@ -254,7 +254,7 @@ void tDelayL_tapIn (tDelayL* const d, float value, uint32_t tapDelay)
     d->buff[tap] = value;
 }
 
-float tDelayL_addTo (tDelayL* const d, float value, uint32_t tapDelay)
+float tLinearDelay_addTo (tLinearDelay* const d, float value, uint32_t tapDelay)
 {
     int32_t tap = d->inPoint - tapDelay - 1;
     
@@ -264,34 +264,34 @@ float tDelayL_addTo (tDelayL* const d, float value, uint32_t tapDelay)
     return (d->buff[tap] += value);
 }
 
-float   tDelayL_getDelay (tDelayL *d)
+float   tLinearDelay_getDelay (tLinearDelay *d)
 {
     return d->delay;
 }
 
-float   tDelayL_getLastOut (tDelayL* const d)
+float   tLinearDelay_getLastOut (tLinearDelay* const d)
 {
     return d->lastOut;
 }
 
-float   tDelayL_getLastIn (tDelayL* const d)
+float   tLinearDelay_getLastIn (tLinearDelay* const d)
 {
     return d->lastIn;
 }
 
-void tDelayL_setGain (tDelayL* const d, float gain)
+void tLinearDelay_setGain (tLinearDelay* const d, float gain)
 {
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-float tDelayL_getGain (tDelayL* const d)
+float tLinearDelay_getGain (tLinearDelay* const d)
 {
     return d->gain;
 }
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ DelayA ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void  tDelayA_init (tDelayA* const d, float delay, uint32_t maxDelay)
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ AllpassDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+void  tAllpassDelay_init (tAllpassDelay* const d, float delay, uint32_t maxDelay)
 {
     d->maxDelay = maxDelay;
     
@@ -309,17 +309,17 @@ void  tDelayA_init (tDelayA* const d, float delay, uint32_t maxDelay)
     d->inPoint = 0;
     d->outPoint = 0;
     
-    tDelayA_setDelay(d, d->delay);
+    tAllpassDelay_setDelay(d, d->delay);
     
     d->apInput = 0.0f;
 }
 
-void tDelayA_free(tDelayA* const d)
+void tAllpassDelay_free(tAllpassDelay* const d)
 {
     leaf_free(d->buff);
 }
 
-float   tDelayA_tick (tDelayA* const d, float input)
+float   tAllpassDelay_tick (tAllpassDelay* const d, float input)
 {
     d->buff[d->inPoint] = input * d->gain;
     
@@ -340,7 +340,7 @@ float   tDelayA_tick (tDelayA* const d, float input)
     return d->lastOut;
 }
 
-int     tDelayA_setDelay (tDelayA* const d, float delay)
+int     tAllpassDelay_setDelay (tAllpassDelay* const d, float delay)
 {
     d->delay = LEAF_clip(0.5f, delay,  d->maxDelay);
     
@@ -373,7 +373,7 @@ int     tDelayA_setDelay (tDelayA* const d, float delay)
     return 0;
 }
 
-float tDelayA_tapOut (tDelayA* const d, uint32_t tapDelay)
+float tAllpassDelay_tapOut (tAllpassDelay* const d, uint32_t tapDelay)
 {
     int32_t tap = d->inPoint - tapDelay - 1;
     
@@ -384,7 +384,7 @@ float tDelayA_tapOut (tDelayA* const d, uint32_t tapDelay)
     
 }
 
-void tDelayA_tapIn (tDelayA* const d, float value, uint32_t tapDelay)
+void tAllpassDelay_tapIn (tAllpassDelay* const d, float value, uint32_t tapDelay)
 {
     int32_t tap = d->inPoint - tapDelay - 1;
     
@@ -394,7 +394,7 @@ void tDelayA_tapIn (tDelayA* const d, float value, uint32_t tapDelay)
     d->buff[tap] = value;
 }
 
-float tDelayA_addTo (tDelayA* const d, float value, uint32_t tapDelay)
+float tAllpassDelay_addTo (tAllpassDelay* const d, float value, uint32_t tapDelay)
 {
     int32_t tap = d->inPoint - tapDelay - 1;
     
@@ -404,28 +404,28 @@ float tDelayA_addTo (tDelayA* const d, float value, uint32_t tapDelay)
     return (d->buff[tap] += value);
 }
 
-float   tDelayA_getDelay (tDelayA* const d)
+float   tAllpassDelay_getDelay (tAllpassDelay* const d)
 {
     return d->delay;
 }
 
-float   tDelayA_getLastOut (tDelayA* const d)
+float   tAllpassDelay_getLastOut (tAllpassDelay* const d)
 {
     return d->lastOut;
 }
 
-float   tDelayA_getLastIn (tDelayA* const d)
+float   tAllpassDelay_getLastIn (tAllpassDelay* const d)
 {
     return d->lastIn;
 }
 
-void tDelayA_setGain (tDelayA* const d, float gain)
+void tAllpassDelay_setGain (tAllpassDelay* const d, float gain)
 {
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-float tDelayA_getGain (tDelayA* const d)
+float tAllpassDelay_getGain (tAllpassDelay* const d)
 {
     return d->gain;
 }

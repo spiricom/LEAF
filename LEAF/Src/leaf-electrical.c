@@ -1,12 +1,23 @@
 /*
- * leaf-WDF.c
+ * leaf-electrical.c
  *
  *  Created on: Sep 25, 2019
  *      Author: jeffsnyder
  */
 
+#if _WIN32 || _WIN64
 
-#include "../Inc/leaf-WDF.h"
+#include "..\Inc\leaf-electrical.h"
+#include "..\leaf.h"
+
+#else
+
+#include "../Inc/leaf-electrical.h"
+#include "../leaf.h"
+
+#endif
+
+//==============================================================================
 
 static float get_port_resistance_for_resistor(tWDF* const r);
 static float get_port_resistance_for_capacitor(tWDF* const r);
