@@ -419,14 +419,20 @@ void tRetune_init(tRetune* const r, int numVoices, int bufSize, int frameSize)
     r->fba = FBA;
     tRetune_setTimeConstant(r, DEFTIMECONSTANT);
     
-    tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
-    
     r->inputPeriod = 0.0f;
     
     r->ps = (tPitchShift*) leaf_alloc(sizeof(tPitchShift) * r->numVoices);
+    r->pitchFactor = (float*) leaf_alloc(sizeof(float) * r->numVoices);
+    r->tickOutput = (float*) leaf_alloc(sizeof(float) * r->numVoices);
     for (int i = 0; i < r->numVoices; ++i)
     {
         r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
+    }
+    
+    tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
+    
+    for (int i = 0; i < r->numVoices; ++i)
+    {
         tPitchShift_init(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize);
     }
 }
@@ -439,6 +445,8 @@ void tRetune_free(tRetune* const r)
         tPitchShift_free(&r->ps[i]);
         leaf_free(r->outBuffers[i]);
     }
+    leaf_free(r->tickOutput);
+    leaf_free(r->pitchFactor);
     leaf_free(r->ps);
     leaf_free(r->inBuffer);
     leaf_free(r->outBuffers);
@@ -463,6 +471,8 @@ void tRetune_setNumVoices(tRetune* const r, int numVoices)
         tPitchShift_free(&r->ps[i]);
         leaf_free(r->outBuffers[i]);
     }
+    leaf_free(r->tickOutput);
+    leaf_free(r->pitchFactor);
     leaf_free(r->ps);
     leaf_free(r->outBuffers);
     
@@ -470,6 +480,8 @@ void tRetune_setNumVoices(tRetune* const r, int numVoices)
     
     r->outBuffers = (float**) leaf_alloc(sizeof(float*) * r->numVoices);
     r->ps = (tPitchShift*) leaf_alloc(sizeof(tPitchShift) * r->numVoices);
+    r->pitchFactor = (float*) leaf_alloc(sizeof(float) * r->numVoices);
+    r->tickOutput = (float*) leaf_alloc(sizeof(float) * r->numVoices);
     for (int i = 0; i < r->numVoices; ++i)
     {
         r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
@@ -540,12 +552,20 @@ void tAutotune_init(tAutotune* const r, int numVoices, int bufSize, int frameSiz
     r->fba = FBA;
     tAutotune_setTimeConstant(r, DEFTIMECONSTANT);
     
-    tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
+    
     
     r->ps = (tPitchShift*) leaf_alloc(sizeof(tPitchShift) * r->numVoices);
+    r->freq = (float*) leaf_alloc(sizeof(float) * r->numVoices);
+    r->tickOutput = (float*) leaf_alloc(sizeof(float) * r->numVoices);
     for (int i = 0; i < r->numVoices; ++i)
     {
         r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
+    }
+    
+    tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
+    
+    for (int i = 0; i < r->numVoices; ++i)
+    {
         tPitchShift_init(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize);
     }
     
@@ -560,6 +580,8 @@ void tAutotune_free(tAutotune* const r)
         tPitchShift_free(&r->ps[i]);
         leaf_free(r->outBuffers[i]);
     }
+    leaf_free(r->tickOutput);
+    leaf_free(r->freq);
     leaf_free(r->ps);
     leaf_free(r->inBuffer);
     leaf_free(r->outBuffers);
@@ -584,6 +606,8 @@ void tAutotune_setNumVoices(tAutotune* const r, int numVoices)
         tPitchShift_free(&r->ps[i]);
         leaf_free(r->outBuffers[i]);
     }
+    leaf_free(r->tickOutput);
+    leaf_free(r->freq);
     leaf_free(r->ps);
     leaf_free(r->outBuffers);
     
@@ -591,6 +615,8 @@ void tAutotune_setNumVoices(tAutotune* const r, int numVoices)
     
     r->outBuffers = (float**) leaf_alloc(sizeof(float*) * r->numVoices);
     r->ps = (tPitchShift*) leaf_alloc(sizeof(tPitchShift) * r->numVoices);
+    r->freq = (float*) leaf_alloc(sizeof(float) * r->numVoices);
+    r->tickOutput = (float*) leaf_alloc(sizeof(float) * r->numVoices);
     for (int i = 0; i < r->numVoices; ++i)
     {
         r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
@@ -600,12 +626,17 @@ void tAutotune_setNumVoices(tAutotune* const r, int numVoices)
     
 }
 
-void tAutotune_setFreq(tAutotune* const r, float f, int voice)
+void tAutotune_setFreqs(tAutotune* const r, float f)
 {
     for (int i = 0; i < r->numVoices; ++i)
     {
         r->freq[i] = f;
     }
+}
+
+void tAutotune_setFreq(tAutotune* const r, float f, int voice)
+{
+    r->freq[voice] = f;
 }
 
 void tAutotune_setTimeConstant(tAutotune* const r, float tc)
@@ -644,7 +675,7 @@ static int pitchshift_attackdetect(tPitchShift* ps)
 {
     float envout;
     
-    envout = tEnv_tick(&ps->p->env);
+    envout = tEnvPD_tick(&ps->p->env);
     
     if (envout >= 1.0f)
     {
@@ -846,8 +877,7 @@ void tSOLAD_setPeriod(tSOLAD* const w, float period)
 // set pitch factor between 0.25 and 4
 void tSOLAD_setPitchFactor(tSOLAD* const w, float pitchfactor)
 {
-    if(pitchfactor < 0.25) pitchfactor = 0.25;
-    else if(pitchfactor > 4.) pitchfactor = 4.;
+    if (pitchfactor <= 0.0f) return;
     w->pitchfactor = pitchfactor;
 }
 

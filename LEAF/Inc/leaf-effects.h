@@ -218,6 +218,7 @@ void        tAutotune_free                (tAutotune* const);
 
 float*      tAutotune_tick                (tAutotune* const, float sample);
 void        tAutotune_setNumVoices        (tAutotune* const, int numVoices);
+void        tAutotune_setFreqs            (tAutotune* const, float f);
 void        tAutotune_setFreq             (tAutotune* const, float f, int voice);
 void        tAutotune_setTimeConstant     (tAutotune* const, float tc);
 void        tAutotune_setHopSize          (tAutotune* const, int hs);

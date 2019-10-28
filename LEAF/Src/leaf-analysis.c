@@ -715,6 +715,7 @@ static float snac_spectralpeak(tSNAC* const s, float periodlength)
 // modified logarithmic bias function
 static void snac_biasbuf(tSNAC* const s)
 {
+    
     int n;
     int maxperiod = (int)(s->framesize * (float)SEEK);
     float bias = s->biasfactor / log((float)(maxperiod - 4));

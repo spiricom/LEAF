@@ -19,6 +19,8 @@ static void run_pool_test(void);
 tNoise noise;
 tCycle sine;
 tDelay delay;
+tRetune retune;
+tAutotune autotune;
 
 float gain;
 float freq;
@@ -39,16 +41,23 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tDelay_init(&delay, 44100, 44100);
     tDelay_free(&delay); //most basic free test
     tDelay_init(&delay, 44100, 44100);
+    
+    tRetune_init(&retune, 1, 4096, 2048);
+    tAutotune_init(&autotune, 1, 4096, 2048);
 }
 
 float   LEAFTest_tick            (float input)
 {
-    tCycle_setFreq(&sine, freq);
-    float sample = tCycle_tick(&sine) * 0.1;
-    tDelay_setDelay(&delay, dtime);
-    sample += tDelay_tick(&delay, sample);
+    float sample = tCycle_tick(&sine);
+    float* retuneOut = tRetune_tick(&retune, sample);
+    float* autotuneOut = tAutotune_tick(&autotune, sample);
+    float r1 = retuneOut[0];
+    //float r2 = retuneOut[1];
+    float a1 = autotuneOut[0];
+    //float a2 = autotuneOut[1];
+    sample = a1;
     
-    return sample;
+    return sample * 0.25f;
 }
 
 
@@ -57,10 +66,12 @@ bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
     float val = getSliderValue("mod freq");
-    freq = val * 2000.f;
+    tRetune_setPitchFactor(&retune, val*4.0f + 0.5f, 0);
+    tAutotune_setFreq(&autotune, val*5000.0f + 50.0f, 0);
     
     val = getSliderValue("mod depth");
-    dtime = val * 40000.;
+    tRetune_setPitchFactor(&retune, val*4.0f + 0.5f, 1);
+    tAutotune_setFreq(&autotune, val*5000.0f + 50.0f, 1);
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)
