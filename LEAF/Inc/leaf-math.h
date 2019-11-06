@@ -128,6 +128,20 @@ int fastabs_int(int in);
 // alternative implementation for abs()
 // REQUIRES: 32 bit floats
 float fastabs(float f);
+    
+#define LOGTEN 2.302585092994
+
+float mtof(float f);
+
+float ftom(float f);
+
+float powtodb(float f);
+
+float rmstodb(float f);
+
+float dbtopow(float f);
+
+float dbtorms(float f);
 
 //==============================================================================
     

@@ -779,7 +779,9 @@ float tPitchShift_shiftToFreq (tPitchShift* ps, float freq)
         
         tSOLAD_setPeriod(&ps->sola, period);
         
-        ps->pitchFactor = period*freq*leaf.invSampleRate;
+        if (period != 0) ps->pitchFactor = period*freq*leaf.invSampleRate;
+        else ps->pitchFactor = 1.0f;
+
         tSOLAD_setPitchFactor(&ps->sola, ps->pitchFactor);
         
         tSOLAD_ioSamples(&ps->sola, &(ps->p->inBuffer[i]), &(ps->outBuffer[i]), ps->frameSize);

@@ -57,19 +57,20 @@ extern "C" {
 /**
  * memory pool structure
  */
-typedef struct mpool_pool_t {
+
+// node of free list
+typedef struct mpool_node_t {
     void                *pool;     // memory pool field
-    struct mpool_pool_t *next;     // next memory pool's pointer
+    struct mpool_node_t *next;     // next node pointer
+    struct mpool_node_t *prev;     // prev node pointer
     size_t size;
-    int used; // used flag
-} mpool_pool_t;
+} mpool_node_t;
 
 typedef struct mpool_t {
-    mpool_pool_t *head;       // memory pool's head
-    size_t        usize;       // used pool size of current pool
-    size_t        msize;       // max pool size of current pool
-    mpool_pool_t *mpool;      // memory pool
-    int next;
+    void*         mpool;       // start of the mpool
+    size_t        usize;       // used size of the pool
+    size_t        msize;       // max size of the pool
+    mpool_node_t* head;        // first node of memory pool free list
 } mpool_t;
 
 void mpool_create (char* memory, size_t size, mpool_t* pool);
@@ -79,7 +80,6 @@ void mpool_free(void* ptr, mpool_t* pool);
 
 size_t mpool_get_size(mpool_t* pool);
 size_t mpool_get_used(mpool_t* pool);
-
 
 void leaf_pool_init(char* memory, size_t size);
 
