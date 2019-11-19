@@ -46,9 +46,11 @@ void tTalkbox_free(tTalkbox* const v)
 {
     leaf_free(v->car0);
     leaf_free(v->car1);
-    leaf_free(v->window);
+
     leaf_free(v->buf0);
     leaf_free(v->buf1);
+    
+    leaf_free(v->window);
 }
 
 void tTalkbox_update(tTalkbox* const v) ///update internal parameters...
@@ -851,6 +853,7 @@ void     tSOLAD_init(tSOLAD* const w)
 
 void tSOLAD_free(tSOLAD* const w)
 {
+    leaf_free(w->delaybuf);
 }
 
 // send one block of input samples, receive one block of output samples

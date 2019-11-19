@@ -21,6 +21,7 @@ tCycle sine;
 tDelay delay;
 tRetune retune;
 tAutotune autotune;
+tTalkbox test;
 
 float gain;
 float freq;
@@ -39,10 +40,22 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tCycle_init(&sine);
     tCycle_setFreq(&sine, 200);
     tDelay_init(&delay, 44100, 44100);
-    tDelay_free(&delay); //most basic free test
+    tDelay_free(&delay);
     tDelay_init(&delay, 44100, 44100);
     
+    tTalkbox_init(&test, 1024);
+    tTalkbox_free(&test);
+    tTalkbox_init(&test, 1024);
+    
     tRetune_init(&retune, 1, 2048, 1024);
+    
+    tDelay_free(&delay);
+    tRetune_free(&retune);
+    tTalkbox_free(&test);
+    tTalkbox_init(&test, 1024);
+    tDelay_init(&delay, 44100, 44100);
+    tRetune_init(&retune, 1, 2048, 1024);
+    
     tAutotune_init(&autotune, 8, 2048, 1024);
 }
 

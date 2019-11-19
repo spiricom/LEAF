@@ -107,8 +107,7 @@ void* mpool_alloc(size_t asize, mpool_t* pool)
     node_to_alloc->size = size_to_alloc;
     if (leftover > header_size)
     {
-        long offset = node_to_alloc - (mpool_node_t*) pool->mpool;
-        offset *= sizeof(mpool_node_t);
+        long offset = (char*) node_to_alloc - (char*) pool->mpool;
         offset += header_size + node_to_alloc->size;
         new_node = create_node(&pool->mpool[offset],
                                node_to_alloc->next,
@@ -168,28 +167,42 @@ void mpool_free(void* ptr, mpool_t* pool)
         {
             // Increase freed node's size
             freed_node->size += header_size + other_node->size;
-            // Delink the merged node
+            // If we are merging with the head, move the head forward
+            if (other_node == pool->head) pool->head = pool->head->next;
+            // Delink the merged node (Shouldn't really be necessary since we're formatting)
             delink_node(other_node);
-            // Attach the merging node to the head
-            freed_node->next = pool->head;
         }
+        
         // Check if a node is directly before the freed node
         else if ((long) other_node + (header_size + other_node->size) == (long) freed_node)
         {
             // Increase the merging node's size
             other_node->size += header_size + freed_node->size;
-            // Delink the merging node
-            delink_node(other_node);
-            // Attach the merging node to the head
-            other_node->next = pool->head;
-            // Nodes are merged
-            freed_node = other_node;
+            
+            if (other_node != pool->head)
+            {
+                // Delink the merging node
+                delink_node(other_node);
+                // Attach the merging node to the head
+                other_node->next = pool->head;
+                // Merge
+                freed_node = other_node;
+            }
+            else
+            {
+                // If we are merging with the head, move the head forward
+                pool->head = pool->head->next;
+                // Merge
+                freed_node = other_node;
+            }
         }
         
         other_node = next_node;
     }
     
-    // Do this after any merging
+    // Ensure the freed node is attached to the head
+    freed_node->next = pool->head;
+    if (pool->head != NULL) pool->head->prev = freed_node;
     pool->head = freed_node;
     
     // Format the freed pool
