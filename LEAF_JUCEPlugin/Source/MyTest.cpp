@@ -70,6 +70,8 @@ float   LEAFTest_tick            (float input)
     float a2 = autotuneOut[7];
     sample = a1 + a2;
     
+    sample = tTalkbox_tick(&test, tNoise_tick(&noise), input);
+    
     return sample * 0.25f;
 }
 

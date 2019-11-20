@@ -44,13 +44,11 @@ void tTalkbox_init(tTalkbox* const v, int bufsize)
 
 void tTalkbox_free(tTalkbox* const v)
 {
-    leaf_free(v->car0);
-    leaf_free(v->car1);
-
-    leaf_free(v->buf0);
     leaf_free(v->buf1);
-    
+    leaf_free(v->buf0);
     leaf_free(v->window);
+    leaf_free(v->car1);
+    leaf_free(v->car0);
 }
 
 void tTalkbox_update(tTalkbox* const v) ///update internal parameters...
