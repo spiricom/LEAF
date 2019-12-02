@@ -23,26 +23,32 @@
 
 //==============================================================================
 
-void  tBuffer_init (tBuffer* const s, uint32_t length)
+void  tBuffer_init (tBuffer* const sb, uint32_t length)
 {
-    s->buff = (float*) leaf_alloc( sizeof(float) * length);
+    _tBuffer* s = *sb = (_tBuffer*) leaf_alloc(sizeof(_tBuffer));
     
+    s->buff = (float*) leaf_alloc( sizeof(float) * length);
     
     s->length = length;
     s->active = 0;
     s->idx = 0;
     s->mode = RecordOneShot;
     
-    tBuffer_clear(s);
+    tBuffer_clear(sb);
 }
 
-void  tBuffer_free (tBuffer* const s)
+void  tBuffer_free (tBuffer* const sb)
 {
+    _tBuffer* s = *sb;
+    
     leaf_free(s->buff);
+    leaf_free(s);
 }
 
-void tBuffer_tick (tBuffer* const s, float sample)
+void tBuffer_tick (tBuffer* const sb, float sample)
 {
+    _tBuffer* s = *sb;
+    
     if (s->active == 1)
     {
         s->buff[s->idx] = sample;
@@ -53,7 +59,7 @@ void tBuffer_tick (tBuffer* const s, float sample)
         {
             if (s->mode == RecordOneShot)
             {
-                tBuffer_stop(s);
+                tBuffer_stop(sb);
             }
             else if (s->mode == RecordLoop)
             {
@@ -63,8 +69,9 @@ void tBuffer_tick (tBuffer* const s, float sample)
     }
 }
 
-void  tBuffer_read(tBuffer* const s, float* buff, uint32_t len)
+void  tBuffer_read(tBuffer* const sb, float* buff, uint32_t len)
 {
+    _tBuffer* s = *sb;
     for (int i = 0; i < s->length; i++)
     {
         if (i < len)    s->buff[i] = buff[i];
@@ -72,42 +79,54 @@ void  tBuffer_read(tBuffer* const s, float* buff, uint32_t len)
     }
 }
 
-float tBuffer_get (tBuffer* const s, int idx)
+float tBuffer_get (tBuffer* const sb, int idx)
 {
+    _tBuffer* s = *sb;
     if ((idx < 0) || (idx >= s->length)) return 0.f;
-    
     return s->buff[idx];
 }
 
-void  tBuffer_record(tBuffer* const s)
+void  tBuffer_record(tBuffer* const sb)
 {
+    _tBuffer* s = *sb;
     s->active = 1;
     s->idx = 0;
 }
 
-void  tBuffer_stop(tBuffer* const s)
+void  tBuffer_stop(tBuffer* const sb)
 {
+    _tBuffer* s = *sb;
     s->active = 0;
 }
 
-void  tBuffer_setRecordMode (tBuffer* const s, RecordMode mode)
+void  tBuffer_setRecordMode (tBuffer* const sb, RecordMode mode)
 {
+    _tBuffer* s = *sb;
     s->mode = mode;
 }
 
-void  tBuffer_clear (tBuffer* const s)
+void  tBuffer_clear (tBuffer* const sb)
 {
+    _tBuffer* s = *sb;
     for (int i = 0; i < s->length; i++)
     {
         s->buff[i] = 0.f;
     }
 }
 
+uint32_t tBuffe_getLength(tBuffer* const sb)
+{
+    _tBuffer* s = *sb;
+    return s->length;
+}
+
 //================================tSampler=====================================
 
-void tSampler_init(tSampler* const p, tBuffer* const s)
+void tSampler_init(tSampler* const sp, uint32_t length)
 {
-    p->samp = s;
+    _tSampler* p = *sp = (_tSampler*) leaf_alloc(sizeof(_tSampler));
+    
+    tBuffer_init(&p->samp, length);
     
     p->active = 0;
     
@@ -132,13 +151,24 @@ void tSampler_init(tSampler* const p, tBuffer* const s)
     tRamp_setVal(&p->gain, 0.f);
 }
 
-void tSampler_free         (tSampler* const p)
+void tSampler_free         (tSampler* const sp)
 {
+    _tSampler* p = *sp;
     tRamp_free(&p->gain);
+    
+    leaf_free(p);
 }
 
-float tSampler_tick        (tSampler* const p)
+tBuffer tSampler_getBuffer (tSampler* const sp)
 {
+    _tSampler* p = *sp;
+    return p->samp;
+}
+
+float tSampler_tick        (tSampler* const sp)
+{
+    _tSampler* p = *sp;
+    
     if (p->active == 0)         return 0.f;
 
     if ((p->inc == 0.0f) || (p->len < 4))
@@ -331,18 +361,16 @@ float tSampler_tick        (tSampler* const p)
     return p->last;
 }
 
-void tSampler_setSample    (tSampler* const p, tBuffer* s)
+void tSampler_setMode      (tSampler* const sp, PlayMode mode)
 {
-    p->samp = s;
-}
-
-void tSampler_setMode      (tSampler* const p, PlayMode mode)
-{
+    _tSampler* p = *sp;
     p->mode = mode;
 }
 
-void tSampler_setCrossfadeLength  (tSampler* const p, uint32_t length)
+void tSampler_setCrossfadeLength  (tSampler* const sp, uint32_t length)
 {
+    _tSampler* p = *sp;
+    
     uint32_t cfxlen = LEAF_clip(0, length, 1000);
     
     //if (cfxlen > p->len)  cfxlen = p->len * 0.25f;
@@ -350,8 +378,10 @@ void tSampler_setCrossfadeLength  (tSampler* const p, uint32_t length)
     p->cfxlen = cfxlen;
 }
 
-void tSampler_play         (tSampler* const p)
+void tSampler_play         (tSampler* const sp)
 {
+    _tSampler* p = *sp;
+    
     if (p->active != 0)
     {
         p->active = -1;
@@ -379,15 +409,19 @@ void tSampler_play         (tSampler* const p)
     }
 }
 
-void tSampler_stop         (tSampler* const p)
+void tSampler_stop         (tSampler* const sp)
 {
+    _tSampler* p = *sp;
+    
     p->active = -1;
     
     tRamp_setDest(&p->gain, 0.f);
 }
 
-static void handleStartEndChange(tSampler* const p)
+static void handleStartEndChange(tSampler* const sp)
 {
+    _tSampler* p = *sp;
+    
     p->len = abs(p->end - p->start);
     
     //if (p->len < p->cfxlen) p->cfxlen = p->len * 0.9f;
@@ -402,22 +436,28 @@ static void handleStartEndChange(tSampler* const p)
     }
 }
 
-void tSampler_setStart     (tSampler* const p, int32_t start)
+void tSampler_setStart     (tSampler* const sp, int32_t start)
 {
+    _tSampler* p = *sp;
+    
     p->start = LEAF_clipInt(0, start, (p->samp->length - 1));
     
-    handleStartEndChange(p);
+    handleStartEndChange(sp);
 }
 
-void tSampler_setEnd       (tSampler* const p, int32_t end)
+void tSampler_setEnd       (tSampler* const sp, int32_t end)
 {
+    _tSampler* p = *sp;
+    
     p->end = LEAF_clipInt(0, end, (p->samp->length - 1));
     
-    handleStartEndChange(p);
+    handleStartEndChange(sp);
 }
 
-void tSampler_setRate      (tSampler* const p, float rate)
+void tSampler_setRate      (tSampler* const sp, float rate)
 {
+    _tSampler* p = *sp;
+    
     if (rate < 0.f)
     {
         rate = -rate;

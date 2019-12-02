@@ -21,16 +21,20 @@
 //============================================================================================================
 // WAVEFOLDER
 //============================================================================================================
-void tLockhartWavefolder_init(tLockhartWavefolder* const w)
+void tLockhartWavefolder_init(tLockhartWavefolder* const wf)
 {
+     _tLockhartWavefolder* w = *wf = (_tLockhartWavefolder*) leaf_alloc(sizeof(_tLockhartWavefolder));
+    
     w->Ln1 = 0.0;
     w->Fn1 = 0.0;
     w->xn1 = 0.0f;
 }
 
-void tLockhardWavefolder_free(tLockhartWavefolder* const w)
+void tLockhardWavefolder_free(tLockhartWavefolder* const wf)
 {
+    _tLockhartWavefolder* w = *wf;
     
+    leaf_free(w);
 }
 
 double tLockhartWavefolderLambert(double x, double ln)
@@ -63,8 +67,9 @@ double tLockhartWavefolderLambert(double x, double ln)
     return w;
 }
 
-float tLockhartWavefolder_tick(tLockhartWavefolder* const w, float samp)
+float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float samp)
 {
+    _tLockhartWavefolder* w = *wf;
     
     float out = 0.0f;
     // Constants
@@ -123,8 +128,10 @@ float tLockhartWavefolder_tick(tLockhartWavefolder* const w, float samp)
 //============================================================================================================
 #define SCALAR 5000.f
 
-void    tCrusher_init    (tCrusher* const c)
+void    tCrusher_init    (tCrusher* const cr)
 {
+    _tCrusher* c = *cr = (_tCrusher*) leaf_alloc(sizeof(_tCrusher));
+    
     c->op = 4;
     c->div = SCALAR;
     c->rnd = 0.25f;
@@ -133,13 +140,17 @@ void    tCrusher_init    (tCrusher* const c)
     c->gain = (c->div / SCALAR) * 0.7f + 0.3f;
 }
 
-void    tCrusher_free    (tCrusher* const c)
+void    tCrusher_free    (tCrusher* const cr)
 {
+    _tCrusher* c = *cr;
     
+    leaf_free(c);
 }
 
-float   tCrusher_tick    (tCrusher* const c, float input)
+float   tCrusher_tick    (tCrusher* const cr, float input)
 {
+    _tCrusher* c = *cr;
+    
     float sample = input;
     
     sample *= SCALAR; // SCALAR is 5000 by default
@@ -160,14 +171,17 @@ float   tCrusher_tick    (tCrusher* const c, float input)
     
 }
 
-void    tCrusher_setOperation (tCrusher* const c, float op)
+void    tCrusher_setOperation (tCrusher* const cr, float op)
 {
+    _tCrusher* c = *cr;
     c->op = (uint32_t) (op * 8.0f);
 }
 
 // 0.0 - 1.0
-void    tCrusher_setQuality (tCrusher* const c, float val)
+void    tCrusher_setQuality (tCrusher* const cr, float val)
 {
+    _tCrusher* c = *cr;
+    
     val = LEAF_clip(0.0f, val, 1.0f);
     
     c->div = 0.01f + val * SCALAR;
@@ -176,13 +190,15 @@ void    tCrusher_setQuality (tCrusher* const c, float val)
 }
 
 // what decimal to round to
-void    tCrusher_setRound (tCrusher* const c, float rnd)
+void    tCrusher_setRound (tCrusher* const cr, float rnd)
 {
+    _tCrusher* c = *cr;
     c->rnd = fabsf(rnd);
 }
 
-void    tCrusher_setSamplingRatio (tCrusher* const c, float ratio)
+void    tCrusher_setSamplingRatio (tCrusher* const cr, float ratio)
 {
+    _tCrusher* c = *cr;
     c->srr = ratio;
 }
 
@@ -191,8 +207,10 @@ void    tCrusher_setSamplingRatio (tCrusher* const c, float ratio)
 // Oversampler
 //============================================================================================================
 // Latency is equal to the phase length (numTaps / ratio)
-void tOversampler_init(tOversampler* const os, int ratio, oBool extraQuality)
+void tOversampler_init(tOversampler* const osr, int ratio, oBool extraQuality)
 {
+    _tOversampler* os = *osr = (_tOversampler*) leaf_alloc(sizeof(_tOversampler));
+    
     uint8_t offset = 0;
     if (extraQuality) offset = 6;
     if (ratio == 2 || ratio == 4  ||
@@ -208,28 +226,35 @@ void tOversampler_init(tOversampler* const os, int ratio, oBool extraQuality)
     }
 }
 
-void tOversampler_free(tOversampler* const os)
+void tOversampler_free(tOversampler* const osr)
 {
+    _tOversampler* os = *osr;
+    
     leaf_free(os->upState);
     leaf_free(os->downState);
+    leaf_free(os);
 }
 
-float tOversampler_tick(tOversampler* const os, float input, float (*effectTick)(float))
+float tOversampler_tick(tOversampler* const osr, float input, float (*effectTick)(float))
 {
+    _tOversampler* os = *osr;
+    
     float buf[os->ratio];
     
-    tOversampler_upsample(os, input, buf);
+    tOversampler_upsample(osr, input, buf);
     
     for (int i = 0; i < os->ratio; ++i) {
         buf[i] = effectTick(buf[i]);
     }
     
-    return tOversampler_downsample(os, buf);
+    return tOversampler_downsample(osr, buf);
 }
 
 // From CMSIS DSP Library
-void tOversampler_upsample(tOversampler* const os, float input, float* output)
+void tOversampler_upsample(tOversampler* const osr, float input, float* output)
 {
+    _tOversampler* os = *osr;
+    
     float *pState = os->upState;                 /* State pointer */
     const float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
     float *pStateCur;
@@ -319,8 +344,10 @@ void tOversampler_upsample(tOversampler* const os, float input, float* output)
 }
 
 // From CMSIS DSP Library
-float tOversampler_downsample(tOversampler *const os, float* input)
+float tOversampler_downsample(tOversampler *const osr, float* input)
 {
+    _tOversampler* os = *osr;
+    
     float *pState = os->downState;                 /* State pointer */
     const float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
     float *pStateCur;                          /* Points to the current sample of the state */
@@ -401,7 +428,8 @@ float tOversampler_downsample(tOversampler *const os, float* input)
     return output;
 }
 
-int tOversampler_getLatency(tOversampler* const os)
+int tOversampler_getLatency(tOversampler* const osr)
 {
+    _tOversampler* os = *osr;
     return os->phaseLength;
 }

@@ -94,6 +94,7 @@ int getComboBoxState(String name)
             return cComboBoxStates[i];
         }
     }
+    return -1;
 }
 
 void setComboBoxState(String name, int idx)

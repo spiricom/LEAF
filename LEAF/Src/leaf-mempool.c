@@ -169,7 +169,7 @@ void mpool_free(void* ptr, mpool_t* pool)
             freed_node->size += header_size + other_node->size;
             // If we are merging with the head, move the head forward
             if (other_node == pool->head) pool->head = pool->head->next;
-            // Delink the merged node (Shouldn't really be necessary since we're formatting)
+            // Delink the merged node
             delink_node(other_node);
         }
         

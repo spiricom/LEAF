@@ -22,41 +22,49 @@
 /* Envelope Follower */
 //===========================================================================
 
-void    tEnvelopeFollower_init(tEnvelopeFollower* const e, float attackThreshold, float decayCoeff)
+void    tEnvelopeFollower_init(tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff)
 {
+    _tEnvelopeFollower* e = *ef = (_tEnvelopeFollower*) leaf_alloc(sizeof(_tEnvelopeFollower));
+    
     e->y = 0.0f;
     e->a_thresh = attackThreshold;
     e->d_coeff = decayCoeff;
 }
 
-void tEnvelopeFollower_free(tEnvelopeFollower* const e)
+void tEnvelopeFollower_free(tEnvelopeFollower* const ef)
 {
+    _tEnvelopeFollower* e = *ef;
     
+    leaf_free(e);
 }
 
 float   tEnvelopeFollower_tick(tEnvelopeFollower* const ef, float x)
 {
+    _tEnvelopeFollower* e = *ef;
+    
     if (x < 0.0f ) x = -x;  /* Absolute value. */
     
-    if ((x >= ef->y) && (x > ef->a_thresh)) ef->y = x;                      /* If we hit a peak, ride the peak to the top. */
-    else                                    ef->y = ef->y * ef->d_coeff;    /* Else, exponential decay of output. */
+    if ((x >= e->y) && (x > e->a_thresh)) e->y = x;                      /* If we hit a peak, ride the peak to the top. */
+    else                                    e->y = e->y * e->d_coeff;    /* Else, exponential decay of output. */
     
     //ef->y = envelope_pow[(uint16_t)(ef->y * (float)UINT16_MAX)] * ef->d_coeff; //not quite the right behavior - too much loss of precision?
     //ef->y = powf(ef->y, 1.000009f) * ef->d_coeff;  // too expensive
     
-    if( ef->y < VSF)   ef->y = 0.0f;
+    if( e->y < VSF)   e->y = 0.0f;
     
-    return ef->y;
+    return e->y;
 }
 
 int     tEnvelopeFollower_decayCoeff(tEnvelopeFollower* const ef, float decayCoeff)
 {
-    return ef->d_coeff = decayCoeff;
+    _tEnvelopeFollower* e = *ef;
+    return e->d_coeff = decayCoeff;
 }
 
 int     tEnvelopeFollower_attackThresh(tEnvelopeFollower* const ef, float attackThresh)
 {
-    return ef->a_thresh = attackThresh;
+    _tEnvelopeFollower* e = *ef;
+    return e->a_thresh = attackThresh;
 }
 
 
@@ -66,20 +74,26 @@ int     tEnvelopeFollower_attackThresh(tEnvelopeFollower* const ef, float attack
 //===========================================================================
 /* Power Follower */
 //===========================================================================
-void    tPowerFollower_init(tPowerFollower* const p, float factor)
+void    tPowerFollower_init(tPowerFollower* const pf, float factor)
 {
+    _tPowerFollower* p = *pf = (_tPowerFollower*) leaf_alloc(sizeof(_tPowerFollower));
+    
     p->curr=0.0f;
     p->factor=factor;
     p->oneminusfactor=1.0f-factor;
 }
 
-void tPowerFollower_free(tPowerFollower* const p)
+void tPowerFollower_free(tPowerFollower* const pf)
 {
+    _tPowerFollower* p = *pf;
     
+    leaf_free(p);
 }
 
-int     tPowerFollower_setFactor(tPowerFollower* const p, float factor)
+int     tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
 {
+    _tPowerFollower* p = *pf;
+    
     if (factor<0) factor=0;
     if (factor>1) factor=1;
     p->factor=factor;
@@ -87,14 +101,16 @@ int     tPowerFollower_setFactor(tPowerFollower* const p, float factor)
     return 0;
 }
 
-float   tPowerFollower_tick(tPowerFollower* const p, float input)
+float   tPowerFollower_tick(tPowerFollower* const pf, float input)
 {
+    _tPowerFollower* p = *pf;
     p->curr = p->factor*input*input+p->oneminusfactor*p->curr;
     return p->curr;
 }
 
-float   tPowerFollower_sample(tPowerFollower* const p)
+float   tPowerFollower_sample(tPowerFollower* const pf)
 {
+    _tPowerFollower* p = *pf;
     return p->curr;
 }
 
@@ -105,8 +121,10 @@ float   tPowerFollower_sample(tPowerFollower* const p)
 /* ---------------- env~ - simple envelope follower. ----------------- */
 //===========================================================================
 
-void tEnvPD_init(tEnvPD* const x, int ws, int hs, int bs)
+void tEnvPD_init(tEnvPD* const xpd, int ws, int hs, int bs)
 {
+    _tEnvPD* x = *xpd = (_tEnvPD*) leaf_alloc(sizeof(_tEnvPD));
+    
     int period = hs, npoints = ws;
     
     int i;
@@ -145,18 +163,23 @@ void tEnvPD_init(tEnvPD* const x, int ws, int hs, int bs)
     // ~ ~ ~ ~ ~ ~ ~ ~
 }
 
-void tEnvPD_free (tEnvPD* const x)
+void tEnvPD_free (tEnvPD* const xpd)
 {
+    _tEnvPD* x = *xpd;
     
+    leaf_free(x);
 }
 
-float tEnvPD_tick (tEnvPD* const x)
+float tEnvPD_tick (tEnvPD* const xpd)
 {
+    _tEnvPD* x = *xpd;
     return powtodb(x->x_result);
 }
 
-void tEnvPD_processBlock(tEnvPD* const x, float* in)
+void tEnvPD_processBlock(tEnvPD* const xpd, float* in)
 {
+    _tEnvPD* x = *xpd;
+    
     int n = x->blockSize;
     
     int count;
@@ -199,26 +222,33 @@ static void atkdtk_envelope(tAttackDetection* const a, float *in);
 
 /********Constructor/Destructor***************/
 
-void tAttackDetection_init(tAttackDetection* const a, int blocksize)
+void tAttackDetection_init(tAttackDetection* const ad, int blocksize)
 {
-    atkdtk_init(a, blocksize, DEFATTACK, DEFRELEASE);
-}
-
-void tAttackDetection_init_expanded(tAttackDetection* const a, int blocksize, int atk, int rel)
-{
-    atkdtk_init(a, blocksize, atk, rel);
-}
-
-void tAttackDetection_free(tAttackDetection *a)
-{
+    *ad = (_tAttackDetection*) leaf_alloc(sizeof(_tAttackDetection));
     
+    atkdtk_init(ad, blocksize, DEFATTACK, DEFRELEASE);
+}
+
+void tAttackDetection_init_expanded(tAttackDetection* const ad, int blocksize, int atk, int rel)
+{
+    *ad = (_tAttackDetection*) leaf_alloc(sizeof(_tAttackDetection));
+    
+    atkdtk_init(ad, blocksize, atk, rel);
+}
+
+void tAttackDetection_free(tAttackDetection* const ad)
+{
+    _tAttackDetection* a = *ad;
+    
+    leaf_free(a);
 }
 
 /*******Public Functions***********/
 
 
-void tAttackDetection_setBlocksize(tAttackDetection* const a, int size)
+void tAttackDetection_setBlocksize(tAttackDetection* const ad, int size)
 {
+    _tAttackDetection* a = *ad;
     
     if(!((size==64)|(size==128)|(size==256)|(size==512)|(size==1024)|(size==2048)))
         size = DEFBLOCKSIZE;
@@ -228,45 +258,45 @@ void tAttackDetection_setBlocksize(tAttackDetection* const a, int size)
     
 }
 
-void tAttackDetection_setSamplerate(tAttackDetection* const a, int inRate)
+void tAttackDetection_setSamplerate(tAttackDetection* const ad, int inRate)
 {
+    _tAttackDetection* a = *ad;
+    
     a->samplerate = inRate;
     
     //Reset atk and rel to recalculate coeff
-    tAttackDetection_setAtk(a, a->atk);
-    tAttackDetection_setRel(a, a->rel);
-    
-    return;
+    tAttackDetection_setAtk(ad, a->atk);
+    tAttackDetection_setRel(ad, a->rel);
 }
 
-void tAttackDetection_setThreshold(tAttackDetection* const a, float thres)
+void tAttackDetection_setThreshold(tAttackDetection* const ad, float thres)
 {
+    _tAttackDetection* a = *ad;
     a->threshold = thres;
-    return;
 }
 
-void tAttackDetection_setAtk(tAttackDetection* const a, int inAtk)
+void tAttackDetection_setAtk(tAttackDetection* const ad, int inAtk)
 {
+    _tAttackDetection* a = *ad;
     a->atk = inAtk;
     a->atk_coeff = pow(0.01, 1.0/(a->atk * a->samplerate * 0.001));
-    
-    return;
 }
 
-void tAttackDetection_setRel(tAttackDetection* const a, int inRel)
+void tAttackDetection_setRel(tAttackDetection* const ad, int inRel)
 {
+    _tAttackDetection* a = *ad;
     a->rel = inRel;
     a->rel_coeff = pow(0.01, 1.0/(a->rel * a->samplerate * 0.001));
-    
-    return;
 }
 
 
-int tAttackDetection_detect(tAttackDetection* const a, float *in)
+int tAttackDetection_detect(tAttackDetection* const ad, float *in)
 {
+    _tAttackDetection* a = *ad;
+    
     int result;
     
-    atkdtk_envelope(a, in);
+    atkdtk_envelope(ad, in);
     
     if(a->env >= a->prevAmp*2) //2 times greater = 6dB increase
         result = 1;
@@ -276,13 +306,14 @@ int tAttackDetection_detect(tAttackDetection* const a, float *in)
     a->prevAmp = a->env;
     
     return result;
-    
 }
 
 /*******Private Functions**********/
 
-static void atkdtk_init(tAttackDetection* const a, int blocksize, int atk, int rel)
+static void atkdtk_init(tAttackDetection* const ad, int blocksize, int atk, int rel)
 {
+    _tAttackDetection* a = *ad;
+    
     a->env = 0;
     a->blocksize = blocksize;
     a->threshold = DEFTHRESHOLD;
@@ -291,12 +322,14 @@ static void atkdtk_init(tAttackDetection* const a, int blocksize, int atk, int r
     
     a->env = 0;
     
-    tAttackDetection_setAtk(a, atk);
-    tAttackDetection_setRel(a, rel);
+    tAttackDetection_setAtk(ad, atk);
+    tAttackDetection_setRel(ad, rel);
 }
 
-static void atkdtk_envelope(tAttackDetection* const a, float *in)
+static void atkdtk_envelope(tAttackDetection* const ad, float *in)
 {
+    _tAttackDetection* a = *ad;
+    
     int i = 0;
     float tmp;
     for(i = 0; i < a->blocksize; ++i){
@@ -313,8 +346,10 @@ static void atkdtk_envelope(tAttackDetection* const a, float *in)
 //===========================================================================
 // PERIODDETECTION
 //===========================================================================
-void    tPeriodDetection_init    (tPeriodDetection* const p, float* in, float* out, int bufSize, int frameSize)
+void    tPeriodDetection_init    (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize)
 {
+    _tPeriodDetection* p = *pd = (_tPeriodDetection*) leaf_alloc(sizeof(_tPeriodDetection));
+    
     p->inBuffer = in;
     p->outBuffer = out;
     p->bufSize = bufSize;
@@ -336,14 +371,19 @@ void    tPeriodDetection_init    (tPeriodDetection* const p, float* in, float* o
     p->radius = expf(-1000.0f * p->hopSize * leaf.invSampleRate / p->timeConstant);
 }
 
-void tPeriodDetection_free (tPeriodDetection* const p)
+void tPeriodDetection_free (tPeriodDetection* const pd)
 {
+    _tPeriodDetection* p = *pd;
+    
     tEnvPD_free(&p->env);
     tSNAC_free(&p->snac);
+    leaf_free(p);
 }
 
-float tPeriodDetection_findPeriod (tPeriodDetection* p, float sample)
+float tPeriodDetection_findPeriod (tPeriodDetection* pd, float sample)
 {
+    _tPeriodDetection* p = *pd;
+    
     int i, iLast;
     
     i = (p->curBlock*p->frameSize);
@@ -375,13 +415,15 @@ float tPeriodDetection_findPeriod (tPeriodDetection* p, float sample)
     return p->period;
 }
 
-void tPeriodDetection_setHopSize(tPeriodDetection* p, int hs)
+void tPeriodDetection_setHopSize(tPeriodDetection* pd, int hs)
 {
+    _tPeriodDetection* p = *pd;
     p->hopSize = hs;
 }
 
-void tPeriodDetection_setWindowSize(tPeriodDetection* p, int ws)
+void tPeriodDetection_setWindowSize(tPeriodDetection* pd, int ws)
 {
+    _tPeriodDetection* p = *pd;
     p->windowSize = ws;
 }
 
@@ -417,8 +459,10 @@ static float snac_spectralpeak(tSNAC* const s, float periodlength);
 /******************************************************************************/
 
 
-void tSNAC_init(tSNAC* const s, int overlaparg)
+void tSNAC_init(tSNAC* const snac, int overlaparg)
 {
+    _tSNAC* s = *snac = (_tSNAC*) leaf_alloc(sizeof(_tSNAC));
+    
     s->biasfactor = DEFBIAS;
     s->timeindex = 0;
     s->periodindex = 0;
@@ -432,24 +476,29 @@ void tSNAC_init(tSNAC* const s, int overlaparg)
     s->spectrumbuf = (float*) leaf_alloc(sizeof(float) * (SNAC_FRAME_SIZE / 2));
     s->biasbuf = (float*) leaf_alloc(sizeof(float) * SNAC_FRAME_SIZE);
     
-    snac_biasbuf(s);
-    tSNAC_setOverlap(s, overlaparg);
+    snac_biasbuf(snac);
+    tSNAC_setOverlap(snac, overlaparg);
 }
 
-void tSNAC_free(tSNAC* const s)
+void tSNAC_free(tSNAC* const snac)
 {
+    _tSNAC* s = *snac;
+    
     leaf_free(s->inputbuf);
     leaf_free(s->processbuf);
     leaf_free(s->spectrumbuf);
     leaf_free(s->biasbuf);
+    leaf_free(s);
 }
 /******************************************************************************/
 /************************** public access functions****************************/
 /******************************************************************************/
 
 
-void tSNAC_ioSamples(tSNAC* const s, float *in, float *out, int size)
+void tSNAC_ioSamples(tSNAC* const snac, float *in, float *out, int size)
 {
+    _tSNAC* s = *snac;
+    
     int timeindex = s->timeindex;
     int mask = s->framesize - 1;
     int outindex = 0;
@@ -457,7 +506,7 @@ void tSNAC_ioSamples(tSNAC* const s, float *in, float *out, int size)
     float *processbuf = s->processbuf;
     
     // call analysis function when it is time
-    if(!(timeindex & (s->framesize / s->overlap - 1))) snac_analyzeframe(s);
+    if(!(timeindex & (s->framesize / s->overlap - 1))) snac_analyzeframe(snac);
     
     while(size--)
     {
@@ -468,25 +517,28 @@ void tSNAC_ioSamples(tSNAC* const s, float *in, float *out, int size)
     s->timeindex = timeindex;
 }
 
-void tSNAC_setOverlap(tSNAC* const s, int lap)
+void tSNAC_setOverlap(tSNAC* const snac, int lap)
 {
+    _tSNAC* s = *snac;
     if(!((lap==1)|(lap==2)|(lap==4)|(lap==8))) lap = DEFOVERLAP;
     s->overlap = lap;
 }
 
 
-void tSNAC_setBias(tSNAC* const s, float bias)
+void tSNAC_setBias(tSNAC* const snac, float bias)
 {
+    _tSNAC* s = *snac;
     if(bias > 1.) bias = 1.;
     if(bias < 0.) bias = 0.;
     s->biasfactor = bias;
-    snac_biasbuf(s);
+    snac_biasbuf(snac);
     return;
 }
 
 
-void tSNAC_setMinRMS(tSNAC* const s, float rms)
+void tSNAC_setMinRMS(tSNAC* const snac, float rms)
 {
+    _tSNAC* s = *snac;
     if(rms > 1.) rms = 1.;
     if(rms < 0.) rms = 0.;
     s->minrms = rms;
@@ -494,14 +546,16 @@ void tSNAC_setMinRMS(tSNAC* const s, float rms)
 }
 
 
-float tSNAC_getPeriod(tSNAC* const s)
+float tSNAC_getPeriod(tSNAC* const snac)
 {
+    _tSNAC* s = *snac;
     return(s->periodlength);
 }
 
 
-float tSNAC_getFidelity(tSNAC* const s)
+float tSNAC_getFidelity(tSNAC* const snac)
 {
+    _tSNAC* s = *snac;
     return(s->fidelity);
 }
 
@@ -512,8 +566,10 @@ float tSNAC_getFidelity(tSNAC* const s)
 
 
 // main analysis function
-static void snac_analyzeframe(tSNAC* const s)
+static void snac_analyzeframe(tSNAC* const snac)
 {
+    _tSNAC* s = *snac;
+    
     int n, tindex = s->timeindex;
     int framesize = s->framesize;
     int mask = framesize - 1;
@@ -534,15 +590,17 @@ static void snac_analyzeframe(tSNAC* const s)
     for(n=framesize; n<(framesize<<1); n++) processbuf[n] = 0.;
     
     // call analysis procedures
-    snac_autocorrelation(s);
-    snac_normalize(s);
-    snac_pickpeak(s);
-    snac_periodandfidelity(s);
+    snac_autocorrelation(snac);
+    snac_normalize(snac);
+    snac_pickpeak(snac);
+    snac_periodandfidelity(snac);
 }
 
 
-static void snac_autocorrelation(tSNAC* const s)
+static void snac_autocorrelation(tSNAC* const snac)
 {
+    _tSNAC* s = *snac;
+    
     int n, m;
     int framesize = s->framesize;
     int fftsize = framesize * 2;
@@ -574,8 +632,10 @@ static void snac_autocorrelation(tSNAC* const s)
 }
 
 
-static void snac_normalize(tSNAC* const s)
+static void snac_normalize(tSNAC* const snac)
 {
+    _tSNAC* s = *snac;
+    
     int framesize = s->framesize;
     int framesizeplustimeindex = s->framesize + s->timeindex;
     int timeindexminusone = s->timeindex - 1;
@@ -611,15 +671,17 @@ static void snac_normalize(tSNAC* const s)
 }
 
 
-static void snac_periodandfidelity(tSNAC* const s)
+static void snac_periodandfidelity(tSNAC* const snac)
 {
+    _tSNAC* s = *snac;
+    
     float periodlength;
     
     if(s->periodindex)
     {
         periodlength = (float)s->periodindex +
         interpolate3phase(s->processbuf, s->periodindex);
-        if(periodlength < 8) periodlength = snac_spectralpeak(s, periodlength);
+        if(periodlength < 8) periodlength = snac_spectralpeak(snac, periodlength);
         s->periodlength = periodlength;
         s->fidelity = interpolate3max(s->processbuf, s->periodindex);
     }
@@ -627,8 +689,10 @@ static void snac_periodandfidelity(tSNAC* const s)
 }
 
 // select the peak which most probably represents period length
-static void snac_pickpeak(tSNAC* const s)
+static void snac_pickpeak(tSNAC* const snac)
 {
+    _tSNAC* s = *snac;
+    
     int n, peakindex=0;
     int seek = s->framesize * SEEK;
     float *processbuf= s->processbuf;
@@ -669,8 +733,10 @@ static void snac_pickpeak(tSNAC* const s)
 // verify period length via frequency domain (up till SR/4)
 // frequency domain is more precise than lag domain for period lengths < 8
 // argument 'periodlength' is initial estimation from autocorrelation
-static float snac_spectralpeak(tSNAC* const s, float periodlength)
+static float snac_spectralpeak(tSNAC* const snac, float periodlength)
 {
+    _tSNAC* s = *snac;
+    
     if(periodlength < 4.) return periodlength;
     
     float max = 0.;
@@ -713,8 +779,9 @@ static float snac_spectralpeak(tSNAC* const s, float periodlength)
 
 
 // modified logarithmic bias function
-static void snac_biasbuf(tSNAC* const s)
+static void snac_biasbuf(tSNAC* const snac)
 {
+    _tSNAC* s = *snac;
     
     int n;
     int maxperiod = (int)(s->framesize * (float)SEEK);

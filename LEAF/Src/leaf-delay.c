@@ -19,8 +19,10 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Delay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tDelay_init (tDelay*  const d, uint32_t delay, uint32_t maxDelay)
+void    tDelay_init (tDelay*  const dl, uint32_t delay, uint32_t maxDelay)
 {
+    _tDelay* d = *dl = (_tDelay*) leaf_alloc(sizeof(_tDelay));
+    
     d->maxDelay = maxDelay;
     
     d->delay = delay;
@@ -35,16 +37,21 @@ void    tDelay_init (tDelay*  const d, uint32_t delay, uint32_t maxDelay)
     
     d->gain = 1.0f;
     
-    tDelay_setDelay(d, d->delay);
+    tDelay_setDelay(dl, d->delay);
 }
 
-void tDelay_free(tDelay* const d)
+void tDelay_free(tDelay* const dl)
 {
+    _tDelay* d = *dl;
+    
     leaf_free(d->buff);
+    leaf_free(d);
 }
 
-float   tDelay_tick (tDelay* const d, float input)
+float   tDelay_tick (tDelay* const dl, float input)
 {
+    _tDelay* d = *dl;
+    
     // Input
     d->lastIn = input;
     d->buff[d->inPoint] = input * d->gain;
@@ -57,11 +64,11 @@ float   tDelay_tick (tDelay* const d, float input)
     return d->lastOut;
 }
 
-
-int     tDelay_setDelay (tDelay* const d, uint32_t delay)
+int     tDelay_setDelay (tDelay* const dl, uint32_t delay)
 {
-    d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
+    _tDelay* d = *dl;
     
+    d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
     
     // read chases write
     if ( d->inPoint >= delay )  d->outPoint = d->inPoint - d->delay;
@@ -70,8 +77,10 @@ int     tDelay_setDelay (tDelay* const d, uint32_t delay)
     return 0;
 }
 
-float tDelay_tapOut (tDelay* const d, uint32_t tapDelay)
+float tDelay_tapOut (tDelay* const dl, uint32_t tapDelay)
 {
+    _tDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -81,8 +90,10 @@ float tDelay_tapOut (tDelay* const d, uint32_t tapDelay)
     
 }
 
-void tDelay_tapIn (tDelay* const d, float value, uint32_t tapDelay)
+void tDelay_tapIn (tDelay* const dl, float value, uint32_t tapDelay)
 {
+    _tDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -91,8 +102,10 @@ void tDelay_tapIn (tDelay* const d, float value, uint32_t tapDelay)
     d->buff[tap] = value;
 }
 
-float tDelay_addTo (tDelay* const d, float value, uint32_t tapDelay)
+float tDelay_addTo (tDelay* const dl, float value, uint32_t tapDelay)
 {
+    _tDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -101,35 +114,42 @@ float tDelay_addTo (tDelay* const d, float value, uint32_t tapDelay)
     return (d->buff[tap] += value);
 }
 
-uint32_t   tDelay_getDelay (tDelay* const d)
+uint32_t   tDelay_getDelay (tDelay* const dl)
 {
+    _tDelay* d = *dl;
     return d->delay;
 }
 
-float   tDelay_getLastOut (tDelay* const d)
+float   tDelay_getLastOut (tDelay* const dl)
 {
+    _tDelay* d = *dl;
     return d->lastOut;
 }
 
-float   tDelay_getLastIn (tDelay* const d)
+float   tDelay_getLastIn (tDelay* const dl)
 {
+    _tDelay* d = *dl;
     return d->lastIn;
 }
 
-void tDelay_setGain (tDelay* const d, float gain)
+void tDelay_setGain (tDelay* const dl, float gain)
 {
+    _tDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-float tDelay_getGain (tDelay* const d)
+float tDelay_getGain (tDelay* const dl)
 {
+    _tDelay* d = *dl;
     return d->gain;
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ LinearDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void   tLinearDelay_init (tLinearDelay* const d, float delay, uint32_t maxDelay)
+void   tLinearDelay_init (tLinearDelay* const dl, float delay, uint32_t maxDelay)
 {
+    _tLinearDelay* d = *dl = (_tLinearDelay*) leaf_alloc(sizeof(_tLinearDelay));
+    
     d->maxDelay = maxDelay;
 
     if (delay > maxDelay)   d->delay = maxDelay;
@@ -146,16 +166,21 @@ void   tLinearDelay_init (tLinearDelay* const d, float delay, uint32_t maxDelay)
     d->inPoint = 0;
     d->outPoint = 0;
     
-    tLinearDelay_setDelay(d, d->delay);
+    tLinearDelay_setDelay(dl, d->delay);
 }
 
-void tLinearDelay_free(tLinearDelay* const d)
+void tLinearDelay_free(tLinearDelay* const dl)
 {
+    _tLinearDelay* d = *dl;
+    
     leaf_free(d->buff);
+    leaf_free(d);
 }
 
-float   tLinearDelay_tick (tLinearDelay* const d, float input)
+float   tLinearDelay_tick (tLinearDelay* const dl, float input)
 {
+    _tLinearDelay* d = *dl;
+    
     d->buff[d->inPoint] = input * d->gain;
     
     // Increment input pointer modulo length.
@@ -176,16 +201,20 @@ float   tLinearDelay_tick (tLinearDelay* const d, float input)
     return d->lastOut;
 }
 
-void   tLinearDelay_tickIn (tLinearDelay* const d, float input)
+void   tLinearDelay_tickIn (tLinearDelay* const dl, float input)
 {
+    _tLinearDelay* d = *dl;
+    
     d->buff[d->inPoint] = input * d->gain;
 
     // Increment input pointer modulo length.
     if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
 }
 
-float   tLinearDelay_tickOut (tLinearDelay* const d)
+float   tLinearDelay_tickOut (tLinearDelay* const dl)
 {
+    _tLinearDelay* d = *dl;
+    
     uint32_t idx = (uint32_t) d->outPoint;
 
     d->lastOut =    LEAF_interpolate_hermite (d->buff[((idx - 1) + d->maxDelay) % d->maxDelay],
@@ -200,8 +229,10 @@ float   tLinearDelay_tickOut (tLinearDelay* const d)
     return d->lastOut;
 }
 
-int     tLinearDelay_setDelay (tLinearDelay* const d, float delay)
+int     tLinearDelay_setDelay (tLinearDelay* const dl, float delay)
 {
+    _tLinearDelay* d = *dl;
+    
     d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
     
     float outPointer = d->inPoint - d->delay;
@@ -219,8 +250,10 @@ int     tLinearDelay_setDelay (tLinearDelay* const d, float delay)
     return 0;
 }
 
-float tLinearDelay_tapOut (tLinearDelay* const d, float tapDelay)
+float tLinearDelay_tapOut (tLinearDelay* const dl, float tapDelay)
 {
+    _tLinearDelay* d = *dl;
+    
     float tap = (float) d->inPoint - tapDelay - 1.f;
     
     // Check for wraparound.
@@ -244,8 +277,10 @@ float tLinearDelay_tapOut (tLinearDelay* const d, float tapDelay)
     
 }
 
-void tLinearDelay_tapIn (tLinearDelay* const d, float value, uint32_t tapDelay)
+void tLinearDelay_tapIn (tLinearDelay* const dl, float value, uint32_t tapDelay)
 {
+    _tLinearDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -254,8 +289,10 @@ void tLinearDelay_tapIn (tLinearDelay* const d, float value, uint32_t tapDelay)
     d->buff[tap] = value;
 }
 
-float tLinearDelay_addTo (tLinearDelay* const d, float value, uint32_t tapDelay)
+float tLinearDelay_addTo (tLinearDelay* const dl, float value, uint32_t tapDelay)
 {
+    _tLinearDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -264,35 +301,42 @@ float tLinearDelay_addTo (tLinearDelay* const d, float value, uint32_t tapDelay)
     return (d->buff[tap] += value);
 }
 
-float   tLinearDelay_getDelay (tLinearDelay *d)
+float   tLinearDelay_getDelay (tLinearDelay* const dl)
 {
+    _tLinearDelay* d = *dl;
     return d->delay;
 }
 
-float   tLinearDelay_getLastOut (tLinearDelay* const d)
+float   tLinearDelay_getLastOut (tLinearDelay* const dl)
 {
+    _tLinearDelay* d = *dl;
     return d->lastOut;
 }
 
-float   tLinearDelay_getLastIn (tLinearDelay* const d)
+float   tLinearDelay_getLastIn (tLinearDelay* const dl)
 {
+    _tLinearDelay* d = *dl;
     return d->lastIn;
 }
 
-void tLinearDelay_setGain (tLinearDelay* const d, float gain)
+void tLinearDelay_setGain (tLinearDelay* const dl, float gain)
 {
+    _tLinearDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-float tLinearDelay_getGain (tLinearDelay* const d)
+float tLinearDelay_getGain (tLinearDelay* const dl)
 {
+    _tLinearDelay* d = *dl;
     return d->gain;
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ AllpassDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void  tAllpassDelay_init (tAllpassDelay* const d, float delay, uint32_t maxDelay)
+void  tAllpassDelay_init (tAllpassDelay* const dl, float delay, uint32_t maxDelay)
 {
+    _tAllpassDelay* d = *dl = (_tAllpassDelay*) leaf_alloc(sizeof(_tAllpassDelay));
+    
     d->maxDelay = maxDelay;
     
     if (delay > maxDelay)   d->delay = maxDelay;
@@ -309,18 +353,23 @@ void  tAllpassDelay_init (tAllpassDelay* const d, float delay, uint32_t maxDelay
     d->inPoint = 0;
     d->outPoint = 0;
     
-    tAllpassDelay_setDelay(d, d->delay);
+    tAllpassDelay_setDelay(dl, d->delay);
     
     d->apInput = 0.0f;
 }
 
-void tAllpassDelay_free(tAllpassDelay* const d)
+void tAllpassDelay_free(tAllpassDelay* const dl)
 {
+    _tAllpassDelay* d = *dl;
+    
     leaf_free(d->buff);
+    leaf_free(d);
 }
 
-float   tAllpassDelay_tick (tAllpassDelay* const d, float input)
+float   tAllpassDelay_tick (tAllpassDelay* const dl, float input)
 {
+    _tAllpassDelay* d = *dl;
+    
     d->buff[d->inPoint] = input * d->gain;
     
     // Increment input pointer modulo length.
@@ -340,10 +389,11 @@ float   tAllpassDelay_tick (tAllpassDelay* const d, float input)
     return d->lastOut;
 }
 
-int     tAllpassDelay_setDelay (tAllpassDelay* const d, float delay)
+int     tAllpassDelay_setDelay (tAllpassDelay* const dl, float delay)
 {
-    d->delay = LEAF_clip(0.5f, delay,  d->maxDelay);
+    _tAllpassDelay* d = *dl;
     
+    d->delay = LEAF_clip(0.5f, delay,  d->maxDelay);
     
     // outPoint chases inPoint
     float outPointer = (float)d->inPoint - d->delay + 1.0f;
@@ -373,8 +423,10 @@ int     tAllpassDelay_setDelay (tAllpassDelay* const d, float delay)
     return 0;
 }
 
-float tAllpassDelay_tapOut (tAllpassDelay* const d, uint32_t tapDelay)
+float tAllpassDelay_tapOut (tAllpassDelay* const dl, uint32_t tapDelay)
 {
+    _tAllpassDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -384,8 +436,10 @@ float tAllpassDelay_tapOut (tAllpassDelay* const d, uint32_t tapDelay)
     
 }
 
-void tAllpassDelay_tapIn (tAllpassDelay* const d, float value, uint32_t tapDelay)
+void tAllpassDelay_tapIn (tAllpassDelay* const dl, float value, uint32_t tapDelay)
 {
+    _tAllpassDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -394,8 +448,10 @@ void tAllpassDelay_tapIn (tAllpassDelay* const d, float value, uint32_t tapDelay
     d->buff[tap] = value;
 }
 
-float tAllpassDelay_addTo (tAllpassDelay* const d, float value, uint32_t tapDelay)
+float tAllpassDelay_addTo (tAllpassDelay* const dl, float value, uint32_t tapDelay)
 {
+    _tAllpassDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -404,35 +460,42 @@ float tAllpassDelay_addTo (tAllpassDelay* const d, float value, uint32_t tapDela
     return (d->buff[tap] += value);
 }
 
-float   tAllpassDelay_getDelay (tAllpassDelay* const d)
+float   tAllpassDelay_getDelay (tAllpassDelay* const dl)
 {
+    _tAllpassDelay* d = *dl;
     return d->delay;
 }
 
-float   tAllpassDelay_getLastOut (tAllpassDelay* const d)
+float   tAllpassDelay_getLastOut (tAllpassDelay* const dl)
 {
+    _tAllpassDelay* d = *dl;
     return d->lastOut;
 }
 
-float   tAllpassDelay_getLastIn (tAllpassDelay* const d)
+float   tAllpassDelay_getLastIn (tAllpassDelay* const dl)
 {
+    _tAllpassDelay* d = *dl;
     return d->lastIn;
 }
 
-void tAllpassDelay_setGain (tAllpassDelay* const d, float gain)
+void tAllpassDelay_setGain (tAllpassDelay* const dl, float gain)
 {
+    _tAllpassDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-float tAllpassDelay_getGain (tAllpassDelay* const d)
+float tAllpassDelay_getGain (tAllpassDelay* const dl)
 {
+    _tAllpassDelay* d = *dl;
     return d->gain;
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ TapeDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void   tTapeDelay_init (tTapeDelay* const d, float delay, uint32_t maxDelay)
+void   tTapeDelay_init (tTapeDelay* const dl, float delay, uint32_t maxDelay)
 {
+    _tTapeDelay* d = *dl = (_tTapeDelay*) leaf_alloc(sizeof(_tTapeDelay));
+    
     d->maxDelay = maxDelay;
 
     d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
@@ -446,18 +509,23 @@ void   tTapeDelay_init (tTapeDelay* const d, float delay, uint32_t maxDelay)
     d->inc = 1.0f;
     d->inPoint = 0;
     
-    tTapeDelay_setDelay(d, delay);
+    tTapeDelay_setDelay(dl, delay);
 }
 
-void tTapeDelay_free(tTapeDelay* const d)
+void tTapeDelay_free(tTapeDelay* const dl)
 {
+    _tTapeDelay* d = *dl;
+    
     leaf_free(d->buff);
+    leaf_free(d);
 }
 
 //#define SMOOTH_FACTOR 10.f
 
-float   tTapeDelay_tick (tTapeDelay* const d, float input)
+float   tTapeDelay_tick (tTapeDelay* const dl, float input)
 {
+    _tTapeDelay* d = *dl;
+    
     d->buff[d->inPoint] = input * d->gain;
     
     // Increment input pointer modulo length.
@@ -485,20 +553,22 @@ float   tTapeDelay_tick (tTapeDelay* const d, float input)
 }
 
 
-void tTapeDelay_setRate(tTapeDelay* const d, float rate)
+void tTapeDelay_setRate(tTapeDelay* const dl, float rate)
 {
+    _tTapeDelay* d = *dl;
     d->inc = rate;
 }
 
-int     tTapeDelay_setDelay (tTapeDelay* const d, float delay)
+void     tTapeDelay_setDelay (tTapeDelay* const dl, float delay)
 {
+    _tTapeDelay* d = *dl;
     d->delay = LEAF_clip(1.f, delay,  d->maxDelay);
-    
-    return 0;
 }
 
-float tTapeDelay_tapOut (tTapeDelay* const d, float tapDelay)
+float tTapeDelay_tapOut (tTapeDelay* const dl, float tapDelay)
 {
+    _tTapeDelay* d = *dl;
+    
     float tap = (float) d->inPoint - tapDelay - 1.f;
     
     // Check for wraparound.
@@ -518,8 +588,10 @@ float tTapeDelay_tapOut (tTapeDelay* const d, float tapDelay)
     
 }
 
-void tTapeDelay_tapIn (tTapeDelay* const d, float value, uint32_t tapDelay)
+void tTapeDelay_tapIn (tTapeDelay* const dl, float value, uint32_t tapDelay)
 {
+    _tTapeDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -528,8 +600,10 @@ void tTapeDelay_tapIn (tTapeDelay* const d, float value, uint32_t tapDelay)
     d->buff[tap] = value;
 }
 
-float tTapeDelay_addTo (tTapeDelay* const d, float value, uint32_t tapDelay)
+float tTapeDelay_addTo (tTapeDelay* const dl, float value, uint32_t tapDelay)
 {
+    _tTapeDelay* d = *dl;
+    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -538,29 +612,34 @@ float tTapeDelay_addTo (tTapeDelay* const d, float value, uint32_t tapDelay)
     return (d->buff[tap] += value);
 }
 
-float   tTapeDelay_getDelay (tTapeDelay *d)
+float   tTapeDelay_getDelay (tTapeDelay *dl)
 {
+    _tTapeDelay* d = *dl;
     return d->delay;
 }
 
-float   tTapeDelay_getLastOut (tTapeDelay* const d)
+float   tTapeDelay_getLastOut (tTapeDelay* const dl)
 {
+    _tTapeDelay* d = *dl;
     return d->lastOut;
 }
 
-float   tTapeDelay_getLastIn (tTapeDelay* const d)
+float   tTapeDelay_getLastIn (tTapeDelay* const dl)
 {
+    _tTapeDelay* d = *dl;
     return d->lastIn;
 }
 
-void tTapeDelay_setGain (tTapeDelay* const d, float gain)
+void tTapeDelay_setGain (tTapeDelay* const dl, float gain)
 {
+    _tTapeDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-float tTapeDelay_getGain (tTapeDelay* const d)
+float tTapeDelay_getGain (tTapeDelay* const dl)
 {
+    _tTapeDelay* d = *dl;
     return d->gain;
 }
 

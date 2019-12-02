@@ -19,8 +19,10 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ PRCReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tPRCReverb_init(tPRCReverb* const r, float t60)
+void    tPRCReverb_init(tPRCReverb* const rev, float t60)
 {
+    _tPRCReverb* r = *rev = (_tPRCReverb*) leaf_alloc(sizeof(_tPRCReverb));
+    
     if (t60 <= 0.0f) t60 = 0.001f;
     
     r->inv_441 = 1.0f/44100.0f;
@@ -47,21 +49,26 @@ void    tPRCReverb_init(tPRCReverb* const r, float t60)
     tDelay_init(&r->allpassDelays[1], lengths[1], lengths[1] * 2);
     tDelay_init(&r->combDelay, lengths[2], lengths[2] * 2);
     
-    tPRCReverb_setT60(r, t60);
+    tPRCReverb_setT60(rev, t60);
     
     r->allpassCoeff = 0.7f;
     r->mix = 0.5f;
 }
 
-void tPRCReverb_free(tPRCReverb* const r)
+void tPRCReverb_free(tPRCReverb* const rev)
 {
+    _tPRCReverb* r = *rev;
+    
     tDelay_free(&r->allpassDelays[0]);
     tDelay_free(&r->allpassDelays[1]);
     tDelay_free(&r->combDelay);
+    leaf_free(r);
 }
 
-void    tPRCReverb_setT60(tPRCReverb* const r, float t60)
+void    tPRCReverb_setT60(tPRCReverb* const rev, float t60)
 {
+    _tPRCReverb* r = *rev;
+    
     if ( t60 <= 0.0f ) t60 = 0.001f;
     
     r->t60 = t60;
@@ -70,13 +77,16 @@ void    tPRCReverb_setT60(tPRCReverb* const r, float t60)
     
 }
 
-void    tPRCReverb_setMix(tPRCReverb* const r, float mix)
+void    tPRCReverb_setMix(tPRCReverb* const rev, float mix)
 {
+    _tPRCReverb* r = *rev;
     r->mix = mix;
 }
 
-float   tPRCReverb_tick(tPRCReverb* const r, float input)
+float   tPRCReverb_tick(tPRCReverb* const rev, float input)
 {
+    _tPRCReverb* r = *rev;
+    
     float temp, temp0, temp1, temp2;
     float out;
     
@@ -107,14 +117,17 @@ float   tPRCReverb_tick(tPRCReverb* const r, float input)
     return out;
 }
 
-void     tPRCReverbSampleRateChanged (tPRCReverb* const r)
+void     tPRCReverbSampleRateChanged (tPRCReverb* const rev)
 {
+    _tPRCReverb* r = *rev;
     r->combCoeff = pow(10.0f, (-3.0f * tDelay_getDelay(&r->combDelay) * leaf.invSampleRate / r->t60 ));
 }
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ NReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
-void    tNReverb_init(tNReverb* const r, float t60)
+void    tNReverb_init(tNReverb* const rev, float t60)
 {
+    _tNReverb* r = *rev = (_tNReverb*) leaf_alloc(sizeof(_tNReverb));
+    
     if (t60 <= 0.0f) t60 = 0.001f;
     
     r->inv_441 = 1.0f/44100.0f;
@@ -150,13 +163,15 @@ void    tNReverb_init(tNReverb* const r, float t60)
         tDelay_setDelay(&r->combDelays[i], lengths[i+2]);
     }
     
-    tNReverb_setT60(r, t60);
+    tNReverb_setT60(rev, t60);
     r->allpassCoeff = 0.7f;
     r->mix = 0.3f;
 }
 
-void    tNReverb_free(tNReverb* const r)
+void    tNReverb_free(tNReverb* const rev)
 {
+    _tNReverb* r = *rev;
+    
     for (int i = 0; i < 6; i++)
     {
         tDelay_free(&r->combDelays[i]);
@@ -166,10 +181,14 @@ void    tNReverb_free(tNReverb* const r)
     {
         tDelay_free(&r->allpassDelays[i]);
     }
+    
+    leaf_free(r);
 }
 
-void    tNReverb_setT60(tNReverb* const r, float t60)
+void    tNReverb_setT60(tNReverb* const rev, float t60)
 {
+    _tNReverb* r = *rev;
+    
     if (t60 <= 0.0f)           t60 = 0.001f;
     
     r->t60 = t60;
@@ -178,13 +197,15 @@ void    tNReverb_setT60(tNReverb* const r, float t60)
     
 }
 
-void    tNReverb_setMix(tNReverb* const r, float mix)
+void    tNReverb_setMix(tNReverb* const rev, float mix)
 {
+    _tNReverb* r = *rev;
     r->mix = mix;
 }
 
-float   tNReverb_tick(tNReverb* const r, float input)
+float   tNReverb_tick(tNReverb* const rev, float input)
 {
+    _tNReverb* r = *rev;
     r->lastIn = input;
     
     float temp, temp0, temp1, temp2, out;
@@ -237,8 +258,9 @@ float   tNReverb_tick(tNReverb* const r, float input)
     return out;
 }
 
-void     tNReverbSampleRateChanged (tNReverb* const r)
+void     tNReverbSampleRateChanged (tNReverb* const rev)
 {
+    _tNReverb* r = *rev;
     for (int i=0; i<6; i++)   r->combCoeffs[i] = pow(10.0, (-3.0 * tDelay_getDelay(&r->combDelays[i]) * leaf.invSampleRate / r->t60 ));
 }
 
@@ -250,8 +272,10 @@ float       in_allpass_delays[4] = { 4.771f, 3.595f, 12.73f, 9.307f };
 float       in_allpass_gains[4] = { 0.75f, 0.75f, 0.625f, 0.625f };
 
 
-void    tDattorroReverb_init              (tDattorroReverb* const r)
+void    tDattorroReverb_init              (tDattorroReverb* const rev)
 {
+    _tDattorroReverb* r = *rev = (_tDattorroReverb*) leaf_alloc(sizeof(_tDattorroReverb));
+    
     r->size_max = 2.0f;
     r->size = 1.f;
     r->t = r->size * leaf.sampleRate * 0.001f;
@@ -298,21 +322,23 @@ void    tDattorroReverb_init              (tDattorroReverb* const r)
     
     
     // PARAMETERS
-    tDattorroReverb_setMix(r, 0.5f);
+    tDattorroReverb_setMix(rev, 0.5f);
     
-    tDattorroReverb_setInputDelay(r,  0.f);
+    tDattorroReverb_setInputDelay(rev,  0.f);
     
-    tDattorroReverb_setInputFilter(r, 10000.f);
+    tDattorroReverb_setInputFilter(rev, 10000.f);
     
-    tDattorroReverb_setFeedbackFilter(r, 5000.f);
+    tDattorroReverb_setFeedbackFilter(rev, 5000.f);
     
-    tDattorroReverb_setFeedbackGain(r, 0.4f);
+    tDattorroReverb_setFeedbackGain(rev, 0.4f);
     
     
 }
 
-void    tDattorroReverb_free              (tDattorroReverb* const r)
+void    tDattorroReverb_free              (tDattorroReverb* const rev)
 {
+    _tDattorroReverb* r = *rev;
+    
     // INPUT
     tTapeDelay_free(&r->in_delay);
     tOnePole_free(&r->in_filter);
@@ -347,10 +373,14 @@ void    tDattorroReverb_free              (tDattorroReverb* const r)
     tHighpass_free(&r->f2_hp);
     
     tCycle_free(&r->f2_lfo);
+    
+    leaf_free(r);
 }
 
-float   tDattorroReverb_tick              (tDattorroReverb* const r, float input)
+float   tDattorroReverb_tick              (tDattorroReverb* const rev, float input)
 {
+    _tDattorroReverb* r = *rev;
+    
     // INPUT
     float in_sample = tTapeDelay_tick(&r->in_delay, input);
     
@@ -449,13 +479,16 @@ float   tDattorroReverb_tick              (tDattorroReverb* const r, float input
     return (input * (1.0f - r->mix) + sample * r->mix);
 }
 
-void    tDattorroReverb_setMix            (tDattorroReverb* const r, float mix)
+void    tDattorroReverb_setMix            (tDattorroReverb* const rev, float mix)
 {
+    _tDattorroReverb* r = *rev;
     r->mix = LEAF_clip(0.0f, mix, 1.0f);
 }
 
-void    tDattorroReverb_setSize           (tDattorroReverb* const r, float size)
+void    tDattorroReverb_setSize           (tDattorroReverb* const rev, float size)
 {
+    _tDattorroReverb* r = *rev;
+    
     r->size = LEAF_clip(0.01f, size*r->size_max, r->size_max);
     r->t = r->size * leaf.sampleRate * 0.001f;
     
@@ -483,29 +516,36 @@ void    tDattorroReverb_setSize           (tDattorroReverb* const r, float size)
     tTapeDelay_setDelay(&r->f2_delay_3, SAMP(106.28f));
 }
 
-void    tDattorroReverb_setInputDelay     (tDattorroReverb* const r, float preDelay)
+void    tDattorroReverb_setInputDelay     (tDattorroReverb* const rev, float preDelay)
 {
+    _tDattorroReverb* r = *rev;
+    
     r->predelay = LEAF_clip(0.0f, preDelay, 200.0f);
     
     tTapeDelay_setDelay(&r->in_delay, SAMP(r->predelay));
 }
 
-void    tDattorroReverb_setInputFilter    (tDattorroReverb* const r, float freq)
+void    tDattorroReverb_setInputFilter    (tDattorroReverb* const rev, float freq)
 {
+    _tDattorroReverb* r = *rev;
+    
     r->input_filter = LEAF_clip(0.0f, freq, 20000.0f);
     
     tOnePole_setFreq(&r->in_filter, r->input_filter);
 }
 
-void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const r, float freq)
+void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const rev, float freq)
 {
+    _tDattorroReverb* r = *rev;
+    
     r->feedback_filter = LEAF_clip(0.0f, freq, 20000.0f);
     
     tOnePole_setFreq(&r->f1_filter, r->feedback_filter);
     tOnePole_setFreq(&r->f2_filter, r->feedback_filter);
 }
 
-void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const r, float gain)
+void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const rev, float gain)
 {
+    _tDattorroReverb* r = *rev;
     r->feedback_gain = gain;
 }

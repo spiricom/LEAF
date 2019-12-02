@@ -24,8 +24,10 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Envelope ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tEnvelope_init(tEnvelope* const env, float attack, float decay, oBool loop)
+void    tEnvelope_init(tEnvelope* const envlp, float attack, float decay, oBool loop)
 {
+    _tEnvelope* env = *envlp = (_tEnvelope*) leaf_alloc(sizeof(_tEnvelope));
+    
     env->exp_buff = exp_decay;
     env->inc_buff = attack_decay_inc;
     env->buff_size = sizeof(exp_decay);
@@ -63,13 +65,16 @@ void    tEnvelope_init(tEnvelope* const env, float attack, float decay, oBool lo
 
 }
 
-void tEnvelope_free(tEnvelope* const env)
+void tEnvelope_free(tEnvelope* const envlp)
 {
-    
+    _tEnvelope* env = *envlp;
+    leaf_free(env);
 }
 
-int     tEnvelope_setAttack(tEnvelope* const env, float attack)
+void     tEnvelope_setAttack(tEnvelope* const envlp, float attack)
 {
+    _tEnvelope* env = *envlp;
+    
     int32_t attackIndex;
     
     if (attack < 0.0f) {
@@ -81,12 +86,12 @@ int     tEnvelope_setAttack(tEnvelope* const env, float attack)
     }
     
     env->attackInc = env->inc_buff[attackIndex];
-    
-    return 0;
 }
 
-int     tEnvelope_setDecay(tEnvelope* const env, float decay)
+void     tEnvelope_setDecay(tEnvelope* const envlp, float decay)
 {
+    _tEnvelope* env = *envlp;
+    
     int32_t decayIndex;
     
     if (decay < 0.0f) {
@@ -97,21 +102,20 @@ int     tEnvelope_setDecay(tEnvelope* const env, float decay)
         decayIndex = ((int32_t)(8192.0f * 8.0f)) - 1; 
     }
     
-    env->decayInc = env->inc_buff[decayIndex]; 
-    
-    return 0;
+    env->decayInc = env->inc_buff[decayIndex];
 }
 
-int     tEnvelope_loop(tEnvelope* const env, oBool loop)
+void     tEnvelope_loop(tEnvelope* const envlp, oBool loop)
 {
+    _tEnvelope* env = *envlp;
     env->loop = loop;
-    
-    return 0;
 }
 
 
-int     tEnvelope_on(tEnvelope* const env, float velocity)
+void     tEnvelope_on(tEnvelope* const envlp, float velocity)
 {
+    _tEnvelope* env = *envlp;
+    
     if (env->inAttack || env->inDecay) // In case envelope retriggered while it is still happening.
     {
         env->rampPhase = 0;
@@ -128,12 +132,12 @@ int     tEnvelope_on(tEnvelope* const env, float velocity)
     env->decayPhase = 0;
     env->inDecay = OFALSE;
     env->gain = velocity;
-    
-    return 0;
 }
 
-float   tEnvelope_tick(tEnvelope* const env)
+float   tEnvelope_tick(tEnvelope* const envlp)
 {
+    _tEnvelope* env = *envlp;
+    
     if (env->inRamp)
     {
         if (env->rampPhase > UINT16_MAX)
@@ -203,8 +207,10 @@ float   tEnvelope_tick(tEnvelope* const env)
 }
 
 /* ADSR */
-void    tADSR_init(tADSR* const adsr, float attack, float decay, float sustain, float release)
+void    tADSR_init(tADSR* const adsrenv, float attack, float decay, float sustain, float release)
 {
+    _tADSR* adsr = *adsrenv = (_tADSR*) leaf_alloc(sizeof(_tADSR));
+    
     adsr->exp_buff = exp_decay;
     adsr->inc_buff = attack_decay_inc;
     adsr->buff_size = sizeof(exp_decay);
@@ -257,13 +263,17 @@ void    tADSR_init(tADSR* const adsr, float attack, float decay, float sustain, 
     adsr->rampInc = adsr->inc_buff[rampIndex];
 }
 
-void tADSR_free(tADSR* const adsr)
+void tADSR_free(tADSR* const adsrenv)
 {
+    _tADSR* adsr = *adsrenv;
     
+    leaf_free(adsr);
 }
 
-int     tADSR_setAttack(tADSR* const adsr, float attack)
+void     tADSR_setAttack(tADSR* const adsrenv, float attack)
 {
+    _tADSR* adsr = *adsrenv;
+    
     int32_t attackIndex;
     
     if (attack < 0.0f) {
@@ -275,12 +285,12 @@ int     tADSR_setAttack(tADSR* const adsr, float attack)
     }
     
     adsr->attackInc = adsr->inc_buff[attackIndex];
-    
-    return 0;
 }
 
-int     tADSR_detDecay(tADSR* const adsr, float decay)
+void     tADSR_detDecay(tADSR* const adsrenv, float decay)
 {
+    _tADSR* adsr = *adsrenv;
+    
     int32_t decayIndex;
     
     if (decay < 0.0f) {
@@ -292,21 +302,21 @@ int     tADSR_detDecay(tADSR* const adsr, float decay)
     }
     
     adsr->decayInc = adsr->inc_buff[decayIndex];
-    
-    return 0;
 }
 
-int     tADSR_setSustain(tADSR *const adsr, float sustain)
+void     tADSR_setSustain(tADSR* const adsrenv, float sustain)
 {
+    _tADSR* adsr = *adsrenv;
+    
     if (sustain > 1.0f)      adsr->sustain = 1.0f;
     else if (sustain < 0.0f) adsr->sustain = 0.0f;
     else                     adsr->sustain = sustain;
-    
-    return 0;
 }
 
-int     tADSR_setRelease(tADSR* const adsr, float release)
+void     tADSR_setRelease(tADSR* const adsrenv, float release)
 {
+    _tADSR* adsr = *adsrenv;
+    
     int32_t releaseIndex;
     
     if (release < 0.0f) {
@@ -318,12 +328,12 @@ int     tADSR_setRelease(tADSR* const adsr, float release)
     }
     
     adsr->releaseInc = adsr->inc_buff[releaseIndex];
-    
-    return 0;
 }
 
-int tADSR_on(tADSR* const adsr, float velocity)
+void tADSR_on(tADSR* const adsrenv, float velocity)
 {
+    _tADSR* adsr = *adsrenv;
+    
     if ((adsr->inAttack || adsr->inDecay) || (adsr->inSustain || adsr->inRelease)) // In case ADSR retriggered while it is still happening.
     {
         adsr->rampPhase = 0;
@@ -342,13 +352,13 @@ int tADSR_on(tADSR* const adsr, float velocity)
     adsr->inSustain = OFALSE;
     adsr->inRelease = OFALSE;
     adsr->gain = velocity;
-    
-    return 0;
 }
 
-int tADSR_off(tADSR* const adsr)
+void tADSR_off(tADSR* const adsrenv)
 {
-    if (adsr->inRelease) return 0;
+    _tADSR* adsr = *adsrenv;
+    
+    if (adsr->inRelease) return;
     
     adsr->inAttack = OFALSE;
     adsr->inDecay = OFALSE;
@@ -356,12 +366,12 @@ int tADSR_off(tADSR* const adsr)
     adsr->inRelease = OTRUE;
     
     adsr->releasePeak = adsr->next;
-    
-    return 0;
 }
 
-float   tADSR_tick(tADSR* const adsr)
+float   tADSR_tick(tADSR* const adsrenv)
 {
+    _tADSR* adsr = *adsrenv;
+    
     if (adsr->inRamp)
     {
         if (adsr->rampPhase > UINT16_MAX)
@@ -440,8 +450,10 @@ float   tADSR_tick(tADSR* const adsr)
 }
 
 /* Ramp */
-void    tRamp_init(tRamp* const ramp, float time, int samples_per_tick)
+void    tRamp_init(tRamp* const r, float time, int samples_per_tick)
 {
+    _tRamp* ramp = *r = (_tRamp*) leaf_alloc(sizeof(_tRamp));
+    
     ramp->inv_sr_ms = 1.0f/(leaf.sampleRate*0.001f);
 	ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
     ramp->curr = 0.0f;
@@ -460,13 +472,17 @@ void    tRamp_init(tRamp* const ramp, float time, int samples_per_tick)
     ramp->inc = ((ramp->dest - ramp->curr) / ramp->time * ramp->inv_sr_ms) * (float)ramp->samples_per_tick;
 }
 
-void tRamp_free(tRamp* const ramp)
+void tRamp_free(tRamp* const r)
 {
+    _tRamp* ramp = *r;
     
+    leaf_free(ramp);
 }
 
-int     tRamp_setTime(tRamp* const r, float time)
+void     tRamp_setTime(tRamp* const ramp, float time)
 {
+    _tRamp* r = *ramp;
+    
 	if (time < r->minimum_time)
 	{
 		r->time = r->minimum_time;
@@ -476,24 +492,25 @@ int     tRamp_setTime(tRamp* const r, float time)
 		r->time = time;
 	}
     r->inc = ((r->dest-r->curr)/r->time * r->inv_sr_ms) * ((float)r->samples_per_tick);
-    return 0;
 }
 
-int     tRamp_setDest(tRamp* const r, float dest)
+void     tRamp_setDest(tRamp* const ramp, float dest)
 {
+    _tRamp* r = *ramp;
     r->dest = dest;
     r->inc = ((r->dest-r->curr)/r->time * r->inv_sr_ms) * ((float)r->samples_per_tick);
-    return 0;
 }
 
-int     tRamp_setVal(tRamp* const r, float val)
+void     tRamp_setVal(tRamp* const ramp, float val)
 {
+    _tRamp* r = *ramp;
     r->curr = val;
     r->inc = ((r->dest-r->curr)/r->time * r->inv_sr_ms) * ((float)r->samples_per_tick);
-    return 0;
 }
 
-float   tRamp_tick(tRamp* const r) {
+float   tRamp_tick(tRamp* const ramp)
+{
+    _tRamp* r = *ramp;
     
     r->curr += r->inc;
     
@@ -504,21 +521,25 @@ float   tRamp_tick(tRamp* const r) {
     return r->curr;
 }
 
-float   tRamp_sample(tRamp* const r) {
-  
+float   tRamp_sample(tRamp* const ramp)
+{
+    _tRamp* r = *ramp;
     return r->curr;
 }
 
-void    tRampSampleRateChanged(tRamp* const r)
+void    tRampSampleRateChanged(tRamp* const ramp)
 {
+    _tRamp* r = *ramp;
     r->inv_sr_ms = 1.0f / (leaf.sampleRate * 0.001f);
     r->inc = ((r->dest-r->curr)/r->time * r->inv_sr_ms)*((float)r->samples_per_tick);
 }
 
 
 /* Exponential Smoother */
-void    tExpSmooth_init(tExpSmooth* const smooth, float val, float factor)
+void    tExpSmooth_init(tExpSmooth* const expsmooth, float val, float factor)
 {	// factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
+    _tExpSmooth* smooth = *expsmooth = (_tExpSmooth*) leaf_alloc(sizeof(_tExpSmooth));
+    
 	smooth->curr=val;
 	smooth->dest=val;
 	if (factor<0) factor=0;
@@ -527,42 +548,47 @@ void    tExpSmooth_init(tExpSmooth* const smooth, float val, float factor)
 	smooth->oneminusfactor=1.0f-factor;
 }
 
-void tExpSmooth_free(tExpSmooth* const smooth)
+void tExpSmooth_free(tExpSmooth* const expsmooth)
 {
+    _tExpSmooth* smooth = *expsmooth;
     
+    leaf_free(smooth);
 }
 
-int     tExpSmooth_setFactor(tExpSmooth* const smooth, float factor)
+void     tExpSmooth_setFactor(tExpSmooth* const expsmooth, float factor)
 {	// factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
+    _tExpSmooth* smooth = *expsmooth;
+    
 	if (factor<0)
 		factor=0;
 	else
 		if (factor>1) factor=1;
 	smooth->factor=factor;
 	smooth->oneminusfactor=1.0f-factor;
-    return 0;
 }
 
-int     tExpSmooth_setDest(tExpSmooth* const smooth, float dest)
+void     tExpSmooth_setDest(tExpSmooth* const expsmooth, float dest)
 {
+    _tExpSmooth* smooth = *expsmooth;
 	smooth->dest=dest;
-    return 0;
 }
 
-int     tExpSmooth_setVal(tExpSmooth* const smooth, float val)
+void     tExpSmooth_setVal(tExpSmooth* const expsmooth, float val)
 {
+    _tExpSmooth* smooth = *expsmooth;
 	smooth->curr=val;
-    return 0;
 }
 
-float   tExpSmooth_tick(tExpSmooth* const smooth)
+float   tExpSmooth_tick(tExpSmooth* const expsmooth)
 {
+    _tExpSmooth* smooth = *expsmooth;
     smooth->curr = smooth->factor*smooth->dest+smooth->oneminusfactor*smooth->curr;
     return smooth->curr;
 }
 
-float   tExpSmooth_sample(tExpSmooth* const smooth)
+float   tExpSmooth_sample(tExpSmooth* const expsmooth)
 {
+    _tExpSmooth* smooth = *expsmooth;
     return smooth->curr;
 }
 

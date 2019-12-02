@@ -41,8 +41,10 @@
  return c;
  }
  */
-void    tCompressor_init(tCompressor* const c)
+void    tCompressor_init(tCompressor* const comp)
 {
+    _tCompressor* c = *comp = (_tCompressor*) leaf_alloc(sizeof(_tCompressor));
+    
     c->tauAttack = 100;
     c->tauRelease = 100;
     
@@ -54,14 +56,18 @@ void    tCompressor_init(tCompressor* const c)
     c->W = 1.0f; // decibel Make-up gain
 }
 
-void tCompressor_free(tCompressor* const c)
+void tCompressor_free(tCompressor* const comp)
 {
+    _tCompressor* c = *comp;
     
+    leaf_free(c);
 }
 
 int ccount = 0;
-float tCompressor_tick(tCompressor* const c, float in)
+float tCompressor_tick(tCompressor* const comp, float in)
 {
+    _tCompressor* c = *comp;
+    
     float slope, overshoot;
     float alphaAtt, alphaRel;
     
@@ -115,14 +121,14 @@ float tCompressor_tick(tCompressor* const c, float in)
      }
      */
     return attenuation * in;
-    
-    
 }
 
 /* Feedback Leveler */
 
-void    tFeedbackLeveler_init(tFeedbackLeveler* const p, float targetLevel, float factor, float strength, int mode)
+void    tFeedbackLeveler_init(tFeedbackLeveler* const fb, float targetLevel, float factor, float strength, int mode)
 {
+    _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) leaf_alloc(sizeof(_tFeedbackLeveler));
+    
     p->curr=0.0f;
     p->targetLevel=targetLevel;
     tPowerFollower_init(&p->pwrFlw,factor);
@@ -130,43 +136,52 @@ void    tFeedbackLeveler_init(tFeedbackLeveler* const p, float targetLevel, floa
     p->strength=strength;
 }
 
-void tFeedbackLeveler_free(tFeedbackLeveler* const p)
+void tFeedbackLeveler_free(tFeedbackLeveler* const fb)
 {
+    _tFeedbackLeveler* p = *fb;
+    
     tPowerFollower_free(&p->pwrFlw);
+    leaf_free(p);
 }
 
-void     tFeedbackLeveler_setStrength(tFeedbackLeveler* const p, float strength)
+void     tFeedbackLeveler_setStrength(tFeedbackLeveler* const fb, float strength)
 {    // strength is how strongly level diff is affecting the amp ratio
     // try 0.125 for a start
+    _tFeedbackLeveler* p = *fb;
     p->strength=strength;
 }
 
-void     tFeedbackLeveler_setFactor(tFeedbackLeveler* const p, float factor)
+void     tFeedbackLeveler_setFactor(tFeedbackLeveler* const fb, float factor)
 {
+    _tFeedbackLeveler* p = *fb;
     tPowerFollower_setFactor(&p->pwrFlw,factor);
 }
 
-void     tFeedbackLeveler_setMode(tFeedbackLeveler* const p, int mode)
+void     tFeedbackLeveler_setMode(tFeedbackLeveler* const fb, int mode)
 {    // 0 for decaying with upwards lev limiting, 1 for constrained absolute level (also downwards limiting)
+    _tFeedbackLeveler* p = *fb;
     p->mode=mode;
 }
 
-float   tFeedbackLeveler_tick(tFeedbackLeveler* const p, float input)
+float   tFeedbackLeveler_tick(tFeedbackLeveler* const fb, float input)
 {
+    _tFeedbackLeveler* p = *fb;
     float levdiff=(tPowerFollower_tick(&p->pwrFlw, input)-p->targetLevel);
     if (p->mode==0 && levdiff<0) levdiff=0;
     p->curr=input*(1-p->strength*levdiff);
     return p->curr;
 }
 
-float   tFeedbackLeveler_sample(tFeedbackLeveler* const p)
+float   tFeedbackLeveler_sample(tFeedbackLeveler* const fb)
 {
+    _tFeedbackLeveler* p = *fb;
     return p->curr;
 }
 
 
-void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const p, float TargetLevel)
+void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const fb, float TargetLevel)
 {
+    _tFeedbackLeveler* p = *fb;
     p->targetLevel=TargetLevel;
 }
 

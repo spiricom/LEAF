@@ -16,8 +16,6 @@
     <GROUP id="{14C5E2CD-5D51-3FD3-5677-28BECA29E95E}" name="Source">
       <GROUP id="{C9F79DF0-2C57-F2B0-7B1B-78A14937E038}" name="LEAF">
         <GROUP id="{B591B686-9726-94F1-28CD-B08349461C76}" name="Externals">
-          <FILE id="oBE37z" name="atkdetect.c" compile="1" resource="0" file="../LEAF/Externals/atkdetect.c"/>
-          <FILE id="MchITp" name="atkdetect.h" compile="0" resource="0" file="../LEAF/Externals/atkdetect.h"/>
           <FILE id="O0YJRY" name="d_fft_mayer.c" compile="1" resource="0" file="../LEAF/Externals/d_fft_mayer.c"/>
           <FILE id="HdG3WV" name="d_fft_mayer.h" compile="0" resource="0" file="../LEAF/Externals/d_fft_mayer.h"/>
           <FILE id="Hu4b98" name="trigtbl.h" compile="0" resource="0" file="../LEAF/Externals/trigtbl.h"/>

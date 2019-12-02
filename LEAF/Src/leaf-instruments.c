@@ -18,7 +18,9 @@
 
 // ----------------- COWBELL ----------------------------//
 
-void t808Cowbell_init(t808Cowbell* const cowbell, int useStick) {
+void t808Cowbell_init(t808Cowbell* const cowbellInst, int useStick)
+{
+    _t808Cowbell* cowbell = *cowbellInst = (_t808Cowbell*) leaf_alloc(sizeof(_t808Cowbell));
     
     tSquare_init(&cowbell->p[0]);
     tSquare_setFreq(&cowbell->p[0], 540.0f);
@@ -45,8 +47,10 @@ void t808Cowbell_init(t808Cowbell* const cowbell, int useStick) {
     cowbell->useStick = useStick;
 }
 
-void t808Cowebell_free(t808Cowbell* const cowbell)
+void t808Cowebell_free(t808Cowbell* const cowbellInst)
 {
+    _t808Cowbell* cowbell = *cowbellInst;
+    
     tSquare_free(&cowbell->p[0]);
     tSquare_free(&cowbell->p[1]);
     tSVF_free(&cowbell->bandpassOsc);
@@ -56,17 +60,22 @@ void t808Cowebell_free(t808Cowbell* const cowbell)
     tHighpass_free(&cowbell->highpass);
     tNoise_free(&cowbell->stick);
     tEnvelope_free(&cowbell->envStick);
+    leaf_free(cowbell);
 }
 
-void t808Cowbell_on(t808Cowbell* const cowbell, float vel)
+void t808Cowbell_on(t808Cowbell* const cowbellInst, float vel)
 {
+    _t808Cowbell* cowbell = *cowbellInst;
+    
     tEnvelope_on(&cowbell->envGain, vel);
     
     if (cowbell->useStick)
         tEnvelope_on(&cowbell->envStick,vel);
 }
 
-float t808Cowbell_tick(t808Cowbell* const cowbell) {
+float t808Cowbell_tick(t808Cowbell* const cowbellInst)
+{
+    _t808Cowbell* cowbell = *cowbellInst;
     
     float sample = 0.0f;
     
@@ -88,42 +97,49 @@ float t808Cowbell_tick(t808Cowbell* const cowbell) {
     return sample;
 }
 
-void t808Cowbell_setDecay(t808Cowbell* const cowbell, float decay)
+void t808Cowbell_setDecay(t808Cowbell* const cowbellInst, float decay)
 {
+    _t808Cowbell* cowbell = *cowbellInst;
     tEnvelope_setDecay(&cowbell->envGain,decay);
 }
 
-void t808Cowbell_setHighpassFreq(t808Cowbell *cowbell, float freq)
+void t808Cowbell_setHighpassFreq(t808Cowbell *cowbellInst, float freq)
 {
+    _t808Cowbell* cowbell = *cowbellInst;
     tHighpass_setFreq(&cowbell->highpass,freq);
 }
 
-void t808Cowbell_setBandpassFreq(t808Cowbell* const cowbell, float freq)
+void t808Cowbell_setBandpassFreq(t808Cowbell* const cowbellInst, float freq)
 {
+    _t808Cowbell* cowbell = *cowbellInst;
     cowbell->filterCutoff = freq;
 }
 
-void t808Cowbell_setFreq(t808Cowbell* const cowbell, float freq)
+void t808Cowbell_setFreq(t808Cowbell* const cowbellInst, float freq)
 {
-    
+    _t808Cowbell* cowbell = *cowbellInst;
     tSquare_setFreq(&cowbell->p[0],freq);
     tSquare_setFreq(&cowbell->p[1],1.48148f*freq);
 }
 
-void t808Cowbell_setOscMix(t808Cowbell* const cowbell, float oscMix)
+void t808Cowbell_setOscMix(t808Cowbell* const cowbellInst, float oscMix)
 {
+    _t808Cowbell* cowbell = *cowbellInst;
     cowbell->oscMix = oscMix;
 }
 
-void t808Cowbell_setStick(t808Cowbell* const cowbell, int useStick)
+void t808Cowbell_setStick(t808Cowbell* const cowbellInst, int useStick)
 {
+    _t808Cowbell* cowbell = *cowbellInst;
     cowbell->useStick = useStick;
 }
 
 // ----------------- HIHAT ----------------------------//
 
-void t808Hihat_init(t808Hihat* const hihat)
+void t808Hihat_init(t808Hihat* const hihatInst)
 {
+    _t808Hihat* hihat = *hihatInst = (_t808Hihat*) leaf_alloc(sizeof(_t808Hihat));
+    
     for (int i = 0; i < 6; i++)
     {
         tSquare_init(&hihat->p[i]);
@@ -153,8 +169,10 @@ void t808Hihat_init(t808Hihat* const hihat)
     tSquare_setFreq(&hihat->p[5], 8.21f * hihat->freq);
 }
 
-void t808Hihat_free(t808Hihat* const hihat)
+void t808Hihat_free(t808Hihat* const hihatInst)
 {
+    _t808Hihat* hihat = *hihatInst;
+    
     for (int i = 0; i < 6; i++)
     {
         tSquare_free(&hihat->p[i]);
@@ -170,26 +188,29 @@ void t808Hihat_free(t808Hihat* const hihat)
     tEnvelope_free(&hihat->envStick);
     
     tHighpass_free(&hihat->highpass);
+    
+    leaf_free(hihat);
 }
 
-void t808Hihat_on(t808Hihat* const hihat, float vel) {
-    
+void t808Hihat_on(t808Hihat* const hihatInst, float vel)
+{
+    _t808Hihat* hihat = *hihatInst;
     tEnvelope_on(&hihat->envGain, vel);
     tEnvelope_on(&hihat->envStick, vel);
-    
 }
 
-void t808Hihat_setOscNoiseMix(t808Hihat* const hihat, float oscNoiseMix) {
-    
+void t808Hihat_setOscNoiseMix(t808Hihat* const hihatInst, float oscNoiseMix)
+{
+    _t808Hihat* hihat = *hihatInst;
     hihat->oscNoiseMix = oscNoiseMix;
-    
 }
 
-float t808Hihat_tick(t808Hihat* const hihat) {
+float t808Hihat_tick(t808Hihat* const hihatInst)
+{
+    _t808Hihat* hihat = *hihatInst;
     
     float sample = 0.0f;
     float gainScale = 0.1666f;
-    
 
     float myNoise = tNoise_tick(&hihat->n);
 
@@ -220,57 +241,68 @@ float t808Hihat_tick(t808Hihat* const hihat) {
     return sample;
 }
 
-void t808Hihat_setDecay(t808Hihat* const hihat, float decay)
+void t808Hihat_setDecay(t808Hihat* const hihatInst, float decay)
 {
+    _t808Hihat* hihat = *hihatInst;
     tEnvelope_setDecay(&hihat->envGain,decay);
 }
 
-void t808Hihat_setHighpassFreq(t808Hihat* const hihat, float freq)
+void t808Hihat_setHighpassFreq(t808Hihat* const hihatInst, float freq)
 {
+    _t808Hihat* hihat = *hihatInst;
     tHighpass_setFreq(&hihat->highpass,freq);
 }
 
-void t808Hihat_setStretch(t808Hihat* const hihat, float stretch)
+void t808Hihat_setStretch(t808Hihat* const hihatInst, float stretch)
 {
+    _t808Hihat* hihat = *hihatInst;
     hihat->stretch = stretch;
 }
 
-void t808Hihat_setFM(t808Hihat* const hihat, float FM_amount)
+void t808Hihat_setFM(t808Hihat* const hihatInst, float FM_amount)
 {
+    _t808Hihat* hihat = *hihatInst;
     hihat->FM_amount = FM_amount;
 }
 
-void t808Hihat_setOscBandpassFreq(t808Hihat* const hihat, float freq)
+void t808Hihat_setOscBandpassFreq(t808Hihat* const hihatInst, float freq)
 {
+    _t808Hihat* hihat = *hihatInst;
     tSVF_setFreq(&hihat->bandpassOsc,freq);
 }
 
-void t808Hihat_setOscBandpassQ(t808Hihat* const hihat, float Q)
+void t808Hihat_setOscBandpassQ(t808Hihat* const hihatInst, float Q)
 {
+    _t808Hihat* hihat = *hihatInst;
     tSVF_setQ(&hihat->bandpassOsc,Q);
 }
 
-void t808Hihat_setStickBandPassFreq(t808Hihat* const hihat, float freq)
+void t808Hihat_setStickBandPassFreq(t808Hihat* const hihatInst, float freq)
 {
+    _t808Hihat* hihat = *hihatInst;
     tSVF_setFreq(&hihat->bandpassStick,freq);
 }
 
-void t808Hihat_setStickBandPassQ(t808Hihat* const hihat, float Q)
+void t808Hihat_setStickBandPassQ(t808Hihat* const hihatInst, float Q)
 {
+    _t808Hihat* hihat = *hihatInst;
     tSVF_setQ(&hihat->bandpassStick,Q);
 }
 
 
 
-void t808Hihat_setOscFreq(t808Hihat* const hihat, float freq)
+void t808Hihat_setOscFreq(t808Hihat* const hihatInst, float freq)
 {
-		hihat->freq = freq;
+    _t808Hihat* hihat = *hihatInst;
+    hihat->freq = freq;
 }
 
 // ----------------- SNARE ----------------------------//
 
-void t808Snare_init(t808Snare* const snare)
+void t808Snare_init(t808Snare* const snareInst)
 {
+    _t808Snare* snare = *snareInst = (_t808Snare*) leaf_alloc(sizeof(_t808Snare));
+    
     float ratio[2] = {1.0, 1.5};
     for (int i = 0; i < 2; i++)
     {
@@ -295,8 +327,10 @@ void t808Snare_init(t808Snare* const snare)
     snare->noiseGain = 1.0f;
 }
 
-void        t808Snare_free                  (t808Snare* const snare)
+void        t808Snare_free                  (t808Snare* const snareInst)
 {
+    _t808Snare* snare = *snareInst;
+    
     for (int i = 0; i < 2; i++)
     {
         tTriangle_free(&snare->tone[i]);
@@ -306,15 +340,18 @@ void        t808Snare_free                  (t808Snare* const snare)
         tEnvelope_free(&snare->toneEnvFilter[i]);
     }
     
-    
     tNoise_free(&snare->noiseOsc);
     tSVF_free(&snare->noiseLowpass);
     tEnvelope_free(&snare->noiseEnvGain);
     tEnvelope_free(&snare->noiseEnvFilter);
+    
+    leaf_free(snare);
 }
 
-void t808Snare_on(t808Snare* const snare, float vel)
+void t808Snare_on(t808Snare* const snareInst, float vel)
 {
+    _t808Snare* snare = *snareInst;
+    
     for (int i = 0; i < 2; i++)
     {
         tEnvelope_on(&snare->toneEnvOsc[i], vel);
@@ -326,53 +363,62 @@ void t808Snare_on(t808Snare* const snare, float vel)
     tEnvelope_on(&snare->noiseEnvFilter, vel);
 }
 
-void t808Snare_setTone1Freq(t808Snare* const snare, float freq)
+void t808Snare_setTone1Freq(t808Snare* const snareInst, float freq)
 {
+    _t808Snare* snare = *snareInst;
     snare->tone1Freq = freq;
     tTriangle_setFreq(&snare->tone[0], freq);
-    
 }
 
-void t808Snare_setTone2Freq(t808Snare* const snare, float freq)
+void t808Snare_setTone2Freq(t808Snare* const snareInst, float freq)
 {
+    _t808Snare* snare = *snareInst;
     snare->tone2Freq = freq;
     tTriangle_setFreq(&snare->tone[1],freq);
 }
 
-void t808Snare_setTone1Decay(t808Snare* const snare, float decay)
+void t808Snare_setTone1Decay(t808Snare* const snareInst, float decay)
 {
+    _t808Snare* snare = *snareInst;
     tEnvelope_setDecay(&snare->toneEnvGain[0],decay);
 }
 
-void t808Snare_setTone2Decay(t808Snare* const snare, float decay)
+void t808Snare_setTone2Decay(t808Snare* const snareInst, float decay)
 {
+    _t808Snare* snare = *snareInst;
     tEnvelope_setDecay(&snare->toneEnvGain[1],decay);
 }
 
-void t808Snare_setNoiseDecay(t808Snare* const snare, float decay)
+void t808Snare_setNoiseDecay(t808Snare* const snareInst, float decay)
 {
+    _t808Snare* snare = *snareInst;
     tEnvelope_setDecay(&snare->noiseEnvGain,decay);
 }
 
-void t808Snare_setToneNoiseMix(t808Snare* const snare, float toneNoiseMix)
+void t808Snare_setToneNoiseMix(t808Snare* const snareInst, float toneNoiseMix)
 {
+    _t808Snare* snare = *snareInst;
     snare->toneNoiseMix = toneNoiseMix;
 }
 
-void t808Snare_setNoiseFilterFreq(t808Snare* const snare, float noiseFilterFreq)
+void t808Snare_setNoiseFilterFreq(t808Snare* const snareInst, float noiseFilterFreq)
 {
+    _t808Snare* snare = *snareInst;
     snare->noiseFilterFreq = noiseFilterFreq;
 }
 
-void t808Snare_setNoiseFilterQ(t808Snare* const snare, float noiseFilterQ)
+void t808Snare_setNoiseFilterQ(t808Snare* const snareInst, float noiseFilterQ)
 {
+    _t808Snare* snare = *snareInst;
     tSVF_setQ(&snare->noiseLowpass, noiseFilterQ);
 }
 
 static float tone[2];
 
-float t808Snare_tick(t808Snare* const snare)
+float t808Snare_tick(t808Snare* const snareInst)
 {
+    _t808Snare* snare = *snareInst;
+    
     for (int i = 0; i < 2; i++)
     {
         tTriangle_setFreq(&snare->tone[i], snare->tone1Freq + (20.0f * tEnvelope_tick(&snare->toneEnvOsc[i])));
@@ -393,8 +439,10 @@ float t808Snare_tick(t808Snare* const snare)
 
 // ----------------- KICK ----------------------------//
 
-void        t808Kick_init        			(t808Kick* const kick)
+void        t808Kick_init        			(t808Kick* const kickInst)
 {
+    _t808Kick* kick = *kickInst = (_t808Kick*) leaf_alloc(sizeof(_t808Kick));
+    
 	tCycle_init(&kick->tone);
 	kick->toneInitialFreq = 40.0f;
 	kick->sighAmountInHz = 7.0f;
@@ -409,8 +457,10 @@ void        t808Kick_init        			(t808Kick* const kick)
 	kick->noiseGain = 0.3f;
 }
 
-void        t808Kick_free                  (t808Kick* const kick)
+void        t808Kick_free                  (t808Kick* const kickInst)
 {
+    _t808Kick* kick = *kickInst;
+    
 	tCycle_free(&kick->tone);
 	tSVF_free(&kick->toneLowpass);
 	tEnvelope_free(&kick->toneEnvOscChirp);
@@ -418,10 +468,14 @@ void        t808Kick_free                  (t808Kick* const kick)
 	tEnvelope_free(&kick->toneEnvGain);
 	tNoise_free(&kick->noiseOsc);
 	tEnvelope_free(&kick->noiseEnvGain);
+    
+    leaf_free(kick);
 }
 
-float       t808Kick_tick                  (t808Kick* const kick)
+float       t808Kick_tick                  (t808Kick* const kickInst)
 {
+    _t808Kick* kick = *kickInst;
+    
 	tCycle_setFreq(&kick->tone, (kick->toneInitialFreq * (1.0f + (kick->chirpRatioMinusOne * tEnvelope_tick(&kick->toneEnvOscChirp)))) + (kick->sighAmountInHz * tEnvelope_tick(&kick->toneEnvOscSigh)));
 	float sample = tCycle_tick(&kick->tone) * tEnvelope_tick(&kick->toneEnvGain);
 	sample+= tNoise_tick(&kick->noiseOsc) * tEnvelope_tick(&kick->noiseEnvGain);
@@ -430,31 +484,34 @@ float       t808Kick_tick                  (t808Kick* const kick)
 	return sample;
 }
 
-void        t808Kick_on                    (t808Kick* const kick, float vel)
+void        t808Kick_on                    (t808Kick* const kickInst, float vel)
 {
+    _t808Kick* kick = *kickInst;
 	tEnvelope_on(&kick->toneEnvOscChirp, vel);
 	tEnvelope_on(&kick->toneEnvOscSigh, vel);
 	tEnvelope_on(&kick->toneEnvGain, vel);
 	tEnvelope_on(&kick->noiseEnvGain, vel);
 
 }
-void        t808Kick_setToneFreq          (t808Kick* const kick, float freq)
+void        t808Kick_setToneFreq          (t808Kick* const kickInst, float freq)
 {
+    _t808Kick* kick = *kickInst;
 	kick->toneInitialFreq = freq;
 
 }
 
-void        t808Kick_setToneDecay         (t808Kick* const kick, float decay)
+void        t808Kick_setToneDecay         (t808Kick* const kickInst, float decay)
 {
+    _t808Kick* kick = *kickInst;
 	tEnvelope_setDecay(&kick->toneEnvGain,decay);
 	tEnvelope_setDecay(&kick->toneEnvGain,decay * 3.0f);
 }
 
-void        t808Kick_setNoiseDecay         (t808Kick* const kick, float decay);
-void        t808Kick_setSighAmount         (t808Kick* const kick, float sigh);
-void        t808Kick_setChirpAmount         (t808Kick* const kick, float chirp);
-void        t808Kick_setToneNoiseMix       (t808Kick* const kick, float toneNoiseMix);
-void        t808Kick_setNoiseFilterFreq    (t808Kick* const kick, float noiseFilterFreq);
-void        t808Kick_setNoiseFilterQ       (t808Kick* const kick, float noiseFilterQ);
+void        t808Kick_setNoiseDecay         (t808Kick* const kickInst, float decay);
+void        t808Kick_setSighAmount         (t808Kick* const kickInst, float sigh);
+void        t808Kick_setChirpAmount         (t808Kick* const kickInst, float chirp);
+void        t808Kick_setToneNoiseMix       (t808Kick* const kickInst, float toneNoiseMix);
+void        t808Kick_setNoiseFilterFreq    (t808Kick* const kickInst, float noiseFilterFreq);
+void        t808Kick_setNoiseFilterQ       (t808Kick* const kickInst, float noiseFilterQ);
 
 
