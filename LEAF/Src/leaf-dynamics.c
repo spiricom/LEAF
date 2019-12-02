@@ -63,7 +63,6 @@ void tCompressor_free(tCompressor* const comp)
     leaf_free(c);
 }
 
-int ccount = 0;
 float tCompressor_tick(tCompressor* const comp, float in)
 {
     _tCompressor* c = *comp;
@@ -110,16 +109,6 @@ float tCompressor_tick(tCompressor* const comp, float in)
     
     float attenuation = powf(10.0f, ((c->M - c->y_T[0])/20.0f));
     
-    /*
-     if (++ccount > 5000)
-     {
-     
-     ccount = 0;
-     DBG(".5width: " + String(c->W * 0.5f));
-     DBG("slope: " + String(slope) + " overshoot: " + String(overshoot));
-     DBG("attenuation: " + String(attenuation));
-     }
-     */
     return attenuation * in;
 }
 

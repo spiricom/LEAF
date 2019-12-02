@@ -60,7 +60,7 @@ extern "C" {
     
     void  tBuffer_clear (tBuffer* const);
     
-    uint32_t tBuffe_getLength(tBuffer* const);
+    uint32_t tBuffer_getLength(tBuffer* const);
     
     //==============================================================================
     

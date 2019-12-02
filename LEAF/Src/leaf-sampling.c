@@ -114,7 +114,7 @@ void  tBuffer_clear (tBuffer* const sb)
     }
 }
 
-uint32_t tBuffe_getLength(tBuffer* const sb)
+uint32_t tBuffer_getLength(tBuffer* const sb)
 {
     _tBuffer* s = *sb;
     return s->length;
