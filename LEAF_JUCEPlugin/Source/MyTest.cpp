@@ -28,6 +28,8 @@ float freq;
 float dtime;
 bool buttonState;
 int ratio = 2;
+int x = 0;
+int y = 0;
 
 #define MSIZE 500000
 char memory[MSIZE];
@@ -62,15 +64,23 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 float   LEAFTest_tick            (float input)
 {
     float sample = tCycle_tick(&sine);
-    float* retuneOut = tRetune_tick(&retune, sample);
-    float* autotuneOut = tAutotune_tick(&autotune, sample);
-    float r1 = retuneOut[0];
-    //float r2 = retuneOut[1];
-    float a1 = autotuneOut[6];
-    float a2 = autotuneOut[7];
-    sample = a1 + a2;
+//    float* retuneOut = tRetune_tick(&retune, sample);
+//    float* autotuneOut = tAutotune_tick(&autotune, sample);
+//    float r1 = retuneOut[0];
+//    //float r2 = retuneOut[1];
+//    float a1 = autotuneOut[6];
+//    float a2 = autotuneOut[7];
+//    sample = a1 + a2;
+//
+//    sample = tTalkbox_tick(&test, tNoise_tick(&noise), input);
     
-    sample = tTalkbox_tick(&test, tNoise_tick(&noise), input);
+    // do more calls based on 2nd slider
+    for (int i = 0; i < x; i++)
+    {
+        // do fast if 3rd slider is all the way up
+        if (y) float exp2 = exp2f(x);
+        else float fexp2 = fastexp2(x);
+    }
     
     return sample * 0.25f;
 }
@@ -84,9 +94,13 @@ void    LEAFTest_block           (void)
     tRetune_setPitchFactor(&retune, val*4.0f + 0.5f, 0);
     tAutotune_setFreq(&autotune, val*5000.0f + 50.0f, 7);
     
+    x = (val*5000);
+    
     val = getSliderValue("mod depth");
     tRetune_setPitchFactor(&retune, val*4.0f + 0.5f, 1);
     tAutotune_setFreq(&autotune, val*5000.0f + 50.0f, 6);
+    
+    y = val;
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

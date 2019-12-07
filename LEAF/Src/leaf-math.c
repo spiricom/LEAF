@@ -73,6 +73,37 @@ float fastabs(float f)
     return alias.f;
 }
 
+// fast floating-point exp2 function taken from Robert Bristow Johnson's
+// post in the music-dsp list on Date: Tue, 02 Sep 2014 16:50:11 -0400
+float fastexp2(float x)
+{
+    if (x >= -127.0)
+    {
+        register float accumulator, xPower;
+        register union {float f; int32_t i;} xBits;
+        
+        xBits.i = (int32_t)(x + 4096.0f) - 4096L;               /* integer part */
+        x -= (float)(xBits.i);                                             /* fractional part */
+        
+        accumulator = 1.0f + 0.69303212081966f*x;
+        xPower = x*x;
+        accumulator += 0.24137976293709f*xPower;
+        xPower *= x;
+        accumulator += 0.05203236900844f*xPower;
+        xPower *= x;
+        accumulator += 0.01355574723481f*xPower;
+        
+        xBits.i += 127;                                                    /* bias integer part */
+        xBits.i<<= 23;                                                     /* move biased int part into exponent bits */
+        
+        return accumulator * xBits.f;
+    }
+    else
+    {
+        return 0.0f;
+    }
+}
+
 // dope af
 float LEAF_chebyshevT(float in, int n){
 	if (n == 0) return 1;
