@@ -122,11 +122,12 @@ uint32_t tBuffer_getLength(tBuffer* const sb)
 
 //================================tSampler=====================================
 
-void tSampler_init(tSampler* const sp, uint32_t length)
+void tSampler_init(tSampler* const sp, tBuffer* const b)
 {
     _tSampler* p = *sp = (_tSampler*) leaf_alloc(sizeof(_tSampler));
+    _tBuffer* s = *b;
     
-    tBuffer_init(&p->samp, length);
+    p->samp = s;
     
     p->active = 0;
     
@@ -159,10 +160,12 @@ void tSampler_free         (tSampler* const sp)
     leaf_free(p);
 }
 
-tBuffer tSampler_getBuffer (tSampler* const sp)
+void tSampler_setSample (tSampler* const sp, tBuffer* const b)
 {
     _tSampler* p = *sp;
-    return p->samp;
+    _tBuffer* s = *b;
+    
+    p->samp = s;
 }
 
 float tSampler_tick        (tSampler* const sp)

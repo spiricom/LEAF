@@ -127,9 +127,9 @@ extern "C" {
     
     // alternative implementation for abs()
     // REQUIRES: 32 bit floats
-    float fastabs(float f);
+    float fastabsf(float f);
     
-    float fastexp2(float f);
+    float fastexp2f(float f);
     
 #define LOGTEN 2.302585092994
     

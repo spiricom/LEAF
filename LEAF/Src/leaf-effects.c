@@ -1303,14 +1303,16 @@ void tFormantShifter_free(tFormantShifter* const fsr)
 }
 
 
-float tFormantShifter_tick(tFormantShifter* fsr, float in, float fwarp)
+float tFormantShifter_tick(tFormantShifter* const fsr, float in)
 {
-    return tFormantShifter_add(fsr, tFormantShifter_remove(fsr, in), fwarp);
+    return tFormantShifter_add(fsr, tFormantShifter_remove(fsr, in));
 }
 
-float tFormantShifter_remove(tFormantShifter* fsr, float in)
+float tFormantShifter_remove(tFormantShifter* const fsr, float in)
 {
     _tFormantShifter* fs = *fsr;
+    
+    in *= fs->intensity;
     
     float fa, fb, fc, foma, falph, ford, flpa, flamb, tf, fk;
     int ti4;
@@ -1347,10 +1349,10 @@ float tFormantShifter_remove(tFormantShifter* fsr, float in)
         fs->cbi = 0;
     }
     
-    return fa;
+    return fa * fs->invIntensity;
 }
 
-float tFormantShifter_add(tFormantShifter* fsr, float in, float fwarp)
+float tFormantShifter_add(tFormantShifter* const fsr, float in)
 {
     _tFormantShifter* fs = *fsr;
     
@@ -1361,7 +1363,7 @@ float tFormantShifter_add(tFormantShifter* fsr, float in, float fwarp)
     foma = (1.0f - falph);
     flpa = fs->flpa;
     flamb = fs->flamb;
-    tf = exp2f(fwarp*0.5f) * (1+flamb)/(1-flamb);
+    tf = fs->shiftFactor * (1+flamb)/(1-flamb);
     frlamb = (tf-1)/(tf+1);
     ti4 = fs->cbi;
     
@@ -1402,9 +1404,9 @@ float tFormantShifter_add(tFormantShifter* fsr, float in, float fwarp)
     f1resp = tf;
     
     //  now solve equations for output, based on 0-response and 1-response
-    tf = (float)2*tf2;
+    tf = 2.0f*tf2;
     tf2 = tf;
-    tf = ((float)1 - f1resp + f0resp);
+    tf = (1.0f - f1resp + f0resp);
     if (tf!=0)
     {
         tf2 = (tf2 + f0resp) / tf;
@@ -1446,4 +1448,18 @@ float tFormantShifter_add(tFormantShifter* fsr, float in, float fwarp)
     // ...and we're done messing with formants
     
     return tf;
+}
+
+// 1.0f is no change, 2.0f is an octave up, 0.5f is an octave down
+void tFormantShifter_setShiftFactor(tFormantShifter* const fsr, float shiftFactor)
+{
+    _tFormantShifter* fs = *fsr;
+    fs->shiftFactor = shiftFactor;
+}
+
+void tFormantShifter_setIntensity(tFormantShifter* const fsr, float intensity)
+{
+    _tFormantShifter* fs = *fsr;
+    fs->intensity = intensity;
+    fs->invIntensity = 1.0f/fs->intensity;
 }

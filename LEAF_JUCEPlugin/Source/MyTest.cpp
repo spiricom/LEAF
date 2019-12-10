@@ -17,19 +17,17 @@ static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
 tNoise noise;
-tCycle sine;
-tDelay delay;
-tRetune retune;
-tAutotune autotune;
-tTalkbox test;
+tSVF bp1;
+tSVF bp2;
+tFormantShifter fs;
 
 float gain;
 float freq;
 float dtime;
 bool buttonState;
 int ratio = 2;
-int x = 0;
-int y = 0;
+float x = 0.0f;
+float y = 0.0f;
 
 #define MSIZE 500000
 char memory[MSIZE];
@@ -39,68 +37,42 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     LEAF_init(sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
     tNoise_init(&noise, WhiteNoise);
-    tCycle_init(&sine);
-    tCycle_setFreq(&sine, 200);
-    tDelay_init(&delay, 44100, 44100);
-    tDelay_free(&delay);
-    tDelay_init(&delay, 44100, 44100);
     
-    tTalkbox_init(&test, 1024);
-    tTalkbox_free(&test);
-    tTalkbox_init(&test, 1024);
+    tSVF_init(&bp1, SVFTypeBandpass, 100, 4.0f);
+    tSVF_init(&bp2, SVFTypeBandpass, 1000, 4.0f);
     
-    tRetune_init(&retune, 1, 2048, 1024);
-    
-    tDelay_free(&delay);
-    tRetune_free(&retune);
-    tTalkbox_free(&test);
-    tTalkbox_init(&test, 1024);
-    tDelay_init(&delay, 44100, 44100);
-    tRetune_init(&retune, 1, 2048, 1024);
-    
-    tAutotune_init(&autotune, 8, 2048, 1024);
+    tFormantShifter_init(&fs, 2048, 20);
 }
 
 float   LEAFTest_tick            (float input)
 {
-    float sample = tCycle_tick(&sine);
-//    float* retuneOut = tRetune_tick(&retune, sample);
-//    float* autotuneOut = tAutotune_tick(&autotune, sample);
-//    float r1 = retuneOut[0];
-//    //float r2 = retuneOut[1];
-//    float a1 = autotuneOut[6];
-//    float a2 = autotuneOut[7];
-//    sample = a1 + a2;
-//
-//    sample = tTalkbox_tick(&test, tNoise_tick(&noise), input);
+    float sample = tNoise_tick(&noise);
+    sample *= 0.5f;
+    float b = tSVF_tick(&bp1, sample);
+    b += tSVF_tick(&bp2, sample);
     
-    // do more calls based on 2nd slider
-    for (int i = 0; i < x; i++)
-    {
-        // do fast if 3rd slider is all the way up
-        if (y) float exp2 = exp2f(x);
-        else float fexp2 = fastexp2(x);
-    }
-    
-    return sample * 0.25f;
+    return (tFormantShifter_tick(&fs, input));
 }
-
 
 
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
     float val = getSliderValue("mod freq");
-    tRetune_setPitchFactor(&retune, val*4.0f + 0.5f, 0);
-    tAutotune_setFreq(&autotune, val*5000.0f + 50.0f, 7);
     
-    x = (val*5000);
+    x = val * 3.5f + 0.5f;
+    
+    DBG("fwarp: " + String(x));
     
     val = getSliderValue("mod depth");
-    tRetune_setPitchFactor(&retune, val*4.0f + 0.5f, 1);
-    tAutotune_setFreq(&autotune, val*5000.0f + 50.0f, 6);
     
-    y = val;
+    y = val * 49.0f + 1.0f;
+    
+    DBG("intensity: " + String(y));
+    
+    tFormantShifter_setShiftFactor(&fs, x);
+    tFormantShifter_setIntensity(&fs, y);
+    
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

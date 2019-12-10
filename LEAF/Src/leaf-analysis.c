@@ -333,7 +333,7 @@ static void atkdtk_envelope(tAttackDetection* const ad, float *in)
     int i = 0;
     float tmp;
     for(i = 0; i < a->blocksize; ++i){
-        tmp = fastabs(in[i]);
+        tmp = fastabsf(in[i]);
         
         if(tmp > a->env)
             a->env = a->atk_coeff * (a->env - tmp) + tmp;

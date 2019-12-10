@@ -100,12 +100,12 @@ extern "C" {
     
     typedef _tSampler* tSampler;
     
-    void    tSampler_init      (tSampler* const, uint32_t length);
+    void    tSampler_init      (tSampler* const, tBuffer* const);
     void    tSampler_free      (tSampler* const);
     
     float   tSampler_tick      (tSampler* const);
     
-    tBuffer tSampler_getBuffer (tSampler* const);
+    void    tSampler_setSample (tSampler* const, tBuffer* const);
     
     void    tSampler_setMode   (tSampler* const, PlayMode mode);
     

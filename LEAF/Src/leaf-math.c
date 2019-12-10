@@ -60,7 +60,7 @@ int fastabs_int(int in){
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit floats
-float fastabs(float f)
+float fastabsf(float f)
 {
     union
     {
@@ -75,7 +75,7 @@ float fastabs(float f)
 
 // fast floating-point exp2 function taken from Robert Bristow Johnson's
 // post in the music-dsp list on Date: Tue, 02 Sep 2014 16:50:11 -0400
-float fastexp2(float x)
+float fastexp2f(float x)
 {
     if (x >= -127.0)
     {

@@ -265,6 +265,8 @@ extern "C" {
         float fmute;
         float fmutealph;
         unsigned int cbi;
+        float shiftFactor;
+        float intensity, invIntensity;
         
     } _tFormantShifter;
     
@@ -273,10 +275,12 @@ extern "C" {
     void        tFormantShifter_init            (tFormantShifter* const, int bufsize, int order);
     void        tFormantShifter_free            (tFormantShifter* const);
     
-    float       tFormantShifter_tick            (tFormantShifter* const, float input, float fwarp);
+    float       tFormantShifter_tick            (tFormantShifter* const, float input);
     float       tFormantShifter_remove          (tFormantShifter* const, float input);
-    float       tFormantShifter_add             (tFormantShifter* const, float input, float fwarp);
+    float       tFormantShifter_add             (tFormantShifter* const, float input);
     void        tFormantShifter_ioSamples       (tFormantShifter* const, float* in, float* out, int size, float fwarp);
+    void        tFormantShifter_setShiftFactor  (tFormantShifter* const, float shiftFactor);
+    void        tFormantShifter_setIntensity    (tFormantShifter* const, float intensity);
     
     //==============================================================================
     
