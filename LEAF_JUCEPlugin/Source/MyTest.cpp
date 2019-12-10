@@ -21,6 +21,10 @@ tSVF bp1;
 tSVF bp2;
 tFormantShifter fs;
 
+tSampler samp;
+tBuffer buff;
+tEnvelope env;
+
 float gain;
 float freq;
 float dtime;
@@ -28,6 +32,7 @@ bool buttonState;
 int ratio = 2;
 float x = 0.0f;
 float y = 0.0f;
+float a, b, c, d;
 
 #define MSIZE 500000
 char memory[MSIZE];
@@ -42,36 +47,62 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tSVF_init(&bp2, SVFTypeBandpass, 1000, 4.0f);
     
     tFormantShifter_init(&fs, 2048, 20);
+    
+    // Init and set record
+    tBuffer_init (&buff, leaf.sampleRate); // init, 1 second buffer
+    tBuffer_setRecordMode (&buff, RecordOneShot); // RecordOneShot records once through
+    
+    // Init and set play
+    tSampler_init (&samp, &buff); // init, give address of record buffer
+    tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
+    tSampler_setRate(&samp, 1.f); // Rate of 1.0
 }
 
 float   LEAFTest_tick            (float input)
 {
-    float sample = tNoise_tick(&noise);
-    sample *= 0.5f;
-    float b = tSVF_tick(&bp1, sample);
-    b += tSVF_tick(&bp2, sample);
+//    float sample = tNoise_tick(&noise);
+//    sample *= 0.5f;
+//    float b = tSVF_tick(&bp1, sample);
+//    b += tSVF_tick(&bp2, sample);
+//
+//    return (tFormantShifter_tick(&fs, input));
     
-    return (tFormantShifter_tick(&fs, input));
+    tBuffer_tick(&buff, input);
+    
+    return tSampler_tick(&samp);
 }
 
-
+int firstFrame = 1;
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
+    if (firstFrame == 1)
+    {
+        tBuffer_record(&buff); // starts recording
+        tSampler_play(&samp); // start spitting samples out
+        firstFrame = 0;
+    }
+    
     float val = getSliderValue("mod freq");
     
     x = val * 3.5f + 0.5f;
     
-    DBG("fwarp: " + String(x));
+    a = val * tBuffer_getLength(&buff);
+    
+    DBG("start: " + String(a));
     
     val = getSliderValue("mod depth");
     
     y = val * 49.0f + 1.0f;
+    b = val * 20.0f - 5.0f;
     
-    DBG("intensity: " + String(y));
+    DBG("rate: " + String(b));
     
-    tFormantShifter_setShiftFactor(&fs, x);
-    tFormantShifter_setIntensity(&fs, y);
+    tSampler_setStart(&samp, a);
+    tSampler_setRate(&samp, b);
+    
+//    tFormantShifter_setShiftFactor(&fs, x);
+//    tFormantShifter_setIntensity(&fs, y);
     
 }
 

@@ -471,7 +471,7 @@ void tSampler_setRate      (tSampler* const sp, float rate)
         p->dir = 1;
     }
     
-    p->inc = LEAF_clip(0.f, rate, 8.0f);
+    p->inc = rate; //LEAF_clip(0.f, rate, 8.0f); any reason to clip this?
     p->iinc = 1.f / p->inc;
 }
 
