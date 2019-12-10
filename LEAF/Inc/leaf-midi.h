@@ -108,6 +108,7 @@ extern "C" {
     void    tPoly_tickPitchBend(tPoly* const);
     
     int     tPoly_getNumVoices(tPoly* const);
+    int     tPoly_getNumActiveVoices(tPoly* const);
     float   tPoly_getPitch(tPoly* const, uint8_t voice);
     int     tPoly_getKey(tPoly* const, uint8_t voice);
     int     tPoly_getVelocity(tPoly* const, uint8_t voice);

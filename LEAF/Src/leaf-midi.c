@@ -303,6 +303,12 @@ int tPoly_getNumVoices(tPoly* const polyh)
     return poly->numVoices;
 }
 
+int tPoly_getNumActiveVoices(tPoly* const polyh)
+{
+    _tPoly* poly = *polyh;
+    return tStack_getSize(&poly->stack);
+}
+
 float tPoly_getPitch(tPoly* const polyh, uint8_t voice)
 {
     _tPoly* poly = *polyh;
