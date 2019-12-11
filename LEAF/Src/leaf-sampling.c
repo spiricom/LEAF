@@ -174,7 +174,7 @@ float tSampler_tick        (tSampler* const sp)
     
     if (p->active == 0)         return 0.f;
 
-    if ((p->inc == 0.0f) || (p->len < 4))
+    if ((p->inc == 0.0f) || (p->len < 1))
     {
     	return p->last;
     }
@@ -218,7 +218,7 @@ float tSampler_tick        (tSampler* const sp)
         int i4 = (idx+2) % p->len;
 
         sample =     LEAF_interpolate_hermite (buff[i1],
-                                               buff[idx],
+                                               buff[idx%p->len],
                                                buff[i3],
                                                buff[i4],
                                                alpha);
@@ -258,7 +258,7 @@ float tSampler_tick        (tSampler* const sp)
         int i4 = ((idx-2) + p->len) % p->len;
     
         sample =     LEAF_interpolate_hermite (buff[i1],
-                                               buff[idx],
+                                               buff[idx%p->len],
                                                buff[i3],
                                                buff[i4],
                                                1.0f-alpha);
