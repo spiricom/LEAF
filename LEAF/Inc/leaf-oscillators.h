@@ -1,9 +1,7 @@
 /*==============================================================================
- 
  leaf-oscillators.h
  Created: 20 Jan 2017 12:00:58pm
  Author:  Michael R Mulshine
- 
  ==============================================================================*/
 
 #ifndef LEAF_OSCILLATORS_H_INCLUDED
@@ -27,15 +25,13 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } _tCycle;
-    
-    typedef _tCycle* tCycle;
+    } tCycle;
     
     void        tCycle_init         (tCycle*  const);
     void        tCycle_free         (tCycle*  const);
     
     float       tCycle_tick         (tCycle*  const);
-    void         tCycle_setFreq      (tCycle*  const, float freq);
+    int         tCycle_setFreq      (tCycle*  const, float freq);
     
     //==============================================================================
     
@@ -46,9 +42,7 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } _tTriangle;
-    
-    typedef _tTriangle* tTriangle;
+    } tTriangle;
     
     void        tTriangle_init      (tTriangle*  const);
     void        tTriangle_free      (tTriangle*  const);
@@ -65,9 +59,7 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } _tSquare;
-    
-    typedef _tSquare* tSquare;
+    } tSquare;
     
     void        tSquare_init        (tSquare*  const);
     void        tSquare_free        (tSquare*  const);
@@ -84,9 +76,7 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } _tSawtooth;
-    
-    typedef _tSawtooth* tSawtooth;
+    } tSawtooth;
     
     void        tSawtooth_init      (tSawtooth*  const);
     void        tSawtooth_free      (tSawtooth*  const);
@@ -102,9 +92,7 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } _tPhasor;
-    
-    typedef _tPhasor* tPhasor;
+    } tPhasor;
     
     void        tPhasor_init        (tPhasor*  const);
     void        tPhasor_free        (tPhasor*  const);
@@ -128,9 +116,7 @@ extern "C" {
         float pinkb0, pinkb1, pinkb2;
         float(*rand)(void);
         
-    } _tNoise;
-    
-    typedef _tNoise* tNoise;
+    } tNoise;
     
     void        tNoise_init          (tNoise* const, NoiseType type);
     void        tNoise_free          (tNoise* const);
@@ -163,9 +149,7 @@ extern "C" {
         float V[3];
         float P[3];
         float gK, gN, gL, C;
-    } _tNeuron;
-    
-    typedef _tNeuron* tNeuron;
+    } tNeuron;
     
     void        tNeuron_init        (tNeuron* const);
     void        tNeuron_free        (tNeuron* const);
@@ -192,4 +176,3 @@ extern "C" {
 #endif  // LEAF_OSCILLATORS_H_INCLUDED
 
 //==============================================================================
-
