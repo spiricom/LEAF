@@ -87,8 +87,8 @@ extern "C" {
         int8_t flip;
         int8_t bnf;
         
-        int32_t start;
-        int32_t end;
+        int32_t start, targetstart;
+        int32_t end, targetend;
         uint32_t len;
         uint32_t cfxlen;
         
