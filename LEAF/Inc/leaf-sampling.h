@@ -55,6 +55,7 @@ extern "C" {
     
     void  tBuffer_record (tBuffer* const);
     void  tBuffer_stop (tBuffer* const);
+    int   tBuffer_getRecordPosition(tBuffer* const);
     
     void  tBuffer_setRecordMode (tBuffer* const, RecordMode mode);
     

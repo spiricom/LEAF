@@ -99,6 +99,12 @@ void  tBuffer_stop(tBuffer* const sb)
     s->active = 0;
 }
 
+int   tBuffer_getRecordPosition(tBuffer* const sb)
+{
+    _tBuffer* s = *sb;
+    return s->idx;
+}
+
 void  tBuffer_setRecordMode (tBuffer* const sb, RecordMode mode)
 {
     _tBuffer* s = *sb;
@@ -224,7 +230,7 @@ float tSampler_tick        (tSampler* const sp)
                                                alpha);
         
         // num samples to end of loop
-        numsamps = (idx - start) / p->inc;
+        numsamps = (idx - start) * p->iinc;
         //numsamps = (dir > 0) ? (end - idx) : (idx - start);
         //numsamps *= p->iinc;
         
@@ -263,7 +269,7 @@ float tSampler_tick        (tSampler* const sp)
                                                buff[i4],
                                                1.0f-alpha);
         
-        numsamps = (idx - start) / p->inc;
+        numsamps = (idx - start) * p->iinc;
         
         if (p->mode == PlayLoop)
         {

@@ -55,7 +55,7 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     // Init and set play
     tSampler_init (&samp, &buff); // init, give address of record buffer
     tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
-    tSampler_setRate(&samp, 1.f); // Rate of 1.0
+    tSampler_setRate(&samp, 1.763f); // Rate of 1.0
 }
 
 float   LEAFTest_tick            (float input)
@@ -95,11 +95,13 @@ void    LEAFTest_block           (void)
     
     y = val * 49.0f + 1.0f;
     b = val * 20.0f - 5.0f;
+    b = val * tBuffer_getLength(&buff);
     
     DBG("rate: " + String(b));
     
     tSampler_setStart(&samp, a);
-    tSampler_setRate(&samp, b);
+    tSampler_setEnd(&samp, b);
+//    tSampler_setRate(&samp, b);
     
 //    tFormantShifter_setShiftFactor(&fs, x);
 //    tFormantShifter_setIntensity(&fs, y);
