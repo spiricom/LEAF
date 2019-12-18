@@ -128,6 +128,12 @@ uint32_t tBuffer_getLength(tBuffer* const sb)
 
 //================================tSampler=====================================
 
+static void handleStartEndChange(tSampler* const sp);
+
+static void attemptStartEndChange(tSampler* const sp);
+
+static void updateStartEnd(tSampler* const sp);
+
 void tSampler_init(tSampler* const sp, tBuffer* const b)
 {
     _tSampler* p = *sp = (_tSampler*) leaf_alloc(sizeof(_tSampler));
@@ -183,42 +189,33 @@ float tSampler_tick        (tSampler* const sp)
     
     if (p->active == 0)         return 0.f;
     
-    if (p->targetstart >= 0)
-    {
-        tSampler_setStart(sp, p->targetstart);
-    }
-    if (p->targetend >= 0)
-    {
-        tSampler_setEnd(sp, p->targetend);
-    }
-    
     if ((p->inc == 0.0f) || (p->len < 4))
     {
+        updateStartEnd(sp);
         return p->last;
     }
     
+    //    attemptStartEndChange(sp);
+    
     float sample = 0.f;
     float cfxsample = 0.f;
-    int numsamps;
+    float numticks;
     float g1 = 1.f, g2 = 0.f;
     
     float* buff = p->samp->buff;
     
     int dir = p->bnf * p->dir * p->flip;
     
-    int idx;
-    float alpha;
+    int idx, revidx;
+    float alpha, revalpha;
     
-    if (dir > 0)
-    {
-        idx = (int) p->idx;
-        alpha = p->idx - idx;
-    }
-    else
-    {
-        idx = (int) (p->idx+1.f); // we think this is because flooring on int works different when reading backwards
-        alpha = (p->idx+1.f) - idx;
-    }
+    
+    idx = (int) p->idx;
+    alpha = p->idx - idx;
+    
+    revidx = idx + 1;// we think this is because flooring on int works different when reading backwards
+    revalpha = 1.f - alpha;
+    
     
     int32_t start = p->start, end = p->end;
     if (p->flip < 0)
@@ -228,15 +225,17 @@ float tSampler_tick        (tSampler* const sp)
     }
     
     uint32_t cfxlen = p->cfxlen;
-    if (p->len < cfxlen) cfxlen = p->len;
+    if (p->len < cfxlen) cfxlen = 0;//p->len;
+    
+    int length = p->samp->length;
     
     // Check dir (direction) to interpolate properly
     if (dir > 0)
     {
         // FORWARD NORMAL SAMPLE
-        int i1 = (idx-1) < p->start ? p->end : idx-1;
-        int i3 = (idx+1) == p->end ? p->start : (idx+1);
-        int i4 = (idx+2) > p->end ? p->start+1 : ((idx+2) == p->end ? p->start : (idx+2));
+        int i1 = ((idx-1) < 0) ? 0 : idx-1;
+        int i3 = ((idx+1) >= length) ? (idx) : (idx+1);
+        int i4 = ((idx+2) >= length) ? (length-1) : (idx+2);
         
         sample =     LEAF_interpolate_hermite (buff[i1],
                                                buff[idx],
@@ -245,87 +244,149 @@ float tSampler_tick        (tSampler* const sp)
                                                alpha);
         
         // num samples to end of loop
-        numsamps = p->end-idx;
+        numticks = (end-idx) * p->iinc;
+        //        if (numticks > cfxlen)
+        //        {
+        //            updateStartEnd(sp);
+        //            start = p->start;
+        //            end = p->end;
+        //            if (p->flip < 0)
+        //            {
+        //                start = p->end;
+        //                end = p->start;
+        //            }
+        //            numticks = (end-idx) * p->iinc;
+        //        }
         //numsamps = (dir > 0) ? (end - idx) : (idx - start);
         //numsamps *= p->iinc;
         
         if (p->mode == PlayLoop)
         {
-            //            if (numsamps <= cfxlen)
-            //            {
-            //                // CROSSFADE SAMPLE
-            //                int cdx = p->start + cfxlen - numsamps;
-            //
-            //                i1 = (cdx-1) < p->start ? p->end-1 : cdx-1;
-            //                i3 = (cdx+1) == p->end ? p->start : (cdx+1);
-            //                i4 = (cdx+2) > p->end ? p->start+1 : ((cdx+2) == p->end ? p->start : (cdx+2));
-            //
-            //                cfxsample =     LEAF_interpolate_hermite (buff[i1],
-            //                                                          buff[cdx],
-            //                                                          buff[i3],
-            //                                                          buff[i4],
-            //                                                          alpha);
-            //
-            //                g2 = (float) (cfxlen - numsamps) / (float) cfxlen;
-            //            }
+            if (numticks <= (float) cfxlen)
+            {
+                // CROSSFADE SAMPLE
+                int cdx = start - numticks * p->inc;
+                if (cdx < 1)
+                {
+                    cdx = -cdx;
+                    
+                    i1 = ((cdx+1) >= length) ? (length-1) : cdx+1;
+                    i3 = ((cdx-1) < 0) ? cdx : (cdx-1);
+                    i4 = ((cdx-2) < 0) ? 0 : (cdx-2);
+                    
+                    cfxsample =     LEAF_interpolate_hermite (buff[i1],
+                                                              buff[cdx],
+                                                              buff[i3],
+                                                              buff[i4],
+                                                              revalpha);
+                }
+                else
+                {
+                    i1 = ((cdx-1) < 0) ? 0 : cdx-1;
+                    i3 = ((cdx+1) >= length) ? (cdx) : (cdx+1);
+                    i4 = ((cdx+2) >= length) ? (length-1) : (cdx+2);
+                    
+                    cfxsample =     LEAF_interpolate_hermite (buff[i1],
+                                                              buff[cdx],
+                                                              buff[i3],
+                                                              buff[i4],
+                                                              alpha);
+                }
+                g2 = (float) (cfxlen - numticks) / (float) cfxlen;
+            }
         }
     }
     else
     {
         // REVERSE
-        int i1 = (idx+1) > p->end ? p->start : idx+1;
-        int i3 = (idx-1) == p->start ? p->end : (idx-1);
-        int i4 = (idx-2) < p->start ? p->end-1 : ((idx-2) == p->start ? p->end : (idx-2));
+        int i1 = ((revidx+1) >= length) ? (length-1) : revidx+1;
+        int i3 = ((revidx-1) < 0) ? revidx : (revidx-1);
+        int i4 = ((revidx-2) < 0) ? 0 : (revidx-2);
         
         sample =     LEAF_interpolate_hermite (buff[i1],
-                                               buff[idx],
+                                               buff[revidx],
                                                buff[i3],
                                                buff[i4],
-                                               alpha);
+                                               revalpha);
         
-        numsamps = idx-p->start;
+        numticks = (revidx-start) * p->iinc;
+        
+        // still get clicks i think because updating start/end can put us in the middle of a crossfade
+        //        if (numticks > cfxlen)
+        //        {
+        //            updateStartEnd(sp);
+        //            start = p->start;
+        //            end = p->end;
+        //            if (p->flip < 0)
+        //            {
+        //                start = p->end;
+        //                end = p->start;
+        //            }
+        //            numticks = (revidx-start) * p->iinc;
+        //        }
         
         if (p->mode == PlayLoop)
         {
-            //            if (numsamps <= cfxlen)
-            //            {
-            //                // CROSSFADE SAMPLE
-            //                int cdx = p->end - cfxlen + numsamps;
-            //
-            //                i1 = (cdx+1) > p->end ? p->start+1 : cdx+1;
-            //                i3 = (cdx-1) == p->start ? p->end : (cdx-1);
-            //                i4 = (cdx-2) < p->start ? p->end-1 : ((cdx-2) == p->start ? p->end : (cdx-2));
-            //
-            //                cfxsample =     LEAF_interpolate_hermite (buff[i1],
-            //                                                          buff[cdx],
-            //                                                          buff[i3],
-            //                                                          buff[i4],
-            //                                                          alpha);
-            //
-            //                g2 = (float) (cfxlen - numsamps) / (float) cfxlen;
-            //            }
+            if (numticks <= (float) cfxlen)
+            {
+                // CROSSFADE SAMPLE
+                int cdx = end + numticks * p->inc;
+                if (cdx > p->samp->length - 2)
+                {
+                    cdx = end - numticks * p->inc;
+                    
+                    i1 = ((cdx-1) < 0) ? 0 : cdx-1;
+                    i3 = ((cdx+1) >= length) ? (cdx) : (cdx+1);
+                    i4 = ((cdx+2) >= length) ? (length-1) : (cdx+2);
+                    
+                    cfxsample =     LEAF_interpolate_hermite (buff[i1],
+                                                              buff[cdx],
+                                                              buff[i3],
+                                                              buff[i4],
+                                                              alpha);
+                }
+                else
+                {
+                    i1 = ((cdx+1) >= length) ? (length-1) : cdx+1;
+                    i3 = ((cdx-1) < 0) ? cdx : (cdx-1);
+                    i4 = ((cdx-2) < 0) ? 0 : (cdx-2);
+                    
+                    cfxsample =     LEAF_interpolate_hermite (buff[i1],
+                                                              buff[cdx],
+                                                              buff[i3],
+                                                              buff[i4],
+                                                              revalpha);
+                }
+                g2 = (float) (cfxlen - numticks) / (float) cfxlen;
+            }
         }
     }
+    
     
     float inc = fmod(p->inc, p->len);
     p->idx += (dir * inc);
     
+    //    attemptStartEndChange(sp);
+    
     if (p->mode == PlayNormal)
     {
-        if (numsamps < (0.007f * leaf.sampleRate))
+        if (numticks < (0.007f * leaf.sampleRate))
         {
             tRamp_setDest(&p->gain, 0.f);
             p->active = -1;
         }
     }
-    else if (p->mode == PlayLoop )
+    else if (p->mode == PlayLoop)
     {
+        // mike's suggestion: make sure idx is within bounds of start and end (instead of targetstart/targetend stuff)
         if (idx < start)
         {
+            updateStartEnd(sp);
             p->idx += (float)(p->len);
         }
         else if (idx > end)
         {
+            updateStartEnd(sp);
             p->idx -= (float)(p->len);
         }
     }
@@ -333,11 +394,13 @@ float tSampler_tick        (tSampler* const sp)
     {
         if (p->idx < start)
         {
+            updateStartEnd(sp);
             p->bnf = -p->bnf;
             p->idx = start;
         }
         else if (p->idx > end)
         {
+            updateStartEnd(sp);
             p->bnf = -p->bnf;
             p->idx = end;
         }
@@ -458,44 +521,98 @@ static void handleStartEndChange(tSampler* const sp)
     }
 }
 
+static void attemptStartEndChange(tSampler* const sp)
+{
+    _tSampler* p = *sp;
+    
+    // Try to update start/end if needed
+    if (p->targetstart >= 0)
+    {
+        tSampler_setStart(sp, p->targetstart);
+    }
+    if (p->targetend >= 0)
+    {
+        tSampler_setEnd(sp, p->targetend);
+    }
+}
+
+static void updateStartEnd(tSampler* const sp)
+{
+    _tSampler* p = *sp;
+    if (p->targetstart >= 0)
+    {
+        p->start = p->targetstart;
+        handleStartEndChange(sp);
+        p->targetstart = -1;
+    }
+    if (p->targetend >= 0)
+    {
+        p->end = p->targetend;
+        handleStartEndChange(sp);
+        p->targetend = -1;
+    }
+}
+
 void tSampler_setStart     (tSampler* const sp, int32_t start)
 {
     _tSampler* p = *sp;
     
-    int dir = p->bnf * p->dir * p->flip;
-    uint32_t cfxlen = (p->len < p->cfxlen) ? p->len : p->cfxlen;
-    if (dir > 0 && ((start > p->idx) || !(p->end-p->idx > cfxlen)))
+    if (p->active)
     {
-        p->targetstart = start;
-    }
-    else
-    {
-        p->start = LEAF_clipInt(0, start, p->samp->length - 1);
-        handleStartEndChange(sp);
-        p->targetstart = -1;
+        int dir = p->bnf * p->dir * p->flip;
+        uint32_t cfxlen = (p->len < p->cfxlen) ? 0 : p->cfxlen;
+        if (p->flip > 0 && dir > 0) // start is start and we're playing forward
+        {
+            if ((start > p->idx) || (p->end-p->idx <= cfxlen)) // start given is after current index or we're in a crossfade
+            {
+                p->targetstart = start;
+                return;
+            }
+        }
+        else if (p->flip < 0 && dir < 0) // start is end and we're playing in reverse
+        {
+            if ((start < p->idx) || (p->idx-p->end <= cfxlen)) // start given is before current index or we're in a crossfade
+            {
+                p->targetstart = start;
+                return;
+            }
+        }
     }
     
-    
+    p->start = LEAF_clipInt(0, start, p->samp->length - 1);
+    handleStartEndChange(sp);
+    p->targetstart = -1;
 }
 
 void tSampler_setEnd       (tSampler* const sp, int32_t end)
 {
     _tSampler* p = *sp;
     
-    int dir = p->bnf * p->dir * p->flip;
-    uint32_t cfxlen = (p->len < p->cfxlen) ? p->len : p->cfxlen;
-    if (dir <= 0 && ((end < p->idx) || !(p->idx-p->start > cfxlen)))
+    if (p->active)
     {
-        p->targetend = end;
-    }
-    else
-    {
-        p->end = LEAF_clipInt(0, end, (p->samp->length - 1));
-        handleStartEndChange(sp);
-        p->targetend = -1;
+        int dir = p->bnf * p->dir * p->flip;
+        uint32_t cfxlen = (p->len < p->cfxlen) ? 0 : p->cfxlen;
+        if (p->flip > 0 && dir < 0) // end is end and we're playing in reverse
+        {
+            if ((end < p->idx) || (p->idx-p->start <= cfxlen)) // end given is before current index or we're in a crossfade
+            {
+                p->targetend = end;
+                return;
+            }
+        }
+        else if (p->flip < 0 && dir > 0) // end is start and we're playing forward
+        {
+            if ((end > p->idx) || (p->start-p->idx <= cfxlen)) // end given is after current index or we're in a crossfade
+            {
+                p->targetend = end;
+                return;
+            }
+        }
     }
     
-    
+    p->end = LEAF_clipInt(0, end, (p->samp->length - 1));
+    handleStartEndChange(sp);
+    p->targetend = -1;
 }
 
 void tSampler_setRate      (tSampler* const sp, float rate)

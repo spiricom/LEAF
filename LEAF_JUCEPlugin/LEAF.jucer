@@ -8,7 +8,7 @@
               pluginIsSynth="0" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="LEAFAU"
               pluginRTASCategory="" aaxIdentifier="com.pumusic.LEAF" pluginAAXCategory="2"
-              jucerVersion="5.4.4" companyName="Princeton University" companyEmail="mrmulshine@gmail.com"
+              jucerVersion="5.4.5" companyName="Princeton University" companyEmail="mrmulshine@gmail.com"
               displaySplashScreen="1" reportAppUsage="1" splashScreenColour="Dark"
               buildStandalone="1" enableIAA="0" cppLanguageStandard="11" companyCopyright="Princeton University"
               pluginFormats="buildVST,buildAU,buildStandalone" pluginCharacteristicsValue="pluginWantsMidiIn">
