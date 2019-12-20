@@ -23,7 +23,7 @@
 //============================================================================================================
 void tLockhartWavefolder_init(tLockhartWavefolder* const wf)
 {
-     _tLockhartWavefolder* w = *wf = (_tLockhartWavefolder*) leaf_alloc(sizeof(_tLockhartWavefolder));
+    _tLockhartWavefolder* w = *wf = (_tLockhartWavefolder*) leaf_alloc(sizeof(_tLockhartWavefolder));
     
     w->Ln1 = 0.0;
     w->Fn1 = 0.0;
@@ -221,8 +221,8 @@ void tOversampler_init(tOversampler* const osr, int ratio, oBool extraQuality)
         os->numTaps = firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
         os->pCoeffs = (float*) firCoeffs[idx];
-        os->upState = leaf_alloc(sizeof(float) * os->phaseLength);
-        os->downState = leaf_alloc(sizeof(float) * os->phaseLength);
+        os->upState = leaf_alloc(sizeof(float) * os->numTaps * 2);
+        os->downState = leaf_alloc(sizeof(float) * os->numTaps * 2);
     }
 }
 
@@ -256,10 +256,10 @@ void tOversampler_upsample(tOversampler* const osr, float input, float* output)
     _tOversampler* os = *osr;
     
     float *pState = os->upState;                 /* State pointer */
-    const float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
+    float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
     float *pStateCur;
     float *ptr1;                               /* Temporary pointer for state buffer */
-    const float *ptr2;                               /* Temporary pointer for coefficient buffer */
+    float *ptr2;                               /* Temporary pointer for coefficient buffer */
     float sum0;                                /* Accumulators */
     uint32_t i, tapCnt;                    /* Loop counters */
     uint32_t phaseLen = os->phaseLength;            /* Length of each polyphase filter component */
@@ -329,7 +329,7 @@ void tOversampler_upsample(tOversampler* const osr, float input, float* output)
     
     /* Points to the start of the state buffer */
     pStateCur = os->upState;
-
+    
     /* Initialize tapCnt with number of samples */
     tapCnt = (phaseLen - 1U);
     
@@ -349,10 +349,10 @@ float tOversampler_downsample(tOversampler *const osr, float* input)
     _tOversampler* os = *osr;
     
     float *pState = os->downState;                 /* State pointer */
-    const float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
+    float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
     float *pStateCur;                          /* Points to the current sample of the state */
     float *px0;                                /* Temporary pointer for state buffer */
-    const float *pb;                                 /* Temporary pointer for coefficient buffer */
+    float *pb;                                 /* Temporary pointer for coefficient buffer */
     float x0, c0;                              /* Temporary variables to hold state and coefficient values */
     float acc0;                                /* Accumulator */
     uint32_t numTaps = os->numTaps;                 /* Number of filter coefficients in the filter */
