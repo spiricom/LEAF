@@ -81,9 +81,9 @@ extern "C" {
         float* downState;
         int numTaps;
         int phaseLength;
-    } _tOversampler;
+    } tOversampler;
     
-    typedef _tOversampler* tOversampler;
+//    typedef _tOversampler* tOversampler;
     
     void        tOversampler_init(tOversampler* const, int order, oBool extraQuality);
     void        tOversampler_free(tOversampler* const);

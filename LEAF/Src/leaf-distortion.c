@@ -30,7 +30,7 @@ void tLockhartWavefolder_init(tLockhartWavefolder* const wf)
     w->xn1 = 0.0f;
 }
 
-void tLockhardWavefolder_free(tLockhartWavefolder* const wf)
+void tLockhartWavefolder_free(tLockhartWavefolder* const wf)
 {
     _tLockhartWavefolder* w = *wf;
     
@@ -207,9 +207,9 @@ void    tCrusher_setSamplingRatio (tCrusher* const cr, float ratio)
 // Oversampler
 //============================================================================================================
 // Latency is equal to the phase length (numTaps / ratio)
-void tOversampler_init(tOversampler* const osr, int ratio, oBool extraQuality)
+void tOversampler_init(tOversampler* const os, int ratio, oBool extraQuality)
 {
-    _tOversampler* os = *osr = (_tOversampler*) leaf_alloc(sizeof(_tOversampler));
+//    _tOversampler* os = *osr = (_tOversampler*) leaf_alloc(sizeof(_tOversampler));
     
     uint8_t offset = 0;
     if (extraQuality) offset = 6;
@@ -226,34 +226,34 @@ void tOversampler_init(tOversampler* const osr, int ratio, oBool extraQuality)
     }
 }
 
-void tOversampler_free(tOversampler* const osr)
+void tOversampler_free(tOversampler* const os)
 {
-    _tOversampler* os = *osr;
+//    _tOversampler* os = *osr;
     
     leaf_free(os->upState);
     leaf_free(os->downState);
     leaf_free(os);
 }
 
-float tOversampler_tick(tOversampler* const osr, float input, float (*effectTick)(float))
+float tOversampler_tick(tOversampler* const os, float input, float (*effectTick)(float))
 {
-    _tOversampler* os = *osr;
+//    _tOversampler* os = *osr;
     
     float buf[os->ratio];
     
-    tOversampler_upsample(osr, input, buf);
+    tOversampler_upsample(os, input, buf);
     
     for (int i = 0; i < os->ratio; ++i) {
         buf[i] = effectTick(buf[i]);
     }
     
-    return tOversampler_downsample(osr, buf);
+    return tOversampler_downsample(os, buf);
 }
 
 // From CMSIS DSP Library
-void tOversampler_upsample(tOversampler* const osr, float input, float* output)
+void tOversampler_upsample(tOversampler* const os, float input, float* output)
 {
-    _tOversampler* os = *osr;
+//    _tOversampler* os = *osr;
     
     float *pState = os->upState;                 /* State pointer */
     const float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
@@ -344,9 +344,9 @@ void tOversampler_upsample(tOversampler* const osr, float input, float* output)
 }
 
 // From CMSIS DSP Library
-float tOversampler_downsample(tOversampler *const osr, float* input)
+float tOversampler_downsample(tOversampler *const os, float* input)
 {
-    _tOversampler* os = *osr;
+//    _tOversampler* os = *osr;
     
     float *pState = os->downState;                 /* State pointer */
     const float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
@@ -428,8 +428,8 @@ float tOversampler_downsample(tOversampler *const osr, float* input)
     return output;
 }
 
-int tOversampler_getLatency(tOversampler* const osr)
+int tOversampler_getLatency(tOversampler* const os)
 {
-    _tOversampler* os = *osr;
+//    _tOversampler* os = *osr;
     return os->phaseLength;
 }
