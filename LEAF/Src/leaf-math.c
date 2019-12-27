@@ -165,23 +165,6 @@ float LEAF_shaper(float input, float m_drive)
     return shaperOut;
 }
 
-// reduce sample resolution
-float hold = 0.f;
-int reduct_count = 0;
-
-
-float LEAF_reduct (float input, float ratio)
-{
-    reduct_count++;
-    if (reduct_count > 1.f / ratio)
-    {
-        hold = input;
-        reduct_count = 0;
-    }
-    
-    return hold;
-}
-
 // round input to nearest rnd
 float LEAF_round (float input, float rnd)
 {
@@ -270,12 +253,12 @@ oBool     LEAF_isPrime(uint64_t number )
 float LEAF_tanh(float x)
 {
     
-    if( x < -3 )
-        return -1;
-    else if( x > 3 )
-        return 1;
+    if( x < -3.0f )
+        return -1.0f;
+    else if( x > 3.0f )
+        return 1.0f;
     else
-        return x * ( 27 + x * x ) / ( 27 + 9 * x * x );
+        return x * ( 27.0f + x * x ) / ( 27.0f + 9.0f * x * x );
 }
 
 

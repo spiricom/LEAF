@@ -25,23 +25,23 @@ extern "C" {
     
     typedef struct _tLockhartWavefolder
     {
-        float Ln1;
-        float Fn1;
+        double Ln1;
+        double Fn1;
         float xn1;
-        
-        float RL;
-        float R;
-        float VT;
-        float Is;
 
-        float a;
-        float b;
-        float d;
+        double RL;
+        double R;
+        double VT;
+        double Is;
+
+        double a;
+        double b;
+        double d;
 
         // Antialiasing error threshold
-        float thresh;
-        float half_a;
-        float longthing;
+        double thresh;
+        double half_a;
+        double longthing;
 
     } _tLockhartWavefolder;
     
@@ -54,6 +54,27 @@ extern "C" {
     
     //==============================================================================
     
+
+
+    typedef struct _tSampleReducer
+    {
+        float invRatio;
+        float hold;
+        uint32_t count;
+    } _tSampleReducer;
+
+    typedef _tSampleReducer* tSampleReducer;
+
+    void    tSampleReducer_init    (tSampleReducer* const);
+    void    tSampleReducer_free    (tSampleReducer* const);
+
+    float   tSampleReducer_tick    (tSampleReducer* const, float input);
+
+    // sampling ratio
+    void    tSampleReducer_setRatio (tSampleReducer* const, float ratio);
+
+    //==============================================================================
+
     typedef struct _tCrusher
     {
         float srr;
@@ -63,6 +84,7 @@ extern "C" {
         uint32_t  op; //which bitwise operation (0-7)
         
         float gain;
+        tSampleReducer sReducer;
         
     } _tCrusher;
     
@@ -85,7 +107,9 @@ extern "C" {
     // sampling ratio
     void    tCrusher_setSamplingRatio (tCrusher* const, float ratio);
     
+
     //==============================================================================
+
     
     typedef struct _tOversampler
     {

@@ -16,11 +16,17 @@
 #include "../Inc/leaf-distortion.h"
 #include "../Inc/leaf-tables.h"
 
+
 #endif
 
 //============================================================================================================
 // WAVEFOLDER
 //============================================================================================================
+
+
+//from the paper: Virtual Analog Model of the Lockhart Wavefolder
+//by Fabián Esqueda, Henri Pöntynen, Julian D. Parker and Stefan Bilbao
+
 void tLockhartWavefolder_init(tLockhartWavefolder* const wf)
 {
     _tLockhartWavefolder* w = *wf = (_tLockhartWavefolder*) leaf_alloc(sizeof(_tLockhartWavefolder));
@@ -37,8 +43,9 @@ void tLockhartWavefolder_init(tLockhartWavefolder* const wf)
     w->a = 2.0*w->RL/w->R;
     w->b = (w->R+2.0*w->RL)/(w->VT*w->R);
     w->d = (w->RL*w->Is)/w->VT;
-    w->half_a = 0.5f * w->a;
+    w->half_a = 0.5 * w->a;
     w->longthing = (0.5*w->VT/w->b);
+
 
     // Antialiasing error threshold
     w->thresh = 10e-10;
@@ -55,28 +62,26 @@ double tLockhartWavefolderLambert(double x, double ln)
 {
     double thresh, w, expw, p, r, s, err;
     // Error threshold
-    thresh = 10e-6;
+    thresh = 10e-10;
     // Initial guess (use previous value)
     w = ln;
     
     // Haley's method (Sec. 4.2 of the paper)
-    for(int i=0; i<100; i+=1) {
+    for(int i=0; i<1000; i+=1) {
         
         expw = exp(w);
         
         p = w*expw - x;
         r = (w+1.0)*expw;
-        s = (w+2.0)/(2.0*(w+1.0));        err = (p/(r-(p*s)));
+        s = (w+2.0)/(2.0*(w+1.0));
+        err = (p/(r-(p*s)));
         
         if (fabs(err)<thresh) {
-            break;
-        }
-        if (isnan(err))
-        {
-            break;
+        	break;
         }
         
         w = w - err;
+
     }
     return w;
 }
@@ -86,11 +91,9 @@ float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float samp)
     _tLockhartWavefolder* w = *wf;
     
     float out = 0.0f;
-    // Constants
-
     
     // Compute Antiderivative
-    int l = (samp > 0) - (samp < 0);
+    int l = (samp > 0.0f) - (samp < 0.0f);
     double u = w->d*exp(l*w->b*samp);
     double Ln = tLockhartWavefolderLambert(u,w->Ln1);
     double Fn = w->longthing*(Ln*(Ln + 2.0)) - w->half_a*samp*samp;
@@ -99,24 +102,16 @@ float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float samp)
     if (fabs(samp-w->xn1)<w->thresh) {
         
         // Compute Averaged Wavefolder Output
-        double xn = 0.5*(samp+w->xn1);
+        float xn = 0.5f*(samp+w->xn1);
         u = w->d*exp(l*w->b*xn);
         Ln = tLockhartWavefolderLambert(u,w->Ln1);
         out = (float) (l*w->VT*Ln - w->a*xn);
-        if (isnan(out))
-        {
-            ;
-        }
 
     }
     else {
         
         // Apply AA Form
         out = (float) ((Fn-w->Fn1)/(samp-w->xn1));
-        if (isnan(out))
-        {
-            ;
-        }
     }
     
     // Update States
@@ -140,14 +135,14 @@ void    tCrusher_init    (tCrusher* const cr)
     c->div = SCALAR;
     c->rnd = 0.25f;
     c->srr = 0.25f;
-    
+    tSampleReducer_init(&c->sReducer);
     c->gain = (c->div / SCALAR) * 0.7f + 0.3f;
 }
 
 void    tCrusher_free    (tCrusher* const cr)
 {
     _tCrusher* c = *cr;
-    
+    tSampleReducer_free(&c->sReducer);
     leaf_free(c);
 }
 
@@ -169,7 +164,7 @@ float   tCrusher_tick    (tCrusher* const cr, float input)
     
     sample = LEAF_round(sample, c->rnd);
     
-    sample = LEAF_reduct(sample, c->srr);
+    sample = tSampleReducer_tick(&c->sReducer, sample);
     
     return sample * c->gain;
     
@@ -204,8 +199,55 @@ void    tCrusher_setSamplingRatio (tCrusher* const cr, float ratio)
 {
     _tCrusher* c = *cr;
     c->srr = ratio;
+    tSampleReducer_setRatio(&c->sReducer, ratio);
+
 }
 
+//============================================================================================================
+// Sample-Rate reducer
+//============================================================================================================
+
+
+void tSampleReducer_init(tSampleReducer* const sr)
+{
+	_tSampleReducer* s = *sr = (_tSampleReducer*) leaf_alloc(sizeof(_tSampleReducer));
+
+
+
+	s->invRatio = 1.0f;
+	s->hold = 0.0f;
+	s->count = 0;
+
+}
+
+void    tSampleReducer_free    (tSampleReducer* const sr)
+{
+	_tSampleReducer* s = *sr;
+
+    leaf_free(s);
+}
+
+float tSampleReducer_tick(tSampleReducer* const sr, float input)
+{
+	_tSampleReducer* s = *sr;
+    if (s->count > s->invRatio)
+    {
+        s->hold = input;
+        s->count = 0;
+    }
+
+    s->count++;
+    return s->hold;
+}
+
+
+void tSampleReducer_setRatio(tSampleReducer* const sr, float ratio)
+{
+	 _tSampleReducer* s = *sr;
+	if ((ratio <= 1.0f) && (ratio >= 0.0f))
+	s->invRatio = 1.0f / ratio;
+
+}
 
 //============================================================================================================
 // Oversampler
@@ -411,7 +453,7 @@ float tOversampler_downsample(tOversampler *const osr, float* input)
     output = acc0;
     
     /* Processing is complete.
-     Now copy the last numTaps - 1 samples to the satrt of the state buffer.
+     Now copy the last numTaps - 1 samples to the start of the state buffer.
      This prepares the state buffer for the next function call. */
     
     /* Points to the start of the state buffer */
