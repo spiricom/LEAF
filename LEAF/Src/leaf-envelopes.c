@@ -514,7 +514,12 @@ float   tRamp_tick(tRamp* const ramp)
     
     r->curr += r->inc;
     
-    if (((r->curr >= r->dest) && (r->inc > 0.0f)) || ((r->curr <= r->dest) && (r->inc < 0.0f))) r->inc = 0.0f;
+    if (((r->curr >= r->dest) && (r->inc > 0.0f)) || ((r->curr <= r->dest) && (r->inc < 0.0f)))
+	{
+		r->inc = 0.0f;
+		r->curr=r->dest;
+	}
+
     // Palle: There is a slight risk that you overshoot here and stay on dest+inc, which with a large inc value could be a real problem
     // I suggest you add: r->curr=r->dest in the true if case
     

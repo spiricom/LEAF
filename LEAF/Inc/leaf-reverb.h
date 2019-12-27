@@ -136,8 +136,9 @@ extern "C" {
     void    tDattorroReverb_free              (tDattorroReverb* const);
     
     float   tDattorroReverb_tick              (tDattorroReverb* const, float input);
-    
+    void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, float input, float* output);
     void    tDattorroReverb_setMix            (tDattorroReverb* const, float mix);
+    void    tDattorroReverb_setHP             (tDattorroReverb* const, float freq);
     void    tDattorroReverb_setSize           (tDattorroReverb* const, float size);
     void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, float preDelay);
     void    tDattorroReverb_setInputFilter    (tDattorroReverb* const, float freq);

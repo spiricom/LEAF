@@ -30,6 +30,8 @@ void LEAF_init(float sr, int blocksize, char* memory, size_t memorysize, float(*
     
     leaf.invSampleRate = 1.0f/sr;
     
+    leaf.twoPiTimesInvSampleRate = leaf.invSampleRate * TWO_PI;
+
     leaf.random = random;
 }
 

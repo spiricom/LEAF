@@ -25,10 +25,24 @@ extern "C" {
     
     typedef struct _tLockhartWavefolder
     {
-        double Ln1;
-        double Fn1;
+        float Ln1;
+        float Fn1;
         float xn1;
         
+        float RL;
+        float R;
+        float VT;
+        float Is;
+
+        float a;
+        float b;
+        float d;
+
+        // Antialiasing error threshold
+        float thresh;
+        float half_a;
+        float longthing;
+
     } _tLockhartWavefolder;
     
     typedef _tLockhartWavefolder* tLockhartWavefolder;

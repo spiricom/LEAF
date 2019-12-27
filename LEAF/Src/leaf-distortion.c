@@ -28,6 +28,20 @@ void tLockhartWavefolder_init(tLockhartWavefolder* const wf)
     w->Ln1 = 0.0;
     w->Fn1 = 0.0;
     w->xn1 = 0.0f;
+
+    w->RL = 7.5e3;
+    w->R = 15e3;
+    w->VT = 26e-3;
+    w->Is = 10e-16;
+
+    w->a = 2.0*w->RL/w->R;
+    w->b = (w->R+2.0*w->RL)/(w->VT*w->R);
+    w->d = (w->RL*w->Is)/w->VT;
+    w->half_a = 0.5f * w->a;
+    w->longthing = (0.5*w->VT/w->b);
+
+    // Antialiasing error threshold
+    w->thresh = 10e-10;
 }
 
 void tLockhartWavefolder_free(tLockhartWavefolder* const wf)
@@ -73,37 +87,27 @@ float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float samp)
     
     float out = 0.0f;
     // Constants
-    double RL = 7.5e3;
-    double R = 15e3;
-    double VT = 26e-3;
-    double Is = 10e-16;
-    
-    double a = 2.0*RL/R;
-    double b = (R+2.0*RL)/(VT*R);
-    double d = (RL*Is)/VT;
-    
-    // Antialiasing error threshold
-    double thresh = 10e-10;
+
     
     // Compute Antiderivative
     int l = (samp > 0) - (samp < 0);
-    double u = d*exp(l*b*samp);
+    double u = w->d*exp(l*w->b*samp);
     double Ln = tLockhartWavefolderLambert(u,w->Ln1);
-    double Fn = (0.5*VT/b)*(Ln*(Ln + 2.0)) - 0.5*a*samp*samp;
+    double Fn = w->longthing*(Ln*(Ln + 2.0)) - w->half_a*samp*samp;
     
     // Check for ill-conditioning
-    if (fabs(samp-w->xn1)<thresh) {
+    if (fabs(samp-w->xn1)<w->thresh) {
         
         // Compute Averaged Wavefolder Output
         double xn = 0.5*(samp+w->xn1);
-        u = d*exp(l*b*xn);
+        u = w->d*exp(l*w->b*xn);
         Ln = tLockhartWavefolderLambert(u,w->Ln1);
-        out = (float) (l*VT*Ln - a*xn);
+        out = (float) (l*w->VT*Ln - w->a*xn);
         if (isnan(out))
         {
             ;
         }
-        
+
     }
     else {
         

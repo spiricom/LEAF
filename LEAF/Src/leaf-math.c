@@ -73,6 +73,22 @@ float fastabsf(float f)
     return alias.f;
 }
 
+
+float fastexpf(float x) {
+  x = 1.0f + (x * 0.0009765625f);
+  x *= x; x *= x; x *= x; x *= x;
+  x *= x; x *= x; x *= x; x *= x;
+  x *= x; x *= x;
+  return x;
+}
+
+float fasterexpf(float x) {
+  x = 1.0 + (x * 0.00390625f);
+  x *= x; x *= x; x *= x; x *= x;
+  x *= x; x *= x; x *= x; x *= x;
+  return x;
+}
+
 // fast floating-point exp2 function taken from Robert Bristow Johnson's
 // post in the music-dsp list on Date: Tue, 02 Sep 2014 16:50:11 -0400
 float fastexp2f(float x)
@@ -394,6 +410,16 @@ float mtof(float f)
     if (f <= -1500.0f) return(0);
     else if (f > 1499.0f) return(mtof(1499.0f));
     else return (8.17579891564f * expf(0.0577622650f * f));
+}
+
+float fast_mtof(float f)
+{
+    return (8.17579891564f * fastexpf(0.0577622650f * f));
+}
+
+float faster_mtof(float f)
+{
+    return (8.17579891564f * fastexpf(0.0577622650f * f));
 }
 
 float ftom(float f)

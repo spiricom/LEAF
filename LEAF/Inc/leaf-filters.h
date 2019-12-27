@@ -50,12 +50,8 @@ extern "C" {
         float gain;
         float a0,a1;
         float b0,b1;
-        
-        float coef;
-        
-        float freq;
-        
         float lastIn, lastOut;
+
         
     } _tOnePole;
     
@@ -83,7 +79,7 @@ extern "C" {
         
         float radius, frequency;
         oBool normalize;
-        
+
         float lastOut[2];
         
     } _tTwoPole;
@@ -288,7 +284,7 @@ extern "C" {
     {
         float gain;
         
-        float N;
+        int N;
         
         tSVF low[NUM_SVF_BW];
         tSVF high[NUM_SVF_BW];

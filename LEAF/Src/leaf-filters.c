@@ -279,7 +279,7 @@ void    tTwoZero_setNotch(tTwoZero* const ft, float freq, float radius)
     f->radius = radius;
     
     f->b2 = radius * radius;
-    f->b1 = -2.0f * radius * cosf(TWO_PI * freq * leaf.invSampleRate); // OPTIMIZE with LOOKUP or APPROXIMATION
+    f->b1 = -2.0f * radius * cosf(freq * leaf.twoPiTimesInvSampleRate); // OPTIMIZE with LOOKUP or APPROXIMATION
     
     // Normalize the filter gain. From STK.
     if ( f->b1 > 0.0f ) // Maximum at z = 0.
@@ -331,7 +331,7 @@ void    tOnePole_init(tOnePole* const ft, float freq)
     
     f->gain = 1.0f;
     f->a0 = 1.0;
-    
+
     tOnePole_setFreq(ft, freq);
     
     f->lastIn = 0.0f;
@@ -374,7 +374,7 @@ void    tOnePole_setPole(tOnePole* const ft, float thePole)
 void        tOnePole_setFreq        (tOnePole* const ft, float freq)
 {
     _tOnePole* f = *ft;
-    f->b0 = freq * TWO_PI * leaf.invSampleRate;
+    f->b0 = freq * leaf.twoPiTimesInvSampleRate;
     f->b0 = LEAF_clip(0.0f, f->b0, 1.0f);
     f->a1 = 1.0f - f->b0;
 }
@@ -462,7 +462,8 @@ void    tTwoPole_setResonance(tTwoPole* const ft, float frequency, float radius,
 {
     _tTwoPole* f = *ft;
     
-    if (frequency < 0.0f)   frequency = 0.0f; // need to also handle when frequency > nyquist
+    if (frequency < 0.0f)   frequency = 0.0f;
+    if (frequency > (leaf.sampleRate * 0.49f))   frequency = leaf.sampleRate * 0.49f;
     if (radius < 0.0f)      radius = 0.0f;
     if (radius >= 1.0f)     radius = 0.999999f;
     
@@ -471,14 +472,14 @@ void    tTwoPole_setResonance(tTwoPole* const ft, float frequency, float radius,
     f->normalize = normalize;
     
     f->a2 = radius * radius;
-    f->a1 =  -2.0f * radius * cos(TWO_PI * frequency * leaf.invSampleRate);
+    f->a1 =  -2.0f * radius * cosf(frequency * leaf.twoPiTimesInvSampleRate);
     
     if ( normalize )
     {
         // Normalize the filter gain ... not terribly efficient.
-        float real = 1 - radius + (f->a2 - radius) * cos(TWO_PI * 2 * frequency * leaf.invSampleRate);
-        float imag = (f->a2 - radius) * sin(TWO_PI * 2 * frequency * leaf.invSampleRate);
-        f->b0 = sqrt( pow(real, 2) + pow(imag, 2) );
+        float real = 1 - radius + (f->a2 - radius) * cosf(2 * frequency * leaf.twoPiTimesInvSampleRate);
+        float imag = (f->a2 - radius) * sinf(2 * frequency * leaf.twoPiTimesInvSampleRate);
+        f->b0 = sqrtf( powf(real, 2) + powf(imag, 2) );
     }
 }
 
@@ -501,14 +502,14 @@ void     tTwoPoleSampleRateChanged (tTwoPole* const ft)
     _tTwoPole* f = *ft;
     
     f->a2 = f->radius * f->radius;
-    f->a1 =  -2.0f * f->radius * cos(TWO_PI * f->frequency * leaf.invSampleRate);
+    f->a1 =  -2.0f * f->radius * cosf(f->frequency * leaf.twoPiTimesInvSampleRate);
     
     if ( f->normalize )
     {
         // Normalize the filter gain ... not terribly efficient.
-        float real = 1 - f->radius + (f->a2 - f->radius) * cos(TWO_PI * 2 * f->frequency * leaf.invSampleRate);
-        float imag = (f->a2 - f->radius) * sin(TWO_PI * 2 * f->frequency * leaf.invSampleRate);
-        f->b0 = sqrt( pow(real, 2) + pow(imag, 2) );
+        float real = 1 - f->radius + (f->a2 - f->radius) * cosf(2 * f->frequency * leaf.twoPiTimesInvSampleRate);
+        float imag = (f->a2 - f->radius) * sinf(2 * f->frequency * leaf.twoPiTimesInvSampleRate);
+        f->b0 = sqrtf( powf(real, 2) + powf(imag, 2) );
     }
 }
 
@@ -663,8 +664,8 @@ void    tBiQuad_setResonance(tBiQuad* const ft, float freq, float radius, oBool 
 {
     _tBiQuad* f = *ft;
     
-    // Should also deal with frequency being > half sample rate / nyquist. See STK
     if (freq < 0.0f)    freq = 0.0f;
+    if (freq > (leaf.sampleRate * 0.49f))   freq = leaf.sampleRate * 0.49f;
     if (radius < 0.0f)  radius = 0.0f;
     if (radius >= 1.0f)  radius = 1.0f;
     
@@ -673,7 +674,7 @@ void    tBiQuad_setResonance(tBiQuad* const ft, float freq, float radius, oBool 
     f->normalize = normalize;
     
     f->a2 = radius * radius;
-    f->a1 = -2.0f * radius * cosf(TWO_PI * freq * leaf.invSampleRate);
+    f->a1 = -2.0f * radius * cosf(freq * leaf.twoPiTimesInvSampleRate);
     
     if (normalize)
     {
@@ -687,12 +688,12 @@ void    tBiQuad_setNotch(tBiQuad* const ft, float freq, float radius)
 {
     _tBiQuad* f = *ft;
     
-    // Should also deal with frequency being > half sample rate / nyquist. See STK
     if (freq < 0.0f)    freq = 0.0f;
+    if (freq > (leaf.sampleRate * 0.49f))   freq = leaf.sampleRate * 0.49f;
     if (radius < 0.0f)  radius = 0.0f;
     
     f->b2 = radius * radius;
-    f->b1 = -2.0f * radius * cosf(TWO_PI * freq * leaf.invSampleRate); // OPTIMIZE with LOOKUP or APPROXIMATION
+    f->b1 = -2.0f * radius * cosf(freq * leaf.twoPiTimesInvSampleRate); // OPTIMIZE with LOOKUP or APPROXIMATION
     
     // Does not attempt to normalize filter gain.
 }
@@ -755,7 +756,7 @@ void    tBiQuadSampleRateChanged(tBiQuad* const ft)
 {
     _tBiQuad* f = *ft;
     f->a2 = f->radius * f->radius;
-    f->a1 = -2.0f * f->radius * cosf(TWO_PI * f->frequency * leaf.invSampleRate);
+    f->a1 = -2.0f * f->radius * cosf(f->frequency * leaf.twoPiTimesInvSampleRate);
     
     if (f->normalize)
     {
@@ -770,7 +771,7 @@ void    tHighpass_init(tHighpass* const ft, float freq)
 {
     _tHighpass* f = *ft = (_tHighpass*) leaf_alloc(sizeof(_tHighpass));
     
-    f->R = (1.0f-((freq * 2.0f * 3.14f)* leaf.invSampleRate));
+    f->R = (1.0f - (freq * leaf.twoPiTimesInvSampleRate));
     f->ys = 0.0f;
     f->xs = 0.0f;
     
@@ -788,7 +789,7 @@ void     tHighpass_setFreq(tHighpass* const ft, float freq)
 {
     _tHighpass* f = *ft;
     f->frequency = freq;
-    f->R = (1.0f-((freq * 2.0f * 3.14f) * leaf.invSampleRate));
+    f->R = (1.0f - (freq * leaf.twoPiTimesInvSampleRate));
     
 }
 
@@ -813,7 +814,7 @@ void tHighpassSampleRateChanged(tHighpass* const ft)
     f->R = (1.0f-((f->frequency * 2.0f * 3.14f) * leaf.invSampleRate));
 }
 
-// Less efficient, more accurate version of SVF, in which cutoff frequency is taken as floating point Hz value and tanh
+// Less efficient, more accurate version of SVF, in which cutoff frequency is taken as floating point Hz value and tanf
 // is calculated when frequency changes.
 void tSVF_init(tSVF* const svff, SVFType type, float freq, float Q)
 {
@@ -825,17 +826,11 @@ void tSVF_init(tSVF* const svff, SVFType type, float freq, float Q)
     svf->ic2eq = 0;
     
     float a1,a2,a3,g,k;
-    g = tanf(PI * freq * leaf.invSampleRate);
-    k = 1.0f/Q;
-    a1 = 1.0f/(1.0f+g*(g+k));
-    a2 = g*a1;
-    a3 = g*a2;
-    
-    svf->g = g;
-    svf->k = k;
-    svf->a1 = a1;
-    svf->a2 = a2;
-    svf->a3 = a3;
+    svf->g = tanf(PI * freq * leaf.invSampleRate);
+    svf->k = 1.0f/Q;
+    svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
+    svf->a2 = g*a1;
+    svf->a3 = g*a2;
 }
 
 void tSVF_free(tSVF* const svff)
@@ -896,17 +891,11 @@ void   tEfficientSVF_init(tEfficientSVF* const svff, SVFType type, uint16_t inpu
     svf->ic2eq = 0;
     
     float a1,a2,a3,g,k;
-    g = filtertan[input];
-    k = 1.0f/Q;
-    a1 = 1.0f/(1.0f+g*(g+k));
-    a2 = g*a1;
-    a3 = g*a2;
-    
-    svf->g = g;
-    svf->k = k;
-    svf->a1 = a1;
-    svf->a2 = a2;
-    svf->a3 = a3;
+    svf->g = filtertan[input];
+    svf->k = 1.0f/Q;
+    svf->a1 = 1.0f/(1.0f+g*(g+k));
+    svf->a2 = g*a1;
+    svf->a3 = g*a2;
 }
 
 void tEfficientSVF_free(tEfficientSVF* const svff)

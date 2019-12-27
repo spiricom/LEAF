@@ -64,13 +64,16 @@ extern "C" {
 #define INV_LOG2                     3.321928095f
     
 #define SOS_M                         343.0f
-    
+#define TWO_TO_5                     32.0f
+#define INV_TWO_TO_5             0.03125f
 #define TWO_TO_7                     128.f
 #define INV_TWO_TO_7             0.0078125f
 #define TWO_TO_8                     256.f
 #define INV_TWO_TO_8             0.00390625f
-#define TWO_TO_5                     32.0f
-#define INV_TWO_TO_5             0.03125f
+#define TWO_TO_10                 1024.f
+#define INV_TWO_TO_10         0.0009765625f
+#define TWO_TO_11                 2048.f
+#define INV_TWO_TO_11         0.00048828125f
 #define TWO_TO_12                 4096.f
 #define INV_TWO_TO_12         0.00024414062f
 #define TWO_TO_15                 32768.f
@@ -133,8 +136,18 @@ extern "C" {
     
 #define LOGTEN 2.302585092994
     
+    float fast_mtof(float f);
+
+    float fastexpf(float x);
+
+    float fasterexpf(float x);
+
     float mtof(float f);
     
+    float fast_mtof(float f);
+
+    float faster_mtof(float f);
+
     float ftom(float f);
     
     float powtodb(float f);

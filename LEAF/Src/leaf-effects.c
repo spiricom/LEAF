@@ -644,13 +644,17 @@ float* tAutotune_tick(tAutotune* const rt, float sample)
 {
     _tAutotune* r = *rt;
     
-    r->inputPeriod = tPeriodDetection_findPeriod(&r->pd, sample);
-    
-    for (int v = 0; v < r->numVoices; ++v)
-    {
-        r->tickOutput[v] = tPitchShift_shiftToFreq(&r->ps[v], r->freq[v]);
-    }
-    
+    float tempPeriod = tPeriodDetection_findPeriod(&r->pd, sample);
+    if (tempPeriod < 1000.0f) //to avoid trying to follow consonants
+	{
+		r->inputPeriod = tempPeriod;
+	}
+
+	for (int v = 0; v < r->numVoices; ++v)
+	{
+		r->tickOutput[v] = tPitchShift_shiftToFreq(&r->ps[v], r->freq[v]);
+	}
+
     return r->tickOutput;
 }
 
@@ -1273,13 +1277,15 @@ void tFormantShifter_init(tFormantShifter* const fsr, int bufsize, int order)
     
     
     fs->falph = powf(0.001f, 80.0f / (leaf.sampleRate));
-    fs->flamb = -(0.8517f*sqrt(atanf(0.06583f*leaf.sampleRate))-0.1916f);
+    fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
     fs->fhp = 0.0f;
     fs->flp = 0.0f;
     fs->flpa = powf(0.001f, 10.0f / (leaf.sampleRate));
     fs->fmute = 1.0f;
     fs->fmutealph = powf(0.001f, 1.0f / (leaf.sampleRate));
     fs->cbi = 0;
+    fs->intensity = 1.0f;
+	fs->invIntensity = 1.0f;
 }
 
 void tFormantShifter_free(tFormantShifter* const fsr)
@@ -1314,12 +1320,11 @@ float tFormantShifter_remove(tFormantShifter* const fsr, float in)
     
     in *= fs->intensity;
     
-    float fa, fb, fc, foma, falph, ford, flpa, flamb, tf, fk;
+    float fa, fb, fc, foma, falph, ford, flamb, tf, fk;
     int ti4;
     ford = fs->ford;
     falph = fs->falph;
     foma = (1.0f - falph);
-    flpa = fs->flpa;
     flamb = fs->flamb;
     
     tf = in;
@@ -1356,11 +1361,11 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
 {
     _tFormantShifter* fs = *fsr;
     
-    float fa, fb, fc, foma, falph, ford, flpa, flamb, tf, tf2, f0resp, f1resp, frlamb;
+    float fa, fb, fc, falph, ford, flpa, flamb, tf, tf2, f0resp, f1resp, frlamb;
     int ti4;
     ford = fs->ford;
     falph = fs->falph;
-    foma = (1.0f - falph);
+
     flpa = fs->flpa;
     flamb = fs->flamb;
     tf = fs->shiftFactor * (1+flamb)/(1-flamb);
@@ -1368,7 +1373,7 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
     ti4 = fs->cbi;
     
     tf2 = in;
-    fa = 0;
+    fa = 0.0f;
     fb = fa;
     for (int i=0; i<ford; i++)
     {
@@ -1407,13 +1412,13 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
     tf = 2.0f*tf2;
     tf2 = tf;
     tf = (1.0f - f1resp + f0resp);
-    if (tf!=0)
+    if (tf!=0.0f)
     {
         tf2 = (tf2 + f0resp) / tf;
     }
     else
     {
-        tf2 = 0;
+        tf2 = 0.0f;
     }
     
     //  third time: update delay registers
@@ -1434,16 +1439,16 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
     
     // Bring up the gain slowly when formant correction goes from disabled
     // to enabled, while things stabilize.
-    if (fs->fmute>0.5)
+    if (fs->fmute>0.5f)
     {
-        tf = tf*(fs->fmute - 0.5)*2;
+        tf = tf*(fs->fmute - 0.5f)*2.0f;
     }
     else
     {
-        tf = 0;
+        tf = 0.0f;
     }
     tf2 = fs->fmutealph;
-    fs->fmute = (1-tf2) + tf2*fs->fmute;
+    fs->fmute = (1.0f-tf2) + tf2*fs->fmute;
     // now tf is signal output
     // ...and we're done messing with formants
     
@@ -1461,5 +1466,14 @@ void tFormantShifter_setIntensity(tFormantShifter* const fsr, float intensity)
 {
     _tFormantShifter* fs = *fsr;
     fs->intensity = intensity;
-    fs->invIntensity = 1.0f/fs->intensity;
+    //make sure you don't divide by zero, doofies
+    if (fs->intensity != 0.0f)
+    {
+    	fs->invIntensity = 1.0f/fs->intensity;
+    }
+    else
+    {
+    	fs->invIntensity = 1.0f;
+    }
+
 }

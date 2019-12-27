@@ -357,7 +357,7 @@ void    tDattorroReverb_free              (tDattorroReverb* const rev)
     
     tOnePole_free(&r->f1_filter);
     
-    tHighpass_free(&r->f2_hp);
+    tHighpass_free(&r->f1_hp);
     
     tCycle_free(&r->f1_lfo);
     
@@ -479,11 +479,127 @@ float   tDattorroReverb_tick              (tDattorroReverb* const rev, float inp
     return (input * (1.0f - r->mix) + sample * r->mix);
 }
 
+void   tDattorroReverb_tickStereo              (tDattorroReverb* const rev, float input, float* output)
+{
+    _tDattorroReverb* r = *rev;
+
+    // INPUT
+    float in_sample = tTapeDelay_tick(&r->in_delay, input);
+
+    in_sample = tOnePole_tick(&r->in_filter, in_sample);
+
+    for (int i = 0; i < 4; i++)
+    {
+        in_sample = tAllpass_tick(&r->in_allpass[i], in_sample);
+    }
+
+    // FEEDBACK 1
+    float f1_sample = in_sample + r->f2_last; // + f2_last_out;
+
+    tAllpass_setDelay(&r->f1_allpass, SAMP(30.51f) + tCycle_tick(&r->f1_lfo) * SAMP(4.0f));
+
+    f1_sample = tAllpass_tick(&r->f1_allpass, f1_sample);
+
+    f1_sample = tTapeDelay_tick(&r->f1_delay_1, f1_sample);
+
+    f1_sample = tOnePole_tick(&r->f1_filter, f1_sample);
+
+    f1_sample = f1_sample + r->f1_delay_2_last * 0.5f;
+
+    float f1_delay_2_sample = tTapeDelay_tick(&r->f1_delay_2, f1_sample * 0.5f);
+
+    r->f1_delay_2_last = f1_delay_2_sample;
+
+    f1_sample = r->f1_delay_2_last + f1_sample;
+
+    f1_sample = tHighpass_tick(&r->f1_hp, f1_sample);
+
+    f1_sample *= r->feedback_gain;
+
+    f1_sample = tanhf(f1_sample);
+
+    r->f1_last = tTapeDelay_tick(&r->f1_delay_3, f1_sample);
+
+    // FEEDBACK 2
+    float f2_sample = in_sample + r->f1_last;
+
+    tAllpass_setDelay(&r->f2_allpass, SAMP(22.58f) + tCycle_tick(&r->f2_lfo) * SAMP(4.0f));
+
+    f2_sample = tAllpass_tick(&r->f2_allpass, f2_sample);
+
+    f2_sample = tTapeDelay_tick(&r->f2_delay_1, f2_sample);
+
+    f2_sample = tOnePole_tick(&r->f2_filter, f2_sample);
+
+    f2_sample = f2_sample + r->f2_delay_2_last * 0.5f;
+
+    float f2_delay_2_sample = tTapeDelay_tick(&r->f2_delay_2, f2_sample * 0.5f);
+
+    r->f2_delay_2_last = f2_delay_2_sample;
+
+    f2_sample = r->f2_delay_2_last + f2_sample;
+
+    f2_sample = tHighpass_tick(&r->f2_hp, f2_sample);
+
+    f2_sample *= r->feedback_gain;
+
+    f2_sample = tanhf(f2_sample);
+
+    r->f2_last = tTapeDelay_tick(&r->f2_delay_3, f2_sample);
+
+
+    // TAP OUT 1
+    f1_sample =     tTapeDelay_tapOut(&r->f1_delay_1, SAMP(8.9f)) +
+    tTapeDelay_tapOut(&r->f1_delay_1, SAMP(99.8f));
+
+    f1_sample -=    tTapeDelay_tapOut(&r->f1_delay_2, SAMP(64.2f));
+
+    f1_sample +=    tTapeDelay_tapOut(&r->f1_delay_3, SAMP(67.f));
+
+    f1_sample -=    tTapeDelay_tapOut(&r->f2_delay_1, SAMP(66.8f));
+
+    f1_sample -=    tTapeDelay_tapOut(&r->f2_delay_2, SAMP(6.3f));
+
+    f1_sample -=    tTapeDelay_tapOut(&r->f2_delay_3, SAMP(35.8f));
+
+    f1_sample *=    0.14f;
+
+    // TAP OUT 2
+    f2_sample =     tTapeDelay_tapOut(&r->f2_delay_1, SAMP(11.8f)) +
+    tTapeDelay_tapOut(&r->f2_delay_1, SAMP(121.7f));
+
+    f2_sample -=    tTapeDelay_tapOut(&r->f2_delay_2, SAMP(6.3f));
+
+    f2_sample +=    tTapeDelay_tapOut(&r->f2_delay_3, SAMP(89.7f));
+
+    f2_sample -=    tTapeDelay_tapOut(&r->f1_delay_1, SAMP(70.8f));
+
+    f2_sample -=    tTapeDelay_tapOut(&r->f1_delay_2, SAMP(11.2f));
+
+    f2_sample -=    tTapeDelay_tapOut(&r->f1_delay_3, SAMP(4.1f));
+
+    f2_sample *=    0.14f;
+
+    output[0] = input * (1.0f - r->mix) + f1_sample  * r->mix;
+    output[1] = input * (1.0f - r->mix) + f2_sample * r->mix;
+
+}
+
 void    tDattorroReverb_setMix            (tDattorroReverb* const rev, float mix)
 {
     _tDattorroReverb* r = *rev;
     r->mix = LEAF_clip(0.0f, mix, 1.0f);
 }
+
+
+void    tDattorroReverb_setHP           (tDattorroReverb* const rev, float freq)
+{
+    _tDattorroReverb* r = *rev;
+    float newFreq = LEAF_clip(20.0f, freq, 20000.0f);
+    tHighpass_setFreq(&r->f1_hp, newFreq);
+    tHighpass_setFreq(&r->f2_hp, newFreq);
+}
+
 
 void    tDattorroReverb_setSize           (tDattorroReverb* const rev, float size)
 {
@@ -507,6 +623,7 @@ void    tDattorroReverb_setSize           (tDattorroReverb* const rev, float siz
     tTapeDelay_setDelay(&r->f1_delay_3, SAMP(125.f));
     
     // maybe change rate of SINE LFO's when size changes?
+    //tCycle_setFreq(&r->f2_lfo, 0.07f * size * r->size_max);
     
     // FEEDBACK 2
     //tAllpass_setDelay(&r->f2_allpass, SAMP(22.58f));

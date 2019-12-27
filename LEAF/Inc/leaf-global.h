@@ -20,7 +20,7 @@ typedef struct _LEAF
     float   sampleRate;
     float   invSampleRate;
     int     blockSize;
-    
+    float	twoPiTimesInvSampleRate;
     float   (*random)(void);
 } LEAF;
 
