@@ -281,6 +281,6 @@ static inline void delink_node(mpool_node_t* node)
 
 void leaf_mempool_overrun(void)
 {
-
+	//TODO: we should set up some kind of leaf_error method that reaches user space to notify library users of things that failed.
 }
 

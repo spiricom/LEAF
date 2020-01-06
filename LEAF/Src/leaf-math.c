@@ -120,6 +120,19 @@ float fastexp2f(float x)
     }
 }
 
+
+/*
+you pass in a float array to get back two indexes representing the volumes of the left (index 0) and right (index 1) channels
+when t is -1, volumes[0] = 0, volumes[1] = 1
+when t = 0, volumes[0] = 0.707, volumes[1] = 0.707 (equal-power cross fade)
+when t = 1, volumes[0] = 1, volumes[1] = 0
+*/
+
+void LEAF_crossfade(float fade, float* volumes) {
+  volumes[0] = sqrtf(0.5f * (1.0f + fade));
+  volumes[1] = sqrtf(0.5f * (1.0f - fade));
+}
+
 // dope af
 float LEAF_chebyshevT(float in, int n){
 	if (n == 0) return 1;
@@ -363,12 +376,28 @@ float LEAF_interpolate_hermite (float A, float B, float C, float D, float alpha)
 {
     alpha = LEAF_clip(0.0f, alpha, 1.0f);
 
-    float a = -A/2.0f + (3.0f*B)/2.0f - (3.0f*C)/2.0f + D/2.0f;
-    float b = A - (5.0f*B)/2.0f + 2.0f*C - D / 2.0f;
-    float c = -A/2.0f + C/2.0f;
+    float a = -A*0.5f + (3.0f*B)*0.5f - (3.0f*C)*0.5f + D*0.5f;
+    float b = A - (5.0f*B)*0.5f + 2.0f*C - D * 0.5f;
+    float c = -A*0.5f + C*0.5f;
     float d = B;
 
     return a*alpha*alpha*alpha + b*alpha*alpha + c*alpha + d;
+}
+
+
+// from http://www.musicdsp.org/archive.php?classid=5#93
+//xx is alpha (fractional part of sample value)
+//grabbed this from Tom Erbe's Delay pd code
+float LEAF_interpolate_hermite_x(float yy0, float yy1, float yy2, float yy3, float xx)
+{
+        // 4-point, 3rd-order Hermite (x-form)
+        float c0 = yy1;
+        float c1 = 0.5f * (yy2 - yy0);
+        float y0my1 = yy0 - yy1;
+        float c3 = (yy1 - yy2) + 0.5f * (yy3 - y0my1 - yy2);
+        float c2 = y0my1 + c1 - c3;
+
+        return ((c3 * xx + c2) * xx + c1) * xx + c0;
 }
 
 // alpha, [0.0, 1.0]

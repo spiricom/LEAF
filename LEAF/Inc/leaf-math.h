@@ -70,6 +70,8 @@ extern "C" {
 #define INV_TWO_TO_7             0.0078125f
 #define TWO_TO_8                     256.f
 #define INV_TWO_TO_8             0.00390625f
+#define TWO_TO_9                     512.f
+#define INV_TWO_TO_9             0.001953125f
 #define TWO_TO_10                 1024.f
 #define INV_TWO_TO_10         0.0009765625f
 #define TWO_TO_11                 2048.f
@@ -88,6 +90,9 @@ extern "C" {
 #define TWO_TO_32        4294967296.0f
 #define INV_TWO_TO_32    0.000000000232831f
     
+
+#define LOGTEN 2.302585092994
+
     // Jones shaper
     float LEAF_shaper     (float input, float m_drive);
     float LEAF_reedTable  (float input, float offset, float slope);
@@ -119,6 +124,7 @@ extern "C" {
     
     // Hermite interpolation
     float LEAF_interpolate_hermite (float A, float B, float C, float D, float t);
+    float LEAF_interpolate_hermite_x(float yy0, float yy1, float yy2, float yy3, float xx);
     float LEAF_interpolation_linear (float A, float B, float t);
     
     float interpolate3max(float *buf, const int peakindex);
@@ -134,8 +140,11 @@ extern "C" {
     
     float fastexp2f(float f);
     
-#define LOGTEN 2.302585092994
     
+    void LEAF_crossfade(float fade, float* volumes);
+
+
+
     float fast_mtof(float f);
 
     float fastexpf(float x);

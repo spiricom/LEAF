@@ -91,7 +91,7 @@ extern "C" {
         int32_t end, targetend;
         uint32_t len;
         uint32_t cfxlen;
-        
+        float numticks;
         PlayMode mode;
         int retrigger;
         
@@ -116,7 +116,9 @@ extern "C" {
     void    tSampler_setStart  (tSampler* const, int32_t start);
     void    tSampler_setEnd    (tSampler* const, int32_t end);
     
-    void    tSampler_setCrossfadeLength  (tSampler* const p, uint32_t length);
+    static void handleStartEndChange(tSampler* const sp);
+
+    void 	tSampler_setCrossfadeLength  (tSampler* const sp, uint32_t length);
     
     void    tSampler_setRate   (tSampler* const, float rate);
     
@@ -129,4 +131,3 @@ extern "C" {
 #endif // LEAF_SAMPLING_H_INCLUDED
 
 //==============================================================================
-

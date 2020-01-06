@@ -645,7 +645,7 @@ float* tAutotune_tick(tAutotune* const rt, float sample)
     _tAutotune* r = *rt;
     
     float tempPeriod = tPeriodDetection_findPeriod(&r->pd, sample);
-    if (tempPeriod < 1000.0f) //to avoid trying to follow consonants
+    if (tempPeriod < 1000.0f) //to avoid trying to follow consonants JS
 	{
 		r->inputPeriod = tempPeriod;
 	}
@@ -1253,6 +1253,7 @@ static void solad_init(_tSOLAD* const w)
 //============================================================================================================
 // FORMANTSHIFTER
 //============================================================================================================
+// algorithm from Tom Baran's autotalent code.
 
 void tFormantShifter_init(tFormantShifter* const fsr, int bufsize, int order)
 {
@@ -1286,6 +1287,10 @@ void tFormantShifter_init(tFormantShifter* const fsr, int bufsize, int order)
     fs->cbi = 0;
     fs->intensity = 1.0f;
 	fs->invIntensity = 1.0f;
+	tHighpass_init(&fs->hp, 20.0f);
+	tHighpass_init(&fs->hp2, 20.0f);
+	tFeedbackLeveler_init(&fs->fbl1, 0.8f, .005f, 0.125, 1);
+	tFeedbackLeveler_init(&fs->fbl2, 0.8f, .005f, 0.125, 1);
 }
 
 void tFormantShifter_free(tFormantShifter* const fsr)
@@ -1305,6 +1310,10 @@ void tFormantShifter_free(tFormantShifter* const fsr)
         leaf_free(fs->fbuff[i]);
     }
     leaf_free(fs->fbuff);
+    tHighpass_free(&fs->hp);
+    tHighpass_free(&fs->hp2);
+	tFeedbackLeveler_free(&fs->fbl1);
+	tFeedbackLeveler_free(&fs->fbl2);
     leaf_free(fs);
 }
 
@@ -1317,9 +1326,10 @@ float tFormantShifter_tick(tFormantShifter* const fsr, float in)
 float tFormantShifter_remove(tFormantShifter* const fsr, float in)
 {
     _tFormantShifter* fs = *fsr;
+    in = tFeedbackLeveler_tick(&fs->fbl1, in);
+    in = tHighpass_tick(&fs->hp, tanhf(in * fs->intensity));
     
-    in *= fs->intensity;
-    
+
     float fa, fb, fc, foma, falph, ford, flamb, tf, fk;
     int ti4;
     ford = fs->ford;
@@ -1361,10 +1371,9 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
 {
     _tFormantShifter* fs = *fsr;
     
-    float fa, fb, fc, falph, ford, flpa, flamb, tf, tf2, f0resp, f1resp, frlamb;
+    float fa, fb, fc, ford, flpa, flamb, tf, tf2, f0resp, f1resp, frlamb;
     int ti4;
     ford = fs->ford;
-    falph = fs->falph;
 
     flpa = fs->flpa;
     flamb = fs->flamb;
@@ -1451,7 +1460,9 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
     fs->fmute = (1.0f-tf2) + tf2*fs->fmute;
     // now tf is signal output
     // ...and we're done messing with formants
-    
+    tf = tFeedbackLeveler_tick(&fs->fbl2, tf);
+    //tf = tHighpass_tick(&fs->hp2, tanhf(tf));
+
     return tf;
 }
 
@@ -1465,7 +1476,13 @@ void tFormantShifter_setShiftFactor(tFormantShifter* const fsr, float shiftFacto
 void tFormantShifter_setIntensity(tFormantShifter* const fsr, float intensity)
 {
     _tFormantShifter* fs = *fsr;
+
+
+
     fs->intensity = intensity;
+
+    tFeedbackLeveler_setTargetLevel(&fs->fbl1, intensity);
+    tFeedbackLeveler_setTargetLevel(&fs->fbl2, intensity);
     //make sure you don't divide by zero, doofies
     if (fs->intensity != 0.0f)
     {

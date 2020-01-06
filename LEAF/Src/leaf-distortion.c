@@ -1,8 +1,8 @@
 //
-//  leaf-oversampler.c
+//  leaf-distortion.c
 //  LEAF
 //
-//  Created by Matthew Wang and Joshua Becker on 2/28/19.
+//  Created by Jeff Snyder, Matthew Wang, Michael Mulshine, and Joshua Becker
 //  Copyright © 2019 Princeton University. All rights reserved.
 //
 
@@ -16,6 +16,8 @@
 #include "../Inc/leaf-distortion.h"
 #include "../Inc/leaf-tables.h"
 
+//testing
+#include "gpio.h"
 
 #endif
 
@@ -62,7 +64,7 @@ double tLockhartWavefolderLambert(double x, double ln)
 {
     double thresh, w, expw, p, r, s, err;
     // Error threshold
-    thresh = 10e-10;
+    thresh = 10e-12;
     // Initial guess (use previous value)
     w = ln;
     
@@ -77,10 +79,15 @@ double tLockhartWavefolderLambert(double x, double ln)
         err = (p/(r-(p*s)));
         
         if (fabs(err)<thresh) {
+
         	break;
         }
         
         w = w - err;
+        if (i == 999)
+        {
+        	//HAL_GPIO_WritePin(GPIOG, GPIO_PIN_7, GPIO_PIN_SET);
+        }
 
     }
     return w;

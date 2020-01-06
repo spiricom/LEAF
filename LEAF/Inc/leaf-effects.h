@@ -14,7 +14,7 @@ extern "C" {
 #endif
     
     //==============================================================================
-    
+#include "leaf-dynamics.h"
 #include "leaf-global.h"
 #include "leaf-math.h"
 #include "leaf-analysis.h"
@@ -241,9 +241,6 @@ extern "C" {
     //==============================================================================
     
     
-#define FORD 7
-#define FORMANT_BUFFER_SIZE 2048
-    
     typedef struct _tFormantShifter
     {
         int ford;
@@ -267,6 +264,10 @@ extern "C" {
         unsigned int cbi;
         float shiftFactor;
         float intensity, invIntensity;
+        tHighpass hp;
+        tHighpass hp2;
+        tFeedbackLeveler fbl1;
+        tFeedbackLeveler fbl2;
         
     } _tFormantShifter;
     
