@@ -19,6 +19,7 @@ extern "C" {
 #include "leaf-global.h"
 #include "leaf-math.h"
 #include "leaf-envelopes.h"
+#include "leaf-mempool.h"
     
     //==============================================================================
     
@@ -45,7 +46,9 @@ extern "C" {
     typedef _tBuffer* tBuffer;
     
     void  tBuffer_init (tBuffer* const, uint32_t length);
+    void  tBuffer_init_locate (tBuffer* const sb, uint32_t length, mpool_t* pool);
     void  tBuffer_free (tBuffer* const);
+    void  tBuffer_free_locate (tBuffer* const sb, mpool_t* pool);
     
     void  tBuffer_tick (tBuffer* const, float sample);
     

@@ -38,6 +38,20 @@ void  tBuffer_init (tBuffer* const sb, uint32_t length)
     tBuffer_clear(sb);
 }
 
+void  tBuffer_init_locate (tBuffer* const sb, uint32_t length, mpool_t* pool)
+{
+    _tBuffer* s = *sb = (_tBuffer*) mpool_alloc(sizeof(_tBuffer), pool);
+
+    s->buff = (float*) mpool_alloc( sizeof(float) * length, pool);
+
+    s->length = length;
+    s->active = 0;
+    s->idx = 0;
+    s->mode = RecordOneShot;
+
+    tBuffer_clear(sb);
+}
+
 void  tBuffer_free (tBuffer* const sb)
 {
     _tBuffer* s = *sb;
@@ -45,6 +59,15 @@ void  tBuffer_free (tBuffer* const sb)
     leaf_free(s->buff);
     leaf_free(s);
 }
+
+void  tBuffer_free_locate (tBuffer* const sb, mpool_t* pool)
+{
+    _tBuffer* s = *sb;
+
+    mpool_free(s->buff, pool);
+    mpool_free(s, pool);
+}
+
 
 void tBuffer_tick (tBuffer* const sb, float sample)
 {
