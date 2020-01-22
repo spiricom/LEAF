@@ -552,6 +552,13 @@ float   tTapeDelay_tick (tTapeDelay* const dl, float input)
     return d->lastOut;
 }
 
+void  tTapeDelay_incrementInPoint(tTapeDelay* const dl)
+{
+    _tTapeDelay* d = *dl;
+    // Increment input pointer modulo length.
+    if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
+}
+
 
 void tTapeDelay_setRate(tTapeDelay* const dl, float rate)
 {

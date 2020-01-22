@@ -35,8 +35,8 @@ extern "C" {
         float* buff;
         
         uint32_t idx;
-        uint32_t length;
-        
+        uint32_t bufferLength;
+        uint32_t recordedLength;
         RecordMode mode;
         
         int active;
@@ -64,7 +64,8 @@ extern "C" {
     
     void  tBuffer_clear (tBuffer* const);
     
-    uint32_t tBuffer_getLength(tBuffer* const);
+    uint32_t tBuffer_getBufferLength(tBuffer* const);
+    uint32_t tBuffer_getRecordedLength(tBuffer* const sb);
     
     //==============================================================================
     
@@ -92,6 +93,7 @@ extern "C" {
         
         int32_t start, targetstart;
         int32_t end, targetend;
+
         uint32_t len;
         uint32_t cfxlen;
         float numticks;
@@ -118,7 +120,7 @@ extern "C" {
     
     void    tSampler_setStart  (tSampler* const, int32_t start);
     void    tSampler_setEnd    (tSampler* const, int32_t end);
-    
+
     static void handleStartEndChange(tSampler* const sp);
 
     void 	tSampler_setCrossfadeLength  (tSampler* const sp, uint32_t length);

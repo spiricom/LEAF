@@ -61,8 +61,8 @@ extern "C" {
         
         float inv_sr, inv_441;
         
-        tDelay allpassDelays[8];
-        tDelay combDelays[6];
+        tLinearDelay allpassDelays[8];
+        tLinearDelay combDelays[6];
         float allpassCoeff;
         float combCoeffs[6];
         float lowpassState;
@@ -77,6 +77,7 @@ extern "C" {
     void    tNReverb_free      (tNReverb* const);
     
     float   tNReverb_tick      (tNReverb* const, float input);
+    void   tNReverb_tickStereo(tNReverb* const rev, float input, float* output);
     
     // Set reverb time in seconds.
     void    tNReverb_setT60    (tNReverb* const, float t60);
@@ -93,7 +94,7 @@ extern "C" {
         float   feedback_filter;
         float   feedback_gain;
         float   mix;
-        
+        uint32_t frozen;
         
         float   size, size_max, t;
         
@@ -138,6 +139,7 @@ extern "C" {
     float   tDattorroReverb_tick              (tDattorroReverb* const, float input);
     void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, float input, float* output);
     void    tDattorroReverb_setMix            (tDattorroReverb* const, float mix);
+    void    tDattorroReverb_setFreeze            (tDattorroReverb* const rev, uint32_t freeze);
     void    tDattorroReverb_setHP             (tDattorroReverb* const, float freq);
     void    tDattorroReverb_setSize           (tDattorroReverb* const, float size);
     void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, float preDelay);

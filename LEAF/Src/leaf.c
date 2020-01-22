@@ -21,6 +21,7 @@
 LEAF leaf;
 
 void LEAF_init(float sr, int blocksize, char* memory, size_t memorysize, float(*random)(void))
+
 {
     leaf_pool_init(memory, memorysize);
     

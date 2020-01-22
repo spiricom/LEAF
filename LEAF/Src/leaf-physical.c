@@ -440,6 +440,7 @@ void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, f
     p->curr=0.0f;
     tExpSmooth_init(&p->wlSmooth, leaf.sampleRate/freq, 0.01); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tLivingString_setFreq(pl, freq);
+    p->freq = freq;
     tExpSmooth_init(&p->ppSmooth, pickPos, 0.01); // smoother for pick position
     tLivingString_setPickPos(pl, pickPos);
     p->prepIndex=prepIndex;
@@ -447,6 +448,7 @@ void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, f
     tLinearDelay_init(&p->delUF,p->waveLengthInSamples, 2400);
     tLinearDelay_init(&p->delUB,p->waveLengthInSamples, 2400);
     tLinearDelay_init(&p->delLB,p->waveLengthInSamples, 2400);
+    p->dampFreq = dampFreq;
     tOnePole_init(&p->bridgeFilter, dampFreq);
     tOnePole_init(&p->nutFilter, dampFreq);
     tOnePole_init(&p->prepFilterU, dampFreq);
@@ -454,6 +456,7 @@ void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, f
     tHighpass_init(&p->DCblockerU,13);
     tHighpass_init(&p->DCblockerL,13);
     p->decay=decay;
+    p->prepIndex = prepIndex;
     tFeedbackLeveler_init(&p->fbLevU, targetLev, levSmoothFactor, levStrength, levMode);
     tFeedbackLeveler_init(&p->fbLevL, targetLev, levSmoothFactor, levStrength, levMode);
     p->levMode=levMode;

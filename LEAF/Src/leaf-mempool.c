@@ -71,8 +71,13 @@ void mpool_create (char* memory, size_t size, mpool_t* pool)
     
     pool->head = create_node(pool->mpool, NULL, NULL, pool->msize-header_size);
     
-    for (int i = 0; i < pool->head->size; i++) memory[i+header_size]=0;
+    for (int i = 0; i < pool->head->size; i++)
+	{
+		memory[i+header_size]=0;
+	}
 }
+
+
 
 void leaf_pool_init(char* memory, size_t size)
 {

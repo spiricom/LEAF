@@ -150,6 +150,7 @@ extern "C" {
     float       tTapeDelay_tapOut      (tTapeDelay* const d, float tapDelay);
     float       tTapeDelay_addTo       (tTapeDelay*  const, float value, uint32_t tapDelay);
     float       tTapeDelay_tick        (tTapeDelay*  const, float sample);
+    void  		tTapeDelay_incrementInPoint(tTapeDelay* const dl);
     float       tTapeDelay_getLastOut  (tTapeDelay*  const);
     float       tTapeDelay_getLastIn   (tTapeDelay*  const);
     
