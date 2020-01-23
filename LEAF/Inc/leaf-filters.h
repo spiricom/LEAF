@@ -16,6 +16,7 @@ extern "C" {
     //==============================================================================
     
 #include "leaf-math.h"
+#include "leaf-mempool.h"
 #include "leaf-delay.h"
 #include "leaf-tables.h"
     
@@ -34,12 +35,14 @@ extern "C" {
     
     typedef _tAllpass* tAllpass;
     
-    void        tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay);
-    void        tAllpass_free           (tAllpass* const);
+    void    tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay);
+    void    tAllpass_free           (tAllpass* const);
+    void    tAllpass_initToPool     (tAllpass* const, float initDelay, uint32_t maxDelay, tMempool* const);
+    void    tAllpass_freeFromPool   (tAllpass* const, tMempool* const);
     
-    float       tAllpass_tick           (tAllpass* const, float input);
-    void        tAllpass_setGain        (tAllpass* const, float gain);
-    void        tAllpass_setDelay       (tAllpass* const f, float delay);
+    float   tAllpass_tick           (tAllpass* const, float input);
+    void    tAllpass_setGain        (tAllpass* const, float gain);
+    void    tAllpass_setDelay       (tAllpass* const, float delay);
     
     
     //==============================================================================
@@ -57,16 +60,18 @@ extern "C" {
     
     typedef _tOnePole* tOnePole;
     
-    void        tOnePole_init           (tOnePole* const, float thePole);
-    void        tOnePole_free           (tOnePole* const);
+    void    tOnePole_init           (tOnePole* const, float thePole);
+    void    tOnePole_free           (tOnePole* const);
+    void    tOnePole_initToPool     (tOnePole* const, float thePole, tMempool* const);
+    void    tOnePole_freeFromPool   (tOnePole* const, tMempool* const);
     
-    float       tOnePole_tick           (tOnePole* const, float input);
-    void        tOnePole_setB0          (tOnePole* const, float b0);
-    void        tOnePole_setA1          (tOnePole* const, float a1);
-    void        tOnePole_setPole        (tOnePole* const, float thePole);
-    void        tOnePole_setFreq        (tOnePole* const, float freq);
-    void        tOnePole_setCoefficients(tOnePole* const, float b0, float a1);
-    void        tOnePole_setGain        (tOnePole* const, float gain);
+    float   tOnePole_tick           (tOnePole* const, float input);
+    void    tOnePole_setB0          (tOnePole* const, float b0);
+    void    tOnePole_setA1          (tOnePole* const, float a1);
+    void    tOnePole_setPole        (tOnePole* const, float thePole);
+    void    tOnePole_setFreq        (tOnePole* const, float freq);
+    void    tOnePole_setCoefficients(tOnePole* const, float b0, float a1);
+    void    tOnePole_setGain        (tOnePole* const, float gain);
     
     //==============================================================================
     
@@ -86,16 +91,18 @@ extern "C" {
     
     typedef _tTwoPole* tTwoPole;
     
-    void        tTwoPole_init           (tTwoPole*  const);
-    void        tTwoPole_free           (tTwoPole*  const);
+    void    tTwoPole_init           (tTwoPole* const);
+    void    tTwoPole_free           (tTwoPole* const);
+    void    tTwoPole_initToPool     (tTwoPole* const, tMempool* const);
+    void    tTwoPole_freeFromPool   (tTwoPole* const, tMempool* const);
     
-    float       tTwoPole_tick           (tTwoPole*  const, float input);
-    void        tTwoPole_setB0          (tTwoPole*  const, float b0);
-    void        tTwoPole_setA1          (tTwoPole*  const, float a1);
-    void        tTwoPole_setA2          (tTwoPole*  const, float a2);
-    void        tTwoPole_setResonance   (tTwoPole*  const, float freq, float radius, oBool normalize);
-    void        tTwoPole_setCoefficients(tTwoPole*  const, float b0, float a1, float a2);
-    void        tTwoPole_setGain        (tTwoPole*  const, float gain);
+    float   tTwoPole_tick           (tTwoPole* const, float input);
+    void    tTwoPole_setB0          (tTwoPole* const, float b0);
+    void    tTwoPole_setA1          (tTwoPole* const, float a1);
+    void    tTwoPole_setA2          (tTwoPole* const, float a2);
+    void    tTwoPole_setResonance   (tTwoPole* const, float freq, float radius, oBool normalize);
+    void    tTwoPole_setCoefficients(tTwoPole* const, float b0, float a1, float a2);
+    void    tTwoPole_setGain        (tTwoPole* const, float gain);
     
     //==============================================================================
     
@@ -110,15 +117,18 @@ extern "C" {
     
     typedef _tOneZero* tOneZero;
     
-    void        tOneZero_init           (tOneZero*  const, float theZero);
-    void        tOneZero_free           (tOneZero*  const);
-    float       tOneZero_tick           (tOneZero*  const, float input);
-    void        tOneZero_setB0          (tOneZero*  const, float b0);
-    void        tOneZero_setB1          (tOneZero*  const, float b1);
-    void        tOneZero_setZero        (tOneZero*  const, float theZero);
-    void        tOneZero_setCoefficients(tOneZero*  const, float b0, float b1);
-    void        tOneZero_setGain        (tOneZero*  const, float gain);
-    float       tOneZero_getPhaseDelay(tOneZero *f, float frequency );
+    void    tOneZero_init           (tOneZero* const, float theZero);
+    void    tOneZero_free           (tOneZero* const);
+    void    tOneZero_initToPool     (tOneZero* const, float theZero, tMempool* const);
+    void    tOneZero_freeFromPool   (tOneZero* const, tMempool* const);
+    
+    float   tOneZero_tick           (tOneZero* const, float input);
+    void    tOneZero_setB0          (tOneZero* const, float b0);
+    void    tOneZero_setB1          (tOneZero* const, float b1);
+    void    tOneZero_setZero        (tOneZero* const, float theZero);
+    void    tOneZero_setCoefficients(tOneZero* const, float b0, float b1);
+    void    tOneZero_setGain        (tOneZero* const, float gain);
+    float   tOneZero_getPhaseDelay  (tOneZero *f, float frequency );
     
     //==============================================================================
     
@@ -136,16 +146,18 @@ extern "C" {
     
     typedef _tTwoZero* tTwoZero;
     
-    void        tTwoZero_init           (tTwoZero*  const);
-    void        tTwoZero_free           (tTwoZero*  const);
+    void    tTwoZero_init           (tTwoZero* const);
+    void    tTwoZero_free           (tTwoZero* const);
+    void    tTwoZero_initToPool     (tTwoZero* const, tMempool* const);
+    void    tTwoZero_freeFromPool   (tTwoZero* const, tMempool* const);
     
-    float       tTwoZero_tick           (tTwoZero*  const, float input);
-    void        tTwoZero_setB0          (tTwoZero*  const, float b0);
-    void        tTwoZero_setB1          (tTwoZero*  const, float b1);
-    void        tTwoZero_setB2          (tTwoZero*  const, float b2);
-    void        tTwoZero_setNotch       (tTwoZero*  const, float frequency, float radius);
-    void        tTwoZero_setCoefficients(tTwoZero*  const, float b0, float b1, float b2);
-    void        tTwoZero_setGain        (tTwoZero*  const, float gain);
+    float   tTwoZero_tick           (tTwoZero* const, float input);
+    void    tTwoZero_setB0          (tTwoZero* const, float b0);
+    void    tTwoZero_setB1          (tTwoZero* const, float b1);
+    void    tTwoZero_setB2          (tTwoZero* const, float b2);
+    void    tTwoZero_setNotch       (tTwoZero* const, float frequency, float radius);
+    void    tTwoZero_setCoefficients(tTwoZero* const, float b0, float b1, float b2);
+    void    tTwoZero_setGain        (tTwoZero* const, float gain);
     
     //==============================================================================
     
@@ -162,17 +174,19 @@ extern "C" {
     
     typedef _tPoleZero* tPoleZero;
     
-    void        tPoleZero_init              (tPoleZero*  const);
-    void        tPoleZero_free              (tPoleZero*  const);
+    void    tPoleZero_init              (tPoleZero* const);
+    void    tPoleZero_free              (tPoleZero* const);
+    void    tPoleZero_initToPool        (tPoleZero* const, tMempool* const);
+    void    tPoleZero_freeFromPool      (tPoleZero* const, tMempool* const);
     
-    float       tPoleZero_tick              (tPoleZero*  const, float input);
-    void        tPoleZero_setB0             (tPoleZero*  const, float b0);
-    void        tPoleZero_setB1             (tPoleZero*  const, float b1);
-    void        tPoleZero_setA1             (tPoleZero*  const, float a1);
-    void        tPoleZero_setCoefficients   (tPoleZero*  const, float b0, float b1, float a1);
-    void        tPoleZero_setAllpass        (tPoleZero*  const, float coeff);
-    void        tPoleZero_setBlockZero      (tPoleZero*  const, float thePole);
-    void        tPoleZero_setGain           (tPoleZero*  const, float gain);
+    float   tPoleZero_tick              (tPoleZero* const, float input);
+    void    tPoleZero_setB0             (tPoleZero* const, float b0);
+    void    tPoleZero_setB1             (tPoleZero* const, float b1);
+    void    tPoleZero_setA1             (tPoleZero* const, float a1);
+    void    tPoleZero_setCoefficients   (tPoleZero* const, float b0, float b1, float a1);
+    void    tPoleZero_setAllpass        (tPoleZero* const, float coeff);
+    void    tPoleZero_setBlockZero      (tPoleZero* const, float thePole);
+    void    tPoleZero_setGain           (tPoleZero* const, float gain);
     
     //==============================================================================
     
@@ -192,19 +206,21 @@ extern "C" {
     
     typedef _tBiQuad* tBiQuad;
     
-    void        tBiQuad_init           (tBiQuad*  const);
-    void        tBiQuad_free           (tBiQuad*  const);
+    void    tBiQuad_init           (tBiQuad* const);
+    void    tBiQuad_free           (tBiQuad* const);
+    void    tBiQuad_initToPool     (tBiQuad* const, tMempool* const);
+    void    tBiQuad_freeFromPool   (tBiQuad* const, tMempool* const);
     
-    float       tBiQuad_tick           (tBiQuad*  const, float input);
-    void        tBiQuad_setB0          (tBiQuad*  const, float b0);
-    void        tBiQuad_setB1          (tBiQuad*  const, float b1);
-    void        tBiQuad_setB2          (tBiQuad*  const, float b2);
-    void        tBiQuad_setA1          (tBiQuad*  const, float a1);
-    void        tBiQuad_setA2          (tBiQuad*  const, float a2);
-    void        tBiQuad_setNotch       (tBiQuad*  const, float freq, float radius);
-    void        tBiQuad_setResonance   (tBiQuad*  const, float freq, float radius, oBool normalize);
-    void        tBiQuad_setCoefficients(tBiQuad*  const, float b0, float b1, float b2, float a1, float a2);
-    void        tBiQuad_setGain        (tBiQuad*  const, float gain);
+    float   tBiQuad_tick           (tBiQuad* const, float input);
+    void    tBiQuad_setB0          (tBiQuad* const, float b0);
+    void    tBiQuad_setB1          (tBiQuad* const, float b1);
+    void    tBiQuad_setB2          (tBiQuad* const, float b2);
+    void    tBiQuad_setA1          (tBiQuad* const, float a1);
+    void    tBiQuad_setA2          (tBiQuad* const, float a2);
+    void    tBiQuad_setNotch       (tBiQuad* const, float freq, float radius);
+    void    tBiQuad_setResonance   (tBiQuad* const, float freq, float radius, oBool normalize);
+    void    tBiQuad_setCoefficients(tBiQuad* const, float b0, float b1, float b2, float a1, float a2);
+    void    tBiQuad_setGain        (tBiQuad* const, float gain);
     
     //==============================================================================
     
@@ -229,12 +245,14 @@ extern "C" {
     
     typedef _tSVF* tSVF;
     
-    void        tSVF_init       (tSVF*  const, SVFType type, float freq, float Q);
-    void        tSVF_free       (tSVF*  const);
+    void    tSVF_init           (tSVF* const, SVFType type, float freq, float Q);
+    void    tSVF_free           (tSVF* const);
+    void    tSVF_initToPool     (tSVF* const, SVFType type, float freq, float Q, tMempool* const);
+    void    tSVF_freeFromPool   (tSVF* const, tMempool* const);
     
-    float       tSVF_tick       (tSVF*  const, float v0);
-    void         tSVF_setFreq    (tSVF*  const, float freq);
-    void         tSVF_setQ       (tSVF*  const, float Q);
+    float   tSVF_tick           (tSVF* const, float v0);
+    void    tSVF_setFreq        (tSVF* const, float freq);
+    void    tSVF_setQ           (tSVF* const, float Q);
     
     //==============================================================================
     
@@ -250,12 +268,14 @@ extern "C" {
     
     typedef _tEfficientSVF* tEfficientSVF;
     
-    void        tEfficientSVF_init      (tEfficientSVF*  const, SVFType type, uint16_t controlFreq, float Q);
-    void        tEfficientSVF_free      (tEfficientSVF*  const);
+    void    tEfficientSVF_init          (tEfficientSVF* const, SVFType type, uint16_t input, float Q);
+    void    tEfficientSVF_free          (tEfficientSVF* const);
+    void    tEfficientSVF_initToPool    (tEfficientSVF* const, SVFType type, uint16_t input, float Q, tMempool* const);
+    void    tEfficientSVF_freeFromPool  (tEfficientSVF* const, tMempool* const);
     
-    float       tEfficientSVF_tick      (tEfficientSVF*  const, float v0);
-    void         tEfficientSVF_setFreq   (tEfficientSVF*  const, uint16_t controlFreq);
-    void         tEfficientSVF_setQ      (tEfficientSVF*  const, float Q);
+    float   tEfficientSVF_tick          (tEfficientSVF* const, float v0);
+    void    tEfficientSVF_setFreq       (tEfficientSVF* const, uint16_t controlFreq);
+    void    tEfficientSVF_setQ          (tEfficientSVF* const, float Q);
     
     //==============================================================================
     
@@ -269,12 +289,14 @@ extern "C" {
     
     typedef _tHighpass* tHighpass;
     
-    void        tHighpass_init      (tHighpass*  const, float freq);
-    void        tHighpass_free      (tHighpass*  const);
+    void    tHighpass_init          (tHighpass* const, float freq);
+    void    tHighpass_free          (tHighpass* const);
+    void    tHighpass_initToPool    (tHighpass* const, float freq, tMempool* const);
+    void    tHighpass_freeFromPool  (tHighpass* const, tMempool* const);
     
-    float       tHighpass_tick      (tHighpass*  const, float x);
-    void        tHighpass_setFreq   (tHighpass*  const, float freq);
-    float       tHighpass_getFreq   (tHighpass*  const);
+    float   tHighpass_tick          (tHighpass* const, float x);
+    void    tHighpass_setFreq       (tHighpass* const, float freq);
+    float   tHighpass_getFreq       (tHighpass* const);
     
     //==============================================================================
     
@@ -295,13 +317,15 @@ extern "C" {
     
     typedef _tButterworth* tButterworth;
     
-    void        tButterworth_init       (tButterworth* const, int N, float f1, float f2);
-    void        tButterworth_free       (tButterworth* const);
+    void    tButterworth_init           (tButterworth* const, int N, float f1, float f2);
+    void    tButterworth_free           (tButterworth* const);
+    void    tButterworth_initToPool     (tButterworth* const, int N, float f1, float f2, tMempool* const);
+    void    tButterworth_freeFromPool   (tButterworth* const, tMempool* const);
     
-    float       tButterworth_tick       (tButterworth* const, float input);
-    void        tButterworth_setF1      (tButterworth* const, float in);
-    void        tButterworth_setF2      (tButterworth* const, float in);
-    void        tButterworth_setFreqs   (tButterworth* const, float f1, float f2);
+    float   tButterworth_tick           (tButterworth* const, float input);
+    void    tButterworth_setF1          (tButterworth* const, float in);
+    void    tButterworth_setF2          (tButterworth* const, float in);
+    void    tButterworth_setFreqs       (tButterworth* const, float f1, float f2);
     
     //==============================================================================
     
@@ -310,16 +334,17 @@ extern "C" {
         float* past;
         float* coeff;
         int numTaps;
-        
     } _tFIR;
     
     typedef _tFIR* tFIR;
     
-    void        tFIR_init       (tFIR* const, float* coeffs, int numTaps);
-    void        tFIR_free       (tFIR* const);
+    void    tFIR_init           (tFIR* const, float* coeffs, int numTaps);
+    void    tFIR_free           (tFIR* const);
+    void    tFIR_initToPool     (tFIR* const, float* coeffs, int numTaps, tMempool* const);
+    void    tFIR_freeFromPool   (tFIR* const, tMempool* const);
     
-    float       tFIR_tick       (tFIR* const, float input);
-    void        tFIR_coeffs      (tFIR* const, float in);
+    float   tFIR_tick           (tFIR* const, float input);
+    void    tFIR_coeffs         (tFIR* const, float in);
     
     //==============================================================================
     

@@ -16,6 +16,259 @@
 
 #endif
 
+//====================================================================================
+/* Stack */
+//====================================================================================
+
+void tStack_init(tStack* const stack)
+{
+    _tStack* ns = *stack = (_tStack*) leaf_alloc(sizeof(_tStack));
+    
+    ns->ordered = OFALSE;
+    ns->size = 0;
+    ns->pos = 0;
+    ns->capacity = STACK_SIZE;
+    
+    for (int i = 0; i < STACK_SIZE; i++) ns->data[i] = -1;
+}
+
+void tStack_free(tStack* const stack)
+{
+    _tStack* ns = *stack;
+    
+    leaf_free(ns);
+}
+
+void    tStack_initToPool           (tStack* const stack, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tStack* ns = *stack = (_tStack*) mpool_alloc(sizeof(_tStack), m->pool);
+    
+    ns->ordered = OFALSE;
+    ns->size = 0;
+    ns->pos = 0;
+    ns->capacity = STACK_SIZE;
+    
+    for (int i = 0; i < STACK_SIZE; i++) ns->data[i] = -1;
+}
+
+void    tStack_freeFromPool         (tStack* const stack, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tStack* ns = *stack;
+    
+    mpool_free(ns, m->pool);
+}
+
+// If stack contains note, returns index. Else returns -1;
+int tStack_contains(tStack* const stack, uint16_t noteVal)
+{
+    _tStack* ns = *stack;
+    for (int i = 0; i < ns->size; i++)
+    {
+        if (ns->data[i] == noteVal)    return i;
+    }
+    return -1;
+}
+
+void tStack_add(tStack* const stack, uint16_t noteVal)
+{
+    _tStack* ns = *stack;
+    
+    uint8_t j;
+    
+    int whereToInsert = 0;
+    if (ns->ordered)
+    {
+        for (j = 0; j < ns->size; j++)
+        {
+            if (noteVal > ns->data[j])
+            {
+                if ((noteVal < ns->data[j+1]) || (ns->data[j+1] == -1))
+                {
+                    whereToInsert = j+1;
+                    break;
+                }
+            }
+        }
+    }
+    
+    //first move notes that are already in the stack one position to the right
+    for (j = ns->size; j > whereToInsert; j--)
+    {
+        ns->data[j] = ns->data[(j - 1)];
+    }
+    
+    //then, insert the new note into the front of the stack
+    ns->data[whereToInsert] = noteVal;
+    
+    ns->size++;
+}
+
+int tStack_addIfNotAlreadyThere(tStack* const stack, uint16_t noteVal)
+{
+    _tStack* ns = *stack;
+    
+    uint8_t j;
+    
+    int added = 0;
+    
+    if (tStack_contains(stack, noteVal) == -1)
+    {
+        int whereToInsert = 0;
+        if (ns->ordered)
+        {
+            for (j = 0; j < ns->size; j++)
+            {
+                if (noteVal > ns->data[j])
+                {
+                    if ((noteVal < ns->data[j+1]) || (ns->data[j+1] == -1))
+                    {
+                        whereToInsert = j+1;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        //first move notes that are already in the stack one position to the right
+        for (j = ns->size; j > whereToInsert; j--)
+        {
+            ns->data[j] = ns->data[(j - 1)];
+        }
+        
+        //then, insert the new note into the front of the stack
+        ns->data[whereToInsert] = noteVal;
+        
+        ns->size++;
+        
+        added = 1;
+    }
+    
+    return added;
+}
+
+// Remove noteVal. return 1 if removed, 0 if not
+int tStack_remove(tStack* const stack, uint16_t noteVal)
+{
+    _tStack* ns = *stack;
+    
+    uint8_t k;
+    int foundIndex = tStack_contains(stack, noteVal);
+    int removed = 0;
+    
+    if (foundIndex >= 0)
+    {
+        for (k = 0; k < (ns->size - foundIndex); k++)
+        {
+            if ((k+foundIndex) >= (ns->capacity - 1))
+            {
+                ns->data[k + foundIndex] = -1;
+            }
+            else
+            {
+                ns->data[k + foundIndex] = ns->data[k + foundIndex + 1];
+                if ((k + foundIndex) == (ns->size - 1))
+                {
+                    ns->data[k + foundIndex + 1] = -1;
+                }
+            }
+            
+        }
+        // in case it got put on the stack multiple times
+        foundIndex--;
+        ns->size--;
+        removed = 1;
+    }
+    
+    return removed;
+}
+
+// Doesn't change size of data types
+void tStack_setCapacity(tStack* const stack, uint16_t cap)
+{
+    _tStack* ns = *stack;
+    
+    if (cap <= 0)
+        ns->capacity = 1;
+    else if (cap <= STACK_SIZE)
+        ns->capacity = cap;
+    else
+        ns->capacity = STACK_SIZE;
+    
+    for (int i = cap; i < STACK_SIZE; i++)
+    {
+        if ((int)ns->data[i] != -1)
+        {
+            ns->data[i] = -1;
+            ns->size -= 1;
+        }
+    }
+    
+    if (ns->pos >= cap)
+    {
+        ns->pos = 0;
+    }
+}
+
+int tStack_getSize(tStack* const stack)
+{
+    _tStack* ns = *stack;
+    
+    return ns->size;
+}
+
+void tStack_clear(tStack* const stack)
+{
+    _tStack* ns = *stack;
+    
+    for (int i = 0; i < STACK_SIZE; i++)
+    {
+        ns->data[i] = -1;
+    }
+    ns->pos = 0;
+    ns->size = 0;
+}
+
+// Next item in order of addition to stack. Return 0-31 if there is a next item to move to. Returns -1 otherwise.
+int tStack_next(tStack* const stack)
+{
+    _tStack* ns = *stack;
+    
+    int step = 0;
+    if (ns->size != 0) // if there is at least one note in the stack
+    {
+        if (ns->pos > 0) // if you're not at the most recent note (first one), then go backward in the array (moving from earliest to latest)
+        {
+            ns->pos--;
+        }
+        else
+        {
+            ns->pos = (ns->size - 1); // if you are the most recent note, go back to the earliest note in the array
+        }
+        
+        step = ns->data[ns->pos];
+        return step;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+int tStack_get(tStack* const stack, int which)
+{
+    _tStack* ns = *stack;
+    return ns->data[which];
+}
+
+int tStack_first(tStack* const stack)
+{
+    _tStack* ns = *stack;
+    return ns->data[0];
+}
+
+
 // POLY
 void tPoly_init(tPoly* const polyh, int maxNumVoices)
 {
@@ -81,6 +334,74 @@ void tPoly_free(tPoly* const polyh)
     leaf_free(poly->firstReceived);
     
     leaf_free(poly);
+}
+
+void    tPoly_initToPool            (tPoly* const polyh, int maxNumVoices, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPoly* poly = *polyh = (_tPoly*) mpool_alloc(sizeof(_tPoly), m->pool);
+    
+    poly->numVoices = maxNumVoices;
+    poly->maxNumVoices = maxNumVoices;
+    poly->lastVoiceToChange = 0;
+    
+    // Arp mode stuff
+    poly->currentVoice = 0;
+    poly->maxLength = 128;
+    poly->currentNote = -1;
+    
+    //default learned CCs and notes are just the CCs 1-128 - notes are skipped
+    for (int i = 0; i < 128; i++)
+    {
+        poly->notes[i][0] = 0;
+        poly->notes[i][1] = -1;
+    }
+    
+    poly->glideTime = 5.0f;
+    
+    poly->ramps = (tRamp*) mpool_alloc(sizeof(tRamp) * poly->maxNumVoices, m->pool);
+    poly->rampVals = (float*) mpool_alloc(sizeof(float) * poly->maxNumVoices, m->pool);
+    poly->firstReceived = (oBool*) mpool_alloc(sizeof(oBool) * poly->maxNumVoices, m->pool);
+    poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, m->pool);
+    
+    for (int i = 0; i < poly->maxNumVoices; ++i)
+    {
+        poly->voices[i] = (int*) mpool_alloc(sizeof(int) * 2, m->pool);
+        poly->voices[i][0] = -1;
+        poly->firstReceived[i] = OFALSE;
+        
+        tRamp_initToPool(&poly->ramps[i], poly->glideTime, 1, mp);
+    }
+    
+    poly->pitchBend = 0.0f;
+    
+    tRamp_initToPool(&poly->pitchBendRamp, 1.0f, 1, mp);
+    tStack_initToPool(&poly->stack, mp);
+    tStack_initToPool(&poly->orderStack, mp);
+    
+    poly->pitchGlideIsActive = OFALSE;
+}
+
+void    tPoly_freeFromPool  (tPoly* const polyh, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPoly* poly = *polyh;
+    
+    for (int i = 0; i < poly->maxNumVoices; i++)
+    {
+        tRamp_freeFromPool(&poly->ramps[i], mp);
+        mpool_free(poly->voices[i], m->pool);
+    }
+    tRamp_freeFromPool(&poly->pitchBendRamp, mp);
+    tStack_freeFromPool(&poly->stack, mp);
+    tStack_freeFromPool(&poly->orderStack, mp);
+    
+    mpool_free(poly->voices, m->pool);
+    mpool_free(poly->ramps, m->pool);
+    mpool_free(poly->rampVals, m->pool);
+    mpool_free(poly->firstReceived, m->pool);
+    
+    mpool_free(poly, m->pool);
 }
 
 void tPoly_tickPitch(tPoly* polyh)
@@ -331,237 +652,4 @@ int tPoly_isOn(tPoly* const polyh, uint8_t voice)
 {
     _tPoly* poly = *polyh;
     return (poly->voices[voice][0] > 0) ? 1 : 0;
-}
-
-
-//====================================================================================
-/* Stack */
-//====================================================================================
-
-void tStack_init(tStack* const stack)
-{
-    _tStack* ns = *stack = (_tStack*) leaf_alloc(sizeof(_tStack));
-    
-    ns->ordered = OFALSE;
-    ns->size = 0;
-    ns->pos = 0;
-    ns->capacity = STACK_SIZE;
-    
-    for (int i = 0; i < STACK_SIZE; i++) ns->data[i] = -1;
-}
-
-void tStack_free(tStack* const stack)
-{
-    _tStack* ns = *stack;
-    
-    leaf_free(ns);
-}
-
-// If stack contains note, returns index. Else returns -1;
-int tStack_contains(tStack* const stack, uint16_t noteVal)
-{
-    _tStack* ns = *stack;
-    for (int i = 0; i < ns->size; i++)
-    {
-        if (ns->data[i] == noteVal)    return i;
-    }
-    return -1;
-}
-
-void tStack_add(tStack* const stack, uint16_t noteVal)
-{
-    _tStack* ns = *stack;
-    
-    uint8_t j;
-    
-    int whereToInsert = 0;
-    if (ns->ordered)
-    {
-        for (j = 0; j < ns->size; j++)
-        {
-            if (noteVal > ns->data[j])
-            {
-                if ((noteVal < ns->data[j+1]) || (ns->data[j+1] == -1))
-                {
-                    whereToInsert = j+1;
-                    break;
-                }
-            }
-        }
-    }
-    
-    //first move notes that are already in the stack one position to the right
-    for (j = ns->size; j > whereToInsert; j--)
-    {
-        ns->data[j] = ns->data[(j - 1)];
-    }
-    
-    //then, insert the new note into the front of the stack
-    ns->data[whereToInsert] = noteVal;
-    
-    ns->size++;
-}
-
-int tStack_addIfNotAlreadyThere(tStack* const stack, uint16_t noteVal)
-{
-    _tStack* ns = *stack;
-    
-    uint8_t j;
-    
-    int added = 0;
-    
-    if (tStack_contains(stack, noteVal) == -1)
-    {
-        int whereToInsert = 0;
-        if (ns->ordered)
-        {
-            for (j = 0; j < ns->size; j++)
-            {
-                if (noteVal > ns->data[j])
-                {
-                    if ((noteVal < ns->data[j+1]) || (ns->data[j+1] == -1))
-                    {
-                        whereToInsert = j+1;
-                        break;
-                    }
-                }
-            }
-        }
-        
-        //first move notes that are already in the stack one position to the right
-        for (j = ns->size; j > whereToInsert; j--)
-        {
-            ns->data[j] = ns->data[(j - 1)];
-        }
-        
-        //then, insert the new note into the front of the stack
-        ns->data[whereToInsert] = noteVal;
-        
-        ns->size++;
-        
-        added = 1;
-    }
-    
-    return added;
-}
-
-
-// Remove noteVal. return 1 if removed, 0 if not
-int tStack_remove(tStack* const stack, uint16_t noteVal)
-{
-    _tStack* ns = *stack;
-    
-    uint8_t k;
-    int foundIndex = tStack_contains(stack, noteVal);
-    int removed = 0;
-    
-    if (foundIndex >= 0)
-    {
-        for (k = 0; k < (ns->size - foundIndex); k++)
-        {
-            if ((k+foundIndex) >= (ns->capacity - 1))
-            {
-                ns->data[k + foundIndex] = -1;
-            }
-            else
-            {
-                ns->data[k + foundIndex] = ns->data[k + foundIndex + 1];
-                if ((k + foundIndex) == (ns->size - 1))
-                {
-                    ns->data[k + foundIndex + 1] = -1;
-                }
-            }
-            
-        }
-        // in case it got put on the stack multiple times
-        foundIndex--;
-        ns->size--;
-        removed = 1;
-    }
-    
-    return removed;
-}
-
-// Doesn't change size of data types
-void tStack_setCapacity(tStack* const stack, uint16_t cap)
-{
-    _tStack* ns = *stack;
-    
-    if (cap <= 0)
-        ns->capacity = 1;
-    else if (cap <= STACK_SIZE)
-        ns->capacity = cap;
-    else
-        ns->capacity = STACK_SIZE;
-    
-    for (int i = cap; i < STACK_SIZE; i++)
-    {
-        if ((int)ns->data[i] != -1)
-        {
-            ns->data[i] = -1;
-            ns->size -= 1;
-        }
-    }
-    
-    if (ns->pos >= cap)
-    {
-        ns->pos = 0;
-    }
-}
-
-int tStack_getSize(tStack* const stack)
-{
-    _tStack* ns = *stack;
-    
-    return ns->size;
-}
-
-void tStack_clear(tStack* const stack)
-{
-    _tStack* ns = *stack;
-    
-    for (int i = 0; i < STACK_SIZE; i++)
-    {
-        ns->data[i] = -1;
-    }
-    ns->pos = 0;
-    ns->size = 0;
-}
-
-// Next item in order of addition to stack. Return 0-31 if there is a next item to move to. Returns -1 otherwise.
-int tStack_next(tStack* const stack)
-{
-    _tStack* ns = *stack;
-    
-    int step = 0;
-    if (ns->size != 0) // if there is at least one note in the stack
-    {
-        if (ns->pos > 0) // if you're not at the most recent note (first one), then go backward in the array (moving from earliest to latest)
-        {
-            ns->pos--;
-        }
-        else
-        {
-            ns->pos = (ns->size - 1); // if you are the most recent note, go back to the earliest note in the array
-        }
-        
-        step = ns->data[ns->pos];
-        return step;
-    }
-    else
-    {
-        return -1;
-    }
-}
-
-int tStack_get(tStack* const stack, int which)
-{
-    _tStack* ns = *stack;
-    return ns->data[which];
-}
-
-int tStack_first(tStack* const stack)
-{
-    _tStack* ns = *stack;
-    return ns->data[0];
 }

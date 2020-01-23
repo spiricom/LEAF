@@ -39,21 +39,6 @@ void  tBuffer_init (tBuffer* const sb, uint32_t length)
     tBuffer_clear(sb);
 }
 
-void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* mp)
-{
-    _tMempool* m = *mp;
-    _tBuffer* s = *sb = (_tBuffer*) mpool_alloc(sizeof(_tBuffer), m->pool);
-
-    s->buff = (float*) mpool_alloc( sizeof(float) * length, m->pool);
-
-    s->bufferLength = length;
-    s->recordedLength = 0;
-    s->idx = 0;
-    s->mode = RecordOneShot;
-
-    tBuffer_clear(sb);
-}
-
 void  tBuffer_free (tBuffer* const sb)
 {
     _tBuffer* s = *sb;
@@ -62,7 +47,22 @@ void  tBuffer_free (tBuffer* const sb)
     leaf_free(s);
 }
 
-void  tBuffer_freeFromPool (tBuffer* const sb, tMempool* mp)
+void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tBuffer* s = *sb = (_tBuffer*) mpool_alloc(sizeof(_tBuffer), m->pool);
+    
+    s->buff = (float*) mpool_alloc( sizeof(float) * length, m->pool);
+    
+    s->bufferLength = length;
+    s->recordedLength = 0;
+    s->idx = 0;
+    s->mode = RecordOneShot;
+    
+    tBuffer_clear(sb);
+}
+
+void  tBuffer_freeFromPool (tBuffer* const sb, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tBuffer* s = *sb;
@@ -70,7 +70,6 @@ void  tBuffer_freeFromPool (tBuffer* const sb, tMempool* mp)
     mpool_free(s->buff, m->pool);
     mpool_free(s, m->pool);
 }
-
 
 void tBuffer_tick (tBuffer* const sb, float sample)
 {

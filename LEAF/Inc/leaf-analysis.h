@@ -33,12 +33,14 @@ extern "C" {
     
     typedef _tEnvelopeFollower* tEnvelopeFollower;
     
-    void    tEnvelopeFollower_init           (tEnvelopeFollower*  const, float attackThreshold, float decayCoeff);
-    void    tEnvelopeFollower_free           (tEnvelopeFollower*  const);
+    void    tEnvelopeFollower_init          (tEnvelopeFollower* const, float attackThreshold, float decayCoeff);
+    void    tEnvelopeFollower_free          (tEnvelopeFollower* const);
+    void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const, float attackThreshold, float decayCoeff, tMempool* const);
+    void    tEnvelopeFollower_freeFromPool  (tEnvelopeFollower* const, tMempool* const);
     
-    float   tEnvelopeFollower_tick           (tEnvelopeFollower*  const, float x);
-    int     tEnvelopeFollower_decayCoeff     (tEnvelopeFollower*  const, float decayCoeff);
-    int     tEnvelopeFollower_attackThresh   (tEnvelopeFollower*  const, float attackThresh);
+    float   tEnvelopeFollower_tick          (tEnvelopeFollower* const, float x);
+    int     tEnvelopeFollower_decayCoeff    (tEnvelopeFollower* const, float decayCoeff);
+    int     tEnvelopeFollower_attackThresh  (tEnvelopeFollower* const, float attackThresh);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -51,11 +53,14 @@ extern "C" {
     
     typedef _tPowerFollower* tPowerFollower;
     
-    void    tPowerFollower_init      (tPowerFollower* const, float factor);
-    void    tPowerFollower_free      (tPowerFollower* const);
-    float   tPowerFollower_tick      (tPowerFollower* const, float input);
-    float   tPowerFollower_sample    (tPowerFollower* const);
-    int     tPowerFollower_setFactor   (tPowerFollower* const, float factor);
+    void    tPowerFollower_init         (tPowerFollower* const, float factor);
+    void    tPowerFollower_free         (tPowerFollower* const);
+    void    tPowerFollower_initToPool   (tPowerFollower* const, float factor, tMempool* const);
+    void    tPowerFollower_freeFromPool (tPowerFollower* const, tMempool* const);
+    
+    float   tPowerFollower_tick         (tPowerFollower* const, float input);
+    float   tPowerFollower_sample       (tPowerFollower* const);
+    int     tPowerFollower_setFactor    (tPowerFollower* const, float factor);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -81,10 +86,13 @@ extern "C" {
     
     typedef _tEnvPD* tEnvPD;
     
-    void    tEnvPD_init           (tEnvPD* const, int windowSize, int hopSize, int blockSize);
-    void    tEnvPD_free           (tEnvPD* const);
-    float   tEnvPD_tick           (tEnvPD* const);
-    void    tEnvPD_processBlock   (tEnvPD* const, float* in);
+    void    tEnvPD_init             (tEnvPD* const, int windowSize, int hopSize, int blockSize);
+    void    tEnvPD_free             (tEnvPD* const);
+    void    tEnvPD_initToPool       (tEnvPD* const, int windowSize, int hopSize, int blockSize, tMempool* const);
+    void    tEnvPD_freeFromPool     (tEnvPD* const, tMempool* const);
+    
+    float   tEnvPD_tick             (tEnvPD* const);
+    void    tEnvPD_processBlock     (tEnvPD* const, float* in);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -117,27 +125,28 @@ extern "C" {
     
     typedef _tAttackDetection* tAttackDetection;
     
-    void    tAttackDetection_init            (tAttackDetection* const, int blocksize);
-    void    tAttackDetection_init_expanded   (tAttackDetection* const, int blocksize, int atk, int rel);
-    void    tAttackDetection_free            (tAttackDetection* const);
+    void    tAttackDetection_init           (tAttackDetection* const, int blocksize, int atk, int rel);
+    void    tAttackDetection_free           (tAttackDetection* const);
+    void    tAttackDetection_initToPool     (tAttackDetection* const, int blocksize, int atk, int rel, tMempool* const);
+    void    tAttackDetection_freeFromPool   (tAttackDetection* const, tMempool* const);
     
     // set expected input blocksize
-    void    tAttackDetection_setBlocksize    (tAttackDetection* const, int size);
+    void    tAttackDetection_setBlocksize   (tAttackDetection* const, int size);
     
     // change atkDetector sample rate
-    void    tAttackDetection_setSamplerate   (tAttackDetection* const, int inRate);
+    void    tAttackDetection_setSamplerate  (tAttackDetection* const, int inRate);
     
     // set attack time and coeff
-    void    tAttackDetection_setAtk          (tAttackDetection* const, int inAtk);
+    void    tAttackDetection_setAttack      (tAttackDetection* const, int inAtk);
     
     // set release time and coeff
-    void    tAttackDetection_setRel          (tAttackDetection* const, int inRel);
+    void    tAttackDetection_setRelease     (tAttackDetection* const, int inRel);
     
     // set level above which values are identified as attacks
-    void    tAttackDetection_setThreshold    (tAttackDetection* const, float thres);
+    void    tAttackDetection_setThreshold   (tAttackDetection* const, float thres);
     
     // find largest transient in input block, return index of attack
-    int     tAttackDetection_detect          (tAttackDetection* const, float *in);
+    int     tAttackDetection_detect         (tAttackDetection* const, float *in);
     
     //==============================================================================
     
@@ -168,8 +177,10 @@ extern "C" {
     
     typedef _tSNAC* tSNAC;
     
-    void    tSNAC_init          (tSNAC* const, int overlaparg);    // constructor
-    void    tSNAC_free          (tSNAC* const);    // destructor
+    void    tSNAC_init          (tSNAC* const, int overlaparg);
+    void    tSNAC_free          (tSNAC* const);
+    void    tSNAC_initToPool    (tSNAC* const, int overlaparg, tMempool* const);
+    void    tSNAC_freeFromPool  (tSNAC* const, tMempool* const);
     
     void    tSNAC_ioSamples     (tSNAC *s, float *in, float *out, int size);
     void    tSNAC_setOverlap    (tSNAC *s, int lap);
@@ -178,7 +189,7 @@ extern "C" {
     
     /*To get freq, perform SAMPLE_RATE/snac_getperiod() */
     float   tSNAC_getPeriod     (tSNAC *s);
-    float   tSNAC_getfidelity   (tSNAC *s);
+    float   tSNAC_getFidelity   (tSNAC *s);
     
 #define DEFPITCHRATIO 2.0f
 #define DEFTIMECONSTANT 100.0f
@@ -220,12 +231,14 @@ extern "C" {
     
     typedef _tPeriodDetection* tPeriodDetection;
     
-    void       tPeriodDetection_init                    (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize);
-    void       tPeriodDetection_free                    (tPeriodDetection* const);
+    void    tPeriodDetection_init               (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize);
+    void    tPeriodDetection_free               (tPeriodDetection* const);
+    void    tPeriodDetection_initToPool         (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, tMempool* const);
+    void    tPeriodDetection_freeFromPool       (tPeriodDetection* const, tMempool* const);
     
-    float      tPeriodDetection_findPeriod              (tPeriodDetection* const, float sample);
-    void       tPeriodDetection_setHopSize              (tPeriodDetection* p, int hs);
-    void       tPeriodDetection_setWindowSize           (tPeriodDetection* p, int ws);
+    float   tPeriodDetection_findPeriod         (tPeriodDetection* const, float sample);
+    void    tPeriodDetection_setHopSize         (tPeriodDetection* p, int hs);
+    void    tPeriodDetection_setWindowSize      (tPeriodDetection* p, int ws);
     
     //==============================================================================
     

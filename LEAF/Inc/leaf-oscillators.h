@@ -14,6 +14,7 @@ extern "C" {
     //==============================================================================
     
 #include "leaf-math.h"
+#include "leaf-mempool.h"
 #include "leaf-filters.h"
     
     //==============================================================================
@@ -25,13 +26,17 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } tCycle;
+    } _tCycle;
     
-    void        tCycle_init         (tCycle*  const);
-    void        tCycle_free         (tCycle*  const);
+    typedef _tCycle* tCycle;
     
-    float       tCycle_tick         (tCycle*  const);
-    int         tCycle_setFreq      (tCycle*  const, float freq);
+    void    tCycle_init         (tCycle* const);
+    void    tCycle_free         (tCycle* const);
+    void    tCycle_initToPool   (tCycle* const, tMempool* const);
+    void    tCycle_freeFromPool (tCycle* const, tMempool* const);
+    
+    float   tCycle_tick         (tCycle* const);
+    int     tCycle_setFreq      (tCycle* const, float freq);
     
     //==============================================================================
     
@@ -42,13 +47,17 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } tTriangle;
+    } _tTriangle;
     
-    void        tTriangle_init      (tTriangle*  const);
-    void        tTriangle_free      (tTriangle*  const);
+    typedef _tTriangle* tTriangle;
     
-    float       tTriangle_tick      (tTriangle*  const);
-    int         tTriangle_setFreq   (tTriangle*  const, float freq);
+    void    tTriangle_init          (tTriangle* const);
+    void    tTriangle_free          (tTriangle* const);
+    void    tTriangle_initToPool    (tTriangle* const, tMempool* const);
+    void    tTriangle_freeFromPool  (tTriangle* const, tMempool* const);
+    
+    float   tTriangle_tick          (tTriangle* const);
+    int     tTriangle_setFreq       (tTriangle* const, float freq);
     
     //==============================================================================
     
@@ -59,13 +68,17 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } tSquare;
+    } _tSquare;
     
-    void        tSquare_init        (tSquare*  const);
-    void        tSquare_free        (tSquare*  const);
+    typedef _tSquare* tSquare;
     
-    float       tSquare_tick        (tSquare*  const);
-    int         tSquare_setFreq     (tSquare*  const, float freq);
+    void    tSquare_init        (tSquare* const);
+    void    tSquare_free        (tSquare* const);
+    void    tSquare_initToPool  (tSquare* const, tMempool* const);
+    void    tSquare_freeFromPool(tSquare* const, tMempool* const);
+    
+    float   tSquare_tick        (tSquare* const);
+    int     tSquare_setFreq     (tSquare* const, float freq);
     
     //==============================================================================
     
@@ -76,13 +89,17 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } tSawtooth;
+    } _tSawtooth;
     
-    void        tSawtooth_init      (tSawtooth*  const);
-    void        tSawtooth_free      (tSawtooth*  const);
+    typedef _tSawtooth* tSawtooth;
     
-    float       tSawtooth_tick      (tSawtooth*  const);
-    int         tSawtooth_setFreq   (tSawtooth*  const, float freq);
+    void    tSawtooth_init          (tSawtooth* const);
+    void    tSawtooth_free          (tSawtooth* const);
+    void    tSawtooth_initToPool    (tSawtooth* const, tMempool* const);
+    void    tSawtooth_freeFromPool  (tSawtooth* const, tMempool* const);
+    
+    float   tSawtooth_tick          (tSawtooth* const);
+    int     tSawtooth_setFreq       (tSawtooth* const, float freq);
     
     //==============================================================================
     
@@ -92,13 +109,17 @@ extern "C" {
         float phase;
         float inc,freq;
         
-    } tPhasor;
+    } _tPhasor;
     
-    void        tPhasor_init        (tPhasor*  const);
-    void        tPhasor_free        (tPhasor*  const);
+    typedef _tPhasor* tPhasor;
     
-    float       tPhasor_tick        (tPhasor*  const);
-    int         tPhasor_setFreq     (tPhasor*  const, float freq);
+    void    tPhasor_init        (tPhasor* const);
+    void    tPhasor_free        (tPhasor* const);
+    void    tPhasor_initToPool  (tPhasor* const, tMempool* const);
+    void    tPhasor_freeFromPool(tPhasor* const, tMempool* const);
+    
+    float   tPhasor_tick        (tPhasor* const);
+    int     tPhasor_setFreq     (tPhasor* const, float freq);
     
     //==============================================================================
     
@@ -116,12 +137,16 @@ extern "C" {
         float pinkb0, pinkb1, pinkb2;
         float(*rand)(void);
         
-    } tNoise;
+    } _tNoise;
     
-    void        tNoise_init          (tNoise* const, NoiseType type);
-    void        tNoise_free          (tNoise* const);
+    typedef _tNoise* tNoise;
     
-    float       tNoise_tick          (tNoise*  const);
+    void    tNoise_init         (tNoise* const, NoiseType type);
+    void    tNoise_free         (tNoise* const);
+    void    tNoise_initToPool   (tNoise* const, NoiseType type, tMempool* const);
+    void    tNoise_freeFromPool (tNoise* const, tMempool* const);
+    
+    float   tNoise_tick         (tNoise* const);
     
     //==============================================================================
     
@@ -149,23 +174,27 @@ extern "C" {
         float V[3];
         float P[3];
         float gK, gN, gL, C;
-    } tNeuron;
+    } _tNeuron;
     
-    void        tNeuron_init        (tNeuron* const);
-    void        tNeuron_free        (tNeuron* const);
+    typedef _tNeuron* tNeuron;
     
-    void        tNeuron_reset       (tNeuron* const);
-    float       tNeuron_Tick        (tNeuron* const);
-    void        tNeuron_setMode     (tNeuron* const, NeuronMode mode);
-    void        tNeuron_setCurrent  (tNeuron* const, float current);
-    void        tNeuron_setK        (tNeuron* const, float K);
-    void        tNeuron_setL        (tNeuron* const, float L);
-    void        tNeuron_setN        (tNeuron* const, float N);
-    void        tNeuron_setC        (tNeuron* const, float C);
-    void        tNeuron_setV1       (tNeuron* const, float V1);
-    void        tNeuron_setV2       (tNeuron* const, float V2);
-    void        tNeuron_setV3       (tNeuron* const, float V3);
-    void        tNeuron_setTimeStep (tNeuron* const, float timestep);
+    void    tNeuron_init        (tNeuron* const);
+    void    tNeuron_free        (tNeuron* const);
+    void    tNeuron_initToPool  (tNeuron* const, tMempool* const);
+    void    tNeuron_freeFromPool(tNeuron* const, tMempool* const);
+    
+    void    tNeuron_reset       (tNeuron* const);
+    float   tNeuron_tick        (tNeuron* const);
+    void    tNeuron_setMode     (tNeuron* const, NeuronMode mode);
+    void    tNeuron_setCurrent  (tNeuron* const, float current);
+    void    tNeuron_setK        (tNeuron* const, float K);
+    void    tNeuron_setL        (tNeuron* const, float L);
+    void    tNeuron_setN        (tNeuron* const, float N);
+    void    tNeuron_setC        (tNeuron* const, float C);
+    void    tNeuron_setV1       (tNeuron* const, float V1);
+    void    tNeuron_setV2       (tNeuron* const, float V2);
+    void    tNeuron_setV3       (tNeuron* const, float V3);
+    void    tNeuron_setTimeStep (tNeuron* const, float timestep);
     
     //==============================================================================
     
@@ -176,3 +205,4 @@ extern "C" {
 #endif  // LEAF_OSCILLATORS_H_INCLUDED
 
 //==============================================================================
+

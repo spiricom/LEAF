@@ -102,8 +102,10 @@ extern "C" {
     
     typedef _tMempool* tMempool;
     
-    void        tMempool_init      (tMempool* const, char* memory, size_t size);
-    void        tMempool_free      (tMempool* const);
+    void    tMempool_init           (tMempool* const, char* memory, size_t size);
+    void    tMempool_free           (tMempool* const);
+    void    tMempool_initToPool     (tMempool* const, tMempool* const);
+    void    tMempool_freeFromPool   (tMempool* const, tMempool* const);
     
     //==============================================================================
     

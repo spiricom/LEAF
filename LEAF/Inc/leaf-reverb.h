@@ -17,6 +17,7 @@ extern "C" {
     
 #include "leaf-global.h"
 #include "leaf-math.h"
+#include "leaf-mempool.h"
 #include "leaf-delay.h"
 #include "leaf-filters.h"
 #include "leaf-oscillators.h"
@@ -41,16 +42,18 @@ extern "C" {
     
     typedef _tPRCReverb* tPRCReverb;
     
-    void    tPRCReverb_init    (tPRCReverb* const, float t60);
-    void    tPRCReverb_free    (tPRCReverb* const);
+    void    tPRCReverb_init         (tPRCReverb* const, float t60);
+    void    tPRCReverb_free         (tPRCReverb* const);
+    void    tPRCReverb_initToPool   (tPRCReverb* const, float t60, tMempool* const);
+    void    tPRCReverb_freeFromPool (tPRCReverb* const, tMempool* const);
     
-    float   tPRCReverb_tick    (tPRCReverb* const, float input);
+    float   tPRCReverb_tick         (tPRCReverb* const, float input);
     
     // Set reverb time in seconds.
-    void    tPRCReverb_setT60  (tPRCReverb* const, float t60);
+    void    tPRCReverb_setT60       (tPRCReverb* const, float t60);
     
     // Set mix between dry input and wet output signal.
-    void    tPRCReverb_setMix  (tPRCReverb* const, float mix);
+    void    tPRCReverb_setMix       (tPRCReverb* const, float mix);
     
     //==============================================================================
     
@@ -73,17 +76,19 @@ extern "C" {
     
     typedef _tNReverb* tNReverb;
     
-    void    tNReverb_init      (tNReverb* const, float t60);
-    void    tNReverb_free      (tNReverb* const);
+    void    tNReverb_init           (tNReverb* const, float t60);
+    void    tNReverb_free           (tNReverb* const);
+    void    tNReverb_initToPool     (tNReverb* const, float t60, tMempool* const);
+    void    tNReverb_freeFromPool   (tNReverb* const, tMempool* const);
     
-    float   tNReverb_tick      (tNReverb* const, float input);
-    void   tNReverb_tickStereo(tNReverb* const rev, float input, float* output);
+    float   tNReverb_tick           (tNReverb* const, float input);
+    void    tNReverb_tickStereo     (tNReverb* const rev, float input, float* output);
     
     // Set reverb time in seconds.
-    void    tNReverb_setT60    (tNReverb* const, float t60);
+    void    tNReverb_setT60         (tNReverb* const, float t60);
     
     // Set mix between dry input and wet output signal.
-    void    tNReverb_setMix    (tNReverb*  const, float mix);
+    void    tNReverb_setMix         (tNReverb* const, float mix);
     
     //==============================================================================
     
@@ -135,11 +140,13 @@ extern "C" {
     
     void    tDattorroReverb_init              (tDattorroReverb* const);
     void    tDattorroReverb_free              (tDattorroReverb* const);
+    void    tDattorroReverb_initToPool        (tDattorroReverb* const, tMempool* const);
+    void    tDattorroReverb_freeFromPool      (tDattorroReverb* const, tMempool* const);
     
     float   tDattorroReverb_tick              (tDattorroReverb* const, float input);
     void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, float input, float* output);
     void    tDattorroReverb_setMix            (tDattorroReverb* const, float mix);
-    void    tDattorroReverb_setFreeze            (tDattorroReverb* const rev, uint32_t freeze);
+    void    tDattorroReverb_setFreeze         (tDattorroReverb* const rev, uint32_t freeze);
     void    tDattorroReverb_setHP             (tDattorroReverb* const, float freq);
     void    tDattorroReverb_setSize           (tDattorroReverb* const, float size);
     void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, float preDelay);

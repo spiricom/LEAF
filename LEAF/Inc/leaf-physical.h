@@ -19,6 +19,7 @@ extern "C" {
     
 #include "leaf-global.h"
 #include "leaf-math.h"
+#include "leaf-mempool.h"
 #include "leaf-delay.h"
 #include "leaf-filters.h"
 #include "leaf-oscillators.h"
@@ -45,28 +46,30 @@ extern "C" {
     
     typedef _tPluck* tPluck;
     
-    void        tPluck_init          (tPluck*  const, float lowestFrequency); //float delayBuff[DELAY_LENGTH]);
-    void        tPluck_free          (tPluck*  const);
+    void    tPluck_init          (tPluck* const, float lowestFrequency); //float delayBuff[DELAY_LENGTH]);
+    void    tPluck_free          (tPluck* const);
+    void    tPluck_initToPool    (tPluck* const, float lowestFrequency, tMempool* const);
+    void    tPluck_freeFromPool  (tPluck* const, tMempool* const);
     
-    float       tPluck_tick          (tPluck*  const);
+    float       tPluck_tick          (tPluck* const);
     
     // Pluck the string.
-    void        tPluck_pluck         (tPluck*  const, float amplitude);
+    void    tPluck_pluck         (tPluck* const, float amplitude);
     
     // Start a note with the given frequency and amplitude.;
-    void        tPluck_noteOn        (tPluck*  const, float frequency, float amplitude );
+    void    tPluck_noteOn        (tPluck* const, float frequency, float amplitude );
     
     // Stop a note with the given amplitude (speed of decay).
-    void        tPluck_noteOff       (tPluck*  const, float amplitude );
+    void    tPluck_noteOff       (tPluck* const, float amplitude );
     
     // Set instrument parameters for a particular frequency.
-    void        tPluck_setFrequency  (tPluck*  const, float frequency );
+    void    tPluck_setFrequency  (tPluck* const, float frequency );
     
     // Perform the control change specified by \e number and \e value (0.0 - 128.0).
-    void        tPluck_controlChange (tPluck*  const, int number, float value);
+    void    tPluck_controlChange (tPluck* const, int number, float value);
     
     // tPluck Utilities.
-    float       tPluck_getLastOut    (tPluck*  const);
+    float   tPluck_getLastOut    (tPluck* const);
     
     //==============================================================================
     
@@ -102,38 +105,40 @@ extern "C" {
     
     typedef _tKarplusStrong* tKarplusStrong;
     
-    void        tKarplusStrong_init               (tKarplusStrong* const, float lowestFrequency); // float delayBuff[2][DELAY_LENGTH]);
-    void        tKarplusStrong_free               (tKarplusStrong* const);
+    void    tKarplusStrong_init               (tKarplusStrong* const, float lowestFrequency); // float delayBuff[2][DELAY_LENGTH]);
+    void    tKarplusStrong_free               (tKarplusStrong* const);
+    void    tKarplusStrong_initToPool         (tKarplusStrong* const, float lowestFrequency, tMempool* const);
+    void    tKarplusStrong_freeFromPool       (tKarplusStrong* const, tMempool* const);
     
-    float       tKarplusStrong_tick               (tKarplusStrong*  const);
+    float   tKarplusStrong_tick               (tKarplusStrong* const);
     
     // Pluck the string.
-    void        tKarplusStrong_pluck              (tKarplusStrong*  const, float amplitude);
+    void    tKarplusStrong_pluck              (tKarplusStrong* const, float amplitude);
     
     // Start a note with the given frequency and amplitude.;
-    void        tKarplusStrong_noteOn             (tKarplusStrong*  const, float frequency, float amplitude );
+    void    tKarplusStrong_noteOn             (tKarplusStrong* const, float frequency, float amplitude );
     
     // Stop a note with the given amplitude (speed of decay).
-    void        tKarplusStrong_noteOff            (tKarplusStrong*  const, float amplitude );
+    void    tKarplusStrong_noteOff            (tKarplusStrong* const, float amplitude );
     
     // Set instrument parameters for a particular frequency.
-    void        tKarplusStrong_setFrequency       (tKarplusStrong*  const, float frequency );
+    void    tKarplusStrong_setFrequency       (tKarplusStrong* const, float frequency );
     
     // Perform the control change specified by \e number and \e value (0.0 - 128.0).
     // Use SKPickPosition, SKStringDamping, or SKDetune for type.
-    void        tKarplusStrong_controlChange      (tKarplusStrong*  const, SKControlType type, float value);
+    void    tKarplusStrong_controlChange      (tKarplusStrong* const, SKControlType type, float value);
     
     // Set the stretch "factor" of the string (0.0 - 1.0).
-    void        tKarplusStrong_setStretch         (tKarplusStrong*  const, float stretch );
+    void    tKarplusStrong_setStretch         (tKarplusStrong* const, float stretch );
     
     // Set the pluck or "excitation" position along the string (0.0 - 1.0).
-    void        tKarplusStrong_setPickupPosition  (tKarplusStrong*  const, float position );
+    void    tKarplusStrong_setPickupPosition  (tKarplusStrong* const, float position );
     
     // Set the base loop gain.
-    void        tKarplusStrong_setBaseLoopGain    (tKarplusStrong*  const, float aGain );
+    void    tKarplusStrong_setBaseLoopGain    (tKarplusStrong* const, float aGain );
     
     // tKarplusStrong utilities.
-    float       tKarplusStrong_getLastOut         (tKarplusStrong*  const);
+    float   tKarplusStrong_getLastOut         (tKarplusStrong* const);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -153,18 +158,25 @@ extern "C" {
     
     typedef _tSimpleLivingString* tSimpleLivingString;
     
-    void    tSimpleLivingString_init      (tSimpleLivingString* const, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode);
-    void    tSimpleLivingString_free      (tSimpleLivingString* const);
-    float   tSimpleLivingString_tick      (tSimpleLivingString* const, float input);
-    float   tSimpleLivingString_sample    (tSimpleLivingString* const);
-    void    tSimpleLivingString_setFreq               (tSimpleLivingString* const, float freq);
-    void    tSimpleLivingString_setWaveLength        (tSimpleLivingString* const, float waveLength); // in samples
-    void    tSimpleLivingString_setDampFreq           (tSimpleLivingString* const, float dampFreq);
-    void    tSimpleLivingString_setDecay             (tSimpleLivingString* const, float decay); // should be near 1.0
+    void    tSimpleLivingString_init                (tSimpleLivingString* const, float freq, float dampFreq,
+                                                     float decay, float targetLev, float levSmoothFactor,
+                                                     float levStrength, int levMode);
+    void    tSimpleLivingString_free                (tSimpleLivingString* const);
+    void    tSimpleLivingString_initToPool          (tSimpleLivingString* const, float freq, float dampFreq,
+                                                     float decay, float targetLev, float levSmoothFactor,
+                                                     float levStrength, int levMode, tMempool* const);
+    void    tSimpleLivingString_freeFromPool        (tSimpleLivingString* const, tMempool* const);
+    
+    float   tSimpleLivingString_tick                (tSimpleLivingString* const, float input);
+    float   tSimpleLivingString_sample              (tSimpleLivingString* const);
+    void    tSimpleLivingString_setFreq             (tSimpleLivingString* const, float freq);
+    void    tSimpleLivingString_setWaveLength       (tSimpleLivingString* const, float waveLength); // in samples
+    void    tSimpleLivingString_setDampFreq         (tSimpleLivingString* const, float dampFreq);
+    void    tSimpleLivingString_setDecay            (tSimpleLivingString* const, float decay); // should be near 1.0
     void    tSimpleLivingString_setTargetLev        (tSimpleLivingString* const, float targetLev);
     void    tSimpleLivingString_setLevSmoothFactor  (tSimpleLivingString* const, float levSmoothFactor);
-    void    tSimpleLivingString_setLevStrength        (tSimpleLivingString* const, float levStrength);
-    void    tSimpleLivingString_setLevMode        (tSimpleLivingString* const, int levMode);
+    void    tSimpleLivingString_setLevStrength      (tSimpleLivingString* const, float levStrength);
+    void    tSimpleLivingString_setLevMode          (tSimpleLivingString* const, int levMode);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -186,19 +198,25 @@ extern "C" {
     
     typedef _tLivingString* tLivingString;
     
-    void    tLivingString_init      (tLivingString* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay,
-                                     float targetLev, float levSmoothFactor, float levStrength, int levMode);
-    void    tLivingString_free      (tLivingString* const);
-    float   tLivingString_tick      (tLivingString* const, float input);
-    float   tLivingString_sample    (tLivingString* const);
+    void    tLivingString_init                  (tLivingString* const, float freq, float pickPos, float prepIndex,
+                                                 float dampFreq, float decay, float targetLev, float levSmoothFactor,
+                                                 float levStrength, int levMode);
+    void    tLivingString_free                  (tLivingString* const);
+    void    tLivingString_initToPool            (tLivingString* const, float freq, float pickPos, float prepIndex,
+                                                 float dampFreq, float decay, float targetLev, float levSmoothFactor,
+                                                 float levStrength, int levMode, tMempool* const);
+    void    tLivingString_freeFromPool          (tLivingString* const, tMempool* const);
+    
+    float   tLivingString_tick                  (tLivingString* const, float input);
+    float   tLivingString_sample                (tLivingString* const);
     void    tLivingString_setFreq               (tLivingString* const, float freq);
-    void    tLivingString_setWaveLength            (tLivingString* const, float waveLength); // in samples
-    void    tLivingString_setPickPos               (tLivingString* const, float pickPos);
-    void    tLivingString_setPrepIndex             (tLivingString* const, float prepIndex);
+    void    tLivingString_setWaveLength         (tLivingString* const, float waveLength); // in samples
+    void    tLivingString_setPickPos            (tLivingString* const, float pickPos);
+    void    tLivingString_setPrepIndex          (tLivingString* const, float prepIndex);
     void    tLivingString_setDampFreq           (tLivingString* const, float dampFreq);
-    void    tLivingString_setDecay                 (tLivingString* const, float decay); // should be near 1.0
-    void    tLivingString_setTargetLev            (tLivingString* const, float targetLev);
-    void    tLivingString_setLevSmoothFactor      (tLivingString* const, float levSmoothFactor);
+    void    tLivingString_setDecay              (tLivingString* const, float decay); // should be near 1.0
+    void    tLivingString_setTargetLev          (tLivingString* const, float targetLev);
+    void    tLivingString_setLevSmoothFactor    (tLivingString* const, float levSmoothFactor);
     void    tLivingString_setLevStrength        (tLivingString* const, float levStrength);
     void    tLivingString_setLevMode            (tLivingString* const, int levMode);
     
@@ -211,12 +229,15 @@ extern "C" {
     
     typedef _tReedTable* tReedTable;
     
-    void    tReedTable_init      (tReedTable* const, float offset, float slope);
-    void    tReedTable_free      (tReedTable* const);
-    float   tReedTable_tick      (tReedTable* const, float input);
-    float   tReedTable_tanh_tick     (tReedTable* const p, float input); //tanh softclip version of reed table - replacing the hard clip in original stk code
-    void     tReedTable_setOffset   (tReedTable* const, float offset);
-    void     tReedTable_setSlope (tReedTable* const, float slope);
+    void    tReedTable_init         (tReedTable* const, float offset, float slope);
+    void    tReedTable_free         (tReedTable* const);
+    void    tReedTable_initToPool   (tReedTable* const, float offset, float slope, tMempool* const);
+    void    tReedTable_freeFromPool (tReedTable* const, tMempool* const);
+    
+    float   tReedTable_tick         (tReedTable* const, float input);
+    float   tReedTable_tanh_tick    (tReedTable* const, float input); //tanh softclip version of reed table - replacing the hard clip in original stk code
+    void    tReedTable_setOffset    (tReedTable* const, float offset);
+    void    tReedTable_setSlope     (tReedTable* const, float slope);
     
     //==============================================================================
     

@@ -19,19 +19,42 @@
 #endif
 
 // Cycle
-void    tCycle_init(tCycle* const c)
+void    tCycle_init(tCycle* const cy)
 {
+    _tCycle* c = *cy = (_tCycle*) leaf_alloc(sizeof(_tCycle));
+    
     c->inc      =  0.0f;
     c->phase    =  0.0f;
 }
 
-void    tCycle_free(tCycle* const c)
+void    tCycle_free(tCycle* const cy)
 {
+    _tCycle* c = *cy;
     
+    leaf_free(c);
 }
 
-int     tCycle_setFreq(tCycle* const c, float freq)
+void    tCycle_initToPool   (tCycle* const cy, tMempool* const mp)
 {
+    _tMempool* m = *mp;
+    _tCycle* c = *cy = (_tCycle*) mpool_alloc(sizeof(_tCycle), m->pool);
+    
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+}
+
+void    tCycle_freeFromPool (tCycle* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tCycle* c = *cy;
+    
+    mpool_free(c, m->pool);
+}
+
+int     tCycle_setFreq(tCycle* const cy, float freq)
+{
+    _tCycle* c = *cy;
+    
     if (freq < 0.0f) freq = 0.0f;
     
     c->freq = freq;
@@ -40,8 +63,10 @@ int     tCycle_setFreq(tCycle* const c, float freq)
     return 0;
 }
 
-float   tCycle_tick(tCycle* const c)
+float   tCycle_tick(tCycle* const cy)
 {
+    _tCycle* c = *cy;
+    
     // Phasor increment
     c->phase += c->inc;
     while (c->phase >= 1.0f) c->phase -= 1.0f;
@@ -56,31 +81,51 @@ float   tCycle_tick(tCycle* const c)
     return (samp0 + (samp1 - samp0) * fracPart);
 }
 
-void     tCycleSampleRateChanged (tCycle* const c)
+void     tCycleSampleRateChanged (tCycle* const cy)
 {
+    _tCycle* c = *cy;
+    
     c->inc = c->freq * leaf.invSampleRate;
 }
 
 //========================================================================
 /* Triangle */
-void    tTriangle_start(tTriangle* const c)
+void   tTriangle_init(tTriangle* const cy)
 {
+    _tTriangle* c = *cy = (_tTriangle*) leaf_alloc(sizeof(_tTriangle));
     
-}
-
-void   tTriangle_init(tTriangle* const c)
-{
     c->inc      =  0.0f;
     c->phase    =  0.0f;
 }
 
-void   tTriangle_free(tTriangle* const c)
+void   tTriangle_free(tTriangle* const cy)
 {
+    _tTriangle* c = *cy;
     
+    leaf_free(c);
 }
 
-int tTriangle_setFreq(tTriangle* const c, float freq)
+void    tTriangle_initToPool    (tTriangle* const cy, tMempool* const mp)
 {
+    _tMempool* m = *mp;
+    _tTriangle* c = *cy = (_tTriangle*) mpool_alloc(sizeof(_tTriangle), m->pool);
+    
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+}
+
+void    tTriangle_freeFromPool  (tTriangle* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTriangle* c = *cy;
+    
+    mpool_free(c, m->pool);
+}
+
+int tTriangle_setFreq(tTriangle* const cy, float freq)
+{
+    _tTriangle* c = *cy;
+    
     if (freq < 0.0f) freq = 0.0f;
     
     c->freq = freq;
@@ -90,8 +135,10 @@ int tTriangle_setFreq(tTriangle* const c, float freq)
 }
 
 
-float   tTriangle_tick(tTriangle* const c)
+float   tTriangle_tick(tTriangle* const cy)
 {
+    _tTriangle* c = *cy;
+    
     // Phasor increment
     c->phase += c->inc;
     while (c->phase >= 1.0f) c->phase -= 1.0f;
@@ -165,26 +212,51 @@ float   tTriangle_tick(tTriangle* const c)
     return out;
 }
 
-void     tTriangleSampleRateChanged (tTriangle*  const c)
+void     tTriangleSampleRateChanged (tTriangle* const cy)
 {
+    _tTriangle* c = *cy;
+    
     c->inc = c->freq * leaf.invSampleRate;
 }
 
 //========================================================================
 /* Square */
-void   tSquare_init(tSquare* const c)
+void   tSquare_init(tSquare* const cy)
 {
+    _tSquare* c = *cy = (_tSquare*) leaf_alloc(sizeof(_tSquare));
+    
     c->inc      =  0.0f;
     c->phase    =  0.0f;
 }
 
-void   tSquare_free(tSquare* const c)
+void   tSquare_free(tSquare* const cy)
 {
+    _tSquare* c = *cy;
     
+    leaf_free(c);
 }
 
-int     tSquare_setFreq(tSquare*  const c, float freq)
+void    tSquare_initToPool  (tSquare* const cy, tMempool* const mp)
 {
+    _tMempool* m = *mp;
+    _tSquare* c = *cy = (_tSquare*) mpool_alloc(sizeof(_tSquare), m->pool);
+    
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+}
+
+void    tSquare_freeFromPool(tSquare* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSquare* c = *cy;
+    
+    mpool_free(c, m->pool);
+}
+
+int     tSquare_setFreq(tSquare* const cy, float freq)
+{
+    _tSquare* c = *cy;
+    
     if (freq < 0.0f) freq = 0.0f;
     
     c->freq = freq;
@@ -193,8 +265,10 @@ int     tSquare_setFreq(tSquare*  const c, float freq)
     return 0;
 }
 
-float   tSquare_tick(tSquare* const c)
+float   tSquare_tick(tSquare* const cy)
 {
+    _tSquare* c = *cy;
+    
     // Phasor increment
     c->phase += c->inc;
     while (c->phase >= 1.0f) c->phase -= 1.0f;
@@ -267,26 +341,51 @@ float   tSquare_tick(tSquare* const c)
     return out;
 }
 
-void     tSquareSampleRateChanged (tSquare*  const c)
+void     tSquareSampleRateChanged (tSquare* const cy)
 {
+    _tSquare* c = *cy;
+    
     c->inc = c->freq * leaf.invSampleRate;
 }
 
 //=====================================================================
 // Sawtooth
-void    tSawtooth_init(tSawtooth* const c)
+void    tSawtooth_init(tSawtooth* const cy)
 {
+    _tSawtooth* c = *cy = (_tSawtooth*) leaf_alloc(sizeof(_tSawtooth));
+    
     c->inc      = 0.0f;
     c->phase    = 0.0f;
 }
 
-void    tSawtooth_free(tSawtooth* const c)
+void    tSawtooth_free(tSawtooth* const cy)
 {
+    _tSawtooth* c = *cy;
     
+    leaf_free(c);
 }
 
-int     tSawtooth_setFreq(tSawtooth* const c, float freq)
+void    tSawtooth_initToPool    (tSawtooth* const cy, tMempool* const mp)
 {
+    _tMempool* m = *mp;
+    _tSawtooth* c = *cy = (_tSawtooth*) mpool_alloc(sizeof(_tSawtooth), m->pool);
+    
+    c->inc      = 0.0f;
+    c->phase    = 0.0f;
+}
+
+void    tSawtooth_freeFromPool  (tSawtooth* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSawtooth* c = *cy;
+    
+    mpool_free(c, m->pool);
+}
+
+int     tSawtooth_setFreq(tSawtooth* const cy, float freq)
+{
+    _tSawtooth* c = *cy;
+    
     if (freq < 0.0f) freq = 0.0f;
     
     c->freq = freq;
@@ -295,8 +394,10 @@ int     tSawtooth_setFreq(tSawtooth* const c, float freq)
     return 0;
 }
 
-float   tSawtooth_tick(tSawtooth* const c)
+float   tSawtooth_tick(tSawtooth* const cy)
 {
+    _tSawtooth* c = *cy;
+    
     // Phasor increment
     c->phase += c->inc;
     while (c->phase >= 1.0f) c->phase -= 1.0f;
@@ -370,31 +471,58 @@ float   tSawtooth_tick(tSawtooth* const c)
     return out;
 }
 
-void     tSawtoothSampleRateChanged (tSawtooth* const c)
+void     tSawtoothSampleRateChanged (tSawtooth* const cy)
 {
+    _tSawtooth* c = *cy;
+    
     c->inc = c->freq * leaf.invSampleRate;
 }
 
 //========================================================================
 /* Phasor */
-void     tPhasorSampleRateChanged (tPhasor* const p)
+void     tPhasorSampleRateChanged (tPhasor* const ph)
 {
+    _tPhasor* p = *ph;
+    
     p->inc = p->freq * leaf.invSampleRate;
 };
 
-void    tPhasor_init(tPhasor* const p)
+void    tPhasor_init(tPhasor* const ph)
 {
+    _tPhasor* p = *ph = (_tPhasor*) leaf_alloc(sizeof(_tPhasor));
+    
     p->phase = 0.0f;
     p->inc = 0.0f;
 }
 
-void    tPhasor_free(tPhasor* const p)
+void    tPhasor_free(tPhasor* const ph)
 {
+    _tPhasor* p = *ph;
     
+    leaf_free(p);
 }
 
-int     tPhasor_setFreq(tPhasor* const p, float freq)
+void    tPhasor_initToPool  (tPhasor* const ph, tMempool* const mp)
 {
+    _tMempool* m = *mp;
+    _tPhasor* p = *ph = (_tPhasor*) mpool_alloc(sizeof(_tPhasor), m->pool);
+    
+    p->phase = 0.0f;
+    p->inc = 0.0f;
+}
+
+void    tPhasor_freeFromPool(tPhasor* const ph, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPhasor* p = *ph;
+    
+    mpool_free(p, m->pool);
+}
+
+int     tPhasor_setFreq(tPhasor* const ph, float freq)
+{
+    _tPhasor* p = *ph;
+    
     if (freq < 0.0f) freq = 0.0f;
     
     p->freq = freq;
@@ -403,8 +531,10 @@ int     tPhasor_setFreq(tPhasor* const p, float freq)
     return 0;
 }
 
-float   tPhasor_tick(tPhasor* const p)
+float   tPhasor_tick(tPhasor* const ph)
 {
+    _tPhasor* p = *ph;
+    
     p->phase += p->inc;
     
     if (p->phase >= 1.0f) p->phase -= 1.0f;
@@ -413,19 +543,42 @@ float   tPhasor_tick(tPhasor* const p)
 }
 
 /* Noise */
-void    tNoise_init(tNoise* const n, NoiseType type)
+void    tNoise_init(tNoise* const ns, NoiseType type)
 {
+    _tNoise* n = *ns = (_tNoise*) leaf_alloc(sizeof(_tNoise));
+    
     n->type = type;
     n->rand = leaf.random;
 }
 
-void    tNoise_free(tNoise* const n)
+void    tNoise_free(tNoise* const ns)
 {
+    _tNoise* n = *ns;
     
+    leaf_free(n);
 }
 
-float   tNoise_tick(tNoise* const n)
+void    tNoise_initToPool   (tNoise* const ns, NoiseType type, tMempool* const mp)
 {
+    _tMempool* m = *mp;
+    _tNoise* n = *ns = (_tNoise*) mpool_alloc(sizeof(_tNoise), m->pool);
+    
+    n->type = type;
+    n->rand = leaf.random;
+}
+
+void    tNoise_freeFromPool (tNoise* const ns, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tNoise* n = *ns;
+    
+    mpool_free(n, m->pool);
+}
+
+float   tNoise_tick(tNoise* const ns)
+{
+    _tNoise* n = *ns;
+    
     float rand = (n->rand() * 2.0f) - 1.0f;
     
     if (n->type == PinkNoise)
@@ -446,13 +599,15 @@ float   tNoise_tick(tNoise* const n)
 //=================================================================================
 /* Neuron */
 
-void     tNeuronSampleRateChanged(tNeuron* n)
+void     tNeuronSampleRateChanged(tNeuron* nr)
 {
     
 }
 
-void    tNeuron_init(tNeuron* const n)
+void    tNeuron_init(tNeuron* const nr)
 {
+    _tNeuron* n = *nr = (_tNeuron*) leaf_alloc(sizeof(_tNeuron));
+    
     tPoleZero_init(&n->f);
     
     tPoleZero_setBlockZero(&n->f, 0.99f);
@@ -480,13 +635,20 @@ void    tNeuron_init(tNeuron* const n)
     n->rate[2] = n->gL/n->C;
 }
 
-void    tNeuron_free(tNeuron* const n)
+void    tNeuron_free(tNeuron* const nr)
 {
+    _tNeuron* n = *nr;
+    
     tPoleZero_free(&n->f);
+    leaf_free(n);
 }
 
-void   tNeuron_reset(tNeuron* const n)
+void    tNeuron_initToPool  (tNeuron* const nr, tMempool* const mp)
 {
+    _tMempool* m = *mp;
+    _tNeuron* n = *nr = (_tNeuron*) mpool_alloc(sizeof(_tNeuron), m->pool);
+    
+    tPoleZero_initToPool(&n->f, mp);
     
     tPoleZero_setBlockZero(&n->f, 0.99f);
     
@@ -513,52 +675,99 @@ void   tNeuron_reset(tNeuron* const n)
     n->rate[2] = n->gL/n->C;
 }
 
-
-void        tNeuron_setV1(tNeuron* const n, float V1)
+void    tNeuron_freeFromPool(tNeuron* const nr, tMempool* const mp)
 {
+    _tMempool* m = *mp;
+    _tNeuron* n = *nr;
+    
+    tPoleZero_free(&n->f);
+    mpool_free(n, m->pool);
+}
+
+void   tNeuron_reset(tNeuron* const nr)
+{
+    _tNeuron* n = *nr;
+    
+    tPoleZero_setBlockZero(&n->f, 0.99f);
+    
+    n->timeStep = 1.0f / 50.0f;
+    
+    n->current = 0.0f; // 100.0f for sound
+    n->voltage = 0.0f;
+    
+    n->mode = NeuronNormal;
+    
+    n->P[0] = 0.0f;
+    n->P[1] = 0.0f;
+    n->P[2] = 1.0f;
+    
+    n->V[0] = -12.0f;
+    n->V[1] = 115.0f;
+    n->V[2] = 10.613f;
+    
+    n->gK = 36.0f;
+    n->gN = 120.0f;
+    n->gL = 0.3f;
+    n->C = 1.0f;
+    
+    n->rate[2] = n->gL/n->C;
+}
+
+void        tNeuron_setV1(tNeuron* const nr, float V1)
+{
+    _tNeuron* n = *nr;
     n->V[0] = V1;
 }
 
 
-void        tNeuron_setV2(tNeuron* const n, float V2)
+void        tNeuron_setV2(tNeuron* const nr, float V2)
 {
+    _tNeuron* n = *nr;
     n->V[1] = V2;
 }
 
-void        tNeuron_setV3(tNeuron* const n, float V3)
+void        tNeuron_setV3(tNeuron* const nr, float V3)
 {
+    _tNeuron* n = *nr;
     n->V[2] = V3;
 }
 
-void        tNeuron_setTimeStep(tNeuron* const n, float timeStep)
+void        tNeuron_setTimeStep(tNeuron* const nr, float timeStep)
 {
+    _tNeuron* n = *nr;
     n->timeStep = timeStep;
 }
 
-void        tNeuron_setK(tNeuron* const n, float K)
+void        tNeuron_setK(tNeuron* const nr, float K)
 {
+    _tNeuron* n = *nr;
     n->gK = K;
 }
 
-void        tNeuron_setL(tNeuron* const n, float L)
+void        tNeuron_setL(tNeuron* const nr, float L)
 {
+    _tNeuron* n = *nr;
     n->gL = L;
     n->rate[2] = n->gL/n->C;
 }
 
-void        tNeuron_setN(tNeuron* const n, float N)
+void        tNeuron_setN(tNeuron* const nr, float N)
 {
+    _tNeuron* n = *nr;
     n->gN = N;
 }
 
-void        tNeuron_setC(tNeuron* const n, float C)
+void        tNeuron_setC(tNeuron* const nr, float C)
 {
+    _tNeuron* n = *nr;
     n->C = C;
     n->rate[2] = n->gL/n->C;
 }
 
-float   tNeuron_tick(tNeuron* const n)
+float   tNeuron_tick(tNeuron* const nr)
 {
+    _tNeuron* n = *nr;
+    
     float output = 0.0f;
     float voltage = n->voltage;
     
@@ -631,12 +840,14 @@ float   tNeuron_tick(tNeuron* const n)
     
 }
 
-void        tNeuron_setMode  (tNeuron* const n, NeuronMode mode)
+void        tNeuron_setMode  (tNeuron* const nr, NeuronMode mode)
 {
+    _tNeuron* n = *nr;
     n->mode = mode;
 }
 
-void        tNeuron_setCurrent  (tNeuron* const n, float current)
+void        tNeuron_setCurrent  (tNeuron* const nr, float current)
 {
+    _tNeuron* n = *nr;
     n->current = current;
 }

@@ -39,7 +39,7 @@ public:
     bool hasEditor() const override;
 
     //==============================================================================
-    const String getName() const override;
+   const String getName() const override;
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;
@@ -49,7 +49,7 @@ public:
     int getNumPrograms() override;
     int getCurrentProgram() override;
     void setCurrentProgram (int index) override;
-    const String getProgramName (int index) override;
+   const String getProgramName (int index) override;
     void changeProgramName (int index, const String& newName) override;
 
     //==============================================================================

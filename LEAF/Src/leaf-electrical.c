@@ -45,45 +45,44 @@ static float get_reflected_wave_for_ideal(tWDF* const n, float input, float inci
 static float get_reflected_wave_for_diode(tWDF* const n, float input, float incident_wave);
 static float get_reflected_wave_for_diode_pair(tWDF* const n, float input, float incident_wave);
 
-//WDF
-void tWDF_init(tWDF* const wdf, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
+static void wdf_init(tWDF* const wdf, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
 {
-    _tWDF* r = *wdf = (_tWDF*) leaf_alloc(sizeof(_tWDF));
+    _tWDF* r = *wdf;
     
-	r->type = type;
+    r->type = type;
     r->child_left = rL;
     r->child_right = rR;
-	r->incident_wave_up = 0.0f;
-	r->incident_wave_left = 0.0f;
-	r->incident_wave_right = 0.0f;
-	r->reflected_wave_up = 0.0f;
-	r->reflected_wave_left = 0.0f;
-	r->reflected_wave_right = 0.0f;
-	r->sample_rate = leaf.sampleRate;
-	r->value = value;
+    r->incident_wave_up = 0.0f;
+    r->incident_wave_left = 0.0f;
+    r->incident_wave_right = 0.0f;
+    r->reflected_wave_up = 0.0f;
+    r->reflected_wave_left = 0.0f;
+    r->reflected_wave_right = 0.0f;
+    r->sample_rate = leaf.sampleRate;
+    r->value = value;
     
     tWDF* child;
     if (r->child_left != NULL) child = r->child_left;
     else child = r->child_right;
     
     if (r->type == Resistor)
-	{
-		r->port_resistance_up = r->value;
-		r->port_conductance_up = 1.0f / r->value;
-
-		r->get_port_resistance = &get_port_resistance_for_resistor;
-		r->get_reflected_wave_up = &get_reflected_wave_for_resistor;
-		r->set_incident_wave = &set_incident_wave_for_leaf;
-	}
-	else if (r->type == Capacitor)
-	{
+    {
+        r->port_resistance_up = r->value;
+        r->port_conductance_up = 1.0f / r->value;
+        
+        r->get_port_resistance = &get_port_resistance_for_resistor;
+        r->get_reflected_wave_up = &get_reflected_wave_for_resistor;
+        r->set_incident_wave = &set_incident_wave_for_leaf;
+    }
+    else if (r->type == Capacitor)
+    {
         r->port_conductance_up = r->sample_rate * 2.0f * r->value;
-		r->port_resistance_up = 1.0f / r->port_conductance_up; //based on trapezoidal discretization
-    
-		r->get_port_resistance = &get_port_resistance_for_capacitor;
-		r->get_reflected_wave_up = &get_reflected_wave_for_capacitor;
-		r->set_incident_wave = &set_incident_wave_for_leaf;
-	}
+        r->port_resistance_up = 1.0f / r->port_conductance_up; //based on trapezoidal discretization
+        
+        r->get_port_resistance = &get_port_resistance_for_capacitor;
+        r->get_reflected_wave_up = &get_reflected_wave_for_capacitor;
+        r->set_incident_wave = &set_incident_wave_for_leaf;
+    }
     else if (r->type == Inductor)
     {
         r->port_resistance_up = r->sample_rate * 2.0f * r->value; //based on trapezoidal discretization
@@ -93,15 +92,15 @@ void tWDF_init(tWDF* const wdf, WDFComponentType type, float value, tWDF* const 
         r->get_reflected_wave_up = &get_reflected_wave_for_capacitor; // same as capacitor
         r->set_incident_wave = &set_incident_wave_for_leaf_inverted;
     }
-	else if (r->type == ResistiveSource)
-	{
+    else if (r->type == ResistiveSource)
+    {
         r->port_resistance_up = r->value;
         r->port_conductance_up = 1.0f / r->port_resistance_up;
         
         r->get_port_resistance = &get_port_resistance_for_resistive;
         r->get_reflected_wave_up = &get_reflected_wave_for_resistive;
         r->set_incident_wave = &set_incident_wave_for_leaf;
-	}
+    }
     else if (r->type == Inverter)
     {
         r->port_resistance_up = tWDF_getPortResistance(r->child_left);
@@ -164,12 +163,35 @@ void tWDF_init(tWDF* const wdf, WDFComponentType type, float value, tWDF* const 
         r->get_port_resistance = &get_port_resistance_for_root;
     }
 }
+//WDF
+void tWDF_init(tWDF* const wdf, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
+{
+    *wdf = (_tWDF*) leaf_alloc(sizeof(_tWDF));
+    
+    wdf_init(wdf, type, value, rL, rR);
+}
 
 void tWDF_free(tWDF* const wdf)
 {
     _tWDF* r = *wdf;
     
     leaf_free(r);
+}
+
+void    tWDF_initToPool             (tWDF* const wdf, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    *wdf = (_tWDF*) mpool_alloc(sizeof(_tWDF), m->pool);
+    
+    wdf_init(wdf, type, value, rL, rR);
+}
+
+void    tWDF_freeFromPool           (tWDF* const wdf, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tWDF* r = *wdf;
+    
+    mpool_free(r, m->pool);
 }
 
 float tWDF_tick(tWDF* const wdf, float sample, tWDF* const outputPoint, uint8_t paramsChanged)

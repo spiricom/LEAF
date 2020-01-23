@@ -14,9 +14,10 @@ extern "C" {
 #endif
     
     //==============================================================================
-#include "leaf-dynamics.h"
 #include "leaf-global.h"
 #include "leaf-math.h"
+#include "leaf-mempool.h"
+#include "leaf-dynamics.h"
 #include "leaf-analysis.h"
     
     //==============================================================================
@@ -45,14 +46,17 @@ extern "C" {
     
     typedef _tTalkbox* tTalkbox;
     
-    void        tTalkbox_init        (tTalkbox* const, int bufsize);
-    void        tTalkbox_free        (tTalkbox* const);
-    float       tTalkbox_tick        (tTalkbox* const, float synth, float voice);
-    void        tTalkbox_update      (tTalkbox* const);
-    void        tTalkbox_suspend     (tTalkbox* const);
-    void        tTalkbox_lpcDurbin   (float *r, int p, float *k, float *g);
-    void        tTalkbox_lpc         (float *buf, float *car, int32_t n, int32_t o);
-    void        tTalkbox_setQuality  (tTalkbox* const, float quality);
+    void    tTalkbox_init           (tTalkbox* const, int bufsize);
+    void    tTalkbox_free           (tTalkbox* const);
+    void    tTalkbox_initToPool     (tTalkbox* const, int bufsize, tMempool* const);
+    void    tTalkbox_freeFromPool   (tTalkbox* const, tMempool* const);
+    
+    float   tTalkbox_tick           (tTalkbox* const, float synth, float voice);
+    void    tTalkbox_update         (tTalkbox* const);
+    void    tTalkbox_suspend        (tTalkbox* const);
+    void    tTalkbox_lpcDurbin      (float *r, int p, float *k, float *g);
+    void    tTalkbox_lpc            (float *buf, float *car, int32_t n, int32_t o);
+    void    tTalkbox_setQuality     (tTalkbox* const, float quality);
     
     //==============================================================================
     
@@ -77,11 +81,14 @@ extern "C" {
     
     typedef _tVocoder* tVocoder;
     
-    void        tVocoder_init        (tVocoder* const);
-    void        tVocoder_free        (tVocoder* const);
-    float       tVocoder_tick        (tVocoder* const, float synth, float voice);
-    void        tVocoder_update      (tVocoder* const);
-    void        tVocoder_suspend     (tVocoder* const);
+    void    tVocoder_init           (tVocoder* const);
+    void    tVocoder_free           (tVocoder* const);
+    void    tVocoder_initToPool     (tVocoder* const, tMempool* const);
+    void    tVocoder_freeFromPool   (tVocoder* const, tMempool* const);
+    
+    float   tVocoder_tick           (tVocoder* const, float synth, float voice);
+    void    tVocoder_update         (tVocoder* const);
+    void    tVocoder_suspend        (tVocoder* const);
     
     //==============================================================================
     
@@ -117,6 +124,9 @@ extern "C" {
     
     void    tSOLAD_init             (tSOLAD* const);
     void    tSOLAD_free             (tSOLAD* const);
+    void    tSOLAD_initToPool       (tSOLAD* const, tMempool* const);
+    void    tSOLAD_freeFromPool     (tSOLAD* const, tMempool* const);
+    
     // send one block of input samples, receive one block of output samples
     void    tSOLAD_ioSamples        (tSOLAD *w, float* in, float* out, int blocksize);
     // set periodicity analysis data
@@ -151,12 +161,15 @@ extern "C" {
     
     typedef _tPitchShift* tPitchShift;
     
-    void        tPitchShift_init                (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize);
-    void        tPitchShift_free                (tPitchShift* const);
-    float       tPitchShift_shift               (tPitchShift* const);
-    float       tPitchShift_shiftToFunc         (tPitchShift* const, float (*fun)(float));
-    float       tPitchShift_shiftToFreq         (tPitchShift* const, float freq);
-    void        tPitchShift_setPitchFactor      (tPitchShift* const, float pf);
+    void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize);
+    void    tPitchShift_free            (tPitchShift* const);
+    void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, tMempool* const);
+    void    tPitchShift_freeFromPool    (tPitchShift* const, tMempool* const);
+    
+    float   tPitchShift_shift           (tPitchShift* const);
+    float   tPitchShift_shiftToFunc     (tPitchShift* const, float (*fun)(float));
+    float   tPitchShift_shiftToFreq     (tPitchShift* const, float freq);
+    void    tPitchShift_setPitchFactor  (tPitchShift* const, float pf);
     
     // Retune
     typedef struct _tRetune
@@ -185,18 +198,20 @@ extern "C" {
     
     typedef _tRetune* tRetune;
     
-    void        tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize);
-    void        tRetune_free                (tRetune* const);
+    void    tRetune_init            (tRetune* const, int numVoices, int bufSize, int frameSize);
+    void    tRetune_free            (tRetune* const);
+    void    tRetune_initToPool      (tRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
+    void    tRetune_freeFromPool    (tRetune* const, tMempool* const);
     
-    float*      tRetune_tick                (tRetune* const, float sample);
-    void        tRetune_setNumVoices        (tRetune* const, int numVoices);
-    void        tRetune_setPitchFactors     (tRetune* const, float pf);
-    void        tRetune_setPitchFactor      (tRetune* const, float pf, int voice);
-    void        tRetune_setTimeConstant     (tRetune* const, float tc);
-    void        tRetune_setHopSize          (tRetune* const, int hs);
-    void        tRetune_setWindowSize       (tRetune* const, int ws);
-    float       tRetune_getInputPeriod      (tRetune* const);
-    float       tRetune_getInputFreq        (tRetune* const);
+    float*  tRetune_tick            (tRetune* const, float sample);
+    void    tRetune_setNumVoices    (tRetune* const, int numVoices);
+    void    tRetune_setPitchFactors (tRetune* const, float pf);
+    void    tRetune_setPitchFactor  (tRetune* const, float pf, int voice);
+    void    tRetune_setTimeConstant (tRetune* const, float tc);
+    void    tRetune_setHopSize      (tRetune* const, int hs);
+    void    tRetune_setWindowSize   (tRetune* const, int ws);
+    float   tRetune_getInputPeriod  (tRetune* const);
+    float   tRetune_getInputFreq    (tRetune* const);
     
     // Autotune
     typedef struct _tAutotune
@@ -225,18 +240,20 @@ extern "C" {
     
     typedef _tAutotune* tAutotune;
     
-    void        tAutotune_init                (tAutotune* const, int numVoices, int bufSize, int frameSize);
-    void        tAutotune_free                (tAutotune* const);
+    void    tAutotune_init              (tAutotune* const, int numVoices, int bufSize, int frameSize);
+    void    tAutotune_free              (tAutotune* const);
+    void    tAutotune_initToPool        (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
+    void    tAutotune_freeFromPool      (tAutotune* const, tMempool* const);
     
-    float*      tAutotune_tick                (tAutotune* const, float sample);
-    void        tAutotune_setNumVoices        (tAutotune* const, int numVoices);
-    void        tAutotune_setFreqs            (tAutotune* const, float f);
-    void        tAutotune_setFreq             (tAutotune* const, float f, int voice);
-    void        tAutotune_setTimeConstant     (tAutotune* const, float tc);
-    void        tAutotune_setHopSize          (tAutotune* const, int hs);
-    void        tAutotune_setWindowSize       (tAutotune* const, int ws);
-    float       tAutotune_getInputPeriod      (tAutotune* const);
-    float       tAutotune_getInputFreq        (tAutotune* const);
+    float*  tAutotune_tick              (tAutotune* const, float sample);
+    void    tAutotune_setNumVoices      (tAutotune* const, int numVoices);
+    void    tAutotune_setFreqs          (tAutotune* const, float f);
+    void    tAutotune_setFreq           (tAutotune* const, float f, int voice);
+    void    tAutotune_setTimeConstant   (tAutotune* const, float tc);
+    void    tAutotune_setHopSize        (tAutotune* const, int hs);
+    void    tAutotune_setWindowSize     (tAutotune* const, int ws);
+    float   tAutotune_getInputPeriod    (tAutotune* const);
+    float   tAutotune_getInputFreq      (tAutotune* const);
     
     //==============================================================================
     
@@ -273,15 +290,17 @@ extern "C" {
     
     typedef _tFormantShifter* tFormantShifter;
     
-    void        tFormantShifter_init            (tFormantShifter* const, int bufsize, int order);
-    void        tFormantShifter_free            (tFormantShifter* const);
+    void    tFormantShifter_init            (tFormantShifter* const, int bufsize, int order);
+    void    tFormantShifter_free            (tFormantShifter* const);
+    void    tFormantShifter_initToPool      (tFormantShifter* const, int bufsize, int order, tMempool* const);
+    void    tFormantShifter_freeFromPool    (tFormantShifter* const, tMempool* const);
     
-    float       tFormantShifter_tick            (tFormantShifter* const, float input);
-    float       tFormantShifter_remove          (tFormantShifter* const, float input);
-    float       tFormantShifter_add             (tFormantShifter* const, float input);
-    void        tFormantShifter_ioSamples       (tFormantShifter* const, float* in, float* out, int size, float fwarp);
-    void        tFormantShifter_setShiftFactor  (tFormantShifter* const, float shiftFactor);
-    void        tFormantShifter_setIntensity    (tFormantShifter* const, float intensity);
+    float   tFormantShifter_tick            (tFormantShifter* const, float input);
+    float   tFormantShifter_remove          (tFormantShifter* const, float input);
+    float   tFormantShifter_add             (tFormantShifter* const, float input);
+    void    tFormantShifter_ioSamples       (tFormantShifter* const, float* in, float* out, int size, float fwarp);
+    void    tFormantShifter_setShiftFactor  (tFormantShifter* const, float shiftFactor);
+    void    tFormantShifter_setIntensity    (tFormantShifter* const, float intensity);
     
     //==============================================================================
     
