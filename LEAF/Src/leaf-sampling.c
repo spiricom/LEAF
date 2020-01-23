@@ -35,8 +35,6 @@ void  tBuffer_init (tBuffer* const sb, uint32_t length)
     s->active = 0;
     s->idx = 0;
     s->mode = RecordOneShot;
-    
-    tBuffer_clear(sb);
 }
 
 void  tBuffer_free (tBuffer* const sb)
@@ -58,8 +56,6 @@ void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp
     s->recordedLength = 0;
     s->idx = 0;
     s->mode = RecordOneShot;
-    
-    tBuffer_clear(sb);
 }
 
 void  tBuffer_freeFromPool (tBuffer* const sb, tMempool* const mp)
