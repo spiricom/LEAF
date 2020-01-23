@@ -209,8 +209,8 @@ void mpool_free(void* ptr, mpool_t* pool)
     pool->head = freed_node;
     
     // Format the freed pool
-    char* freed_pool = (char*)freed_node->pool;
-    for (int i = 0; i < freed_node->size; i++) freed_pool[i] = 0;
+//    char* freed_pool = (char*)freed_node->pool;
+//    for (int i = 0; i < freed_node->size; i++) freed_pool[i] = 0;
 }
 
 void leaf_free(void* ptr)
@@ -299,4 +299,20 @@ void tMempool_free(tMempool* const mp)
     _tMempool* m = *mp;
     
     leaf_free(m);
+}
+
+void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem)
+{
+    _tMempool* mm = *mem;
+    _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), mm->pool);
+    
+    mpool_create (memory, size, m->pool);
+}
+
+void    tMempool_freeFromPool   (tMempool* const mp, tMempool* const mem)
+{
+    _tMempool* mm = *mem;
+    _tMempool* m = *mp;
+    
+    mpool_free(m, mm->pool);
 }
