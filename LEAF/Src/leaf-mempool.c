@@ -77,8 +77,6 @@ void mpool_create (char* memory, size_t size, mpool_t* pool)
 	}
 }
 
-
-
 void leaf_pool_init(char* memory, size_t size)
 {
     mpool_create(memory, size, &leaf_pool);
@@ -289,3 +287,16 @@ void leaf_mempool_overrun(void)
 	//TODO: we should set up some kind of leaf_error method that reaches user space to notify library users of things that failed.
 }
 
+void tMempool_init(tMempool* const mp, char* memory, size_t size)
+{
+    _tMempool* m = *mp = (_tMempool*) leaf_alloc(sizeof(_tMempool));
+    
+    mpool_create (memory, size, m->pool);
+}
+
+void tMempool_free(tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    
+    leaf_free(m);
+}

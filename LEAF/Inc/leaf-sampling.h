@@ -46,9 +46,9 @@ extern "C" {
     typedef _tBuffer* tBuffer;
     
     void  tBuffer_init (tBuffer* const, uint32_t length);
-    void  tBuffer_init_locate (tBuffer* const sb, uint32_t length, mpool_t* pool);
+    void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* mp);
     void  tBuffer_free (tBuffer* const);
-    void  tBuffer_free_locate (tBuffer* const sb, mpool_t* pool);
+    void  tBuffer_freeFromPool (tBuffer* const sb, tMempool* mp);
     
     void  tBuffer_tick (tBuffer* const, float sample);
     
