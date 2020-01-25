@@ -241,6 +241,7 @@ void    tLinearDelay_freeFromPool(tLinearDelay* const dl, tMempool* const mp)
     mpool_free(d, m->pool);
 }
 
+<<<<<<< HEAD
 
 void    tLinearDelay_clear(tLinearDelay* const dl)
 {
@@ -253,6 +254,8 @@ void    tLinearDelay_clear(tLinearDelay* const dl)
 
 }
 
+=======
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
 float   tLinearDelay_tick (tLinearDelay* const dl, float input)
 {
     _tLinearDelay* d = *dl;

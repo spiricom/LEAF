@@ -57,8 +57,8 @@ void OopsAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 
 void OopsAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
-    const int totalNumInputChannels  = getTotalNumInputChannels();
-    const int totalNumOutputChannels = getTotalNumOutputChannels();
+   const int totalNumInputChannels  = getTotalNumInputChannels();
+   const int totalNumOutputChannels = getTotalNumOutputChannels();
     
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
@@ -88,8 +88,8 @@ void OopsAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
     }
     
 
-    const float* inPointerL = buffer.getReadPointer (0);
-    const float* inPointerR = buffer.getReadPointer (1);
+   const float* inPointerL = buffer.getReadPointer (0);
+   const float* inPointerR = buffer.getReadPointer (1);
     
     float* outPointerL = buffer.getWritePointer( 0);
     float* outPointerR = buffer.getWritePointer( 1);

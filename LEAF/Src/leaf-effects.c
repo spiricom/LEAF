@@ -506,10 +506,17 @@ static void pitchup(_tSOLAD *w, float *out);
 // init
 void     tSOLAD_init(tSOLAD* const wp)
 {
+<<<<<<< HEAD
     _tSOLAD* w = *wp = (_tSOLAD*) leaf_allocAndClear(sizeof(_tSOLAD));
     
     w->pitchfactor = 1.;
     w->delaybuf = (float*) leaf_allocAndClear(sizeof(float) * (LOOPSIZE+16));
+=======
+    _tSOLAD* w = *wp = (_tSOLAD*) leaf_alloc(sizeof(_tSOLAD));
+    
+    w->pitchfactor = 1.;
+    w->delaybuf = (float*) leaf_alloc(sizeof(float) * (LOOPSIZE+16));
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
     solad_init(w);
 }
 
@@ -524,10 +531,17 @@ void tSOLAD_free(tSOLAD* const wp)
 void    tSOLAD_initToPool       (tSOLAD* const wp, tMempool* const mp)
 {
     _tMempool* m = *mp;
+<<<<<<< HEAD
     _tSOLAD* w = *wp = (_tSOLAD*) mpool_allocAndClear(sizeof(_tSOLAD), m->pool);
     
     w->pitchfactor = 1.;
     w->delaybuf = (float*) mpool_allocAndClear(sizeof(float) * (LOOPSIZE+16), m->pool);
+=======
+    _tSOLAD* w = *wp = (_tSOLAD*) mpool_alloc(sizeof(_tSOLAD), m->pool);
+    
+    w->pitchfactor = 1.;
+    w->delaybuf = (float*) mpool_alloc(sizeof(float) * (LOOPSIZE+16), m->pool);
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
     solad_init(w);
 }
 
@@ -905,7 +919,11 @@ void tPitchShift_free(tPitchShift* const psr)
 void    tPitchShift_initToPool      (tPitchShift* const psr, tPeriodDetection* const pd, float* out, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
+<<<<<<< HEAD
     _tPitchShift* ps = *psr = (_tPitchShift*) mpool_allocAndClear(sizeof(_tPitchShift), m->pool);
+=======
+    _tPitchShift* ps = *psr = (_tPitchShift*) mpool_alloc(sizeof(_tPitchShift), m->pool);
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
     _tPeriodDetection* p = *pd;
     
     ps->p = pd;
@@ -1055,14 +1073,23 @@ float tPitchShift_shiftToFunc (tPitchShift* psr, float (*fun)(float))
 
 void tRetune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize)
 {
+<<<<<<< HEAD
     _tRetune* r = *rt = (_tRetune*) leaf_allocAndClear(sizeof(_tRetune));
+=======
+    _tRetune* r = *rt = (_tRetune*) leaf_alloc(sizeof(_tRetune));
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
     
     r->bufSize = bufSize;
     r->frameSize = frameSize;
     r->numVoices = numVoices;
     
+<<<<<<< HEAD
     r->inBuffer = (float*) leaf_allocAndClear(sizeof(float) * r->bufSize);
     r->outBuffers = (float**) leaf_allocAndClear(sizeof(float*) * r->numVoices);
+=======
+    r->inBuffer = (float*) leaf_alloc(sizeof(float) * r->bufSize);
+    r->outBuffers = (float**) leaf_alloc(sizeof(float*) * r->numVoices);
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
     
     r->hopSize = DEFHOPSIZE;
     r->windowSize = DEFWINDOWSIZE;
@@ -1071,12 +1098,21 @@ void tRetune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize)
     
     r->inputPeriod = 0.0f;
     
+<<<<<<< HEAD
     r->ps = (tPitchShift*) leaf_allocAndClear(sizeof(tPitchShift) * r->numVoices);
     r->pitchFactor = (float*) leaf_allocAndClear(sizeof(float) * r->numVoices);
     r->tickOutput = (float*) leaf_allocAndClear(sizeof(float) * r->numVoices);
     for (int i = 0; i < r->numVoices; ++i)
     {
         r->outBuffers[i] = (float*) leaf_allocAndClear(sizeof(float) * r->bufSize);
+=======
+    r->ps = (tPitchShift*) leaf_alloc(sizeof(tPitchShift) * r->numVoices);
+    r->pitchFactor = (float*) leaf_alloc(sizeof(float) * r->numVoices);
+    r->tickOutput = (float*) leaf_alloc(sizeof(float) * r->numVoices);
+    for (int i = 0; i < r->numVoices; ++i)
+    {
+        r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
     }
     
     tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
@@ -1114,8 +1150,13 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     r->frameSize = frameSize;
     r->numVoices = numVoices;
     
+<<<<<<< HEAD
     r->inBuffer = (float*) mpool_allocAndClear(sizeof(float) * r->bufSize, m->pool);
     r->outBuffers = (float**) mpool_allocAndClear(sizeof(float*) * r->numVoices, m->pool);
+=======
+    r->inBuffer = (float*) mpool_alloc(sizeof(float) * r->bufSize, m->pool);
+    r->outBuffers = (float**) mpool_alloc(sizeof(float*) * r->numVoices, m->pool);
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
     
     r->hopSize = DEFHOPSIZE;
     r->windowSize = DEFWINDOWSIZE;
@@ -1124,12 +1165,21 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     
     r->inputPeriod = 0.0f;
     
+<<<<<<< HEAD
     r->ps = (tPitchShift*) mpool_allocAndClear(sizeof(tPitchShift) * r->numVoices, m->pool);
     r->pitchFactor = (float*) mpool_allocAndClear(sizeof(float) * r->numVoices, m->pool);
     r->tickOutput = (float*) mpool_allocAndClear(sizeof(float) * r->numVoices, m->pool);
     for (int i = 0; i < r->numVoices; ++i)
     {
         r->outBuffers[i] = (float*) mpool_allocAndClear(sizeof(float) * r->bufSize, m->pool);
+=======
+    r->ps = (tPitchShift*) mpool_alloc(sizeof(tPitchShift) * r->numVoices, m->pool);
+    r->pitchFactor = (float*) mpool_alloc(sizeof(float) * r->numVoices, m->pool);
+    r->tickOutput = (float*) mpool_alloc(sizeof(float) * r->numVoices, m->pool);
+    for (int i = 0; i < r->numVoices; ++i)
+    {
+        r->outBuffers[i] = (float*) mpool_alloc(sizeof(float) * r->bufSize, m->pool);
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
@@ -1287,6 +1337,7 @@ void tAutotune_init(tAutotune* const rt, int numVoices, int bufSize, int frameSi
     for (int i = 0; i < r->numVoices; ++i)
     {
         r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
+<<<<<<< HEAD
     }
     
     tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
@@ -1296,6 +1347,17 @@ void tAutotune_init(tAutotune* const rt, int numVoices, int bufSize, int frameSi
         tPitchShift_init(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize);
     }
     
+=======
+    }
+    
+    tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
+    
+    for (int i = 0; i < r->numVoices; ++i)
+    {
+        tPitchShift_init(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize);
+    }
+    
+>>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
     r->inputPeriod = 0.0f;
 }
 
