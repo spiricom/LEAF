@@ -63,6 +63,30 @@ void tCompressor_free(tCompressor* const comp)
     leaf_free(c);
 }
 
+void    tCompressor_initToPool  (tCompressor* const comp, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tCompressor* c = *comp = (_tCompressor*) mpool_alloc(sizeof(_tCompressor), m->pool);
+    
+    c->tauAttack = 100;
+    c->tauRelease = 100;
+    
+    c->isActive = OFALSE;
+    
+    c->T = 0.0f; // Threshold
+    c->R = 0.5f; // compression Ratio
+    c->M = 3.0f; // decibel Width of knee transition
+    c->W = 1.0f; // decibel Make-up gain
+}
+
+void    tCompressor_freeFromPool(tCompressor* const comp, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tCompressor* c = *comp;
+    
+    mpool_free(c, m->pool);
+}
+
 float tCompressor_tick(tCompressor* const comp, float in)
 {
     _tCompressor* c = *comp;
@@ -133,6 +157,27 @@ void tFeedbackLeveler_free(tFeedbackLeveler* const fb)
     leaf_free(p);
 }
 
+void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const fb, float targetLevel, float factor, float strength, int mode, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) mpool_alloc(sizeof(_tFeedbackLeveler), m->pool);
+    
+    p->curr=0.0f;
+    p->targetLevel=targetLevel;
+    tPowerFollower_initToPool(&p->pwrFlw,factor, mp);
+    p->mode=mode;
+    p->strength=strength;
+}
+
+void    tFeedbackLeveler_freeFromPool   (tFeedbackLeveler* const fb, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tFeedbackLeveler* p = *fb;
+    
+    tPowerFollower_freeFromPool(&p->pwrFlw, mp);
+    mpool_free(p, m->pool);
+}
+
 void     tFeedbackLeveler_setStrength(tFeedbackLeveler* const fb, float strength)
 {    // strength is how strongly level diff is affecting the amp ratio
     // try 0.125 for a start
@@ -156,8 +201,8 @@ float   tFeedbackLeveler_tick(tFeedbackLeveler* const fb, float input)
 {
     _tFeedbackLeveler* p = *fb;
     float levdiff=(tPowerFollower_tick(&p->pwrFlw, input)-p->targetLevel);
-    if (p->mode==0 && levdiff<0) levdiff=0;
-    p->curr=input*(1-p->strength*levdiff);
+    if (p->mode==0 && levdiff<0.0f) levdiff=0.0f;
+    p->curr=input*(1.0f-p->strength*levdiff);
     return p->curr;
 }
 

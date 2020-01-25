@@ -40,6 +40,27 @@ void tAllpass_free(tAllpass* const ft)
     leaf_free(f);
 }
 
+void    tAllpass_initToPool     (tAllpass* const ft, float initDelay, uint32_t maxDelay, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tAllpass* f = *ft = (_tAllpass*) mpool_alloc(sizeof(_tAllpass), m->pool);
+    
+    f->gain = 0.7f;
+    
+    f->lastOut = 0.0f;
+    
+    tLinearDelay_initToPool(&f->delay, initDelay, maxDelay, mp);
+}
+
+void    tAllpass_freeFromPool   (tAllpass* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tAllpass* f = *ft;
+    
+    tLinearDelay_freeFromPool(&f->delay, mp);
+    mpool_free(f, m->pool);
+}
+
 void    tAllpass_setDelay(tAllpass* const ft, float delay)
 {
     _tAllpass* f = *ft;
@@ -67,77 +88,236 @@ float   tAllpass_tick(tAllpass* const ft, float input)
     return f->lastOut;
 }
 
-void tButterworth_init(tButterworth* const ft, int N, float f1, float f2)
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+void    tOnePole_init(tOnePole* const ft, float freq)
 {
-    _tButterworth* f = *ft = (_tButterworth*) leaf_alloc(sizeof(_tButterworth));
+    _tOnePole* f = *ft = (_tOnePole*) leaf_alloc(sizeof(_tOnePole));
     
-	f->f1 = f1;
-	f->f2 = f2;
-	f->gain = 1.0f;
+    f->gain = 1.0f;
+    f->a0 = 1.0;
     
-    f->N = N;
+    tOnePole_setFreq(ft, freq);
     
-    if (f->N > NUM_SVF_BW) f->N = NUM_SVF_BW;
-
-	for(int i = 0; i < N/2; ++i)
-	{
-        tSVF_init(&f->low[i], SVFTypeHighpass, f1, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*N)));
-        tSVF_init(&f->high[i], SVFTypeLowpass, f2, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*N)));
-	}
+    f->lastIn = 0.0f;
+    f->lastOut = 0.0f;
 }
 
-void tButterworth_free(tButterworth* const ft)
+void    tOnePole_free(tOnePole* const ft)
 {
-    _tButterworth* f = *ft;
-    
-    for(int i = 0; i < f->N/2; ++i)
-    {
-        tSVF_free(&f->low[i]);
-        tSVF_free(&f->high[i]);
-    }
+    _tOnePole* f = *ft;
     
     leaf_free(f);
 }
 
-float tButterworth_tick(tButterworth* const ft, float samp)
+void    tOnePole_initToPool     (tOnePole* const ft, float freq, tMempool* const mp)
 {
-    _tButterworth* f = *ft;
+    _tMempool* m = *mp;
+    _tOnePole* f = *ft = (_tOnePole*) mpool_alloc(sizeof(_tOnePole), m->pool);
     
-	for(int i = 0; i < ((f->N)/2); ++i)
-	{
-		samp = tSVF_tick(&f->low[i],samp);
-		samp = tSVF_tick(&f->high[i],samp);
-	}
-	return samp;
+    f->gain = 1.0f;
+    f->a0 = 1.0;
+    
+    tOnePole_setFreq(ft, freq);
+    
+    f->lastIn = 0.0f;
+    f->lastOut = 0.0f;
 }
 
-void tButterworth_setF1(tButterworth* const ft, float f1)
+void    tOnePole_freeFromPool   (tOnePole* const ft, tMempool* const mp)
 {
-    _tButterworth* f = *ft;
+    _tMempool* m = *mp;
+    _tOnePole* f = *ft;
     
-	f->f1 = f1;
-	for(int i = 0; i < ((f->N)/2); ++i)		tSVF_setFreq(&f->low[i], f1);
+    mpool_free(f, m->pool);
 }
 
-void tButterworth_setF2(tButterworth* const ft, float f2)
+void    tOnePole_setB0(tOnePole* const ft, float b0)
 {
-    _tButterworth* f = *ft;
-    
-	f->f2 = f2;
-	for(int i = 0; i < ((f->N)/2); ++i)		tSVF_setFreq(&f->high[i], f2);
+    _tOnePole* f = *ft;
+    f->b0 = b0;
 }
 
-void tButterworth_setFreqs(tButterworth* const ft, float f1, float f2)
+void    tOnePole_setA1(tOnePole* const ft, float a1)
 {
-    _tButterworth* f = *ft;
+    _tOnePole* f = *ft;
+    if (a1 >= 1.0f)     a1 = 0.999999f;
+    f->a1 = a1;
+}
+
+void    tOnePole_setPole(tOnePole* const ft, float thePole)
+{
+    _tOnePole* f = *ft;
     
-	f->f1 = f1;
-	f->f2 = f2;
-	for(int i = 0; i < ((f->N)/2); ++i)
-	{
-		tSVF_setFreq(&f->low[i], f1);
-		tSVF_setFreq(&f->high[i], f2);
-	}
+    if (thePole >= 1.0f)    thePole = 0.999999f;
+    
+    // Normalize coefficients for peak unity gain.
+    if (thePole > 0.0f)     f->b0 = (1.0f - thePole);
+    else                    f->b0 = (1.0f + thePole);
+    
+    f->a1 = -thePole;
+}
+
+void        tOnePole_setFreq        (tOnePole* const ft, float freq)
+{
+    _tOnePole* f = *ft;
+    f->b0 = freq * leaf.twoPiTimesInvSampleRate;
+    f->b0 = LEAF_clip(0.0f, f->b0, 1.0f);
+    f->a1 = 1.0f - f->b0;
+}
+
+void    tOnePole_setCoefficients(tOnePole* const ft, float b0, float a1)
+{
+    _tOnePole* f = *ft;
+    if (a1 >= 1.0f)     a1 = 0.999999f;
+    f->b0 = b0;
+    f->a1 = a1;
+}
+
+void    tOnePole_setGain(tOnePole* const ft, float gain)
+{
+    _tOnePole* f = *ft;
+    f->gain = gain;
+}
+
+float   tOnePole_tick(tOnePole* const ft, float input)
+{
+    _tOnePole* f = *ft;
+    
+    float in = input * f->gain;
+    float out = (f->b0 * in) + (f->a1 * f->lastOut);
+    
+    f->lastIn = in;
+    f->lastOut = out;
+    
+    return out;
+}
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ TwoPole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+void    tTwoPole_init(tTwoPole* const ft)
+{
+    _tTwoPole* f = *ft = (_tTwoPole*) leaf_alloc(sizeof(_tTwoPole));
+    
+    f->gain = 1.0f;
+    f->a0 = 1.0;
+    f->b0 = 1.0;
+    
+    f->lastOut[0] = 0.0f;
+    f->lastOut[1] = 0.0f;
+}
+
+void    tTwoPole_free(tTwoPole* const ft)
+{
+    _tTwoPole* f = *ft;
+    
+    leaf_free(f);
+}
+
+void    tTwoPole_initToPool     (tTwoPole* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTwoPole* f = *ft = (_tTwoPole*) mpool_alloc(sizeof(_tTwoPole), m->pool);
+    
+    f->gain = 1.0f;
+    f->a0 = 1.0;
+    f->b0 = 1.0;
+    
+    f->lastOut[0] = 0.0f;
+    f->lastOut[1] = 0.0f;
+}
+
+void    tTwoPole_freeFromPool   (tTwoPole* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTwoPole* f = *ft;
+    
+    mpool_free(f, m->pool);
+}
+
+float   tTwoPole_tick(tTwoPole* const ft, float input)
+{
+    _tTwoPole* f = *ft;
+    
+    float in = input * f->gain;
+    float out = (f->b0 * in) - (f->a1 * f->lastOut[0]) - (f->a2 * f->lastOut[1]);
+    
+    f->lastOut[1] = f->lastOut[0];
+    f->lastOut[0] = out;
+    
+    return out;
+}
+
+void    tTwoPole_setB0(tTwoPole* const ft, float b0)
+{
+    _tTwoPole* f = *ft;
+    f->b0 = b0;
+}
+
+void    tTwoPole_setA1(tTwoPole* const ft, float a1)
+{
+    _tTwoPole* f = *ft;
+    f->a1 = a1;
+}
+
+void    tTwoPole_setA2(tTwoPole* const ft, float a2)
+{
+    _tTwoPole* f = *ft;
+    f->a2 = a2;
+}
+
+
+void    tTwoPole_setResonance(tTwoPole* const ft, float frequency, float radius, oBool normalize)
+{
+    _tTwoPole* f = *ft;
+    
+    if (frequency < 0.0f)   frequency = 0.0f;
+    if (frequency > (leaf.sampleRate * 0.49f))   frequency = leaf.sampleRate * 0.49f;
+    if (radius < 0.0f)      radius = 0.0f;
+    if (radius >= 1.0f)     radius = 0.999999f;
+    
+    f->radius = radius;
+    f->frequency = frequency;
+    f->normalize = normalize;
+    
+    f->a2 = radius * radius;
+    f->a1 =  -2.0f * radius * cosf(frequency * leaf.twoPiTimesInvSampleRate);
+    
+    if ( normalize )
+    {
+        // Normalize the filter gain ... not terribly efficient.
+        float real = 1 - radius + (f->a2 - radius) * cosf(2 * frequency * leaf.twoPiTimesInvSampleRate);
+        float imag = (f->a2 - radius) * sinf(2 * frequency * leaf.twoPiTimesInvSampleRate);
+        f->b0 = sqrtf( powf(real, 2) + powf(imag, 2) );
+    }
+}
+
+void    tTwoPole_setCoefficients(tTwoPole* const ft, float b0, float a1, float a2)
+{
+    _tTwoPole* f = *ft;
+    f->b0 = b0;
+    f->a1 = a1;
+    f->a2 = a2;
+}
+
+void    tTwoPole_setGain(tTwoPole* const ft, float gain)
+{
+    _tTwoPole* f = *ft;
+    f->gain = gain;
+}
+
+void     tTwoPoleSampleRateChanged (tTwoPole* const ft)
+{
+    _tTwoPole* f = *ft;
+    
+    f->a2 = f->radius * f->radius;
+    f->a1 =  -2.0f * f->radius * cosf(f->frequency * leaf.twoPiTimesInvSampleRate);
+    
+    if ( f->normalize )
+    {
+        // Normalize the filter gain ... not terribly efficient.
+        float real = 1 - f->radius + (f->a2 - f->radius) * cosf(2 * f->frequency * leaf.twoPiTimesInvSampleRate);
+        float imag = (f->a2 - f->radius) * sinf(2 * f->frequency * leaf.twoPiTimesInvSampleRate);
+        f->b0 = sqrtf( powf(real, 2) + powf(imag, 2) );
+    }
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OneZero Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
@@ -156,6 +336,25 @@ void    tOneZero_free(tOneZero* const ft)
     _tOneZero* f = *ft;
     
     leaf_free(f);
+}
+
+void    tOneZero_initToPool     (tOneZero* const ft, float theZero, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tOneZero* f = *ft = (_tOneZero*) mpool_alloc(sizeof(_tOneZero), m->pool);
+    
+    f->gain = 1.0f;
+    f->lastIn = 0.0f;
+    f->lastOut = 0.0f;
+    tOneZero_setZero(ft, theZero);
+}
+
+void    tOneZero_freeFromPool   (tOneZero* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tOneZero* f = *ft;
+    
+    mpool_free(f, m->pool);
 }
 
 float   tOneZero_tick(tOneZero* const ft, float input)
@@ -254,6 +453,24 @@ void    tTwoZero_free(tTwoZero* const ft)
     leaf_free(f);
 }
 
+void    tTwoZero_initToPool     (tTwoZero* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTwoZero* f = *ft = (_tTwoZero*) mpool_alloc(sizeof(_tTwoZero), m->pool);
+    
+    f->gain = 1.0f;
+    f->lastIn[0] = 0.0f;
+    f->lastIn[1] = 0.0f;
+}
+
+void    tTwoZero_freeFromPool   (tTwoZero* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTwoZero* f = *ft;
+    
+    mpool_free(f, m->pool);
+}
+
 float   tTwoZero_tick(tTwoZero* const ft, float input)
 {
     _tTwoZero* f = *ft;
@@ -324,195 +541,6 @@ void tTwoZeroSampleRateChanged(tTwoZero* const ft)
     tTwoZero_setNotch(ft, f->frequency, f->radius);
 }
 
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tOnePole_init(tOnePole* const ft, float freq)
-{
-    _tOnePole* f = *ft = (_tOnePole*) leaf_alloc(sizeof(_tOnePole));
-    
-    f->gain = 1.0f;
-    f->a0 = 1.0;
-
-    tOnePole_setFreq(ft, freq);
-    
-    f->lastIn = 0.0f;
-    f->lastOut = 0.0f;
-}
-
-void    tOnePole_free(tOnePole* const ft)
-{
-    _tOnePole* f = *ft;
-    
-    leaf_free(f);
-}
-
-void    tOnePole_setB0(tOnePole* const ft, float b0)
-{
-    _tOnePole* f = *ft;
-    f->b0 = b0;
-}
-
-void    tOnePole_setA1(tOnePole* const ft, float a1)
-{
-    _tOnePole* f = *ft;
-    if (a1 >= 1.0f)     a1 = 0.999999f;
-    f->a1 = a1;
-}
-
-void    tOnePole_setPole(tOnePole* const ft, float thePole)
-{
-    _tOnePole* f = *ft;
-    
-    if (thePole >= 1.0f)    thePole = 0.999999f;
-    
-    // Normalize coefficients for peak unity gain.
-    if (thePole > 0.0f)     f->b0 = (1.0f - thePole);
-    else                    f->b0 = (1.0f + thePole);
-    
-    f->a1 = -thePole;
-}
-
-void        tOnePole_setFreq        (tOnePole* const ft, float freq)
-{
-    _tOnePole* f = *ft;
-    f->b0 = freq * leaf.twoPiTimesInvSampleRate;
-    f->b0 = LEAF_clip(0.0f, f->b0, 1.0f);
-    f->a1 = 1.0f - f->b0;
-}
-
-void    tOnePole_setCoefficients(tOnePole* const ft, float b0, float a1)
-{
-    _tOnePole* f = *ft;
-    if (a1 >= 1.0f)     a1 = 0.999999f;
-    f->b0 = b0;
-    f->a1 = a1;
-}
-
-void    tOnePole_setGain(tOnePole* const ft, float gain)
-{
-    _tOnePole* f = *ft;
-    f->gain = gain;
-}
-
-float   tOnePole_tick(tOnePole* const ft, float input)
-{
-    _tOnePole* f = *ft;
-    
-    float in = input * f->gain;
-    float out = (f->b0 * in) + (f->a1 * f->lastOut);
-    
-    f->lastIn = in;
-    f->lastOut = out;
-    
-    return out;
-}
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ TwoPole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tTwoPole_init(tTwoPole* const ft)
-{
-    _tTwoPole* f = *ft = (_tTwoPole*) leaf_alloc(sizeof(_tTwoPole));
-    
-    f->gain = 1.0f;
-    f->a0 = 1.0;
-    f->b0 = 1.0;
-    
-    f->lastOut[0] = 0.0f;
-    f->lastOut[1] = 0.0f;
-}
-
-void    tTwoPole_free(tTwoPole* const ft)
-{
-    _tTwoPole* f = *ft;
-    
-    leaf_free(f);
-}
-
-float   tTwoPole_tick(tTwoPole* const ft, float input)
-{
-    _tTwoPole* f = *ft;
-    
-    float in = input * f->gain;
-    float out = (f->b0 * in) - (f->a1 * f->lastOut[0]) - (f->a2 * f->lastOut[1]);
-    
-    f->lastOut[1] = f->lastOut[0];
-    f->lastOut[0] = out;
-    
-    return out;
-}
-
-void    tTwoPole_setB0(tTwoPole* const ft, float b0)
-{
-    _tTwoPole* f = *ft;
-    f->b0 = b0;
-}
-
-void    tTwoPole_setA1(tTwoPole* const ft, float a1)
-{
-    _tTwoPole* f = *ft;
-    f->a1 = a1;
-}
-
-void    tTwoPole_setA2(tTwoPole* const ft, float a2)
-{
-    _tTwoPole* f = *ft;
-    f->a2 = a2;
-}
-
-
-void    tTwoPole_setResonance(tTwoPole* const ft, float frequency, float radius, oBool normalize)
-{
-    _tTwoPole* f = *ft;
-    
-    if (frequency < 0.0f)   frequency = 0.0f;
-    if (frequency > (leaf.sampleRate * 0.49f))   frequency = leaf.sampleRate * 0.49f;
-    if (radius < 0.0f)      radius = 0.0f;
-    if (radius >= 1.0f)     radius = 0.999999f;
-    
-    f->radius = radius;
-    f->frequency = frequency;
-    f->normalize = normalize;
-    
-    f->a2 = radius * radius;
-    f->a1 =  -2.0f * radius * cosf(frequency * leaf.twoPiTimesInvSampleRate);
-    
-    if ( normalize )
-    {
-        // Normalize the filter gain ... not terribly efficient.
-        float real = 1 - radius + (f->a2 - radius) * cosf(2 * frequency * leaf.twoPiTimesInvSampleRate);
-        float imag = (f->a2 - radius) * sinf(2 * frequency * leaf.twoPiTimesInvSampleRate);
-        f->b0 = sqrtf( powf(real, 2) + powf(imag, 2) );
-    }
-}
-
-void    tTwoPole_setCoefficients(tTwoPole* const ft, float b0, float a1, float a2)
-{
-    _tTwoPole* f = *ft;
-    f->b0 = b0;
-    f->a1 = a1;
-    f->a2 = a2;
-}
-
-void    tTwoPole_setGain(tTwoPole* const ft, float gain)
-{
-    _tTwoPole* f = *ft;
-    f->gain = gain;
-}
-
-void     tTwoPoleSampleRateChanged (tTwoPole* const ft)
-{
-    _tTwoPole* f = *ft;
-    
-    f->a2 = f->radius * f->radius;
-    f->a1 =  -2.0f * f->radius * cosf(f->frequency * leaf.twoPiTimesInvSampleRate);
-    
-    if ( f->normalize )
-    {
-        // Normalize the filter gain ... not terribly efficient.
-        float real = 1 - f->radius + (f->a2 - f->radius) * cosf(2 * f->frequency * leaf.twoPiTimesInvSampleRate);
-        float imag = (f->a2 - f->radius) * sinf(2 * f->frequency * leaf.twoPiTimesInvSampleRate);
-        f->b0 = sqrtf( powf(real, 2) + powf(imag, 2) );
-    }
-}
-
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ PoleZero Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 void   tPoleZero_init(tPoleZero* const pzf)
 {
@@ -531,6 +559,27 @@ void   tPoleZero_free(tPoleZero* const pzf)
     _tPoleZero* f = *pzf;
     
     leaf_free(f);
+}
+
+void    tPoleZero_initToPool        (tPoleZero* const pzf, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPoleZero* f = *pzf = (_tPoleZero*) mpool_alloc(sizeof(_tPoleZero), m->pool);
+    
+    f->gain = 1.0f;
+    f->b0 = 1.0;
+    f->a0 = 1.0;
+    
+    f->lastIn = 0.0f;
+    f->lastOut = 0.0f;
+}
+
+void    tPoleZero_freeFromPool      (tPoleZero* const pzf, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPoleZero* f = *pzf;
+    
+    mpool_free(f, m->pool);
 }
 
 void    tPoleZero_setB0(tPoleZero* const pzf, float b0)
@@ -641,6 +690,30 @@ void    tBiQuad_free(tBiQuad* const ft)
     _tBiQuad* f = *ft;
     
     leaf_free(f);
+}
+
+void    tBiQuad_initToPool     (tBiQuad* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tBiQuad* f = *ft = (_tBiQuad*) mpool_alloc(sizeof(_tBiQuad), m->pool);
+    
+    f->gain = 1.0f;
+    
+    f->b0 = 0.0f;
+    f->a0 = 0.0f;
+    
+    f->lastIn[0] = 0.0f;
+    f->lastIn[1] = 0.0f;
+    f->lastOut[0] = 0.0f;
+    f->lastOut[1] = 0.0f;
+}
+
+void    tBiQuad_freeFromPool   (tBiQuad* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tBiQuad* f = *ft;
+    
+    mpool_free(f, m->pool);
 }
 
 float   tBiQuad_tick(tBiQuad* const ft, float input)
@@ -766,54 +839,6 @@ void    tBiQuadSampleRateChanged(tBiQuad* const ft)
     }
 }
 
-/* Highpass */
-void    tHighpass_init(tHighpass* const ft, float freq)
-{
-    _tHighpass* f = *ft = (_tHighpass*) leaf_alloc(sizeof(_tHighpass));
-    
-    f->R = (1.0f - (freq * leaf.twoPiTimesInvSampleRate));
-    f->ys = 0.0f;
-    f->xs = 0.0f;
-    
-    f->frequency = freq;
-}
-
-void    tHighpass_free(tHighpass* const ft)
-{
-    _tHighpass* f = *ft;
-    
-    leaf_free(f);
-}
-
-void     tHighpass_setFreq(tHighpass* const ft, float freq)
-{
-    _tHighpass* f = *ft;
-    f->frequency = freq;
-    f->R = (1.0f - (freq * leaf.twoPiTimesInvSampleRate));
-    
-}
-
-float     tHighpass_getFreq(tHighpass* const ft)
-{
-    _tHighpass* f = *ft;
-    return f->frequency;
-}
-
-// From JOS DC Blocker
-float   tHighpass_tick(tHighpass* const ft, float x)
-{
-    _tHighpass* f = *ft;
-    f->ys = x - f->xs + f->R * f->ys;
-    f->xs = x;
-    return f->ys;
-}
-
-void tHighpassSampleRateChanged(tHighpass* const ft)
-{
-    _tHighpass* f = *ft;
-    f->R = (1.0f-((f->frequency * 2.0f * 3.14f) * leaf.invSampleRate));
-}
-
 // Less efficient, more accurate version of SVF, in which cutoff frequency is taken as floating point Hz value and tanf
 // is calculated when frequency changes.
 void tSVF_init(tSVF* const svff, SVFType type, float freq, float Q)
@@ -825,12 +850,11 @@ void tSVF_init(tSVF* const svff, SVFType type, float freq, float Q)
     svf->ic1eq = 0;
     svf->ic2eq = 0;
     
-    float a1,a2,a3,g,k;
     svf->g = tanf(PI * freq * leaf.invSampleRate);
     svf->k = 1.0f/Q;
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
-    svf->a2 = g*a1;
-    svf->a3 = g*a2;
+    svf->a2 = svf->g*svf->a1;
+    svf->a3 = svf->g*svf->a2;
 }
 
 void tSVF_free(tSVF* const svff)
@@ -838,6 +862,31 @@ void tSVF_free(tSVF* const svff)
     _tSVF* svf = *svff;
     
     leaf_free(svf);
+}
+
+void    tSVF_initToPool     (tSVF* const svff, SVFType type, float freq, float Q, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSVF* svf = *svff = (_tSVF*) mpool_alloc(sizeof(_tSVF), m->pool);
+    
+    svf->type = type;
+    
+    svf->ic1eq = 0;
+    svf->ic2eq = 0;
+    
+    svf->g = tanf(PI * freq * leaf.invSampleRate);
+    svf->k = 1.0f/Q;
+    svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
+    svf->a2 = svf->g*svf->a1;
+    svf->a3 = svf->g*svf->a2;
+}
+
+void    tSVF_freeFromPool   (tSVF* const svff, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSVF* svf = *svff;
+    
+    mpool_free(svf, m->pool);
 }
 
 float   tSVF_tick(tSVF* const svff, float v0)
@@ -890,12 +939,11 @@ void   tEfficientSVF_init(tEfficientSVF* const svff, SVFType type, uint16_t inpu
     svf->ic1eq = 0;
     svf->ic2eq = 0;
     
-    float a1,a2,a3,g,k;
     svf->g = filtertan[input];
     svf->k = 1.0f/Q;
-    svf->a1 = 1.0f/(1.0f+g*(g+k));
-    svf->a2 = g*a1;
-    svf->a3 = g*a2;
+    svf->a1 = 1.0f/(1.0f+svf->g*(svf->g+svf->k));
+    svf->a2 = svf->g*svf->a1;
+    svf->a3 = svf->g*svf->a2;
 }
 
 void tEfficientSVF_free(tEfficientSVF* const svff)
@@ -903,6 +951,31 @@ void tEfficientSVF_free(tEfficientSVF* const svff)
     _tEfficientSVF* svf = *svff;
     
     leaf_free(svf);
+}
+
+void    tEfficientSVF_initToPool    (tEfficientSVF* const svff, SVFType type, uint16_t input, float Q, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tEfficientSVF* svf = *svff = (_tEfficientSVF*) mpool_alloc(sizeof(_tEfficientSVF), m->pool);
+    
+    svf->type = type;
+    
+    svf->ic1eq = 0;
+    svf->ic2eq = 0;
+    
+    svf->g = filtertan[input];
+    svf->k = 1.0f/Q;
+    svf->a1 = 1.0f/(1.0f+svf->g*(svf->g+svf->k));
+    svf->a2 = svf->g*svf->a1;
+    svf->a3 = svf->g*svf->a2;
+}
+
+void    tEfficientSVF_freeFromPool  (tEfficientSVF* const svff, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tEfficientSVF* svf = *svff;
+    
+    mpool_free(svf, m->pool);
 }
 
 float   tEfficientSVF_tick(tEfficientSVF* const svff, float v0)
@@ -945,6 +1018,181 @@ void     tEfficientSVF_setQ(tEfficientSVF* const svff, float Q)
     svf->a3 = svf->g * svf->a2;
 }
 
+/* Highpass */
+void    tHighpass_init(tHighpass* const ft, float freq)
+{
+    _tHighpass* f = *ft = (_tHighpass*) leaf_alloc(sizeof(_tHighpass));
+    
+    f->R = (1.0f - (freq * leaf.twoPiTimesInvSampleRate));
+    f->ys = 0.0f;
+    f->xs = 0.0f;
+    
+    f->frequency = freq;
+}
+
+void    tHighpass_free(tHighpass* const ft)
+{
+    _tHighpass* f = *ft;
+    
+    leaf_free(f);
+}
+
+void    tHighpass_initToPool    (tHighpass* const ft, float freq, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tHighpass* f = *ft = (_tHighpass*) mpool_alloc(sizeof(_tHighpass), m->pool);
+    
+    f->R = (1.0f - (freq * leaf.twoPiTimesInvSampleRate));
+    f->ys = 0.0f;
+    f->xs = 0.0f;
+    
+    f->frequency = freq;
+}
+
+void    tHighpass_freeFromPool  (tHighpass* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tHighpass* f = *ft;
+    
+    mpool_free(f, m->pool);
+}
+
+void     tHighpass_setFreq(tHighpass* const ft, float freq)
+{
+    _tHighpass* f = *ft;
+    f->frequency = freq;
+    f->R = (1.0f - (freq * leaf.twoPiTimesInvSampleRate));
+    
+}
+
+float     tHighpass_getFreq(tHighpass* const ft)
+{
+    _tHighpass* f = *ft;
+    return f->frequency;
+}
+
+// From JOS DC Blocker
+float   tHighpass_tick(tHighpass* const ft, float x)
+{
+    _tHighpass* f = *ft;
+    f->ys = x - f->xs + f->R * f->ys;
+    f->xs = x;
+    return f->ys;
+}
+
+void tHighpassSampleRateChanged(tHighpass* const ft)
+{
+    _tHighpass* f = *ft;
+    f->R = (1.0f-((f->frequency * 2.0f * 3.14f) * leaf.invSampleRate));
+}
+
+void tButterworth_init(tButterworth* const ft, int N, float f1, float f2)
+{
+    _tButterworth* f = *ft = (_tButterworth*) leaf_alloc(sizeof(_tButterworth));
+    
+    f->f1 = f1;
+    f->f2 = f2;
+    f->gain = 1.0f;
+    
+    f->N = N;
+    
+    if (f->N > NUM_SVF_BW) f->N = NUM_SVF_BW;
+    
+    for(int i = 0; i < N/2; ++i)
+    {
+        tSVF_init(&f->low[i], SVFTypeHighpass, f1, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*N)));
+        tSVF_init(&f->high[i], SVFTypeLowpass, f2, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*N)));
+    }
+}
+
+void tButterworth_free(tButterworth* const ft)
+{
+    _tButterworth* f = *ft;
+    
+    for(int i = 0; i < f->N/2; ++i)
+    {
+        tSVF_free(&f->low[i]);
+        tSVF_free(&f->high[i]);
+    }
+    
+    leaf_free(f);
+}
+
+void    tButterworth_initToPool     (tButterworth* const ft, int N, float f1, float f2, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tButterworth* f = *ft = (_tButterworth*) mpool_alloc(sizeof(_tButterworth), m->pool);
+    
+    f->f1 = f1;
+    f->f2 = f2;
+    f->gain = 1.0f;
+    
+    f->N = N;
+    
+    if (f->N > NUM_SVF_BW) f->N = NUM_SVF_BW;
+    
+    for(int i = 0; i < N/2; ++i)
+    {
+        tSVF_initToPool(&f->low[i], SVFTypeHighpass, f1, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*N)), mp);
+        tSVF_initToPool(&f->high[i], SVFTypeLowpass, f2, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*N)), mp);
+    }
+}
+
+void    tButterworth_freeFromPool   (tButterworth* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tButterworth* f = *ft;
+    
+    for(int i = 0; i < f->N/2; ++i)
+    {
+        tSVF_freeFromPool(&f->low[i], mp);
+        tSVF_freeFromPool(&f->high[i], mp);
+    }
+    
+    mpool_free(f, m->pool);
+}
+
+float tButterworth_tick(tButterworth* const ft, float samp)
+{
+    _tButterworth* f = *ft;
+    
+    for(int i = 0; i < ((f->N)/2); ++i)
+    {
+        samp = tSVF_tick(&f->low[i],samp);
+        samp = tSVF_tick(&f->high[i],samp);
+    }
+    return samp;
+}
+
+void tButterworth_setF1(tButterworth* const ft, float f1)
+{
+    _tButterworth* f = *ft;
+    
+    f->f1 = f1;
+    for(int i = 0; i < ((f->N)/2); ++i)        tSVF_setFreq(&f->low[i], f1);
+}
+
+void tButterworth_setF2(tButterworth* const ft, float f2)
+{
+    _tButterworth* f = *ft;
+    
+    f->f2 = f2;
+    for(int i = 0; i < ((f->N)/2); ++i)        tSVF_setFreq(&f->high[i], f2);
+}
+
+void tButterworth_setFreqs(tButterworth* const ft, float f1, float f2)
+{
+    _tButterworth* f = *ft;
+    
+    f->f1 = f1;
+    f->f2 = f2;
+    for(int i = 0; i < ((f->N)/2); ++i)
+    {
+        tSVF_setFreq(&f->low[i], f1);
+        tSVF_setFreq(&f->high[i], f2);
+    }
+}
+
 void	tFIR_init(tFIR* const firf, float* coeffs, int numTaps)
 {
     _tFIR* fir = *firf = (_tFIR*) leaf_alloc(sizeof(_tFIR));
@@ -953,6 +1201,34 @@ void	tFIR_init(tFIR* const firf, float* coeffs, int numTaps)
     fir->coeff = coeffs;
     fir->past = (float*)leaf_alloc(sizeof(float) * fir->numTaps);
     for (int i = 0; i < fir->numTaps; ++i) fir->past[i] = 0.0f;
+}
+
+void    tFIR_free(tFIR* const firf)
+{
+    _tFIR* fir = *firf;
+    
+    leaf_free(fir->past);
+    leaf_free(fir);
+}
+
+void    tFIR_initToPool     (tFIR* const firf, float* coeffs, int numTaps, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tFIR* fir = *firf = (_tFIR*) mpool_alloc(sizeof(_tFIR), m->pool);
+    
+    fir->numTaps = numTaps;
+    fir->coeff = coeffs;
+    fir->past = (float*) mpool_alloc(sizeof(float) * fir->numTaps, m->pool);
+    for (int i = 0; i < fir->numTaps; ++i) fir->past[i] = 0.0f;
+}
+
+void    tFIR_freeFromPool   (tFIR* const firf, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tFIR* fir = *firf;
+    
+    mpool_free(fir->past, m->pool);
+    mpool_free(fir, m->pool);
 }
 
 float	tFIR_tick(tFIR* const firf, float input)
@@ -964,12 +1240,4 @@ float	tFIR_tick(tFIR* const firf, float input)
 	for (int i = 0; i < fir->numTaps; ++i) y += fir->past[i]*fir->coeff[i];
 	for (int i = fir->numTaps-1; i > 0; --i) fir->past[i] = fir->past[i-1];
 	return y;
-}
-
-void	tFIR_free(tFIR* const firf)
-{
-     _tFIR* fir = *firf;
-    
-    leaf_free(fir->past);
-    leaf_free(fir);
 }

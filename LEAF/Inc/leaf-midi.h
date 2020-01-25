@@ -40,6 +40,8 @@ extern "C" {
     
     void    tStack_init                 (tStack* const);
     void    tStack_free                 (tStack* const);
+    void    tStack_initToPool           (tStack* const, tMempool* const);
+    void    tStack_freeFromPool         (tStack* const, tMempool* const);
     
     void    tStack_setCapacity          (tStack* const, uint16_t cap);
     int     tStack_addIfNotAlreadyThere (tStack* const, uint16_t item);
@@ -91,28 +93,30 @@ extern "C" {
     typedef _tPoly* tPoly;
     
     /* MPoly*/
-    void    tPoly_init(tPoly* const, int maxNumVoices);
-    void    tPoly_free(tPoly* const);
+    void    tPoly_init                  (tPoly* const, int maxNumVoices);
+    void    tPoly_free                  (tPoly* const);
+    void    tPoly_initToPool            (tPoly* const, int maxNumVoices, tMempool* const);
+    void    tPoly_freeFromPool          (tPoly* const, tMempool* const);
     
     //ADDING A NOTE
-    int     tPoly_noteOn(tPoly* const, int note, uint8_t vel);
-    int     tPoly_noteOff(tPoly* const, uint8_t note);
-    void    tPoly_orderedAddToStack(tPoly* const, uint8_t noteVal);
-    void    tPoly_setNumVoices(tPoly* const, uint8_t numVoices);
+    int     tPoly_noteOn                (tPoly* const, int note, uint8_t vel);
+    int     tPoly_noteOff               (tPoly* const, uint8_t note);
+    void    tPoly_orderedAddToStack     (tPoly* const, uint8_t noteVal);
+    void    tPoly_setNumVoices          (tPoly* const, uint8_t numVoices);
     
-    void    tPoly_setPitchBend(tPoly* const, float pitchBend);
-    void    tPoly_setPitchGlideActive(tPoly* const, oBool isActive);
-    void    tPoly_setPitchGlideTime(tPoly* const, float t);
-    void    tPoly_tickPitch(tPoly* const);
-    void    tPoly_tickPitchGlide(tPoly* const);
-    void    tPoly_tickPitchBend(tPoly* const);
+    void    tPoly_setPitchBend          (tPoly* const, float pitchBend);
+    void    tPoly_setPitchGlideActive   (tPoly* const, oBool isActive);
+    void    tPoly_setPitchGlideTime     (tPoly* const, float t);
+    void    tPoly_tickPitch             (tPoly* const);
+    void    tPoly_tickPitchGlide        (tPoly* const);
+    void    tPoly_tickPitchBend         (tPoly* const);
     
-    int     tPoly_getNumVoices(tPoly* const);
-    int     tPoly_getNumActiveVoices(tPoly* const);
-    float   tPoly_getPitch(tPoly* const, uint8_t voice);
-    int     tPoly_getKey(tPoly* const, uint8_t voice);
-    int     tPoly_getVelocity(tPoly* const, uint8_t voice);
-    int     tPoly_isOn(tPoly* const, uint8_t voice);
+    int     tPoly_getNumVoices          (tPoly* const);
+    int     tPoly_getNumActiveVoices    (tPoly* const);
+    float   tPoly_getPitch              (tPoly* const, uint8_t voice);
+    int     tPoly_getKey                (tPoly* const, uint8_t voice);
+    int     tPoly_getVelocity           (tPoly* const, uint8_t voice);
+    int     tPoly_isOn                  (tPoly* const, uint8_t voice);
     
     //==============================================================================
     

@@ -18,6 +18,7 @@ extern "C" {
     
 #include "leaf-global.h"
 #include "leaf-math.h"
+#include "leaf-mempool.h"
 #include "leaf-analysis.h"
     
     //==============================================================================
@@ -38,9 +39,12 @@ extern "C" {
     
     typedef _tCompressor* tCompressor;
     
-    void    tCompressor_init    (tCompressor* const);
-    void    tCompressor_free    (tCompressor* const);
-    float   tCompressor_tick    (tCompressor* const, float input);
+    void    tCompressor_init        (tCompressor* const);
+    void    tCompressor_free        (tCompressor* const);
+    void    tCompressor_initToPool  (tCompressor* const, tMempool* const);
+    void    tCompressor_freeFromPool(tCompressor* const, tMempool* const);
+    
+    float   tCompressor_tick        (tCompressor* const, float input);
     
     ///
     /* Feedback leveller */
@@ -61,15 +65,17 @@ extern "C" {
     
     typedef _tFeedbackLeveler* tFeedbackLeveler;
     
-    void    tFeedbackLeveler_init      (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode);
-    void    tFeedbackLeveler_free      (tFeedbackLeveler* const);
+    void    tFeedbackLeveler_init           (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode);
+    void    tFeedbackLeveler_free           (tFeedbackLeveler* const);
+    void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, tMempool* const);
+    void    tFeedbackLeveler_freeFromPool   (tFeedbackLeveler* const, tMempool* const);
     
-    float   tFeedbackLeveler_tick      (tFeedbackLeveler* const, float input);
-    float   tFeedbackLeveler_sample    (tFeedbackLeveler* const);
-    void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const, float TargetLevel);
-    void     tFeedbackLeveler_setFactor   (tFeedbackLeveler* const, float factor);
-    void     tFeedbackLeveler_setMode   (tFeedbackLeveler* const, int mode); // 0 for upwards limiting only, 1 for biderctional limiting
-    void     tFeedbackLeveler_setStrength   (tFeedbackLeveler* const, float strength);
+    float   tFeedbackLeveler_tick           (tFeedbackLeveler* const, float input);
+    float   tFeedbackLeveler_sample         (tFeedbackLeveler* const);
+    void    tFeedbackLeveler_setTargetLevel (tFeedbackLeveler* const, float TargetLevel);
+    void    tFeedbackLeveler_setFactor      (tFeedbackLeveler* const, float factor);
+    void    tFeedbackLeveler_setMode        (tFeedbackLeveler* const, int mode); // 0 for upwards limiting only, 1 for biderctional limiting
+    void    tFeedbackLeveler_setStrength    (tFeedbackLeveler* const, float strength);
     
     
     //==============================================================================

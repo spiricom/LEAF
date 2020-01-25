@@ -16,6 +16,7 @@ extern "C" {
     
 #include "leaf-global.h"
 #include "leaf-math.h"
+#include "leaf-mempool.h"
     
     //==============================================================================
     
@@ -64,21 +65,24 @@ extern "C" {
     };
     
     //WDF Linear Components
-    void tWDF_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR);
-    void tWDF_free(tWDF* const r);
-    float tWDF_tick(tWDF* const r, float sample, tWDF* const outputPoint, uint8_t paramsChanged);
+    void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR);
+    void    tWDF_free                   (tWDF* const);
+    void    tWDF_initToPool             (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const);
+    void    tWDF_freeFromPool           (tWDF* const, tMempool* const);
     
-    void tWDF_setValue(tWDF* const r, float value);
-    void tWDF_setSampleRate(tWDF* const r, float sample_rate);
-    uint8_t tWDF_isLeaf(tWDF* const r);
+    float   tWDF_tick                   (tWDF* const, float sample, tWDF* const outputPoint, uint8_t paramsChanged);
     
-    float tWDF_getPortResistance(tWDF* const r);
-    float tWDF_getReflectedWaveUp(tWDF* const r, float input); //for tree, only uses input for resistive source
-    float tWDF_getReflectedWaveDown(tWDF* const r, float input, float incident_wave); //for roots
-    void tWDF_setIncidentWave(tWDF* const r, float incident_wave, float input);
+    void    tWDF_setValue               (tWDF* const, float value);
+    void    tWDF_setSampleRate          (tWDF* const, float sample_rate);
+    uint8_t tWDF_isLeaf                 (tWDF* const);
     
-    float tWDF_getVoltage(tWDF* const r);
-    float tWDF_getCurrent(tWDF* const r);
+    float   tWDF_getPortResistance      (tWDF* const);
+    float   tWDF_getReflectedWaveUp     (tWDF* const, float input); //for tree, only uses input for resistive source
+    float   tWDF_getReflectedWaveDown   (tWDF* const, float input, float incident_wave); //for roots
+    void    tWDF_setIncidentWave        (tWDF* const, float incident_wave, float input);
+    
+    float   tWDF_getVoltage             (tWDF* const);
+    float   tWDF_getCurrent             (tWDF* const);
     
     
     //==============================================================================

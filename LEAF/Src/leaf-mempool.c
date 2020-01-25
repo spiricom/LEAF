@@ -77,8 +77,6 @@ void mpool_create (char* memory, size_t size, mpool_t* pool)
 	}
 }
 
-
-
 void leaf_pool_init(char* memory, size_t size)
 {
     mpool_create(memory, size, &leaf_pool);
@@ -143,12 +141,85 @@ void* mpool_alloc(size_t asize, mpool_t* pool)
     return node_to_alloc->pool;
 }
 
+
+/**
+ * allocate memory from memory pool and also clear that memory to be blank
+ */
+void* mpool_allocAndClear(size_t asize, mpool_t* pool)
+{
+    // If the head is NULL, the mempool is full
+    if (pool->head == NULL) return NULL;
+
+    // Should we alloc the first block large enough or check all blocks and pick the one closest in size?
+    size_t size_to_alloc = mpool_align(asize);
+    mpool_node_t* node_to_alloc = pool->head;
+
+    // Traverse the free list for a large enough block
+    while (node_to_alloc->size < size_to_alloc)
+    {
+        node_to_alloc = node_to_alloc->next;
+
+        // If we reach the end of the free list, there
+        // are no blocks large enough, return NULL
+        if (node_to_alloc == NULL) return NULL;
+    }
+
+    // Create a new node after the node to be allocated if there is enough space
+    mpool_node_t* new_node;
+    size_t leftover = node_to_alloc->size - size_to_alloc;
+    node_to_alloc->size = size_to_alloc;
+    if (leftover > header_size)
+    {
+        long offset = (char*) node_to_alloc - (char*) pool->mpool;
+        offset += header_size + node_to_alloc->size;
+        new_node = create_node(&pool->mpool[offset],
+                               node_to_alloc->next,
+                               node_to_alloc->prev,
+                               leftover - header_size);
+    }
+    else
+    {
+        // Add any leftover space to the allocated node to avoid fragmentation
+        node_to_alloc->size += leftover;
+
+        new_node = node_to_alloc->next;
+    }
+
+    // Update the head if we are allocating the first node of the free list
+    // The head will be NULL if there is no space left
+    if (pool->head == node_to_alloc)
+    {
+        pool->head = new_node;
+    }
+
+    // Remove the allocated node from the free list
+    delink_node(node_to_alloc);
+
+    pool->usize += header_size + node_to_alloc->size;
+    // Format the new pool
+    char* new_pool = (char*)node_to_alloc->pool;
+    for (int i = 0; i < node_to_alloc->size; i++) new_pool[i] = 0;
+    // Return the pool of the allocated node;
+    return node_to_alloc->pool;
+}
+
 void* leaf_alloc(size_t size)
 {
     //printf("alloc %i\n", size);
 	void* block = mpool_alloc(size, &leaf_pool);
 
 	if (block == NULL) leaf_mempool_overrun();
+
+    return block;
+}
+
+void* leaf_allocAndClear(size_t size)
+{
+    //printf("alloc %i\n", size);
+	void* block = mpool_allocAndClear(size, &leaf_pool);
+
+	if (block == NULL) leaf_mempool_overrun();
+
 
     return block;
 }
@@ -211,8 +282,8 @@ void mpool_free(void* ptr, mpool_t* pool)
     pool->head = freed_node;
     
     // Format the freed pool
-    char* freed_pool = (char*)freed_node->pool;
-    for (int i = 0; i < freed_node->size; i++) freed_pool[i] = 0;
+//    char* freed_pool = (char*)freed_node->pool;
+//    for (int i = 0; i < freed_node->size; i++) freed_pool[i] = 0;
 }
 
 void leaf_free(void* ptr)
@@ -289,3 +360,32 @@ void leaf_mempool_overrun(void)
 	//TODO: we should set up some kind of leaf_error method that reaches user space to notify library users of things that failed.
 }
 
+void tMempool_init(tMempool* const mp, char* memory, size_t size)
+{
+    _tMempool* m = *mp = (_tMempool*) leaf_alloc(sizeof(_tMempool));
+    
+    mpool_create (memory, size, m->pool);
+}
+
+void tMempool_free(tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    
+    leaf_free(m);
+}
+
+void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem)
+{
+    _tMempool* mm = *mem;
+    _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), mm->pool);
+    
+    mpool_create (memory, size, m->pool);
+}
+
+void    tMempool_freeFromPool   (tMempool* const mp, tMempool* const mem)
+{
+    _tMempool* mm = *mem;
+    _tMempool* m = *mp;
+    
+    mpool_free(m, mm->pool);
+}

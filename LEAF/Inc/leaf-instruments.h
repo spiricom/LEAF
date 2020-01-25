@@ -42,16 +42,19 @@ extern "C" {
     
     typedef _t808Cowbell* t808Cowbell;
     
-    void    t808Cowbell_init             (t808Cowbell* const, int useStick);
-    void    t808Cowbell_free             (t808Cowbell* const);
-    float   t808Cowbell_tick             (t808Cowbell* const);
-    void    t808Cowbell_on               (t808Cowbell* const, float vel);
-    void    t808Cowbell_setDecay         (t808Cowbell* const, float decay);
-    void    t808Cowbell_setHighpassFreq  (t808Cowbell* const, float freq);
-    void    t808Cowbell_setBandpassFreq  (t808Cowbell* const, float freq);
-    void    t808Cowbell_setFreq          (t808Cowbell* const, float freq);
-    void    t808Cowbell_setOscMix        (t808Cowbell* const, float oscMix);
-    void    t808Cowbell_setStick         (t808Cowbell* const, int useStick);
+    void    t808Cowbell_init            (t808Cowbell* const, int useStick);
+    void    t808Cowbell_free            (t808Cowbell* const);
+    void    t808Cowbell_initToPool      (t808Cowbell* const, int useStick, tMempool* const);
+    void    t808Cowbell_freeFromPool    (t808Cowbell* const, tMempool* const);
+    
+    float   t808Cowbell_tick            (t808Cowbell* const);
+    void    t808Cowbell_on              (t808Cowbell* const, float vel);
+    void    t808Cowbell_setDecay        (t808Cowbell* const, float decay);
+    void    t808Cowbell_setHighpassFreq (t808Cowbell* const, float freq);
+    void    t808Cowbell_setBandpassFreq (t808Cowbell* const, float freq);
+    void    t808Cowbell_setFreq         (t808Cowbell* const, float freq);
+    void    t808Cowbell_setOscMix       (t808Cowbell* const, float oscMix);
+    void    t808Cowbell_setStick        (t808Cowbell* const, int useStick);
     
     //==============================================================================
     
@@ -78,21 +81,23 @@ extern "C" {
     
     typedef _t808Hihat* t808Hihat;
     
-    void        t808Hihat_init               (t808Hihat* const);
-    void        t808Hihat_free               (t808Hihat* const);
+    void    t808Hihat_init                  (t808Hihat* const);
+    void    t808Hihat_free                  (t808Hihat* const);
+    void    t808Hihat_initToPool            (t808Hihat* const, tMempool* const);
+    void    t808Hihat_freeFromPool          (t808Hihat* const, tMempool* const);
     
-    float       t808Hihat_tick               (t808Hihat* const);
-    void        t808Hihat_on                 (t808Hihat* const, float vel);
-    void        t808Hihat_setOscNoiseMix     (t808Hihat* const, float oscNoiseMix);
-    void        t808Hihat_setDecay           (t808Hihat* const, float decay);
-    void        t808Hihat_setHighpassFreq    (t808Hihat* const, float freq);
-    void        t808Hihat_setOscBandpassFreq  (t808Hihat* const, float freq);
-    void         t808Hihat_setOscBandpassQ        (t808Hihat* const hihat, float Q);
-    void        t808Hihat_setStickBandPassFreq  (t808Hihat* const, float freq);
-    void         t808Hihat_setStickBandPassQ        (t808Hihat* const hihat, float Q);
-    void        t808Hihat_setOscFreq         (t808Hihat* const, float freq);
-    void         t808Hihat_setStretch                (t808Hihat* const hihat, float stretch);
-    void         t808Hihat_setFM                    (t808Hihat* const hihat, float FM_amount);
+    float   t808Hihat_tick                  (t808Hihat* const);
+    void    t808Hihat_on                    (t808Hihat* const, float vel);
+    void    t808Hihat_setOscNoiseMix        (t808Hihat* const, float oscNoiseMix);
+    void    t808Hihat_setDecay              (t808Hihat* const, float decay);
+    void    t808Hihat_setHighpassFreq       (t808Hihat* const, float freq);
+    void    t808Hihat_setOscBandpassFreq    (t808Hihat* const, float freq);
+    void    t808Hihat_setOscBandpassQ       (t808Hihat* const hihat, float Q);
+    void    t808Hihat_setStickBandPassFreq  (t808Hihat* const, float freq);
+    void    t808Hihat_setStickBandPassQ     (t808Hihat* const hihat, float Q);
+    void    t808Hihat_setOscFreq            (t808Hihat* const, float freq);
+    void    t808Hihat_setStretch            (t808Hihat* const hihat, float stretch);
+    void    t808Hihat_setFM                 (t808Hihat* const hihat, float FM_amount);
     
     //==============================================================================
     
@@ -123,19 +128,21 @@ extern "C" {
     
     typedef _t808Snare* t808Snare;
     
-    void        t808Snare_init                  (t808Snare* const);
-    void        t808Snare_free                  (t808Snare* const);
+    void    t808Snare_init                  (t808Snare* const);
+    void    t808Snare_free                  (t808Snare* const);
+    void    t808Snare_initToPool            (t808Snare* const, tMempool* const);
+    void    t808Snare_freeFromPool          (t808Snare* const, tMempool* const);
     
-    float       t808Snare_tick                  (t808Snare* const);
-    void        t808Snare_on                    (t808Snare* const, float vel);
-    void        t808Snare_setTone1Freq          (t808Snare* const, float freq);
-    void        t808Snare_setTone2Freq          (t808Snare* const, float freq);
-    void        t808Snare_setTone1Decay         (t808Snare* const, float decay);
-    void        t808Snare_setTone2Decay         (t808Snare* const, float decay);
-    void        t808Snare_setNoiseDecay         (t808Snare* const, float decay);
-    void        t808Snare_setToneNoiseMix       (t808Snare* const, float toneNoiseMix);
-    void        t808Snare_setNoiseFilterFreq    (t808Snare* const, float noiseFilterFreq);
-    void        t808Snare_setNoiseFilterQ       (t808Snare* const, float noiseFilterQ);
+    float   t808Snare_tick                  (t808Snare* const);
+    void    t808Snare_on                    (t808Snare* const, float vel);
+    void    t808Snare_setTone1Freq          (t808Snare* const, float freq);
+    void    t808Snare_setTone2Freq          (t808Snare* const, float freq);
+    void    t808Snare_setTone1Decay         (t808Snare* const, float decay);
+    void    t808Snare_setTone2Decay         (t808Snare* const, float decay);
+    void    t808Snare_setNoiseDecay         (t808Snare* const, float decay);
+    void    t808Snare_setToneNoiseMix       (t808Snare* const, float toneNoiseMix);
+    void    t808Snare_setNoiseFilterFreq    (t808Snare* const, float noiseFilterFreq);
+    void    t808Snare_setNoiseFilterQ       (t808Snare* const, float noiseFilterQ);
     
     //==============================================================================
     
@@ -164,19 +171,21 @@ extern "C" {
     
     typedef _t808Kick* t808Kick;
     
-    void        t808Kick_init                  (t808Kick* const);
-    void        t808Kick_free                  (t808Kick* const);
+    void    t808Kick_init               (t808Kick* const);
+    void    t808Kick_free               (t808Kick* const);
+    void    t808Kick_initToPool         (t808Kick* const, tMempool* const);
+    void    t808Kick_freeFromPool       (t808Kick* const, tMempool* const);
     
-    float       t808Kick_tick                  (t808Kick* const);
-    void        t808Kick_on                    (t808Kick* const, float vel);
-    void        t808Kick_setToneFreq          (t808Kick* const, float freq);
-    void        t808Kick_setToneDecay         (t808Kick* const, float decay);
-    void        t808Kick_setNoiseDecay         (t808Kick* const, float decay);
-    void        t808Kick_setSighAmount         (t808Kick* const, float sigh);
-    void        t808Kick_setChirpAmount         (t808Kick* const, float chirp);
-    void        t808Kick_setToneNoiseMix       (t808Kick* const, float toneNoiseMix);
-    void        t808Kick_setNoiseFilterFreq    (t808Kick* const, float noiseFilterFreq);
-    void        t808Kick_setNoiseFilterQ       (t808Kick* const, float noiseFilterQ);
+    float   t808Kick_tick               (t808Kick* const);
+    void    t808Kick_on                 (t808Kick* const, float vel);
+    void    t808Kick_setToneFreq        (t808Kick* const, float freq);
+    void    t808Kick_setToneDecay       (t808Kick* const, float decay);
+    void    t808Kick_setNoiseDecay      (t808Kick* const, float decay);
+    void    t808Kick_setSighAmount      (t808Kick* const, float sigh);
+    void    t808Kick_setChirpAmount     (t808Kick* const, float chirp);
+    void    t808Kick_setToneNoiseMix    (t808Kick* const, float toneNoiseMix);
+    void    t808Kick_setNoiseFilterFreq (t808Kick* const, float noiseFilterFreq);
+    void    t808Kick_setNoiseFilterQ    (t808Kick* const, float noiseFilterQ);
     
     //==============================================================================
     

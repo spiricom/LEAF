@@ -18,6 +18,7 @@ extern "C" {
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
 #include "leaf-math.h"
+#include "leaf-mempool.h"
 #include "leaf-filters.h"
 #include "leaf-delay.h"
     
@@ -26,8 +27,8 @@ extern "C" {
     /* Attack-Decay envelope */
     typedef struct _tEnvelope {
         
-        const float *exp_buff;
-        const float *inc_buff;
+       const float *exp_buff;
+       const float *inc_buff;
         uint32_t buff_size;
         
         float next;
@@ -46,22 +47,24 @@ extern "C" {
     
     typedef _tEnvelope* tEnvelope;
     
-    void    tEnvelope_init      (tEnvelope* const, float attack, float decay, oBool loop);
-    void    tEnvelope_free      (tEnvelope* const);
+    void    tEnvelope_init          (tEnvelope* const, float attack, float decay, oBool loop);
+    void    tEnvelope_free          (tEnvelope* const);
+    void    tEnvelope_initToPool    (tEnvelope* const, float attack, float decay, oBool loop, tMempool* const);
+    void    tEnvelope_freeFromPool  (tEnvelope* const, tMempool* const);
     
-    float   tEnvelope_tick      (tEnvelope* const);
-    void     tEnvelope_setAttack (tEnvelope*  const, float attack);
-    void     tEnvelope_setDecay  (tEnvelope*  const, float decay);
-    void     tEnvelope_loop      (tEnvelope*  const, oBool loop);
-    void     tEnvelope_on        (tEnvelope*  const, float velocity);
+    float   tEnvelope_tick          (tEnvelope* const);
+    void    tEnvelope_setAttack     (tEnvelope* const, float attack);
+    void    tEnvelope_setDecay      (tEnvelope* const, float decay);
+    void    tEnvelope_loop          (tEnvelope* const, oBool loop);
+    void    tEnvelope_on            (tEnvelope* const, float velocity);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /* ADSR */
     typedef struct _tADSR
     {
-        const float *exp_buff;
-        const float *inc_buff;
+       const float *exp_buff;
+       const float *inc_buff;
         uint32_t buff_size;
         
         float next;
@@ -78,16 +81,18 @@ extern "C" {
     
     typedef _tADSR* tADSR;
     
-    void    tADSR_init      (tADSR*  const, float attack, float decay, float sustain, float release);
-    void    tADSR_free      (tADSR*  const);
+    void    tADSR_init          (tADSR* const, float attack, float decay, float sustain, float release);
+    void    tADSR_free          (tADSR* const);
+    void    tADSR_initToPool    (tADSR* const, float attack, float decay, float sustain, float release, tMempool* const);
+    void    tADSR_freeFromPool  (tADSR* const, tMempool* const);
     
-    float   tADSR_tick      (tADSR*  const);
-    void    tADSR_setAttack (tADSR*  const, float attack);
-    void    tADSR_setDecay  (tADSR*  const, float decay);
-    void    tADSR_setSustain(tADSR*  const, float sustain);
-    void    tADSR_setRelease(tADSR*  const, float release);
-    void    tADSR_on        (tADSR*  const, float velocity);
-    void    tADSR_off       (tADSR*  const);
+    float   tADSR_tick          (tADSR* const);
+    void    tADSR_setAttack     (tADSR* const, float attack);
+    void    tADSR_setDecay      (tADSR* const, float decay);
+    void    tADSR_setSustain    (tADSR* const, float sustain);
+    void    tADSR_setRelease    (tADSR* const, float release);
+    void    tADSR_on            (tADSR* const, float velocity);
+    void    tADSR_off           (tADSR* const);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -106,14 +111,16 @@ extern "C" {
     
     typedef _tRamp* tRamp;
     
-    void    tRamp_init      (tRamp* const, float time, int samplesPerTick);
-    void    tRamp_free      (tRamp* const);
+    void    tRamp_init          (tRamp* const, float time, int samplesPerTick);
+    void    tRamp_free          (tRamp* const);
+    void    tRamp_initToPool    (tRamp* const, float time, int samplesPerTick, tMempool* const);
+    void    tRamp_freeFromPool  (tRamp* const, tMempool* const);
     
-    float   tRamp_tick      (tRamp* const);
-    float   tRamp_sample    (tRamp* const);
-    void    tRamp_setTime   (tRamp* const, float time);
-    void    tRamp_setDest   (tRamp* const, float dest);
-    void    tRamp_setVal    (tRamp* const, float val);
+    float   tRamp_tick          (tRamp* const);
+    float   tRamp_sample        (tRamp* const);
+    void    tRamp_setTime       (tRamp* const, float time);
+    void    tRamp_setDest       (tRamp* const, float dest);
+    void    tRamp_setVal        (tRamp* const, float val);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -126,14 +133,16 @@ extern "C" {
     
     typedef _tExpSmooth* tExpSmooth;
     
-    void    tExpSmooth_init      (tExpSmooth* const, float val, float factor);
-    void    tExpSmooth_free      (tExpSmooth* const);
+    void    tExpSmooth_init         (tExpSmooth* const, float val, float factor);
+    void    tExpSmooth_free         (tExpSmooth* const);
+    void    tExpSmooth_initToPool   (tExpSmooth* const, float val, float factor, tMempool* const);
+    void    tExpSmooth_freeFromPool (tExpSmooth* const, tMempool* const);
     
-    float   tExpSmooth_tick      (tExpSmooth* const);
-    float   tExpSmooth_sample    (tExpSmooth* const);
-    void    tExpSmooth_setFactor   (tExpSmooth* const, float factor);
-    void    tExpSmooth_setDest   (tExpSmooth* const, float dest);
-    void    tExpSmooth_setVal    (tExpSmooth* const, float val);
+    float   tExpSmooth_tick         (tExpSmooth* const);
+    float   tExpSmooth_sample       (tExpSmooth* const);
+    void    tExpSmooth_setFactor    (tExpSmooth* const, float factor);
+    void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
+    void    tExpSmooth_setVal       (tExpSmooth* const, float val);
     
 #ifdef __cplusplus
 }
