@@ -68,7 +68,7 @@ void tPRCReverb_free(tPRCReverb* const rev)
 void    tPRCReverb_initToPool   (tPRCReverb* const rev, float t60, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPRCReverb* r = *rev = (_tPRCReverb*) mpool_alloc(sizeof(_tPRCReverb), m->pool);
+    _tPRCReverb* r = *rev = (_tPRCReverb*) mpool_alloc(sizeof(_tPRCReverb), &m->pool);
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
@@ -110,7 +110,7 @@ void    tPRCReverb_freeFromPool (tPRCReverb* const rev, tMempool* const mp)
     tDelay_freeFromPool(&r->allpassDelays[0], mp);
     tDelay_freeFromPool(&r->allpassDelays[1], mp);
     tDelay_freeFromPool(&r->combDelay, mp);
-    mpool_free(r, m->pool);
+    mpool_free(r, &m->pool);
 }
 
 void    tPRCReverb_setT60(tPRCReverb* const rev, float t60)
@@ -234,7 +234,7 @@ void    tNReverb_free(tNReverb* const rev)
 void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tNReverb* r = *rev = (_tNReverb*) mpool_alloc(sizeof(_tNReverb), m->pool);
+    _tNReverb* r = *rev = (_tNReverb*) mpool_alloc(sizeof(_tNReverb), &m->pool);
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
@@ -287,7 +287,7 @@ void    tNReverb_freeFromPool   (tNReverb* const rev, tMempool* const mp)
         tLinearDelay_freeFromPool(&r->allpassDelays[i], mp);
     }
     
-    mpool_free(r, m->pool);
+    mpool_free(r, &m->pool);
 }
 
 void    tNReverb_setT60(tNReverb* const rev, float t60)
@@ -537,7 +537,7 @@ void    tDattorroReverb_free              (tDattorroReverb* const rev)
 void    tDattorroReverb_initToPool        (tDattorroReverb* const rev, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tDattorroReverb* r = *rev = (_tDattorroReverb*) mpool_alloc(sizeof(_tDattorroReverb), m->pool);
+    _tDattorroReverb* r = *rev = (_tDattorroReverb*) mpool_alloc(sizeof(_tDattorroReverb), &m->pool);
     
     r->size_max = 2.0f;
     r->size = 1.f;
@@ -636,7 +636,7 @@ void    tDattorroReverb_freeFromPool      (tDattorroReverb* const rev, tMempool*
     
     tCycle_freeFromPool(&r->f2_lfo, mp);
     
-    mpool_free(r, m->pool);
+    mpool_free(r, &m->pool);
 }
 
 float   tDattorroReverb_tick              (tDattorroReverb* const rev, float input)

@@ -49,7 +49,7 @@ void tPluck_free (tPluck* const pl)
 void    tPluck_initToPool    (tPluck* const pl, float lowestFrequency, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPluck* p = *pl = (_tPluck*) mpool_alloc(sizeof(_tPluck), m->pool);
+    _tPluck* p = *pl = (_tPluck*) mpool_alloc(sizeof(_tPluck), &m->pool);
     
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 10.0f;
     
@@ -74,7 +74,7 @@ void    tPluck_freeFromPool  (tPluck* const pl, tMempool* const mp)
     tOneZero_freeFromPool(&p->loopFilter, mp);
     tAllpassDelay_freeFromPool(&p->delayLine, mp);
     
-    mpool_free(p, m->pool);
+    mpool_free(p, &m->pool);
 }
 
 float   tPluck_getLastOut    (tPluck* const pl)
@@ -204,7 +204,7 @@ void tKarplusStrong_free (tKarplusStrong* const pl)
 void    tKarplusStrong_initToPool   (tKarplusStrong* const pl, float lowestFrequency, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tKarplusStrong* p = *pl = (_tKarplusStrong*) mpool_alloc(sizeof(_tKarplusStrong), m->pool);
+    _tKarplusStrong* p = *pl = (_tKarplusStrong*) mpool_alloc(sizeof(_tKarplusStrong), &m->pool);
     
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 8.0f;
     
@@ -246,7 +246,7 @@ void    tKarplusStrong_freeFromPool (tKarplusStrong* const pl, tMempool* const m
         tBiQuad_freeFromPool(&p->biquad[i], mp);
     }
     
-    mpool_free(p, m->pool);
+    mpool_free(p, &m->pool);
 }
 
 float   tKarplusStrong_getLastOut    (tKarplusStrong* const pl)
@@ -441,7 +441,7 @@ void    tSimpleLivingString_initToPool  (tSimpleLivingString* const pl, float fr
                                          float levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tSimpleLivingString* p = *pl = (_tSimpleLivingString*) mpool_alloc(sizeof(_tSimpleLivingString), m->pool);
+    _tSimpleLivingString* p = *pl = (_tSimpleLivingString*) mpool_alloc(sizeof(_tSimpleLivingString), &m->pool);
     
     p->curr=0.0f;
     tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
@@ -465,7 +465,7 @@ void    tSimpleLivingString_freeFromPool    (tSimpleLivingString* const pl, tMem
     tHighpass_freeFromPool(&p->DCblocker, mp);
     tFeedbackLeveler_freeFromPool(&p->fbLev, mp);
     
-    mpool_free(p, m->pool);
+    mpool_free(p, &m->pool);
 }
 
 void     tSimpleLivingString_setFreq(tSimpleLivingString* const pl, float freq)
@@ -603,7 +603,7 @@ void    tLivingString_initToPool    (tLivingString* const pl, float freq, float 
                                      float levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tLivingString* p = *pl = (_tLivingString*) mpool_alloc(sizeof(_tLivingString), m->pool);
+    _tLivingString* p = *pl = (_tLivingString*) mpool_alloc(sizeof(_tLivingString), &m->pool);
     
     p->curr=0.0f;
     tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
@@ -650,7 +650,7 @@ void    tLivingString_freeFromPool  (tLivingString* const pl, tMempool* const mp
     tFeedbackLeveler_freeFromPool(&p->fbLevU, mp);
     tFeedbackLeveler_freeFromPool(&p->fbLevL, mp);
     
-    mpool_free(p, m->pool);
+    mpool_free(p, &m->pool);
 }
 
 void     tLivingString_setFreq(tLivingString* const pl, float freq)
@@ -795,7 +795,7 @@ void    tReedTable_free      (tReedTable* const pm)
 void    tReedTable_initToPool   (tReedTable* const pm, float offset, float slope, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tReedTable* p = *pm = (_tReedTable*) mpool_alloc(sizeof(_tReedTable), m->pool);
+    _tReedTable* p = *pm = (_tReedTable*) mpool_alloc(sizeof(_tReedTable), &m->pool);
     
     p->offset = offset;
     p->slope = slope;
@@ -806,7 +806,7 @@ void    tReedTable_freeFromPool (tReedTable* const pm, tMempool* const mp)
     _tMempool* m = *mp;
     _tReedTable* p = *pm;
     
-    mpool_free(p, m->pool);
+    mpool_free(p, &m->pool);
 }
 
 float   tReedTable_tick      (tReedTable* const pm, float input)
