@@ -206,7 +206,7 @@ void tEnvPD_free (tEnvPD* const xpd)
 void    tEnvPD_initToPool       (tEnvPD* const xpd, int ws, int hs, int bs, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tEnvPD* x = *xpd = (_tEnvPD*) mpool_alloc(sizeof(_tEnvPD), &m->pool);
+    _tEnvPD* x = *xpd = (_tEnvPD*) mpool_allocAndClear(sizeof(_tEnvPD), &m->pool);
     
     int period = hs, npoints = ws;
     
@@ -875,7 +875,7 @@ void tPeriodDetection_free (tPeriodDetection* const pd)
 void    tPeriodDetection_initToPool  (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_alloc(sizeof(_tPeriodDetection), &m->pool);
+    _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_allocAndClear(sizeof(_tPeriodDetection), &m->pool);
     
     p->inBuffer = in;
     p->outBuffer = out;
