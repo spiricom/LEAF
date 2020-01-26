@@ -87,7 +87,7 @@ void    LEAFTest_block           (void)
     
     x = val * 3.5f + 0.5f;
     
-    a = val * tBuffer_getLength(&buff);
+    a = val * tBuffer_getBufferLength(&buff);
     
     DBG("start: " + String(a));
     
@@ -95,7 +95,7 @@ void    LEAFTest_block           (void)
     
     y = val * 49.0f + 1.0f;
     b = val * 20.0f - 5.0f;
-    b = val * tBuffer_getLength(&buff);
+    b = val * tBuffer_getBufferLength(&buff);
     
     DBG("rate: " + String(b));
     

@@ -1542,6 +1542,7 @@ void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int bufsize
     _tFormantShifter* fs = *fsr = (_tFormantShifter*) mpool_alloc(sizeof(_tFormantShifter), &m->pool);
     
     fs->ford = order;
+
     fs->fk = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
     fs->fb = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
     fs->fc = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
@@ -1550,7 +1551,6 @@ void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int bufsize
     fs->fsig = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
     fs->fsmooth = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
     fs->ftvec = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
-    
     fs->fbuff = (float*) mpool_alloc(sizeof(float*) * fs->ford, &m->pool);
 
     
