@@ -289,9 +289,9 @@ extern "C" {
     
     typedef _tFormantShifter* tFormantShifter;
     
-    void    tFormantShifter_init            (tFormantShifter* const, int bufsize, int order);
+    void    tFormantShifter_init            (tFormantShifter* const, int order);
     void    tFormantShifter_free            (tFormantShifter* const);
-    void    tFormantShifter_initToPool      (tFormantShifter* const, int bufsize, int order, tMempool* const);
+    void    tFormantShifter_initToPool      (tFormantShifter* const, int order, tMempool* const);
     void    tFormantShifter_freeFromPool    (tFormantShifter* const, tMempool* const);
     
     float   tFormantShifter_tick            (tFormantShifter* const, float input);

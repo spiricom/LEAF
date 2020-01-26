@@ -1485,35 +1485,35 @@ float tAutotune_getInputFreq(tAutotune* const rt)
 //============================================================================================================
 // algorithm from Tom Baran's autotalent code.
 
-void tFormantShifter_init(tFormantShifter* const fsr, int bufsize, int order)
+void tFormantShifter_init(tFormantShifter* const fsr, int order)
 {
     _tFormantShifter* fs = *fsr = (_tFormantShifter*) leaf_alloc(sizeof(_tFormantShifter));
     
     fs->ford = order;
-    fs->fk = (float*) leaf_alloc(sizeof(float) * fs->ford);
-    fs->fb = (float*) leaf_alloc(sizeof(float) * fs->ford);
-    fs->fc = (float*) leaf_alloc(sizeof(float) * fs->ford);
-    fs->frb = (float*) leaf_alloc(sizeof(float) * fs->ford);
-    fs->frc = (float*) leaf_alloc(sizeof(float) * fs->ford);
-    fs->fsig = (float*) leaf_alloc(sizeof(float) * fs->ford);
-    fs->fsmooth = (float*) leaf_alloc(sizeof(float) * fs->ford);
-    fs->ftvec = (float*) leaf_alloc(sizeof(float) * fs->ford);
-    fs->fbuff = (float*) leaf_alloc(sizeof(float*) * fs->ford);
+    fs->fk = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
+    fs->fb = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
+    fs->fc = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
+    fs->frb = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
+    fs->frc = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
+    fs->fsig = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
+    fs->fsmooth = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
+    fs->ftvec = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
+    fs->fbuff = (float*) leaf_allocAndClear(sizeof(float*) * fs->ford);
 
-    fs->falph = powf(0.001f, 10.0f / (leaf.sampleRate));
+    fs->falph = powf(0.001f, 40.0f * leaf.invSampleRate);
     fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
     fs->fhp = 0.0f;
     fs->flp = 0.0f;
-    fs->flpa = powf(0.001f, 10.0f / (leaf.sampleRate));
+    fs->flpa = powf(0.001f, 10.0f * leaf.invSampleRate);
     fs->fmute = 1.0f;
-    fs->fmutealph = powf(0.001f, 1.0f / (leaf.sampleRate));
+    fs->fmutealph = powf(0.001f, 0.5f * leaf.invSampleRate);
     fs->cbi = 0;
     fs->intensity = 1.0f;
 	fs->invIntensity = 1.0f;
 	tHighpass_init(&fs->hp, 10.0f);
 	tHighpass_init(&fs->hp2, 10.0f);
-	tFeedbackLeveler_init(&fs->fbl1, 0.8f, 0.005f, 0.125f, 0);
-	tFeedbackLeveler_init(&fs->fbl2, 0.8f, 0.005f, 0.125f, 0);
+	tFeedbackLeveler_init(&fs->fbl1, 0.99f, 0.005f, 0.125f, 0);
+	tFeedbackLeveler_init(&fs->fbl2, 0.99f, 0.005f, 0.125f, 0);
 }
 
 void tFormantShifter_free(tFormantShifter* const fsr)
@@ -1536,31 +1536,31 @@ void tFormantShifter_free(tFormantShifter* const fsr)
     leaf_free(fs);
 }
 
-void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int bufsize, int order, tMempool* const mp)
+void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int order, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tFormantShifter* fs = *fsr = (_tFormantShifter*) mpool_alloc(sizeof(_tFormantShifter), &m->pool);
     
     fs->ford = order;
-
-    fs->fk = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
-    fs->fb = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
-    fs->fc = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
-    fs->frb = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
-    fs->frc = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
-    fs->fsig = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
-    fs->fsmooth = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
-    fs->ftvec = (float*) mpool_alloc(sizeof(float) * fs->ford, &m->pool);
-    fs->fbuff = (float*) mpool_alloc(sizeof(float*) * fs->ford, &m->pool);
+    fs->fk = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
+    fs->fb = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
+    fs->fc = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
+    fs->frb = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
+    fs->frc = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
+    fs->fsig = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
+    fs->fsmooth = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
+    fs->ftvec = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
+    
+    fs->fbuff = (float*) mpool_allocAndClear(sizeof(float*) * fs->ford, &m->pool);
 
     
-    fs->falph = powf(0.001f, 10.0f / (leaf.sampleRate));
+    fs->falph = powf(0.001f, 10.0f * leaf.invSampleRate);
     fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
     fs->fhp = 0.0f;
     fs->flp = 0.0f;
-    fs->flpa = powf(0.001f, 10.0f / (leaf.sampleRate));
+    fs->flpa = powf(0.001f, 10.0f * leaf.invSampleRate);
     fs->fmute = 1.0f;
-    fs->fmutealph = powf(0.001f, 1.0f / (leaf.sampleRate));
+    fs->fmutealph = powf(0.001f, 1.0f * leaf.invSampleRate);
     fs->cbi = 0;
     fs->intensity = 1.0f;
     fs->invIntensity = 1.0f;
@@ -1599,8 +1599,8 @@ float tFormantShifter_tick(tFormantShifter* const fsr, float in)
 float tFormantShifter_remove(tFormantShifter* const fsr, float in)
 {
     _tFormantShifter* fs = *fsr;
-    in = tFeedbackLeveler_tick(&fs->fbl1, in * fs->intensity);
-    in = tHighpass_tick(&fs->hp, in * 100.0f);
+    in = tFeedbackLeveler_tick(&fs->fbl1, in);
+    in = tHighpass_tick(&fs->hp, in * fs->intensity);
     
 
     float fa, fb, fc, foma, falph, ford, flamb, tf, fk;
@@ -1631,8 +1631,8 @@ float tFormantShifter_remove(tFormantShifter* const fsr, float in)
         fa = fa - tf*fc;
     }
 
-    return fa / 100.f;
-    //return fa * fs->invIntensity;
+    //return fa * 0.1f;
+    return fa;
 }
 
 float tFormantShifter_add(tFormantShifter* const fsr, float in)
@@ -1729,7 +1729,7 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
     //tf = tFeedbackLeveler_tick(&fs->fbl2, tf);
     tf = tHighpass_tick(&fs->hp2, tanhf(tf));
 
-    return tf;
+    return tf * fs->invIntensity;
 }
 
 // 1.0f is no change, 2.0f is an octave up, 0.5f is an octave down
@@ -1745,10 +1745,10 @@ void tFormantShifter_setIntensity(tFormantShifter* const fsr, float intensity)
 
 
 
-    fs->intensity = intensity;
+    fs->intensity = LEAF_clip(1.0f, intensity, 100.0f);
 
-    tFeedbackLeveler_setTargetLevel(&fs->fbl1, intensity);
-    tFeedbackLeveler_setTargetLevel(&fs->fbl2, intensity);
+   // tFeedbackLeveler_setTargetLevel(&fs->fbl1, fs->intensity);
+    //tFeedbackLeveler_setTargetLevel(&fs->fbl2, fs->intensity);
     //make sure you don't divide by zero, doofies
     if (fs->intensity != 0.0f)
     {
