@@ -261,7 +261,6 @@ extern "C" {
     typedef struct _tFormantShifter
     {
         int ford;
-        int bufsize;
         float falph;
         float flamb;
         float* fk;
@@ -274,7 +273,7 @@ extern "C" {
         float fhp;
         float flp;
         float flpa;
-        float** fbuff;
+        float* fbuff;
         float* ftvec;
         float fmute;
         float fmutealph;

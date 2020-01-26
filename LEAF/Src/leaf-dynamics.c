@@ -66,7 +66,7 @@ void tCompressor_free(tCompressor* const comp)
 void    tCompressor_initToPool  (tCompressor* const comp, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tCompressor* c = *comp = (_tCompressor*) mpool_alloc(sizeof(_tCompressor), m->pool);
+    _tCompressor* c = *comp = (_tCompressor*) mpool_alloc(sizeof(_tCompressor), &m->pool);
     
     c->tauAttack = 100;
     c->tauRelease = 100;
@@ -84,7 +84,7 @@ void    tCompressor_freeFromPool(tCompressor* const comp, tMempool* const mp)
     _tMempool* m = *mp;
     _tCompressor* c = *comp;
     
-    mpool_free(c, m->pool);
+    mpool_free(c, &m->pool);
 }
 
 float tCompressor_tick(tCompressor* const comp, float in)
@@ -160,7 +160,7 @@ void tFeedbackLeveler_free(tFeedbackLeveler* const fb)
 void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const fb, float targetLevel, float factor, float strength, int mode, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) mpool_alloc(sizeof(_tFeedbackLeveler), m->pool);
+    _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) mpool_alloc(sizeof(_tFeedbackLeveler), &m->pool);
     
     p->curr=0.0f;
     p->targetLevel=targetLevel;
@@ -175,7 +175,7 @@ void    tFeedbackLeveler_freeFromPool   (tFeedbackLeveler* const fb, tMempool* c
     _tFeedbackLeveler* p = *fb;
     
     tPowerFollower_freeFromPool(&p->pwrFlw, mp);
-    mpool_free(p, m->pool);
+    mpool_free(p, &m->pool);
 }
 
 void     tFeedbackLeveler_setStrength(tFeedbackLeveler* const fb, float strength)

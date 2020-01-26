@@ -364,7 +364,7 @@ void tMempool_init(tMempool* const mp, char* memory, size_t size)
 {
     _tMempool* m = *mp = (_tMempool*) leaf_alloc(sizeof(_tMempool));
     
-    mpool_create (memory, size, m->pool);
+    mpool_create (memory, size, &m->pool);
 }
 
 void tMempool_free(tMempool* const mp)
@@ -377,9 +377,9 @@ void tMempool_free(tMempool* const mp)
 void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem)
 {
     _tMempool* mm = *mem;
-    _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), mm->pool);
+    _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), &mm->pool);
     
-    mpool_create (memory, size, m->pool);
+    mpool_create (memory, size, &m->pool);
 }
 
 void    tMempool_freeFromPool   (tMempool* const mp, tMempool* const mem)
@@ -387,5 +387,5 @@ void    tMempool_freeFromPool   (tMempool* const mp, tMempool* const mem)
     _tMempool* mm = *mem;
     _tMempool* m = *mp;
     
-    mpool_free(m, mm->pool);
+    mpool_free(m, &mm->pool);
 }

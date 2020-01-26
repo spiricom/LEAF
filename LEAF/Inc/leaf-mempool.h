@@ -74,13 +74,10 @@ extern "C" {
     } mpool_t;
     
     void mpool_create (char* memory, size_t size, mpool_t* pool);
-    
-<<<<<<< HEAD
+
     void* mpool_alloc(size_t size, mpool_t* pool);
     void* mpool_allocAndClear(size_t asize, mpool_t* pool);
-=======
-    void *mpool_alloc(size_t size, mpool_t* pool);
->>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
+
     void mpool_free(void* ptr, mpool_t* pool);
     
     size_t mpool_get_size(mpool_t* pool);
@@ -89,10 +86,8 @@ extern "C" {
     void leaf_pool_init(char* memory, size_t size);
     
     void* leaf_alloc(size_t size);
-<<<<<<< HEAD
     void* leaf_allocAndClear(size_t size);
-=======
->>>>>>> b8628af4ceadb4749cd557e6bd3057c2639f3c97
+
     void leaf_free(void* ptr);
     
     size_t leaf_pool_get_size(void);
@@ -106,7 +101,7 @@ extern "C" {
     
     typedef struct _tMempool
     {
-        mpool_t* pool;
+        mpool_t pool;
     } _tMempool;
     
     typedef _tMempool* tMempool;
