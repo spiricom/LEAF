@@ -26,7 +26,7 @@ void LEAF_init(float sr, int blocksize, char* memory, size_t memorysize, float(*
     leaf_pool_init(memory, memorysize);
     
     leaf.sampleRate = sr;
-    
+
     leaf.blockSize = blocksize;
     
     leaf.invSampleRate = 1.0f/sr;

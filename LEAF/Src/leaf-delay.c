@@ -187,7 +187,7 @@ void   tLinearDelay_init (tLinearDelay* const dl, float delay, uint32_t maxDelay
     else if (delay < 0.0f)  d->delay = 0.0f;
     else                    d->delay = delay;
     
-    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
+    d->buff = (float*) leaf_allocAndClear(sizeof(float) * maxDelay);
     
     d->gain = 1.0f;
     
@@ -902,6 +902,7 @@ float   tTapeDelay_tick (tTapeDelay* const dl, float input)
     
     if (d->idx >= d->maxDelay) d->idx = 0.0f;
 
+    if (d->lastOut)
     return d->lastOut;
 }
 
