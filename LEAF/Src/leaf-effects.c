@@ -1025,7 +1025,7 @@ float tPitchShift_shiftToFunc (tPitchShift* psr, float (*fun)(float))
 //============================================================================================================
 static void retune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize)
 {
-    _tRetune* r = *rt = (_tRetune*) leaf_allocAndClear(sizeof(_tRetune));
+    _tRetune* r = *rt;
     
     r->bufSize = bufSize;
     r->frameSize = frameSize;
@@ -1225,7 +1225,7 @@ float tRetune_getInputFreq(tRetune* const rt)
 // AUTOTUNE
 //============================================================================================================
 
-void autotune_init(tAutotune* const rt, int numVoices, int bufSize, int frameSize)
+static void autotune_init(tAutotune* const rt, int numVoices, int bufSize, int frameSize)
 {
     _tAutotune* r = *rt;
     
