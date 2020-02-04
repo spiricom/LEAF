@@ -416,7 +416,7 @@ void    tDattorroReverb_init              (tDattorroReverb* const rev)
 {
     _tDattorroReverb* r = *rev = (_tDattorroReverb*) leaf_alloc(sizeof(_tDattorroReverb));
     float size_max = 2.0f;
-    r->t = r->size * leaf.sampleRate * 0.001f;
+    r->t = leaf.sampleRate * 0.001f;
     // INPUT
     tTapeDelay_init(&r->in_delay, 0.f, SAMP(200.f));
     tOnePole_init(&r->in_filter, 1.f);
@@ -502,7 +502,7 @@ void    tDattorroReverb_initToPool        (tDattorroReverb* const rev, tMempool*
     _tMempool* m = *mp;
     _tDattorroReverb* r = *rev = (_tDattorroReverb*) mpool_alloc(sizeof(_tDattorroReverb), &m->pool);
     float size_max = 2.0f;
-    r->t = r->size * leaf.sampleRate * 0.001f;
+    r->t = leaf.sampleRate * 0.001f;
     // INPUT
     tTapeDelay_initToPool(&r->in_delay, 0.f, SAMP(200.f), mp);
     tOnePole_initToPool(&r->in_filter, 1.f, mp);
