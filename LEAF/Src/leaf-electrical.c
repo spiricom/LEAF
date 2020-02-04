@@ -167,14 +167,12 @@ static void wdf_init(tWDF* const wdf, WDFComponentType type, float value, tWDF* 
 void tWDF_init(tWDF* const wdf, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
 {
     *wdf = (_tWDF*) leaf_alloc(sizeof(_tWDF));
-    
     wdf_init(wdf, type, value, rL, rR);
 }
 
 void tWDF_free(tWDF* const wdf)
 {
     _tWDF* r = *wdf;
-    
     leaf_free(r);
 }
 
@@ -182,7 +180,6 @@ void    tWDF_initToPool             (tWDF* const wdf, WDFComponentType type, flo
 {
     _tMempool* m = *mp;
     *wdf = (_tWDF*) mpool_alloc(sizeof(_tWDF), &m->pool);
-    
     wdf_init(wdf, type, value, rL, rR);
 }
 
@@ -190,7 +187,6 @@ void    tWDF_freeFromPool           (tWDF* const wdf, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tWDF* r = *wdf;
-    
     mpool_free(r, &m->pool);
 }
 

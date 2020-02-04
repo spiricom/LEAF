@@ -19,35 +19,36 @@
 #endif
 
 // Cycle
-void    tCycle_init(tCycle* const cy)
+static void    cycle_init(tCycle* const cy)
 {
-    _tCycle* c = *cy = (_tCycle*) leaf_alloc(sizeof(_tCycle));
-    
+    _tCycle* c = *cy;
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+}
+
+void    tCycle_init(tCycle* const cy)
+{
+    *cy = (_tCycle*) leaf_alloc(sizeof(_tCycle));
+    cycle_init(cy);
 }
 
 void    tCycle_free(tCycle* const cy)
 {
     _tCycle* c = *cy;
-    
     leaf_free(c);
 }
 
 void    tCycle_initToPool   (tCycle* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tCycle* c = *cy = (_tCycle*) mpool_alloc(sizeof(_tCycle), &m->pool);
-    
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
+    *cy = (_tCycle*) mpool_alloc(sizeof(_tCycle), &m->pool);
+    cycle_init(cy);
 }
 
 void    tCycle_freeFromPool (tCycle* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tCycle* c = *cy;
-    
     mpool_free(c, &m->pool);
 }
 
@@ -90,35 +91,36 @@ void     tCycleSampleRateChanged (tCycle* const cy)
 
 //========================================================================
 /* Triangle */
-void   tTriangle_init(tTriangle* const cy)
+static void   triangle_init(tTriangle* const cy)
 {
-    _tTriangle* c = *cy = (_tTriangle*) leaf_alloc(sizeof(_tTriangle));
-    
+    _tTriangle* c = *cy;
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+}
+
+void   tTriangle_init(tTriangle* const cy)
+{
+    *cy = (_tTriangle*) leaf_alloc(sizeof(_tTriangle));
+    triangle_init(cy);
 }
 
 void   tTriangle_free(tTriangle* const cy)
 {
     _tTriangle* c = *cy;
-    
     leaf_free(c);
 }
 
 void    tTriangle_initToPool    (tTriangle* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tTriangle* c = *cy = (_tTriangle*) mpool_alloc(sizeof(_tTriangle), &m->pool);
-    
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
+    *cy = (_tTriangle*) mpool_alloc(sizeof(_tTriangle), &m->pool);
+    triangle_init(cy);
 }
 
 void    tTriangle_freeFromPool  (tTriangle* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tTriangle* c = *cy;
-    
     mpool_free(c, &m->pool);
 }
 
@@ -221,35 +223,36 @@ void     tTriangleSampleRateChanged (tTriangle* const cy)
 
 //========================================================================
 /* Square */
-void   tSquare_init(tSquare* const cy)
+static void   square_init(tSquare* const cy)
 {
-    _tSquare* c = *cy = (_tSquare*) leaf_alloc(sizeof(_tSquare));
-    
+    _tSquare* c = *cy;
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+}
+
+void   tSquare_init(tSquare* const cy)
+{
+    *cy = (_tSquare*) leaf_alloc(sizeof(_tSquare));
+    square_init(cy);
 }
 
 void   tSquare_free(tSquare* const cy)
 {
     _tSquare* c = *cy;
-    
     leaf_free(c);
 }
 
 void    tSquare_initToPool  (tSquare* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tSquare* c = *cy = (_tSquare*) mpool_alloc(sizeof(_tSquare), &m->pool);
-    
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
+    *cy = (_tSquare*) mpool_alloc(sizeof(_tSquare), &m->pool);
+    square_init(cy);
 }
 
 void    tSquare_freeFromPool(tSquare* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSquare* c = *cy;
-    
     mpool_free(c, &m->pool);
 }
 
@@ -350,35 +353,36 @@ void     tSquareSampleRateChanged (tSquare* const cy)
 
 //=====================================================================
 // Sawtooth
-void    tSawtooth_init(tSawtooth* const cy)
+static void    sawtooth_init(tSawtooth* const cy)
 {
-    _tSawtooth* c = *cy = (_tSawtooth*) leaf_alloc(sizeof(_tSawtooth));
-    
+    _tSawtooth* c = *cy;
     c->inc      = 0.0f;
     c->phase    = 0.0f;
+}
+
+void    tSawtooth_init(tSawtooth* const cy)
+{
+    *cy = (_tSawtooth*) leaf_alloc(sizeof(_tSawtooth));
+    sawtooth_init(cy);
 }
 
 void    tSawtooth_free(tSawtooth* const cy)
 {
     _tSawtooth* c = *cy;
-    
     leaf_free(c);
 }
 
 void    tSawtooth_initToPool    (tSawtooth* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tSawtooth* c = *cy = (_tSawtooth*) mpool_alloc(sizeof(_tSawtooth), &m->pool);
-    
-    c->inc      = 0.0f;
-    c->phase    = 0.0f;
+    *cy = (_tSawtooth*) mpool_alloc(sizeof(_tSawtooth), &m->pool);
+    sawtooth_init(cy);
 }
 
 void    tSawtooth_freeFromPool  (tSawtooth* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSawtooth* c = *cy;
-    
     mpool_free(c, &m->pool);
 }
 
@@ -480,42 +484,36 @@ void     tSawtoothSampleRateChanged (tSawtooth* const cy)
 
 //========================================================================
 /* Phasor */
-void     tPhasorSampleRateChanged (tPhasor* const ph)
+static void    phasor_init(tPhasor* const ph)
 {
     _tPhasor* p = *ph;
-    
-    p->inc = p->freq * leaf.invSampleRate;
-};
+    p->phase = 0.0f;
+    p->inc = 0.0f;
+}
 
 void    tPhasor_init(tPhasor* const ph)
 {
-    _tPhasor* p = *ph = (_tPhasor*) leaf_alloc(sizeof(_tPhasor));
-    
-    p->phase = 0.0f;
-    p->inc = 0.0f;
+    *ph = (_tPhasor*) leaf_alloc(sizeof(_tPhasor));
+    phasor_init(ph);
 }
 
 void    tPhasor_free(tPhasor* const ph)
 {
     _tPhasor* p = *ph;
-    
     leaf_free(p);
 }
 
 void    tPhasor_initToPool  (tPhasor* const ph, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPhasor* p = *ph = (_tPhasor*) mpool_alloc(sizeof(_tPhasor), &m->pool);
-    
-    p->phase = 0.0f;
-    p->inc = 0.0f;
+    *ph = (_tPhasor*) mpool_alloc(sizeof(_tPhasor), &m->pool);
+    phasor_init(ph);
 }
 
 void    tPhasor_freeFromPool(tPhasor* const ph, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPhasor* p = *ph;
-    
     mpool_free(p, &m->pool);
 }
 
@@ -543,35 +541,36 @@ float   tPhasor_tick(tPhasor* const ph)
 }
 
 /* Noise */
-void    tNoise_init(tNoise* const ns, NoiseType type)
+static void    noise_init(tNoise* const ns, NoiseType type)
 {
-    _tNoise* n = *ns = (_tNoise*) leaf_alloc(sizeof(_tNoise));
-    
+    _tNoise* n = *ns;
     n->type = type;
     n->rand = leaf.random;
+}
+
+void    tNoise_init(tNoise* const ns, NoiseType type)
+{
+    *ns = (_tNoise*) leaf_alloc(sizeof(_tNoise));
+    noise_init(ns, type);
 }
 
 void    tNoise_free(tNoise* const ns)
 {
     _tNoise* n = *ns;
-    
     leaf_free(n);
 }
 
 void    tNoise_initToPool   (tNoise* const ns, NoiseType type, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tNoise* n = *ns = (_tNoise*) mpool_alloc(sizeof(_tNoise), &m->pool);
-    
-    n->type = type;
-    n->rand = leaf.random;
+    *ns = (_tNoise*) mpool_alloc(sizeof(_tNoise), &m->pool);
+    noise_init(ns, type);
 }
 
 void    tNoise_freeFromPool (tNoise* const ns, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tNoise* n = *ns;
-    
     mpool_free(n, &m->pool);
 }
 
@@ -596,20 +595,18 @@ float   tNoise_tick(tNoise* const ns)
     }
 }
 
-//=================================================================================
-/* Neuron */
-
-void     tNeuronSampleRateChanged(tNeuron* nr)
+void     tPhasorSampleRateChanged (tPhasor* const ph)
 {
+    _tPhasor* p = *ph;
     
+    p->inc = p->freq * leaf.invSampleRate;
 }
 
-void    tNeuron_init(tNeuron* const nr)
+//=================================================================================
+/* Neuron */
+static void    neuron_init(tNeuron* const nr)
 {
-    _tNeuron* n = *nr = (_tNeuron*) leaf_alloc(sizeof(_tNeuron));
-    
-    tPoleZero_init(&n->f);
-    
+    _tNeuron* n = *nr;
     tPoleZero_setBlockZero(&n->f, 0.99f);
     
     n->timeStep = 1.0f / 50.0f;
@@ -635,10 +632,16 @@ void    tNeuron_init(tNeuron* const nr)
     n->rate[2] = n->gL/n->C;
 }
 
+void    tNeuron_init(tNeuron* const nr)
+{
+    _tNeuron* n = *nr = (_tNeuron*) leaf_alloc(sizeof(_tNeuron));
+    tPoleZero_init(&n->f);
+    neuron_init(nr);
+}
+
 void    tNeuron_free(tNeuron* const nr)
 {
     _tNeuron* n = *nr;
-    
     tPoleZero_free(&n->f);
     leaf_free(n);
 }
@@ -647,32 +650,8 @@ void    tNeuron_initToPool  (tNeuron* const nr, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tNeuron* n = *nr = (_tNeuron*) mpool_alloc(sizeof(_tNeuron), &m->pool);
-    
     tPoleZero_initToPool(&n->f, mp);
-    
-    tPoleZero_setBlockZero(&n->f, 0.99f);
-    
-    n->timeStep = 1.0f / 50.0f;
-    
-    n->current = 0.0f; // 100.0f for sound
-    n->voltage = 0.0f;
-    
-    n->mode = NeuronNormal;
-    
-    n->P[0] = 0.0f;
-    n->P[1] = 0.0f;
-    n->P[2] = 1.0f;
-    
-    n->V[0] = -12.0f;
-    n->V[1] = 115.0f;
-    n->V[2] = 10.613f;
-    
-    n->gK = 36.0f;
-    n->gN = 120.0f;
-    n->gL = 0.3f;
-    n->C = 1.0f;
-    
-    n->rate[2] = n->gL/n->C;
+    neuron_init(nr);
 }
 
 void    tNeuron_freeFromPool(tNeuron* const nr, tMempool* const mp)
@@ -850,4 +829,9 @@ void        tNeuron_setCurrent  (tNeuron* const nr, float current)
 {
     _tNeuron* n = *nr;
     n->current = current;
+}
+
+void     tNeuronSampleRateChanged(tNeuron* nr)
+{
+    
 }

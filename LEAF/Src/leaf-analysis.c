@@ -21,38 +21,38 @@
 //===========================================================================
 /* Envelope Follower */
 //===========================================================================
-
-void    tEnvelopeFollower_init(tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff)
+static void    envelopefollower_init(tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff)
 {
-    _tEnvelopeFollower* e = *ef = (_tEnvelopeFollower*) leaf_alloc(sizeof(_tEnvelopeFollower));
+    _tEnvelopeFollower* e = *ef;
     
     e->y = 0.0f;
     e->a_thresh = attackThreshold;
     e->d_coeff = decayCoeff;
 }
 
+void    tEnvelopeFollower_init(tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff)
+{
+    *ef = (_tEnvelopeFollower*) leaf_alloc(sizeof(_tEnvelopeFollower));
+    envelopefollower_init(ef, attackThreshold, decayCoeff);
+}
+
 void tEnvelopeFollower_free(tEnvelopeFollower* const ef)
 {
     _tEnvelopeFollower* e = *ef;
-    
     leaf_free(e);
 }
 
 void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tEnvelopeFollower* e = *ef = (_tEnvelopeFollower*) mpool_alloc(sizeof(_tEnvelopeFollower), &m->pool);
-    
-    e->y = 0.0f;
-    e->a_thresh = attackThreshold;
-    e->d_coeff = decayCoeff;
+    *ef = (_tEnvelopeFollower*) mpool_alloc(sizeof(_tEnvelopeFollower), &m->pool);
+    envelopefollower_init(ef, attackThreshold, decayCoeff);
 }
 
 void    tEnvelopeFollower_freeFromPool  (tEnvelopeFollower* const ef, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tEnvelopeFollower* e = *ef;
-    
     mpool_free(e, &m->pool);
 }
 
@@ -89,37 +89,38 @@ int     tEnvelopeFollower_attackThresh(tEnvelopeFollower* const ef, float attack
 //===========================================================================
 /* Power Follower */
 //===========================================================================
-void    tPowerFollower_init(tPowerFollower* const pf, float factor)
+static void    powerfollower_init(tPowerFollower* const pf, float factor)
 {
-    _tPowerFollower* p = *pf = (_tPowerFollower*) leaf_alloc(sizeof(_tPowerFollower));
+    _tPowerFollower* p = *pf;
     
     p->curr=0.0f;
     p->factor=factor;
     p->oneminusfactor=1.0f-factor;
 }
 
+void    tPowerFollower_init(tPowerFollower* const pf, float factor)
+{
+    *pf = (_tPowerFollower*) leaf_alloc(sizeof(_tPowerFollower));
+    powerfollower_init(pf, factor);
+}
+
 void tPowerFollower_free(tPowerFollower* const pf)
 {
     _tPowerFollower* p = *pf;
-    
     leaf_free(p);
 }
 
 void    tPowerFollower_initToPool   (tPowerFollower* const pf, float factor, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPowerFollower* p = *pf = (_tPowerFollower*) mpool_alloc(sizeof(_tPowerFollower), &m->pool);
-    
-    p->curr=0.0f;
-    p->factor=factor;
-    p->oneminusfactor=1.0f-factor;
+    *pf = (_tPowerFollower*) mpool_alloc(sizeof(_tPowerFollower), &m->pool);
+    powerfollower_init(pf, factor);
 }
 
 void    tPowerFollower_freeFromPool (tPowerFollower* const pf, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPowerFollower* p = *pf;
-    
     mpool_free(p, &m->pool);
 }
 
@@ -153,10 +154,9 @@ float   tPowerFollower_sample(tPowerFollower* const pf)
 //===========================================================================
 /* ---------------- env~ - simple envelope follower. ----------------- */
 //===========================================================================
-
-void tEnvPD_init(tEnvPD* const xpd, int ws, int hs, int bs)
+static void envpd_init(tEnvPD* const xpd, int ws, int hs, int bs)
 {
-    _tEnvPD* x = *xpd = (_tEnvPD*) leaf_allocAndClear(sizeof(_tEnvPD));
+    _tEnvPD* x = *xpd;
     
     int period = hs, npoints = ws;
     
@@ -196,61 +196,29 @@ void tEnvPD_init(tEnvPD* const xpd, int ws, int hs, int bs)
     // ~ ~ ~ ~ ~ ~ ~ ~
 }
 
+void tEnvPD_init(tEnvPD* const xpd, int ws, int hs, int bs)
+{
+    *xpd = (_tEnvPD*) leaf_allocAndClear(sizeof(_tEnvPD));
+    envpd_init(xpd, ws, hs, bs);
+}
+
 void tEnvPD_free (tEnvPD* const xpd)
 {
     _tEnvPD* x = *xpd;
-    
     leaf_free(x);
 }
 
 void    tEnvPD_initToPool       (tEnvPD* const xpd, int ws, int hs, int bs, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tEnvPD* x = *xpd = (_tEnvPD*) mpool_allocAndClear(sizeof(_tEnvPD), &m->pool);
-    
-    int period = hs, npoints = ws;
-    
-    int i;
-    
-    if (npoints < 1) npoints = 1024;
-    if (period < 1) period = npoints/2;
-    if (period < npoints / MAXOVERLAP + 1)
-        period = npoints / MAXOVERLAP + 1;
-    
-    x->x_npoints = npoints;
-    x->x_phase = 0;
-    x->x_period = period;
-    
-    x->windowSize = npoints;
-    x->hopSize = period;
-    x->blockSize = bs;
-    
-    for (i = 0; i < MAXOVERLAP; i++) x->x_sumbuf[i] = 0;
-    for (i = 0; i < npoints; i++)
-        x->buf[i] = (1.0f - cosf((2 * PI * i) / npoints))/npoints;
-    for (; i < npoints+INITVSTAKEN; i++) x->buf[i] = 0;
-    
-    x->x_f = 0;
-    
-    x->x_allocforvs = INITVSTAKEN;
-    
-    // ~ ~ ~ dsp ~ ~ ~
-    if (x->x_period % x->blockSize)
-    {
-        x->x_realperiod = x->x_period + x->blockSize - (x->x_period % x->blockSize);
-    }
-    else
-    {
-        x->x_realperiod = x->x_period;
-    }
-    // ~ ~ ~ ~ ~ ~ ~ ~
+    *xpd = (_tEnvPD*) mpool_allocAndClear(sizeof(_tEnvPD), &m->pool);
+    envpd_init(xpd, ws, hs, bs);
 }
 
 void    tEnvPD_freeFromPool     (tEnvPD* const xpd, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tEnvPD* x = *xpd;
-    
     mpool_free(x, &m->pool);
 }
 
@@ -458,11 +426,9 @@ static float snac_spectralpeak(tSNAC* const s, float periodlength);
 /******************************************************************************/
 /******************************** constructor, destructor *********************/
 /******************************************************************************/
-
-
-void tSNAC_init(tSNAC* const snac, int overlaparg)
+static void snac_init(tSNAC* const snac, int overlaparg)
 {
-    _tSNAC* s = *snac = (_tSNAC*) leaf_allocAndClear(sizeof(_tSNAC));
+    _tSNAC* s = *snac;
     
     s->biasfactor = DEFBIAS;
     s->timeindex = 0;
@@ -472,13 +438,18 @@ void tSNAC_init(tSNAC* const snac, int overlaparg)
     s->minrms = DEFMINRMS;
     s->framesize = SNAC_FRAME_SIZE;
     
+    snac_biasbuf(snac);
+    tSNAC_setOverlap(snac, overlaparg);
+}
+
+void tSNAC_init(tSNAC* const snac, int overlaparg)
+{
+    _tSNAC* s = *snac = (_tSNAC*) leaf_allocAndClear(sizeof(_tSNAC));
     s->inputbuf = (float*) leaf_allocAndClear(sizeof(float) * SNAC_FRAME_SIZE);
     s->processbuf = (float*) leaf_allocAndClear(sizeof(float) * (SNAC_FRAME_SIZE * 2));
     s->spectrumbuf = (float*) leaf_allocAndClear(sizeof(float) * (SNAC_FRAME_SIZE / 2));
     s->biasbuf = (float*) leaf_allocAndClear(sizeof(float) * SNAC_FRAME_SIZE);
-    
-    snac_biasbuf(snac);
-    tSNAC_setOverlap(snac, overlaparg);
+    snac_init(snac, overlaparg);
 }
 
 void tSNAC_free(tSNAC* const snac)
@@ -496,29 +467,17 @@ void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const 
 {
     _tMempool* m = *mp;
     _tSNAC* s = *snac = (_tSNAC*) mpool_alloc(sizeof(_tSNAC), &m->pool);
-    
-    s->biasfactor = DEFBIAS;
-    s->timeindex = 0;
-    s->periodindex = 0;
-    s->periodlength = 0.;
-    s->fidelity = 0.;
-    s->minrms = DEFMINRMS;
-    s->framesize = SNAC_FRAME_SIZE;
-
     s->inputbuf = (float*) mpool_allocAndClear(sizeof(float) * SNAC_FRAME_SIZE, &m->pool);
     s->processbuf = (float*) mpool_allocAndClear(sizeof(float) * (SNAC_FRAME_SIZE * 2), &m->pool);
     s->spectrumbuf = (float*) mpool_allocAndClear(sizeof(float) * (SNAC_FRAME_SIZE / 2), &m->pool);
     s->biasbuf = (float*) mpool_allocAndClear(sizeof(float) * SNAC_FRAME_SIZE, &m->pool);
-    
-    snac_biasbuf(snac);
-    tSNAC_setOverlap(snac, overlaparg);
+    snac_init(snac, overlaparg);
 }
 
 void    tSNAC_freeFromPool  (tSNAC* const snac, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSNAC* s = *snac;
-    
     mpool_free(s->inputbuf, &m->pool);
     mpool_free(s->processbuf, &m->pool);
     mpool_free(s->spectrumbuf, &m->pool);
@@ -838,9 +797,9 @@ static void snac_biasbuf(tSNAC* const snac)
 //===========================================================================
 // PERIODDETECTION
 //===========================================================================
-void    tPeriodDetection_init    (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize)
+static void    perioddetection_init    (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize)
 {
-    _tPeriodDetection* p = *pd = (_tPeriodDetection*) leaf_allocAndClear(sizeof(_tPeriodDetection));
+    _tPeriodDetection* p = *pd;
     
     p->inBuffer = in;
     p->outBuffer = out;
@@ -855,18 +814,22 @@ void    tPeriodDetection_init    (tPeriodDetection* const pd, float* in, float* 
     p->windowSize = DEFWINDOWSIZE;
     p->fba = FBA;
     
-    tEnvPD_init(&p->env, p->windowSize, p->hopSize, p->frameSize);
-    
-    tSNAC_init(&p->snac, DEFOVERLAP);
-    
     p->timeConstant = DEFTIMECONSTANT;
     p->radius = expf(-1000.0f * p->hopSize * leaf.invSampleRate / p->timeConstant);
+}
+
+void    tPeriodDetection_init    (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize)
+{
+    _tPeriodDetection* p = *pd = (_tPeriodDetection*) leaf_allocAndClear(sizeof(_tPeriodDetection));
+    perioddetection_init(pd, in, out, bufSize, frameSize);
+    
+    tEnvPD_init(&p->env, p->windowSize, p->hopSize, p->frameSize);
+    tSNAC_init(&p->snac, DEFOVERLAP);
 }
 
 void tPeriodDetection_free (tPeriodDetection* const pd)
 {
     _tPeriodDetection* p = *pd;
-    
     tEnvPD_free(&p->env);
     tSNAC_free(&p->snac);
     leaf_free(p);
@@ -876,33 +839,16 @@ void    tPeriodDetection_initToPool  (tPeriodDetection* const pd, float* in, flo
 {
     _tMempool* m = *mp;
     _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_allocAndClear(sizeof(_tPeriodDetection), &m->pool);
-    
-    p->inBuffer = in;
-    p->outBuffer = out;
-    p->bufSize = bufSize;
-    p->frameSize = frameSize;
-    p->framesPerBuffer = p->bufSize / p->frameSize;
-    p->curBlock = 1;
-    p->lastBlock = 0;
-    p->index = 0;
-    
-    p->hopSize = DEFHOPSIZE;
-    p->windowSize = DEFWINDOWSIZE;
-    p->fba = FBA;
+    perioddetection_init(pd, in, out, bufSize, frameSize);
     
     tEnvPD_initToPool(&p->env, p->windowSize, p->hopSize, p->frameSize, mp);
-    
     tSNAC_initToPool(&p->snac, DEFOVERLAP, mp);
-    
-    p->timeConstant = DEFTIMECONSTANT;
-    p->radius = expf(-1000.0f * p->hopSize * leaf.invSampleRate / p->timeConstant);
 }
 
 void    tPeriodDetection_freeFromPool       (tPeriodDetection* const pd, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPeriodDetection* p = *pd;
-    
     tEnvPD_freeFromPool(&p->env, mp);
     tSNAC_freeFromPool(&p->snac, mp);
     mpool_free(p, &m->pool);

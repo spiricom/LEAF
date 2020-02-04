@@ -124,8 +124,6 @@ extern "C" {
     void    tSampler_setStart           (tSampler* const, int32_t start);
     void    tSampler_setEnd             (tSampler* const, int32_t end);
 
-    static void handleStartEndChange    (tSampler* const sp);
-
     void 	tSampler_setCrossfadeLength (tSampler* const sp, uint32_t length);
     
     void    tSampler_setRate            (tSampler* const, float rate);

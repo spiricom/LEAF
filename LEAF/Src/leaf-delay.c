@@ -19,31 +19,31 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Delay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tDelay_init (tDelay* const dl, uint32_t delay, uint32_t maxDelay)
+static void    delay_init (tDelay* const dl, uint32_t delay, uint32_t maxDelay)
 {
-    _tDelay* d = *dl = (_tDelay*) leaf_alloc(sizeof(_tDelay));
+    _tDelay* d = *dl;
     
     d->maxDelay = maxDelay;
-    
     d->delay = delay;
-    
-    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
-    
     d->inPoint = 0;
     d->outPoint = 0;
-    
     d->lastIn = 0.0f;
     d->lastOut = 0.0f;
-    
     d->gain = 1.0f;
     
     tDelay_setDelay(dl, d->delay);
 }
 
+void    tDelay_init (tDelay* const dl, uint32_t delay, uint32_t maxDelay)
+{
+    _tDelay* d = *dl = (_tDelay*) leaf_alloc(sizeof(_tDelay));
+    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
+    delay_init(dl, delay, maxDelay);
+}
+
 void tDelay_free(tDelay* const dl)
 {
     _tDelay* d = *dl;
-    
     leaf_free(d->buff);
     leaf_free(d);
 }
@@ -52,29 +52,14 @@ void        tDelay_initToPool   (tDelay* const dl, uint32_t delay, uint32_t maxD
 {
     _tMempool* m = *mp;
     _tDelay* d = *dl = (_tDelay*) mpool_alloc(sizeof(_tDelay), &m->pool);
-    
-    d->maxDelay = maxDelay;
-    
-    d->delay = delay;
-    
     d->buff = (float*) mpool_alloc(sizeof(float) * maxDelay, &m->pool);
-    
-    d->inPoint = 0;
-    d->outPoint = 0;
-    
-    d->lastIn = 0.0f;
-    d->lastOut = 0.0f;
-    
-    d->gain = 1.0f;
-    
-    tDelay_setDelay(dl, d->delay);
+    delay_init(dl, delay, maxDelay);
 }
 
 void        tDelay_freeFromPool (tDelay* const dl, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tDelay* d = *dl;
-    
     mpool_free(d->buff, &m->pool);
     mpool_free(d, &m->pool);
 }
@@ -177,33 +162,35 @@ float tDelay_getGain (tDelay* const dl)
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ LinearDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void   tLinearDelay_init (tLinearDelay* const dl, float delay, uint32_t maxDelay)
+static void   lineardelay_init (tLinearDelay* const dl, float delay, uint32_t maxDelay)
 {
-    _tLinearDelay* d = *dl = (_tLinearDelay*) leaf_alloc(sizeof(_tLinearDelay));
+    _tLinearDelay* d = *dl;
     
     d->maxDelay = maxDelay;
-
+    
     if (delay > maxDelay)   d->delay = maxDelay;
     else if (delay < 0.0f)  d->delay = 0.0f;
     else                    d->delay = delay;
     
-    d->buff = (float*) leaf_allocAndClear(sizeof(float) * maxDelay);
-    
     d->gain = 1.0f;
-    
     d->lastIn = 0.0f;
     d->lastOut = 0.0f;
-
     d->inPoint = 0;
     d->outPoint = 0;
     
     tLinearDelay_setDelay(dl, d->delay);
 }
 
+void   tLinearDelay_init (tLinearDelay* const dl, float delay, uint32_t maxDelay)
+{
+    _tLinearDelay* d = *dl = (_tLinearDelay*) leaf_alloc(sizeof(_tLinearDelay));
+    d->buff = (float*) leaf_allocAndClear(sizeof(float) * maxDelay);
+    lineardelay_init(dl, delay, maxDelay);
+}
+
 void tLinearDelay_free(tLinearDelay* const dl)
 {
     _tLinearDelay* d = *dl;
-    
     leaf_free(d->buff);
     leaf_free(d);
 }
@@ -212,31 +199,14 @@ void    tLinearDelay_initToPool  (tLinearDelay* const dl, float delay, uint32_t 
 {
     _tMempool* m = *mp;
     _tLinearDelay* d = *dl = (_tLinearDelay*) mpool_alloc(sizeof(_tLinearDelay), &m->pool);
-    
-    d->maxDelay = maxDelay;
-    
-    if (delay > maxDelay)   d->delay = maxDelay;
-    else if (delay < 0.0f)  d->delay = 0.0f;
-    else                    d->delay = delay;
-    
-    d->buff = (float*) mpool_alloc(sizeof(float) * maxDelay, &m->pool);
-    
-    d->gain = 1.0f;
-    
-    d->lastIn = 0.0f;
-    d->lastOut = 0.0f;
-    
-    d->inPoint = 0;
-    d->outPoint = 0;
-    
-    tLinearDelay_setDelay(dl, d->delay);
+    d->buff = (float*) mpool_allocAndClear(sizeof(float) * maxDelay, &m->pool);
+    lineardelay_init(dl, delay, maxDelay);
 }
 
 void    tLinearDelay_freeFromPool(tLinearDelay* const dl, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tLinearDelay* d = *dl;
-    
     mpool_free(d->buff, &m->pool);
     mpool_free(d, &m->pool);
 }
@@ -248,8 +218,6 @@ void    tLinearDelay_clear(tLinearDelay* const dl)
 	{
 		d->buff[i] = 0;
 	}
-
-
 }
 
 float   tLinearDelay_tick (tLinearDelay* const dl, float input)
@@ -393,38 +361,37 @@ float tLinearDelay_getGain (tLinearDelay* const dl)
 }
 
 
-
-
-
 /// Hermite Interpolated Delay
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ LinearDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void   tHermiteDelay_init (tHermiteDelay* const dl, float delay, uint32_t maxDelay)
+static void   hermitedelay_init (tHermiteDelay* const dl, float delay, uint32_t maxDelay)
 {
-	_tHermiteDelay* d = *dl = (_tHermiteDelay*) leaf_alloc(sizeof(_tHermiteDelay));
-
+    _tHermiteDelay* d = *dl;
+    
     d->maxDelay = maxDelay;
-
+    
     if (delay > maxDelay)   d->delay = maxDelay;
     else if (delay < 0.0f)  d->delay = 0.0f;
     else                    d->delay = delay;
 
-    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
-
     d->gain = 1.0f;
-
     d->lastIn = 0.0f;
     d->lastOut = 0.0f;
-
     d->inPoint = 0;
     d->outPoint = 0;
-
+    
     tHermiteDelay_setDelay(dl, d->delay);
+}
+
+void   tHermiteDelay_init (tHermiteDelay* const dl, float delay, uint32_t maxDelay)
+{
+	_tHermiteDelay* d = *dl = (_tHermiteDelay*) leaf_alloc(sizeof(_tHermiteDelay));
+    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
+    hermitedelay_init(dl, delay, maxDelay);
 }
 
 void tHermiteDelay_free(tHermiteDelay* const dl)
 {
 	_tHermiteDelay* d = *dl;
-
     leaf_free(d->buff);
     leaf_free(d);
 }
@@ -433,31 +400,14 @@ void    tHermiteDelay_initToPool  (tHermiteDelay* const dl, float delay, uint32_
 {
     _tMempool* m = *mp;
     _tHermiteDelay* d = *dl = (_tHermiteDelay*) mpool_alloc(sizeof(_tHermiteDelay), &m->pool);
-
-    d->maxDelay = maxDelay;
-
-    if (delay > maxDelay)   d->delay = maxDelay;
-    else if (delay < 0.0f)  d->delay = 0.0f;
-    else                    d->delay = delay;
-
     d->buff = (float*) mpool_alloc(sizeof(float) * maxDelay, &m->pool);
-
-    d->gain = 1.0f;
-
-    d->lastIn = 0.0f;
-    d->lastOut = 0.0f;
-
-    d->inPoint = 0;
-    d->outPoint = 0;
-
-    tHermiteDelay_setDelay(dl, d->delay);
+    hermitedelay_init(dl, delay, maxDelay);
 }
 
 void    tHermiteDelay_freeFromPool(tHermiteDelay* const dl, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tHermiteDelay* d = *dl;
-
     mpool_free(d->buff, &m->pool);
     mpool_free(d, &m->pool);
 }
@@ -470,8 +420,6 @@ void    tHermiteDelay_clear(tHermiteDelay* const dl)
 	{
 		d->buff[i] = 0;
 	}
-
-
 }
 
 float   tHermiteDelay_tick (tHermiteDelay* const dl, float input)
@@ -616,14 +564,10 @@ float tHermiteDelay_getGain (tHermiteDelay* const dl)
     return d->gain;
 }
 
-
-
-
-
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ AllpassDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void  tAllpassDelay_init (tAllpassDelay* const dl, float delay, uint32_t maxDelay)
+static void  allpass_init (tAllpassDelay* const dl, float delay, uint32_t maxDelay)
 {
-    _tAllpassDelay* d = *dl = (_tAllpassDelay*) leaf_alloc(sizeof(_tAllpassDelay));
+    _tAllpassDelay* d = *dl;
     
     d->maxDelay = maxDelay;
     
@@ -631,25 +575,25 @@ void  tAllpassDelay_init (tAllpassDelay* const dl, float delay, uint32_t maxDela
     else if (delay < 0.0f)  d->delay = 0.0f;
     else                    d->delay = delay;
     
-    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
-    
     d->gain = 1.0f;
-    
     d->lastIn = 0.0f;
     d->lastOut = 0.0f;
-    
     d->inPoint = 0;
     d->outPoint = 0;
-    
     tAllpassDelay_setDelay(dl, d->delay);
-    
     d->apInput = 0.0f;
+}
+
+void  tAllpassDelay_init (tAllpassDelay* const dl, float delay, uint32_t maxDelay)
+{
+    _tAllpassDelay* d = *dl = (_tAllpassDelay*) leaf_alloc(sizeof(_tAllpassDelay));
+    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
+    allpass_init(dl, delay, maxDelay);
 }
 
 void tAllpassDelay_free(tAllpassDelay* const dl)
 {
     _tAllpassDelay* d = *dl;
-    
     leaf_free(d->buff);
     leaf_free(d);
 }
@@ -658,33 +602,14 @@ void    tAllpassDelay_initToPool  (tAllpassDelay* const dl, float delay, uint32_
 {
     _tMempool* m = *mp;
     _tAllpassDelay* d = *dl = (_tAllpassDelay*) mpool_alloc(sizeof(_tAllpassDelay), &m->pool);
-    
-    d->maxDelay = maxDelay;
-    
-    if (delay > maxDelay)   d->delay = maxDelay;
-    else if (delay < 0.0f)  d->delay = 0.0f;
-    else                    d->delay = delay;
-    
     d->buff = (float*) mpool_alloc(sizeof(float) * maxDelay, &m->pool);
-    
-    d->gain = 1.0f;
-    
-    d->lastIn = 0.0f;
-    d->lastOut = 0.0f;
-    
-    d->inPoint = 0;
-    d->outPoint = 0;
-    
-    tAllpassDelay_setDelay(dl, d->delay);
-    
-    d->apInput = 0.0f;
+    allpass_init(dl, delay, maxDelay);
 }
 
 void    tAllpassDelay_freeFromPool(tAllpassDelay* const dl, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tAllpassDelay* d = *dl;
-    
     mpool_free(d->buff, &m->pool);
     mpool_free(d, &m->pool);
 }
@@ -815,19 +740,14 @@ float tAllpassDelay_getGain (tAllpassDelay* const dl)
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ TapeDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void   tTapeDelay_init (tTapeDelay* const dl, float delay, uint32_t maxDelay)
+static void   tapedelay_init (tTapeDelay* const dl, float delay, uint32_t maxDelay)
 {
-    _tTapeDelay* d = *dl = (_tTapeDelay*) leaf_alloc(sizeof(_tTapeDelay));
+    _tTapeDelay* d = *dl;
     
     d->maxDelay = maxDelay;
-
-    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
-    
     d->gain = 1.0f;
-    
     d->lastIn = 0.0f;
     d->lastOut = 0.0f;
-    
     d->idx = 0.0f;
     d->inc = 1.0f;
     d->inPoint = 0;
@@ -835,10 +755,16 @@ void   tTapeDelay_init (tTapeDelay* const dl, float delay, uint32_t maxDelay)
     tTapeDelay_setDelay(dl, delay);
 }
 
+void   tTapeDelay_init (tTapeDelay* const dl, float delay, uint32_t maxDelay)
+{
+    _tTapeDelay* d = *dl = (_tTapeDelay*) leaf_alloc(sizeof(_tTapeDelay));
+    d->buff = (float*) leaf_alloc(sizeof(float) * maxDelay);
+    tapedelay_init(dl, delay, maxDelay);
+}
+
 void tTapeDelay_free(tTapeDelay* const dl)
 {
     _tTapeDelay* d = *dl;
-    
     leaf_free(d->buff);
     leaf_free(d);
 }
@@ -847,28 +773,14 @@ void    tTapeDelay_initToPool  (tTapeDelay* const dl, float delay, uint32_t maxD
 {
     _tMempool* m = *mp;
     _tTapeDelay* d = *dl = (_tTapeDelay*) mpool_alloc(sizeof(_tTapeDelay), &m->pool);
-    
-    d->maxDelay = maxDelay;
-    
     d->buff = (float*) mpool_alloc(sizeof(float) * maxDelay, &m->pool);
-    
-    d->gain = 1.0f;
-    
-    d->lastIn = 0.0f;
-    d->lastOut = 0.0f;
-    
-    d->idx = 0.0f;
-    d->inc = 1.0f;
-    d->inPoint = 0;
-    
-    tTapeDelay_setDelay(dl, delay);
+    tapedelay_init(dl, delay, maxDelay);
 }
 
 void    tTapeDelay_freeFromPool(tTapeDelay* const dl, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tTapeDelay* d = *dl;
-    
     mpool_free(d->buff, &m->pool);
     mpool_free(d, &m->pool);
 }
@@ -902,8 +814,8 @@ float   tTapeDelay_tick (tTapeDelay* const dl, float input)
     
     if (d->idx >= d->maxDelay) d->idx = 0.0f;
 
-    if (d->lastOut)
-    return d->lastOut;
+    if (d->lastOut) return d->lastOut;
+    else return 0.0f;
 }
 
 void  tTapeDelay_incrementInPoint(tTapeDelay* const dl)
