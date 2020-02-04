@@ -1268,12 +1268,12 @@ void tAutotune_init(tAutotune* const rt, int numVoices, int bufSize, int frameSi
 void tAutotune_free(tAutotune* const rt)
 {
     _tAutotune* r = *rt;
-    tPeriodDetection_free(&r->pd);
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_free(&r->ps[i]);
         leaf_free(r->outBuffers[i]);
     }
+    tPeriodDetection_free(&r->pd);
     leaf_free(r->tickOutput);
     leaf_free(r->freq);
     leaf_free(r->ps);
@@ -1311,12 +1311,12 @@ void    tAutotune_freeFromPool      (tAutotune* const rt, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tAutotune* r = *rt;
-    tPeriodDetection_freeFromPool(&r->pd, mp);
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_freeFromPool(&r->ps[i], mp);
         mpool_free(r->outBuffers[i], &m->pool);
     }
+    tPeriodDetection_freeFromPool(&r->pd, mp);
     mpool_free(r->tickOutput, &m->pool);
     mpool_free(r->freq, &m->pool);
     mpool_free(r->ps, &m->pool);

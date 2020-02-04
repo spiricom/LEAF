@@ -555,8 +555,6 @@ static void    livingstring_init(tLivingString* const pl, float freq, float pick
     p->decay = decay;
     p->prepIndex = prepIndex;
     p->levMode = levMode;
-    tLivingString_setFreq(pl, freq);
-    tLivingString_setPickPos(pl, pickPos);
 }
 
 void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, float prepIndex,
@@ -564,9 +562,11 @@ void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, f
                            float levStrength, int levMode)
 {
     _tLivingString* p = *pl = (_tLivingString*) leaf_alloc(sizeof(_tLivingString));
-
+    
     tExpSmooth_init(&p->wlSmooth, leaf.sampleRate/freq, 0.01); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tExpSmooth_init(&p->ppSmooth, pickPos, 0.01); // smoother for pick position
+    tLivingString_setFreq(pl, freq);
+    tLivingString_setPickPos(pl, pickPos);
     tLinearDelay_init(&p->delLF,p->waveLengthInSamples, 2400);
     tLinearDelay_init(&p->delUF,p->waveLengthInSamples, 2400);
     tLinearDelay_init(&p->delUB,p->waveLengthInSamples, 2400);
@@ -614,6 +614,8 @@ void    tLivingString_initToPool    (tLivingString* const pl, float freq, float 
     
     tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tExpSmooth_initToPool(&p->ppSmooth, pickPos, 0.01, mp); // smoother for pick position
+    tLivingString_setFreq(pl, freq);
+    tLivingString_setPickPos(pl, pickPos);
     tLinearDelay_initToPool(&p->delLF,p->waveLengthInSamples, 2400, mp);
     tLinearDelay_initToPool(&p->delUF,p->waveLengthInSamples, 2400, mp);
     tLinearDelay_initToPool(&p->delUB,p->waveLengthInSamples, 2400, mp);
