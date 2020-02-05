@@ -1273,7 +1273,6 @@ void tAutotune_free(tAutotune* const rt)
         tPitchShift_free(&r->ps[i]);
         leaf_free(r->outBuffers[i]);
     }
-    tPeriodDetection_free(&r->pd);
     leaf_free(r->tickOutput);
     leaf_free(r->freq);
     leaf_free(r->ps);

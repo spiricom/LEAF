@@ -19,8 +19,6 @@
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ tPluck ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 static void    pluck_init         (tPluck* const pl, float lowestFrequency)
 {
-    _tPluck* p = *pl;
-    
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 10.0f;
 
     tPluck_setFrequency(pl, 220.0f);
@@ -548,7 +546,7 @@ static void    livingstring_init(tLivingString* const pl, float freq, float pick
 {
     _tLivingString* p = *pl;
     
-    p->curr=0.0f;
+    p->curr = 0.0f;
     p->freq = freq;
     p->prepIndex = prepIndex;
     p->dampFreq = dampFreq;
@@ -658,8 +656,8 @@ void    tLivingString_freeFromPool  (tLivingString* const pl, tMempool* const mp
 void     tLivingString_setFreq(tLivingString* const pl, float freq)
 {    // NOTE: It is faster to set wavelength in samples directly
     _tLivingString* p = *pl;
-    if (freq<20) freq=20;
-    else if (freq>10000) freq=10000;
+    if (freq < 20) freq = 20;
+    else if (freq > 10000) freq = 10000;
     p->waveLengthInSamples = leaf.sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
@@ -667,8 +665,8 @@ void     tLivingString_setFreq(tLivingString* const pl, float freq)
 void     tLivingString_setWaveLength(tLivingString* const pl, float waveLength)
 {
     _tLivingString* p = *pl;
-    if (waveLength<4.8) waveLength=4.8;
-    else if (waveLength>2400) waveLength=2400;
+    if (waveLength < 4.8) waveLength = 4.8;
+    else if (waveLength > 2400) waveLength = 2400;
     p->waveLengthInSamples = waveLength;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
@@ -787,7 +785,7 @@ static void    reedtable_init      (tReedTable* const pm, float offset, float sl
 
 void    tReedTable_init      (tReedTable* const pm, float offset, float slope)
 {
-    _tReedTable* p = *pm = (_tReedTable*) leaf_alloc(sizeof(_tReedTable));
+    *pm = (_tReedTable*) leaf_alloc(sizeof(_tReedTable));
     reedtable_init(pm, offset, slope);
 }
 
@@ -800,7 +798,7 @@ void    tReedTable_free      (tReedTable* const pm)
 void    tReedTable_initToPool   (tReedTable* const pm, float offset, float slope, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tReedTable* p = *pm = (_tReedTable*) mpool_alloc(sizeof(_tReedTable), &m->pool);
+    *pm = (_tReedTable*) mpool_alloc(sizeof(_tReedTable), &m->pool);
     reedtable_init(pm, offset, slope);
 }
 

@@ -114,10 +114,10 @@ static void    feedbackleveler_init(tFeedbackLeveler* const fb, float targetLeve
 {
     _tFeedbackLeveler* p = *fb;
     
-    p->curr=0.0f;
-    p->targetLevel=targetLevel;
-    p->mode=mode;
-    p->strength=strength;
+    p->curr = 0.0f;
+    p->targetLevel = targetLevel;
+    p->mode = mode;
+    p->strength = strength;
 }
 
 void    tFeedbackLeveler_init(tFeedbackLeveler* const fb, float targetLevel, float factor, float strength, int mode)
@@ -139,7 +139,7 @@ void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const fb, float targe
     _tMempool* m = *mp;
     _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) mpool_alloc(sizeof(_tFeedbackLeveler), &m->pool);
     feedbackleveler_init(fb, targetLevel, factor, strength, mode);
-    tPowerFollower_init(&p->pwrFlw,factor);
+    tPowerFollower_initToPool(&p->pwrFlw, factor, mp);
 }
 
 void    tFeedbackLeveler_freeFromPool   (tFeedbackLeveler* const fb, tMempool* const mp)

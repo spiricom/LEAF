@@ -301,16 +301,16 @@ static void poly_init(tPoly* const polyh, int maxNumVoices)
 void tPoly_init(tPoly* const polyh, int maxNumVoices)
 {
     _tPoly* poly = *polyh = (_tPoly*) leaf_alloc(sizeof(_tPoly));
+    
+    poly->ramps = (tRamp*) leaf_alloc(sizeof(tRamp) * maxNumVoices);
+    poly->rampVals = (float*) leaf_alloc(sizeof(float) * maxNumVoices);
+    poly->firstReceived = (oBool*) leaf_alloc(sizeof(oBool) * maxNumVoices);
+    poly->voices = (int**) leaf_alloc(sizeof(int*) * maxNumVoices);
     for (int i = 0; i < maxNumVoices; ++i)
     {
         poly->voices[i] = (int*) leaf_alloc(sizeof(int) * 2);
     }
     poly_init(polyh, maxNumVoices);
-    
-    poly->ramps = (tRamp*) leaf_alloc(sizeof(tRamp) * poly->maxNumVoices);
-    poly->rampVals = (float*) leaf_alloc(sizeof(float) * poly->maxNumVoices);
-    poly->firstReceived = (oBool*) leaf_alloc(sizeof(oBool) * poly->maxNumVoices);
-    poly->voices = (int**) leaf_alloc(sizeof(int*) * poly->maxNumVoices);
     
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
@@ -346,16 +346,16 @@ void    tPoly_initToPool            (tPoly* const polyh, int maxNumVoices, tMemp
 {
     _tMempool* m = *mp;
     _tPoly* poly = *polyh = (_tPoly*) mpool_alloc(sizeof(_tPoly), &m->pool);
+    
+    poly->ramps = (tRamp*) mpool_alloc(sizeof(tRamp) * maxNumVoices, &m->pool);
+    poly->rampVals = (float*) mpool_alloc(sizeof(float) * maxNumVoices, &m->pool);
+    poly->firstReceived = (oBool*) mpool_alloc(sizeof(oBool) * maxNumVoices, &m->pool);
+    poly->voices = (int**) mpool_alloc(sizeof(int*) * maxNumVoices, &m->pool);
     for (int i = 0; i < maxNumVoices; ++i)
     {
         poly->voices[i] = (int*) mpool_alloc(sizeof(int) * 2, &m->pool);
     }
     poly_init(polyh, maxNumVoices);
-    
-    poly->ramps = (tRamp*) mpool_alloc(sizeof(tRamp) * poly->maxNumVoices, &m->pool);
-    poly->rampVals = (float*) mpool_alloc(sizeof(float) * poly->maxNumVoices, &m->pool);
-    poly->firstReceived = (oBool*) mpool_alloc(sizeof(oBool) * poly->maxNumVoices, &m->pool);
-    poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, &m->pool);
     
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {

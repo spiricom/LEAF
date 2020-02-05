@@ -603,12 +603,12 @@ static void    expsmooth_init(tExpSmooth* const expsmooth, float val, float fact
 {    // factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
     _tExpSmooth* smooth = *expsmooth;
     
-    smooth->curr=val;
-    smooth->dest=val;
-    if (factor<0) factor=0;
-    if (factor>1) factor=1;
-    smooth->factor=factor;
-    smooth->oneminusfactor=1.0f-factor;
+    smooth->curr = val;
+    smooth->dest = val;
+    if (factor < 0) factor = 0;
+    if (factor > 1) factor = 1;
+    smooth->factor = factor;
+    smooth->oneminusfactor = 1.0f - factor;
 }
 
 void    tExpSmooth_init(tExpSmooth* const expsmooth, float val, float factor)
