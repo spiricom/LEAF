@@ -23,9 +23,13 @@
 #endif
 
 //==============================================================================
-static void  buffer_init (tBuffer* const sb, uint32_t length)
+
+void  tBuffer_init (tBuffer* const sb, uint32_t length)
 {
-    _tBuffer* s = *sb;
+    _tBuffer* s = *sb = (_tBuffer*) leaf_alloc(sizeof(_tBuffer));
+    
+    s->buff = (float*) leaf_alloc( sizeof(float) * length);
+    
     s->bufferLength = length;
     s->recordedLength = 0;
     s->active = 0;
@@ -33,16 +37,10 @@ static void  buffer_init (tBuffer* const sb, uint32_t length)
     s->mode = RecordOneShot;
 }
 
-void  tBuffer_init (tBuffer* const sb, uint32_t length)
-{
-    _tBuffer* s = *sb = (_tBuffer*) leaf_alloc(sizeof(_tBuffer));
-    buffer_init(sb, length);
-    s->buff = (float*) leaf_alloc( sizeof(float) * length);
-}
-
 void  tBuffer_free (tBuffer* const sb)
 {
     _tBuffer* s = *sb;
+    
     leaf_free(s->buff);
     leaf_free(s);
 }
@@ -51,14 +49,20 @@ void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp
 {
     _tMempool* m = *mp;
     _tBuffer* s = *sb = (_tBuffer*) mpool_alloc(sizeof(_tBuffer), &m->pool);
-    buffer_init(sb, length);
+    
     s->buff = (float*) mpool_alloc( sizeof(float) * length, &m->pool);
+    
+    s->bufferLength = length;
+    s->recordedLength = 0;
+    s->idx = 0;
+    s->mode = RecordOneShot;
 }
 
 void  tBuffer_freeFromPool (tBuffer* const sb, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tBuffer* s = *sb;
+
     mpool_free(s->buff, &m->pool);
     mpool_free(s, &m->pool);
 }
@@ -158,9 +162,9 @@ static void handleStartEndChange(tSampler* const sp);
 
 static void attemptStartEndChange(tSampler* const sp);
 
-static void sampler_init(tSampler* const sp, tBuffer* const b)
+void tSampler_init(tSampler* const sp, tBuffer* const b)
 {
-    _tSampler* p = *sp;
+    _tSampler* p = *sp = (_tSampler*) leaf_alloc(sizeof(_tSampler));
     _tBuffer* s = *b;
     
     p->samp = s;
@@ -184,40 +188,19 @@ static void sampler_init(tSampler* const sp, tBuffer* const b)
     
     p->cfxlen = 500; // default 300 sample crossfade
     
+    tRamp_init(&p->gain, 7.0f, 1);
     tRamp_setVal(&p->gain, 0.f);
     
     p->targetstart = -1;
     p->targetend = -1;
 }
 
-void tSampler_init(tSampler* const sp, tBuffer* const b)
-{
-    _tSampler* p = *sp = (_tSampler*) leaf_alloc(sizeof(_tSampler));
-    tRamp_init(&p->gain, 7.0f, 1);
-    sampler_init(sp, b);
-}
-
 void tSampler_free         (tSampler* const sp)
 {
     _tSampler* p = *sp;
     tRamp_free(&p->gain);
+    
     leaf_free(p);
-}
-
-void tSampler_initToPool    (tSampler* const sp, tBuffer* const b, tMempool* mp)
-{
-    _tMempool* m = *mp;
-    _tSampler* p = *sp = (_tSampler*) mpool_alloc(sizeof(_tSampler), &m->pool);
-    tRamp_initToPool(&p->gain, 7.0f, 1, mp);
-    sampler_init(sp, b);
-}
-
-void tSampler_freeFromPool  (tSampler* const sp, tMempool* mp)
-{
-    _tMempool* m = *mp;
-    _tSampler* p = *sp;
-    tRamp_freeFromPool(&p->gain, mp);
-    mpool_free(p, &m->pool);
 }
 
 void tSampler_setSample (tSampler* const sp, tBuffer* const b)

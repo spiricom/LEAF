@@ -31,8 +31,6 @@ extern "C" {
         
         float inv_441;
         
-        int lengths[4];
-        
         tDelay allpassDelays[2];
         tDelay combDelay;
         float allpassCoeff;
@@ -65,8 +63,6 @@ extern "C" {
         float mix, t60;
         
         float inv_sr, inv_441;
-        
-        int lengths[15];
         
         tLinearDelay allpassDelays[8];
         tLinearDelay combDelays[6];

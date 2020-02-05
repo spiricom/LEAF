@@ -19,9 +19,31 @@
 //==============================================================================
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Compressor ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-static void    compressor_init(tCompressor* const comp)
+
+/*
+ tCompressor*    tCompressorInit(int tauAttack, int tauRelease)
+ {
+ tCompressor* c = &leaf.tCompressorRegistry[leaf.registryIndex[T_COMPRESSOR]++];
+ 
+ c->tauAttack = tauAttack;
+ c->tauRelease = tauRelease;
+ 
+ c->x_G[0] = 0.0f, c->x_G[1] = 0.0f,
+ c->y_G[0] = 0.0f, c->y_G[1] = 0.0f,
+ c->x_T[0] = 0.0f, c->x_T[1] = 0.0f,
+ c->y_T[0] = 0.0f, c->y_T[1] = 0.0f;
+ 
+ c->T = 0.0f; // Threshold
+ c->R = 1.0f; // compression Ratio
+ c->M = 0.0f; // decibel Make-up gain
+ c->W = 0.0f; // decibel Width of knee transition
+ 
+ return c;
+ }
+ */
+void    tCompressor_init(tCompressor* const comp)
 {
-    _tCompressor* c = *comp;
+    _tCompressor* c = *comp = (_tCompressor*) leaf_alloc(sizeof(_tCompressor));
     
     c->tauAttack = 100;
     c->tauRelease = 100;
@@ -34,29 +56,34 @@ static void    compressor_init(tCompressor* const comp)
     c->W = 1.0f; // decibel Make-up gain
 }
 
-void    tCompressor_init(tCompressor* const comp)
-{
-    *comp = (_tCompressor*) leaf_alloc(sizeof(_tCompressor));
-    compressor_init(comp);
-}
-
 void tCompressor_free(tCompressor* const comp)
 {
     _tCompressor* c = *comp;
+    
     leaf_free(c);
 }
 
 void    tCompressor_initToPool  (tCompressor* const comp, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    *comp = (_tCompressor*) mpool_alloc(sizeof(_tCompressor), &m->pool);
-    compressor_init(comp);
+    _tCompressor* c = *comp = (_tCompressor*) mpool_alloc(sizeof(_tCompressor), &m->pool);
+    
+    c->tauAttack = 100;
+    c->tauRelease = 100;
+    
+    c->isActive = OFALSE;
+    
+    c->T = 0.0f; // Threshold
+    c->R = 0.5f; // compression Ratio
+    c->M = 3.0f; // decibel Width of knee transition
+    c->W = 1.0f; // decibel Make-up gain
 }
 
 void    tCompressor_freeFromPool(tCompressor* const comp, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tCompressor* c = *comp;
+    
     mpool_free(c, &m->pool);
 }
 
@@ -110,26 +137,22 @@ float tCompressor_tick(tCompressor* const comp, float in)
 }
 
 /* Feedback Leveler */
-static void    feedbackleveler_init(tFeedbackLeveler* const fb, float targetLevel, float factor, float strength, int mode)
-{
-    _tFeedbackLeveler* p = *fb;
-    
-    p->curr = 0.0f;
-    p->targetLevel = targetLevel;
-    p->mode = mode;
-    p->strength = strength;
-}
 
 void    tFeedbackLeveler_init(tFeedbackLeveler* const fb, float targetLevel, float factor, float strength, int mode)
 {
     _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) leaf_alloc(sizeof(_tFeedbackLeveler));
-    feedbackleveler_init(fb, targetLevel, factor, strength, mode);
+    
+    p->curr=0.0f;
+    p->targetLevel=targetLevel;
     tPowerFollower_init(&p->pwrFlw,factor);
+    p->mode=mode;
+    p->strength=strength;
 }
 
 void tFeedbackLeveler_free(tFeedbackLeveler* const fb)
 {
     _tFeedbackLeveler* p = *fb;
+    
     tPowerFollower_free(&p->pwrFlw);
     leaf_free(p);
 }
@@ -138,14 +161,19 @@ void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const fb, float targe
 {
     _tMempool* m = *mp;
     _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) mpool_alloc(sizeof(_tFeedbackLeveler), &m->pool);
-    feedbackleveler_init(fb, targetLevel, factor, strength, mode);
-    tPowerFollower_initToPool(&p->pwrFlw, factor, mp);
+    
+    p->curr=0.0f;
+    p->targetLevel=targetLevel;
+    tPowerFollower_initToPool(&p->pwrFlw,factor, mp);
+    p->mode=mode;
+    p->strength=strength;
 }
 
 void    tFeedbackLeveler_freeFromPool   (tFeedbackLeveler* const fb, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tFeedbackLeveler* p = *fb;
+    
     tPowerFollower_freeFromPool(&p->pwrFlw, mp);
     mpool_free(p, &m->pool);
 }

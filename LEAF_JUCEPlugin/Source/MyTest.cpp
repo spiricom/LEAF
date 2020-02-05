@@ -46,7 +46,7 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tSVF_init(&bp1, SVFTypeBandpass, 100, 4.0f);
     tSVF_init(&bp2, SVFTypeBandpass, 1000, 4.0f);
     
-    tFormantShifter_init(&fs, 20);
+    tFormantShifter_init(&fs, 2048, 20);
     
     // Init and set record
     tBuffer_init (&buff, leaf.sampleRate); // init, 1 second buffer

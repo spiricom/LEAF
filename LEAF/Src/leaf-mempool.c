@@ -360,34 +360,32 @@ void leaf_mempool_overrun(void)
 	//TODO: we should set up some kind of leaf_error method that reaches user space to notify library users of things that failed.
 }
 
-static void mempool_init(tMempool* const mp, char* memory, size_t size)
-{
-    _tMempool* m = *mp;
-    mpool_create (memory, size, &m->pool);
-}
-
 void tMempool_init(tMempool* const mp, char* memory, size_t size)
 {
-    *mp = (_tMempool*) leaf_alloc(sizeof(_tMempool));
-    mempool_init(mp, memory, size);
+    _tMempool* m = *mp = (_tMempool*) leaf_alloc(sizeof(_tMempool));
+    
+    mpool_create (memory, size, &m->pool);
 }
 
 void tMempool_free(tMempool* const mp)
 {
     _tMempool* m = *mp;
+    
     leaf_free(m);
 }
 
 void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem)
 {
     _tMempool* mm = *mem;
-    *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), &mm->pool);
-    mempool_init(mp, memory, size);
+    _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), &mm->pool);
+    
+    mpool_create (memory, size, &m->pool);
 }
 
 void    tMempool_freeFromPool   (tMempool* const mp, tMempool* const mem)
 {
     _tMempool* mm = *mem;
     _tMempool* m = *mp;
+    
     mpool_free(m, &mm->pool);
 }
