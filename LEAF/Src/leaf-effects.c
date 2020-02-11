@@ -506,10 +506,10 @@ static void pitchup(_tSOLAD *w, float *out);
 // init
 void     tSOLAD_init(tSOLAD* const wp)
 {
-    _tSOLAD* w = *wp = (_tSOLAD*) leaf_allocAndClear(sizeof(_tSOLAD));
+    _tSOLAD* w = *wp = (_tSOLAD*) leaf_calloc(sizeof(_tSOLAD));
     
     w->pitchfactor = 1.;
-    w->delaybuf = (float*) leaf_allocAndClear(sizeof(float) * (LOOPSIZE+16));
+    w->delaybuf = (float*) leaf_calloc(sizeof(float) * (LOOPSIZE+16));
     
     solad_init(w);
 }
@@ -526,10 +526,10 @@ void    tSOLAD_initToPool       (tSOLAD* const wp, tMempool* const mp)
 {
     _tMempool* m = *mp;
 
-    _tSOLAD* w = *wp = (_tSOLAD*) mpool_allocAndClear(sizeof(_tSOLAD), &m->pool);
+    _tSOLAD* w = *wp = (_tSOLAD*) mpool_calloc(sizeof(_tSOLAD), &m->pool);
     
     w->pitchfactor = 1.;
-    w->delaybuf = (float*) mpool_allocAndClear(sizeof(float) * (LOOPSIZE+16), &m->pool);
+    w->delaybuf = (float*) mpool_calloc(sizeof(float) * (LOOPSIZE+16), &m->pool);
 
     solad_init(w);
 }
@@ -875,7 +875,7 @@ static int pitchshift_attackdetect(_tPitchShift* ps)
 
 void tPitchShift_init (tPitchShift* const psr, tPeriodDetection* pd, float* out, int bufSize)
 {
-    _tPitchShift* ps = *psr = (_tPitchShift*) leaf_allocAndClear(sizeof(_tPitchShift));
+    _tPitchShift* ps = *psr = (_tPitchShift*) leaf_calloc(sizeof(_tPitchShift));
     _tPeriodDetection* p = *pd;
     
     ps->p = pd;
@@ -909,7 +909,7 @@ void    tPitchShift_initToPool      (tPitchShift* const psr, tPeriodDetection* c
 {
     _tMempool* m = *mp;
 
-    _tPitchShift* ps = *psr = (_tPitchShift*) mpool_allocAndClear(sizeof(_tPitchShift), &m->pool);
+    _tPitchShift* ps = *psr = (_tPitchShift*) mpool_calloc(sizeof(_tPitchShift), &m->pool);
 
     _tPeriodDetection* p = *pd;
     
@@ -1060,14 +1060,14 @@ float tPitchShift_shiftToFunc (tPitchShift* psr, float (*fun)(float))
 
 void tRetune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize)
 {
-    _tRetune* r = *rt = (_tRetune*) leaf_allocAndClear(sizeof(_tRetune));
+    _tRetune* r = *rt = (_tRetune*) leaf_calloc(sizeof(_tRetune));
     
     r->bufSize = bufSize;
     r->frameSize = frameSize;
     r->numVoices = numVoices;
     
-    r->inBuffer = (float*) leaf_allocAndClear(sizeof(float) * r->bufSize);
-    r->outBuffers = (float**) leaf_allocAndClear(sizeof(float*) * r->numVoices);
+    r->inBuffer = (float*) leaf_calloc(sizeof(float) * r->bufSize);
+    r->outBuffers = (float**) leaf_calloc(sizeof(float*) * r->numVoices);
     
     r->hopSize = DEFHOPSIZE;
     r->windowSize = DEFWINDOWSIZE;
@@ -1076,12 +1076,12 @@ void tRetune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize)
     
     r->inputPeriod = 0.0f;
     
-    r->ps = (tPitchShift*) leaf_allocAndClear(sizeof(tPitchShift) * r->numVoices);
-    r->pitchFactor = (float*) leaf_allocAndClear(sizeof(float) * r->numVoices);
-    r->tickOutput = (float*) leaf_allocAndClear(sizeof(float) * r->numVoices);
+    r->ps = (tPitchShift*) leaf_calloc(sizeof(tPitchShift) * r->numVoices);
+    r->pitchFactor = (float*) leaf_calloc(sizeof(float) * r->numVoices);
+    r->tickOutput = (float*) leaf_calloc(sizeof(float) * r->numVoices);
     for (int i = 0; i < r->numVoices; ++i)
     {
-        r->outBuffers[i] = (float*) leaf_allocAndClear(sizeof(float) * r->bufSize);
+        r->outBuffers[i] = (float*) leaf_calloc(sizeof(float) * r->bufSize);
     }
     
     tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
@@ -1119,8 +1119,8 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     r->frameSize = frameSize;
     r->numVoices = numVoices;
     
-    r->inBuffer = (float*) mpool_allocAndClear(sizeof(float) * r->bufSize, &m->pool);
-    r->outBuffers = (float**) mpool_allocAndClear(sizeof(float*) * r->numVoices, &m->pool);
+    r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, &m->pool);
+    r->outBuffers = (float**) mpool_calloc(sizeof(float*) * r->numVoices, &m->pool);
     
     r->hopSize = DEFHOPSIZE;
     r->windowSize = DEFWINDOWSIZE;
@@ -1129,12 +1129,12 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     
     r->inputPeriod = 0.0f;
 
-    r->ps = (tPitchShift*) mpool_allocAndClear(sizeof(tPitchShift) * r->numVoices, &m->pool);
-    r->pitchFactor = (float*) mpool_allocAndClear(sizeof(float) * r->numVoices, &m->pool);
-    r->tickOutput = (float*) mpool_allocAndClear(sizeof(float) * r->numVoices, &m->pool);
+    r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, &m->pool);
+    r->pitchFactor = (float*) mpool_calloc(sizeof(float) * r->numVoices, &m->pool);
+    r->tickOutput = (float*) mpool_calloc(sizeof(float) * r->numVoices, &m->pool);
     for (int i = 0; i < r->numVoices; ++i)
     {
-        r->outBuffers[i] = (float*) mpool_allocAndClear(sizeof(float) * r->bufSize, &m->pool);
+        r->outBuffers[i] = (float*) mpool_calloc(sizeof(float) * r->bufSize, &m->pool);
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
@@ -1490,15 +1490,15 @@ void tFormantShifter_init(tFormantShifter* const fsr, int order)
     _tFormantShifter* fs = *fsr = (_tFormantShifter*) leaf_alloc(sizeof(_tFormantShifter));
     
     fs->ford = order;
-    fs->fk = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
-    fs->fb = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
-    fs->fc = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
-    fs->frb = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
-    fs->frc = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
-    fs->fsig = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
-    fs->fsmooth = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
-    fs->ftvec = (float*) leaf_allocAndClear(sizeof(float) * fs->ford);
-    fs->fbuff = (float*) leaf_allocAndClear(sizeof(float*) * fs->ford);
+    fs->fk = (float*) leaf_calloc(sizeof(float) * fs->ford);
+    fs->fb = (float*) leaf_calloc(sizeof(float) * fs->ford);
+    fs->fc = (float*) leaf_calloc(sizeof(float) * fs->ford);
+    fs->frb = (float*) leaf_calloc(sizeof(float) * fs->ford);
+    fs->frc = (float*) leaf_calloc(sizeof(float) * fs->ford);
+    fs->fsig = (float*) leaf_calloc(sizeof(float) * fs->ford);
+    fs->fsmooth = (float*) leaf_calloc(sizeof(float) * fs->ford);
+    fs->ftvec = (float*) leaf_calloc(sizeof(float) * fs->ford);
+    fs->fbuff = (float*) leaf_calloc(sizeof(float*) * fs->ford);
 
     fs->falph = powf(0.001f, 40.0f * leaf.invSampleRate);
     fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
@@ -1542,16 +1542,16 @@ void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int order, 
     _tFormantShifter* fs = *fsr = (_tFormantShifter*) mpool_alloc(sizeof(_tFormantShifter), &m->pool);
     
     fs->ford = order;
-    fs->fk = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
-    fs->fb = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
-    fs->fc = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
-    fs->frb = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
-    fs->frc = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
-    fs->fsig = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
-    fs->fsmooth = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
-    fs->ftvec = (float*) mpool_allocAndClear(sizeof(float) * fs->ford, &m->pool);
+    fs->fk = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
+    fs->fb = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
+    fs->fc = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
+    fs->frb = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
+    fs->frc = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
+    fs->fsig = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
+    fs->fsmooth = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
+    fs->ftvec = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
     
-    fs->fbuff = (float*) mpool_allocAndClear(sizeof(float*) * fs->ford, &m->pool);
+    fs->fbuff = (float*) mpool_calloc(sizeof(float*) * fs->ford, &m->pool);
 
     
     fs->falph = powf(0.001f, 10.0f * leaf.invSampleRate);

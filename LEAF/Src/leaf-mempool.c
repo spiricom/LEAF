@@ -145,7 +145,7 @@ void* mpool_alloc(size_t asize, mpool_t* pool)
 /**
  * allocate memory from memory pool and also clear that memory to be blank
  */
-void* mpool_allocAndClear(size_t asize, mpool_t* pool)
+void* mpool_calloc(size_t asize, mpool_t* pool)
 {
     // If the head is NULL, the mempool is full
     if (pool->head == NULL) return NULL;
@@ -213,10 +213,10 @@ void* leaf_alloc(size_t size)
     return block;
 }
 
-void* leaf_allocAndClear(size_t size)
+void* leaf_calloc(size_t size)
 {
     //printf("alloc %i\n", size);
-    void* block = mpool_allocAndClear(size, &leaf_pool->pool);
+    void* block = mpool_calloc(size, &leaf_pool->pool);
     
     if (block == NULL) leaf_mempool_overrun();
     

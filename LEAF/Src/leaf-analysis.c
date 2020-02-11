@@ -156,7 +156,7 @@ float   tPowerFollower_sample(tPowerFollower* const pf)
 
 void tEnvPD_init(tEnvPD* const xpd, int ws, int hs, int bs)
 {
-    _tEnvPD* x = *xpd = (_tEnvPD*) leaf_allocAndClear(sizeof(_tEnvPD));
+    _tEnvPD* x = *xpd = (_tEnvPD*) leaf_calloc(sizeof(_tEnvPD));
     
     int period = hs, npoints = ws;
     
@@ -206,7 +206,7 @@ void tEnvPD_free (tEnvPD* const xpd)
 void    tEnvPD_initToPool       (tEnvPD* const xpd, int ws, int hs, int bs, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tEnvPD* x = *xpd = (_tEnvPD*) mpool_allocAndClear(sizeof(_tEnvPD), &m->pool);
+    _tEnvPD* x = *xpd = (_tEnvPD*) mpool_calloc(sizeof(_tEnvPD), &m->pool);
     
     int period = hs, npoints = ws;
     
@@ -462,7 +462,7 @@ static float snac_spectralpeak(tSNAC* const s, float periodlength);
 
 void tSNAC_init(tSNAC* const snac, int overlaparg)
 {
-    _tSNAC* s = *snac = (_tSNAC*) leaf_allocAndClear(sizeof(_tSNAC));
+    _tSNAC* s = *snac = (_tSNAC*) leaf_calloc(sizeof(_tSNAC));
     
     s->biasfactor = DEFBIAS;
     s->timeindex = 0;
@@ -472,10 +472,10 @@ void tSNAC_init(tSNAC* const snac, int overlaparg)
     s->minrms = DEFMINRMS;
     s->framesize = SNAC_FRAME_SIZE;
     
-    s->inputbuf = (float*) leaf_allocAndClear(sizeof(float) * SNAC_FRAME_SIZE);
-    s->processbuf = (float*) leaf_allocAndClear(sizeof(float) * (SNAC_FRAME_SIZE * 2));
-    s->spectrumbuf = (float*) leaf_allocAndClear(sizeof(float) * (SNAC_FRAME_SIZE / 2));
-    s->biasbuf = (float*) leaf_allocAndClear(sizeof(float) * SNAC_FRAME_SIZE);
+    s->inputbuf = (float*) leaf_calloc(sizeof(float) * SNAC_FRAME_SIZE);
+    s->processbuf = (float*) leaf_calloc(sizeof(float) * (SNAC_FRAME_SIZE * 2));
+    s->spectrumbuf = (float*) leaf_calloc(sizeof(float) * (SNAC_FRAME_SIZE / 2));
+    s->biasbuf = (float*) leaf_calloc(sizeof(float) * SNAC_FRAME_SIZE);
     
     snac_biasbuf(snac);
     tSNAC_setOverlap(snac, overlaparg);
@@ -505,10 +505,10 @@ void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const 
     s->minrms = DEFMINRMS;
     s->framesize = SNAC_FRAME_SIZE;
 
-    s->inputbuf = (float*) mpool_allocAndClear(sizeof(float) * SNAC_FRAME_SIZE, &m->pool);
-    s->processbuf = (float*) mpool_allocAndClear(sizeof(float) * (SNAC_FRAME_SIZE * 2), &m->pool);
-    s->spectrumbuf = (float*) mpool_allocAndClear(sizeof(float) * (SNAC_FRAME_SIZE / 2), &m->pool);
-    s->biasbuf = (float*) mpool_allocAndClear(sizeof(float) * SNAC_FRAME_SIZE, &m->pool);
+    s->inputbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, &m->pool);
+    s->processbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE * 2), &m->pool);
+    s->spectrumbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE / 2), &m->pool);
+    s->biasbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, &m->pool);
     
     snac_biasbuf(snac);
     tSNAC_setOverlap(snac, overlaparg);
@@ -840,7 +840,7 @@ static void snac_biasbuf(tSNAC* const snac)
 //===========================================================================
 void    tPeriodDetection_init    (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize)
 {
-    _tPeriodDetection* p = *pd = (_tPeriodDetection*) leaf_allocAndClear(sizeof(_tPeriodDetection));
+    _tPeriodDetection* p = *pd = (_tPeriodDetection*) leaf_calloc(sizeof(_tPeriodDetection));
     
     p->inBuffer = in;
     p->outBuffer = out;
@@ -875,7 +875,7 @@ void tPeriodDetection_free (tPeriodDetection* const pd)
 void    tPeriodDetection_initToPool  (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_allocAndClear(sizeof(_tPeriodDetection), &m->pool);
+    _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_calloc(sizeof(_tPeriodDetection), &m->pool);
     
     p->inBuffer = in;
     p->outBuffer = out;

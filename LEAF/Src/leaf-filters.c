@@ -1040,7 +1040,7 @@ void    tHighpass_free(tHighpass* const ft)
 void    tHighpass_initToPool    (tHighpass* const ft, float freq, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tHighpass* f = *ft = (_tHighpass*) mpool_allocAndClear(sizeof(_tHighpass), &m->pool);
+    _tHighpass* f = *ft = (_tHighpass*) mpool_calloc(sizeof(_tHighpass), &m->pool);
     
     f->R = (1.0f - (freq * leaf.twoPiTimesInvSampleRate));
     f->ys = 0.0f;

@@ -187,7 +187,7 @@ void   tLinearDelay_init (tLinearDelay* const dl, float delay, uint32_t maxDelay
     else if (delay < 0.0f)  d->delay = 0.0f;
     else                    d->delay = delay;
     
-    d->buff = (float*) leaf_allocAndClear(sizeof(float) * maxDelay);
+    d->buff = (float*) leaf_calloc(sizeof(float) * maxDelay);
     
     d->gain = 1.0f;
     

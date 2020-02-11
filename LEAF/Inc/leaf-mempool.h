@@ -76,7 +76,7 @@ extern "C" {
     void mpool_create (char* memory, size_t size, mpool_t* pool);
 
     void* mpool_alloc(size_t size, mpool_t* pool);
-    void* mpool_allocAndClear(size_t asize, mpool_t* pool);
+    void* mpool_calloc(size_t asize, mpool_t* pool);
 
     void mpool_free(void* ptr, mpool_t* pool);
     
@@ -86,7 +86,7 @@ extern "C" {
     void leaf_pool_init(char* memory, size_t size);
     
     void* leaf_alloc(size_t size);
-    void* leaf_allocAndClear(size_t size);
+    void* leaf_calloc(size_t size);
 
     void leaf_free(void* ptr);
     
