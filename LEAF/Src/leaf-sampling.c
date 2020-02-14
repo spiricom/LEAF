@@ -164,7 +164,18 @@ static void attemptStartEndChange(tSampler* const sp);
 
 void tSampler_init(tSampler* const sp, tBuffer* const b)
 {
-    _tSampler* p = *sp = (_tSampler*) leaf_alloc(sizeof(_tSampler));
+    tSampler_initToPool(sp, b, &leaf_mempool);
+}
+
+void tSampler_free         (tSampler* const sp)
+{
+    tSampler_freeFromPool(sp, &leaf_mempool);
+}
+
+void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSampler* p = *sp = (_tSampler*) mpool_alloc(sizeof(_tSampler), &m->pool);
     _tBuffer* s = *b;
     
     p->samp = s;
@@ -188,19 +199,20 @@ void tSampler_init(tSampler* const sp, tBuffer* const b)
     
     p->cfxlen = 500; // default 300 sample crossfade
     
-    tRamp_init(&p->gain, 7.0f, 1);
+    tRamp_initToPool(&p->gain, 7.0f, 1, mp);
     tRamp_setVal(&p->gain, 0.f);
     
     p->targetstart = -1;
     p->targetend = -1;
 }
 
-void tSampler_free         (tSampler* const sp)
+void tSampler_freeFromPool         (tSampler* const sp, tMempool* const mp)
 {
+    _tMempool* m = *mp;
     _tSampler* p = *sp;
-    tRamp_free(&p->gain);
+    tRamp_freeFromPool(&p->gain, mp);
     
-    leaf_free(p);
+    mpool_free(p, &m->pool);
 }
 
 void tSampler_setSample (tSampler* const sp, tBuffer* const b)
@@ -704,3 +716,129 @@ void tSampler_setRate      (tSampler* const sp, float rate)
 }
 
 //==============================================================================
+
+void    tAutoSampler_init   (tAutoSampler* const as, tBuffer* const b)
+{
+    tAutoSampler_initToPool(as, b, &leaf_mempool);
+}
+
+void    tAutoSampler_free   (tAutoSampler* const as)
+{
+    tAutoSampler_freeFromPool(as, &leaf_mempool);
+}
+
+void    tAutoSampler_initToPool (tAutoSampler* const as, tBuffer* const b, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tAutoSampler* a = *as = (_tAutoSampler*) mpool_alloc(sizeof(_tAutoSampler), &m->pool);
+    
+    tBuffer_setRecordMode(b, RecordOneShot);
+    tSampler_initToPool(&a->sampler, b, mp);
+    tSampler_setMode(&a->sampler, PlayLoop);
+    tEnvelopeFollower_initToPool(&a->ef, 0.05f, 0.9999f, mp);
+}
+
+void    tAutoSampler_freeFromPool       (tAutoSampler* const as, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tAutoSampler* a = *as;
+    
+    tEnvelopeFollower_freeFromPool(&a->ef, mp);
+    tSampler_freeFromPool(&a->sampler, mp);
+    
+    mpool_free(a, &m->pool);
+}
+
+float   tAutoSampler_tick               (tAutoSampler* const as, float input)
+{
+    _tAutoSampler* a = *as;
+    float currentPower = tEnvelopeFollower_tick(&a->ef, input);
+    
+    if ((currentPower > (a->threshold)) &&
+        (currentPower > a->previousPower + 0.001f) &&
+        (a->sampleTriggered == 0) &&
+        (a->sampleCounter == 0))
+    {
+        a->sampleTriggered = 1;
+        tBuffer_record(&a->sampler->samp);
+        a->sampler->samp->recordedLength = a->sampler->samp->bufferLength;
+        a->sampleCounter = a->windowSize + 24;//arbitrary extra time to avoid resampling while playing previous sample - better solution would be alternating buffers and crossfading
+        a->powerCounter = 1000;
+    }
+    
+    if (a->sampleCounter > 0)
+    {
+        a->sampleCounter--;
+    }
+    
+    
+    tSampler_setEnd(&a->sampler, a->windowSize);
+    tBuffer_tick(&a->sampler->samp, input);
+    //on it's way down
+    if (currentPower <= a->previousPower)
+    {
+        if (a->powerCounter > 0)
+        {
+            a->powerCounter--;
+        }
+        else if (a->sampleTriggered == 1)
+        {
+            a->sampleTriggered = 0;
+        }
+    }
+    
+    a->previousPower = currentPower;
+    
+    return tSampler_tick(&a->sampler);
+}
+
+void    tAutoSampler_setBuffer         (tAutoSampler* const as, tBuffer* const b)
+{
+    _tAutoSampler* a = *as;
+    tBuffer_setRecordMode(b, RecordOneShot);
+    if (a->windowSize > tBuffer_getBufferLength(b))
+        a->windowSize = tBuffer_getBufferLength(b);
+    tSampler_setSample(&a->sampler, b);
+}
+
+void    tAutoSampler_setMode            (tAutoSampler* const as, PlayMode mode)
+{
+    _tAutoSampler* a = *as;
+    tSampler_setMode(&a->sampler, mode);
+}
+
+void    tAutoSampler_play               (tAutoSampler* const as)
+{
+    _tAutoSampler* a = *as;
+    tSampler_play(&a->sampler);
+}
+void    tAutoSampler_stop               (tAutoSampler* const as)
+{
+    _tAutoSampler* a = *as;
+    tSampler_stop(&a->sampler);
+}
+
+void    tAutoSampler_setThreshold       (tAutoSampler* const as, float thresh)
+{
+    _tAutoSampler* a = *as;
+    a->threshold = thresh;
+}
+
+void    tAutoSampler_setWindowSize      (tAutoSampler* const as, uint32_t size)
+{
+    _tAutoSampler* a = *as;
+    if (size > tBuffer_getBufferLength(&a->sampler->samp))
+        a->windowSize = tBuffer_getBufferLength(&a->sampler->samp);
+    else a->windowSize = size;
+}
+
+void    tAutoSampler_setCrossfadeLength (tAutoSampler* const as, uint32_t length)
+{
+    _tAutoSampler* a = *as;
+    tSampler_setCrossfadeLength(&a->sampler, length);
+}
+
+void    tAutoSampler_setRate    (tAutoSampler* const as, float rate)
+{
+    ;
+}

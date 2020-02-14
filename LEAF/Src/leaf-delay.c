@@ -903,7 +903,8 @@ float   tTapeDelay_tick (tTapeDelay* const dl, float input)
     if (d->idx >= d->maxDelay) d->idx = 0.0f;
 
     if (d->lastOut)
-    return d->lastOut;
+        return d->lastOut;
+    return 0.0f;
 }
 
 void  tTapeDelay_incrementInPoint(tTapeDelay* const dl)

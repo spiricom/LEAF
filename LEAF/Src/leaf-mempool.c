@@ -48,8 +48,10 @@
 
 #endif
 
-tMempool leaf_pool;
+_tMempool leaf_pool;
+tMempool leaf_mempool;
 size_t header_size;
+
 
 /**
  * private function
@@ -79,7 +81,9 @@ void mpool_create (char* memory, size_t size, mpool_t* pool)
 
 void leaf_pool_init(char* memory, size_t size)
 {
-    mpool_create(memory, size, &leaf_pool->pool);
+    mpool_create(memory, size, &leaf_pool.pool);
+    
+    leaf_mempool = &leaf_pool;
 }
 
 /**
@@ -206,7 +210,7 @@ void* mpool_calloc(size_t asize, mpool_t* pool)
 void* leaf_alloc(size_t size)
 {
     //printf("alloc %i\n", size);
-    void* block = mpool_alloc(size, &leaf_pool->pool);
+    void* block = mpool_alloc(size, &leaf_pool.pool);
     
     if (block == NULL) leaf_mempool_overrun();
     
@@ -216,7 +220,7 @@ void* leaf_alloc(size_t size)
 void* leaf_calloc(size_t size)
 {
     //printf("alloc %i\n", size);
-    void* block = mpool_calloc(size, &leaf_pool->pool);
+    void* block = mpool_calloc(size, &leaf_pool.pool);
     
     if (block == NULL) leaf_mempool_overrun();
     
@@ -288,7 +292,7 @@ void mpool_free(void* ptr, mpool_t* pool)
 
 void leaf_free(void* ptr)
 {
-    mpool_free(ptr, &leaf_pool->pool);
+    mpool_free(ptr, &leaf_pool.pool);
 }
 
 size_t mpool_get_size(mpool_t* pool)
@@ -303,17 +307,17 @@ size_t mpool_get_used(mpool_t* pool)
 
 size_t leaf_pool_get_size(void)
 {
-    return mpool_get_size(&leaf_pool->pool);
+    return mpool_get_size(&leaf_pool.pool);
 }
 
 size_t leaf_pool_get_used(void)
 {
-    return mpool_get_used(&leaf_pool->pool);
+    return mpool_get_used(&leaf_pool.pool);
 }
 
 void* leaf_pool_get_pool(void)
 {
-    float* buff = (float*)leaf_pool->pool.mpool;
+    float* buff = (float*)leaf_pool.pool.mpool;
     
     return buff;
 }
@@ -362,12 +366,12 @@ void leaf_mempool_overrun(void)
 
 void tMempool_init(tMempool* const mp, char* memory, size_t size)
 {
-    tMempool_initToPool(mp, memory, size, &leaf_pool);
+    tMempool_initToPool(mp, memory, size, &leaf_mempool);
 }
 
 void tMempool_free(tMempool* const mp)
 {
-    tMempool_freeFromPool(mp, &leaf_pool);
+    tMempool_freeFromPool(mp, &leaf_mempool);
 }
 
 void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem)

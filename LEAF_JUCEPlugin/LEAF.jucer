@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="ArQetv" name="LEAF" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.pumusic.LEAF" includeBinaryInAppConfig="1"
-              buildVST="1" buildVST3="0" buildAU="1" buildAUv3="0" buildRTAS="0"
+              buildVST="0" buildVST3="0" buildAU="1" buildAUv3="0" buildRTAS="0"
               buildAAX="0" pluginName="LEAF" pluginDesc="LEAF" pluginManufacturer="pumusic"
               pluginManufacturerCode="Manu" pluginCode="Arqe" pluginChannelConfigs="{2,2}"
               pluginIsSynth="0" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
@@ -11,7 +11,7 @@
               jucerVersion="5.4.7" companyName="Princeton University" companyEmail="mrmulshine@gmail.com"
               displaySplashScreen="1" reportAppUsage="1" splashScreenColour="Dark"
               buildStandalone="1" enableIAA="0" cppLanguageStandard="11" companyCopyright="Princeton University"
-              pluginFormats="buildVST,buildAU,buildStandalone" pluginCharacteristicsValue="pluginWantsMidiIn">
+              pluginFormats="buildAU,buildStandalone" pluginCharacteristicsValue="pluginWantsMidiIn">
   <MAINGROUP id="F7Bywq" name="LEAF">
     <GROUP id="{14C5E2CD-5D51-3FD3-5677-28BECA29E95E}" name="Source">
       <GROUP id="{C9F79DF0-2C57-F2B0-7B1B-78A14937E038}" name="LEAF">

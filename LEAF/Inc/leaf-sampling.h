@@ -21,6 +21,7 @@ extern "C" {
 #include "leaf-mempool.h"
 #include "leaf-envelopes.h"
 #include "leaf-mempool.h"
+#include "leaf-analysis.h"
     
     //==============================================================================
     
@@ -131,6 +132,40 @@ extern "C" {
     void    tSampler_setRate            (tSampler* const, float rate);
     
     //==============================================================================
+    
+    typedef struct _tAutoSampler
+    {
+        tSampler sampler;
+        tEnvelopeFollower ef;
+        uint32_t windowSize;
+        float threshold;
+        float previousPower;
+        uint32_t sampleCounter;
+        uint32_t powerCounter;
+        uint8_t sampleTriggered;
+    } _tAutoSampler;
+    
+    typedef _tAutoSampler* tAutoSampler;
+    
+    void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const);
+    void    tAutoSampler_free               (tAutoSampler* const);
+    void    tAutoSampler_initToPool         (tAutoSampler* const, tBuffer* const, tMempool* const);
+    void    tAutoSampler_freeFromPool       (tAutoSampler* const, tMempool* const);
+    
+    float   tAutoSampler_tick               (tAutoSampler* const, float input);
+    
+    void    tAutoSampler_setBuffer          (tAutoSampler* const, tBuffer* const);
+    
+    void    tAutoSampler_setMode            (tAutoSampler* const, PlayMode mode);
+    
+    void    tAutoSampler_play               (tAutoSampler* const);
+    void    tAutoSampler_stop               (tAutoSampler* const);
+    
+    void    tAutoSampler_setThreshold       (tAutoSampler* const, float thresh);
+    void    tAutoSampler_setWindowSize      (tAutoSampler* const, uint32_t size);
+    void    tAutoSampler_setCrossfadeLength (tAutoSampler* const, uint32_t length);
+    
+    void    tAutoSampler_setRate            (tAutoSampler* const, float rate);
     
 #ifdef __cplusplus
 }

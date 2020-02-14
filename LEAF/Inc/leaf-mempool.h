@@ -113,6 +113,8 @@ extern "C" {
     
     //==============================================================================
     
+    extern tMempool leaf_mempool;
+    
 #ifdef __cplusplus
 }
 #endif
