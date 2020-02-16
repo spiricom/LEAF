@@ -9,11 +9,13 @@ Many of these algorithms are sourced from other projects, especially the STK (So
 
 Other interesting projects to check out that similarly target embedded applicatons are: TeensyAudio (C++), Hoxton Owl (C++), Axoloti (C), and Mutable Instruments (C++). 
 
-(1) Use of standard malloc and calloc are avoided, and a custom memory pool implementation is included instead, allowing dynamic memory allocation/deallocation within a fixed block size.
+(1) LEAF has no dependencies on any other code, except for the standard math.h functions (sinf(), etc.)
 
-(2) The included JUCE template is intended to simplify using LEAF for audio software development aimed at computers or mobile devices. features an easily reconfigurable UI and simple block and tick setup to test the library components. Of course, if you intend to use the provided JUCE plugin project, you need to get JUCE and the Projucer ( https://www.juce.com/get-juce ). Check out the first tutorial to get started - it's fun an easy! 
+(2) Use of standard malloc and calloc are avoided, and a custom memory pool implementation is included instead. This allows dynamic memory allocation/deallocation within a fixed block size, with more control over where the memory is located (very useful for embedded systems). 
 
-(3) if you are looking to add LEAF to a System Workbench (SW4STM32) project (the free IDE for developing STM32 embedded firmware) then follow this guide: https://docs.google.com/document/d/1LtMFigQvnIOkRCSL-UVge4GM91woTmVkidlzzgtCjdE/edit?usp=sharing
+(3) The included JUCE template is intended to simplify using LEAF for audio software development aimed at computers or mobile devices. features an easily reconfigurable UI and simple block and tick setup to test the library components. Of course, if you intend to use the provided JUCE plugin project, you need to get JUCE and the Projucer ( https://www.juce.com/get-juce ). Check out the first tutorial to get started - it's fun and easy! 
+
+(4) if you are looking to add LEAF to a System Workbench (SW4STM32) project (the free IDE for developing STM32 embedded firmware) then follow this guide to include LEAF: https://docs.google.com/document/d/1LtMFigQvnIOkRCSL-UVge4GM91woTmVkidlzzgtCjdE/edit?usp=sharing   If you don't want to deal with using leaf as a git submodule, you can also just drop the .c and .h files from LEAF's Src and Inc folders into your own Src and Inc folders, that will work as well - it'll just be a little harder to update things to newer versions of LEAF later on.
 
 
 
@@ -36,7 +38,7 @@ LEAF assumes a global sample rate (passed into LEAF when the library itself is i
 tCycle mySine;
 
 
-//also, create a mempool object where you can store the data for the LEAF objects. It should be an array of chars
+//also, create a memory pool array where you can store the data for the LEAF objects. It should be an array of chars. Note that you can also define multiple mempool objects in different memory locations in you want to, and initialize different LEAF objects in different places. However, LEAF needs at least one mempool, so the one you pass into the LEAF_init function is considered the default location for any LEAF-related memory, unless you specifically put something elsewhere by using an initToPool(), freeFromPool() function instead of init() or free(). 
 
 #define MEM_SIZE 500000
 char myMemory[MEM_SIZE];
