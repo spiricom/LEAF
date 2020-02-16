@@ -16,3 +16,62 @@ Other interesting projects to check out that similarly target embedded applicato
 (3) if you are looking to add LEAF to a System Workbench (SW4STM32) project (the free IDE for developing STM32 embedded firmware) then follow this guide: https://docs.google.com/document/d/1LtMFigQvnIOkRCSL-UVge4GM91woTmVkidlzzgtCjdE/edit?usp=sharing
 
 
+
+///
+LEAF conventions:
+
+Objects types start with a lowercase t: like tCycle, tSawtooth, tRamp, tEnvelopeFollower
+
+All function names start with the object type name, followed by an underscore, then the function name in camel-case: like tCycle_setFreq(), tRamp_setDest()
+
+LEAF assumes a global sample rate (passed into LEAF when the library itself is initialized). 
+////
+
+
+
+Example of using LEAF:
+
+//in your user code, create an instance of a leaf object
+
+tCycle mySine;
+
+
+//also, create a mempool object where you can store the data for the LEAF objects. It should be an array of chars
+
+#define MEM_SIZE 500000
+char myMemory[MEM_SIZE];
+
+
+//we'll assume your code has some kind of audio buffer that is transmitting samples to an audio codec or an operating system's audio driver. In this example, let's define this here.
+
+#define AUDIO_BUFFER_SIZE 128
+float audioBuffer[AUDIO_BUFFER_SIZE];
+
+
+//then initialize the whole LEAF library (this only needs to be done once, it sets global parameters like the default mempool and the sample rate)
+//the parameters are: sample rate, audio buffer size in samples, name of mempool array, size of mempool array, and address of a function to generate a random number. In this case, there is a function called randomNumber that exists elsewhere in the user code that generates a random floating point number from 0.0 to 1.0. We ask the user to pass in a random number function because LEAF has no dependencies, and users developing on embedded systems may want to use a hardware RNG, for instance.
+
+LEAF_init(48000, AUDIO_BUFFER_SIZE, myMemory, MEM_SIZE, &randomNumber);
+
+
+//now initialize the object you want to use, in this case the sine wave oscillator you created above.
+
+tCycle_init(&mySine);
+
+
+//set the frequency of the oscillator (defaults to zero). In a real use case, you'd probably want to be updating this to new values in the audio frame based on knob positions or midi data or other inputs, but here we'll assume it stays fixed.
+
+tCycle_setFreq(&mySine, 440.0);
+
+
+//now, in your audio callback (a function that will be called every audio frame, to compute the samples needed to fill the audio buffer) tick the LEAF audio object to generate or process audio samples. 
+
+void audioFrame()
+{
+  for (int i = 0; i < AUDIO_BUFFER_SIZE; i++)
+  {
+    audioBuffer[i] = tCycle_tick(&mySine);
+  }
+}
+
+
