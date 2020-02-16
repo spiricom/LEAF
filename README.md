@@ -22,9 +22,9 @@ Some notes about LEAF:
 
 
 ///
-
+<h2>
 **LEAF conventions:**
-
+</h2>
 We call the psuedo-objects in LEAF "objects" because it's simpler to say, even though technically they are just structs with associated functions. 
 
 Objects types start with a lowercase t: like tCycle, tSawtooth, tRamp, tEnvelopeFollower
