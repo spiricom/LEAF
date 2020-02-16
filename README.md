@@ -18,7 +18,7 @@ Other interesting projects to check out that similarly target embedded applicato
 
 
 ///
-LEAF conventions:
+**LEAF conventions:**
 
 Objects types start with a lowercase t: like tCycle, tSawtooth, tRamp, tEnvelopeFollower
 
@@ -29,8 +29,8 @@ LEAF assumes a global sample rate (passed into LEAF when the library itself is i
 
 
 
-Example of using LEAF:
-
+**Example of using LEAF:**
+```
 //in your user code, create an instance of a leaf object
 
 tCycle mySine;
@@ -73,5 +73,5 @@ void audioFrame()
     audioBuffer[i] = tCycle_tick(&mySine);
   }
 }
-
+```
 
