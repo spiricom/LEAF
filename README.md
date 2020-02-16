@@ -9,6 +9,8 @@ Many of these algorithms are sourced from other projects, especially the STK (So
 
 Other interesting projects to check out that similarly target embedded applicatons are: TeensyAudio (C++), Hoxton Owl (C++), Axoloti (C), and Mutable Instruments (C++). 
 
+Some notes about LEAF:
+
 (1) LEAF has no dependencies on any other code, except for the standard math.h functions like sinf().
 
 (2) Use of standard malloc and calloc are avoided, and a custom memory pool implementation is included instead. This allows dynamic memory allocation/deallocation within a fixed block size, with more control over where the memory is located (very useful for embedded systems). 
@@ -20,13 +22,28 @@ Other interesting projects to check out that similarly target embedded applicato
 
 
 ///
+
 **LEAF conventions:**
+
+We call the psuedo-objects in LEAF "objects" because it's simpler to say, even though technically they are just structs with associated functions. 
 
 Objects types start with a lowercase t: like tCycle, tSawtooth, tRamp, tEnvelopeFollower
 
-All function names start with the object type name, followed by an underscore, then the function name in camel-case: like tCycle_setFreq(), tRamp_setDest()
+All function names start with the object type name, followed by an underscore, then the function name in camel-case: like tCycle_setFreq(), tRamp_setDest().
 
-LEAF assumes a global sample rate (passed into LEAF when the library itself is initialized). 
+The first parameter of all LEAF functions associated with an object type is the object instance it is operating on. 
+
+LEAF assumes a global sample rate (passed into LEAF when the library itself is initialized). You can change this sample rate whenever you want, and all objects that use the global sample rate will see the change.
+
+All LEAF objects operate on single-precision float input and output data. There are sometimes double-precision operations inside LEAF objects, but only when the precision is deemed to actually be necessary for the operation. Float literal notation (like 0.12f instead of 0.12) is used to force computation using single precision when it would otherwise be ambigious, to make LEAF more efficient for processors that have a single-precision FPU, or where the FPU computes single-precision faster than double-precision.
+
+Audio inputs and outputs are assumed to be between -1.0 and 1.0
+
+Internally, LEAF objects that the user defines globally (by writing something like "tCycle mySine") are actually just pointers. The structs for the data of the LEAF object is created in the mempool when the init function is called on that pointer (as in tCycle_init(&mySine)). For instance, when you create a tCycle, you are actually just creating a pointer, and when you call tCycle_init() on that tCycle, you are then creating a struct that has real data inside the mempool. This is done to make the footprint of the LEAF objects very small outside of their designated mempools, so that a large number of LEAF object pointers can exist globally even if only a few complete objects can exist in memory at a single time. 
+
+All LEAF objects must have an init() function and a free() function -- these will create the objects inside the default mempool, as well as an initToPool() and freeFromPool() function -- these will create the objects inside a user-defined specific mempool that is not the default. 
+
+
 ////
 
 
