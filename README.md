@@ -9,7 +9,7 @@ Many of these algorithms are sourced from other projects, especially the STK (So
 
 Other interesting projects to check out that similarly target embedded applicatons are: TeensyAudio (C++), Hoxton Owl (C++), Axoloti (C), and Mutable Instruments (C++). 
 
-(1) LEAF has no dependencies on any other code, except for the standard math.h functions (sinf(), etc.)
+(1) LEAF has no dependencies on any other code, except for the standard math.h functions like sinf().
 
 (2) Use of standard malloc and calloc are avoided, and a custom memory pool implementation is included instead. This allows dynamic memory allocation/deallocation within a fixed block size, with more control over where the memory is located (very useful for embedded systems). 
 
