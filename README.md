@@ -23,7 +23,7 @@ Some notes about LEAF:
 
 ///
 <h2>
-**LEAF conventions:**
+LEAF conventions:
 </h2>
 We call the psuedo-objects in LEAF "objects" because it's simpler to say, even though technically they are just structs with associated functions. 
 
@@ -48,7 +48,7 @@ All LEAF objects must have an init() function and a free() function -- these wil
 
 
 
-**Example of using LEAF:**
+<h2>Example of using LEAF:</h2>
 ```
 //in your user code, create an instance of a leaf object
 
