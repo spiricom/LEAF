@@ -1,5 +1,5 @@
 # LEAF
-LEAF (Lightweight Embedded Audio Framework) is a C library for Audio synthesis and processing created by Jeff Snyder, Mike Mulshine, and Matt Wang. It was originally called OOPS when we started writing it in 2017, so you may see references to it under that name as well. 
+LEAF (Lightweight Embedded Audio Framework) is a C library for audio synthesis and processing created by Jeff Snyder, Mike Mulshine, and Matt Wang. It was originally called OOPS when we started writing it in 2017, so you may see references to it under that name as well. 
 
 The library consists of a set of high-level audio synthesis components (Oscillators, Filters, Envelopes, Delays, Reverbs, and other Utilities).
 
