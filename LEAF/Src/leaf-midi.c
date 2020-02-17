@@ -514,7 +514,7 @@ int tPoly_noteOff(tPoly* const polyh, uint8_t note)
     poly->notes[note][1] = -1;
     
     int deactivatedVoice = -1;
-    for (int i = 0; i < poly->numVoices; i++)
+    for (int i = 0; i < poly->maxNumVoices; i++)
     {
         if (poly->voices[i][0] == note)
         {
