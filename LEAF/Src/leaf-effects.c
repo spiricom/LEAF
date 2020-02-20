@@ -1096,8 +1096,7 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
-    tPeriodDetection_setSmoothAmount(&r->pd, 0.0f);
-    
+
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, mp);
@@ -1207,12 +1206,6 @@ void tRetune_setWindowSize(tRetune* const rt, int ws)
     tPeriodDetection_setWindowSize(&r->pd, r->windowSize);
 }
 
-void tRetune_setSmoothAmount(tRetune* const rt, float smooth)
-{
-    _tRetune* r = *rt;
-    tPeriodDetection_setSmoothAmount(&r->pd, smooth);
-}
-
 float tRetune_getInputPeriod(tRetune* const rt)
 {
     _tRetune* r = *rt;
@@ -1267,8 +1260,7 @@ void    tAutotune_initToPool        (tAutotune* const rt, int numVoices, int buf
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
-    tPeriodDetection_setSmoothAmount(&r->pd, 0.0f);
-    
+
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, mp);
@@ -1380,12 +1372,6 @@ void tAutotune_setWindowSize(tAutotune* const rt, int ws)
     
     r->windowSize = ws;
     tPeriodDetection_setWindowSize(&r->pd, r->windowSize);
-}
-
-void tAutotune_setSmoothAmount(tAutotune* const rt, float smooth)
-{
-    _tAutotune* r = *rt;
-    tPeriodDetection_setSmoothAmount(&r->pd, smooth);
 }
 
 float tAutotune_getInputPeriod(tAutotune* const rt)

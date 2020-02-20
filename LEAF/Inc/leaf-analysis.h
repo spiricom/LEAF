@@ -217,13 +217,10 @@ extern "C" {
         int iLast;
         int index;
         float period;
-        float smoothPeriod;
         
         uint16_t hopSize;
         uint16_t windowSize;
         uint8_t fba;
-    
-        tExpSmooth smooth;
         
         float timeConstant;
         float radius;
@@ -242,7 +239,6 @@ extern "C" {
     
     float   tPeriodDetection_tick               (tPeriodDetection* const, float sample);
     float   tPeriodDetection_getPeriod          (tPeriodDetection* const);
-    void    tPeriodDetection_setSmoothAmount    (tPeriodDetection* const, float amount);
     void    tPeriodDetection_setHopSize         (tPeriodDetection* p, int hs);
     void    tPeriodDetection_setWindowSize      (tPeriodDetection* p, int ws);
     

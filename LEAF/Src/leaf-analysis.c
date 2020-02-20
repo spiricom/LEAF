@@ -870,8 +870,6 @@ void    tPeriodDetection_initToPool  (tPeriodDetection* const pd, float* in, flo
     
     tSNAC_initToPool(&p->snac, DEFOVERLAP, mp);
     
-    tExpSmooth_initToPool(&p->smooth, 0.0f, 1.0f, mp);
-    
     p->timeConstant = DEFTIMECONSTANT;
     p->radius = expf(-1000.0f * p->hopSize * leaf.invSampleRate / p->timeConstant);
 }
@@ -883,7 +881,6 @@ void    tPeriodDetection_freeFromPool       (tPeriodDetection* const pd, tMempoo
     
     tEnvPD_freeFromPool(&p->env, mp);
     tSNAC_freeFromPool(&p->snac, mp);
-    tExpSmooth_freeFromPool(&p->smooth, mp);
     mpool_free(p, &m->pool);
 }
 
@@ -918,22 +915,13 @@ float tPeriodDetection_tick (tPeriodDetection* pd, float sample)
         if (p->lastBlock >= p->framesPerBuffer) p->lastBlock = 0;
     }
     
-    tExpSmooth_setDest(&p->smooth, p->period);
-    p->smoothPeriod = tExpSmooth_tick(&p->smooth);
-    return p->smoothPeriod;
+    return p->period;
 }
 
 float tPeriodDetection_getPeriod(tPeriodDetection* pd)
 {
     _tPeriodDetection* p = *pd;
-    return p->smoothPeriod;
-}
-
-void tPeriodDetection_setSmoothAmount(tPeriodDetection* pd, float amount)
-{
-    _tPeriodDetection* p = *pd;
-    LEAF_clip(0.0f, amount, 1.0f);
-    tExpSmooth_setFactor(&p->smooth, 1.0f - amount);
+    return p->period;
 }
 
 void tPeriodDetection_setHopSize(tPeriodDetection* pd, int hs)
