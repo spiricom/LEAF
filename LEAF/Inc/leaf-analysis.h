@@ -152,6 +152,7 @@ extern "C" {
     //==============================================================================
     
     // tSNAC: period detector
+    // from Katja Vetters http://www.katjaas.nl/helmholtz/helmholtz.html
 #define SNAC_FRAME_SIZE 1024           // default analysis framesize // should be the same as (or smaller than?) PS_FRAME_SIZE
 #define DEFOVERLAP 1                // default overlap
 #define DEFBIAS 0.2f        // default bias
@@ -228,6 +229,8 @@ extern "C" {
         float lastmax;
         float deltamax;
         
+        float fidelityThreshold;
+        
     } _tPeriodDetection;
     
     typedef _tPeriodDetection* tPeriodDetection;
@@ -239,8 +242,9 @@ extern "C" {
     
     float   tPeriodDetection_tick               (tPeriodDetection* const, float sample);
     float   tPeriodDetection_getPeriod          (tPeriodDetection* const);
-    void    tPeriodDetection_setHopSize         (tPeriodDetection* p, int hs);
-    void    tPeriodDetection_setWindowSize      (tPeriodDetection* p, int ws);
+    void    tPeriodDetection_setHopSize         (tPeriodDetection* const, int hs);
+    void    tPeriodDetection_setWindowSize      (tPeriodDetection* const, int ws);
+    void    tPeriodDetection_setFidelityThreshold(tPeriodDetection* const, float threshold);
     
     //==============================================================================
     

@@ -1206,6 +1206,13 @@ void tRetune_setWindowSize(tRetune* const rt, int ws)
     tPeriodDetection_setWindowSize(&r->pd, r->windowSize);
 }
 
+void tRetune_setFidelityThreshold(tRetune* const rt, float threshold)
+{
+    _tRetune* r = *rt;
+    
+    tPeriodDetection_setFidelityThreshold(&r->pd, threshold);
+}
+
 float tRetune_getInputPeriod(tRetune* const rt)
 {
     _tRetune* r = *rt;
@@ -1372,6 +1379,13 @@ void tAutotune_setWindowSize(tAutotune* const rt, int ws)
     
     r->windowSize = ws;
     tPeriodDetection_setWindowSize(&r->pd, r->windowSize);
+}
+
+void tAutotune_setFidelityThreshold(tAutotune* const rt, float threshold)
+{
+    _tAutotune* r = *rt;
+
+    tPeriodDetection_setFidelityThreshold(&r->pd, threshold);
 }
 
 float tAutotune_getInputPeriod(tAutotune* const rt)

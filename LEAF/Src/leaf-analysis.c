@@ -872,6 +872,7 @@ void    tPeriodDetection_initToPool  (tPeriodDetection* const pd, float* in, flo
     
     p->timeConstant = DEFTIMECONSTANT;
     p->radius = expf(-1000.0f * p->hopSize * leaf.invSampleRate / p->timeConstant);
+    p->fidelityThreshold = 0.95;
 }
 
 void    tPeriodDetection_freeFromPool       (tPeriodDetection* const pd, tMempool* const mp)
@@ -907,7 +908,9 @@ float tPeriodDetection_tick (tPeriodDetection* pd, float sample)
         tEnvPD_processBlock(&p->env, &(p->inBuffer[i]));
         
         tSNAC_ioSamples(&p->snac, &(p->inBuffer[i]), &(p->outBuffer[i]), p->frameSize);
-        p->period = tSNAC_getPeriod(&p->snac);
+        float fidelity = tSNAC_getFidelity(&p->snac);
+        // Fidelity threshold recommended by Katja Vetters is 0.95 for most instruments/voices http://www.katjaas.nl/helmholtz/helmholtz.html
+        if (fidelity > p->fidelityThreshold) p->period = tSNAC_getPeriod(&p->snac);
         
         p->curBlock++;
         if (p->curBlock >= p->framesPerBuffer) p->curBlock = 0;
@@ -934,4 +937,10 @@ void tPeriodDetection_setWindowSize(tPeriodDetection* pd, int ws)
 {
     _tPeriodDetection* p = *pd;
     p->windowSize = ws;
+}
+
+void tPeriodDetection_setFidelityThreshold(tPeriodDetection* pd, float threshold)
+{
+    _tPeriodDetection* p = *pd;
+    p->fidelityThreshold = threshold;
 }

@@ -99,6 +99,7 @@ extern "C" {
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /* tSOLAD : pitch shifting algorithm that underlies tRetune etc */
+    // from Katja Vetters http://www.katjaas.nl/pitchshiftlowlatency/pitchshiftlowlatency.html
 #define LOOPSIZE (2048*2)      // (4096*2) // loop size must be power of two
 #define LOOPMASK (LOOPSIZE - 1)
 #define PITCHFACTORDEFAULT 1.0f
@@ -199,20 +200,21 @@ extern "C" {
     
     typedef _tRetune* tRetune;
     
-    void    tRetune_init            (tRetune* const, int numVoices, int bufSize, int frameSize);
-    void    tRetune_free            (tRetune* const);
-    void    tRetune_initToPool      (tRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
-    void    tRetune_freeFromPool    (tRetune* const, tMempool* const);
+    void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize);
+    void    tRetune_free                (tRetune* const);
+    void    tRetune_initToPool          (tRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
+    void    tRetune_freeFromPool        (tRetune* const, tMempool* const);
     
-    float*  tRetune_tick            (tRetune* const, float sample);
-    void    tRetune_setNumVoices    (tRetune* const, int numVoices);
-    void    tRetune_setPitchFactors (tRetune* const, float pf);
-    void    tRetune_setPitchFactor  (tRetune* const, float pf, int voice);
-    void    tRetune_setTimeConstant (tRetune* const, float tc);
-    void    tRetune_setHopSize      (tRetune* const, int hs);
-    void    tRetune_setWindowSize   (tRetune* const, int ws);
-    float   tRetune_getInputPeriod  (tRetune* const);
-    float   tRetune_getInputFreq    (tRetune* const);
+    float*  tRetune_tick                (tRetune* const, float sample);
+    void    tRetune_setNumVoices        (tRetune* const, int numVoices);
+    void    tRetune_setPitchFactors     (tRetune* const, float pf);
+    void    tRetune_setPitchFactor      (tRetune* const, float pf, int voice);
+    void    tRetune_setTimeConstant     (tRetune* const, float tc);
+    void    tRetune_setHopSize          (tRetune* const, int hs);
+    void    tRetune_setWindowSize       (tRetune* const, int ws);
+    void    tRetune_setFidelityThreshold(tRetune* const, float threshold);
+    float   tRetune_getInputPeriod      (tRetune* const);
+    float   tRetune_getInputFreq        (tRetune* const);
     
     // Autotune
     typedef struct _tAutotune
@@ -241,20 +243,21 @@ extern "C" {
     
     typedef _tAutotune* tAutotune;
     
-    void    tAutotune_init              (tAutotune* const, int numVoices, int bufSize, int frameSize);
-    void    tAutotune_free              (tAutotune* const);
-    void    tAutotune_initToPool        (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
-    void    tAutotune_freeFromPool      (tAutotune* const, tMempool* const);
+    void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize);
+    void    tAutotune_free                  (tAutotune* const);
+    void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
+    void    tAutotune_freeFromPool          (tAutotune* const, tMempool* const);
     
-    float*  tAutotune_tick              (tAutotune* const, float sample);
-    void    tAutotune_setNumVoices      (tAutotune* const, int numVoices);
-    void    tAutotune_setFreqs          (tAutotune* const, float f);
-    void    tAutotune_setFreq           (tAutotune* const, float f, int voice);
-    void    tAutotune_setTimeConstant   (tAutotune* const, float tc);
-    void    tAutotune_setHopSize        (tAutotune* const, int hs);
-    void    tAutotune_setWindowSize     (tAutotune* const, int ws);
-    float   tAutotune_getInputPeriod    (tAutotune* const);
-    float   tAutotune_getInputFreq      (tAutotune* const);
+    float*  tAutotune_tick                  (tAutotune* const, float sample);
+    void    tAutotune_setNumVoices          (tAutotune* const, int numVoices);
+    void    tAutotune_setFreqs              (tAutotune* const, float f);
+    void    tAutotune_setFreq               (tAutotune* const, float f, int voice);
+    void    tAutotune_setTimeConstant       (tAutotune* const, float tc);
+    void    tAutotune_setHopSize            (tAutotune* const, int hs);
+    void    tAutotune_setWindowSize         (tAutotune* const, int ws);
+    void    tAutotune_setFidelityThreshold  (tAutotune* const, float threshold);
+    float   tAutotune_getInputPeriod        (tAutotune* const);
+    float   tAutotune_getInputFreq          (tAutotune* const);
     
     //==============================================================================
     
