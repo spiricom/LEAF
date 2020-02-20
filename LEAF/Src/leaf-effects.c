@@ -963,7 +963,7 @@ float tPitchShift_shift (tPitchShift* psr)
     
     if (p->indexstore >= ps->frameSize)
     {
-        period = p->period;
+        period = tPeriodDetection_getPeriod(&p);
         
         if(pitchshift_attackdetect(ps) == 1)
         {
@@ -995,7 +995,7 @@ float tPitchShift_shiftToFreq (tPitchShift* psr, float freq)
     
     if (p->indexstore >= ps->frameSize)
     {
-        period = p->period;
+        period = tPeriodDetection_getPeriod(&p);
         
         if(pitchshift_attackdetect(ps) == 1)
         {
@@ -1030,7 +1030,7 @@ float tPitchShift_shiftToFunc (tPitchShift* psr, float (*fun)(float))
     
     if (p->indexstore >= ps->frameSize)
     {
-        period = p->period;
+        period = tPeriodDetection_getPeriod(&p);
         
         if(pitchshift_attackdetect(ps) == 1)
         {
@@ -1060,54 +1060,12 @@ float tPitchShift_shiftToFunc (tPitchShift* psr, float (*fun)(float))
 
 void tRetune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize)
 {
-    _tRetune* r = *rt = (_tRetune*) leaf_calloc(sizeof(_tRetune));
-    
-    r->bufSize = bufSize;
-    r->frameSize = frameSize;
-    r->numVoices = numVoices;
-    
-    r->inBuffer = (float*) leaf_calloc(sizeof(float) * r->bufSize);
-    r->outBuffers = (float**) leaf_calloc(sizeof(float*) * r->numVoices);
-    
-    r->hopSize = DEFHOPSIZE;
-    r->windowSize = DEFWINDOWSIZE;
-    r->fba = FBA;
-    tRetune_setTimeConstant(rt, DEFTIMECONSTANT);
-    
-    r->inputPeriod = 0.0f;
-    
-    r->ps = (tPitchShift*) leaf_calloc(sizeof(tPitchShift) * r->numVoices);
-    r->pitchFactor = (float*) leaf_calloc(sizeof(float) * r->numVoices);
-    r->tickOutput = (float*) leaf_calloc(sizeof(float) * r->numVoices);
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        r->outBuffers[i] = (float*) leaf_calloc(sizeof(float) * r->bufSize);
-    }
-    
-    tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
-    
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        tPitchShift_init(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize);
-    }
+    tRetune_initToPool(rt, numVoices, bufSize, frameSize, &leaf_mempool);
 }
 
 void tRetune_free(tRetune* const rt)
 {
-    _tRetune* r = *rt;
-    
-    tPeriodDetection_free(&r->pd);
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        tPitchShift_free(&r->ps[i]);
-        leaf_free(r->outBuffers[i]);
-    }
-    leaf_free(r->tickOutput);
-    leaf_free(r->pitchFactor);
-    leaf_free(r->ps);
-    leaf_free(r->inBuffer);
-    leaf_free(r->outBuffers);
-    leaf_free(r);
+    tRetune_freeFromPool(rt, &leaf_mempool);
 }
 
 void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, int frameSize, tMempool* const mp)
@@ -1138,6 +1096,7 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
+    tPeriodDetection_setSmoothAmount(&r->pd, 0.0f);
     
     for (int i = 0; i < r->numVoices; ++i)
     {
@@ -1168,7 +1127,7 @@ float* tRetune_tick(tRetune* const rt, float sample)
 {
     _tRetune* r = *rt;
     
-    r->inputPeriod = tPeriodDetection_findPeriod(&r->pd, sample);
+    r->inputPeriod = tPeriodDetection_tick(&r->pd, sample);
     
     for (int v = 0; v < r->numVoices; ++v)
     {
@@ -1203,8 +1162,6 @@ void tRetune_setNumVoices(tRetune* const rt, int numVoices)
         r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
         tPitchShift_init(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize);
     }
-    
-    
 }
 
 void tRetune_setPitchFactors(tRetune* const rt, float pf)
@@ -1270,56 +1227,12 @@ float tRetune_getInputFreq(tRetune* const rt)
 
 void tAutotune_init(tAutotune* const rt, int numVoices, int bufSize, int frameSize)
 {
-    _tAutotune* r = *rt = (_tAutotune*) leaf_alloc(sizeof(_tAutotune));
-    
-    r->bufSize = bufSize;
-    r->frameSize = frameSize;
-    r->numVoices = numVoices;
-    
-    r->inBuffer = (float*) leaf_alloc(sizeof(float) * r->bufSize);
-    r->outBuffers = (float**) leaf_alloc(sizeof(float*) * r->numVoices);
-    
-    r->hopSize = DEFHOPSIZE;
-    r->windowSize = DEFWINDOWSIZE;
-    r->fba = FBA;
-    tAutotune_setTimeConstant(rt, DEFTIMECONSTANT);
-    
-    
-    
-    r->ps = (tPitchShift*) leaf_alloc(sizeof(tPitchShift) * r->numVoices);
-    r->freq = (float*) leaf_alloc(sizeof(float) * r->numVoices);
-    r->tickOutput = (float*) leaf_alloc(sizeof(float) * r->numVoices);
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
-    }
-    
-    tPeriodDetection_init(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize);
-    
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        tPitchShift_init(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize);
-    }
-    
-    r->inputPeriod = 0.0f;
+    tAutotune_initToPool(rt, numVoices, bufSize, frameSize, &leaf_mempool);
 }
 
 void tAutotune_free(tAutotune* const rt)
 {
-    _tAutotune* r = *rt;
-    
-    tPeriodDetection_free(&r->pd);
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        tPitchShift_free(&r->ps[i]);
-        leaf_free(r->outBuffers[i]);
-    }
-    leaf_free(r->tickOutput);
-    leaf_free(r->freq);
-    leaf_free(r->ps);
-    leaf_free(r->inBuffer);
-    leaf_free(r->outBuffers);
-    leaf_free(r);
+    tAutotune_freeFromPool(rt, &leaf_mempool);
 }
 
 void    tAutotune_initToPool        (tAutotune* const rt, int numVoices, int bufSize, int frameSize, tMempool* const mp)
@@ -1339,8 +1252,6 @@ void    tAutotune_initToPool        (tAutotune* const rt, int numVoices, int buf
     r->fba = FBA;
     tAutotune_setTimeConstant(rt, DEFTIMECONSTANT);
     
-    
-    
     r->ps = (tPitchShift*) mpool_alloc(sizeof(tPitchShift) * r->numVoices, &m->pool);
     r->freq = (float*) mpool_alloc(sizeof(float) * r->numVoices, &m->pool);
     r->tickOutput = (float*) mpool_alloc(sizeof(float) * r->numVoices, &m->pool);
@@ -1350,6 +1261,7 @@ void    tAutotune_initToPool        (tAutotune* const rt, int numVoices, int buf
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
+    tPeriodDetection_setSmoothAmount(&r->pd, 0.5f);
     
     for (int i = 0; i < r->numVoices; ++i)
     {
@@ -1382,7 +1294,7 @@ float* tAutotune_tick(tAutotune* const rt, float sample)
 {
     _tAutotune* r = *rt;
     
-    float tempPeriod = tPeriodDetection_findPeriod(&r->pd, sample);
+    float tempPeriod = tPeriodDetection_tick(&r->pd, sample);
     if (tempPeriod < 1000.0f) //to avoid trying to follow consonants JS
 	{
 		r->inputPeriod = tempPeriod;

@@ -25,6 +25,8 @@ tSampler samp;
 tBuffer buff;
 tEnvelope env;
 
+tAutotune at;
+
 float gain;
 float freq;
 float dtime;
@@ -43,19 +45,21 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     tNoise_init(&noise, WhiteNoise);
     
-    tSVF_init(&bp1, SVFTypeBandpass, 100, 4.0f);
-    tSVF_init(&bp2, SVFTypeBandpass, 1000, 4.0f);
+    tAutotune_init(&at, 1, 1024, 512);
     
-    tFormantShifter_init(&fs, 20);
-    
-    // Init and set record
-    tBuffer_init (&buff, leaf.sampleRate); // init, 1 second buffer
-    tBuffer_setRecordMode (&buff, RecordOneShot); // RecordOneShot records once through
-    
-    // Init and set play
-    tSampler_init (&samp, &buff); // init, give address of record buffer
-    tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
-    tSampler_setRate(&samp, 1.763f); // Rate of 1.0
+//    tSVF_init(&bp1, SVFTypeBandpass, 100, 4.0f);
+//    tSVF_init(&bp2, SVFTypeBandpass, 1000, 4.0f);
+//
+//    tFormantShifter_init(&fs, 20);
+//
+//    // Init and set record
+//    tBuffer_init (&buff, leaf.sampleRate); // init, 1 second buffer
+//    tBuffer_setRecordMode (&buff, RecordOneShot); // RecordOneShot records once through
+//
+//    // Init and set play
+//    tSampler_init (&samp, &buff); // init, give address of record buffer
+//    tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
+//    tSampler_setRate(&samp, 1.763f); // Rate of 1.0
 }
 
 float   LEAFTest_tick            (float input)
@@ -66,28 +70,32 @@ float   LEAFTest_tick            (float input)
 //    b += tSVF_tick(&bp2, sample);
 //
 //    return (tFormantShifter_tick(&fs, input));
+//
+//    tBuffer_tick(&buff, input);
     
-    tBuffer_tick(&buff, input);
+//    return tSampler_tick(&samp);
     
-    return tSampler_tick(&samp);
+    tAutotune_setFreq(&at, 440.0f, 0);
+    
+    return tAutotune_tick(&at, input)[0];
 }
 
 int firstFrame = 1;
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-    if (firstFrame == 1)
-    {
-        tBuffer_record(&buff); // starts recording
-        tSampler_play(&samp); // start spitting samples out
-        firstFrame = 0;
-    }
+//    if (firstFrame == 1)
+//    {
+//        tBuffer_record(&buff); // starts recording
+//        tSampler_play(&samp); // start spitting samples out
+//        firstFrame = 0;
+//    }
     
     float val = getSliderValue("mod freq");
     
     x = val * 3.5f + 0.5f;
     
-    a = val * tBuffer_getBufferLength(&buff);
+//    a = val * tBuffer_getBufferLength(&buff);
     
     DBG("start: " + String(a));
     
@@ -95,12 +103,12 @@ void    LEAFTest_block           (void)
     
     y = val * 49.0f + 1.0f;
     b = val * 20.0f - 5.0f;
-    b = val * tBuffer_getBufferLength(&buff);
+//    b = val * tBuffer_getBufferLength(&buff);
     
     DBG("rate: " + String(b));
-    
-    tSampler_setStart(&samp, a);
-    tSampler_setEnd(&samp, b);
+//    
+//    tSampler_setStart(&samp, a);
+//    tSampler_setEnd(&samp, b);
 //    tSampler_setRate(&samp, b);
     
 //    tFormantShifter_setShiftFactor(&fs, x);

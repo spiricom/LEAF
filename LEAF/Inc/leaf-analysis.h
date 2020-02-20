@@ -19,6 +19,7 @@ extern "C" {
 #include "leaf-mempool.h"
 #include "leaf-math.h"
 #include "leaf-filters.h"
+#include "leaf-envelopes.h"
     
     //==============================================================================
     
@@ -216,10 +217,13 @@ extern "C" {
         int iLast;
         int index;
         float period;
+        float smoothPeriod;
         
         uint16_t hopSize;
         uint16_t windowSize;
         uint8_t fba;
+    
+        tExpSmooth smooth;
         
         float timeConstant;
         float radius;
@@ -236,7 +240,9 @@ extern "C" {
     void    tPeriodDetection_initToPool         (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, tMempool* const);
     void    tPeriodDetection_freeFromPool       (tPeriodDetection* const, tMempool* const);
     
-    float   tPeriodDetection_findPeriod         (tPeriodDetection* const, float sample);
+    float   tPeriodDetection_tick               (tPeriodDetection* const, float sample);
+    float   tPeriodDetection_getPeriod          (tPeriodDetection* const);
+    void    tPeriodDetection_setSmoothAmount    (tPeriodDetection* const, float amount);
     void    tPeriodDetection_setHopSize         (tPeriodDetection* p, int hs);
     void    tPeriodDetection_setWindowSize      (tPeriodDetection* p, int ws);
     
