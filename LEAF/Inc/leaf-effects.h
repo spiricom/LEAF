@@ -211,6 +211,7 @@ extern "C" {
     void    tRetune_setTimeConstant (tRetune* const, float tc);
     void    tRetune_setHopSize      (tRetune* const, int hs);
     void    tRetune_setWindowSize   (tRetune* const, int ws);
+    void    tRetune_setSmoothAmount (tRetune* const, float smooth);
     float   tRetune_getInputPeriod  (tRetune* const);
     float   tRetune_getInputFreq    (tRetune* const);
     
@@ -253,6 +254,7 @@ extern "C" {
     void    tAutotune_setTimeConstant   (tAutotune* const, float tc);
     void    tAutotune_setHopSize        (tAutotune* const, int hs);
     void    tAutotune_setWindowSize     (tAutotune* const, int ws);
+    void    tAutotune_setSmoothAmount   (tAutotune* const, float smooth);
     float   tAutotune_getInputPeriod    (tAutotune* const);
     float   tAutotune_getInputFreq      (tAutotune* const);
     
