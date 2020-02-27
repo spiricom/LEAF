@@ -480,7 +480,8 @@ void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, f
                            float dampFreq, float decay, float targetLev, float levSmoothFactor,
                            float levStrength, int levMode)
 {
-    tLivingString_initToPool(pl, fre, pickPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf_mempool);
+    tLivingString_initToPool(pl, freq, pickPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf_mempool);
+}
 
 void tLivingString_free(tLivingString* const pl)
 {
