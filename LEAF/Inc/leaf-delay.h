@@ -41,6 +41,7 @@ extern "C" {
     void        tDelay_initToPool   (tDelay* const, uint32_t delay, uint32_t maxDelay, tMempool* const);
     void        tDelay_freeFromPool (tDelay* const, tMempool* const);
     
+    void        tDelay_clear        (tDelay* const);
     int         tDelay_setDelay     (tDelay* const, uint32_t delay);
     uint32_t    tDelay_getDelay     (tDelay* const);
     void        tDelay_tapIn        (tDelay* const, float in, uint32_t tapDelay);
@@ -160,6 +161,7 @@ extern "C" {
     void    tAllpassDelay_initToPool  (tAllpassDelay* const, float delay, uint32_t maxDelay, tMempool* const);
     void    tAllpassDelay_freeFromPool(tAllpassDelay* const, tMempool* const);
     
+    void    tAllpassDelay_clear       (tDelay* const);
     int     tAllpassDelay_setDelay    (tAllpassDelay* const, float delay);
     float   tAllpassDelay_getDelay    (tAllpassDelay* const);
     void    tAllpassDelay_tapIn       (tAllpassDelay* const, float in, uint32_t tapDelay);
@@ -196,6 +198,7 @@ extern "C" {
     void    tTapeDelay_initToPool  (tTapeDelay* const, float delay, uint32_t maxDelay, tMempool* const);
     void    tTapeDelay_freeFromPool(tTapeDelay* const, tMempool* const);
     
+    void    tTapeDelay_clear       (tDelay* const);
     void    tTapeDelay_setDelay    (tTapeDelay* const, float delay);
     float   tTapeDelay_getDelay    (tTapeDelay* const);
     void    tTapeDelay_tapIn       (tTapeDelay* const, float in, uint32_t tapDelay);
