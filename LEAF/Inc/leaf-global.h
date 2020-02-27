@@ -20,8 +20,9 @@ extern "C" {
         float   sampleRate;
         float   invSampleRate;
         int     blockSize;
-        float    twoPiTimesInvSampleRate;
+        float   twoPiTimesInvSampleRate;
         float   (*random)(void);
+        int     clearOnAllocation;
     } LEAF;
     
     extern LEAF leaf; // The global instance of LEAF.

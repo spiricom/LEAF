@@ -141,6 +141,12 @@ void* mpool_alloc(size_t asize, mpool_t* pool)
     
     pool->usize += header_size + node_to_alloc->size;
     
+    if (leaf.clearOnAllocation > 0)
+    {
+        char* new_pool = (char*)node_to_alloc->pool;
+        for (int i = 0; i < node_to_alloc->size; i++) new_pool[i] = 0;
+    }
+    
     // Return the pool of the allocated node;
     return node_to_alloc->pool;
 }

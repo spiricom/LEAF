@@ -34,6 +34,8 @@ void LEAF_init(float sr, int blocksize, char* memory, size_t memorysize, float(*
     leaf.twoPiTimesInvSampleRate = leaf.invSampleRate * TWO_PI;
 
     leaf.random = random;
+    
+    leaf.clearOnAllocation = 0;
 }
 
 
