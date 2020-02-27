@@ -47,6 +47,7 @@ extern "C" {
     void    tPRCReverb_initToPool   (tPRCReverb* const, float t60, tMempool* const);
     void    tPRCReverb_freeFromPool (tPRCReverb* const, tMempool* const);
     
+    void    tPRCReverb_clear        (tPRCReverb* const);
     float   tPRCReverb_tick         (tPRCReverb* const, float input);
     
     // Set reverb time in seconds.
@@ -81,6 +82,7 @@ extern "C" {
     void    tNReverb_initToPool     (tNReverb* const, float t60, tMempool* const);
     void    tNReverb_freeFromPool   (tNReverb* const, tMempool* const);
     
+    void    tNReverb_clear          (tNReverb* const);
     float   tNReverb_tick           (tNReverb* const, float input);
     void    tNReverb_tickStereo     (tNReverb* const rev, float input, float* output);
     
@@ -143,6 +145,7 @@ extern "C" {
     void    tDattorroReverb_initToPool        (tDattorroReverb* const, tMempool* const);
     void    tDattorroReverb_freeFromPool      (tDattorroReverb* const, tMempool* const);
     
+    void    tDattorroReverb_clear             (tDattorroReverb* const);
     float   tDattorroReverb_tick              (tDattorroReverb* const, float input);
     void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, float input, float* output);
     void    tDattorroReverb_setMix            (tDattorroReverb* const, float mix);

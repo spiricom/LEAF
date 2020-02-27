@@ -113,6 +113,15 @@ void    tPRCReverb_freeFromPool (tPRCReverb* const rev, tMempool* const mp)
     mpool_free(r, &m->pool);
 }
 
+void    tPRCRevert_clear(tPRCReverb* const rev)
+{
+    _tPRCReverb* r = *rev;
+    
+    tDelay_clear(&r->allpassDelays[0]);
+    tDelay_clear(&r->allpassDelays[1]);
+    tDelay_clear(&r->combDelay);
+}
+
 void    tPRCReverb_setT60(tPRCReverb* const rev, float t60)
 {
     _tPRCReverb* r = *rev;
@@ -308,6 +317,21 @@ void    tNReverb_setMix(tNReverb* const rev, float mix)
     r->mix = mix;
 }
 
+void    tNReverb_clear             (tNReverb* const rev)
+{
+    _tNReverb* r = *rev;
+    
+    for (int i = 0; i < 6; i++)
+    {
+        tLinearDelay_clear(&r->combDelays[i]);
+    }
+    
+    for (int i = 0; i < 8; i++)
+    {
+        tLinearDelay_clear(&r->allpassDelays[i]);
+    }
+}
+
 float   tNReverb_tick(tNReverb* const rev, float input)
 {
     _tNReverb* r = *rev;
@@ -433,105 +457,12 @@ float       in_allpass_gains[4] = { 0.75f, 0.75f, 0.625f, 0.625f };
 
 void    tDattorroReverb_init              (tDattorroReverb* const rev)
 {
-    _tDattorroReverb* r = *rev = (_tDattorroReverb*) leaf_alloc(sizeof(_tDattorroReverb));
-    
-    r->size_max = 2.0f;
-    r->size = 1.f;
-    r->t = r->size * leaf.sampleRate * 0.001f;
-    r->frozen = 0;
-    // INPUT
-    tTapeDelay_init(&r->in_delay, 0.f, SAMP(200.f));
-    tOnePole_init(&r->in_filter, 1.f);
-    
-    for (int i = 0; i < 4; i++)
-    {
-        tAllpass_init(&r->in_allpass[i], SAMP(in_allpass_delays[i]), SAMP(20.f)); // * r->size_max
-        tAllpass_setGain(&r->in_allpass[i], in_allpass_gains[i]);
-    }
-    
-    // FEEDBACK 1
-    tAllpass_init(&r->f1_allpass, SAMP(30.51f), SAMP(100.f)); // * r->size_max
-    tAllpass_setGain(&r->f1_allpass, 0.7f);
-    
-    tTapeDelay_init(&r->f1_delay_1, SAMP(141.69f), SAMP(200.0f) * r->size_max + 1);
-    tTapeDelay_init(&r->f1_delay_2, SAMP(89.24f), SAMP(100.0f) * r->size_max + 1);
-    tTapeDelay_init(&r->f1_delay_3, SAMP(125.f), SAMP(200.0f) * r->size_max + 1);
-    
-    tOnePole_init(&r->f1_filter, 1.f);
-    
-    tHighpass_init(&r->f1_hp, 20.f);
-    
-    tCycle_init(&r->f1_lfo);
-    tCycle_setFreq(&r->f1_lfo, 0.1f);
-    
-    // FEEDBACK 2
-    tAllpass_init(&r->f2_allpass, SAMP(22.58f), SAMP(100.f)); // * r->size_max
-    tAllpass_setGain(&r->f2_allpass, 0.7f);
-    
-    tTapeDelay_init(&r->f2_delay_1, SAMP(149.62f), SAMP(200.f) * r->size_max + 1);
-    tTapeDelay_init(&r->f2_delay_2, SAMP(60.48f), SAMP(100.f) * r->size_max + 1);
-    tTapeDelay_init(&r->f2_delay_3, SAMP(106.28f), SAMP(200.f) * r->size_max + 1);
-    
-    tOnePole_init(&r->f2_filter, 1.f);
-    
-    tHighpass_init(&r->f2_hp, 20.f);
-    
-    tCycle_init(&r->f2_lfo);
-    tCycle_setFreq(&r->f2_lfo, 0.07f);
-    
-    
-    // PARAMETERS
-    tDattorroReverb_setMix(rev, 0.5f);
-    
-    tDattorroReverb_setInputDelay(rev,  0.f);
-    
-    tDattorroReverb_setInputFilter(rev, 10000.f);
-    
-    tDattorroReverb_setFeedbackFilter(rev, 5000.f);
-    
-    tDattorroReverb_setFeedbackGain(rev, 0.4f);
+    tDattorroReverb_initToPool(rev, &leaf_mempool);
 }
 
 void    tDattorroReverb_free              (tDattorroReverb* const rev)
 {
-    _tDattorroReverb* r = *rev;
-    
-    // INPUT
-    tTapeDelay_free(&r->in_delay);
-    tOnePole_free(&r->in_filter);
-    
-    for (int i = 0; i < 4; i++)
-    {
-        tAllpass_free(&r->in_allpass[i]);
-    }
-    
-    // FEEDBACK 1
-    tAllpass_free(&r->f1_allpass);
-    
-    tTapeDelay_free(&r->f1_delay_1);
-    tTapeDelay_free(&r->f1_delay_2);
-    tTapeDelay_free(&r->f1_delay_3);
-    
-    tOnePole_free(&r->f1_filter);
-    
-    tHighpass_free(&r->f1_hp);
-    
-    tCycle_free(&r->f1_lfo);
-    
-    // FEEDBACK 2
-    tAllpass_free(&r->f2_allpass);
-    
-    tTapeDelay_free(&r->f2_delay_1);
-    tTapeDelay_free(&r->f2_delay_2);
-    tTapeDelay_free(&r->f2_delay_3);
-    
-    tOnePole_free(&r->f2_filter);
-    
-    tHighpass_free(&r->f2_hp);
-    
-    tCycle_free(&r->f2_lfo);
-    
-    leaf_free(r);
+    tDattorroReverb_freeFromPool(rev, &leaf_mempool);
 }
 
 void    tDattorroReverb_initToPool        (tDattorroReverb* const rev, tMempool* const mp)
@@ -637,6 +568,19 @@ void    tDattorroReverb_freeFromPool      (tDattorroReverb* const rev, tMempool*
     tCycle_freeFromPool(&r->f2_lfo, mp);
     
     mpool_free(r, &m->pool);
+}
+
+void    tDattorroReverb_clear             (tDattorroReverb* const rev)
+{
+    _tDattorroReverb* r = *rev;
+    
+    tTapeDelay_clear(&r->in_delay);
+    tTapeDelay_clear(&r->f1_delay_1);
+    tTapeDelay_clear(&r->f1_delay_2);
+    tTapeDelay_clear(&r->f1_delay_3);
+    tTapeDelay_clear(&r->f2_delay_1);
+    tTapeDelay_clear(&r->f2_delay_2);
+    tTapeDelay_clear(&r->f2_delay_3);
 }
 
 float   tDattorroReverb_tick              (tDattorroReverb* const rev, float input)
