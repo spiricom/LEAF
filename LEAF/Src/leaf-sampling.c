@@ -26,23 +26,12 @@
 
 void  tBuffer_init (tBuffer* const sb, uint32_t length)
 {
-    _tBuffer* s = *sb = (_tBuffer*) leaf_alloc(sizeof(_tBuffer));
-    
-    s->buff = (float*) leaf_alloc( sizeof(float) * length);
-    
-    s->bufferLength = length;
-    s->recordedLength = 0;
-    s->active = 0;
-    s->idx = 0;
-    s->mode = RecordOneShot;
+    tBuffer_initToPool(sb, length, &leaf_mempool);
 }
 
 void  tBuffer_free (tBuffer* const sb)
 {
-    _tBuffer* s = *sb;
-    
-    leaf_free(s->buff);
-    leaf_free(s);
+    tBuffer_freeFromPool(sb, &leaf_mempool);
 }
 
 void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp)
@@ -54,6 +43,7 @@ void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp
     
     s->bufferLength = length;
     s->recordedLength = 0;
+    s->active = 0;
     s->idx = 0;
     s->mode = RecordOneShot;
 }
