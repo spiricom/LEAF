@@ -31,7 +31,7 @@ Objects types start with a lowercase t: like tCycle, tSawtooth, tRamp, tEnvelope
 
 All function names start with the object type name, followed by an underscore, then the function name in camel-case: like tCycle_setFreq(), tRamp_setDest().
 
-The first parameter of all LEAF functions associated with an object type is the object instance it is operating on. 
+The first input parameter of all LEAF functions associated with an object type is the object instance it is operating on. 
 
 LEAF assumes a global sample rate (passed into LEAF when the library itself is initialized). You can change this sample rate whenever you want, and all objects that use the global sample rate will see the change.
 
