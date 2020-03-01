@@ -254,15 +254,7 @@ float tTalkbox_tick(tTalkbox* const voc, float synth, float voice)
     v->pos = p0;
     v->FX = fx;
     
-    float den = 1.0e-10f; //(float)pow(10.0f, -10.0f * param[4]);
-    if(fabs(v->d0) < den) v->d0 = 0.0f; //anti-denormal (doesn't seem necessary but P4?)
-    if(fabs(v->d1) < den) v->d1 = 0.0f;
-    if(fabs(v->d2) < den) v->d2 = 0.0f;
-    if(fabs(v->d3) < den) v->d3 = 0.0f;
-    if(fabs(v->u0) < den) v->u0 = 0.0f;
-    if(fabs(v->u1) < den) v->u1 = 0.0f;
-    if(fabs(v->u2) < den) v->u2 = 0.0f;
-    if(fabs(v->u3) < den) v->u3 = 0.0f;
+
     return o;
 }
 

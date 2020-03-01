@@ -107,6 +107,8 @@ extern "C" {
     void    tPoly_setPitchBend          (tPoly* const, float pitchBend);
     void    tPoly_setPitchGlideActive   (tPoly* const, oBool isActive);
     void    tPoly_setPitchGlideTime     (tPoly* const, float t);
+    void 	tPoly_setBendGlideTime		(tPoly* const polyh, float t);
+    void 	tPoly_setBendSamplesPerTick	(tPoly* const polyh, float t);
     void    tPoly_tickPitch             (tPoly* const);
     void    tPoly_tickPitchGlide        (tPoly* const);
     void    tPoly_tickPitchBend         (tPoly* const);

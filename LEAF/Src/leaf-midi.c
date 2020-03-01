@@ -425,7 +425,6 @@ void tPoly_tickPitchBend(tPoly* polyh)
     tRamp_tick(&poly->pitchBendRamp);
 }
 
-//instead of including in dacsend, should have a separate pitch bend ramp, that is added when the ramps are ticked and sent to DAC
 void tPoly_setPitchBend(tPoly* const polyh, float pitchBend)
 {
     _tPoly* poly = *polyh;
@@ -480,7 +479,7 @@ int tPoly_noteOn(tPoly* const polyh, int note, uint8_t vel)
                 whichVoice = poly->notes[whichNote][1];
                 if (whichVoice >= 0)
                 {
-                    poly->lastVoiceToChange = j;
+                    poly->lastVoiceToChange = whichVoice;
                     int oldNote = poly->voices[whichVoice][0];
                     poly->voices[whichVoice][0] = note;
                     poly->voices[whichVoice][1] = vel;
@@ -488,7 +487,14 @@ int tPoly_noteOn(tPoly* const polyh, int note, uint8_t vel)
                     poly->notes[note][0] = vel;
                     poly->notes[note][1] = whichVoice;
                     
-                    tRamp_setTime(&poly->ramps[whichVoice], poly->glideTime);
+                    if (poly->pitchGlideIsActive)
+                    {
+                    	tRamp_setTime(&poly->ramps[whichVoice], poly->glideTime);
+                    }
+                    else
+                    {
+                    	tRamp_setVal(&poly->ramps[whichVoice], note);
+                    }
                     tRamp_setDest(&poly->ramps[whichVoice], poly->voices[whichVoice][0]);
                     
                     alteredVoice = whichVoice;
@@ -546,6 +552,14 @@ int tPoly_noteOff(tPoly* const polyh, uint8_t note)
             if (poly->notes[noteToTest][1] < 0) //if there is a stolen note waiting (marked inactive but on the stack)
             {
                 poly->voices[deactivatedVoice][0] = noteToTest; //set the newly free voice to use the old stolen note
+                if (poly->pitchGlideIsActive)
+                {
+                	tRamp_setTime(&poly->ramps[deactivatedVoice], poly->glideTime);
+                }
+                else
+                {
+                	tRamp_setVal(&poly->ramps[deactivatedVoice], noteToTest);
+                }
                 tRamp_setDest(&poly->ramps[deactivatedVoice], poly->voices[deactivatedVoice][0]);
                 poly->voices[deactivatedVoice][1] = poly->notes[noteToTest][0]; // set the velocity of the voice to be the velocity of that note
                 poly->notes[noteToTest][1] = deactivatedVoice; //mark that it is no longer stolen and is now active
@@ -616,6 +630,18 @@ void tPoly_setPitchGlideTime(tPoly* const polyh, float t)
     {
         tRamp_setTime(&poly->ramps[i], poly->glideTime);
     }
+}
+
+void tPoly_setBendGlideTime(tPoly* const polyh, float t)
+{
+    _tPoly* poly = *polyh;
+    tRamp_setTime(&poly->pitchBendRamp, t);
+}
+
+void tPoly_setBendSamplesPerTick(tPoly* const polyh, float t)
+{
+	 _tPoly* poly = *polyh;
+	 poly->pitchBendRamp->samples_per_tick =  t;
 }
 
 int tPoly_getNumVoices(tPoly* const polyh)

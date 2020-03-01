@@ -399,7 +399,7 @@ void     tADSR_setAttack(tADSR* const adsrenv, float attack)
     adsr->attackInc = adsr->inc_buff[attackIndex];
 }
 
-void     tADSR_detDecay(tADSR* const adsrenv, float decay)
+void     tADSR_setDecay(tADSR* const adsrenv, float decay)
 {
     _tADSR* adsr = *adsrenv;
     
@@ -657,14 +657,11 @@ float   tRamp_tick(tRamp* const ramp)
     
     r->curr += r->inc;
     
-    if (((r->curr >= r->dest) && (r->inc > 0.0f)) || ((r->curr <= r->dest) && (r->inc < 0.0f)))
+    if (((r->curr >= r->dest) && (r->inc >= 0.0f)) || ((r->curr <= r->dest) && (r->inc < 0.0f)))
 	{
 		r->inc = 0.0f;
 		r->curr=r->dest;
 	}
-
-    // Palle: There is a slight risk that you overshoot here and stay on dest+inc, which with a large inc value could be a real problem
-    // I suggest you add: r->curr=r->dest in the true if case
     
     return r->curr;
 }

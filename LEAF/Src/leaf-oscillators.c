@@ -25,6 +25,7 @@ void    tCycle_init(tCycle* const cy)
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+
 }
 
 void    tCycle_free(tCycle* const cy)
@@ -41,6 +42,7 @@ void    tCycle_initToPool   (tCycle* const cy, tMempool* const mp)
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+
 }
 
 void    tCycle_freeFromPool (tCycle* const cy, tMempool* const mp)
@@ -55,30 +57,38 @@ int     tCycle_setFreq(tCycle* const cy, float freq)
 {
     _tCycle* c = *cy;
     
-    if (freq < 0.0f) freq = 0.0f;
-    
     c->freq = freq;
     c->inc = freq * leaf.invSampleRate;
     
     return 0;
 }
 
+//need to check bounds and wrap table properly to allow through-zero FM
 float   tCycle_tick(tCycle* const cy)
 {
     _tCycle* c = *cy;
+    float temp;;
+    int intPart;;
+    float fracPart;
+    float samp0;
+    float samp1;
     
     // Phasor increment
     c->phase += c->inc;
     while (c->phase >= 1.0f) c->phase -= 1.0f;
-    
+    while (c->phase <= 0.0f) c->phase += 1.0f;
+
     // Wavetable synthesis
-    float temp = SINE_TABLE_SIZE * c->phase;
-    int intPart = (int)temp;
-    float fracPart = temp - (float)intPart;
-    float samp0 = sinewave[intPart];
-    if (++intPart >= SINE_TABLE_SIZE) intPart = 0;
-    float samp1 = sinewave[intPart];
+
+	temp = SINE_TABLE_SIZE * c->phase;
+	intPart = (int)temp;
+	fracPart = temp - (float)intPart;
+	samp0 = sinewave[intPart];
+	if (++intPart >= SINE_TABLE_SIZE) intPart = 0;
+	samp1 = sinewave[intPart];
+
     return (samp0 + (samp1 - samp0) * fracPart);
+
 }
 
 void     tCycleSampleRateChanged (tCycle* const cy)
