@@ -104,6 +104,7 @@ extern "C" {
         
         float attackPhase, decayPhase, releasePhase, rampPhase;
 
+        float leakFactor;
 
 
     } _tADSR;
@@ -120,6 +121,7 @@ extern "C" {
     void    tADSR_setDecay      (tADSR* const, float decay);
     void    tADSR_setSustain    (tADSR* const, float sustain);
     void    tADSR_setRelease    (tADSR* const, float release);
+    void 	tADSR_setLeakFactor	(tADSR* const, float leakFactor);
     void    tADSR_on            (tADSR* const, float velocity);
     void    tADSR_off           (tADSR* const);
     

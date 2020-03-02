@@ -309,6 +309,8 @@ void    tADSR_init(tADSR* const adsrenv, float attack, float decay, float sustai
     adsr->releaseInc = adsr->inc_buff[releaseIndex];
     adsr->rampInc = adsr->inc_buff[rampIndex];
 
+    adsr->leakFactor = 1.0f;
+
 }
 
 void tADSR_free(tADSR* const adsrenv)
@@ -374,6 +376,7 @@ void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, fl
     adsr->releaseInc = adsr->inc_buff[releaseIndex];
     adsr->rampInc = adsr->inc_buff[rampIndex];
 
+    adsr->leakFactor = 1.0f;
 }
 
 void    tADSR_freeFromPool  (tADSR* const adsrenv, tMempool* const mp)
@@ -443,7 +446,14 @@ void     tADSR_setRelease(tADSR* const adsrenv, float release)
     adsr->releaseInc = adsr->inc_buff[releaseIndex];
 }
 
+// 0.999999 is slow leak, 0.9 is fast leak
+void     tADSR_setLeakFactor(tADSR* const adsrenv, float leakFactor)
+{
+    _tADSR* adsr = *adsrenv;
 
+
+    adsr->leakFactor = leakFactor;
+}
 
 void tADSR_on(tADSR* const adsrenv, float velocity)
 {
@@ -543,6 +553,11 @@ float   tADSR_tick(tADSR* const adsrenv)
         
         // Increment ADSR decay.
         adsr->decayPhase += adsr->decayInc;
+    }
+
+    if (adsr->inSustain)
+    {
+    	adsr->next = adsr->next * adsr->leakFactor;
     }
 
     if (adsr->inRelease)
