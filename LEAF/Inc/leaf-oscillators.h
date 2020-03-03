@@ -17,9 +17,19 @@ extern "C" {
 #include "leaf-mempool.h"
 #include "leaf-filters.h"
     
+    /*!
+     * @defgroup OSCILLATORS Oscillators
+     */
+    
     //==============================================================================
     
-    /* tCycle: Cycle/Sine waveform. Wavetable synthesis.*/
+    /*!
+     * @ingroup OSCILLATORS
+     * @defgroup TCYCLE tCycle
+     * A cycle/sine waveform oscillator. Uses wavetable synthesis.
+     * @{
+     */
+    
     typedef struct _tCycle
     {
         // Underlying phasor
@@ -30,15 +40,61 @@ extern "C" {
     
     typedef _tCycle* tCycle;
     
-    void    tCycle_init         (tCycle* const);
-    void    tCycle_free         (tCycle* const);
-    void    tCycle_initToPool   (tCycle* const, tMempool* const);
-    void    tCycle_freeFromPool (tCycle* const, tMempool* const);
+    //! Initializes a tCycle to the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tCycle to be initialized.
+     */
+    void    tCycle_init         (tCycle* const osc);
     
-    float   tCycle_tick         (tCycle* const);
-    int     tCycle_setFreq      (tCycle* const, float freq);
+    
+    //! Frees a tCycle from the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tCycle to be freed.
+     */
+    void    tCycle_free         (tCycle* const osc);
+    
+    
+    //! Initializes a tCycle to a specified mempool.
+    /*!
+     @param osc A pointer to the tCycle to be initialized.
+     @param pool A pointer to the tMempool to which the tCycle should be initialized.
+     */
+    void    tCycle_initToPool   (tCycle* const osc, tMempool* const pool);
+    
+    
+    //! Frees a tCycle from a specified mempool.
+    /*!
+     @param osc A pointer to the tCycle to be freed.
+     @param pool A pointer to the tMempool from which the tCycle should be freed.
+     */
+    void    tCycle_freeFromPool (tCycle* const osc, tMempool* const pool);
+    
+    
+    //! Tick a tCycle oscillator.
+    /*!
+     @param osc A pointer to the relevant tCycle.
+     @return The ticked sample.
+     */
+    float   tCycle_tick         (tCycle* const osc);
+    
+    
+    //! Set the frequency of a tCycle oscillator.
+    /*!
+     @param osc A pointer to the relevant tCycle.
+     @param freq The frequency to set the oscillator to.
+     */
+    void    tCycle_setFreq      (tCycle* const osc, float freq);
+    
+    /*! @} */
     
     //==============================================================================
+    
+    /*!
+     * @ingroup OSCILLATORS
+     * @defgroup TTRIANGLE tTriangle
+     * An anti-aliased triangle waveform oscillator. Uses wavetable synthesis.
+     * @{
+     */
     
     /* tTriangle: Anti-aliased Triangle waveform using wavetable interpolation. Wavetables constructed from sine components. */
     typedef struct _tTriangle
@@ -51,15 +107,61 @@ extern "C" {
     
     typedef _tTriangle* tTriangle;
     
-    void    tTriangle_init          (tTriangle* const);
-    void    tTriangle_free          (tTriangle* const);
-    void    tTriangle_initToPool    (tTriangle* const, tMempool* const);
-    void    tTriangle_freeFromPool  (tTriangle* const, tMempool* const);
+    //! Initializes a tTriangle to the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tTriangle to be initialized.
+     */
+    void    tTriangle_init          (tTriangle* const osc);
     
-    float   tTriangle_tick          (tTriangle* const);
-    int     tTriangle_setFreq       (tTriangle* const, float freq);
+    
+    //! Frees a tTriangle from the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tTriangle to be freed.
+     */
+    void    tTriangle_free          (tTriangle* const osc);
+    
+    
+    //! Initializes a tTriangle to a specified mempool.
+    /*!
+     @param osc A pointer to the tTriangle to be initialized.
+     @param pool A pointer to the tMempool to which the tTriangle should be initialized.
+     */
+    void    tTriangle_initToPool    (tTriangle* const osc, tMempool* const pool);
+    
+    
+    //! Frees a tTriangle from a specified mempool.
+    /*!
+     @param osc A pointer to the tTriangle to be freed.
+     @param pool A pointer to the tMempool from which the tTriangle should be freed.
+     */
+    void    tTriangle_freeFromPool  (tTriangle* const osc, tMempool* const pool);
+    
+    
+    //! Tick a tTriangle oscillator.
+    /*!
+     @param osc A pointer to the relevant tTriangle.
+     @return The ticked sample.
+     */
+    float   tTriangle_tick          (tTriangle* const osc);
+    
+    
+    //! Set the frequency of a tTriangle oscillator.
+    /*!
+     @param osc A pointer to the relevant tTriangle.
+     @param freq The frequency to set the oscillator to.
+     */
+    int     tTriangle_setFreq       (tTriangle* const osc, float freq);
+    
+    /*! @} */
     
     //==============================================================================
+    
+    /*!
+     * @ingroup OSCILLATORS
+     * @defgroup TSQUARE tSquare
+     * An anti-aliased square waveform oscillator. Uses wavetable synthesis.
+     * @{
+     */
     
     /* tSquare: Anti-aliased Square waveform using wavetable interpolation. Wavetables constructed from sine components. */
     typedef struct _tSquare
@@ -72,13 +174,50 @@ extern "C" {
     
     typedef _tSquare* tSquare;
     
-    void    tSquare_init        (tSquare* const);
-    void    tSquare_free        (tSquare* const);
-    void    tSquare_initToPool  (tSquare* const, tMempool* const);
-    void    tSquare_freeFromPool(tSquare* const, tMempool* const);
+    //! Initializes a tSquare to the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tSquare to be initialized.
+     */
+    void    tSquare_init        (tSquare* const osc);
     
-    float   tSquare_tick        (tSquare* const);
-    int     tSquare_setFreq     (tSquare* const, float freq);
+    
+    //! Frees a tSquare from the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tSquare to be freed.
+     */
+    void    tSquare_free        (tSquare* const osc);
+    
+    
+    //! Initializes a tSquare to a specified mempool.
+    /*!
+     @param osc A pointer to the tSquare to be initialized.
+     @param pool A pointer to the tMempool to which the tSquare should be initialized.
+     */
+    void    tSquare_initToPool  (tSquare* const osc, tMempool* const);
+    
+    
+    //! Frees a tSquare from a specified mempool.
+    /*!
+     @param osc A pointer to the tSquare to be freed.
+     @param pool A pointer to the tMempool from which the tSquare should be freed.
+     */
+    void    tSquare_freeFromPool(tSquare* const osc, tMempool* const);
+    
+    
+    //! Tick a tSquare oscillator.
+    /*!
+     @param osc A pointer to the relevant tSquare.
+     @return The ticked sample.
+     */
+    float   tSquare_tick        (tSquare* const osc);
+
+    
+    //! Set the frequency of a tSquare oscillator.
+    /*!
+     @param osc A pointer to the relevant tSquare.
+     @param freq The frequency to set the oscillator to.
+     */
+    int     tSquare_setFreq     (tSquare* const osc, float freq);
     
     //==============================================================================
     
@@ -93,13 +232,13 @@ extern "C" {
     
     typedef _tSawtooth* tSawtooth;
     
-    void    tSawtooth_init          (tSawtooth* const);
-    void    tSawtooth_free          (tSawtooth* const);
-    void    tSawtooth_initToPool    (tSawtooth* const, tMempool* const);
-    void    tSawtooth_freeFromPool  (tSawtooth* const, tMempool* const);
+    void    tSawtooth_init          (tSawtooth* const osc);
+    void    tSawtooth_free          (tSawtooth* const osc);
+    void    tSawtooth_initToPool    (tSawtooth* const osc, tMempool* const);
+    void    tSawtooth_freeFromPool  (tSawtooth* const osc, tMempool* const);
     
-    float   tSawtooth_tick          (tSawtooth* const);
-    int     tSawtooth_setFreq       (tSawtooth* const, float freq);
+    float   tSawtooth_tick          (tSawtooth* const osc);
+    int     tSawtooth_setFreq       (tSawtooth* const osc, float freq);
     
     //==============================================================================
     
@@ -113,13 +252,13 @@ extern "C" {
     
     typedef _tPhasor* tPhasor;
     
-    void    tPhasor_init        (tPhasor* const);
-    void    tPhasor_free        (tPhasor* const);
-    void    tPhasor_initToPool  (tPhasor* const, tMempool* const);
-    void    tPhasor_freeFromPool(tPhasor* const, tMempool* const);
+    void    tPhasor_init        (tPhasor* const osc);
+    void    tPhasor_free        (tPhasor* const osc);
+    void    tPhasor_initToPool  (tPhasor* const osc, tMempool* const);
+    void    tPhasor_freeFromPool(tPhasor* const osc, tMempool* const);
     
-    float   tPhasor_tick        (tPhasor* const);
-    int     tPhasor_setFreq     (tPhasor* const, float freq);
+    float   tPhasor_tick        (tPhasor* const osc);
+    int     tPhasor_setFreq     (tPhasor* const osc, float freq);
     
     //==============================================================================
     
@@ -141,12 +280,12 @@ extern "C" {
     
     typedef _tNoise* tNoise;
     
-    void    tNoise_init         (tNoise* const, NoiseType type);
-    void    tNoise_free         (tNoise* const);
-    void    tNoise_initToPool   (tNoise* const, NoiseType type, tMempool* const);
-    void    tNoise_freeFromPool (tNoise* const, tMempool* const);
+    void    tNoise_init         (tNoise* const noise, NoiseType type);
+    void    tNoise_free         (tNoise* const noise);
+    void    tNoise_initToPool   (tNoise* const noise, NoiseType type, tMempool* const);
+    void    tNoise_freeFromPool (tNoise* const noise, tMempool* const);
     
-    float   tNoise_tick         (tNoise* const);
+    float   tNoise_tick         (tNoise* const noise);
     
     //==============================================================================
     
@@ -178,23 +317,23 @@ extern "C" {
     
     typedef _tNeuron* tNeuron;
     
-    void    tNeuron_init        (tNeuron* const);
-    void    tNeuron_free        (tNeuron* const);
-    void    tNeuron_initToPool  (tNeuron* const, tMempool* const);
-    void    tNeuron_freeFromPool(tNeuron* const, tMempool* const);
+    void    tNeuron_init        (tNeuron* const neuron);
+    void    tNeuron_free        (tNeuron* const neuron);
+    void    tNeuron_initToPool  (tNeuron* const neuron, tMempool* const);
+    void    tNeuron_freeFromPool(tNeuron* const neuron, tMempool* const);
     
-    void    tNeuron_reset       (tNeuron* const);
-    float   tNeuron_tick        (tNeuron* const);
-    void    tNeuron_setMode     (tNeuron* const, NeuronMode mode);
-    void    tNeuron_setCurrent  (tNeuron* const, float current);
-    void    tNeuron_setK        (tNeuron* const, float K);
-    void    tNeuron_setL        (tNeuron* const, float L);
-    void    tNeuron_setN        (tNeuron* const, float N);
-    void    tNeuron_setC        (tNeuron* const, float C);
-    void    tNeuron_setV1       (tNeuron* const, float V1);
-    void    tNeuron_setV2       (tNeuron* const, float V2);
-    void    tNeuron_setV3       (tNeuron* const, float V3);
-    void    tNeuron_setTimeStep (tNeuron* const, float timestep);
+    void    tNeuron_reset       (tNeuron* const neuron);
+    float   tNeuron_tick        (tNeuron* const neuron);
+    void    tNeuron_setMode     (tNeuron* const neuron, NeuronMode mode);
+    void    tNeuron_setCurrent  (tNeuron* const neuron, float current);
+    void    tNeuron_setK        (tNeuron* const neuron, float K);
+    void    tNeuron_setL        (tNeuron* const neuron, float L);
+    void    tNeuron_setN        (tNeuron* const neuron, float N);
+    void    tNeuron_setC        (tNeuron* const neuron, float C);
+    void    tNeuron_setV1       (tNeuron* const neuron, float V1);
+    void    tNeuron_setV2       (tNeuron* const neuron, float V2);
+    void    tNeuron_setV3       (tNeuron* const neuron, float V3);
+    void    tNeuron_setTimeStep (tNeuron* const neuron, float timestep);
     
     //==============================================================================
     

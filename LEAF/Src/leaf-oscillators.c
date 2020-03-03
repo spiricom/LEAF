@@ -53,14 +53,12 @@ void    tCycle_freeFromPool (tCycle* const cy, tMempool* const mp)
     mpool_free(c, &m->pool);
 }
 
-int     tCycle_setFreq(tCycle* const cy, float freq)
+void     tCycle_setFreq(tCycle* const cy, float freq)
 {
     _tCycle* c = *cy;
     
     c->freq = freq;
     c->inc = freq * leaf.invSampleRate;
-    
-    return 0;
 }
 
 //need to check bounds and wrap table properly to allow through-zero FM
