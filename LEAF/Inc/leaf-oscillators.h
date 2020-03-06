@@ -18,14 +18,21 @@ extern "C" {
 #include "leaf-filters.h"
     
     /*!
-     * @defgroup OSCILLATORS Oscillators
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
+    /*!
+     * @defgroup oscillators Oscillators
      */
     
     //==============================================================================
     
     /*!
-     * @ingroup OSCILLATORS
-     * @defgroup TCYCLE tCycle
+     * @ingroup oscillators
+     * @defgroup tcycle tCycle
      * A cycle/sine waveform oscillator. Uses wavetable synthesis.
      * @{
      */
@@ -90,8 +97,8 @@ extern "C" {
     //==============================================================================
     
     /*!
-     * @ingroup OSCILLATORS
-     * @defgroup TTRIANGLE tTriangle
+     * @ingroup oscillators
+     * @defgroup ttriangle tTriangle
      * An anti-aliased triangle waveform oscillator. Uses wavetable synthesis.
      * @{
      */
@@ -157,8 +164,8 @@ extern "C" {
     //==============================================================================
     
     /*!
-     * @ingroup OSCILLATORS
-     * @defgroup TSQUARE tSquare
+     * @ingroup oscillators
+     * @defgroup tsquare tSquare
      * An anti-aliased square waveform oscillator. Uses wavetable synthesis.
      * @{
      */
