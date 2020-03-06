@@ -73,7 +73,7 @@ void tEnvelope_free(tEnvelope* const envlp)
 void    tEnvelope_initToPool    (tEnvelope* const envlp, float attack, float decay, oBool loop, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tEnvelope* env = *envlp = (_tEnvelope*) mpool_alloc(sizeof(_tEnvelope), &m->pool);
+    _tEnvelope* env = *envlp = (_tEnvelope*) mpool_alloc(sizeof(_tEnvelope), m);
     
     env->exp_buff = exp_decay;
     env->inc_buff = attack_decay_inc;
@@ -115,7 +115,7 @@ void    tEnvelope_freeFromPool  (tEnvelope* const envlp, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tEnvelope* env = *envlp;
-    mpool_free(env, &m->pool);
+    mpool_free(env, m);
 }
 
 void     tEnvelope_setAttack(tEnvelope* const envlp, float attack)
@@ -323,7 +323,7 @@ void tADSR_free(tADSR* const adsrenv)
 void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tADSR* adsr = *adsrenv = (_tADSR*) mpool_alloc(sizeof(_tADSR), &m->pool);
+    _tADSR* adsr = *adsrenv = (_tADSR*) mpool_alloc(sizeof(_tADSR), m);
     
     adsr->exp_buff = exp_decay;
     adsr->inc_buff = attack_decay_inc;
@@ -383,7 +383,7 @@ void    tADSR_freeFromPool  (tADSR* const adsrenv, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tADSR* adsr = *adsrenv;
-    mpool_free(adsr, &m->pool);
+    mpool_free(adsr, m);
 }
 
 void     tADSR_setAttack(tADSR* const adsrenv, float attack)
@@ -614,7 +614,7 @@ void tRamp_free(tRamp* const r)
 void    tRamp_initToPool    (tRamp* const r, float time, int samples_per_tick, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tRamp* ramp = *r = (_tRamp*) mpool_alloc(sizeof(_tRamp), &m->pool);
+    _tRamp* ramp = *r = (_tRamp*) mpool_alloc(sizeof(_tRamp), m);
     
     ramp->inv_sr_ms = 1.0f/(leaf.sampleRate*0.001f);
     ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
@@ -639,7 +639,7 @@ void    tRamp_freeFromPool  (tRamp* const r, tMempool* const mp)
     _tMempool* m = *mp;
     _tRamp* ramp = *r;
     
-    mpool_free(ramp, &m->pool);
+    mpool_free(ramp, m);
 }
 
 void     tRamp_setTime(tRamp* const ramp, float time)
@@ -723,7 +723,7 @@ void tExpSmooth_free(tExpSmooth* const expsmooth)
 void    tExpSmooth_initToPool   (tExpSmooth* const expsmooth, float val, float factor, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tExpSmooth* smooth = *expsmooth = (_tExpSmooth*) mpool_alloc(sizeof(_tExpSmooth), &m->pool);
+    _tExpSmooth* smooth = *expsmooth = (_tExpSmooth*) mpool_alloc(sizeof(_tExpSmooth), m);
     
     smooth->curr=val;
     smooth->dest=val;
@@ -738,7 +738,7 @@ void    tExpSmooth_freeFromPool (tExpSmooth* const expsmooth, tMempool* const mp
     _tMempool* m = *mp;
     _tExpSmooth* smooth = *expsmooth;
     
-    mpool_free(smooth, &m->pool);
+    mpool_free(smooth, m);
 }
 
 void     tExpSmooth_setFactor(tExpSmooth* const expsmooth, float factor)

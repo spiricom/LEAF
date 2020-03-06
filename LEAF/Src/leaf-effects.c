@@ -62,7 +62,7 @@ void tTalkbox_free(tTalkbox* const voc)
 void    tTalkbox_initToPool     (tTalkbox* const voc, int bufsize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tTalkbox* v = *voc = (_tTalkbox*) mpool_alloc(sizeof(_tTalkbox), &m->pool);
+    _tTalkbox* v = *voc = (_tTalkbox*) mpool_alloc(sizeof(_tTalkbox), m);
     
     v->param[0] = 0.5f;  //wet
     v->param[1] = 0.0f;  //dry
@@ -71,11 +71,11 @@ void    tTalkbox_initToPool     (tTalkbox* const voc, int bufsize, tMempool* con
     
     v->bufsize = bufsize;
     
-    v->car0 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, &m->pool);
-    v->car1 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, &m->pool);
-    v->window = (float*) mpool_alloc(sizeof(float) * v->bufsize, &m->pool);
-    v->buf0 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, &m->pool);
-    v->buf1 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, &m->pool);
+    v->car0 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+    v->car1 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+    v->window = (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+    v->buf0 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+    v->buf1 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
     
     tTalkbox_update(voc);
     tTalkbox_suspend(voc);
@@ -86,13 +86,13 @@ void    tTalkbox_freeFromPool   (tTalkbox* const voc, tMempool* const mp)
     _tMempool* m = *mp;
     _tTalkbox* v = *voc;
     
-    mpool_free(v->buf1, &m->pool);
-    mpool_free(v->buf0, &m->pool);
-    mpool_free(v->window, &m->pool);
-    mpool_free(v->car1, &m->pool);
-    mpool_free(v->car0, &m->pool);
+    mpool_free(v->buf1, m);
+    mpool_free(v->buf0, m);
+    mpool_free(v->window, m);
+    mpool_free(v->car1, m);
+    mpool_free(v->car0, m);
     
-    mpool_free(v, &m->pool);
+    mpool_free(v, m);
 }
 
 void tTalkbox_update(tTalkbox* const voc) ///update internal parameters...
@@ -297,7 +297,7 @@ void tVocoder_free (tVocoder* const voc)
 void    tVocoder_initToPool     (tVocoder* const voc, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tVocoder* v = *voc = (_tVocoder*) mpool_alloc(sizeof(_tVocoder), &m->pool);
+    _tVocoder* v = *voc = (_tVocoder*) mpool_alloc(sizeof(_tVocoder), m);
     
     v->param[0] = 0.33f;  //input select
     v->param[1] = 0.50f;  //output dB
@@ -316,7 +316,7 @@ void    tVocoder_freeFromPool   (tVocoder* const voc, tMempool* const mp)
     _tMempool* m = *mp;
     _tVocoder* v = *voc;
     
-    mpool_free(v, &m->pool);
+    mpool_free(v, m);
 }
 
 void        tVocoder_update      (tVocoder* const voc)
@@ -518,10 +518,10 @@ void    tSOLAD_initToPool       (tSOLAD* const wp, tMempool* const mp)
 {
     _tMempool* m = *mp;
 
-    _tSOLAD* w = *wp = (_tSOLAD*) mpool_calloc(sizeof(_tSOLAD), &m->pool);
+    _tSOLAD* w = *wp = (_tSOLAD*) mpool_calloc(sizeof(_tSOLAD), m);
     
     w->pitchfactor = 1.;
-    w->delaybuf = (float*) mpool_calloc(sizeof(float) * (LOOPSIZE+16), &m->pool);
+    w->delaybuf = (float*) mpool_calloc(sizeof(float) * (LOOPSIZE+16), m);
 
     solad_init(w);
 }
@@ -531,8 +531,8 @@ void    tSOLAD_freeFromPool     (tSOLAD* const wp, tMempool* const mp)
     _tMempool* m = *mp;
     _tSOLAD* w = *wp;
     
-    mpool_free(w->delaybuf, &m->pool);
-    mpool_free(w, &m->pool);
+    mpool_free(w->delaybuf, m);
+    mpool_free(w, m);
 }
 
 // send one block of input samples, receive one block of output samples
@@ -901,7 +901,7 @@ void    tPitchShift_initToPool      (tPitchShift* const psr, tPeriodDetection* c
 {
     _tMempool* m = *mp;
 
-    _tPitchShift* ps = *psr = (_tPitchShift*) mpool_calloc(sizeof(_tPitchShift), &m->pool);
+    _tPitchShift* ps = *psr = (_tPitchShift*) mpool_calloc(sizeof(_tPitchShift), m);
 
     _tPeriodDetection* p = *pd;
     
@@ -930,7 +930,7 @@ void    tPitchShift_freeFromPool    (tPitchShift* const psr, tMempool* const mp)
     
     tSOLAD_freeFromPool(&ps->sola, mp);
     tHighpass_freeFromPool(&ps->hp, mp);
-    mpool_free(ps, &m->pool);
+    mpool_free(ps, m);
 }
 
 void tPitchShift_setPitchFactor(tPitchShift* psr, float pf)
@@ -1052,25 +1052,25 @@ float tPitchShift_shiftToFunc (tPitchShift* psr, float (*fun)(float))
 
 void tRetune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize)
 {
-    tRetune_initToPool(rt, numVoices, bufSize, frameSize, &leaf_mempool);
+    tRetune_initToPool(rt, numVoices, bufSize, frameSize, &leaf.mempool);
 }
 
 void tRetune_free(tRetune* const rt)
 {
-    tRetune_freeFromPool(rt, &leaf_mempool);
+    tRetune_freeFromPool(rt, &leaf.mempool);
 }
 
 void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, int frameSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tRetune* r = *rt = (_tRetune*) mpool_alloc(sizeof(_tRetune), &m->pool);
+    _tRetune* r = *rt = (_tRetune*) mpool_alloc(sizeof(_tRetune), m);
     
     r->bufSize = bufSize;
     r->frameSize = frameSize;
     r->numVoices = numVoices;
     
-    r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, &m->pool);
-    r->outBuffers = (float**) mpool_calloc(sizeof(float*) * r->numVoices, &m->pool);
+    r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
+    r->outBuffers = (float**) mpool_calloc(sizeof(float*) * r->numVoices, m);
     
     r->hopSize = DEFHOPSIZE;
     r->windowSize = DEFWINDOWSIZE;
@@ -1079,12 +1079,12 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     
     r->inputPeriod = 0.0f;
 
-    r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, &m->pool);
-    r->pitchFactor = (float*) mpool_calloc(sizeof(float) * r->numVoices, &m->pool);
-    r->tickOutput = (float*) mpool_calloc(sizeof(float) * r->numVoices, &m->pool);
+    r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
+    r->pitchFactor = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
+    r->tickOutput = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
     for (int i = 0; i < r->numVoices; ++i)
     {
-        r->outBuffers[i] = (float*) mpool_calloc(sizeof(float) * r->bufSize, &m->pool);
+        r->outBuffers[i] = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
@@ -1104,14 +1104,14 @@ void    tRetune_freeFromPool    (tRetune* const rt, tMempool* const mp)
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_freeFromPool(&r->ps[i], mp);
-        mpool_free(r->outBuffers[i], &m->pool);
+        mpool_free(r->outBuffers[i], m);
     }
-    mpool_free(r->tickOutput, &m->pool);
-    mpool_free(r->pitchFactor, &m->pool);
-    mpool_free(r->ps, &m->pool);
-    mpool_free(r->inBuffer, &m->pool);
-    mpool_free(r->outBuffers, &m->pool);
-    mpool_free(r, &m->pool);
+    mpool_free(r->tickOutput, m);
+    mpool_free(r->pitchFactor, m);
+    mpool_free(r->ps, m);
+    mpool_free(r->inBuffer, m);
+    mpool_free(r->outBuffers, m);
+    mpool_free(r, m);
 }
 
 float* tRetune_tick(tRetune* const rt, float sample)
@@ -1225,37 +1225,37 @@ float tRetune_getInputFreq(tRetune* const rt)
 
 void tAutotune_init(tAutotune* const rt, int numVoices, int bufSize, int frameSize)
 {
-    tAutotune_initToPool(rt, numVoices, bufSize, frameSize, &leaf_mempool);
+    tAutotune_initToPool(rt, numVoices, bufSize, frameSize, &leaf.mempool);
 }
 
 void tAutotune_free(tAutotune* const rt)
 {
-    tAutotune_freeFromPool(rt, &leaf_mempool);
+    tAutotune_freeFromPool(rt, &leaf.mempool);
 }
 
 void    tAutotune_initToPool        (tAutotune* const rt, int numVoices, int bufSize, int frameSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tAutotune* r = *rt = (_tAutotune*) mpool_alloc(sizeof(_tAutotune), &m->pool);
+    _tAutotune* r = *rt = (_tAutotune*) mpool_alloc(sizeof(_tAutotune), m);
     
     r->bufSize = bufSize;
     r->frameSize = frameSize;
     r->numVoices = numVoices;
     
-    r->inBuffer = (float*) mpool_alloc(sizeof(float) * r->bufSize, &m->pool);
-    r->outBuffers = (float**) mpool_alloc(sizeof(float*) * r->numVoices, &m->pool);
+    r->inBuffer = (float*) mpool_alloc(sizeof(float) * r->bufSize, m);
+    r->outBuffers = (float**) mpool_alloc(sizeof(float*) * r->numVoices, m);
     
     r->hopSize = DEFHOPSIZE;
     r->windowSize = DEFWINDOWSIZE;
     r->fba = FBA;
     tAutotune_setTimeConstant(rt, DEFTIMECONSTANT);
     
-    r->ps = (tPitchShift*) mpool_alloc(sizeof(tPitchShift) * r->numVoices, &m->pool);
-    r->freq = (float*) mpool_alloc(sizeof(float) * r->numVoices, &m->pool);
-    r->tickOutput = (float*) mpool_alloc(sizeof(float) * r->numVoices, &m->pool);
+    r->ps = (tPitchShift*) mpool_alloc(sizeof(tPitchShift) * r->numVoices, m);
+    r->freq = (float*) mpool_alloc(sizeof(float) * r->numVoices, m);
+    r->tickOutput = (float*) mpool_alloc(sizeof(float) * r->numVoices, m);
     for (int i = 0; i < r->numVoices; ++i)
     {
-        r->outBuffers[i] = (float*) mpool_alloc(sizeof(float) * r->bufSize, &m->pool);
+        r->outBuffers[i] = (float*) mpool_alloc(sizeof(float) * r->bufSize, m);
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
@@ -1277,14 +1277,14 @@ void    tAutotune_freeFromPool      (tAutotune* const rt, tMempool* const mp)
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_freeFromPool(&r->ps[i], mp);
-        mpool_free(r->outBuffers[i], &m->pool);
+        mpool_free(r->outBuffers[i], m);
     }
-    mpool_free(r->tickOutput, &m->pool);
-    mpool_free(r->freq, &m->pool);
-    mpool_free(r->ps, &m->pool);
-    mpool_free(r->inBuffer, &m->pool);
-    mpool_free(r->outBuffers, &m->pool);
-    mpool_free(r, &m->pool);
+    mpool_free(r->tickOutput, m);
+    mpool_free(r->freq, m);
+    mpool_free(r->ps, m);
+    mpool_free(r->inBuffer, m);
+    mpool_free(r->outBuffers, m);
+    mpool_free(r, m);
 }
 
 float* tAutotune_tick(tAutotune* const rt, float sample)
@@ -1453,19 +1453,19 @@ void tFormantShifter_free(tFormantShifter* const fsr)
 void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int order, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tFormantShifter* fs = *fsr = (_tFormantShifter*) mpool_alloc(sizeof(_tFormantShifter), &m->pool);
+    _tFormantShifter* fs = *fsr = (_tFormantShifter*) mpool_alloc(sizeof(_tFormantShifter), m);
     
     fs->ford = order;
-    fs->fk = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
-    fs->fb = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
-    fs->fc = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
-    fs->frb = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
-    fs->frc = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
-    fs->fsig = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
-    fs->fsmooth = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
-    fs->ftvec = (float*) mpool_calloc(sizeof(float) * fs->ford, &m->pool);
+    fs->fk = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
+    fs->fb = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
+    fs->fc = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
+    fs->frb = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
+    fs->frc = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
+    fs->fsig = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
+    fs->fsmooth = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
+    fs->ftvec = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
     
-    fs->fbuff = (float*) mpool_calloc(sizeof(float*) * fs->ford, &m->pool);
+    fs->fbuff = (float*) mpool_calloc(sizeof(float*) * fs->ford, m);
 
     
     fs->falph = powf(0.001f, 10.0f * leaf.invSampleRate);
@@ -1489,20 +1489,20 @@ void    tFormantShifter_freeFromPool    (tFormantShifter* const fsr, tMempool* c
     _tMempool* m = *mp;
     _tFormantShifter* fs = *fsr;
     
-    mpool_free(fs->fk, &m->pool);
-    mpool_free(fs->fb, &m->pool);
-    mpool_free(fs->fc, &m->pool);
-    mpool_free(fs->frb, &m->pool);
-    mpool_free(fs->frc, &m->pool);
-    mpool_free(fs->fsig, &m->pool);
-    mpool_free(fs->fsmooth, &m->pool);
-    mpool_free(fs->ftvec, &m->pool);
-    mpool_free(fs->fbuff, &m->pool);
+    mpool_free(fs->fk, m);
+    mpool_free(fs->fb, m);
+    mpool_free(fs->fc, m);
+    mpool_free(fs->frb, m);
+    mpool_free(fs->frc, m);
+    mpool_free(fs->fsig, m);
+    mpool_free(fs->fsmooth, m);
+    mpool_free(fs->ftvec, m);
+    mpool_free(fs->fbuff, m);
     tHighpass_freeFromPool(&fs->hp, mp);
     tHighpass_freeFromPool(&fs->hp2, mp);
     tFeedbackLeveler_freeFromPool(&fs->fbl1, mp);
     tFeedbackLeveler_freeFromPool(&fs->fbl2, mp);
-    mpool_free(fs, &m->pool);
+    mpool_free(fs, m);
 }
 
 float tFormantShifter_tick(tFormantShifter* const fsr, float in)

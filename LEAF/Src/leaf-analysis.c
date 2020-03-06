@@ -41,7 +41,7 @@ void tEnvelopeFollower_free(tEnvelopeFollower* const ef)
 void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tEnvelopeFollower* e = *ef = (_tEnvelopeFollower*) mpool_alloc(sizeof(_tEnvelopeFollower), &m->pool);
+    _tEnvelopeFollower* e = *ef = (_tEnvelopeFollower*) mpool_alloc(sizeof(_tEnvelopeFollower), m);
     
     e->y = 0.0f;
     e->a_thresh = attackThreshold;
@@ -53,7 +53,7 @@ void    tEnvelopeFollower_freeFromPool  (tEnvelopeFollower* const ef, tMempool* 
     _tMempool* m = *mp;
     _tEnvelopeFollower* e = *ef;
     
-    mpool_free(e, &m->pool);
+    mpool_free(e, m);
 }
 
 float   tEnvelopeFollower_tick(tEnvelopeFollower* const ef, float x)
@@ -108,7 +108,7 @@ void tPowerFollower_free(tPowerFollower* const pf)
 void    tPowerFollower_initToPool   (tPowerFollower* const pf, float factor, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPowerFollower* p = *pf = (_tPowerFollower*) mpool_alloc(sizeof(_tPowerFollower), &m->pool);
+    _tPowerFollower* p = *pf = (_tPowerFollower*) mpool_alloc(sizeof(_tPowerFollower), m);
     
     p->curr=0.0f;
     p->factor=factor;
@@ -120,7 +120,7 @@ void    tPowerFollower_freeFromPool (tPowerFollower* const pf, tMempool* const m
     _tMempool* m = *mp;
     _tPowerFollower* p = *pf;
     
-    mpool_free(p, &m->pool);
+    mpool_free(p, m);
 }
 
 int     tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
@@ -206,7 +206,7 @@ void tEnvPD_free (tEnvPD* const xpd)
 void    tEnvPD_initToPool       (tEnvPD* const xpd, int ws, int hs, int bs, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tEnvPD* x = *xpd = (_tEnvPD*) mpool_calloc(sizeof(_tEnvPD), &m->pool);
+    _tEnvPD* x = *xpd = (_tEnvPD*) mpool_calloc(sizeof(_tEnvPD), m);
     
     int period = hs, npoints = ws;
     
@@ -251,7 +251,7 @@ void    tEnvPD_freeFromPool     (tEnvPD* const xpd, tMempool* const mp)
     _tMempool* m = *mp;
     _tEnvPD* x = *xpd;
     
-    mpool_free(x, &m->pool);
+    mpool_free(x, m);
 }
 
 float tEnvPD_tick (tEnvPD* const xpd)
@@ -323,7 +323,7 @@ void tAttackDetection_free(tAttackDetection* const ad)
 void    tAttackDetection_initToPool     (tAttackDetection* const ad, int blocksize, int atk, int rel, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    *ad = (_tAttackDetection*) mpool_alloc(sizeof(_tAttackDetection), &m->pool);
+    *ad = (_tAttackDetection*) mpool_alloc(sizeof(_tAttackDetection), m);
     
     atkdtk_init(ad, blocksize, atk, rel);
 }
@@ -333,7 +333,7 @@ void    tAttackDetection_freeFromPool   (tAttackDetection* const ad, tMempool* c
     _tMempool* m = *mp;
     _tAttackDetection* a = *ad;
     
-    mpool_free(a, &m->pool);
+    mpool_free(a, m);
 }
 
 /*******Public Functions***********/
@@ -495,7 +495,7 @@ void tSNAC_free(tSNAC* const snac)
 void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tSNAC* s = *snac = (_tSNAC*) mpool_alloc(sizeof(_tSNAC), &m->pool);
+    _tSNAC* s = *snac = (_tSNAC*) mpool_alloc(sizeof(_tSNAC), m);
     
     s->biasfactor = DEFBIAS;
     s->timeindex = 0;
@@ -505,10 +505,10 @@ void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const 
     s->minrms = DEFMINRMS;
     s->framesize = SNAC_FRAME_SIZE;
 
-    s->inputbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, &m->pool);
-    s->processbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE * 2), &m->pool);
-    s->spectrumbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE / 2), &m->pool);
-    s->biasbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, &m->pool);
+    s->inputbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, m);
+    s->processbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE * 2), m);
+    s->spectrumbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE / 2), m);
+    s->biasbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, m);
     
     snac_biasbuf(snac);
     tSNAC_setOverlap(snac, overlaparg);
@@ -519,11 +519,11 @@ void    tSNAC_freeFromPool  (tSNAC* const snac, tMempool* const mp)
     _tMempool* m = *mp;
     _tSNAC* s = *snac;
     
-    mpool_free(s->inputbuf, &m->pool);
-    mpool_free(s->processbuf, &m->pool);
-    mpool_free(s->spectrumbuf, &m->pool);
-    mpool_free(s->biasbuf, &m->pool);
-    mpool_free(s, &m->pool);
+    mpool_free(s->inputbuf, m);
+    mpool_free(s->processbuf, m);
+    mpool_free(s->spectrumbuf, m);
+    mpool_free(s->biasbuf, m);
+    mpool_free(s, m);
 }
 
 /******************************************************************************/
@@ -840,18 +840,18 @@ static void snac_biasbuf(tSNAC* const snac)
 //===========================================================================
 void    tPeriodDetection_init    (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize)
 {
-    tPeriodDetection_initToPool(pd, in, out, bufSize, frameSize, &leaf_mempool);
+    tPeriodDetection_initToPool(pd, in, out, bufSize, frameSize, &leaf.mempool);
 }
 
 void tPeriodDetection_free (tPeriodDetection* const pd)
 {
-    tPeriodDetection_freeFromPool(pd, &leaf_mempool);
+    tPeriodDetection_freeFromPool(pd, &leaf.mempool);
 }
 
 void    tPeriodDetection_initToPool  (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_calloc(sizeof(_tPeriodDetection), &m->pool);
+    _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_calloc(sizeof(_tPeriodDetection), m);
     
     p->inBuffer = in;
     p->outBuffer = out;
@@ -882,7 +882,7 @@ void    tPeriodDetection_freeFromPool       (tPeriodDetection* const pd, tMempoo
     
     tEnvPD_freeFromPool(&p->env, mp);
     tSNAC_freeFromPool(&p->snac, mp);
-    mpool_free(p, &m->pool);
+    mpool_free(p, m);
 }
 
 float tPeriodDetection_tick (tPeriodDetection* pd, float sample)

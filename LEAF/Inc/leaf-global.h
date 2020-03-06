@@ -15,6 +15,8 @@
 extern "C" {
 #endif
     
+#include "leaf-mempool.h"
+    
     /*!
      * @internal
      * @defgroup LEAF LEAF 
@@ -30,6 +32,9 @@ extern "C" {
         float   twoPiTimesInvSampleRate; //!<  Two-pi times the inverse of the current sample rate.
         float   (*random)(void); //!< A pointer to a random() function provided on initialization.
         int     clearOnAllocation; //!< A flag that determines whether memory allocated from the LEAF memory pool will be cleared.
+        tMempool mempool;
+        _tMempool _mempool;
+        size_t header_size;
         ///@}
     } LEAF;
     

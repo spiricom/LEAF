@@ -54,6 +54,12 @@ extern "C" {
     
     //#define size_t unsigned long
     
+    /**
+     * @defgroup TMEMPOOL tMempool
+     * An object that can contain an additional mempool for the allocation of LEAF objects.
+     * @{
+     */
+    
     // node of free list
     typedef struct mpool_node_t {
         void                *pool;     // memory pool field
@@ -62,49 +68,12 @@ extern "C" {
         size_t size;
     } mpool_node_t;
     
-    typedef struct mpool_t {
+    typedef struct _tMempool
+    {
         void*         mpool;       // start of the mpool
         size_t        usize;       // used size of the pool
         size_t        msize;       // max size of the pool
         mpool_node_t* head;        // first node of memory pool free list
-    } mpool_t;
-    
-    void mpool_create (char* memory, size_t size, mpool_t* pool);
-
-    void* mpool_alloc(size_t size, mpool_t* pool);
-    void* mpool_calloc(size_t asize, mpool_t* pool);
-
-    void mpool_free(void* ptr, mpool_t* pool);
-    
-    size_t mpool_get_size(mpool_t* pool);
-    size_t mpool_get_used(mpool_t* pool);
-    
-    void leaf_pool_init(char* memory, size_t size);
-    
-    void* leaf_alloc(size_t size);
-    void* leaf_calloc(size_t size);
-
-    void leaf_free(void* ptr);
-    
-    size_t leaf_pool_get_size(void);
-    size_t leaf_pool_get_used(void);
-    
-    void* leaf_pool_get_pool(void);
-    
-    void leaf_mempool_overrun(void);
-    
-    
-    
-    
-    /**
-     * @defgroup TMEMPOOL tMempool
-     * An object that can contain an additional mempool for the allocation of LEAF objects.
-     * @{
-     */
-    
-    typedef struct _tMempool
-    {
-        mpool_t pool;
     } _tMempool;
 
     typedef _tMempool* tMempool;
@@ -145,8 +114,37 @@ extern "C" {
     /*! @} */
     
     //==============================================================================
+
+    //    typedef struct mpool_t {
+    //        void*         mpool;       // start of the mpool
+    //        size_t        usize;       // used size of the pool
+    //        size_t        msize;       // max size of the pool
+    //        mpool_node_t* head;        // first node of memory pool free list
+    //    } mpool_t;
     
-    extern tMempool leaf_mempool;
+    void mpool_create (char* memory, size_t size, _tMempool* pool);
+    
+    void* mpool_alloc(size_t size, _tMempool* pool);
+    void* mpool_calloc(size_t asize, _tMempool* pool);
+    
+    void mpool_free(void* ptr, _tMempool* pool);
+    
+    size_t mpool_get_size(_tMempool* pool);
+    size_t mpool_get_used(_tMempool* pool);
+    
+    void leaf_pool_init(char* memory, size_t size);
+    
+    void* leaf_alloc(size_t size);
+    void* leaf_calloc(size_t size);
+    
+    void leaf_free(void* ptr);
+    
+    size_t leaf_pool_get_size(void);
+    size_t leaf_pool_get_used(void);
+    
+    void* leaf_pool_get_pool(void);
+    
+    void leaf_mempool_overrun(void);
     
 #ifdef __cplusplus
 }
