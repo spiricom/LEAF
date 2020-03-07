@@ -8,7 +8,7 @@
   ==============================================================================
 */
 
-#include "basic-oscillators.c"
+#include "basic-oscillators.h"
 
 void exampleInit()
 {
