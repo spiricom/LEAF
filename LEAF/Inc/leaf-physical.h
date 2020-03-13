@@ -26,6 +26,14 @@ extern "C" {
 #include "leaf-envelopes.h"
 #include "leaf-dynamics.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
     //==============================================================================
     
     /* Karplus Strong model */

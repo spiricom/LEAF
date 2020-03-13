@@ -21,6 +21,14 @@ extern "C" {
 #include "leaf-filters.h"
 #include "leaf-envelopes.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
     //==============================================================================
     
     // 808 Cowbell

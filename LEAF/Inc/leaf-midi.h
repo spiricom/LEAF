@@ -20,9 +20,24 @@ extern "C" {
 #include "leaf-math.h"
 #include "leaf-envelopes.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
     //==============================================================================
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    
+    /*!
+     * @defgroup tstack tStack
+     * @ingroup midi
+     * @brief A basic stack of integers with a fixed max size of 128, used by tPoly to keep track of MIDI notes.
+     * @{
+     */
     
     // STACK implementation (fixed size)
 #define STACK_SIZE 128
@@ -38,21 +53,120 @@ extern "C" {
     
     typedef _tStack* tStack;
     
-    void    tStack_init                 (tStack* const);
-    void    tStack_free                 (tStack* const);
-    void    tStack_initToPool           (tStack* const, tMempool* const);
-    void    tStack_freeFromPool         (tStack* const, tMempool* const);
+    //! Initialize a tStack to the default LEAF mempool.
+    /*!
+     @param stack A pointer to the tStack to be initialized.
+     */
+    void    tStack_init                 (tStack* const stack);
     
-    void    tStack_setCapacity          (tStack* const, uint16_t cap);
-    int     tStack_addIfNotAlreadyThere (tStack* const, uint16_t item);
-    void    tStack_add                  (tStack* const, uint16_t item);
-    int     tStack_remove               (tStack* const, uint16_t item);
-    void    tStack_clear                (tStack* const);
-    int     tStack_first                (tStack* const);
-    int     tStack_getSize              (tStack* const);
-    int     tStack_contains             (tStack* const, uint16_t item);
-    int     tStack_next                 (tStack* const);
-    int     tStack_get                  (tStack* const, int which);
+    
+    //! Free a tStack from the default LEAF mempool.
+    /*!
+     @param stack A pointer to the tStack to be freed.
+     */
+    void    tStack_free                 (tStack* const stack);
+    
+    
+    //! Initialize a tStack to a specified mempool.
+    /*!
+     @param stack A pointer to the tStack to be initialized.
+     @param pool A pointer to the tMempool to which the tStack should be initialized.
+     */
+    void    tStack_initToPool           (tStack* const stack, tMempool* const pool);
+    
+    
+    //! Free a tStack from a specified mempool.
+    /*!
+     @param stack A pointer to the tStack to be freed.
+     @param pool A pointer to the tMempool from which the tStack should be freed.
+     */
+    void    tStack_freeFromPool         (tStack* const stack, tMempool* const pool);
+    
+    //! Set the capacity of the stack.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     @param cap The new capacity.
+     */
+    void    tStack_setCapacity          (tStack* const stack, uint16_t cap);
+    
+    
+    //! Add a value to the stack only if that value is not already in the stack.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     @param item The value to be added.
+     */
+    int     tStack_addIfNotAlreadyThere (tStack* const stack, uint16_t item);
+    
+    
+    //! Add a value to the stack.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     @param item The value to be added.
+     */
+    void    tStack_add                  (tStack* const stack, uint16_t item);
+    
+    
+    //! Remove a single instance of a value from the stack.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     @param item The value to be removed.
+     */
+    int     tStack_remove               (tStack* const stack, uint16_t item);
+    
+    
+    //! Clear the stack.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     */
+    void    tStack_clear                (tStack* const stack);
+    
+    
+    //! Get the first value in the stack.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     @return The first value in the stack.
+     */
+    int     tStack_first                (tStack* const stack);
+    
+    
+    //! Get the current size of the stack.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     @return The current size of the stack.
+     */
+    int     tStack_getSize              (tStack* const stack);
+    
+    //! Check if the stack contains a value, and if it does, get the index of that value.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     @param item The value to check against the stack.
+     @return The index of the value or -1 if the stack does not contain the value.
+     */
+    int     tStack_contains             (tStack* const stack, uint16_t item);
+    
+    //! Get the next value in the stack, starting from the earliest added values.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     @return The next value in the stack or -1 if there are no values in the stack.
+     */
+    int     tStack_next                 (tStack* const stack);
+    
+    //! Get the value at a given index of the stack.
+    /*!
+     @param stack A pointer to the relevant tStack.
+     @param index The index of the stack from which to get a value.
+     @return The value at the given index.
+     */
+    int     tStack_get                  (tStack* const stack, int index);
+    
+    /*! @} */
+    
+    /*!
+     * @defgroup tpoly tPoly
+     * @ingroup midi
+     * @brief An object for polyphonic handling.
+     * @{
+     */
     
     /* tPoly */
     typedef struct _tPoly
@@ -93,32 +207,159 @@ extern "C" {
     typedef _tPoly* tPoly;
     
     /* MPoly*/
-    void    tPoly_init                  (tPoly* const, int maxNumVoices);
-    void    tPoly_free                  (tPoly* const);
-    void    tPoly_initToPool            (tPoly* const, int maxNumVoices, tMempool* const);
-    void    tPoly_freeFromPool          (tPoly* const, tMempool* const);
+    //! Initialize a tPoly to the default LEAF mempool.
+    /*!
+     @param poly A pointer to the tPoly to be initialized.
+     @param maxNumVoices The maximum number of voices this tPoly can handle at once.
+     */
+    void    tPoly_init                  (tPoly* const poly, int maxNumVoices);
     
-    //ADDING A NOTE
-    int     tPoly_noteOn                (tPoly* const, int note, uint8_t vel);
-    int     tPoly_noteOff               (tPoly* const, uint8_t note);
-    void    tPoly_orderedAddToStack     (tPoly* const, uint8_t noteVal);
-    void    tPoly_setNumVoices          (tPoly* const, uint8_t numVoices);
     
-    void    tPoly_setPitchBend          (tPoly* const, float pitchBend);
-    void    tPoly_setPitchGlideActive   (tPoly* const, oBool isActive);
-    void    tPoly_setPitchGlideTime     (tPoly* const, float t);
-    void 	tPoly_setBendGlideTime		(tPoly* const polyh, float t);
-    void 	tPoly_setBendSamplesPerTick	(tPoly* const polyh, float t);
-    void    tPoly_tickPitch             (tPoly* const);
-    void    tPoly_tickPitchGlide        (tPoly* const);
-    void    tPoly_tickPitchBend         (tPoly* const);
+    //! Free a tPoly from the default LEAF mempool.
+    /*!
+     @param poly A pointer to the tPoly to be freed.
+     */
+    void    tPoly_free                  (tPoly* const poly);
     
-    int     tPoly_getNumVoices          (tPoly* const);
-    int     tPoly_getNumActiveVoices    (tPoly* const);
-    float   tPoly_getPitch              (tPoly* const, uint8_t voice);
-    int     tPoly_getKey                (tPoly* const, uint8_t voice);
-    int     tPoly_getVelocity           (tPoly* const, uint8_t voice);
-    int     tPoly_isOn                  (tPoly* const, uint8_t voice);
+    
+    //! Initialize a tPoly to a specified mempool.
+    /*!
+     @param poly A pointer to the tPoly to be initialized.
+     @param pool A pointer to the tMempool to which the tPoly should be initialized.
+     */
+    void    tPoly_initToPool            (tPoly* const poly, int maxNumVoices, tMempool* const pool);
+    
+    
+    //! Free a tPoly from a specified mempool.
+    /*!
+     @param poly A pointer to the tPoly to be freed.
+     @param pool A pointer to the tMempool from which the tPoly should be freed.
+     */
+    void    tPoly_freeFromPool          (tPoly* const poly, tMempool* const pool);
+    
+    //! Add a note with a given velocity to the poly handler.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param note The MIDI note number to add.
+     @param vel The MIDI velocity of the note to add.
+     @return The voice that will play the note.
+     */
+    int     tPoly_noteOn                (tPoly* const poly, int note, uint8_t vel);
+    
+    
+    //! Remove a note from the poly handler.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param note The MIDI note number to remove.
+     @return The voice that was playing the removed note.
+     */
+    int     tPoly_noteOff               (tPoly* const poly, uint8_t note);
+    
+    void    tPoly_orderedAddToStack     (tPoly* const poly, uint8_t note);
+    
+    
+    //! Set the number of voices available to play notes.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param numVoices The new number of available voices. Cannot be greater than the max number voices given in tPoly_init().
+     */
+    void    tPoly_setNumVoices          (tPoly* const poly, uint8_t numVoices);
+    
+    //! Set whether pitch glide over note changes in voices is active.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param isActive Whether pitch glide should be active or not.
+     */
+    void    tPoly_setPitchGlideActive   (tPoly* const poly, oBool isActive);
+    
+    //! Set how long pitch glide over note changes in voices takes.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param t The time to glide in milliseconds.
+     */
+    void    tPoly_setPitchGlideTime     (tPoly* const poly, float t);
+    
+    //! Set the amount of pitch bend
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param pitchBend The new amount of pitch bend.
+     */
+    void    tPoly_setPitchBend          (tPoly* const poly, float pitchBend);
+    void 	tPoly_setBendGlideTime		(tPoly* const poly, float t);
+    void 	tPoly_setBendSamplesPerTick	(tPoly* const poly, float t);
+
+    
+    //! Execute all tick-rate changes in the poly handler's pitch, including glide and bend.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     */
+    void    tPoly_tickPitch             (tPoly* const poly);
+    
+    
+    //! Execute the tick-rate change of the poly handler's pitch glide.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     */
+    void    tPoly_tickPitchGlide        (tPoly* const poly);
+    
+    
+    //! Execute the tick-rate change of the poly handler's pitch bend.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     */
+    void    tPoly_tickPitchBend         (tPoly* const poly);
+    
+    
+    //! Get the current number of voices available to play notes.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @return The current number of voices available to play notes.
+     */
+    int     tPoly_getNumVoices          (tPoly* const poly);
+    
+    //! Get the number of voices currently playing notes.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @return The number of voices currently playing notes.
+     */
+    int     tPoly_getNumActiveVoices    (tPoly* const poly);
+    
+    //! Get the current pitch of a given voice.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param voice The voice to get the pitch of.
+     @return The current pitch of the given voice as a fractional MIDI note number.
+     */
+    float   tPoly_getPitch              (tPoly* const poly, uint8_t voice);
+    
+    
+    //! Get the current MIDI note number of a given voice.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param voice The voice to get the MIDI note number of.
+     @return The MIDI note number of the given voice.
+     */
+    int     tPoly_getKey                (tPoly* const poly, uint8_t voice);
+    
+    
+    //! Get the current MIDI velocity of a given voice.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param voice The voice to get the MIDI velocity of.
+     @return The current MIDI velocity of the given voice.
+     */
+    int     tPoly_getVelocity           (tPoly* const poly, uint8_t voice);
+    
+    
+    //! Get the current play state of a given voice.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param voice The voice to get the state of.
+     @return The current play state of the given voice.
+     */
+    int     tPoly_isOn                  (tPoly* const poly, uint8_t voice);
+    
+    /*! @} */
     
     //==============================================================================
     

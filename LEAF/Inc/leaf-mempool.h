@@ -54,8 +54,9 @@ extern "C" {
     
     //#define size_t unsigned long
     
-    /**
-     * @defgroup TMEMPOOL tMempool
+    /*!
+     * @defgroup tmempool tMempool
+     * @ingroup mempool
      * An object that can contain an additional mempool for the allocation of LEAF objects.
      * @{
      */
@@ -78,7 +79,7 @@ extern "C" {
 
     typedef _tMempool* tMempool;
     
-    //! Initializes a tMempool for a given memory location and size to the default LEAF mempool.
+    //! Initialize a tMempool for a given memory location and size to the default LEAF mempool.
     /*!
      @param pool A pointer to the tMempool to be initialized.
      @param memory A pointer to the chunk of memory to be used as a mempool.
@@ -87,14 +88,14 @@ extern "C" {
     void    tMempool_init           (tMempool* const pool, char* memory, size_t size);
     
     
-    //! Frees a tMempool from the default LEAF mempool.
+    //! Free a tMempool from the default LEAF mempool.
     /*!
      @param pool A pointer to the tMempool to be freed.
      */
     void    tMempool_free           (tMempool* const pool);
     
     
-    //! Initializes a tMempool for a given memory location and size to a specified mempool.
+    //! Initialize a tMempool for a given memory location and size to a specified mempool.
     /*!
      @param pool A pointer to the tMempool to be initialized.
      @param memory A pointer to the chunk of memory to be used as a mempool.
@@ -104,7 +105,7 @@ extern "C" {
     void    tMempool_initToPool     (tMempool* const pool, char* memory, size_t size, tMempool* const poolTo);
     
     
-    //! Frees a tMempool from a specified mempool.
+    //! Free a tMempool from a specified mempool.
     /*!
      @param pool A pointer to the tMempool to be freed from the default LEAF mempool.
      @param poolFrom A pointer to the tMempool from which a tMempool should be freed.

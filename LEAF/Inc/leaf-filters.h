@@ -20,6 +20,14 @@ extern "C" {
 #include "leaf-delay.h"
 #include "leaf-tables.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
     //==============================================================================
     
     /* tAllpass: Schroeder allpass. Comb-filter with feedforward and feedback. */

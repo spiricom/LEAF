@@ -18,27 +18,24 @@ extern "C" {
 #include "leaf-mempool.h"
     
     /*!
-     * @internal
-     * @defgroup LEAF LEAF 
-     * @brief The LEAF instance. Contains global references and settings.
-     * @{
+     * @ingroup leaf
+     * @brief The struct of the global LEAF instance `leaf`. Contains global variables and settings.
      */
-    typedef struct LEAF
+    struct LEAF
     {
-        ///@{ @internal
-        float   sampleRate; //!< The current audio sample rate.
+        ///@{ 
+        float   sampleRate; //!< The current audio sample rate. Set with LEAF_setSampleRate().
         float   invSampleRate; //!< The inverse of the current sample rate.
-        int     blockSize; //!< The size of the audio block and delay in sample between input and output.
+        int     blockSize; //!< The audio block size.
         float   twoPiTimesInvSampleRate; //!<  Two-pi times the inverse of the current sample rate.
-        float   (*random)(void); //!< A pointer to a random() function provided on initialization.
+        float   (*random)(void); //!< A pointer to the random() function provided on initialization.
         int     clearOnAllocation; //!< A flag that determines whether memory allocated from the LEAF memory pool will be cleared.
-        tMempool mempool;
+        tMempool mempool; //!< The default LEAF mempool object.
         _tMempool _mempool;
-        size_t header_size;
+        size_t header_size; //!< The size in bytes of memory region headers within mempools.
         ///@}
-    } LEAF;
-    
-    /*! @} */
+    };
+    typedef struct LEAF LEAF;
     
     extern LEAF leaf;
     

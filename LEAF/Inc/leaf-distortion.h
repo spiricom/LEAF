@@ -19,6 +19,14 @@ extern "C" {
 #include "leaf-mempool.h"
 #include "leaf-math.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
     //==============================================================================
     
     typedef struct _tSampleReducer
@@ -136,6 +144,7 @@ extern "C" {
     void    tCrusher_setSamplingRatio (tCrusher* const, float ratio);
     
     //==============================================================================
+
     
 #ifdef __cplusplus
 }
