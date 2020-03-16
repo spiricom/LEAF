@@ -97,9 +97,9 @@ void tOversampler_init(tOversampler* const osr, int ratio, oBool extraQuality)
         ratio == 32 || ratio == 64) {
         os->ratio = ratio;
         int idx = (int)(log2f(os->ratio))-1+offset;
-        os->numTaps = firNumTaps[idx];
+        os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
-        os->pCoeffs = (float*) firCoeffs[idx];
+        os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
         os->upState = leaf_alloc(sizeof(float) * os->numTaps * 2);
         os->downState = leaf_alloc(sizeof(float) * os->numTaps * 2);
     }
@@ -126,9 +126,9 @@ void    tOversampler_initToPool     (tOversampler* const osr, int ratio, oBool e
         ratio == 32 || ratio == 64) {
         os->ratio = ratio;
         int idx = (int)(log2f(os->ratio))-1+offset;
-        os->numTaps = firNumTaps[idx];
+        os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
-        os->pCoeffs = (float*) firCoeffs[idx];
+        os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
         os->upState = mpool_alloc(sizeof(float) * os->numTaps * 2, m);
         os->downState = mpool_alloc(sizeof(float) * os->numTaps * 2, m);
     }

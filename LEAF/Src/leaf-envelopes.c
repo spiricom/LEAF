@@ -28,9 +28,9 @@ void    tEnvelope_init(tEnvelope* const envlp, float attack, float decay, oBool 
 {
     _tEnvelope* env = *envlp = (_tEnvelope*) leaf_alloc(sizeof(_tEnvelope));
     
-    env->exp_buff = exp_decay;
-    env->inc_buff = attack_decay_inc;
-    env->buff_size = sizeof(exp_decay);
+    env->exp_buff = __leaf_table_exp_decay;
+    env->inc_buff = __leaf_table_attack_decay_inc;
+    env->buff_size = sizeof(__leaf_table_exp_decay);
     
     env->loop = loop;
     
@@ -75,9 +75,9 @@ void    tEnvelope_initToPool    (tEnvelope* const envlp, float attack, float dec
     _tMempool* m = *mp;
     _tEnvelope* env = *envlp = (_tEnvelope*) mpool_alloc(sizeof(_tEnvelope), m);
     
-    env->exp_buff = exp_decay;
-    env->inc_buff = attack_decay_inc;
-    env->buff_size = sizeof(exp_decay);
+    env->exp_buff = __leaf_table_exp_decay;
+    env->inc_buff = __leaf_table_attack_decay_inc;
+    env->buff_size = sizeof(__leaf_table_exp_decay);
     
     env->loop = loop;
     
@@ -258,9 +258,9 @@ void    tADSR_init(tADSR* const adsrenv, float attack, float decay, float sustai
 {
     _tADSR* adsr = *adsrenv = (_tADSR*) leaf_alloc(sizeof(_tADSR));
     
-    adsr->exp_buff = exp_decay;
-    adsr->inc_buff = attack_decay_inc;
-    adsr->buff_size = sizeof(exp_decay);
+    adsr->exp_buff = __leaf_table_exp_decay;
+    adsr->inc_buff = __leaf_table_attack_decay_inc;
+    adsr->buff_size = sizeof(__leaf_table_exp_decay);
     
     if (attack > 8192.0f)
         attack = 8192.0f;
@@ -325,9 +325,9 @@ void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, fl
     _tMempool* m = *mp;
     _tADSR* adsr = *adsrenv = (_tADSR*) mpool_alloc(sizeof(_tADSR), m);
     
-    adsr->exp_buff = exp_decay;
-    adsr->inc_buff = attack_decay_inc;
-    adsr->buff_size = sizeof(exp_decay);
+    adsr->exp_buff = __leaf_table_exp_decay;
+    adsr->inc_buff = __leaf_table_attack_decay_inc;
+    adsr->buff_size = sizeof(__leaf_table_exp_decay);
     
     if (attack > 8192.0f)
         attack = 8192.0f;

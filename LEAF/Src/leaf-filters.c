@@ -939,7 +939,7 @@ void   tEfficientSVF_init(tEfficientSVF* const svff, SVFType type, uint16_t inpu
     svf->ic1eq = 0;
     svf->ic2eq = 0;
     
-    svf->g = filtertan[input];
+    svf->g = __leaf_table_filtertan[input];
     svf->k = 1.0f/Q;
     svf->a1 = 1.0f/(1.0f+svf->g*(svf->g+svf->k));
     svf->a2 = svf->g*svf->a1;
@@ -963,7 +963,7 @@ void    tEfficientSVF_initToPool    (tEfficientSVF* const svff, SVFType type, ui
     svf->ic1eq = 0;
     svf->ic2eq = 0;
     
-    svf->g = filtertan[input];
+    svf->g = __leaf_table_filtertan[input];
     svf->k = 1.0f/Q;
     svf->a1 = 1.0f/(1.0f+svf->g*(svf->g+svf->k));
     svf->a2 = svf->g*svf->a1;
@@ -1002,7 +1002,7 @@ void     tEfficientSVF_setFreq(tEfficientSVF* const svff, uint16_t input)
 {
     _tEfficientSVF* svf = *svff;
     
-    svf->g = filtertan[input];
+    svf->g = __leaf_table_filtertan[input];
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;

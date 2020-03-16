@@ -75,9 +75,9 @@ float   tCycle_tick(tCycle* const cy)
 	temp = SINE_TABLE_SIZE * c->phase;
 	intPart = (int)temp;
 	fracPart = temp - (float)intPart;
-	samp0 = sinewave[intPart];
+	samp0 = __leaf_table_sinewave[intPart];
 	if (++intPart >= SINE_TABLE_SIZE) intPart = 0;
-	samp1 = sinewave[intPart];
+	samp1 = __leaf_table_sinewave[intPart];
 
     return (samp0 + (samp1 - samp0) * fracPart);
 
@@ -149,61 +149,61 @@ float   tTriangle_tick(tTriangle* const cy)
     
     if (c->freq <= 20.0f)
     {
-        out = triangle[T20][idx];
+        out = __leaf_table_triangle[T20][idx];
     }
     else if (c->freq <= 40.0f)
     {
         w = ((40.0f - c->freq) * INV_20);
-        out = (triangle[T20][idx] * w) + (triangle[T40][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T20][idx] * w) + (__leaf_table_triangle[T40][idx] * (1.0f - w));
     }
     else if (c->freq <= 80.0f)
     {
         w = ((80.0f - c->freq) * INV_40);
-        out = (triangle[T40][idx] * w) + (triangle[T80][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T40][idx] * w) + (__leaf_table_triangle[T80][idx] * (1.0f - w));
     }
     else if (c->freq <= 160.0f)
     {
         w = ((160.0f - c->freq) * INV_80);
-        out = (triangle[T80][idx] * w) + (triangle[T160][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T80][idx] * w) + (__leaf_table_triangle[T160][idx] * (1.0f - w));
     }
     else if (c->freq <= 320.0f)
     {
         w = ((320.0f - c->freq) * INV_160);
-        out = (triangle[T160][idx] * w) + (triangle[T320][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T160][idx] * w) + (__leaf_table_triangle[T320][idx] * (1.0f - w));
     }
     else if (c->freq <= 640.0f)
     {
         w = ((640.0f - c->freq) * INV_320);
-        out = (triangle[T320][idx] * w) + (triangle[T640][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T320][idx] * w) + (__leaf_table_triangle[T640][idx] * (1.0f - w));
     }
     else if (c->freq <= 1280.0f)
     {
         w = ((1280.0f - c->freq) * INV_640);
-        out = (triangle[T640][idx] * w) + (triangle[T1280][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T640][idx] * w) + (__leaf_table_triangle[T1280][idx] * (1.0f - w));
     }
     else if (c->freq <= 2560.0f)
     {
         w = ((2560.0f - c->freq) * INV_1280);
-        out = (triangle[T1280][idx] * w) + (triangle[T2560][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T1280][idx] * w) + (__leaf_table_triangle[T2560][idx] * (1.0f - w));
     }
     else if (c->freq <= 5120.0f)
     {
         w = ((5120.0f - c->freq) * INV_2560);
-        out = (triangle[T2560][idx] * w) + (triangle[T5120][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T2560][idx] * w) + (__leaf_table_triangle[T5120][idx] * (1.0f - w));
     }
     else if (c->freq <= 10240.0f)
     {
         w = ((10240.0f - c->freq) * INV_5120);
-        out = (triangle[T5120][idx] * w) + (triangle[T10240][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T5120][idx] * w) + (__leaf_table_triangle[T10240][idx] * (1.0f - w));
     }
     else if (c->freq <= 20480.0f)
     {
         w = ((20480.0f - c->freq) * INV_10240);
-        out = (triangle[T10240][idx] * w) + (triangle[T20480][idx] * (1.0f - w));
+        out = (__leaf_table_triangle[T10240][idx] * w) + (__leaf_table_triangle[T20480][idx] * (1.0f - w));
     }
     else
     {
-        out = triangle[T20480][idx];
+        out = __leaf_table_triangle[T20480][idx];
     }
     
     return out;
@@ -273,61 +273,61 @@ float   tSquare_tick(tSquare* const cy)
     
     if (c->freq <= 20.0f)
     {
-        out = squarewave[T20][idx];
+        out = __leaf_table_squarewave[T20][idx];
     }
     else if (c->freq <= 40.0f)
     {
         w = ((40.0f - c->freq) * INV_20);
-        out = (squarewave[T20][idx] * w) + (squarewave[T40][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T20][idx] * w) + (__leaf_table_squarewave[T40][idx] * (1.0f - w));
     }
     else if (c->freq <= 80.0f)
     {
         w = ((80.0f - c->freq) * INV_40);
-        out = (squarewave[T40][idx] * w) + (squarewave[T80][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T40][idx] * w) + (__leaf_table_squarewave[T80][idx] * (1.0f - w));
     }
     else if (c->freq <= 160.0f)
     {
         w = ((160.0f - c->freq) * INV_80);
-        out = (squarewave[T80][idx] * w) + (squarewave[T160][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T80][idx] * w) + (__leaf_table_squarewave[T160][idx] * (1.0f - w));
     }
     else if (c->freq <= 320.0f)
     {
         w = ((320.0f - c->freq) * INV_160);
-        out = (squarewave[T160][idx] * w) + (squarewave[T320][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T160][idx] * w) + (__leaf_table_squarewave[T320][idx] * (1.0f - w));
     }
     else if (c->freq <= 640.0f)
     {
         w = ((640.0f - c->freq) * INV_320);
-        out = (squarewave[T320][idx] * w) + (squarewave[T640][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T320][idx] * w) + (__leaf_table_squarewave[T640][idx] * (1.0f - w));
     }
     else if (c->freq <= 1280.0f)
     {
         w = ((1280.0f - c->freq) * INV_640);
-        out = (squarewave[T640][idx] * w) + (squarewave[T1280][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T640][idx] * w) + (__leaf_table_squarewave[T1280][idx] * (1.0f - w));
     }
     else if (c->freq <= 2560.0f)
     {
         w = ((2560.0f - c->freq) * INV_1280);
-        out = (squarewave[T1280][idx] * w) + (squarewave[T2560][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T1280][idx] * w) + (__leaf_table_squarewave[T2560][idx] * (1.0f - w));
     }
     else if (c->freq <= 5120.0f)
     {
         w = ((5120.0f - c->freq) * INV_2560);
-        out = (squarewave[T2560][idx] * w) + (squarewave[T5120][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T2560][idx] * w) + (__leaf_table_squarewave[T5120][idx] * (1.0f - w));
     }
     else if (c->freq <= 10240.0f)
     {
         w = ((10240.0f - c->freq) * INV_5120);
-        out = (squarewave[T5120][idx] * w) + (squarewave[T10240][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T5120][idx] * w) + (__leaf_table_squarewave[T10240][idx] * (1.0f - w));
     }
     else if (c->freq <= 20480.0f)
     {
         w = ((20480.0f - c->freq) * INV_10240);
-        out = (squarewave[T10240][idx] * w) + (squarewave[T20480][idx] * (1.0f - w));
+        out = (__leaf_table_squarewave[T10240][idx] * w) + (__leaf_table_squarewave[T20480][idx] * (1.0f - w));
     }
     else
     {
-        out = squarewave[T20480][idx];
+        out = __leaf_table_squarewave[T20480][idx];
     }
     
     return out;
@@ -398,61 +398,61 @@ float   tSawtooth_tick(tSawtooth* const cy)
     
     if (c->freq <= 20.0f)
     {
-        out = sawtooth[T20][idx];
+        out = __leaf_table_sawtooth[T20][idx];
     }
     else if (c->freq <= 40.0f)
     {
         w = ((40.0f - c->freq) * INV_20);
-        out = (sawtooth[T20][idx] * w) + (sawtooth[T40][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T20][idx] * w) + (__leaf_table_sawtooth[T40][idx] * (1.0f - w));
     }
     else if (c->freq <= 80.0f)
     {
         w = ((80.0f - c->freq) * INV_40);
-        out = (sawtooth[T40][idx] * w) + (sawtooth[T80][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T40][idx] * w) + (__leaf_table_sawtooth[T80][idx] * (1.0f - w));
     }
     else if (c->freq <= 160.0f)
     {
         w = ((160.0f - c->freq) * INV_80);
-        out = (sawtooth[T80][idx] * w) + (sawtooth[T160][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T80][idx] * w) + (__leaf_table_sawtooth[T160][idx] * (1.0f - w));
     }
     else if (c->freq <= 320.0f)
     {
         w = ((320.0f - c->freq) * INV_160);
-        out = (sawtooth[T160][idx] * w) + (sawtooth[T320][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T160][idx] * w) + (__leaf_table_sawtooth[T320][idx] * (1.0f - w));
     }
     else if (c->freq <= 640.0f)
     {
         w = ((640.0f - c->freq) * INV_320);
-        out = (sawtooth[T320][idx] * w) + (sawtooth[T640][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T320][idx] * w) + (__leaf_table_sawtooth[T640][idx] * (1.0f - w));
     }
     else if (c->freq <= 1280.0f)
     {
         w = ((1280.0f - c->freq) * INV_640);
-        out = (sawtooth[T640][idx] * w) + (sawtooth[T1280][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T640][idx] * w) + (__leaf_table_sawtooth[T1280][idx] * (1.0f - w));
     }
     else if (c->freq <= 2560.0f)
     {
         w = ((2560.0f - c->freq) * INV_1280);
-        out = (sawtooth[T1280][idx] * w) + (sawtooth[T2560][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T1280][idx] * w) + (__leaf_table_sawtooth[T2560][idx] * (1.0f - w));
     }
     else if (c->freq <= 5120.0f)
     {
         w = ((5120.0f - c->freq) * INV_2560);
-        out = (sawtooth[T2560][idx] * w) + (sawtooth[T5120][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T2560][idx] * w) + (__leaf_table_sawtooth[T5120][idx] * (1.0f - w));
     }
     else if (c->freq <= 10240.0f)
     {
         w = ((10240.0f - c->freq) * INV_5120);
-        out = (sawtooth[T5120][idx] * w) + (sawtooth[T10240][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T5120][idx] * w) + (__leaf_table_sawtooth[T10240][idx] * (1.0f - w));
     }
     else if (c->freq <= 20480.0f)
     {
         w = ((20480.0f - c->freq) * INV_10240);
-        out = (sawtooth[T10240][idx] * w) + (sawtooth[T20480][idx] * (1.0f - w));
+        out = (__leaf_table_sawtooth[T10240][idx] * w) + (__leaf_table_sawtooth[T20480][idx] * (1.0f - w));
     }
     else
     {
-        out = sawtooth[T20480][idx];
+        out = __leaf_table_sawtooth[T20480][idx];
     }
     
     return out;
