@@ -15,6 +15,7 @@ extern "C" {
     
 #include "leaf-math.h"
 #include "leaf-mempool.h"
+#include  "leaf-tables.h"
 #include "leaf-filters.h"
     
     /*!
@@ -31,7 +32,6 @@ extern "C" {
         // Underlying phasor
         float phase;
         float inc,freq;
-        
     } _tCycle;
     
     typedef _tCycle* tCycle;
@@ -99,7 +99,8 @@ extern "C" {
         // Underlying phasor
         float phase;
         float inc,freq;
-        
+        TableName oct;
+        float w;
     } _tTriangle;
     
     typedef _tTriangle* tTriangle;
@@ -154,7 +155,7 @@ extern "C" {
      @param osc A pointer to the relevant tTriangle.
      @param freq The frequency to set the oscillator to.
      */
-    int     tTriangle_setFreq       (tTriangle* const osc, float freq);
+    void    tTriangle_setFreq       (tTriangle* const osc, float freq);
     
     /*! @} */
     
@@ -166,7 +167,8 @@ extern "C" {
         // Underlying phasor
         float phase;
         float inc,freq;
-        
+        TableName oct;
+        float w;
     } _tSquare;
     
     typedef _tSquare* tSquare;
@@ -221,7 +223,7 @@ extern "C" {
      @param osc A pointer to the relevant tSquare.
      @param freq The frequency to set the oscillator to.
      */
-    int     tSquare_setFreq     (tSquare* const osc, float freq);
+    void    tSquare_setFreq     (tSquare* const osc, float freq);
     
     /*! @} */
     
@@ -233,7 +235,8 @@ extern "C" {
         // Underlying phasor
         float phase;
         float inc,freq;
-        
+        TableName oct;
+        float w;
     } _tSawtooth;
     
     typedef _tSawtooth* tSawtooth;
@@ -288,7 +291,7 @@ extern "C" {
      @param osc A pointer to the relevant tSawtooth.
      @param freq The frequency to set the oscillator to.
      */
-    int     tSawtooth_setFreq       (tSawtooth* const osc, float freq);
+    void    tSawtooth_setFreq       (tSawtooth* const osc, float freq);
     
     /*! @} */
     
@@ -354,7 +357,7 @@ extern "C" {
      @param osc A pointer to the relevant tPhasor.
      @param freq The frequency to set the oscillator to.
      */
-    int     tPhasor_setFreq     (tPhasor* const osc, float freq);
+    void    tPhasor_setFreq     (tPhasor* const osc, float freq);
     
     /*! @} */
     

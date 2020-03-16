@@ -6,13 +6,11 @@
 
 #if _WIN32 || _WIN64
 
-#include "..\Inc\leaf-tables.h"
 #include "..\Inc\leaf-oscillators.h"
 #include "..\leaf.h"
 
 #else
 
-#include "../Inc/leaf-tables.h"
 #include "../Inc/leaf-oscillators.h"
 #include "../leaf.h"
 
@@ -51,7 +49,10 @@ void     tCycle_setFreq(tCycle* const cy, float freq)
 {
     _tCycle* c = *cy;
     
-    c->freq = freq;
+    if (freq < 0.0f) c->freq = 0.0f;
+    else if (freq > 20480.0f) c->freq = 20480.0f;
+    else c->freq  = freq;
+
     c->inc = freq * leaf.invSampleRate;
 }
 
@@ -109,6 +110,7 @@ void    tTriangle_initToPool    (tTriangle* const cy, tMempool* const mp)
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+    tTriangle_setFreq(cy, 220);
 }
 
 void    tTriangle_freeFromPool  (tTriangle* const cy, tMempool* const mp)
@@ -119,16 +121,22 @@ void    tTriangle_freeFromPool  (tTriangle* const cy, tMempool* const mp)
     mpool_free(c, m);
 }
 
-int tTriangle_setFreq(tTriangle* const cy, float freq)
+void tTriangle_setFreq(tTriangle* const cy, float freq)
 {
     _tTriangle* c = *cy;
     
-    if (freq < 0.0f) freq = 0.0f;
+    if (freq < 0.0f) c->freq = 0.0f;
+    else if (freq > 20480.0f) c->freq = 20480.0f;
+    else c->freq  = freq;
     
-    c->freq = freq;
-    c->inc = freq * leaf.invSampleRate;
+    c->inc = c->freq * leaf.invSampleRate;
     
-    return 0;
+    c->w = c->freq * INV_20;
+    for (c->oct = 0; c->w > 2.0f; c->oct++)
+    {
+        c->w = 0.5f * c->w;
+    }
+    c->w = 2.0f - c->w;
 }
 
 
@@ -141,70 +149,12 @@ float   tTriangle_tick(tTriangle* const cy)
     while (c->phase >= 1.0f) c->phase -= 1.0f;
     
     float out = 0.0f;
-    float w;
     
     int idx = (int)(c->phase * TRI_TABLE_SIZE);
     
     // Wavetable synthesis
-    
-    if (c->freq <= 20.0f)
-    {
-        out = __leaf_table_triangle[T20][idx];
-    }
-    else if (c->freq <= 40.0f)
-    {
-        w = ((40.0f - c->freq) * INV_20);
-        out = (__leaf_table_triangle[T20][idx] * w) + (__leaf_table_triangle[T40][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 80.0f)
-    {
-        w = ((80.0f - c->freq) * INV_40);
-        out = (__leaf_table_triangle[T40][idx] * w) + (__leaf_table_triangle[T80][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 160.0f)
-    {
-        w = ((160.0f - c->freq) * INV_80);
-        out = (__leaf_table_triangle[T80][idx] * w) + (__leaf_table_triangle[T160][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 320.0f)
-    {
-        w = ((320.0f - c->freq) * INV_160);
-        out = (__leaf_table_triangle[T160][idx] * w) + (__leaf_table_triangle[T320][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 640.0f)
-    {
-        w = ((640.0f - c->freq) * INV_320);
-        out = (__leaf_table_triangle[T320][idx] * w) + (__leaf_table_triangle[T640][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 1280.0f)
-    {
-        w = ((1280.0f - c->freq) * INV_640);
-        out = (__leaf_table_triangle[T640][idx] * w) + (__leaf_table_triangle[T1280][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 2560.0f)
-    {
-        w = ((2560.0f - c->freq) * INV_1280);
-        out = (__leaf_table_triangle[T1280][idx] * w) + (__leaf_table_triangle[T2560][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 5120.0f)
-    {
-        w = ((5120.0f - c->freq) * INV_2560);
-        out = (__leaf_table_triangle[T2560][idx] * w) + (__leaf_table_triangle[T5120][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 10240.0f)
-    {
-        w = ((10240.0f - c->freq) * INV_5120);
-        out = (__leaf_table_triangle[T5120][idx] * w) + (__leaf_table_triangle[T10240][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 20480.0f)
-    {
-        w = ((20480.0f - c->freq) * INV_10240);
-        out = (__leaf_table_triangle[T10240][idx] * w) + (__leaf_table_triangle[T20480][idx] * (1.0f - w));
-    }
-    else
-    {
-        out = __leaf_table_triangle[T20480][idx];
-    }
+    out = __leaf_table_triangle[c->oct+1][idx] +
+         (__leaf_table_triangle[c->oct][idx] - __leaf_table_triangle[c->oct+1][idx]) * c->w;
     
     return out;
 }
@@ -235,6 +185,7 @@ void    tSquare_initToPool  (tSquare* const cy, tMempool* const mp)
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
+    tSquare_setFreq(cy, 220);
 }
 
 void    tSquare_freeFromPool(tSquare* const cy, tMempool* const mp)
@@ -245,16 +196,22 @@ void    tSquare_freeFromPool(tSquare* const cy, tMempool* const mp)
     mpool_free(c, m);
 }
 
-int     tSquare_setFreq(tSquare* const cy, float freq)
+void    tSquare_setFreq(tSquare* const cy, float freq)
 {
     _tSquare* c = *cy;
     
-    if (freq < 0.0f) freq = 0.0f;
+    if (freq < 0.0f) c->freq = 0.0f;
+    else if (freq > 20480.0f) c->freq = 20480.0f;
+    else c->freq  = freq;
     
-    c->freq = freq;
-    c->inc = freq * leaf.invSampleRate;
+    c->inc = c->freq * leaf.invSampleRate;
     
-    return 0;
+    c->w = c->freq * INV_20;
+    for (c->oct = 0; c->w > 2.0f; c->oct++)
+    {
+        c->w = 0.5f * c->w;
+    }
+    c->w = 2.0f - c->w;
 }
 
 float   tSquare_tick(tSquare* const cy)
@@ -266,69 +223,12 @@ float   tSquare_tick(tSquare* const cy)
     while (c->phase >= 1.0f) c->phase -= 1.0f;
     
     float out = 0.0f;
-    float w = 0.0f;
+    
     int idx = (int)(c->phase * TRI_TABLE_SIZE);
     
     // Wavetable synthesis
-    
-    if (c->freq <= 20.0f)
-    {
-        out = __leaf_table_squarewave[T20][idx];
-    }
-    else if (c->freq <= 40.0f)
-    {
-        w = ((40.0f - c->freq) * INV_20);
-        out = (__leaf_table_squarewave[T20][idx] * w) + (__leaf_table_squarewave[T40][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 80.0f)
-    {
-        w = ((80.0f - c->freq) * INV_40);
-        out = (__leaf_table_squarewave[T40][idx] * w) + (__leaf_table_squarewave[T80][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 160.0f)
-    {
-        w = ((160.0f - c->freq) * INV_80);
-        out = (__leaf_table_squarewave[T80][idx] * w) + (__leaf_table_squarewave[T160][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 320.0f)
-    {
-        w = ((320.0f - c->freq) * INV_160);
-        out = (__leaf_table_squarewave[T160][idx] * w) + (__leaf_table_squarewave[T320][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 640.0f)
-    {
-        w = ((640.0f - c->freq) * INV_320);
-        out = (__leaf_table_squarewave[T320][idx] * w) + (__leaf_table_squarewave[T640][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 1280.0f)
-    {
-        w = ((1280.0f - c->freq) * INV_640);
-        out = (__leaf_table_squarewave[T640][idx] * w) + (__leaf_table_squarewave[T1280][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 2560.0f)
-    {
-        w = ((2560.0f - c->freq) * INV_1280);
-        out = (__leaf_table_squarewave[T1280][idx] * w) + (__leaf_table_squarewave[T2560][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 5120.0f)
-    {
-        w = ((5120.0f - c->freq) * INV_2560);
-        out = (__leaf_table_squarewave[T2560][idx] * w) + (__leaf_table_squarewave[T5120][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 10240.0f)
-    {
-        w = ((10240.0f - c->freq) * INV_5120);
-        out = (__leaf_table_squarewave[T5120][idx] * w) + (__leaf_table_squarewave[T10240][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 20480.0f)
-    {
-        w = ((20480.0f - c->freq) * INV_10240);
-        out = (__leaf_table_squarewave[T10240][idx] * w) + (__leaf_table_squarewave[T20480][idx] * (1.0f - w));
-    }
-    else
-    {
-        out = __leaf_table_squarewave[T20480][idx];
-    }
+    out = __leaf_table_squarewave[c->oct+1][idx] +
+         (__leaf_table_squarewave[c->oct][idx] - __leaf_table_squarewave[c->oct+1][idx]) * c->w;
     
     return out;
 }
@@ -359,6 +259,7 @@ void    tSawtooth_initToPool    (tSawtooth* const cy, tMempool* const mp)
     
     c->inc      = 0.0f;
     c->phase    = 0.0f;
+    tSawtooth_setFreq(cy, 220);
 }
 
 void    tSawtooth_freeFromPool  (tSawtooth* const cy, tMempool* const mp)
@@ -369,16 +270,22 @@ void    tSawtooth_freeFromPool  (tSawtooth* const cy, tMempool* const mp)
     mpool_free(c, m);
 }
 
-int     tSawtooth_setFreq(tSawtooth* const cy, float freq)
+void    tSawtooth_setFreq(tSawtooth* const cy, float freq)
 {
     _tSawtooth* c = *cy;
     
-    if (freq < 0.0f) freq = 0.0f;
+    if (freq < 0.0f) c->freq = 0.0f;
+    else if (freq > 20480.0f) c->freq = 20480.0f;
+    else c->freq  = freq;
     
-    c->freq = freq;
-    c->inc = freq * leaf.invSampleRate;
+    c->inc = c->freq * leaf.invSampleRate;
     
-    return 0;
+    c->w = c->freq * INV_20;
+    for (c->oct = 0; c->w > 2.0f; c->oct++)
+    {
+        c->w = 0.5f * c->w;
+    }
+    c->w = 2.0f - c->w;
 }
 
 float   tSawtooth_tick(tSawtooth* const cy)
@@ -390,70 +297,12 @@ float   tSawtooth_tick(tSawtooth* const cy)
     while (c->phase >= 1.0f) c->phase -= 1.0f;
     
     float out = 0.0f;
-    float w;
     
     int idx = (int)(c->phase * TRI_TABLE_SIZE);
     
     // Wavetable synthesis
-    
-    if (c->freq <= 20.0f)
-    {
-        out = __leaf_table_sawtooth[T20][idx];
-    }
-    else if (c->freq <= 40.0f)
-    {
-        w = ((40.0f - c->freq) * INV_20);
-        out = (__leaf_table_sawtooth[T20][idx] * w) + (__leaf_table_sawtooth[T40][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 80.0f)
-    {
-        w = ((80.0f - c->freq) * INV_40);
-        out = (__leaf_table_sawtooth[T40][idx] * w) + (__leaf_table_sawtooth[T80][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 160.0f)
-    {
-        w = ((160.0f - c->freq) * INV_80);
-        out = (__leaf_table_sawtooth[T80][idx] * w) + (__leaf_table_sawtooth[T160][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 320.0f)
-    {
-        w = ((320.0f - c->freq) * INV_160);
-        out = (__leaf_table_sawtooth[T160][idx] * w) + (__leaf_table_sawtooth[T320][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 640.0f)
-    {
-        w = ((640.0f - c->freq) * INV_320);
-        out = (__leaf_table_sawtooth[T320][idx] * w) + (__leaf_table_sawtooth[T640][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 1280.0f)
-    {
-        w = ((1280.0f - c->freq) * INV_640);
-        out = (__leaf_table_sawtooth[T640][idx] * w) + (__leaf_table_sawtooth[T1280][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 2560.0f)
-    {
-        w = ((2560.0f - c->freq) * INV_1280);
-        out = (__leaf_table_sawtooth[T1280][idx] * w) + (__leaf_table_sawtooth[T2560][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 5120.0f)
-    {
-        w = ((5120.0f - c->freq) * INV_2560);
-        out = (__leaf_table_sawtooth[T2560][idx] * w) + (__leaf_table_sawtooth[T5120][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 10240.0f)
-    {
-        w = ((10240.0f - c->freq) * INV_5120);
-        out = (__leaf_table_sawtooth[T5120][idx] * w) + (__leaf_table_sawtooth[T10240][idx] * (1.0f - w));
-    }
-    else if (c->freq <= 20480.0f)
-    {
-        w = ((20480.0f - c->freq) * INV_10240);
-        out = (__leaf_table_sawtooth[T10240][idx] * w) + (__leaf_table_sawtooth[T20480][idx] * (1.0f - w));
-    }
-    else
-    {
-        out = __leaf_table_sawtooth[T20480][idx];
-    }
+    out = __leaf_table_sawtooth[c->oct+1][idx] +
+         (__leaf_table_sawtooth[c->oct][idx] - __leaf_table_sawtooth[c->oct+1][idx]) * c->w;
     
     return out;
 }
@@ -501,16 +350,15 @@ void    tPhasor_freeFromPool(tPhasor* const ph, tMempool* const mp)
     mpool_free(p, m);
 }
 
-int     tPhasor_setFreq(tPhasor* const ph, float freq)
+void    tPhasor_setFreq(tPhasor* const ph, float freq)
 {
     _tPhasor* p = *ph;
     
-    if (freq < 0.0f) freq = 0.0f;
+    if (freq < 0.0f) p->freq = 0.0f;
+    else if (freq > 20480.0f) p->freq = 20480.0f;
+    else p->freq  = freq;
     
-    p->freq = freq;
     p->inc = freq * leaf.invSampleRate;
-    
-    return 0;
 }
 
 float   tPhasor_tick(tPhasor* const ph)
