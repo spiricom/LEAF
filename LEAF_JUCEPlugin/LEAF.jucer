@@ -13,6 +13,12 @@
               buildStandalone="1" enableIAA="0" cppLanguageStandard="11" companyCopyright="Princeton University"
               pluginFormats="buildAU,buildStandalone" pluginCharacteristicsValue="pluginWantsMidiIn">
   <MAINGROUP id="F7Bywq" name="LEAF">
+    <GROUP id="{F7096CF4-1A84-4CC8-A236-06FAE894451E}" name="Examples">
+      <FILE id="hMMOsl" name="basic-oscillators.c" compile="0" resource="0"
+            file="../Examples/basic-oscillators.c"/>
+      <FILE id="mVSe2h" name="basic-oscillators.h" compile="0" resource="0"
+            file="../Examples/basic-oscillators.h"/>
+    </GROUP>
     <GROUP id="{14C5E2CD-5D51-3FD3-5677-28BECA29E95E}" name="Source">
       <GROUP id="{C9F79DF0-2C57-F2B0-7B1B-78A14937E038}" name="LEAF">
         <GROUP id="{B591B686-9726-94F1-28CD-B08349461C76}" name="Externals">

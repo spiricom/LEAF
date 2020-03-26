@@ -227,7 +227,7 @@ float   tSquare_tick(tSquare* const cy)
     float out = 0.0f;
     
     int idx = (int)(c->phase * SQR_TABLE_SIZE);
-    
+
     // Wavetable synthesis
     out = __leaf_table_squarewave[c->oct+1][idx] +
          (__leaf_table_squarewave[c->oct][idx] - __leaf_table_squarewave[c->oct+1][idx]) * c->w;

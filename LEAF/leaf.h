@@ -1,12 +1,12 @@
 /*
-  ==============================================================================
-
-    leaf.h
-    Created: 20 Jan 2017 12:07:26pm
-    Author:  Michael R Mulshine
-
-  ==============================================================================
-*/
+ ==============================================================================
+ 
+ leaf.h
+ Created: 20 Jan 2017 12:07:26pm
+ Author:  Michael R Mulshine
+ 
+ ==============================================================================
+ */
 
 #ifndef LEAF_H_INCLUDED
 #define LEAF_H_INCLUDED
@@ -61,16 +61,77 @@
 
 #endif
 
+/*! \mainpage LEAF
+ *
+ * \section intro_sec Introduction
+ *
+ * This is the introduction.
+ *
+ * \section install_sec Installation
+ *
+ * \subsection step1 Step 1: Opening the box
+ *
+ * etc...
+ */
+
+/*!
+ * @defgroup leaf LEAF
+ * @defgroup oscillators Oscillators
+ * @defgroup filters Filters
+ * @defgroup delay Delay
+ * @defgroup reverb Reverb
+ * @defgroup distortion Distortion
+ * @defgroup effects Effects
+ * @defgroup envelopes Envelopes
+ * @defgroup dynamics Dynamics
+ * @defgroup analysis Analysis
+ * @defgroup instruments Instruments
+ * @defgroup midi MIDI
+ * @defgroup sampling Sampling
+ * @defgroup physical Physical Models
+ * @defgroup electrical Electrical Models
+ * @defgroup mempool Mempool
+ * @defgroup math Math
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
     
-void        LEAF_init            (float sampleRate, int blocksize, char* memory, size_t memorysize, float(*randomNumberFunction)(void));
-void        LEAF_setSampleRate   (float sampleRate);
-float       LEAF_getSampleRate   (void);
-
+    /*!
+     * @ingroup leaf
+     * @{
+     */
+    
+    //! Initialize the LEAF instance.
+    /*!
+     @param sampleRate The audio sample rate.
+     @param blockSize The audio block size.
+     @param memory A pointer to the memory that will make up the default LEAF mempool.
+     @param memorySize The size of the memory that will make up the default LEAF mempool.
+     @param random A pointer to a random number function. Should return a float >= 0 and < 1.
+     */
+    void        LEAF_init            (float sampleRate, int blockSize, char* memory, size_t memorySize, float(*random)(void));
+    
+    //! Set the sample rate of LEAF.
+    /*!
+     @param sampleRate The new audio sample rate.
+     */
+    void        LEAF_setSampleRate   (float sampleRate);
+    
+    //! Get the sample rate of LEAF.
+    /*!
+     @return The current sample rate as a float.
+     */
+    float       LEAF_getSampleRate   (void);
+    
+    /*!
+     * @}
+     */
+    
 #ifdef __cplusplus
 }
 #endif
 
 #endif  // LEAF_H_INCLUDED
+

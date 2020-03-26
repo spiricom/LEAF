@@ -43,7 +43,7 @@ Internally, LEAF objects that the user defines globally (by writing something li
 
 All LEAF objects must have an init() function and a free() function -- these will create the objects inside the default mempool, as well as an initToPool() and freeFromPool() function -- these will create the objects inside a user-defined specific mempool that is not the default. 
 
-LEAF objects assume that they will be "ticked" once per sample, and generally take single sample input and produce single sample output. The alternative would be to have the user pass in an array and have the objects operate on the full array, which could have performance advantages if SIMD instructions are available on the processor, but would have disadvantages in flexibility of use. If an audio object requires some kind of buffer to operate on (such as a pitch detector) it will collect samples in it's sample-by-sample tick function and store them in its own internal buffer. 
+LEAF objects assume that they will be "ticked" once per sample, and generally take single sample input and produce single sample output. The alternative would be to have the user pass in an array and have the objects operate on the full array, which could have performance advantages if SIMD instructions are available on the processor, but would have disadvantages in flexibility of use. If an audio object requires some kind of buffer to operate on (such as a pitch detector) it will collect samples in its sample-by-sample tick function and store them in its own internal buffer. 
 
 
 ////

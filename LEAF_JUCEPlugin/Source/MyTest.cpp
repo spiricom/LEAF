@@ -27,6 +27,8 @@ tEnvelope env;
 
 tAutotune at;
 
+tTriangle tri;
+
 float gain;
 float freq;
 float dtime;
@@ -43,9 +45,11 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
-    tNoise_init(&noise, WhiteNoise);
+    tTriangle_init(&tri);
     
-    tAutotune_init(&at, 1, 1024, 512);
+//    tNoise_init(&noise, WhiteNoise);
+//
+//    tAutotune_init(&at, 1, 1024, 512);
     
 //    tSVF_init(&bp1, SVFTypeBandpass, 100, 4.0f);
 //    tSVF_init(&bp2, SVFTypeBandpass, 1000, 4.0f);
@@ -75,9 +79,12 @@ float   LEAFTest_tick            (float input)
     
 //    return tSampler_tick(&samp);
     
-    tAutotune_setFreq(&at, 440.0f, 0);
+//    tAutotune_setFreq(&at, 440.0f, 0);
     
-    return tAutotune_tick(&at, input)[0];
+//    return tAutotune_tick(&at, input)[0];
+    
+    tTriangle_setFreq(&tri, x);
+    return tTriangle_tick(&tri);
 }
 
 int firstFrame = 1;
@@ -93,7 +100,7 @@ void    LEAFTest_block           (void)
     
     float val = getSliderValue("mod freq");
     
-    x = val * 3.5f + 0.5f;
+    x = val * -40000.0f + 20000;
     
 //    a = val * tBuffer_getBufferLength(&buff);
     
