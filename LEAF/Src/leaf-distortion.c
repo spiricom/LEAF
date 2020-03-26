@@ -45,7 +45,7 @@ void    tSampleReducer_free    (tSampleReducer* const sr)
 void    tSampleReducer_initToPool   (tSampleReducer* const sr, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tSampleReducer* s = *sr = (_tSampleReducer*) mpool_alloc(sizeof(_tSampleReducer), &m->pool);
+    _tSampleReducer* s = *sr = (_tSampleReducer*) mpool_alloc(sizeof(_tSampleReducer), m);
     
     s->invRatio = 1.0f;
     s->hold = 0.0f;
@@ -57,7 +57,7 @@ void    tSampleReducer_freeFromPool (tSampleReducer* const sr, tMempool* const m
     _tMempool* m = *mp;
     _tSampleReducer* s = *sr;
     
-    mpool_free(s, &m->pool);
+    mpool_free(s, m);
 }
 
 float tSampleReducer_tick(tSampleReducer* const sr, float input)
@@ -97,9 +97,9 @@ void tOversampler_init(tOversampler* const osr, int ratio, oBool extraQuality)
         ratio == 32 || ratio == 64) {
         os->ratio = ratio;
         int idx = (int)(log2f(os->ratio))-1+offset;
-        os->numTaps = firNumTaps[idx];
+        os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
-        os->pCoeffs = (float*) firCoeffs[idx];
+        os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
         os->upState = leaf_alloc(sizeof(float) * os->numTaps * 2);
         os->downState = leaf_alloc(sizeof(float) * os->numTaps * 2);
     }
@@ -117,7 +117,7 @@ void tOversampler_free(tOversampler* const osr)
 void    tOversampler_initToPool     (tOversampler* const osr, int ratio, oBool extraQuality, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tOversampler* os = *osr = (_tOversampler*) mpool_alloc(sizeof(_tOversampler), &m->pool);
+    _tOversampler* os = *osr = (_tOversampler*) mpool_alloc(sizeof(_tOversampler), m);
     
     uint8_t offset = 0;
     if (extraQuality) offset = 6;
@@ -126,11 +126,11 @@ void    tOversampler_initToPool     (tOversampler* const osr, int ratio, oBool e
         ratio == 32 || ratio == 64) {
         os->ratio = ratio;
         int idx = (int)(log2f(os->ratio))-1+offset;
-        os->numTaps = firNumTaps[idx];
+        os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
-        os->pCoeffs = (float*) firCoeffs[idx];
-        os->upState = mpool_alloc(sizeof(float) * os->numTaps * 2, &m->pool);
-        os->downState = mpool_alloc(sizeof(float) * os->numTaps * 2, &m->pool);
+        os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
+        os->upState = mpool_alloc(sizeof(float) * os->numTaps * 2, m);
+        os->downState = mpool_alloc(sizeof(float) * os->numTaps * 2, m);
     }
 }
 
@@ -139,9 +139,9 @@ void    tOversampler_freeFromPool   (tOversampler* const osr, tMempool* const mp
     _tMempool* m = *mp;
     _tOversampler* os = *osr;
     
-    mpool_free(os->upState, &m->pool);
-    mpool_free(os->downState, &m->pool);
-    mpool_free(os, &m->pool);
+    mpool_free(os->upState, m);
+    mpool_free(os->downState, m);
+    mpool_free(os, m);
 }
 
 float tOversampler_tick(tOversampler* const osr, float input, float (*effectTick)(float))
@@ -385,7 +385,7 @@ void tLockhartWavefolder_free(tLockhartWavefolder* const wf)
 void    tLockhartWavefolder_initToPool   (tLockhartWavefolder* const wf, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tLockhartWavefolder* w = *wf = (_tLockhartWavefolder*) mpool_alloc(sizeof(_tLockhartWavefolder), &m->pool);
+    _tLockhartWavefolder* w = *wf = (_tLockhartWavefolder*) mpool_alloc(sizeof(_tLockhartWavefolder), m);
     
     w->Ln1 = 0.0;
     w->Fn1 = 0.0;
@@ -412,7 +412,7 @@ void    tLockhartWavefolder_freeFromPool (tLockhartWavefolder* const wf, tMempoo
     _tMempool* m = *mp;
     _tLockhartWavefolder* w = *wf;
     
-    mpool_free(w, &m->pool);
+    mpool_free(w, m);
 }
 
 double tLockhartWavefolderLambert(double x, double ln)
@@ -511,7 +511,7 @@ void    tCrusher_free    (tCrusher* const cr)
 void    tCrusher_initToPool   (tCrusher* const cr, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tCrusher* c = *cr = (_tCrusher*) mpool_alloc(sizeof(_tCrusher), &m->pool);
+    _tCrusher* c = *cr = (_tCrusher*) mpool_alloc(sizeof(_tCrusher), m);
     
     c->op = 4;
     c->div = SCALAR;
@@ -526,7 +526,7 @@ void    tCrusher_freeFromPool (tCrusher* const cr, tMempool* const mp)
     _tMempool* m = *mp;
     _tCrusher* c = *cr;
     tSampleReducer_freeFromPool(&c->sReducer, mp);
-    mpool_free(c, &m->pool);
+    mpool_free(c, m);
 }
 
 float   tCrusher_tick    (tCrusher* const cr, float input)

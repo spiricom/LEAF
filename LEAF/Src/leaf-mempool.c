@@ -48,11 +48,6 @@
 
 #endif
 
-_tMempool leaf_pool;
-tMempool leaf_mempool;
-size_t header_size;
-
-
 /**
  * private function
  */
@@ -63,33 +58,33 @@ static inline void delink_node(mpool_node_t* node);
 /**
  * create memory pool
  */
-void mpool_create (char* memory, size_t size, mpool_t* pool)
+void mpool_create (char* memory, size_t size, _tMempool* pool)
 {
-    header_size = mpool_align(sizeof(mpool_node_t));
+    leaf.header_size = mpool_align(sizeof(mpool_node_t));
     
     pool->mpool = (void*)memory;
     pool->usize  = 0;
     pool->msize  = size;
     
-    pool->head = create_node(pool->mpool, NULL, NULL, pool->msize-header_size);
+    pool->head = create_node(pool->mpool, NULL, NULL, pool->msize-leaf.header_size);
     
     for (int i = 0; i < pool->head->size; i++)
     {
-        memory[i+header_size]=0;
+        memory[i+leaf.header_size]=0;
     }
 }
 
 void leaf_pool_init(char* memory, size_t size)
 {
-    mpool_create(memory, size, &leaf_pool.pool);
+    mpool_create(memory, size, &leaf._mempool);
     
-    leaf_mempool = &leaf_pool;
+    leaf.mempool = &leaf._mempool;
 }
 
 /**
  * allocate memory from memory pool
  */
-void* mpool_alloc(size_t asize, mpool_t* pool)
+void* mpool_alloc(size_t asize, _tMempool* pool)
 {
     // If the head is NULL, the mempool is full
     if (pool->head == NULL) return NULL;
@@ -112,14 +107,14 @@ void* mpool_alloc(size_t asize, mpool_t* pool)
     mpool_node_t* new_node;
     size_t leftover = node_to_alloc->size - size_to_alloc;
     node_to_alloc->size = size_to_alloc;
-    if (leftover > header_size)
+    if (leftover > leaf.header_size)
     {
         long offset = (char*) node_to_alloc - (char*) pool->mpool;
-        offset += header_size + node_to_alloc->size;
+        offset += leaf.header_size + node_to_alloc->size;
         new_node = create_node(&pool->mpool[offset],
                                node_to_alloc->next,
                                node_to_alloc->prev,
-                               leftover - header_size);
+                               leftover - leaf.header_size);
     }
     else
     {
@@ -139,7 +134,7 @@ void* mpool_alloc(size_t asize, mpool_t* pool)
     // Remove the allocated node from the free list
     delink_node(node_to_alloc);
     
-    pool->usize += header_size + node_to_alloc->size;
+    pool->usize += leaf.header_size + node_to_alloc->size;
     
     if (leaf.clearOnAllocation > 0)
     {
@@ -155,7 +150,7 @@ void* mpool_alloc(size_t asize, mpool_t* pool)
 /**
  * allocate memory from memory pool and also clear that memory to be blank
  */
-void* mpool_calloc(size_t asize, mpool_t* pool)
+void* mpool_calloc(size_t asize, _tMempool* pool)
 {
     // If the head is NULL, the mempool is full
     if (pool->head == NULL) return NULL;
@@ -178,14 +173,14 @@ void* mpool_calloc(size_t asize, mpool_t* pool)
     mpool_node_t* new_node;
     size_t leftover = node_to_alloc->size - size_to_alloc;
     node_to_alloc->size = size_to_alloc;
-    if (leftover > header_size)
+    if (leftover > leaf.header_size)
     {
         long offset = (char*) node_to_alloc - (char*) pool->mpool;
-        offset += header_size + node_to_alloc->size;
+        offset += leaf.header_size + node_to_alloc->size;
         new_node = create_node(&pool->mpool[offset],
                                node_to_alloc->next,
                                node_to_alloc->prev,
-                               leftover - header_size);
+                               leftover - leaf.header_size);
     }
     else
     {
@@ -205,7 +200,7 @@ void* mpool_calloc(size_t asize, mpool_t* pool)
     // Remove the allocated node from the free list
     delink_node(node_to_alloc);
     
-    pool->usize += header_size + node_to_alloc->size;
+    pool->usize += leaf.header_size + node_to_alloc->size;
     // Format the new pool
     char* new_pool = (char*)node_to_alloc->pool;
     for (int i = 0; i < node_to_alloc->size; i++) new_pool[i] = 0;
@@ -216,7 +211,7 @@ void* mpool_calloc(size_t asize, mpool_t* pool)
 void* leaf_alloc(size_t size)
 {
     //printf("alloc %i\n", size);
-    void* block = mpool_alloc(size, &leaf_pool.pool);
+    void* block = mpool_alloc(size, &leaf._mempool);
     
     if (block == NULL) leaf_mempool_overrun();
     
@@ -226,7 +221,7 @@ void* leaf_alloc(size_t size)
 void* leaf_calloc(size_t size)
 {
     //printf("alloc %i\n", size);
-    void* block = mpool_calloc(size, &leaf_pool.pool);
+    void* block = mpool_calloc(size, &leaf._mempool);
     
     if (block == NULL) leaf_mempool_overrun();
     
@@ -234,13 +229,13 @@ void* leaf_calloc(size_t size)
     return block;
 }
 
-void mpool_free(void* ptr, mpool_t* pool)
+void mpool_free(void* ptr, _tMempool* pool)
 {
     //if (ptr < pool->mpool || ptr >= pool->mpool + pool->msize)
     // Get the node at the freed space
-    mpool_node_t* freed_node = (mpool_node_t*) (ptr - header_size);
+    mpool_node_t* freed_node = (mpool_node_t*) (ptr - leaf.header_size);
     
-    pool->usize -= header_size + freed_node->size;
+    pool->usize -= leaf.header_size + freed_node->size;
     
     // Check each node in the list against the newly freed one to see if it's adjacent in memory
     mpool_node_t* other_node = pool->head;
@@ -249,10 +244,10 @@ void mpool_free(void* ptr, mpool_t* pool)
     {
         next_node = other_node->next;
         // Check if a node is directly after the freed node
-        if ((long) freed_node + (header_size + freed_node->size) == (long) other_node)
+        if ((long) freed_node + (leaf.header_size + freed_node->size) == (long) other_node)
         {
             // Increase freed node's size
-            freed_node->size += header_size + other_node->size;
+            freed_node->size += leaf.header_size + other_node->size;
             // If we are merging with the head, move the head forward
             if (other_node == pool->head) pool->head = pool->head->next;
             // Delink the merged node
@@ -260,10 +255,10 @@ void mpool_free(void* ptr, mpool_t* pool)
         }
         
         // Check if a node is directly before the freed node
-        else if ((long) other_node + (header_size + other_node->size) == (long) freed_node)
+        else if ((long) other_node + (leaf.header_size + other_node->size) == (long) freed_node)
         {
             // Increase the merging node's size
-            other_node->size += header_size + freed_node->size;
+            other_node->size += leaf.header_size + freed_node->size;
             
             if (other_node != pool->head)
             {
@@ -298,32 +293,32 @@ void mpool_free(void* ptr, mpool_t* pool)
 
 void leaf_free(void* ptr)
 {
-    mpool_free(ptr, &leaf_pool.pool);
+    mpool_free(ptr, &leaf._mempool);
 }
 
-size_t mpool_get_size(mpool_t* pool)
+size_t mpool_get_size(_tMempool* pool)
 {
     return pool->msize;
 }
 
-size_t mpool_get_used(mpool_t* pool)
+size_t mpool_get_used(_tMempool* pool)
 {
     return pool->usize;
 }
 
 size_t leaf_pool_get_size(void)
 {
-    return mpool_get_size(&leaf_pool.pool);
+    return mpool_get_size(&leaf._mempool);
 }
 
 size_t leaf_pool_get_used(void)
 {
-    return mpool_get_used(&leaf_pool.pool);
+    return mpool_get_used(&leaf._mempool);
 }
 
 void* leaf_pool_get_pool(void)
 {
-    float* buff = (float*)leaf_pool.pool.mpool;
+    float* buff = (float*)leaf._mempool.mpool;
     
     return buff;
 }
@@ -338,7 +333,7 @@ static inline size_t mpool_align(size_t size) {
 static inline mpool_node_t* create_node(void* block_location, mpool_node_t* next, mpool_node_t* prev, size_t size)
 {
     mpool_node_t* node = (mpool_node_t*)block_location;
-    node->pool = block_location + header_size;
+    node->pool = block_location + leaf.header_size;
     node->next = next;
     node->prev = prev;
     node->size = size;
@@ -372,20 +367,20 @@ void leaf_mempool_overrun(void)
 
 void tMempool_init(tMempool* const mp, char* memory, size_t size)
 {
-    tMempool_initToPool(mp, memory, size, &leaf_mempool);
+    tMempool_initToPool(mp, memory, size, &leaf.mempool);
 }
 
 void tMempool_free(tMempool* const mp)
 {
-    tMempool_freeFromPool(mp, &leaf_mempool);
+    tMempool_freeFromPool(mp, &leaf.mempool);
 }
 
 void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem)
 {
     _tMempool* mm = *mem;
-    _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), &mm->pool);
+    _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), mm);
     
-    mpool_create (memory, size, &m->pool);
+    mpool_create (memory, size, m);
 }
 
 void    tMempool_freeFromPool   (tMempool* const mp, tMempool* const mem)
@@ -393,5 +388,5 @@ void    tMempool_freeFromPool   (tMempool* const mp, tMempool* const mem)
     _tMempool* mm = *mem;
     _tMempool* m = *mp;
     
-    mpool_free(m, &mm->pool);
+    mpool_free(m, mm);
 }

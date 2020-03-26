@@ -42,7 +42,7 @@ void tStack_free(tStack* const stack)
 void    tStack_initToPool           (tStack* const stack, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tStack* ns = *stack = (_tStack*) mpool_alloc(sizeof(_tStack), &m->pool);
+    _tStack* ns = *stack = (_tStack*) mpool_alloc(sizeof(_tStack), m);
     
     ns->ordered = OFALSE;
     ns->size = 0;
@@ -57,7 +57,7 @@ void    tStack_freeFromPool         (tStack* const stack, tMempool* const mp)
     _tMempool* m = *mp;
     _tStack* ns = *stack;
     
-    mpool_free(ns, &m->pool);
+    mpool_free(ns, m);
 }
 
 // If stack contains note, returns index. Else returns -1;
@@ -339,7 +339,7 @@ void tPoly_free(tPoly* const polyh)
 void    tPoly_initToPool            (tPoly* const polyh, int maxNumVoices, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPoly* poly = *polyh = (_tPoly*) mpool_alloc(sizeof(_tPoly), &m->pool);
+    _tPoly* poly = *polyh = (_tPoly*) mpool_alloc(sizeof(_tPoly), m);
     
     poly->numVoices = maxNumVoices;
     poly->maxNumVoices = maxNumVoices;
@@ -359,14 +359,14 @@ void    tPoly_initToPool            (tPoly* const polyh, int maxNumVoices, tMemp
     
     poly->glideTime = 5.0f;
     
-    poly->ramps = (tRamp*) mpool_alloc(sizeof(tRamp) * poly->maxNumVoices, &m->pool);
-    poly->rampVals = (float*) mpool_alloc(sizeof(float) * poly->maxNumVoices, &m->pool);
-    poly->firstReceived = (oBool*) mpool_alloc(sizeof(oBool) * poly->maxNumVoices, &m->pool);
-    poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, &m->pool);
+    poly->ramps = (tRamp*) mpool_alloc(sizeof(tRamp) * poly->maxNumVoices, m);
+    poly->rampVals = (float*) mpool_alloc(sizeof(float) * poly->maxNumVoices, m);
+    poly->firstReceived = (oBool*) mpool_alloc(sizeof(oBool) * poly->maxNumVoices, m);
+    poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, m);
     
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
-        poly->voices[i] = (int*) mpool_alloc(sizeof(int) * 2, &m->pool);
+        poly->voices[i] = (int*) mpool_alloc(sizeof(int) * 2, m);
         poly->voices[i][0] = -1;
         poly->firstReceived[i] = OFALSE;
         
@@ -390,18 +390,18 @@ void    tPoly_freeFromPool  (tPoly* const polyh, tMempool* const mp)
     for (int i = 0; i < poly->maxNumVoices; i++)
     {
         tRamp_freeFromPool(&poly->ramps[i], mp);
-        mpool_free(poly->voices[i], &m->pool);
+        mpool_free(poly->voices[i], m);
     }
     tRamp_freeFromPool(&poly->pitchBendRamp, mp);
     tStack_freeFromPool(&poly->stack, mp);
     tStack_freeFromPool(&poly->orderStack, mp);
     
-    mpool_free(poly->voices, &m->pool);
-    mpool_free(poly->ramps, &m->pool);
-    mpool_free(poly->rampVals, &m->pool);
-    mpool_free(poly->firstReceived, &m->pool);
+    mpool_free(poly->voices, m);
+    mpool_free(poly->ramps, m);
+    mpool_free(poly->rampVals, m);
+    mpool_free(poly->firstReceived, m);
     
-    mpool_free(poly, &m->pool);
+    mpool_free(poly, m);
 }
 
 void tPoly_tickPitch(tPoly* polyh)

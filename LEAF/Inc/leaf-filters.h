@@ -20,6 +20,14 @@ extern "C" {
 #include "leaf-delay.h"
 #include "leaf-tables.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
     //==============================================================================
     
     /* tAllpass: Schroeder allpass. Comb-filter with feedforward and feedback. */
@@ -344,10 +352,31 @@ extern "C" {
     void    tFIR_freeFromPool   (tFIR* const, tMempool* const);
     
     float   tFIR_tick           (tFIR* const, float input);
-    void    tFIR_coeffs         (tFIR* const, float in);
+
     
     //==============================================================================
     
+
+    typedef struct _tMedianFilter
+    {
+    	float* val;
+    	int* age;
+    	int m;
+    	int size;
+    	int middlePosition;
+    	int last;
+    	int pos;
+    } _tMedianFilter;
+
+    typedef _tMedianFilter* tMedianFilter;
+
+    void    tMedianFilter_init           (tMedianFilter* const, int size);
+	void    tMedianFilter_free           (tMedianFilter* const);
+	void    tMedianFilter_initToPool     (tMedianFilter* const, int size, tMempool* const);
+	void    tMedianFilter_freeFromPool   (tMedianFilter* const, tMempool* const);
+
+	float   tMedianFilter_tick           (tMedianFilter* const, float input);
+
 #ifdef __cplusplus
 }
 #endif

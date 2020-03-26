@@ -23,6 +23,14 @@ extern "C" {
 #include "leaf-mempool.h"
 #include "leaf-analysis.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
     //==============================================================================
     
     typedef enum RecordMode

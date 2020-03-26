@@ -167,6 +167,9 @@ extern "C" {
     
     float dbtorms(float f);
     
+    float atodb(float a);
+
+    float dbtoa(float db);
     //==============================================================================
     
 #ifdef __cplusplus

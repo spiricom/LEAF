@@ -22,6 +22,14 @@ extern "C" {
 #include "leaf-filters.h"
 #include "leaf-oscillators.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+
     //==============================================================================
     
     /* PRCReverb: Reverb, reimplemented from STK (Cook and Scavone). */

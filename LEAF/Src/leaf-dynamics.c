@@ -66,7 +66,7 @@ void tCompressor_free(tCompressor* const comp)
 void    tCompressor_initToPool  (tCompressor* const comp, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tCompressor* c = *comp = (_tCompressor*) mpool_alloc(sizeof(_tCompressor), &m->pool);
+    _tCompressor* c = *comp = (_tCompressor*) mpool_alloc(sizeof(_tCompressor), m);
     
     c->tauAttack = 100;
     c->tauRelease = 100;
@@ -84,7 +84,7 @@ void    tCompressor_freeFromPool(tCompressor* const comp, tMempool* const mp)
     _tMempool* m = *mp;
     _tCompressor* c = *comp;
     
-    mpool_free(c, &m->pool);
+    mpool_free(c, m);
 }
 
 float tCompressor_tick(tCompressor* const comp, float in)
@@ -160,7 +160,7 @@ void tFeedbackLeveler_free(tFeedbackLeveler* const fb)
 void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const fb, float targetLevel, float factor, float strength, int mode, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) mpool_alloc(sizeof(_tFeedbackLeveler), &m->pool);
+    _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) mpool_alloc(sizeof(_tFeedbackLeveler), m);
     
     p->curr=0.0f;
     p->targetLevel=targetLevel;
@@ -175,7 +175,7 @@ void    tFeedbackLeveler_freeFromPool   (tFeedbackLeveler* const fb, tMempool* c
     _tFeedbackLeveler* p = *fb;
     
     tPowerFollower_freeFromPool(&p->pwrFlw, mp);
-    mpool_free(p, &m->pool);
+    mpool_free(p, m);
 }
 
 void     tFeedbackLeveler_setStrength(tFeedbackLeveler* const fb, float strength)
@@ -219,3 +219,63 @@ void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const fb, float Ta
     p->targetLevel=TargetLevel;
 }
 
+
+
+void    tThreshold_init(tThreshold* const th, float low, float high)
+{
+	tThreshold_initToPool(th, low, high, &leaf.mempool);
+}
+
+void tThreshold_free(tThreshold* const th)
+{
+	tThreshold_freeFromPool(th, &leaf.mempool);
+}
+
+void    tThreshold_initToPool  (tThreshold* const th, float low, float high, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tThreshold* t = *th = (_tThreshold*) mpool_alloc(sizeof(_tThreshold), m);
+
+    t->highThresh = high;
+    t->lowThresh = low;
+
+    t->currentValue = 0;
+}
+
+void    tThreshold_freeFromPool(tThreshold* const th, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tThreshold* t = *th;
+
+    mpool_free(t, m);
+}
+
+int tThreshold_tick(tThreshold* const th, float in)
+{
+    _tThreshold* t = *th;
+
+    if (in >= t->highThresh)
+    {
+    	t->currentValue = 1;
+    }
+    else if (in <= t->lowThresh)
+	{
+    	t->currentValue = 0;
+	}
+
+    return t->currentValue;
+}
+
+void tThreshold_setLow(tThreshold* const th, float low)
+{
+    _tThreshold* t = *th;
+
+    t->lowThresh = low;
+}
+
+void tThreshold_setHigh(tThreshold* const th, float high)
+{
+    _tThreshold* t = *th;
+
+    t->highThresh = high;
+}

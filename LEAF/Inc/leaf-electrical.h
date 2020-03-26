@@ -18,6 +18,14 @@ extern "C" {
 #include "leaf-math.h"
 #include "leaf-mempool.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
     //==============================================================================
     
     typedef enum WDFComponentType

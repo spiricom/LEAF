@@ -68,7 +68,7 @@ void tPRCReverb_free(tPRCReverb* const rev)
 void    tPRCReverb_initToPool   (tPRCReverb* const rev, float t60, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPRCReverb* r = *rev = (_tPRCReverb*) mpool_alloc(sizeof(_tPRCReverb), &m->pool);
+    _tPRCReverb* r = *rev = (_tPRCReverb*) mpool_alloc(sizeof(_tPRCReverb), m);
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
@@ -110,7 +110,7 @@ void    tPRCReverb_freeFromPool (tPRCReverb* const rev, tMempool* const mp)
     tDelay_freeFromPool(&r->allpassDelays[0], mp);
     tDelay_freeFromPool(&r->allpassDelays[1], mp);
     tDelay_freeFromPool(&r->combDelay, mp);
-    mpool_free(r, &m->pool);
+    mpool_free(r, m);
 }
 
 void    tPRCRevert_clear(tPRCReverb* const rev)
@@ -243,7 +243,7 @@ void    tNReverb_free(tNReverb* const rev)
 void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tNReverb* r = *rev = (_tNReverb*) mpool_alloc(sizeof(_tNReverb), &m->pool);
+    _tNReverb* r = *rev = (_tNReverb*) mpool_alloc(sizeof(_tNReverb), m);
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
@@ -296,7 +296,7 @@ void    tNReverb_freeFromPool   (tNReverb* const rev, tMempool* const mp)
         tLinearDelay_freeFromPool(&r->allpassDelays[i], mp);
     }
     
-    mpool_free(r, &m->pool);
+    mpool_free(r, m);
 }
 
 void    tNReverb_setT60(tNReverb* const rev, float t60)
@@ -457,18 +457,18 @@ float       in_allpass_gains[4] = { 0.75f, 0.75f, 0.625f, 0.625f };
 
 void    tDattorroReverb_init              (tDattorroReverb* const rev)
 {
-    tDattorroReverb_initToPool(rev, &leaf_mempool);
+    tDattorroReverb_initToPool(rev, &leaf.mempool);
 }
 
 void    tDattorroReverb_free              (tDattorroReverb* const rev)
 {
-    tDattorroReverb_freeFromPool(rev, &leaf_mempool);
+    tDattorroReverb_freeFromPool(rev, &leaf.mempool);
 }
 
 void    tDattorroReverb_initToPool        (tDattorroReverb* const rev, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tDattorroReverb* r = *rev = (_tDattorroReverb*) mpool_alloc(sizeof(_tDattorroReverb), &m->pool);
+    _tDattorroReverb* r = *rev = (_tDattorroReverb*) mpool_alloc(sizeof(_tDattorroReverb), m);
     
     r->size_max = 2.0f;
     r->size = 1.f;
@@ -567,7 +567,7 @@ void    tDattorroReverb_freeFromPool      (tDattorroReverb* const rev, tMempool*
     
     tCycle_freeFromPool(&r->f2_lfo, mp);
     
-    mpool_free(r, &m->pool);
+    mpool_free(r, m);
 }
 
 void    tDattorroReverb_clear             (tDattorroReverb* const rev)

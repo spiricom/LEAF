@@ -21,6 +21,14 @@ extern "C" {
 #include "leaf-mempool.h"
 #include "leaf-analysis.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+    
     //==============================================================================
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -80,6 +88,30 @@ extern "C" {
     
     //==============================================================================
     
+
+    //Threshold with hysteresis (like Max/MSP thresh~ object)
+
+    typedef struct _tThreshold {
+        float highThresh, lowThresh;
+		int currentValue;
+
+    } _tThreshold;
+
+    typedef _tThreshold* tThreshold;
+
+    void    tThreshold_init        (tThreshold* const, float low, float high);
+    void    tThreshold_free        (tThreshold* const);
+    void    tThreshold_initToPool  (tThreshold* const, float low, float high, tMempool* const);
+    void    tThreshold_freeFromPool(tThreshold* const, tMempool* const);
+
+    int   tThreshold_tick        (tThreshold* const, float input);
+    void   tThreshold_setLow        (tThreshold* const, float low);
+    void   tThreshold_setHigh       (tThreshold* const, float high);
+
+
+
+    //////======================================================================
+
 #ifdef __cplusplus
 }
 #endif

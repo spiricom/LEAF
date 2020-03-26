@@ -54,8 +54,11 @@ extern "C" {
     
     //#define size_t unsigned long
     
-    /**
-     * memory pool structure
+    /*!
+     * @defgroup tmempool tMempool
+     * @ingroup mempool
+     * An object that can contain an additional mempool for the allocation of LEAF objects.
+     * @{
      */
     
     // node of free list
@@ -66,28 +69,75 @@ extern "C" {
         size_t size;
     } mpool_node_t;
     
-    typedef struct mpool_t {
+    typedef struct _tMempool
+    {
         void*         mpool;       // start of the mpool
         size_t        usize;       // used size of the pool
         size_t        msize;       // max size of the pool
         mpool_node_t* head;        // first node of memory pool free list
-    } mpool_t;
-    
-    void mpool_create (char* memory, size_t size, mpool_t* pool);
+    } _tMempool;
 
-    void* mpool_alloc(size_t size, mpool_t* pool);
-    void* mpool_calloc(size_t asize, mpool_t* pool);
-
-    void mpool_free(void* ptr, mpool_t* pool);
+    typedef _tMempool* tMempool;
     
-    size_t mpool_get_size(mpool_t* pool);
-    size_t mpool_get_used(mpool_t* pool);
+    //! Initialize a tMempool for a given memory location and size to the default LEAF mempool.
+    /*!
+     @param pool A pointer to the tMempool to be initialized.
+     @param memory A pointer to the chunk of memory to be used as a mempool.
+     @param size The size of the chunk of memory to be used as a mempool.
+     */
+    void    tMempool_init           (tMempool* const pool, char* memory, size_t size);
+    
+    
+    //! Free a tMempool from the default LEAF mempool.
+    /*!
+     @param pool A pointer to the tMempool to be freed.
+     */
+    void    tMempool_free           (tMempool* const pool);
+    
+    
+    //! Initialize a tMempool for a given memory location and size to a specified mempool.
+    /*!
+     @param pool A pointer to the tMempool to be initialized.
+     @param memory A pointer to the chunk of memory to be used as a mempool.
+     @param size The size of the chuck of memory to be used as a mempool.
+     @param poolTo A pointer to the tMempool to which a tMempool should be initialized.
+     */
+    void    tMempool_initToPool     (tMempool* const pool, char* memory, size_t size, tMempool* const poolTo);
+    
+    
+    //! Free a tMempool from a specified mempool.
+    /*!
+     @param pool A pointer to the tMempool to be freed from the default LEAF mempool.
+     @param poolFrom A pointer to the tMempool from which a tMempool should be freed.
+     */
+    void    tMempool_freeFromPool   (tMempool* const pool, tMempool* const poolFrom);
+    
+    /*! @} */
+    
+    //==============================================================================
+
+    //    typedef struct mpool_t {
+    //        void*         mpool;       // start of the mpool
+    //        size_t        usize;       // used size of the pool
+    //        size_t        msize;       // max size of the pool
+    //        mpool_node_t* head;        // first node of memory pool free list
+    //    } mpool_t;
+    
+    void mpool_create (char* memory, size_t size, _tMempool* pool);
+    
+    void* mpool_alloc(size_t size, _tMempool* pool);
+    void* mpool_calloc(size_t asize, _tMempool* pool);
+    
+    void mpool_free(void* ptr, _tMempool* pool);
+    
+    size_t mpool_get_size(_tMempool* pool);
+    size_t mpool_get_used(_tMempool* pool);
     
     void leaf_pool_init(char* memory, size_t size);
     
     void* leaf_alloc(size_t size);
     void* leaf_calloc(size_t size);
-
+    
     void leaf_free(void* ptr);
     
     size_t leaf_pool_get_size(void);
@@ -96,24 +146,6 @@ extern "C" {
     void* leaf_pool_get_pool(void);
     
     void leaf_mempool_overrun(void);
-    
-    // User object for creating additional mempools
-    
-    typedef struct _tMempool
-    {
-        mpool_t pool;
-    } _tMempool;
-    
-    typedef _tMempool* tMempool;
-    
-    void    tMempool_init           (tMempool* const, char* memory, size_t size);
-    void    tMempool_free           (tMempool* const);
-    void    tMempool_initToPool     (tMempool* const, char* memory, size_t size, tMempool* const);
-    void    tMempool_freeFromPool   (tMempool* const, tMempool* const);
-    
-    //==============================================================================
-    
-    extern tMempool leaf_mempool;
     
 #ifdef __cplusplus
 }

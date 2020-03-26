@@ -24,6 +24,14 @@ extern "C" {
 #include "leaf-analysis.h"
 #include "leaf-envelopes.h"
     
+    /*!
+     * @internal
+     * Header.
+     * @include basic-oscillators.h
+     * @example basic-oscillators.c
+     * An example.
+     */
+
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /* Attack-Decay envelope */
@@ -154,6 +162,26 @@ extern "C" {
     void    tRamp_setVal        (tRamp* const, float val);
 
     
+
+    //Slide (based on Max/MSP's slide~)
+	typedef struct _tSlide {
+		float prevOut;
+		float currentOut;
+		float prevIn;
+		float invUpSlide;
+		float invDownSlide;
+
+	} _tSlide;
+
+	typedef _tSlide* tSlide;
+
+	void    tSlide_init          (tSlide* const, float upSlide, float downSlide);
+	void    tSlide_free          (tSlide* const);
+	void    tSlide_initToPool    (tSlide* const, float upSlide, float downSlide, tMempool* const);
+	void    tSlide_freeFromPool  (tSlide* const, tMempool* const);
+
+	float   tSlide_tick          (tSlide* const, float in);
+
 #ifdef __cplusplus
 }
 #endif

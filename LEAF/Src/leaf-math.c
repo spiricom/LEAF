@@ -18,10 +18,27 @@
 
 #endif
 
-// The C-embedded Audio Library.
-#define TWO_TO_16 65536.f
 
 #define EXPONENTIAL_TABLE_SIZE 65536
+
+#define log10f_fast(x)  (log2f_approx(x)*0.3010299956639812f)
+
+// This is a fast approximation to log2() found on http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html credited to this post https://community.arm.com/developer/tools-software/tools/f/armds-forum/4292/cmsis-dsp-new-functionality-proposal/22621#22621
+// Y = C[0]*F*F*F + C[1]*F*F + C[2]*F + C[3] + E;
+float log2f_approx(float X) {
+  float Y, F;
+  int E;
+  F = frexpf(fabsf(X), &E);
+  Y = 1.23149591368684f;
+  Y *= F;
+  Y += -4.11852516267426f;
+  Y *= F;
+  Y += 6.02197014179219f;
+  Y *= F;
+  Y += -3.13396450166353f;
+  Y += E;
+  return(Y);
+}
 
 float interpolate3max(float *buf, const int peakindex)
 {
@@ -190,11 +207,12 @@ float LEAF_round (float input, float rnd)
     return roundf(input * scale) / scale;
 }
 
-union unholy_t unholy;
+
 
 float LEAF_bitwise_xor(float input, uint32_t op)
 {
-    unholy.f = input;
+	union unholy_t unholy;
+	unholy.f = input;
     unholy.i = (unholy.i ^ op);
     
     return unholy.f;
@@ -444,8 +462,8 @@ float powtodb(float f)
     if (f <= 0) return (0);
     else
     {
-        float val = 100 + 10.f/LOGTEN * logf(f);
-        return (val < 0 ? 0 : val);
+        float val = 100.0f + 10.0f/LOGTEN * logf(f);
+        return (val < 0.0f ? 0.0f : val);
     }
 }
 
@@ -482,4 +500,18 @@ float dbtorms(float f)
     }
     return (expf((LOGTEN * 0.05f) * (f-100.0f)));
 }
+
+
+float atodb(float a)
+{
+	return 20.0f*log10f(a);
+}
+
+float dbtoa(float db)
+{
+	return powf(10.0f, db * 0.05f);
+	//return expf(0.115129254649702f * db); //faster version from http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html
+}
+
+
 
