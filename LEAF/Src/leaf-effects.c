@@ -1209,14 +1209,14 @@ float tRetune_getInputPeriod(tRetune* const rt)
 {
     _tRetune* r = *rt;
     
-    return r->inputPeriod;
+    return (r->inputPeriod * leaf.invSampleRate);
 }
 
 float tRetune_getInputFreq(tRetune* const rt)
 {
     _tRetune* r = *rt;
     
-    return 1.0f/r->inputPeriod;
+    return 1.0f/(r->inputPeriod * leaf.invSampleRate);
 }
 
 //============================================================================================================

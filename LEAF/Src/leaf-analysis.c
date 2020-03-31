@@ -609,7 +609,7 @@ static void snac_analyzeframe(tSNAC* const snac)
     int n, tindex = s->timeindex;
     int framesize = s->framesize;
     int mask = framesize - 1;
-    float norm = 1. / sqrt((float)(framesize * 2));
+    float norm = 1.0f / sqrtf((float)(framesize * 2));
     
     float *inputbuf = s->inputbuf;
     float *processbuf = s->processbuf;
