@@ -29,6 +29,10 @@ tAutotune at;
 
 tTriangle tri;
 
+tMinBLEP minblep;
+
+tPhasor phasor;
+
 float gain;
 float freq;
 float dtime;
@@ -47,6 +51,9 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     tTriangle_init(&tri);
     
+    tMinBLEP_init(&minblep);
+    
+    tPhasor_init(&phasor);
 //    tNoise_init(&noise, WhiteNoise);
 //
 //    tAutotune_init(&at, 1, 1024, 512);
@@ -66,6 +73,15 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 //    tSampler_setRate(&samp, 1.763f); // Rate of 1.0
 }
 
+inline double getSawFall(double angle) {
+    
+    angle = fmod(angle + double_Pi, 2*double_Pi); // shift x
+    double sample = angle/double_Pi - double(1); // computer as remainder
+    
+    return sample;
+    
+}
+
 float   LEAFTest_tick            (float input)
 {
 //    float sample = tNoise_tick(&noise);
@@ -83,8 +99,17 @@ float   LEAFTest_tick            (float input)
     
 //    return tAutotune_tick(&at, input)[0];
     
-    tTriangle_setFreq(&tri, x);
-    return tTriangle_tick(&tri);
+    tPhasor_setFreq(&phasor, y);
+    
+    
+    float sample = tPhasor_tick(&phasor) * 2.0f - 1.0f;
+    
+    if (phasor->phaseDidReset)
+    {
+        tMinBLEP_addBLEP(&minblep, 0.0f, 2, 0.0f);
+    }
+    
+    return tMinBLEP_tick(&minblep, sample);
 }
 
 int firstFrame = 1;
@@ -100,7 +125,7 @@ void    LEAFTest_block           (void)
     
     float val = getSliderValue("mod freq");
     
-    x = val * -40000.0f + 20000;
+    x = val ;
     
 //    a = val * tBuffer_getBufferLength(&buff);
     
@@ -108,8 +133,7 @@ void    LEAFTest_block           (void)
     
     val = getSliderValue("mod depth");
     
-    y = val * 49.0f + 1.0f;
-    b = val * 20.0f - 5.0f;
+    y = val * 20000.0f + 20.0f;
 //    b = val * tBuffer_getBufferLength(&buff);
     
     DBG("rate: " + String(b));

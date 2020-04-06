@@ -15,7 +15,7 @@ extern "C" {
     
 #include "leaf-math.h"
 #include "leaf-mempool.h"
-#include  "leaf-tables.h"
+#include "leaf-tables.h"
 #include "leaf-filters.h"
     
     /*!
@@ -302,6 +302,7 @@ extern "C" {
     {
         float phase;
         float inc,freq;
+        uint8_t phaseDidReset;
         
     } _tPhasor;
     
@@ -599,6 +600,53 @@ extern "C" {
     /*! @} */
     
     //==============================================================================
+    
+    typedef struct _tMinBLEP
+    {
+        float coeffs[6];
+        
+        // FilterState
+        float* x1, x2, y1, y2;
+        
+        float ratio, lastRatio;
+        
+        float overSamplingRatio;
+        int zeroCrossings;
+        
+        float lastValue;
+        float lastDelta; // previous derivative ...
+        
+        // Tweaking the Blep F
+        float proportionalBlepFreq;
+        uint8_t returnDerivative; // set this to return the FIRST DERIVATIVE of the blep (for first der. discontinuities)
+        
+        int blepIndex;
+        int numActiveBleps;
+        //currentActiveBlepOffsets;
+        float* offset;
+        float* freqMultiple;
+        float* pos_change_magnitude;
+        float* vel_change_magnitude;
+        
+        int minBlepSize;
+        float* minBlepArray;
+        float* minBlepDerivArray;
+    } _tMinBLEP;
+    
+    typedef _tMinBLEP* tMinBLEP;
+    
+    void    tMinBLEP_init           (tMinBLEP* const minblep);
+    void    tMinBLEP_free           (tMinBLEP* const minblep);
+    void    tMinBLEP_initToPool     (tMinBLEP* const minblep, tMempool* const pool);
+    void    tMinBLEP_freeFromPool   (tMinBLEP* const minblep, tMempool* const pool);
+    
+    // pass in audio, identify discontinuities and return the audio with minbleps inserted
+    float   tMinBLEP_tick           (tMinBLEP* const minblep, float input);
+    void    tMinBLEP_buildBLEP      (tMinBLEP* const minblep);
+    void    tMinBLEP_addBLEP        (tMinBLEP* const minblep, float offset, float posChange, float velChange);
+    
+    void    tMinBLEP_setOversamplingRatio   (tMinBLEP* const minblep, float ratio);
+    void    tMinBLEP_setNumZeroCrossings    (tMinBLEP* const minblep, int numCrossings);
     
 #ifdef __cplusplus
 }
