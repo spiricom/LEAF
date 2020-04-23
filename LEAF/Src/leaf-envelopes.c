@@ -700,6 +700,151 @@ void    tRampSampleRateChanged(tRamp* const ramp)
 }
 
 
+
+/* RampUpDown */
+void    tRampUpDown_init(tRampUpDown* const r, float upTime, float downTime, int samples_per_tick)
+{
+	tRampUpDown_initToPool(r, upTime, downTime, samples_per_tick, &leaf.mempool);
+}
+
+void tRampUpDown_free(tRampUpDown* const r)
+{
+	tRampUpDown_freeFromPool(r, &leaf.mempool);
+}
+
+void    tRampUpDown_initToPool(tRampUpDown* const r, float upTime, float downTime, int samples_per_tick, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tRampUpDown* ramp = *r = (_tRampUpDown*) mpool_alloc(sizeof(_tRampUpDown), m);
+
+    ramp->inv_sr_ms = 1.0f/(leaf.sampleRate*0.001f);
+    ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
+    ramp->curr = 0.0f;
+    ramp->dest = 0.0f;
+
+    if (upTime < ramp->minimum_time)
+    {
+        ramp->upTime = ramp->minimum_time;
+    }
+    else
+    {
+        ramp->upTime = upTime;
+    }
+
+    if (downTime < ramp->minimum_time)
+    {
+        ramp->downTime = ramp->minimum_time;
+    }
+    else
+    {
+        ramp->downTime = downTime;
+    }
+
+    ramp->samples_per_tick = samples_per_tick;
+    ramp->upInc = ((ramp->dest - ramp->curr) / ramp->upTime * ramp->inv_sr_ms) * (float)ramp->samples_per_tick;
+    ramp->downInc = ((ramp->dest - ramp->curr) / ramp->downTime * ramp->inv_sr_ms) * (float)ramp->samples_per_tick;
+}
+
+void    tRampUpDown_freeFromPool  (tRampUpDown* const r, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tRampUpDown* ramp = *r;
+
+    mpool_free(ramp, m);
+}
+
+void     tRampUpDown_setUpTime(tRampUpDown* const ramp, float upTime)
+{
+    _tRampUpDown* r = *ramp;
+
+    if (upTime < r->minimum_time)
+    {
+        r->upTime = r->minimum_time;
+    }
+    else
+    {
+        r->upTime = upTime;
+    }
+    r->upInc = ((r->dest - r->curr) / r->upTime * r->inv_sr_ms) * (float)r->samples_per_tick;
+}
+
+
+void     tRampUpDown_setDownTime(tRampUpDown* const ramp, float downTime)
+{
+    _tRampUpDown* r = *ramp;
+
+    if (downTime < r->minimum_time)
+    {
+        r->downTime = r->minimum_time;
+    }
+    else
+    {
+        r->downTime = downTime;
+    }
+    r->downInc = ((r->dest - r->curr) / r->downTime * r->inv_sr_ms) * (float)r->samples_per_tick;
+}
+
+void     tRampUpDown_setDest(tRampUpDown* const ramp, float dest)
+{
+    _tRampUpDown* r = *ramp;
+    r->dest = dest;
+    r->upInc = ((r->dest - r->curr) / r->upTime * r->inv_sr_ms) * (float)r->samples_per_tick;
+    r->downInc = ((r->dest - r->curr) / r->downTime * r->inv_sr_ms) * (float)r->samples_per_tick;
+}
+
+void     tRampUpDown_setVal(tRampUpDown* const ramp, float val)
+{
+    _tRampUpDown* r = *ramp;
+    r->curr = val;
+    r->upInc = ((r->dest - r->curr) / r->upTime * r->inv_sr_ms) * (float)r->samples_per_tick;
+    r->downInc = ((r->dest - r->curr) / r->downTime * r->inv_sr_ms) * (float)r->samples_per_tick;
+}
+
+float   tRampUpDown_tick(tRampUpDown* const ramp)
+{
+    _tRampUpDown* r = *ramp;
+    float test;
+
+    if (r->dest < r->curr)
+    {
+    	test = r->curr + r->downInc;
+    	if (test > r->dest)
+    	{
+    		r->curr = test;
+    	}
+    	else
+    	{
+    		r->downInc = 0.0f;
+    		r->curr = r->dest;
+    	}
+    }
+    else if (r->dest > r->curr)
+    {
+    	test = r->curr + r->upInc;
+    	if (test < r->dest)
+    	{
+    		r->curr = test;
+    	}
+    	else
+    	{
+    		r->upInc = 0.0f;
+    		r->curr = r->dest;
+    	}
+    }
+    return r->curr;
+}
+
+float   tRampUpDown_sample(tRampUpDown* const ramp)
+{
+    _tRampUpDown* r = *ramp;
+    return r->curr;
+}
+
+
+
+
+
+
 /* Exponential Smoother */
 void    tExpSmooth_init(tExpSmooth* const expsmooth, float val, float factor)
 {	// factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms

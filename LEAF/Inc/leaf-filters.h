@@ -240,6 +240,8 @@ extern "C" {
         SVFTypeBandpass,
         SVFTypeNotch,
         SVFTypePeak,
+		SVFTypeLowShelf,
+		SVFTypeHighShelf
     } SVFType;
     
     typedef struct _tSVF
@@ -247,7 +249,7 @@ extern "C" {
         SVFType type;
         float cutoff, Q;
         float ic1eq,ic2eq;
-        float g,k,a1,a2,a3;
+        float g,k,a1,a2,a3,cH,cB,cL, kAmount;
         
     } _tSVF;
     
@@ -376,6 +378,65 @@ extern "C" {
 	void    tMedianFilter_freeFromPool   (tMedianFilter* const, tMempool* const);
 
 	float   tMedianFilter_tick           (tMedianFilter* const, float input);
+
+
+
+
+
+	//Vadim Zavalishin style from VA book (from implementation in RSlib posted to kvr forum)
+
+    typedef enum VZFilterType
+    {
+    	Highpass = 0,
+        Lowpass,
+        BandpassSkirt,
+		BandpassPeak,
+		BandReject,
+        Bell,
+		Lowshelf,
+		Highshelf,
+		Morph,
+		Bypass,
+		Allpass
+    } VZFilterType;
+
+
+	typedef struct _tVZFilter
+	    {
+			VZFilterType type;
+			// state:
+			float s1, s2;
+
+			// filter coefficients:
+			float g;          // embedded integrator gain
+			float R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+			float h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+			float cL, cB, cH; // coefficients for low-, band-, and highpass signals
+
+			// parameters:
+			float fs;    // sample-rate
+			float fc;    // characteristic frequency
+			float G;     // gain
+			float B;     // bandwidth (in octaves)
+			float m;     // morph parameter (0...1)
+
+	    } _tVZFilter;
+
+	    typedef _tVZFilter* tVZFilter;
+
+	    void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q);
+		void    tVZFilter_free           (tVZFilter* const);
+		void    tVZFilter_initToPool     (tVZFilter* const, VZFilterType type, float freq, float Q, tMempool* const);
+		void    tVZFilter_freeFromPool   (tVZFilter* const, tMempool* const);
+
+		float   tVZFilter_tick           	(tVZFilter* const, float input);
+		void   tVZFilter_calcCoeffs           (tVZFilter* const);
+		void   tVZFilter_setBandwidth        	(tVZFilter* const, float bandWidth);
+		void   tVZFilter_setFreq           (tVZFilter* const, float freq);
+		void   tVZFilter_setGain          		(tVZFilter* const, float gain);
+		void   tVZFilter_setType          		(tVZFilter* const, VZFilterType type);
+		float 	tVZFilter_BandwidthToR		(tVZFilter* const vf, float B);
+
 
 #ifdef __cplusplus
 }

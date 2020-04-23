@@ -33,7 +33,7 @@ extern "C" {
         float f;
         int i;
     };
-    
+
 #define SQRT8 2.82842712475f
 #define WSCALE 1.30612244898f
 #define PI              (3.14159265358979f)
@@ -90,6 +90,7 @@ extern "C" {
 #define TWO_TO_32        4294967296.0f
 #define INV_TWO_TO_32    0.000000000232831f
     
+#define ONE_OVER_SQRT2	0.707106781186548f
 
 #define LOGTEN 2.302585092994
 
@@ -170,6 +171,14 @@ extern "C" {
     float atodb(float a);
 
     float dbtoa(float db);
+
+    float fastdbtoa(float db);
+
+    float maximum (float num1, float num2);
+
+    float minimum (float num1, float num2);
+
+
     //==============================================================================
     
 #ifdef __cplusplus

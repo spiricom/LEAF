@@ -161,8 +161,36 @@ extern "C" {
     void    tRamp_setDest       (tRamp* const, float dest);
     void    tRamp_setVal        (tRamp* const, float val);
 
-    
+    ///=============
+    /* Ramp Updown*/
+    typedef struct _tRampUpDown {
+        float upInc;
+        float downInc;
+        float inv_sr_ms;
+        float minimum_time;
+        float curr,dest;
+        float upTime;
+        float downTime;
+        int samples_per_tick;
 
+    } _tRampUpDown;
+
+    typedef _tRampUpDown* tRampUpDown;
+
+    void    tRampUpDown_init          (tRampUpDown* const, float upTime, float downTime, int samplesPerTick);
+    void    tRampUpDown_free          (tRampUpDown* const);
+    void    tRampUpDown_initToPool    (tRampUpDown* const, float upTime, float downTime, int samplesPerTick, tMempool* const);
+    void    tRampUpDown_freeFromPool  (tRampUpDown* const, tMempool* const);
+    
+    float   tRampUpDown_tick          (tRampUpDown* const);
+    float   tRampUpDown_sample        (tRampUpDown* const);
+    void    tRampUpDown_setUpTime       (tRampUpDown* const, float upTime);
+    void    tRampUpDown_setDownTime       (tRampUpDown* const, float downTime);
+    void    tRampUpDown_setDest       (tRampUpDown* const, float dest);
+    void    tRampUpDown_setVal        (tRampUpDown* const, float val);
+
+
+    ///=========================
     //Slide (based on Max/MSP's slide~)
 	typedef struct _tSlide {
 		float prevOut;

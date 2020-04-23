@@ -514,4 +514,21 @@ float dbtoa(float db)
 }
 
 
+float fastdbtoa(float db)
+{
+	//return powf(10.0f, db * 0.05f);
+	return expf(0.115129254649702f * db); //faster version from http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html
+}
+
+
+float maximum (float num1, float num2)
+{
+	return (num1 > num2 ) ? num1 : num2;
+}
+
+float minimum (float num1, float num2)
+{
+	return (num1 < num2 ) ? num1 : num2;
+}
+
 
