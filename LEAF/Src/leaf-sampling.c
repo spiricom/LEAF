@@ -52,7 +52,7 @@ void  tBuffer_freeFromPool (tBuffer* const sb, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tBuffer* s = *sb;
-
+    
     mpool_free(s->buff, m);
     mpool_free(s, m);
 }
@@ -194,6 +194,10 @@ void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const m
     
     p->targetstart = -1;
     p->targetend = -1;
+    
+    p->inCrossfade = 0;
+    p->flipStart = -1;
+    p->flipIdx = -1;
 }
 
 void tSampler_freeFromPool         (tSampler* const sp, tMempool* const mp)
@@ -211,12 +215,12 @@ void tSampler_setSample (tSampler* const sp, tBuffer* const b)
     _tBuffer* s = *b;
     
     p->samp = s;
-
+    
     p->start = 0;
     p->end = p->samp->bufferLength - 1;
-
+    
     p->len = p->end - p->start;
-
+    
     p->idx = 0.f;
 }
 
@@ -227,26 +231,22 @@ float tSampler_tick        (tSampler* const sp)
     _tSampler* p = *sp;
     
     if (p->active == 0)         return 0.f;
-
-    if ((p->inc == 0.0f) || (p->len == 0))
+    
+    if ((p->inc == 0.0f) || (p->len < 2))
     {
+        p->inCrossfade = 0;
         return p->last;
     }
-
-    attemptStartEndChange(sp);
-
-    float sample = 0.f;
-    float cfxsample = 0.f;
-    float numticks;
-    float g1 = 1.f, g2 = 0.f;
-
-    float* buff = p->samp->buff;
-
     
-
-    int idx, revidx;
-    float alpha, revalpha;
-
+    attemptStartEndChange(sp);
+    
+    float sample = 0.0f;
+    float cfxsample = 0.0f;
+    float crossfadeMix = 0.0f;
+    
+    float* buff = p->samp->buff;
+    
+    // Variables so start is also before end
     int32_t start = p->start;
     int32_t end = p->end;
     if (p->flip < 0)
@@ -254,185 +254,150 @@ float tSampler_tick        (tSampler* const sp)
         start = p->end;
         end = p->start;
     }
-
-
-
+    
+    // Get the direction and a reverse flag for some calcs
     int dir = p->bnf * p->dir * p->flip;
-    idx = (int) p->idx;
-    alpha = p->idx - idx;
+    int rev = 0;
+    if (dir < 0) rev = 1;
     
-    revidx = idx + 1;// we think this is because flooring on int works different when reading backwards
-    revalpha = 1.f - alpha;
+    // Get the current integer index and alpha for interpolation
+    int idx = (int) p->idx;
+    float alpha = rev + (p->idx - idx) * dir;
+    idx += rev;
     
-    
-
-
-    
-    uint32_t cfxlen = p->cfxlen;
-    if (p->len < cfxlen) cfxlen = p->len * 0.25f;//p->len;
+    // Get the indexes for interpolation
+    int i1 = idx-(1*dir);
+    int i2 = idx;
+    int i3 = idx+(1*dir);
+    int i4 = idx+(2*dir);
     
     int length = p->samp->recordedLength;
     
-    if (dir > 0)
-    {			// num samples (hopping the increment size) to end of loop
-		numticks = (end-idx) * p->iinc;
-    }
-    else
+    // Wrap as needed
+    i1 = (i1 < length*rev) ? i1 + (length * (1-rev)) : i1 - (length * rev);
+    i2 = (i2 < length*rev) ? i2 + (length * (1-rev)) : i2 - (length * rev);
+    i3 = (i3 < length*(1-rev)) ? i3 + (length * rev) : i3 - (length * (1-rev));
+    i4 = (i4 < length*(1-rev)) ? i4 + (length * rev) : i4 - (length * (1-rev));
+    
+    sample = LEAF_interpolate_hermite_x (buff[i1],
+                                         buff[idx],
+                                         buff[i3],
+                                         buff[i4],
+                                         alpha);
+    
+    uint32_t cfxlen = p->cfxlen;
+    if (p->len * 0.25f < cfxlen) cfxlen = p->len * 0.25f;
+    
+    // Determine crossfade points
+    uint32_t fadeLeftStart = 0;
+    if (start >= cfxlen) fadeLeftStart = start - cfxlen;
+    uint32_t fadeLeftEnd = fadeLeftStart + cfxlen;
+    
+    uint32_t fadeRightEnd = end + (fadeLeftEnd - start);
+    if (fadeRightEnd >= length) fadeRightEnd = length - 1;
+    uint32_t fadeRightStart = fadeRightEnd - cfxlen;
+    
+    p->inCrossfade = 0;
+    if (p->mode == PlayLoop)
     {
-		numticks = (revidx-start) * p->iinc;
+        float flipLength = fabsf(p->flipIdx - p->flipStart);
+        if (flipLength > cfxlen)
+        {
+            p->flipStart = -1;
+            p->flipIdx = -1;
+        }
+        if (p->flipIdx >= 0)
+        {
+            if (p->flipStart == -1)
+            {
+                p->flipStart = p->idx;
+                p->flipIdx = p->idx;
+            }
+            flipLength = fabsf(p->flipIdx - p->flipStart);
+            
+            int fdx = (int) p->flipIdx;
+            float falpha = (1-rev) - (p->flipIdx - fdx) * dir;
+            idx += (1-rev);
+            
+            // Get the indexes for interpolation
+            int f1 = fdx+(1*dir);
+            int f2 = fdx;
+            int f3 = fdx-(1*dir);
+            int f4 = fdx-(2*dir);
+            
+            // Wrap as needed
+            f1 = (f1 < length*(1-rev)) ? f1 + (length * rev) : f1 - (length * (1-rev));
+            f2 = (f2 < length*(1-rev)) ? f2 + (length * rev) : f2 - (length * (1-rev));
+            f3 = (f3 < length*rev) ? f3 + (length * (1-rev)) : f3 - (length * rev);
+            f4 = (f4 < length*rev) ? f4 + (length * (1-rev)) : f4 - (length * rev);
+            
+            cfxsample = LEAF_interpolate_hermite_x (buff[f1],
+                                                    buff[fdx],
+                                                    buff[f3],
+                                                    buff[f4],
+                                                    falpha);
+            crossfadeMix = (float) (cfxlen - flipLength) / (float) cfxlen;
+        }
+        else
+        {
+            int offset = 0;
+            int cdx = 0;
+            if ((fadeLeftStart <= idx) && (idx <= fadeLeftEnd))
+            {
+                offset = fadeLeftEnd - idx;
+                cdx = fadeRightEnd - offset;
+                p->inCrossfade = 1;
+            }
+            else if ((fadeRightStart <= idx) && (idx <= fadeRightEnd))
+            {
+                offset = idx - fadeRightStart;
+                cdx = fadeLeftStart + offset;
+                p->inCrossfade = 1;
+            }
+            
+            if (p->inCrossfade)
+            {
+                int c1 = cdx-(1*dir);
+                int c2 = cdx;
+                int c3 = cdx+(1*dir);
+                int c4 = cdx+(2*dir);
+                
+                // Wrap as needed
+                c1 = (c1 < length * rev) ? c1 + (length * (1-rev)) : c1 - (length * rev);
+                c2 = (c2 < length * rev) ? c2 + (length * (1-rev)) : c2 - (length * rev);
+                c3 = (c3 < length * (1-rev)) ? c3 + (length * rev) : c3 - (length * (1-rev));
+                c4 = (c4 < length * (1-rev)) ? c4 + (length * rev) : c4 - (length * (1-rev));
+                
+                cfxsample = LEAF_interpolate_hermite_x (buff[c1],
+                                                        buff[c2],
+                                                        buff[c3],
+                                                        buff[c4],
+                                                        alpha);
+                crossfadeMix = (float) offset / (float) cfxlen;
+            }
+        }
     }
-
-	// Check dir (direction) to interpolate properly
-	if (dir > 0)
-	{
-		// FORWARD NORMAL SAMPLE
-		int i1 = ((idx-1) < 0) ? 0 : idx-1;
-		int i3 = ((idx+1) >= length) ? (idx) : (idx+1);
-		int i4 = ((idx+2) >= length) ? (length-1) : (idx+2);
-
-		sample =     LEAF_interpolate_hermite_x (buff[i1],
-											   buff[idx],
-											   buff[i3],
-											   buff[i4],
-											   alpha);
-
-		if (cfxlen > 0)// necessary to avoid divide by zero, also a waste of computation otherwise
-		{
-
-			if (p->mode == PlayLoop)
-			{
-
-
-
-				if (numticks <= (float) cfxlen)
-				{
-					// CROSSFADE SAMPLE
-					int cdx = start - (numticks * p->inc);
-					if (cdx < 1)
-					{
-						cdx = -cdx;
-
-						i1 = ((cdx+1) >= length) ? (length-1) : cdx+1;
-						i3 = ((cdx-1) < 0) ? cdx : (cdx-1);
-						i4 = ((cdx-2) < 0) ? 0 : (cdx-2);
-
-						cfxsample =     LEAF_interpolate_hermite_x (buff[i1],
-																  buff[cdx],
-																  buff[i3],
-																  buff[i4],
-																  revalpha);
-					}
-					else
-					{
-						i1 = ((cdx-1) < 0) ? 0 : cdx-1;
-						i3 = ((cdx+1) >= length) ? (cdx) : (cdx+1);
-						i4 = ((cdx+2) >= length) ? (length-1) : (cdx+2);
-
-						cfxsample =     LEAF_interpolate_hermite_x (buff[i1],
-																  buff[cdx],
-																  buff[i3],
-																  buff[i4],
-																  alpha);
-					}
-
-					g2 = (float) (cfxlen - numticks) / (float) cfxlen;
-
-				}
-
-			}
-		}
-	    else
-	    {
-	    	g2 = 0.0f;
-	    }
-
-	}
-	else
-	{
-		// REVERSE
-		int i1 = ((revidx+1) >= length) ? (length-1) : revidx+1;
-		int i3 = ((revidx-1) < 0) ? revidx : (revidx-1);
-		int i4 = ((revidx-2) < 0) ? 0 : (revidx-2);
-
-		sample =     LEAF_interpolate_hermite_x (buff[i1],
-											   buff[revidx],
-											   buff[i3],
-											   buff[i4],
-											   revalpha);
-
-
-
-		if (cfxlen > 0)// necessary to avoid divide by zero, also a waste of computation otherwise
-		{
-
-			if (p->mode == PlayLoop)
-			{
-				if (numticks <= (float) cfxlen)
-				{
-					// CROSSFADE SAMPLE
-					int cdx = end + (numticks * p->inc);
-					if (cdx > length - 2)
-					{
-
-						//the problem with the click is here --- at some point it crosses this threshold and jumps from a point near the boundary to a point far away from the boundary - that's not correct
-						///// ooooops
-
-						cdx = end - (numticks * p->inc);
-
-						i1 = ((cdx-1) < 0) ? 0 : cdx-1;
-						i3 = ((cdx+1) >= length) ? (cdx) : (cdx+1);
-						i4 = ((cdx+2) >= length) ? (length-1) : (cdx+2);
-
-						cfxsample =     LEAF_interpolate_hermite_x (buff[i1],
-																  buff[cdx],
-																  buff[i3],
-																  buff[i4],
-																  revalpha);
-					}
-					else
-					{
-						i1 = ((cdx+1) >= length) ? (length-1) : cdx+1;
-						i3 = ((cdx-1) < 0) ? cdx : (cdx-1);
-						i4 = ((cdx-2) < 0) ? 0 : (cdx-2);
-
-						cfxsample =     LEAF_interpolate_hermite_x (buff[i1],
-																  buff[cdx],
-																  buff[i3],
-																  buff[i4],
-																  alpha);
-					}
-					g2 = (float) (cfxlen - numticks) / (float) cfxlen;
-				}
-
-			}
-		}
-	    else
-	    {
-	    	g2 = 0.0f;
-	    }
-
-	}
-
-
     
     float inc = fmod(p->inc, p->len);
     p->idx += (dir * inc);
-
-    //handle start and end cases for looping and back and forth modes
+    if (p->flipIdx >= 0)
+    {
+        p->flipIdx += (-dir * inc);
+    }
+    
     if (p->mode == PlayLoop)
     {
-
-        while((int)p->idx < start)
+        if((int)p->idx < start)
         {
-            p->idx += (float)(p->len);
+            p->idx += (float)(fadeRightEnd - fadeLeftEnd);
         }
-        while((int)p->idx > end)
+        if((int)p->idx > end)
         {
-
-            p->idx -= (float)(p->len);
+            
+            p->idx -= (float)(fadeRightEnd - fadeLeftEnd);
         }
     }
-    else // == PlayBackAndForth
+    else if (p->mode == PlayBackAndForth)
     {
         if (p->idx < start)
         {
@@ -445,21 +410,18 @@ float tSampler_tick        (tSampler* const sp)
             p->idx = end - 1;
         }
     }
-
-
-    //handle very short fade out for end of one-shot normal playback
+    
+    float ticksToEnd = rev ? ((idx - start) * p->iinc) : ((end - idx) * p->iinc);
     if (p->mode == PlayNormal)
     {
-        if (numticks < (0.007f * leaf.sampleRate))
+        if (ticksToEnd < (0.007f * leaf.sampleRate))
         {
             tRamp_setDest(&p->gain, 0.f);
             p->active = -1;
         }
     }
-
-    g1 = 1.f - g2;
     
-    sample = sample * g1 + cfxsample * g2;
+    sample = (sample * (1.0f - crossfadeMix)) + (cfxsample * crossfadeMix);
     
     sample = sample * tRamp_tick(&p->gain);
     
@@ -491,15 +453,15 @@ float tSampler_tick        (tSampler* const sp)
             
         }
     }
-
+    
     if (fabsf(sample-p->last) > 0.1f)
     {
-    	errorState = 1;
+        errorState = 1;
     }
-
+    
     p->last = sample;
     
-
+    
     return p->last;
 }
 
@@ -513,9 +475,7 @@ void tSampler_setCrossfadeLength  (tSampler* const sp, uint32_t length)
 {
     _tSampler* p = *sp;
     
-    uint32_t cfxlen = LEAF_clip(0, length, 1000);
-    
-    if (cfxlen > (p->len * 0.25f))  cfxlen = p->len * 0.25f;
+    uint32_t cfxlen = LEAF_clip(0, length, p->len * 0.25f);
     
     p->cfxlen = cfxlen;
 }
@@ -564,11 +524,11 @@ void tSampler_stop         (tSampler* const sp)
 static void handleStartEndChange(tSampler* const sp)
 {
     _tSampler* p = *sp;
-
+    
     p->len = abs(p->end - p->start);
-
-    if (p->len < (p->cfxlen * 0.25f)) p->cfxlen = p->len * 0.25f;
-
+    
+    if (p->cfxlen > (p->len * 0.25f)) p->cfxlen = p->len * 0.25f;
+    
     if (p->start > p->end)
     {
         p->flip = -1;
@@ -597,15 +557,15 @@ static void attemptStartEndChange(tSampler* const sp)
 void tSampler_setStart     (tSampler* const sp, int32_t start)
 {
     _tSampler* p = *sp;
-
+    
     int tempflip;
     if (start == p->end)
     {
-    	return;
+        return;
     }
-   // if (p->active)
+    // if (p->active)
     {
-
+        
         if (start > p->end)
         {
             tempflip = -1;
@@ -614,12 +574,20 @@ void tSampler_setStart     (tSampler* const sp, int32_t start)
         {
             tempflip = 1;
         }
-
-    	int dir = p->bnf * p->dir * tempflip;
-        uint32_t cfxlen = (p->len < p->cfxlen) ? 0 : p->cfxlen;
+        
+        int dir = p->bnf * p->dir * tempflip;
+        
+        uint32_t cfxlen = p->cfxlen;
+        if (p->len * 0.25f < cfxlen) cfxlen = p->len * 0.25f;
+        
+        if (p->inCrossfade)
+        {
+            p->targetstart = start;
+            return;
+        }
         if ((tempflip > 0) && (dir > 0)) // start is start and we're playing forward
         {
-            if (((start > p->idx) || (p->end-p->idx <= cfxlen)) && (start > p->end))// start given is after current index or we're in a crossfade
+            if (start > p->idx)// start given is after current index or we're in a crossfade
             {
                 p->targetstart = start;
                 return;
@@ -627,47 +595,58 @@ void tSampler_setStart     (tSampler* const sp, int32_t start)
         }
         else if ((tempflip < 0) && (dir < 0)) // start is end and we're playing in reverse
         {
-            if (((start < p->idx) || (p->idx-p->end <= cfxlen)) && (start < p->end))// start given is before current index or we're in a crossfade
+            if (start < p->idx)// start given is before current index or we're in a crossfade
             {
                 p->targetstart = start;
                 return;
             }
         }
     }
-
-	p->start = LEAF_clipInt(0, start, p->samp->recordedLength - 1);
-	handleStartEndChange(sp);
-	p->targetstart = -1;
-
+    
+    if (tempflip != p->flip && p->flipIdx < 0) p->flipIdx = 0;
+    
+    p->start = LEAF_clipInt(0, start, p->samp->recordedLength - 1);
+    handleStartEndChange(sp);
+    p->targetstart = -1;
+    
 }
 
 void tSampler_setEnd       (tSampler* const sp, int32_t end)
 {
     _tSampler* p = *sp;
-
+    
     int tempflip;
-
+    
     if (end == p->start)
     {
-    	return;
+        return;
     }
     //if (p->active)
     {
-
-
+        
+        
         if (p->start > end)
         {
             tempflip = -1;
         }
         else
         {
-        	tempflip = 1;
+            tempflip = 1;
         }
-    	int dir = p->bnf * p->dir * tempflip;
-        uint32_t cfxlen = (p->len < p->cfxlen) ? 0 : p->cfxlen;
+        
+        int dir = p->bnf * p->dir * tempflip;
+        
+        uint32_t cfxlen = p->cfxlen;
+        if (p->len * 0.25f < cfxlen) cfxlen = p->len * 0.25f;
+        
+        if (p->inCrossfade)
+        {
+            p->targetend = end;
+            return;
+        }
         if (tempflip > 0 && dir < 0) // end is end and we're playing in reverse
         {
-            if (((end < p->idx) || (p->idx-p->start <= cfxlen)) && (end < p->start)) // end given is before current index or we're in a crossfade
+            if (end < p->idx) // end given is before current index or we're in a crossfade
             {
                 p->targetend = end;
                 return;
@@ -675,13 +654,16 @@ void tSampler_setEnd       (tSampler* const sp, int32_t end)
         }
         else if (tempflip < 0 && dir > 0) // end is start and we're playing forward
         {
-            if (((end > p->idx) || (p->start-p->idx <= cfxlen)) && (end > p->start)) // end given is after current index or we're in a crossfade
+            if (end > p->idx) // end given is after current index or we're in a crossfade
             {
                 p->targetend = end;
                 return;
             }
         }
     }
+    
+    if (tempflip != p->flip && p->flipIdx < 0) p->flipIdx = 0;
+    
     p->end = LEAF_clipInt(0, end, (p->samp->recordedLength - 1));
     handleStartEndChange(sp);
     p->targetend = -1;
@@ -700,7 +682,7 @@ void tSampler_setRate      (tSampler* const sp, float rate)
     {
         p->dir = 1;
     }
-
+    
     p->inc = rate;
     p->iinc = 1.f / p->inc;
 }

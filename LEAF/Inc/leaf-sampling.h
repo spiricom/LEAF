@@ -103,7 +103,7 @@ extern "C" {
         
         int32_t start, targetstart;
         int32_t end, targetend;
-
+        
         uint32_t len;
         uint32_t cfxlen;
         float numticks;
@@ -111,6 +111,11 @@ extern "C" {
         int retrigger;
         
         int active;
+        
+        uint8_t inCrossfade;
+        
+        float flipStart;
+        float flipIdx;
         
     } _tSampler;
     
@@ -132,10 +137,10 @@ extern "C" {
     
     void    tSampler_setStart           (tSampler* const, int32_t start);
     void    tSampler_setEnd             (tSampler* const, int32_t end);
-
+    
     static void handleStartEndChange    (tSampler* const sp);
-
-    void 	tSampler_setCrossfadeLength (tSampler* const sp, uint32_t length);
+    
+    void     tSampler_setCrossfadeLength (tSampler* const sp, uint32_t length);
     
     void    tSampler_setRate            (tSampler* const, float rate);
     
