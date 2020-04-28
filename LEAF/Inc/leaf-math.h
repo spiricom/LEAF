@@ -145,10 +145,21 @@ extern "C" {
     void LEAF_crossfade(float fade, float* volumes);
 
 
+    float LEAF_tanh(float x);
+    void LEAF_generate_sine(float* buffer, int size);
+    void LEAF_generate_sawtooth(float* buffer, float basefreq, int size);
+    void LEAF_generate_triangle(float* buffer, float basefreq, int size);
+    void LEAF_generate_square(float* buffer, float basefreq, int size);
+    float LEAF_midiToFrequency(float f);
+
 
     float fast_mtof(float f);
 
+    double fastexp(double x);
+
     float fastexpf(float x);
+
+    double fasterexp(double x);
 
     float fasterexpf(float x);
 

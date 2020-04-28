@@ -17,7 +17,7 @@
 #include "../Inc/leaf-filters.h"
 #include "../Inc/leaf-tables.h"
 #include "../leaf.h"
-
+#include "tim.h"
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
@@ -1398,6 +1398,8 @@ void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, float 
 	f->m    = 0.0f;
 	f->s1 = 0.0f;
 	f->s2 = 0.0f;
+	f->sr = leaf.sampleRate;
+	f->inv_sr = leaf.invSampleRate;
 	tVZFilter_calcCoeffs(vf);
 
 
@@ -1407,6 +1409,13 @@ void    tVZFilter_freeFromPool   (tVZFilter* const vf, tMempool* const mp)
 	 _tMempool* m = *mp;
 		 _tVZFilter* f = *vf = (_tVZFilter*) mpool_alloc(sizeof(_tVZFilter), m);
 		 mpool_free(f, m);
+}
+
+void 	tVZFilter_setSampleRate  (tVZFilter* const vf, float sampleRate)
+{
+	_tVZFilter* f = *vf;
+	f->sr = sampleRate;
+	f->inv_sr = 1.0f/sampleRate;
 }
 
 float   tVZFilter_tick           	(tVZFilter* const vf, float in)
@@ -1444,13 +1453,13 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
 {
 
 	_tVZFilter* f = *vf;
-	f->g = tanf(PI * f->fc * leaf.invSampleRate);  // embedded integrator gain (Fig 3.11)
+	f->g = tanf(PI * f->fc * f->inv_sr);  // embedded integrator gain (Fig 3.11)
 
 	  switch( f->type )
 	  {
 	  case Bypass:
 		{
-		  f->R2 = 1.0f / f->G;  // can we use an arbitrary value here, for example R2 = 1?
+		  f->R2 = f->invG;  // can we use an arbitrary value here, for example R2 = 1?
 		  f->cL = 1.0f;
 		  f->cB = f->R2;
 		  f->cH = 1.0f;
@@ -1458,19 +1467,19 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
 		break;
 	  case Lowpass:
 		{
-			f->R2 = 1.0f / f->G;
+			f->R2 = f->invG;
 			f->cL = 1.0f; f->cB = 0.0f; f->cH = 0.0f;
 		}
 		break;
 	  case Highpass:
 		{
-			f->R2 = 1.0f / f->G;
+			f->R2 = f->invG;
 			f->cL = 0.0f; f->cB = 0.0f; f->cH = 1.0f;
 		}
 		break;
 	  case BandpassSkirt:
 		{
-			f->R2 = 1.0f / f->G;
+			f->R2 = f->invG;
 			f->cL = 0.0f; f->cB = 1.0f; f->cH = 0.0f;
 		}
 		break;
@@ -1489,7 +1498,7 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
 	  case Bell:
 		{
 			float fl = f->fc*powf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
-			float wl = tanf(PI*fl*leaf.invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+			float wl = tanf(PI*fl*f->inv_sr);   // warped radian lower bandedge frequency /(2*fs)
 			float r  = f->g/wl;
 			r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
 									   // warped upper bandedge, wc the center
@@ -1523,7 +1532,7 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
 		// experimental - maybe we must find better curves for cL, cB, cH:
 	  case Morph:
 		{
-			f->R2 = 1.0f / f->G;
+			f->R2 = f->invG;
 		  float x  = 2.0f*f->m-1.0f;
 
 		  f->cL = maximum(-x, 0.0f); /*cL *= cL;*/
@@ -1562,6 +1571,7 @@ void   tVZFilter_setGain          		(tVZFilter* const vf, float gain)
 {
 	_tVZFilter* f = *vf;
 	f->G = LEAF_clip(0.000001f, gain, 100.0f);
+	f->invG = 1.0f/f->G;
 	tVZFilter_calcCoeffs(vf);
 }
 
@@ -1583,9 +1593,148 @@ float tVZFilter_BandwidthToR(tVZFilter* const vf, float B)
 {
 	_tVZFilter* f = *vf;
   float fl = f->fc*powf(2.0f, -B*0.5f); // lower bandedge frequency (in Hz)
-  float gl = tanf(PI*fl*leaf.invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+  float gl = tanf(PI*fl*f->inv_sr);   // warped radian lower bandedge frequency /(2*fs)
   float r  = gl/f->g;            // ratio between warped lower bandedge- and center-frequencies
 							   // unwarped: r = pow(2, -B/2) -> approximation for low
 							   // center-frequencies
   return sqrtf((1.0f-r*r)*(1.0f-r*r)/(4.0f*r*r));
 }
+
+
+
+void    tDiodeFilter_init           (tDiodeFilter* const vf, float cutoff, float resonance)
+{
+	tDiodeFilter_initToPool(vf, cutoff, resonance, &leaf.mempool);
+}
+
+void    tDiodeFilter_free           (tDiodeFilter* const vf)
+{
+	tDiodeFilter_freeFromPool(vf, &leaf.mempool);
+}
+void    tDiodeFilter_initToPool     (tDiodeFilter* const vf, float cutoff, float resonance, tMempool* const mp)
+{
+
+	 _tMempool* m = *mp;
+	 _tDiodeFilter* f = *vf = (_tDiodeFilter*) mpool_alloc(sizeof(_tDiodeFilter), m);
+	 // initialization (the resonance factor is between 0 and 8 according to the article)
+	 f->f = tan(PI * cutoff/leaf.sampleRate);
+	 f->r = (7.f * resonance + 0.5f);
+	 f->Vt = 0.5f;
+	 f->n = 1.836f;
+	 f->zi = 0.0f; //previous input value
+	 f->gamma = f->Vt*f->n;
+	 f->s0 = 0.01f;
+	 f->s1 = 0.02f;
+	 f->s2 = 0.03f;
+	 f->s3 = 0.04f;
+	 f->g0inv = 1.f/(2.f*f->Vt);
+	 f->g1inv = 1.f/(2.f*f->gamma);
+	 f->g2inv = 1.f/(6.f*f->gamma);
+
+
+}
+void    tDiodeFilter_freeFromPool   (tDiodeFilter* const vf, tMempool* const mp)
+{
+	 _tMempool* m = *mp;
+	 _tDiodeFilter* f = *vf = (_tDiodeFilter*) mpool_alloc(sizeof(_tDiodeFilter), m);
+	 mpool_free(f, m);
+}
+
+float tanhXdX(float x)
+{
+    float a = x*x;
+    // IIRC I got this as Pade-approx for tanh(sqrt(x))/sqrt(x)
+    return ((a + 105.0f)*a + 945.0f) / ((15.0f*a + 420.0f)*a + 945.0f);
+}
+
+float   tDiodeFilter_tick           	(tDiodeFilter* const vf, float in)
+{
+	_tDiodeFilter* f = *vf;
+
+	// the input x[n+1] is given by 'in', and x[n] by zi
+	// input with half delay
+	float ih = 0.5f * (in + f->zi);
+
+	// evaluate the non-linear factors
+	float t0 = f->f*tanhXdX((ih - f->r * f->s3)*f->g0inv)*f->g0inv;
+	float t1 = f->f*tanhXdX((f->s1-f->s0)*f->g1inv)*f->g1inv;
+	float t2 = f->f*tanhXdX((f->s2-f->s1)*f->g1inv)*f->g1inv;
+	float t3 = f->f*tanhXdX((f->s3-f->s2)*f->g1inv)*f->g1inv;
+	float t4 = f->f*tanhXdX((f->s3)*f->g2inv)*f->g2inv;
+
+
+
+	// This formula gives the result for y3 thanks to MATLAB
+	float y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
+	if (isnan(y3))
+	{
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+	}
+	float tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
+	if (isnan(tempy3denom))
+	{
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+	}
+	if (tempy3denom == 0.0f)
+	{
+		tempy3denom = 0.000001f;
+	}
+	y3 = y3 / tempy3denom;
+	if (isnan(y3))
+	{
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+	}
+	if (t1 == 0.0f)
+	{
+		t1 = 0.000001f;
+	}
+	if (t2 == 0.0f)
+	{
+		t2 = 0.000001f;
+	}
+	if (t3 == 0.0f)
+	{
+		t3 = 0.000001f;
+	}
+	// Other outputs
+	float y2 = (f->s3 - (1+t4+t3)*y3) / (-t3);
+	float y1 = (f->s2 - (1+t3+t2)*y2 + t3*y3) / (-t2);
+	float y0 = (f->s1 - (1+t2+t1)*y1 + t2*y2) / (-t1);
+	float xx = (in - f->r*y3);
+
+	// update state
+	f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
+	if (isnan(f->s0))
+	{
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+	}
+
+	if (isinf(f->s0))
+	{
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+	}
+	f->s1 += 2.0f * (t2*(y2-y1) - t1*(y1-y0));
+	f->s2 += 2.0f * (t3*(y3-y2) - t2*(y2-y1));
+	f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));
+
+	f->zi = in;
+	return y3*f->r;
+
+}
+
+
+
+void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff)
+{
+	 _tDiodeFilter* f = *vf;
+	 f->f = tanf(PI * LEAF_clip(10.0f, cutoff, 20000.0f)*leaf.invSampleRate);
+}
+
+
+void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance)
+{
+	 _tDiodeFilter* f = *vf;
+	 f->r = LEAF_clip(0.5, (7.f * resonance + 0.5f), 8.0f);
+
+}
+

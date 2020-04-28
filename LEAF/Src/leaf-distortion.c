@@ -17,7 +17,7 @@
 #include "../Inc/leaf-tables.h"
 
 //testing
-//#include "gpio.h"
+#include "gpio.h"
 
 #endif
 
@@ -353,26 +353,7 @@ int tOversampler_getLatency(tOversampler* const osr)
 
 void tLockhartWavefolder_init(tLockhartWavefolder* const wf)
 {
-    _tLockhartWavefolder* w = *wf = (_tLockhartWavefolder*) leaf_alloc(sizeof(_tLockhartWavefolder));
-    
-    w->Ln1 = 0.0;
-    w->Fn1 = 0.0;
-    w->xn1 = 0.0f;
-
-    w->RL = 7.5e3;
-    w->R = 15e3;
-    w->VT = 26e-3;
-    w->Is = 10e-16;
-
-    w->a = 2.0*w->RL/w->R;
-    w->b = (w->R+2.0*w->RL)/(w->VT*w->R);
-    w->d = (w->RL*w->Is)/w->VT;
-    w->half_a = 0.5 * w->a;
-    w->longthing = (0.5*w->VT/w->b);
-
-
-    // Antialiasing error threshold
-    w->thresh = 10e-10;
+	tLockhartWavefolder_initToPool   (wf,  &leaf.mempool);
 }
 
 void tLockhartWavefolder_free(tLockhartWavefolder* const wf)
@@ -389,7 +370,7 @@ void    tLockhartWavefolder_initToPool   (tLockhartWavefolder* const wf, tMempoo
     
     w->Ln1 = 0.0;
     w->Fn1 = 0.0;
-    w->xn1 = 0.0f;
+    w->xn1 = 0.0;
     
     w->RL = 7.5e3;
     w->R = 15e3;
@@ -404,7 +385,26 @@ void    tLockhartWavefolder_initToPool   (tLockhartWavefolder* const wf, tMempoo
     
     
     // Antialiasing error threshold
-    w->thresh = 10e-10;
+    w->AAthresh = 10e-10; //10
+
+	w->LambertThresh = 10e-10; //12  //was 8
+
+
+    w->w = 0.0f;
+    w->expw = 0.0f;
+    w->p = 0.0f;
+    w->r = 0.0f;
+    w->s= 0.0f;
+    w->myerr = 0.0f;
+    w->l = 0.0f;
+    w->u = 0.0f;
+    w->Ln = 0.0f;
+	w->Fn = 0.0f;
+    w->tempsDenom = 0.0f;
+    w->tempErrDenom = 0.0f;
+    w->tempOutDenom = 0.0f;
+
+
 }
 
 void    tLockhartWavefolder_freeFromPool (tLockhartWavefolder* const wf, tMempool* const mp)
@@ -415,71 +415,182 @@ void    tLockhartWavefolder_freeFromPool (tLockhartWavefolder* const wf, tMempoo
     mpool_free(w, m);
 }
 
-double tLockhartWavefolderLambert(double x, double ln)
+
+
+double tLockhartWavefolderLambert(tLockhartWavefolder* const wf, double x, double ln)
 {
-    double thresh, w, expw, p, r, s, err;
-    // Error threshold
-    thresh = 10e-12;
+	_tLockhartWavefolder* mwf = *wf;
+
+
     // Initial guess (use previous value)
-    w = ln;
+	mwf->w = ln;
     
     // Haley's method (Sec. 4.2 of the paper)
-    for(int i=0; i<1000; i+=1) {
+    for(int i=0; i<3000; i+=1) { //1000
         
-        expw = exp(w);
-        
-        p = w*expw - x;
-        r = (w+1.0)*expw;
-        s = (w+2.0)/(2.0*(w+1.0));
-        err = (p/(r-(p*s)));
-        
-        if (fabs(err)<thresh) {
+    	mwf->expw = exp(mwf->w);
+    	/*
+        if (isinf(mwf->expw) || isnan(mwf->expw))
+        {
+        	mwf->expw = 10e-5;
+        	LEAF_error();
+        }
+        */
+    	mwf->p = mwf->w*mwf->expw - x;
+    	/*
+        if (isinf(mwf->p) || isnan(mwf->p))
+        {
+        	mwf->p = 10e-5;
+        	LEAF_error();
+        }
+        */
+    	mwf->r = (mwf->w+1.0)*mwf->expw;
+    	/*
+        if (isinf(mwf->r) || isnan(mwf->r))
+        {
+        	mwf->r = 10e-5;
+        	LEAF_error();
+        }
+        */
+    	mwf->tempsDenom = (2.0*(mwf->w+1.0));
+    	/*
+        if ((mwf->tempsDenom == 0.0) || isinf(mwf->tempsDenom) || isnan(mwf->tempsDenom))
+        {
+        	mwf->tempsDenom = 10e-5;
+        	LEAF_error();
+        }
+        */
+        mwf->s = (mwf->w+2.0)/mwf->tempsDenom;
+        /*
+        if (isnan(mwf->s) || isinf(mwf->s))
+        {
+        	mwf->s = 10e-5;
+        	LEAF_error();
+        }
+        */
+        mwf->tempErrDenom = (mwf->r-(mwf->p*mwf->s));
+         /*
+        if ((mwf->tempErrDenom == 0.0) || isinf(mwf->tempErrDenom) || isnan(mwf->tempErrDenom))
+        {
+        	mwf->tempErrDenom = 10e-5;
+        	LEAF_error();
+        }
+        */
+        mwf->myerr = (mwf->p/mwf->tempErrDenom);
+         /*
+        if (isnan(mwf->myerr) || isinf(mwf->myerr))
+        {
+        	mwf->myerr = 10e-5;
+        	LEAF_error();
+        }
+        */
+
+        if ((fabs(mwf->myerr))<mwf->LambertThresh) {
 
         	break;
         }
-        
-        w = w - err;
-        if (i == 999)
+
+        mwf->w = mwf->w - mwf->myerr;
+
+         /*
+        if (isinf(mwf->w) || isnan(mwf->w))
         {
-        	//HAL_GPIO_WritePin(GPIOG, GPIO_PIN_7, GPIO_PIN_SET);
+        	mwf->w = 10e-5;
+        	LEAF_error();
         }
+*/
 
     }
-    return w;
+    return mwf->w;
 }
 
-float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float samp)
+float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float in)
 {
     _tLockhartWavefolder* w = *wf;
-    
+
     float out = 0.0f;
     
     // Compute Antiderivative
-    int l = (samp > 0.0f) - (samp < 0.0f);
-    double u = w->d*exp(l*w->b*samp);
-    double Ln = tLockhartWavefolderLambert(u,w->Ln1);
-    double Fn = w->longthing*(Ln*(Ln + 2.0)) - w->half_a*samp*samp;
-    
+    w->l = (in > 0.0) - (in < 0.0);
+    w->u = w->d*exp(w->l*w->b*in);
+    /*
+    if ((w->u == 0.0) || isinf(w->u) || isnan(w->u))
+    {
+    	w->u = 10e-5;
+    	LEAF_error();
+    }
+    */
+
+    w->Ln = tLockhartWavefolderLambert(wf,w->u,w->Ln1);
+    /*
+    if ((w->Ln == 0.0) || isinf(w->Ln) || isnan(w->Ln))
+	{
+		w->Ln = 10e-5;
+		LEAF_error();
+	}
+*/
+    w->Fn = (w->longthing*(w->Ln*(w->Ln + 2.0))) - (w->half_a*in*in);
+    /*
+    if ((w->Fn == 0.0) || isinf(w->Fn) || isnan(w->Fn))
+	{
+		w->Fn = 10e-5;
+		LEAF_error();
+	}
+	*/
     // Check for ill-conditioning
-    if (fabs(samp-w->xn1)<w->thresh) {
+
+    if (fabs(in-w->xn1)<w->AAthresh)
+    {
         
         // Compute Averaged Wavefolder Output
-        float xn = 0.5f*(samp+w->xn1);
-        u = w->d*exp(l*w->b*xn);
-        Ln = tLockhartWavefolderLambert(u,w->Ln1);
-        out = (float) (l*w->VT*Ln - w->a*xn);
+    	double xn = 0.5*(in+w->xn1);
+    	w->u = w->d*exp(w->l*w->b*xn);
+        /*
+    	if ((w->u == 0.0) || isinf(w->u) || isnan(w->u))
+        {
+        	w->u = 10e-5;
+        	LEAF_error();
+
+        }
+        */
+    	w->Ln = tLockhartWavefolderLambert(wf,w->u,w->Ln1);
+    	/*
+        if ((w->Ln == 0.0) || isinf(w->Ln) || isnan(w->Ln))
+    	{
+    		w->Ln = 10e-5;
+    		LEAF_error();
+    	}
+    	*/
+        out = (float)((w->l*w->VT*w->Ln) - (w->a*xn));
 
     }
-    else {
-        
+    else
+    {
+
         // Apply AA Form
-        out = (float) ((Fn-w->Fn1)/(samp-w->xn1));
+    	w->tempOutDenom = (in-w->xn1);
+    	/*
+    	if ((w->tempOutDenom == 0.0) || isinf(w->tempOutDenom))
+    	{
+    		w->tempOutDenom = 10e-5;
+    		LEAF_error();
+    	}
+    	*/
+        out = ((w->Fn-w->Fn1)/w->tempOutDenom);
+        /*
+        if (isinf(out) || isnan(out))
+		{
+        	out = 10e-5;
+        	LEAF_error();
+		}
+		*/
+
     }
-    
+
     // Update States
-    w->Ln1 = Ln;
-    w->Fn1 = Fn;
-    w->xn1 = samp;
+    w->Ln1 = w->Ln;
+    w->Fn1 = w->Fn;
+    w->xn1 = (double)in;
     
     return out;
 }

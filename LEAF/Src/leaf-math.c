@@ -90,6 +90,13 @@ float fastabsf(float f)
     return alias.f;
 }
 
+double fastexp(double x) {
+  x = 1.0 + (x * 0.0009765625);
+  x *= x; x *= x; x *= x; x *= x;
+  x *= x; x *= x; x *= x; x *= x;
+  x *= x; x *= x;
+  return x;
+}
 
 float fastexpf(float x) {
   x = 1.0f + (x * 0.0009765625f);
@@ -99,8 +106,15 @@ float fastexpf(float x) {
   return x;
 }
 
+double fasterexp(double x) {
+  x = 1.0 + (x * 0.00390625);
+  x *= x; x *= x; x *= x; x *= x;
+  x *= x; x *= x; x *= x; x *= x;
+  return x;
+}
+
 float fasterexpf(float x) {
-  x = 1.0 + (x * 0.00390625f);
+  x = 1.0f + (x * 0.00390625f);
   x *= x; x *= x; x *= x; x *= x;
   x *= x; x *= x; x *= x; x *= x;
   return x;

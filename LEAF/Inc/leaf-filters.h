@@ -417,8 +417,12 @@ extern "C" {
 			float fs;    // sample-rate
 			float fc;    // characteristic frequency
 			float G;     // gain
+			float invG;		//1/gain
 			float B;     // bandwidth (in octaves)
 			float m;     // morph parameter (0...1)
+
+			float sr;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+			float inv_sr;
 
 	    } _tVZFilter;
 
@@ -428,7 +432,7 @@ extern "C" {
 		void    tVZFilter_free           (tVZFilter* const);
 		void    tVZFilter_initToPool     (tVZFilter* const, VZFilterType type, float freq, float Q, tMempool* const);
 		void    tVZFilter_freeFromPool   (tVZFilter* const, tMempool* const);
-
+		void 	tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate);
 		float   tVZFilter_tick           	(tVZFilter* const, float input);
 		void   tVZFilter_calcCoeffs           (tVZFilter* const);
 		void   tVZFilter_setBandwidth        	(tVZFilter* const, float bandWidth);
@@ -436,6 +440,37 @@ extern "C" {
 		void   tVZFilter_setGain          		(tVZFilter* const, float gain);
 		void   tVZFilter_setType          		(tVZFilter* const, VZFilterType type);
 		float 	tVZFilter_BandwidthToR		(tVZFilter* const vf, float B);
+
+
+
+
+		//diode ladder filter
+		typedef struct _tDiodeFilter
+		    {
+
+			 	 float f;
+			 	 float r;
+			 	 float Vt;
+			 	 float n;
+			 	 float gamma;
+			 	 float zi;
+			 	 float g0inv;
+			 	 float g1inv;
+			 	 float g2inv;
+			 	 float s0, s1, s2, s3;
+
+		    } _tDiodeFilter;
+
+		    typedef _tDiodeFilter* tDiodeFilter;
+
+		    void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q);
+			void    tDiodeFilter_free           (tDiodeFilter* const);
+			void    tDiodeFilter_initToPool     (tDiodeFilter* const, float freq, float Q, tMempool* const);
+			void    tDiodeFilter_freeFromPool   (tDiodeFilter* const, tMempool* const);
+
+			float   tDiodeFilter_tick           	(tDiodeFilter* const, float input);
+			void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff);
+			void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance);
 
 
 #ifdef __cplusplus

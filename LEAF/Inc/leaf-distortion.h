@@ -80,7 +80,7 @@ extern "C" {
     {
         double Ln1;
         double Fn1;
-        float xn1;
+        double xn1;
 
         double RL;
         double R;
@@ -92,9 +92,16 @@ extern "C" {
         double d;
 
         // Antialiasing error threshold
-        double thresh;
+        double AAthresh;
         double half_a;
         double longthing;
+
+        double LambertThresh, w, expw, p, r, s, myerr;
+        double l;
+        double u, Ln, Fn;
+        double tempsDenom;
+        double tempErrDenom;
+        double tempOutDenom;
 
     } _tLockhartWavefolder;
     
