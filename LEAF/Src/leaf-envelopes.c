@@ -256,68 +256,12 @@ float   tEnvelope_tick(tEnvelope* const envlp)
 /* ADSR */
 void    tADSR_init(tADSR* const adsrenv, float attack, float decay, float sustain, float release)
 {
-    _tADSR* adsr = *adsrenv = (_tADSR*) leaf_alloc(sizeof(_tADSR));
-    
-    adsr->exp_buff = __leaf_table_exp_decay;
-    adsr->inc_buff = __leaf_table_attack_decay_inc;
-    adsr->buff_size = sizeof(__leaf_table_exp_decay);
-    
-    if (attack > 8192.0f)
-        attack = 8192.0f;
-    if (attack < 0.0f)
-        attack = 0.0f;
-    
-    if (decay > 8192.0f)
-        decay = 8192.0f;
-    if (decay < 0.0f)
-        decay = 0.0f;
-    
-    if (sustain > 1.0f)
-        sustain = 1.0f;
-    if (sustain < 0.0f)
-        sustain = 0.0f;
-    
-    if (release > 8192.0f)
-        release = 8192.0f;
-    if (release < 0.0f)
-        release = 0.0f;
-    
-    int16_t attackIndex = ((int16_t)(attack * 8.0f))-1;
-    int16_t decayIndex = ((int16_t)(decay * 8.0f))-1;
-    int16_t releaseIndex = ((int16_t)(release * 8.0f))-1;
-    int16_t rampIndex = ((int16_t)(2.0f * 8.0f))-1;
-    
-    if (attackIndex < 0)
-        attackIndex = 0;
-    if (decayIndex < 0)
-        decayIndex = 0;
-    if (releaseIndex < 0)
-        releaseIndex = 0;
-    if (rampIndex < 0)
-        rampIndex = 0;
-    
-    adsr->inRamp = OFALSE;
-    adsr->inAttack = OFALSE;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OFALSE;
-    
-    adsr->sustain = sustain;
-    
-    adsr->attackInc = adsr->inc_buff[attackIndex];
-    adsr->decayInc = adsr->inc_buff[decayIndex];
-    adsr->releaseInc = adsr->inc_buff[releaseIndex];
-    adsr->rampInc = adsr->inc_buff[rampIndex];
-
-    adsr->leakFactor = 1.0f;
-
+    tADSR_initToPool(adsrenv, attack, decay, sustain, release, &leaf.mempool);
 }
 
 void tADSR_free(tADSR* const adsrenv)
 {
-    _tADSR* adsr = *adsrenv;
-
-    leaf_free(adsr);
+    tADSR_freeFromPool(adsrenv, &leaf.mempool);
 }
 
 void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp)
@@ -362,6 +306,8 @@ void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, fl
         releaseIndex = 0;
     if (rampIndex < 0)
         rampIndex = 0;
+    
+    adsr->next = 0.0f;
     
     adsr->inRamp = OFALSE;
     adsr->inAttack = OFALSE;
