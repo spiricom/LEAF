@@ -254,7 +254,7 @@ float tTalkbox_tick(tTalkbox* const voc, float synth, float voice)
     v->pos = p0;
     v->FX = fx;
     
-
+    
     return o;
 }
 
@@ -517,12 +517,12 @@ void tSOLAD_free(tSOLAD* const wp)
 void    tSOLAD_initToPool       (tSOLAD* const wp, tMempool* const mp)
 {
     _tMempool* m = *mp;
-
+    
     _tSOLAD* w = *wp = (_tSOLAD*) mpool_calloc(sizeof(_tSOLAD), m);
     
     w->pitchfactor = 1.;
     w->delaybuf = (float*) mpool_calloc(sizeof(float) * (LOOPSIZE+16), m);
-
+    
     solad_init(w);
 }
 
@@ -900,9 +900,9 @@ void tPitchShift_free(tPitchShift* const psr)
 void    tPitchShift_initToPool      (tPitchShift* const psr, tPeriodDetection* const pd, float* out, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-
+    
     _tPitchShift* ps = *psr = (_tPitchShift*) mpool_calloc(sizeof(_tPitchShift), m);
-
+    
     _tPeriodDetection* p = *pd;
     
     ps->p = pd;
@@ -1078,7 +1078,7 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     tRetune_setTimeConstant(rt, DEFTIMECONSTANT);
     
     r->inputPeriod = 0.0f;
-
+    
     r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
     r->pitchFactor = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
     r->tickOutput = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
@@ -1088,7 +1088,7 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
-
+    
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, mp);
@@ -1259,7 +1259,7 @@ void    tAutotune_initToPool        (tAutotune* const rt, int numVoices, int buf
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
-
+    
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, mp);
@@ -1293,15 +1293,15 @@ float* tAutotune_tick(tAutotune* const rt, float sample)
     
     float tempPeriod = tPeriodDetection_tick(&r->pd, sample);
     if (tempPeriod < 1000.0f) //to avoid trying to follow consonants JS
-	{
-		r->inputPeriod = tempPeriod;
-	}
-
-	for (int v = 0; v < r->numVoices; ++v)
-	{
-		r->tickOutput[v] = tPitchShift_shiftToFreq(&r->ps[v], r->freq[v]);
-	}
-
+    {
+        r->inputPeriod = tempPeriod;
+    }
+    
+    for (int v = 0; v < r->numVoices; ++v)
+    {
+        r->tickOutput[v] = tPitchShift_shiftToFreq(&r->ps[v], r->freq[v]);
+    }
+    
     return r->tickOutput;
 }
 
@@ -1376,8 +1376,20 @@ void tAutotune_setWindowSize(tAutotune* const rt, int ws)
 void tAutotune_setFidelityThreshold(tAutotune* const rt, float threshold)
 {
     _tAutotune* r = *rt;
-
+    
     tPeriodDetection_setFidelityThreshold(&r->pd, threshold);
+}
+
+void     tAutotune_setAlpha                (tAutotune* rt, float alpha)
+{
+    _tAutotune* r = *rt;
+    tPeriodDetection_setAlpha(&r->pd, alpha);
+}
+
+void     tAutotune_setTolerance            (tAutotune* rt, float tolerance)
+{
+    _tAutotune* r = *rt;
+    tPeriodDetection_setTolerance(&r->pd, tolerance);
 }
 
 float tAutotune_getInputPeriod(tAutotune* const rt)
@@ -1413,7 +1425,7 @@ void tFormantShifter_init(tFormantShifter* const fsr, int order)
     fs->fsmooth = (float*) leaf_calloc(sizeof(float) * fs->ford);
     fs->ftvec = (float*) leaf_calloc(sizeof(float) * fs->ford);
     fs->fbuff = (float*) leaf_calloc(sizeof(float*) * fs->ford);
-
+    
     fs->falph = powf(0.001f, 40.0f * leaf.invSampleRate);
     fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
     fs->fhp = 0.0f;
@@ -1423,11 +1435,11 @@ void tFormantShifter_init(tFormantShifter* const fsr, int order)
     fs->fmutealph = powf(0.001f, 0.5f * leaf.invSampleRate);
     fs->cbi = 0;
     fs->intensity = 1.0f;
-	fs->invIntensity = 1.0f;
-	tHighpass_init(&fs->hp, 10.0f);
-	tHighpass_init(&fs->hp2, 10.0f);
-	tFeedbackLeveler_init(&fs->fbl1, 0.99f, 0.005f, 0.125f, 0);
-	tFeedbackLeveler_init(&fs->fbl2, 0.99f, 0.005f, 0.125f, 0);
+    fs->invIntensity = 1.0f;
+    tHighpass_init(&fs->hp, 10.0f);
+    tHighpass_init(&fs->hp2, 10.0f);
+    tFeedbackLeveler_init(&fs->fbl1, 0.99f, 0.005f, 0.125f, 0);
+    tFeedbackLeveler_init(&fs->fbl2, 0.99f, 0.005f, 0.125f, 0);
 }
 
 void tFormantShifter_free(tFormantShifter* const fsr)
@@ -1445,8 +1457,8 @@ void tFormantShifter_free(tFormantShifter* const fsr)
     leaf_free(fs->fbuff);
     tHighpass_free(&fs->hp);
     tHighpass_free(&fs->hp2);
-	tFeedbackLeveler_free(&fs->fbl1);
-	tFeedbackLeveler_free(&fs->fbl2);
+    tFeedbackLeveler_free(&fs->fbl1);
+    tFeedbackLeveler_free(&fs->fbl2);
     leaf_free(fs);
 }
 
@@ -1466,7 +1478,7 @@ void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int order, 
     fs->ftvec = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
     
     fs->fbuff = (float*) mpool_calloc(sizeof(float*) * fs->ford, m);
-
+    
     
     fs->falph = powf(0.001f, 10.0f * leaf.invSampleRate);
     fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
@@ -1516,9 +1528,9 @@ float tFormantShifter_remove(tFormantShifter* const fsr, float in)
     in = tFeedbackLeveler_tick(&fs->fbl1, in);
     in = tHighpass_tick(&fs->hp, in * fs->intensity);
     
-
+    
     float fa, fb, fc, foma, falph, ford, flamb, tf, fk;
-
+    
     ford = fs->ford;
     falph = fs->falph;
     foma = (1.0f - falph);
@@ -1544,7 +1556,7 @@ float tFormantShifter_remove(tFormantShifter* const fsr, float in)
         fb = fc - tf*fa;
         fa = fa - tf*fc;
     }
-
+    
     //return fa * 0.1f;
     return fa;
 }
@@ -1555,7 +1567,7 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
     
     float fa, fb, fc, ford, flpa, flamb, tf, tf2, f0resp, f1resp, frlamb;
     ford = fs->ford;
-
+    
     flpa = fs->flpa;
     flamb = fs->flamb;
     tf = fs->shiftFactor * (1.0f+flamb)/(1.0f-flamb);
@@ -1642,7 +1654,7 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
     // ...and we're done messing with formants
     //tf = tFeedbackLeveler_tick(&fs->fbl2, tf);
     tf = tHighpass_tick(&fs->hp2, tanhf(tf));
-
+    
     return tf * fs->invIntensity;
 }
 
@@ -1656,21 +1668,21 @@ void tFormantShifter_setShiftFactor(tFormantShifter* const fsr, float shiftFacto
 void tFormantShifter_setIntensity(tFormantShifter* const fsr, float intensity)
 {
     _tFormantShifter* fs = *fsr;
-
-
-
+    
+    
+    
     fs->intensity = LEAF_clip(1.0f, intensity, 100.0f);
-
-   // tFeedbackLeveler_setTargetLevel(&fs->fbl1, fs->intensity);
+    
+    // tFeedbackLeveler_setTargetLevel(&fs->fbl1, fs->intensity);
     //tFeedbackLeveler_setTargetLevel(&fs->fbl2, fs->intensity);
     //make sure you don't divide by zero, doofies
     if (fs->intensity != 0.0f)
     {
-    	fs->invIntensity = 1.0f/fs->intensity;
+        fs->invIntensity = 1.0f/fs->intensity;
     }
     else
     {
-    	fs->invIntensity = 1.0f;
+        fs->invIntensity = 1.0f;
     }
-
+    
 }

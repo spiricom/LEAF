@@ -1,10 +1,10 @@
 /*==============================================================================
-
-    leaf-analysis.c
-    Created: 30 Nov 2018 11:56:49am
-    Author:  airship
-
-==============================================================================*/
+ 
+ leaf-analysis.c
+ Created: 30 Nov 2018 11:56:49am
+ Author:  airship
+ 
+ ==============================================================================*/
 
 #if _WIN32 || _WIN64
 
@@ -504,7 +504,7 @@ void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const 
     s->fidelity = 0.;
     s->minrms = DEFMINRMS;
     s->framesize = SNAC_FRAME_SIZE;
-
+    
     s->inputbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, m);
     s->processbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE * 2), m);
     s->spectrumbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE / 2), m);
@@ -873,6 +873,10 @@ void    tPeriodDetection_initToPool  (tPeriodDetection* const pd, float* in, flo
     p->timeConstant = DEFTIMECONSTANT;
     p->radius = expf(-1000.0f * p->hopSize * leaf.invSampleRate / p->timeConstant);
     p->fidelityThreshold = 0.95;
+    
+    p->history = 0.0f;
+    p->alpha = 1.0f;
+    p->tolerance = 1.0f;
 }
 
 void    tPeriodDetection_freeFromPool       (tPeriodDetection* const pd, tMempool* const mp)
@@ -910,7 +914,15 @@ float tPeriodDetection_tick (tPeriodDetection* pd, float sample)
         tSNAC_ioSamples(&p->snac, &(p->inBuffer[i]), &(p->outBuffer[i]), p->frameSize);
         float fidelity = tSNAC_getFidelity(&p->snac);
         // Fidelity threshold recommended by Katja Vetters is 0.95 for most instruments/voices http://www.katjaas.nl/helmholtz/helmholtz.html
-        if (fidelity > p->fidelityThreshold) p->period = tSNAC_getPeriod(&p->snac);
+        if (fidelity > p->fidelityThreshold)
+        {
+            float detected = tSNAC_getPeriod(&p->snac);
+            p->history = detected * p->alpha + (p->history * (1 - p->alpha));
+            float delta = 0.0f;
+            if (detected > p->history) delta = (detected / p->history) - 1.0f;
+            else delta = (p->history / detected) - 1.0f;
+            if (delta < p->tolerance) p->period = detected;
+        }
         
         p->curBlock++;
         if (p->curBlock >= p->framesPerBuffer) p->curBlock = 0;
@@ -943,4 +955,17 @@ void tPeriodDetection_setFidelityThreshold(tPeriodDetection* pd, float threshold
 {
     _tPeriodDetection* p = *pd;
     p->fidelityThreshold = threshold;
+}
+
+void tPeriodDetection_setAlpha            (tPeriodDetection* pd, float alpha)
+{
+    _tPeriodDetection* p = *pd;
+    p->alpha = LEAF_clip(0.0f, alpha, 1.0f);
+}
+
+void tPeriodDetection_setTolerance        (tPeriodDetection* pd, float tolerance)
+{
+    _tPeriodDetection* p = *pd;
+    if (tolerance < 0.0f) p->tolerance = 0.0f;
+    else p->tolerance = tolerance;
 }

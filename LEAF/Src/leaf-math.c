@@ -262,11 +262,17 @@ float   LEAF_softClip(float val, float thresh)
 
 float   LEAF_clip(float min, float val, float max)
 {
-    
-    if (val < min) {
-        return min;
-    } else if (val > max) {
-        return max;
+    int tempmin = min;
+    int tempmax = max;
+    if (min > max)
+    {
+        tempmin = max;
+        tempmax = min;
+    }
+    if (val < tempmin) {
+        return tempmin;
+    } else if (val > tempmax) {
+        return tempmax;
     } else {
         return val;
     }
