@@ -24,6 +24,7 @@
 // TALKBOX
 //============================================================================================================
 
+//LPC vocoder adapted from MDA's excellent open source talkbox plugin code
 void tTalkbox_init(tTalkbox* const voc, int bufsize)
 {
     
@@ -33,7 +34,8 @@ void tTalkbox_init(tTalkbox* const voc, int bufsize)
     v->param[1] = 0.0f;  //dry
     v->param[2] = 0; // Swap
     v->param[3] = 1.0f;  //quality
-    
+    v->warpFactor = 0.0f;
+    v->warpOn = 0;
     v->bufsize = bufsize;
     
     v->car0 =   (float*) leaf_alloc(sizeof(float) * v->bufsize);
@@ -68,7 +70,8 @@ void    tTalkbox_initToPool     (tTalkbox* const voc, int bufsize, tMempool* con
     v->param[1] = 0.0f;  //dry
     v->param[2] = 0; // Swap
     v->param[3] = 1.0f;  //quality
-    
+    v->warpFactor = 0.0f;
+    v->warpOn = 0;
     v->bufsize = bufsize;
     
     v->car0 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
@@ -103,7 +106,7 @@ void tTalkbox_update(tTalkbox* const voc) ///update internal parameters...
     if(fs <  8000.0f) fs =  8000.0f;
     if(fs > 96000.0f) fs = 96000.0f;
     
-    int32_t n = (int32_t)(0.01633f * fs);
+    int32_t n = (int32_t)(0.01633f * fs); //this sets the window time to 16ms if the buffer is large enough. Buffer needs to be at least 784 samples at 48000
     if(n > v->bufsize) n = v->bufsize;
     
     //O = (VstInt32)(0.0005f * fs);
@@ -144,18 +147,77 @@ void tTalkbox_suspend(tTalkbox* const voc) ///clear any buffers...
     }
 }
 
+// warped autocorrelation adapted from ten.enegatum@liam's post on music-dsp 2004-04-07 09:37:51
+//find the order-P autocorrelation array, R, for the sequence x of length L and warping of lambda
+//wAutocorrelate(&pfSrc[stIndex],siglen,R,P,0);
+void tTalkbox_warpedAutocorrelate(float * x, unsigned int L, float * R, unsigned int P, float lambda)
+{
+    double dl[L];
+    double Rt[L];
+    double r1,r2,r1t;
+    R[0]=0;
+    Rt[0]=0;
+    r1=0;
+    r2=0;
+    r1t=0;
+    for(int32_t k=0; k<L;k++)
+    {
+                    Rt[0] += (double)(x[k]) * (double)(x[k]);
 
-#define ORD_MAX           100 // Was 50. Increasing this gets rid of glitchiness, lowering it breaks it; not sure how it affects performance
-void tTalkbox_lpc(float *buf, float *car, int32_t n, int32_t o)
+                    dl[k]= r1 - (double)(lambda) * (double)(x[k]-r2);
+                    r1 = x[k];
+                    r2 = dl[k];
+    }
+    for(int32_t i=1; i<=P; i++)
+    {
+            Rt[i]=0;
+            r1=0;
+            r2=0;
+            for(unsigned int k=0; k<L;k++)
+            {
+                    Rt[i] += (double) (dl[k]) * (double)(x[k]);
+
+                    r1t = dl[k];
+                    dl[k]= r1 - (double)(lambda) * (double)(r1t-r2);
+                    r1 = r1t;
+                    r2 = dl[k];
+            }
+    }
+    for(int32_t i=0; i<=P; i++)
+    {
+            R[i]=(float)(Rt[i]);
+    }
+
+}
+
+
+
+#define ORD_MAX           35 // Was 100.
+// order is defined by the set_quality function.
+// it's set to max out at 0.0005 of sample rate (if you don't go above 1.0f in the quality setting) == at 48000 that's 24.
+// -JS
+void tTalkbox_lpc(float *buf, float *car, int32_t n, int32_t o, float warp, int warpOn)
 {
     float z[ORD_MAX], r[ORD_MAX], k[ORD_MAX], G, x;
     int32_t i, j, nn=n;
     
-    for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
+    if (warpOn == 0)
     {
-        z[j] = r[j] = 0.0f;
-        for(i=0; i<nn; i++) r[j] += buf[i] * buf[i+j]; //autocorrelation
+        for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
+        {
+            z[j] = r[j] = 0.0f;
+            for(i=0; i<nn; i++) r[j] += buf[i] * buf[i+j]; //autocorrelation
+        }
     }
+    else
+    {
+        for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
+        {
+            z[j] = r[j] = 0.0f;
+        }
+    	tTalkbox_warpedAutocorrelate(buf, n, r, o, warp);
+    }
+
     r[0] *= 1.001f;  //stability fix
     
     float min = 0.00001f;
@@ -163,6 +225,8 @@ void tTalkbox_lpc(float *buf, float *car, int32_t n, int32_t o)
     
     tTalkbox_lpcDurbin(r, o, k, &G);  //calc reflection coeffs
     
+    //this is for stability to keep reflection coefficients inside the unit circle
+    //but in Harma's papers I've seen 0.998.  just needs to be less than 1 it seems but maybe some wiggle room to avoid instability from floating point precision -JS
     for(i=0; i<=o; i++)
     {
         if(k[i] > 0.995f) k[i] = 0.995f; else if(k[i] < -0.995f) k[i] = -.995f;
@@ -186,8 +250,8 @@ void tTalkbox_lpcDurbin(float *r, int p, float *k, float *g)
     int i, j;
     float a[ORD_MAX], at[ORD_MAX], e=r[0];
     
-    for(i=0; i<=p; i++) a[i] = at[i] = 0.0f; //probably don't need to clear at[] or k[]
-    
+    for(i=0; i<=p; i++) a[i] = 0.0f; //probably don't need to clear at[] or k[]
+    at[0] = 0.0f;
     for(i=1; i<=p; i++)
     {
         k[i] = -r[i];
@@ -198,7 +262,7 @@ void tTalkbox_lpcDurbin(float *r, int p, float *k, float *g)
             k[i] -= a[j] * r[i-j];
         }
         if(fabs(e) < 1.0e-20f) { e = 0.0f;  break; }
-        k[i] /= e; // This might be costing us
+        k[i] /= e;
         
         a[i] = k[i];
         for(j=1; j<i; j++) a[j] = at[j] + k[i] * at[i-j];
@@ -215,14 +279,14 @@ float tTalkbox_tick(tTalkbox* const voc, float synth, float voice)
     _tTalkbox* v = *voc;
     
     int32_t  p0=v->pos, p1 = (v->pos + v->N/2) % v->N;
-    float e=v->emphasis, w, o, x, dr, fx=v->FX;
+    float e=v->emphasis, w, o, x, fx=v->FX;
     float p, q, h0=0.3f, h1=0.77f;
     
     o = voice;
     x = synth;
     
-    dr = o;
-    
+
+
     p = v->d0 + h0 *  x; v->d0 = v->d1;  v->d1 = x  - h0 * p;
     q = v->d2 + h1 * v->d4; v->d2 = v->d3;  v->d3 = v->d4 - h1 * q;
     v->d4 = x;
@@ -237,10 +301,10 @@ float tTalkbox_tick(tTalkbox* const voc, float synth, float voice)
         x = o - e;  e = o;  //6dB/oct pre-emphasis
         
         w = v->window[p0]; fx = v->buf0[p0] * w;  v->buf0[p0] = x * w;  //50% overlapping hanning windows
-        if(++p0 >= v->N) { tTalkbox_lpc(v->buf0, v->car0, v->N, v->O);  p0 = 0; }
+        if(++p0 >= v->N) { tTalkbox_lpc(v->buf0, v->car0, v->N, v->O, v->warpFactor, v->warpOn);  p0 = 0; }
         
         w = 1.0f - w;  fx += v->buf1[p1] * w;  v->buf1[p1] = x * w;
-        if(++p1 >= v->N) { tTalkbox_lpc(v->buf1, v->car1, v->N, v->O);  p1 = 0; }
+        if(++p1 >= v->N) { tTalkbox_lpc(v->buf1, v->car1, v->N, v->O, v->warpFactor, v->warpOn);  p1 = 0; }
     }
     
     p = v->u0 + h0 * fx; v->u0 = v->u1;  v->u1 = fx - h0 * p;
@@ -254,7 +318,7 @@ float tTalkbox_tick(tTalkbox* const voc, float synth, float voice)
     v->pos = p0;
     v->FX = fx;
     
-    
+
     return o;
 }
 
@@ -264,6 +328,24 @@ void tTalkbox_setQuality(tTalkbox* const voc, float quality)
     
     v->param[3] = quality;
     v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf.sampleRate);
+    if (v->O >= ORD_MAX)
+    {
+    	v->O = ORD_MAX-1;
+    }
+}
+
+void tTalkbox_setWarpFactor(tTalkbox* const voc, float warpFactor)
+{
+    _tTalkbox* v = *voc;
+
+    v->warpFactor = warpFactor;
+}
+
+void tTalkbox_setWarpOn(tTalkbox* const voc, float warpOn)
+{
+    _tTalkbox* v = *voc;
+
+    v->warpOn = warpOn;
 }
 
 
@@ -479,6 +561,89 @@ void        tVocoder_suspend     (tVocoder* const voc)
     v->kval = 0;
 }
 
+
+
+/// Glottal Pulse (Rosenberg model)
+
+void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const gp)
+{
+	tRosenbergGlottalPulse_initToPool(gp, &leaf.mempool);
+}
+void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const gp)
+{
+	tRosenbergGlottalPulse_freeFromPool(gp, &leaf.mempool);
+}
+void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const gp, tMempool* const mp)
+{
+
+	 _tMempool* m = *mp;
+	_tRosenbergGlottalPulse* g = *gp = (_tRosenbergGlottalPulse*) mpool_alloc(sizeof(_tRosenbergGlottalPulse), m);
+
+	g->phase  = 0.0f;
+	g->openLength = 0.0f;
+	g->pulseLength = 0.0f;
+	g->freq = 0.0f;
+	g->inc = 0.0f;
+
+
+}
+void    tRosenbergGlottalPulse_freeFromPool   (tRosenbergGlottalPulse* const gp, tMempool* const mp)
+{
+	_tMempool* m = *mp;
+	_tRosenbergGlottalPulse* g = *gp;
+	mpool_free(g, m);
+}
+
+float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const gp)
+{
+	_tRosenbergGlottalPulse* g = *gp;
+
+	float output = 0.0f;
+
+    // Phasor increment
+    g->phase += g->inc;
+    while (g->phase >= 1.0f) g->phase -= 1.0f;
+    while (g->phase < 0.0f) g->phase += 1.0f;
+
+	if (g->phase < g->openLength)
+	{
+		output = 0.5f*(1.0f-cosf(PI * g->phase));
+	}
+
+	else if (g->phase < g->pulseLength)
+	{
+		output = cosf(HALF_PI * (g->phase-g->openLength)/(g->pulseLength-g->openLength));
+	}
+
+	else
+	{
+		output = 0.0f;
+	}
+	return output;
+}
+
+float   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const gp, float freq)
+{
+	_tRosenbergGlottalPulse* g = *gp;
+	g->freq = freq;
+	g->inc = freq * leaf.invSampleRate;
+}
+
+float   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const gp, float openLength)
+{
+	_tRosenbergGlottalPulse* g = *gp;
+	g->openLength = openLength;
+}
+
+float   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const gp, float pulseLength)
+{
+	_tRosenbergGlottalPulse* g = *gp;
+	g->pulseLength = pulseLength;
+}
+
+
+
+
 //============================================================================================================
 // SOLAD
 //============================================================================================================
@@ -517,12 +682,12 @@ void tSOLAD_free(tSOLAD* const wp)
 void    tSOLAD_initToPool       (tSOLAD* const wp, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    
+
     _tSOLAD* w = *wp = (_tSOLAD*) mpool_calloc(sizeof(_tSOLAD), m);
     
     w->pitchfactor = 1.;
     w->delaybuf = (float*) mpool_calloc(sizeof(float) * (LOOPSIZE+16), m);
-    
+
     solad_init(w);
 }
 
@@ -900,9 +1065,9 @@ void tPitchShift_free(tPitchShift* const psr)
 void    tPitchShift_initToPool      (tPitchShift* const psr, tPeriodDetection* const pd, float* out, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    
+
     _tPitchShift* ps = *psr = (_tPitchShift*) mpool_calloc(sizeof(_tPitchShift), m);
-    
+
     _tPeriodDetection* p = *pd;
     
     ps->p = pd;
@@ -1078,7 +1243,7 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     tRetune_setTimeConstant(rt, DEFTIMECONSTANT);
     
     r->inputPeriod = 0.0f;
-    
+
     r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
     r->pitchFactor = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
     r->tickOutput = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
@@ -1088,7 +1253,7 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
-    
+
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, mp);
@@ -1259,7 +1424,7 @@ void    tAutotune_initToPool        (tAutotune* const rt, int numVoices, int buf
     }
     
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
-    
+
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, mp);
@@ -1293,15 +1458,15 @@ float* tAutotune_tick(tAutotune* const rt, float sample)
     
     float tempPeriod = tPeriodDetection_tick(&r->pd, sample);
     if (tempPeriod < 1000.0f) //to avoid trying to follow consonants JS
-    {
-        r->inputPeriod = tempPeriod;
-    }
-    
-    for (int v = 0; v < r->numVoices; ++v)
-    {
-        r->tickOutput[v] = tPitchShift_shiftToFreq(&r->ps[v], r->freq[v]);
-    }
-    
+	{
+		r->inputPeriod = tempPeriod;
+	}
+
+	for (int v = 0; v < r->numVoices; ++v)
+	{
+		r->tickOutput[v] = tPitchShift_shiftToFreq(&r->ps[v], r->freq[v]);
+	}
+
     return r->tickOutput;
 }
 
@@ -1376,20 +1541,8 @@ void tAutotune_setWindowSize(tAutotune* const rt, int ws)
 void tAutotune_setFidelityThreshold(tAutotune* const rt, float threshold)
 {
     _tAutotune* r = *rt;
-    
+
     tPeriodDetection_setFidelityThreshold(&r->pd, threshold);
-}
-
-void     tAutotune_setAlpha                (tAutotune* rt, float alpha)
-{
-    _tAutotune* r = *rt;
-    tPeriodDetection_setAlpha(&r->pd, alpha);
-}
-
-void     tAutotune_setTolerance            (tAutotune* rt, float tolerance)
-{
-    _tAutotune* r = *rt;
-    tPeriodDetection_setTolerance(&r->pd, tolerance);
 }
 
 float tAutotune_getInputPeriod(tAutotune* const rt)
@@ -1425,7 +1578,7 @@ void tFormantShifter_init(tFormantShifter* const fsr, int order)
     fs->fsmooth = (float*) leaf_calloc(sizeof(float) * fs->ford);
     fs->ftvec = (float*) leaf_calloc(sizeof(float) * fs->ford);
     fs->fbuff = (float*) leaf_calloc(sizeof(float*) * fs->ford);
-    
+
     fs->falph = powf(0.001f, 40.0f * leaf.invSampleRate);
     fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
     fs->fhp = 0.0f;
@@ -1435,11 +1588,11 @@ void tFormantShifter_init(tFormantShifter* const fsr, int order)
     fs->fmutealph = powf(0.001f, 0.5f * leaf.invSampleRate);
     fs->cbi = 0;
     fs->intensity = 1.0f;
-    fs->invIntensity = 1.0f;
-    tHighpass_init(&fs->hp, 10.0f);
-    tHighpass_init(&fs->hp2, 10.0f);
-    tFeedbackLeveler_init(&fs->fbl1, 0.99f, 0.005f, 0.125f, 0);
-    tFeedbackLeveler_init(&fs->fbl2, 0.99f, 0.005f, 0.125f, 0);
+	fs->invIntensity = 1.0f;
+	tHighpass_init(&fs->hp, 10.0f);
+	tHighpass_init(&fs->hp2, 10.0f);
+	tFeedbackLeveler_init(&fs->fbl1, 0.99f, 0.005f, 0.125f, 0);
+	tFeedbackLeveler_init(&fs->fbl2, 0.99f, 0.005f, 0.125f, 0);
 }
 
 void tFormantShifter_free(tFormantShifter* const fsr)
@@ -1457,8 +1610,8 @@ void tFormantShifter_free(tFormantShifter* const fsr)
     leaf_free(fs->fbuff);
     tHighpass_free(&fs->hp);
     tHighpass_free(&fs->hp2);
-    tFeedbackLeveler_free(&fs->fbl1);
-    tFeedbackLeveler_free(&fs->fbl2);
+	tFeedbackLeveler_free(&fs->fbl1);
+	tFeedbackLeveler_free(&fs->fbl2);
     leaf_free(fs);
 }
 
@@ -1478,7 +1631,7 @@ void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int order, 
     fs->ftvec = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
     
     fs->fbuff = (float*) mpool_calloc(sizeof(float*) * fs->ford, m);
-    
+
     
     fs->falph = powf(0.001f, 10.0f * leaf.invSampleRate);
     fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
@@ -1528,9 +1681,9 @@ float tFormantShifter_remove(tFormantShifter* const fsr, float in)
     in = tFeedbackLeveler_tick(&fs->fbl1, in);
     in = tHighpass_tick(&fs->hp, in * fs->intensity);
     
-    
+
     float fa, fb, fc, foma, falph, ford, flamb, tf, fk;
-    
+
     ford = fs->ford;
     falph = fs->falph;
     foma = (1.0f - falph);
@@ -1556,7 +1709,7 @@ float tFormantShifter_remove(tFormantShifter* const fsr, float in)
         fb = fc - tf*fa;
         fa = fa - tf*fc;
     }
-    
+
     //return fa * 0.1f;
     return fa;
 }
@@ -1567,7 +1720,7 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
     
     float fa, fb, fc, ford, flpa, flamb, tf, tf2, f0resp, f1resp, frlamb;
     ford = fs->ford;
-    
+
     flpa = fs->flpa;
     flamb = fs->flamb;
     tf = fs->shiftFactor * (1.0f+flamb)/(1.0f-flamb);
@@ -1654,7 +1807,7 @@ float tFormantShifter_add(tFormantShifter* const fsr, float in)
     // ...and we're done messing with formants
     //tf = tFeedbackLeveler_tick(&fs->fbl2, tf);
     tf = tHighpass_tick(&fs->hp2, tanhf(tf));
-    
+
     return tf * fs->invIntensity;
 }
 
@@ -1668,21 +1821,21 @@ void tFormantShifter_setShiftFactor(tFormantShifter* const fsr, float shiftFacto
 void tFormantShifter_setIntensity(tFormantShifter* const fsr, float intensity)
 {
     _tFormantShifter* fs = *fsr;
-    
-    
-    
+
+
+
     fs->intensity = LEAF_clip(1.0f, intensity, 100.0f);
-    
-    // tFeedbackLeveler_setTargetLevel(&fs->fbl1, fs->intensity);
+
+   // tFeedbackLeveler_setTargetLevel(&fs->fbl1, fs->intensity);
     //tFeedbackLeveler_setTargetLevel(&fs->fbl2, fs->intensity);
     //make sure you don't divide by zero, doofies
     if (fs->intensity != 0.0f)
     {
-        fs->invIntensity = 1.0f/fs->intensity;
+    	fs->invIntensity = 1.0f/fs->intensity;
     }
     else
     {
-        fs->invIntensity = 1.0f;
+    	fs->invIntensity = 1.0f;
     }
-    
+
 }

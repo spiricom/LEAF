@@ -45,11 +45,15 @@ extern "C" {
         float* buf0;
         float* buf1;
         
+        float warpFactor;
+        int32_t warpOn;
+
         float emphasis;
         int32_t K, N, O, pos;
         float wet, dry, FX;
         float d0, d1, d2, d3, d4;
         float u0, u1, u2, u3, u4;
+
         
     } _tTalkbox;
     
@@ -64,9 +68,11 @@ extern "C" {
     void    tTalkbox_update         (tTalkbox* const);
     void    tTalkbox_suspend        (tTalkbox* const);
     void    tTalkbox_lpcDurbin      (float *r, int p, float *k, float *g);
-    void    tTalkbox_lpc            (float *buf, float *car, int32_t n, int32_t o);
+    void 	tTalkbox_lpc			(float *buf, float *car, int32_t n, int32_t o, float warp, int warpOn);
     void    tTalkbox_setQuality     (tTalkbox* const, float quality);
-    
+    void 	tTalkbox_setWarpFactor		(tTalkbox* const voc, float warp);
+    void 	tTalkbox_setWarpOn		(tTalkbox* const voc, float warpOn);
+    void 	tTalkbox_warpedAutocorrelate	(float * x, unsigned int L, float * R, unsigned int P, float lambda);
     //==============================================================================
     
     /* tVocoder */
@@ -101,6 +107,34 @@ extern "C" {
     
     //==============================================================================
     
+    // tRosenbergGlottalPulse
+
+	typedef struct _tRosenbergGlottalPulse
+	{
+
+		float phase;
+		float openLength;
+		float pulseLength;
+		float freq;
+		float inc;
+
+
+	} _tRosenbergGlottalPulse;
+
+	typedef _tRosenbergGlottalPulse* tRosenbergGlottalPulse;
+
+	void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const);
+	void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const);
+	void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const, tMempool* const);
+	void    tRosenbergGlottalPulse_freeFromPool   (tRosenbergGlottalPulse* const, tMempool* const);
+
+	float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const);
+
+	float   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq);
+
+	float   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, float openLength);
+
+	float   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const, float pulseLength);
     
     //==============================================================================
     
@@ -264,8 +298,6 @@ extern "C" {
     void    tAutotune_setHopSize            (tAutotune* const, int hs);
     void    tAutotune_setWindowSize         (tAutotune* const, int ws);
     void    tAutotune_setFidelityThreshold  (tAutotune* const, float threshold);
-    void     tAutotune_setAlpha                (tAutotune* const, float alpha);
-    void     tAutotune_setTolerance            (tAutotune* const, float tolerance);
     float   tAutotune_getInputPeriod        (tAutotune* const);
     float   tAutotune_getInputFreq          (tAutotune* const);
     

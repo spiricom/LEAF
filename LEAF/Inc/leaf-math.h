@@ -37,8 +37,9 @@ extern "C" {
 #define SQRT8 2.82842712475f
 #define WSCALE 1.30612244898f
 #define PI              (3.14159265358979f)
-#define TWO_PI          (2 * PI)
-    
+#define TWO_PI          (6.28318530717958f)
+#define HALF_PI			(1.570796326794897f)
+
 #define VSF             1.0e-38f
     
 #define MAX_DELAY       8192
