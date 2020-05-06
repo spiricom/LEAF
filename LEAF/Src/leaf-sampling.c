@@ -685,6 +685,13 @@ void tSampler_setEnd       (tSampler* const sp, int32_t end)
     p->targetend = -1;
 }
 
+void    tSampler_setLength    (tSampler* const sp, int32_t length)
+{
+    _tSampler* p = *sp;
+    if (length == 0) length = 1;
+    tSampler_setEnd(sp, p->start + length);
+}
+
 void tSampler_setRate      (tSampler* const sp, float rate)
 {
     _tSampler* p = *sp;

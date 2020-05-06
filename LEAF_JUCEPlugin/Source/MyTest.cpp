@@ -16,22 +16,7 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-tNoise noise;
-tSVF bp1;
-tSVF bp2;
-tFormantShifter fs;
-
-tSampler samp;
-tBuffer buff;
-tEnvelope env;
-
-tAutotune at;
-
-tTriangle tri;
-
-tMinBLEP minblep;
-
-tPhasor phasor;
+tSine sine;
 
 float gain;
 float freq;
@@ -48,68 +33,16 @@ char memory[MSIZE];
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
-    
-    tTriangle_init(&tri);
-    
-    tMinBLEP_init(&minblep);
-    
-    tPhasor_init(&phasor);
-//    tNoise_init(&noise, WhiteNoise);
-//
-//    tAutotune_init(&at, 1, 1024, 512);
-    
-//    tSVF_init(&bp1, SVFTypeBandpass, 100, 4.0f);
-//    tSVF_init(&bp2, SVFTypeBandpass, 1000, 4.0f);
-//
-//    tFormantShifter_init(&fs, 20);
-//
-//    // Init and set record
-//    tBuffer_init (&buff, leaf.sampleRate); // init, 1 second buffer
-//    tBuffer_setRecordMode (&buff, RecordOneShot); // RecordOneShot records once through
-//
-//    // Init and set play
-//    tSampler_init (&samp, &buff); // init, give address of record buffer
-//    tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
-//    tSampler_setRate(&samp, 1.763f); // Rate of 1.0
-}
 
-inline double getSawFall(double angle) {
     
-    angle = fmod(angle + double_Pi, 2*double_Pi); // shift x
-    double sample = angle/double_Pi - double(1); // computer as remainder
-    
-    return sample;
-    
+    tSine_init(&sine, 1000);
+    tSine_setFreq(&sine, 400);
 }
 
 float   LEAFTest_tick            (float input)
 {
-//    float sample = tNoise_tick(&noise);
-//    sample *= 0.5f;
-//    float b = tSVF_tick(&bp1, sample);
-//    b += tSVF_tick(&bp2, sample);
-//
-//    return (tFormantShifter_tick(&fs, input));
-//
-//    tBuffer_tick(&buff, input);
     
-//    return tSampler_tick(&samp);
-    
-//    tAutotune_setFreq(&at, 440.0f, 0);
-    
-//    return tAutotune_tick(&at, input)[0];
-    
-    tPhasor_setFreq(&phasor, y);
-    
-    
-    float sample = tPhasor_tick(&phasor) * 2.0f - 1.0f;
-    
-    if (phasor->phaseDidReset)
-    {
-        tMinBLEP_addBLEP(&minblep, 0.0f, 2, 0.0f);
-    }
-    
-    return tMinBLEP_tick(&minblep, sample);
+    return tSine_tick(&sine);
 }
 
 int firstFrame = 1;
