@@ -90,6 +90,72 @@ extern "C" {
     
     /*! @} */
     
+    //==============================================================================
+    
+    typedef struct _tSine
+    {
+        float* sine;
+        int size;
+        float phase;
+        float inc,freq;
+    } _tSine;
+    
+    typedef _tSine* tSine;
+    
+    /*!
+     * @defgroup tsine tSine
+     * @ingroup oscillators
+     * @brief A cycle/sine waveform oscillator.
+     * @{
+     */
+    
+    //! Initialize a tSine to the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tSine to be initialized.
+     */
+    void    tSine_init         (tSine* const osc, int size);
+    
+    
+    //! Free a tSine from the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tSine to be freed.
+     */
+    void    tSine_free         (tSine* const osc);
+    
+    
+    //! Initialize a tSine to a specified mempool.
+    /*!
+     @param osc A pointer to the tSine to be initialized.
+     @param pool A pointer to the tMempool to which the tSine should be initialized.
+     */
+    void    tSine_initToPool   (tSine* const osc, int size, tMempool* const pool);
+    
+    
+    //! Free a tSine from a specified mempool.
+    /*!
+     @param osc A pointer to the tSine to be freed.
+     @param pool A pointer to the tMempool from which the tSine should be freed.
+     */
+    void    tSine_freeFromPool (tSine* const osc, tMempool* const pool);
+    
+    
+    //! Tick a tSine oscillator.
+    /*!
+     @param osc A pointer to the relevant tSine.
+     @return The ticked sample as a float from -1 to 1.
+     */
+    float   tSine_tick         (tSine* const osc);
+    
+    
+    //! Set the frequency of a tSine oscillator.
+    /*!
+     @param osc A pointer to the relevant tSine.
+     @param freq The frequency to set the oscillator to.
+     */
+    void    tSine_setFreq      (tSine* const osc, float freq);
+    
+    /*! @} */
+    
     
     //==============================================================================
     

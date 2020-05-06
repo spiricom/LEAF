@@ -92,6 +92,85 @@ void     tCycleSampleRateChanged (tCycle* const cy)
 }
 
 //========================================================================
+// Sine
+void    tSine_init(tSine* const cy, int size)
+{
+    tSine_initToPool(cy, size, &leaf.mempool);
+}
+
+void    tSine_free(tSine* const cy)
+{
+    tSine_freeFromPool(cy, &leaf.mempool);
+}
+
+void    tSine_initToPool   (tSine* const cy, int size, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSine* c = *cy = (_tSine*) mpool_alloc(sizeof(_tSine), m);
+    
+    c->size = size;
+    c->sine = (float*) mpool_alloc(sizeof(float) * c->size, m);
+    LEAF_generate_sine(c->sine, size);
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+    
+}
+
+void    tSine_freeFromPool (tSine* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSine* c = *cy;
+    
+    mpool_free(c->sine, m);
+    mpool_free(c, m);
+}
+
+void     tSine_setFreq(tSine* const cy, float freq)
+{
+    _tSine* c = *cy;
+    
+    if (freq < 0.0f) c->freq = 0.0f;
+    else if (freq > 20480.0f) c->freq = 20480.0f;
+    else c->freq  = freq;
+    
+    c->inc = freq * leaf.invSampleRate;
+}
+
+float   tSine_tick(tSine* const cy)
+{
+    _tSine* c = *cy;
+    float temp;
+    int intPart;
+    float fracPart;
+    float samp0;
+    float samp1;
+    
+    // Phasor increment
+    c->phase += c->inc;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase < 0.0f) c->phase += 1.0f;
+    
+    // Wavetable synthesis
+    
+    temp = c->size * c->phase;
+    intPart = (int)temp;
+    fracPart = temp - (float)intPart;
+    samp0 = c->sine[intPart];
+    if (++intPart >= c->size) intPart = 0;
+    samp1 = c->sine[intPart];
+    
+    return (samp0 + (samp1 - samp0) * fracPart);
+    
+}
+
+void     tSineSampleRateChanged (tSine* const cy)
+{
+    _tSine* c = *cy;
+    
+    c->inc = c->freq * leaf.invSampleRate;
+}
+
+//========================================================================
 /* Triangle */
 void   tTriangle_init(tTriangle* const cy)
 {

@@ -137,6 +137,7 @@ extern "C" {
     
     void    tSampler_setStart           (tSampler* const, int32_t start);
     void    tSampler_setEnd             (tSampler* const, int32_t end);
+    void    tSampler_setLength             (tSampler* const, int32_t length);
     
     static void handleStartEndChange    (tSampler* const sp);
     
