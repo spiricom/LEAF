@@ -49,9 +49,7 @@ void     tCycle_setFreq(tCycle* const cy, float freq)
 {
     _tCycle* c = *cy;
     
-    if (freq < 0.0f) c->freq = 0.0f;
-    else if (freq > 20480.0f) c->freq = 20480.0f;
-    else c->freq  = freq;
+    c->freq  = freq;
 
     c->inc = freq * leaf.invSampleRate;
 }
@@ -129,9 +127,8 @@ void     tSine_setFreq(tSine* const cy, float freq)
 {
     _tSine* c = *cy;
     
-    if (freq < 0.0f) c->freq = 0.0f;
-    else if (freq > 20480.0f) c->freq = 20480.0f;
-    else c->freq  = freq;
+
+    c->freq  = freq;
     
     c->inc = freq * leaf.invSampleRate;
 }
@@ -204,9 +201,7 @@ void tTriangle_setFreq(tTriangle* const cy, float freq)
 {
     _tTriangle* c = *cy;
     
-    if (freq < 0.0f) c->freq = 0.0f;
-    else if (freq > 20480.0f) c->freq = 20480.0f;
-    else c->freq  = freq;
+    c->freq  = freq;
     
     c->inc = c->freq * leaf.invSampleRate;
     
@@ -279,10 +274,8 @@ void    tSquare_freeFromPool(tSquare* const cy, tMempool* const mp)
 void    tSquare_setFreq(tSquare* const cy, float freq)
 {
     _tSquare* c = *cy;
-    
-    if (freq < 0.0f) c->freq = 0.0f;
-    else if (freq > 20480.0f) c->freq = 20480.0f;
-    else c->freq  = freq;
+
+    c->freq  = freq;
     
     c->inc = c->freq * leaf.invSampleRate;
     
@@ -355,9 +348,7 @@ void    tSawtooth_setFreq(tSawtooth* const cy, float freq)
 {
     _tSawtooth* c = *cy;
     
-    if (freq < 0.0f) c->freq = 0.0f;
-    else if (freq > 20480.0f) c->freq = 20480.0f;
-    else c->freq  = freq;
+    c->freq  = freq;
     
     c->inc = c->freq * leaf.invSampleRate;
     
@@ -436,10 +427,8 @@ void    tPhasor_freeFromPool(tPhasor* const ph, tMempool* const mp)
 void    tPhasor_setFreq(tPhasor* const ph, float freq)
 {
     _tPhasor* p = *ph;
-    
-    if (freq < 0.0f) p->freq = 0.0f;
-    else if (freq > 20480.0f) p->freq = 20480.0f;
-    else p->freq  = freq;
+
+    p->freq  = freq;
     
     p->inc = freq * leaf.invSampleRate;
 }
