@@ -944,3 +944,16 @@ void tPeriodDetection_setFidelityThreshold(tPeriodDetection* pd, float threshold
     _tPeriodDetection* p = *pd;
     p->fidelityThreshold = threshold;
 }
+
+void tPeriodDetection_setAlpha            (tPeriodDetection* pd, float alpha)
+{
+    _tPeriodDetection* p = *pd;
+    p->alpha = LEAF_clip(0.0f, alpha, 1.0f);
+}
+
+void tPeriodDetection_setTolerance        (tPeriodDetection* pd, float tolerance)
+{
+    _tPeriodDetection* p = *pd;
+    if (tolerance < 0.0f) p->tolerance = 0.0f;
+    else p->tolerance = tolerance;
+}

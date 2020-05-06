@@ -1545,6 +1545,18 @@ void tAutotune_setFidelityThreshold(tAutotune* const rt, float threshold)
     tPeriodDetection_setFidelityThreshold(&r->pd, threshold);
 }
 
+void     tAutotune_setAlpha                (tAutotune* rt, float alpha)
+{
+    _tAutotune* r = *rt;
+    tPeriodDetection_setAlpha(&r->pd, alpha);
+}
+
+void     tAutotune_setTolerance            (tAutotune* rt, float tolerance)
+{
+    _tAutotune* r = *rt;
+    tPeriodDetection_setTolerance(&r->pd, tolerance);
+}
+
 float tAutotune_getInputPeriod(tAutotune* const rt)
 {
     _tAutotune* r = *rt;

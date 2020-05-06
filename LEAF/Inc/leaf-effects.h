@@ -298,6 +298,8 @@ extern "C" {
     void    tAutotune_setHopSize            (tAutotune* const, int hs);
     void    tAutotune_setWindowSize         (tAutotune* const, int ws);
     void    tAutotune_setFidelityThreshold  (tAutotune* const, float threshold);
+    void    tAutotune_setAlpha              (tAutotune* const, float alpha);
+    void    tAutotune_setTolerance          (tAutotune* const, float tolerance);
     float   tAutotune_getInputPeriod        (tAutotune* const);
     float   tAutotune_getInputFreq          (tAutotune* const);
     
