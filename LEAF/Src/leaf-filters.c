@@ -843,58 +843,8 @@ void    tBiQuadSampleRateChanged(tBiQuad* const ft)
 // is calculated when frequency changes.
 void tSVF_init(tSVF* const svff, SVFType type, float freq, float Q)
 {
-    _tSVF* svf = *svff = (_tSVF*) leaf_alloc(sizeof(_tSVF));
-    
-    svf->type = type;
-    
-    svf->ic1eq = 0;
-    svf->ic2eq = 0;
-    
-    svf->g = tanf(PI * freq * leaf.invSampleRate);
-    svf->k = 1.0f/Q;
-    svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
-    svf->a2 = svf->g*svf->a1;
-    svf->a3 = svf->g*svf->a2;
+    tSVF_initToPool     (svff, type, freq, Q, &leaf.mempool);
 
-    if (type == SVFTypeLowpass)
-    {
-		svf->cH = 0.0f;
-		svf->cB = 0.0f;
-		svf->kAmount = 0.0f;
-		svf->cL = 1.0f;
-    }
-    else if (type == SVFTypeBandpass)
-    {
-		svf->cH = 0.0f;
-		svf->cB = 1.0f;
-		svf->kAmount = 0.0f;
-		svf->cL = 0.0f;
-    }
-
-    else if (type == SVFTypeHighpass)
-    {
-		svf->cH = 1.0f;
-		svf->cB = svf->k * -1.0f;
-		svf->kAmount = 1.0f;
-		svf->cL = -1.0f;
-    }
-
-    else if (type == SVFTypeNotch)
-    {
-		svf->cH = 1.0f;
-		svf->cB = svf->k * -1.0f;
-		svf->kAmount = 1.0f;
-		svf->cL = 0.0f;
-    }
-
-
-    else if (type == SVFTypePeak)
-    {
-		svf->cH = 1.0f;
-		svf->cB = svf->k * -1.0f;
-		svf->kAmount = 1.0f;
-		svf->cL = -2.0f;
-    }
     // or maybe this?
     /*
      * hp=1 bp=A/Q (where A is 10^(G/40) and G is gain in decibels) and lp = 1
@@ -904,21 +854,20 @@ void tSVF_init(tSVF* const svff, SVFType type, float freq, float Q)
 
 void tSVF_free(tSVF* const svff)
 {
-    _tSVF* svf = *svff;
-    
-    leaf_free(svf);
+    tSVF_freeFromPool     (svff, &leaf.mempool);
 }
 
 void    tSVF_initToPool     (tSVF* const svff, SVFType type, float freq, float Q, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSVF* svf = *svff = (_tSVF*) mpool_alloc(sizeof(_tSVF), m);
-    
+
     svf->type = type;
-    
+
     svf->ic1eq = 0;
     svf->ic2eq = 0;
-    
+    svf->Q = Q;
+    svf->cutoff = freq;
     svf->g = tanf(PI * freq * leaf.invSampleRate);
     svf->k = 1.0f/Q;
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
@@ -927,6 +876,46 @@ void    tSVF_initToPool     (tSVF* const svff, SVFType type, float freq, float Q
     svf->cH = 0.0f;
     svf->cB = 0.0f;
     svf->cL = 1.0f;
+
+    if (type == SVFTypeLowpass)
+    {
+        svf->cH = 0.0f;
+        svf->cB = 0.0f;
+        svf->cBK = 0.0f;
+        svf->cL = 1.0f;
+    }
+    else if (type == SVFTypeBandpass)
+    {
+        svf->cH = 0.0f;
+        svf->cB = 1.0f;
+        svf->cBK = 0.0f;
+        svf->cL = 0.0f;
+    }
+
+    else if (type == SVFTypeHighpass)
+    {
+        svf->cH = 1.0f;
+        svf->cB = 0.0f;
+        svf->cBK = -1.0f;
+        svf->cL = -1.0f;
+    }
+
+    else if (type == SVFTypeNotch)
+    {
+        svf->cH = 1.0f;
+        svf->cB = 0.0f;
+        svf->cBK = -1.0f;
+        svf->cL = 0.0f;
+    }
+
+
+    else if (type == SVFTypePeak)
+    {
+        svf->cH = 1.0f;
+        svf->cB = 0.0f;
+        svf->cBK = -1.0f;
+        svf->cL = -2.0f;
+    }
 }
 
 void    tSVF_freeFromPool   (tSVF* const svff, tMempool* const mp)
@@ -948,13 +937,13 @@ float   tSVF_tick(tSVF* const svff, float v0)
     svf->ic1eq = (2.0f * v1) - svf->ic1eq;
     svf->ic2eq = (2.0f * v2) - svf->ic2eq;
     
-    return (v0 * svf->cH) + (svf->kAmount * svf->k * v1 * svf->cB) + (v2 * svf->cL);
+    return (v0 * svf->cH) + (v1 * svf->cB) + (svf->k * v1 * svf->cBK) + (v2 * svf->cL);
 }
 
 void     tSVF_setFreq(tSVF* const svff, float freq)
 {
     _tSVF* svf = *svff;
-    
+    svf->cutoff = freq;
     svf->g = tanf(PI * freq * leaf.invSampleRate);
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g * svf->a1;
@@ -964,7 +953,7 @@ void     tSVF_setFreq(tSVF* const svff, float freq)
 void     tSVF_setQ(tSVF* const svff, float Q)
 {
     _tSVF* svf = *svff;
-    
+    svf->Q = Q;
     svf->k = 1.0f/Q;
 
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
@@ -972,7 +961,7 @@ void     tSVF_setQ(tSVF* const svff, float Q)
     svf->a3 = svf->g * svf->a2;
 }
 
-void 	tSVF_setFreqAndQ(tSVF* const svff, float freq, float Q)
+void    tSVF_setFreqAndQ(tSVF* const svff, float freq, float Q)
 {
     _tSVF* svf = *svff;
     svf->k = 1.0f/Q;

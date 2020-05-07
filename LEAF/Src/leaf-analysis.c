@@ -86,6 +86,99 @@ int     tEnvelopeFollower_attackThresh(tEnvelopeFollower* const ef, float attack
 }
 
 
+
+
+
+// zero crossing detector
+
+void    tZeroCrossing_init         (tZeroCrossing* const zc, int maxWindowSize)
+{
+    tZeroCrossing_initToPool   (zc, maxWindowSize, &leaf.mempool);
+}
+void    tZeroCrossing_free         (tZeroCrossing* const zc)
+{
+    tZeroCrossing_freeFromPool   (zc, &leaf.mempool);
+}
+void    tZeroCrossing_initToPool   (tZeroCrossing* const zc, int maxWindowSize, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tZeroCrossing* z = *zc = (_tZeroCrossing*) mpool_alloc(sizeof(_tZeroCrossing), m);
+
+    z->count = 0;
+    z->maxWindowSize = maxWindowSize;
+    z->currentWindowSize = maxWindowSize;
+    z->invCurrentWindowSize = 1.0f / maxWindowSize;
+    z->position = 0;
+    z->prevPosition = maxWindowSize;
+    z->inBuffer = (float*) mpool_calloc(sizeof(float) * maxWindowSize, m);
+    z->countBuffer = (uint16_t*) mpool_calloc(sizeof(uint16_t) * maxWindowSize, m);
+}
+void    tZeroCrossing_freeFromPool (tZeroCrossing* const zc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tZeroCrossing* z = *zc;
+
+    mpool_free(z, m);
+}
+
+//returns proportion of zero crossings within window size (0.0 would be none in window, 1.0 would be all zero crossings)
+float   tZeroCrossing_tick         (tZeroCrossing* const zc, float input)
+{
+    _tZeroCrossing* z = *zc;
+
+    z->inBuffer[z->position] = input;
+    int futurePosition = ((z->position + 1) % z->currentWindowSize);
+    float output = 0.0f;
+
+    //add new value to count
+    if ((z->inBuffer[z->position] * z->inBuffer[z->prevPosition]) < 0.0f)
+    {
+        //zero crossing happened, add it to the count array
+        z->countBuffer[z->position] = 1;
+        z->count++;
+    }
+    else
+    {
+        z->countBuffer[z->position] = 0;
+    }
+
+    //remove oldest value from count
+    if (z->countBuffer[futurePosition] > 0)
+    {
+        z->count--;
+        if (z->count < 0)
+        {
+            z->count = 0;
+        }
+    }
+
+    z->prevPosition = z->position;
+    z->position = futurePosition;
+
+    output = z->count * z->invCurrentWindowSize;
+
+    return output;
+}
+
+
+void    tZeroCrossing_setWindow        (tZeroCrossing* const zc, float windowSize)
+{
+    _tZeroCrossing* z = *zc;
+    if (windowSize <= z->maxWindowSize)
+        {
+            z->currentWindowSize = windowSize;
+        }
+    else
+    {
+        z->currentWindowSize = z->maxWindowSize;
+    }
+    z->invCurrentWindowSize = 1.0f / z->currentWindowSize;
+}
+
+
+
+
+
 //===========================================================================
 /* Power Follower */
 //===========================================================================

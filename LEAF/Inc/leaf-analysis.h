@@ -52,6 +52,30 @@ extern "C" {
     int     tEnvelopeFollower_attackThresh  (tEnvelopeFollower* const, float attackThresh);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    /* Zero Crossing Detector */
+    typedef struct _tZeroCrossing {
+        int count;
+        int maxWindowSize;
+        int currentWindowSize;
+        float invCurrentWindowSize;
+        float* inBuffer;
+        uint16_t* countBuffer;
+        int prevPosition;
+        int position;
+    } _tZeroCrossing;
+
+    typedef _tZeroCrossing* tZeroCrossing;
+
+    void    tZeroCrossing_init         (tZeroCrossing* const, int maxWindowSize);
+    void    tZeroCrossing_free         (tZeroCrossing* const);
+    void    tZeroCrossing_initToPool   (tZeroCrossing* const, int maxWindowSize, tMempool* const);
+    void    tZeroCrossing_freeFromPool (tZeroCrossing* const, tMempool* const);
+
+    float   tZeroCrossing_tick         (tZeroCrossing* const, float input);
+    void    tZeroCrossing_setWindow        (tZeroCrossing* const, float windowSize);
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /* PowerEnvelopeFollower */
     typedef struct _tPowerFollower {
