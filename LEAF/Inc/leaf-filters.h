@@ -232,7 +232,7 @@ extern "C" {
     
     //==============================================================================
     
-    /* State Variable Filter, algorithm from Andy Simper. */
+/* State Variable Filter, algorithm from Andy Simper. */
     typedef enum SVFType
     {
         SVFTypeHighpass = 0,
@@ -240,8 +240,8 @@ extern "C" {
         SVFTypeBandpass,
         SVFTypeNotch,
         SVFTypePeak,
-		SVFTypeLowShelf,
-		SVFTypeHighShelf
+        SVFTypeLowShelf,
+        SVFTypeHighShelf
     } SVFType;
     
     typedef struct _tSVF
@@ -249,7 +249,8 @@ extern "C" {
         SVFType type;
         float cutoff, Q;
         float ic1eq,ic2eq;
-        float g,k,a1,a2,a3,cH,cB,cL, kAmount;
+        float g,k,a1,a2,a3,cH,cB,cL,cBK;
+
         
     } _tSVF;
     
@@ -263,7 +264,7 @@ extern "C" {
     float   tSVF_tick           (tSVF* const, float v0);
     void    tSVF_setFreq        (tSVF* const, float freq);
     void    tSVF_setQ           (tSVF* const, float Q);
-    
+    void    tSVF_setFreqAndQ    (tSVF* const svff, float freq, float Q);
     //==============================================================================
     
     /* Efficient State Variable Filter for 14-bit control input, [0, 4096). */
