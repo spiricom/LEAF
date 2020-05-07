@@ -113,11 +113,13 @@ void    tZeroCrossing_initToPool   (tZeroCrossing* const zc, int maxWindowSize, 
     z->inBuffer = (float*) mpool_calloc(sizeof(float) * maxWindowSize, m);
     z->countBuffer = (uint16_t*) mpool_calloc(sizeof(uint16_t) * maxWindowSize, m);
 }
+
 void    tZeroCrossing_freeFromPool (tZeroCrossing* const zc, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tZeroCrossing* z = *zc;
-
+    mpool_free(z->inBuffer, m);
+    mpool_free(z->countBuffer, m);
     mpool_free(z, m);
 }
 
