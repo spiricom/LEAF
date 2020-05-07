@@ -230,9 +230,9 @@ float tSampler_tick        (tSampler* const sp)
 {
     _tSampler* p = *sp;
     
-    if (p->active == 0)         return 0.f;
-    
     attemptStartEndChange(sp);
+    
+    if (p->active == 0)         return 0.f;
     
     if ((p->inc == 0.0f) || (p->len < 2))
     {
@@ -573,9 +573,8 @@ void tSampler_setStart     (tSampler* const sp, int32_t start)
     {
         return;
     }
-    // if (p->active)
+    if (p->active) // only bother with these checks if we're actually playing
     {
-        
         if (start > p->end)
         {
             tempflip = -1;
@@ -611,11 +610,10 @@ void tSampler_setStart     (tSampler* const sp, int32_t start)
                 return;
             }
         }
-    }
-    
-    if (tempflip != p->flip && p->flipStart < 0)
-    {
-        p->flipIdx = 0;
+        if (tempflip != p->flip && p->flipStart < 0)
+        {
+            p->flipIdx = 0;
+        }
     }
     
     p->start = LEAF_clipInt(0, start, p->samp->recordedLength-1);
@@ -634,10 +632,8 @@ void tSampler_setEnd       (tSampler* const sp, int32_t end)
     {
         return;
     }
-    //if (p->active)
+    if (p->active) // only bother with these checks if we're actually playing
     {
-        
-        
         if (p->start > end)
         {
             tempflip = -1;
@@ -673,11 +669,10 @@ void tSampler_setEnd       (tSampler* const sp, int32_t end)
                 return;
             }
         }
-    }
-    
-    if (tempflip != p->flip && p->flipStart < 0)
-    {
-        p->flipIdx = 0;
+        if (tempflip != p->flip && p->flipStart < 0)
+        {
+            p->flipIdx = 0;
+        }
     }
     
     p->end = LEAF_clipInt(0, end, p->samp->recordedLength-1);
