@@ -403,6 +403,58 @@ void LEAF_generate_square(float* buffer, float basefreq, int size)
     }
 }
 
+// http://www.martin-finke.de/blog/articles/audio-plugins-018-polyblep-oscillator/
+// http://www.kvraudio.com/forum/viewtopic.php?t=375517
+// t = phase, dt = inc, assuming 0-1 phase
+// assumes discontinuity at 0, so offset inputs as needed
+float LEAF_poly_blep(float t, float dt)
+{
+    // 0 <= t < 1
+    if (t < dt) {
+        t /= dt;
+        return t+t - t*t - 1.0f;
+    }
+    // -1 < t < 0
+    else if (t > 1.0f - dt) {
+        t = (t - 1.0f) / dt;
+        return t*t + t+t + 1.0f;
+    }
+    // 0 otherwise
+    else return 0.0f;
+    
+//
+//    float y = 0.0f;
+//    if (t < 2.0f * dt)
+//    {
+//        float x = t / dt;
+//        float u = 2.0f - x;
+//        u *= u;
+//        u *= u;
+//        y += u;
+//        if (t < dt) {
+//            float v = 1.0f - x;
+//            v *= v;
+//            v *= v;
+//            y -= 4.0f * v;
+//        }
+//    }
+//    else if (t > 1.0f - (2.0f * dt))
+//    {
+//        float x = (t - 1.0f) / dt;
+//        float u = 2.0f - x;
+//        u *= u;
+//        u *= u;
+//        y += u;
+//        if (t > 1.0f - dt) {
+//            float v = 1.0f - x;
+//            v *= v;
+//            v *= v;
+//            y += 4.0f * v;
+//        }
+//    }
+//    return y / 12.0f;
+}
+
 
 //-----------------------------------------------------------------------------
 // name: mtof()

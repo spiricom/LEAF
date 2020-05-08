@@ -16,9 +16,6 @@
 #include "../Inc/leaf-distortion.h"
 #include "../Inc/leaf-tables.h"
 
-//testing
-#include "gpio.h"
-
 #endif
 
 //============================================================================================================

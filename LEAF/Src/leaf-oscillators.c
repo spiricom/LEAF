@@ -90,84 +90,6 @@ void     tCycleSampleRateChanged (tCycle* const cy)
 }
 
 //========================================================================
-// Sine
-void    tSine_init(tSine* const cy, int size)
-{
-    tSine_initToPool(cy, size, &leaf.mempool);
-}
-
-void    tSine_free(tSine* const cy)
-{
-    tSine_freeFromPool(cy, &leaf.mempool);
-}
-
-void    tSine_initToPool   (tSine* const cy, int size, tMempool* const mp)
-{
-    _tMempool* m = *mp;
-    _tSine* c = *cy = (_tSine*) mpool_alloc(sizeof(_tSine), m);
-    
-    c->size = size;
-    c->sine = (float*) mpool_alloc(sizeof(float) * c->size, m);
-    LEAF_generate_sine(c->sine, size);
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
-    
-}
-
-void    tSine_freeFromPool (tSine* const cy, tMempool* const mp)
-{
-    _tMempool* m = *mp;
-    _tSine* c = *cy;
-    
-    mpool_free(c->sine, m);
-    mpool_free(c, m);
-}
-
-void     tSine_setFreq(tSine* const cy, float freq)
-{
-    _tSine* c = *cy;
-    
-
-    c->freq  = freq;
-    
-    c->inc = freq * leaf.invSampleRate;
-}
-
-float   tSine_tick(tSine* const cy)
-{
-    _tSine* c = *cy;
-    float temp;
-    int intPart;
-    float fracPart;
-    float samp0;
-    float samp1;
-    
-    // Phasor increment
-    c->phase += c->inc;
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
-    
-    // Wavetable synthesis
-    
-    temp = c->size * c->phase;
-    intPart = (int)temp;
-    fracPart = temp - (float)intPart;
-    samp0 = c->sine[intPart];
-    if (++intPart >= c->size) intPart = 0;
-    samp1 = c->sine[intPart];
-    
-    return (samp0 + (samp1 - samp0) * fracPart);
-    
-}
-
-void     tSineSampleRateChanged (tSine* const cy)
-{
-    _tSine* c = *cy;
-    
-    c->inc = c->freq * leaf.invSampleRate;
-}
-
-//========================================================================
 /* Triangle */
 void   tTriangle_init(tTriangle* const cy)
 {
@@ -385,6 +307,281 @@ void     tSawtoothSampleRateChanged (tSawtooth* const cy)
     _tSawtooth* c = *cy;
     
     c->inc = c->freq * leaf.invSampleRate;
+}
+
+//========================================================================
+// Sine
+void    tSine_init(tSine* const cy, int size)
+{
+    tSine_initToPool(cy, size, &leaf.mempool);
+}
+
+void    tSine_free(tSine* const cy)
+{
+    tSine_freeFromPool(cy, &leaf.mempool);
+}
+
+void    tSine_initToPool   (tSine* const cy, int size, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSine* c = *cy = (_tSine*) mpool_alloc(sizeof(_tSine), m);
+    
+    c->size = size;
+    c->sine = (float*) mpool_alloc(sizeof(float) * c->size, m);
+    LEAF_generate_sine(c->sine, size);
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+}
+
+void    tSine_freeFromPool (tSine* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSine* c = *cy;
+    
+    mpool_free(c->sine, m);
+    mpool_free(c, m);
+}
+
+void     tSine_setFreq(tSine* const cy, float freq)
+{
+    _tSine* c = *cy;
+    
+    c->freq  = freq;
+    c->inc = freq * leaf.invSampleRate;
+}
+
+float   tSine_tick(tSine* const cy)
+{
+    _tSine* c = *cy;
+    float temp;
+    int intPart;
+    float fracPart;
+    float samp0;
+    float samp1;
+    
+    // Phasor increment
+    c->phase += c->inc;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase < 0.0f) c->phase += 1.0f;
+    
+    // Wavetable synthesis
+    
+    temp = c->size * c->phase;
+    intPart = (int)temp;
+    fracPart = temp - (float)intPart;
+    samp0 = c->sine[intPart];
+    if (++intPart >= c->size) intPart = 0;
+    samp1 = c->sine[intPart];
+    
+    return (samp0 + (samp1 - samp0) * fracPart);
+    
+}
+
+void     tSineSampleRateChanged (tSine* const cy)
+{
+    _tSine* c = *cy;
+    
+    c->inc = c->freq * leaf.invSampleRate;
+}
+
+//==============================================================================
+
+/* tTri: Anti-aliased Triangle waveform. */
+void    tTri_init          (tTri* const osc)
+{
+    tTri_initToPool(osc, &leaf.mempool);
+}
+
+void    tTri_free          (tTri* const osc)
+{
+    tTri_freeFromPool(osc, &leaf.mempool);
+}
+
+void    tTri_initToPool    (tTri* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTri* c = *osc = (_tTri*) mpool_alloc(sizeof(_tTri), m);
+
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+    c->skew     =  0.5f;
+    c->lastOut  =  0.0f;
+}
+
+void    tTri_freeFromPool  (tTri* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTri* c = *cy;
+    
+    mpool_free(c, m);
+}
+
+float   tTri_tick          (tTri* const osc)
+{
+    _tTri* c = *osc;
+    
+    float out;
+    float skew;
+    
+    if (c->phase < c->skew)
+    {
+        out = 1.0f;
+        skew = (1.0f - c->skew) * 2.0f;
+    }
+    else
+    {
+        out = -1.0f;
+        skew = c->skew * 2.0f;
+    }
+    
+    out += LEAF_poly_blep(c->phase, c->inc);
+    out -= LEAF_poly_blep(fmod(c->phase + (1.0f - c->skew), 1.0f), c->inc);
+    
+    out = (skew * c->inc * out) + ((1 - c->inc) * c->lastOut);
+    c->lastOut = out;
+    
+    c->phase += c->inc;
+    if (c->phase >= 1.0f)
+    {
+        c->phase -= 1.0f;
+    }
+    
+    return out;
+}
+
+void    tTri_setFreq       (tTri* const osc, float freq)
+{
+    _tTri* c = *osc;
+    
+    c->freq  = freq;
+    c->inc = freq * leaf.invSampleRate;
+}
+
+void    tTri_setSkew       (tTri* const osc, float skew)
+{
+    _tTri* c = *osc;
+    c->skew = (skew + 1.0f) * 0.5f;
+}
+
+
+//==============================================================================
+
+/* tPulse: Anti-aliased pulse waveform. */
+void    tPulse_init        (tPulse* const osc)
+{
+    tPulse_initToPool(osc, &leaf.mempool);
+}
+
+void    tPulse_free        (tPulse* const osc)
+{
+    tPulse_freeFromPool(osc, &leaf.mempool);
+}
+
+void    tPulse_initToPool  (tPulse* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPulse* c = *osc = (_tPulse*) mpool_alloc(sizeof(_tPulse), m);
+    
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+    c->width     =  0.5f;
+}
+
+void    tPulse_freeFromPool(tPulse* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPulse* c = *osc;
+    
+    mpool_free(c, m);
+}
+
+float   tPulse_tick        (tPulse* const osc)
+{
+    _tPulse* c = *osc;
+    
+    float out;
+    if (c->phase < c->width) out = 1.0f;
+    else out = -1.0f;
+    out += LEAF_poly_blep(c->phase, c->inc);
+    out -= LEAF_poly_blep(fmod(c->phase + (1.0f - c->width), 1.0f), c->inc);
+    
+    c->phase += c->inc;
+    if (c->phase >= 1.0f)
+    {
+        c->phase -= 1.0f;
+    }
+    
+    return out;
+}
+
+void    tPulse_setFreq     (tPulse* const osc, float freq)
+{
+    _tPulse* c = *osc;
+    
+    c->freq  = freq;
+    c->inc = freq * leaf.invSampleRate;
+}
+
+void    tPulse_setWidth    (tPulse* const osc, float width)
+{
+    _tPulse* c = *osc;
+    c->width = width;
+}
+
+
+//==============================================================================
+
+/* tSawtooth: Anti-aliased Sawtooth waveform. */
+void    tSaw_init          (tSaw* const osc)
+{
+    tSaw_initToPool(osc, &leaf.mempool);
+}
+
+void    tSaw_free          (tSaw* const osc)
+{
+    tSaw_freeFromPool(osc, &leaf.mempool);
+}
+
+void    tSaw_initToPool    (tSaw* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSaw* c = *osc = (_tSaw*) mpool_alloc(sizeof(_tSaw), m);
+    
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+}
+
+void    tSaw_freeFromPool  (tSaw* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSaw* c = *osc;
+    
+    mpool_free(c, m);
+}
+
+float   tSaw_tick          (tSaw* const osc)
+{
+    _tSaw* c = *osc;
+    
+    float out = (c->phase * 2.0f) - 1.0f;
+    out -= LEAF_poly_blep(c->phase, c->inc);
+    
+    c->phase += c->inc;
+    if (c->phase >= 1.0f)
+    {
+        c->phase -= 1.0f;
+    }
+    
+    return out;
+}
+
+void    tSaw_setFreq       (tSaw* const osc, float freq)
+{
+    _tSaw* c = *osc;
+    
+    c->freq  = freq;
+    
+    c->inc = freq * leaf.invSampleRate;
 }
 
 //========================================================================

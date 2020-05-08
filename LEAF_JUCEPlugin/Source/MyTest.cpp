@@ -17,6 +17,11 @@ static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
 tSine sine;
+tSaw saw;
+tTri tri;
+tPulse pulse;
+
+tPhasor phasor;
 
 float gain;
 float freq;
@@ -36,48 +41,49 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 
     
     tSine_init(&sine, 1000);
-    tSine_setFreq(&sine, 400);
+    tSine_setFreq(&sine, 200);
+    
+    tSaw_init(&saw);
+    tSaw_setFreq(&saw, 200);
+    
+    tPulse_init(&pulse);
+    tPulse_setFreq(&pulse, 200);
+    
+    tTri_init(&tri);
+    tTri_setFreq(&tri, 200);
+    
+    tPhasor_init(&phasor);
 }
 
 float   LEAFTest_tick            (float input)
 {
+//    return tSine_tick(&sine);
+    tSaw_setFreq(&saw, x);
+    tPhasor_setFreq(&phasor, x);
+    return tSaw_tick(&saw);
+
+//    tTri_setFreq(&tri, x);
+//    tTri_setSkew(&tri, (y * 2.0f) - 1.0f);
+//    return tTri_tick(&tri);
     
-    return tSine_tick(&sine);
+//    tPulse_setFreq(&pulse, x);
+//    tPulse_setWidth(&pulse, y);
+//    return tPulse_tick(&pulse);
 }
 
 int firstFrame = 1;
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-//    if (firstFrame == 1)
-//    {
-//        tBuffer_record(&buff); // starts recording
-//        tSampler_play(&samp); // start spitting samples out
-//        firstFrame = 0;
-//    }
-    
     float val = getSliderValue("mod freq");
     
-    x = val ;
+    x = val * 20000;
     
-//    a = val * tBuffer_getBufferLength(&buff);
-    
-    DBG("start: " + String(a));
+    DBG(String(x));
     
     val = getSliderValue("mod depth");
     
-    y = val * 20000.0f + 20.0f;
-//    b = val * tBuffer_getBufferLength(&buff);
-    
-    DBG("rate: " + String(b));
-//    
-//    tSampler_setStart(&samp, a);
-//    tSampler_setEnd(&samp, b);
-//    tSampler_setRate(&samp, b);
-    
-//    tFormantShifter_setShiftFactor(&fs, x);
-//    tFormantShifter_setIntensity(&fs, y);
-    
+    y = val;;
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

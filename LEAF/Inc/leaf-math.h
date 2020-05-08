@@ -151,6 +151,7 @@ extern "C" {
     void LEAF_generate_sawtooth(float* buffer, float basefreq, int size);
     void LEAF_generate_triangle(float* buffer, float basefreq, int size);
     void LEAF_generate_square(float* buffer, float basefreq, int size);
+    float LEAF_poly_blep(float t, float dt);
     float LEAF_midiToFrequency(float f);
 
 

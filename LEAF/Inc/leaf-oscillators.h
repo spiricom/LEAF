@@ -92,73 +92,6 @@ extern "C" {
     
     //==============================================================================
     
-    typedef struct _tSine
-    {
-        float* sine;
-        int size;
-        float phase;
-        float inc,freq;
-    } _tSine;
-    
-    typedef _tSine* tSine;
-    
-    /*!
-     * @defgroup tsine tSine
-     * @ingroup oscillators
-     * @brief A cycle/sine waveform oscillator.
-     * @{
-     */
-    
-    //! Initialize a tSine to the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tSine to be initialized.
-     */
-    void    tSine_init         (tSine* const osc, int size);
-    
-    
-    //! Free a tSine from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tSine to be freed.
-     */
-    void    tSine_free         (tSine* const osc);
-    
-    
-    //! Initialize a tSine to a specified mempool.
-    /*!
-     @param osc A pointer to the tSine to be initialized.
-     @param pool A pointer to the tMempool to which the tSine should be initialized.
-     */
-    void    tSine_initToPool   (tSine* const osc, int size, tMempool* const pool);
-    
-    
-    //! Free a tSine from a specified mempool.
-    /*!
-     @param osc A pointer to the tSine to be freed.
-     @param pool A pointer to the tMempool from which the tSine should be freed.
-     */
-    void    tSine_freeFromPool (tSine* const osc, tMempool* const pool);
-    
-    
-    //! Tick a tSine oscillator.
-    /*!
-     @param osc A pointer to the relevant tSine.
-     @return The ticked sample as a float from -1 to 1.
-     */
-    float   tSine_tick         (tSine* const osc);
-    
-    
-    //! Set the frequency of a tSine oscillator.
-    /*!
-     @param osc A pointer to the relevant tSine.
-     @param freq The frequency to set the oscillator to.
-     */
-    void    tSine_setFreq      (tSine* const osc, float freq);
-    
-    /*! @} */
-    
-    
-    //==============================================================================
-    
     /* tTriangle: Anti-aliased Triangle waveform using wavetable interpolation. Wavetables constructed from sine components. */
     typedef struct _tTriangle
     {
@@ -358,6 +291,274 @@ extern "C" {
      @param freq The frequency to set the oscillator to.
      */
     void    tSawtooth_setFreq       (tSawtooth* const osc, float freq);
+    
+    /*! @} */
+    
+    //==============================================================================
+    
+    typedef struct _tSine
+    {
+        float* sine;
+        int size;
+        float phase;
+        float inc,freq;
+    } _tSine;
+    
+    typedef _tSine* tSine;
+    
+    /*!
+     * @defgroup tsine tSine
+     * @ingroup oscillators
+     * @brief A cycle/sine waveform oscillator.
+     * @{
+     */
+    
+    //! Initialize a tSine to the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tSine to be initialized.
+     */
+    void    tSine_init         (tSine* const osc, int size);
+    
+    
+    //! Free a tSine from the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tSine to be freed.
+     */
+    void    tSine_free         (tSine* const osc);
+    
+    
+    //! Initialize a tSine to a specified mempool.
+    /*!
+     @param osc A pointer to the tSine to be initialized.
+     @param pool A pointer to the tMempool to which the tSine should be initialized.
+     */
+    void    tSine_initToPool   (tSine* const osc, int size, tMempool* const pool);
+    
+    
+    //! Free a tSine from a specified mempool.
+    /*!
+     @param osc A pointer to the tSine to be freed.
+     @param pool A pointer to the tMempool from which the tSine should be freed.
+     */
+    void    tSine_freeFromPool (tSine* const osc, tMempool* const pool);
+    
+    
+    //! Tick a tSine oscillator.
+    /*!
+     @param osc A pointer to the relevant tSine.
+     @return The ticked sample as a float from -1 to 1.
+     */
+    float   tSine_tick         (tSine* const osc);
+    
+    
+    //! Set the frequency of a tSine oscillator.
+    /*!
+     @param osc A pointer to the relevant tSine.
+     @param freq The frequency to set the oscillator to.
+     */
+    void    tSine_setFreq      (tSine* const osc, float freq);
+    
+    /*! @} */
+    
+    //==============================================================================
+    
+    /* tTri: Anti-aliased Triangle waveform using wavetable interpolation. */
+    typedef struct _tTri
+    {
+        float phase;
+        float inc,freq;
+        float skew;
+        float lastOut;
+    } _tTri;
+    
+    typedef _tTri* tTri;
+    
+    /*!
+     * @defgroup tTri tTri
+     * @ingroup oscillators
+     * @brief An anti-aliased triangle waveform oscillator.
+     * @{
+     */
+    
+    //! Initialize a tTri to the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tTri to be initialized.
+     */
+    void    tTri_init          (tTri* const osc);
+    
+    
+    //! Free a tTri from the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tTri to be freed.
+     */
+    void    tTri_free          (tTri* const osc);
+    
+    
+    //! Initialize a tTri to a specified mempool.
+    /*!
+     @param osc A pointer to the tTri to be initialized.
+     @param pool A pointer to the tMempool to which the tTri should be initialized.
+     */
+    void    tTri_initToPool    (tTri* const osc, tMempool* const pool);
+    
+    
+    //! Free a tTri from a specified mempool.
+    /*!
+     @param osc A pointer to the tTri to be freed.
+     @param pool A pointer to the tMempool from which the tTri should be freed.
+     */
+    void    tTri_freeFromPool  (tTri* const osc, tMempool* const pool);
+    
+    
+    //! Tick a tTri oscillator.
+    /*!
+     @param osc A pointer to the relevant tTri.
+     @return The ticked sample as a float from -1 to 1.
+     */
+    float   tTri_tick          (tTri* const osc);
+    
+    
+    //! Set the frequency of a tTri oscillator.
+    /*!
+     @param osc A pointer to the relevant tTriangle.
+     @param freq The frequency to set the oscillator to.
+     */
+    void    tTri_setFreq       (tTri* const osc, float freq);
+    
+    void    tTri_setSkew       (tTri* const osc, float skew);
+    
+    /*! @} */
+    
+    //==============================================================================
+    
+    /* tPulse: Anti-aliased Square waveform. */
+    typedef struct _tPulse
+    {
+        float phase;
+        float inc,freq;
+        float width;
+    } _tPulse;
+    
+    typedef _tPulse* tPulse;
+    
+    /*!
+     * @defgroup tPulse tPulse
+     * @ingroup oscillators
+     * @brief An anti-aliased pulse waveform oscillator with changeable pulse width.
+     * @{
+     */
+    
+    //! Initialize a tPulse to the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tPulse to be initialized.
+     */
+    void    tPulse_init        (tPulse* const osc);
+    
+    
+    //! Free a tPulse from the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tPulse to be freed.
+     */
+    void    tPulse_free        (tPulse* const osc);
+    
+    
+    //! Initialize a tPulse to a specified mempool.
+    /*!
+     @param osc A pointer to the tPulse to be initialized.
+     @param pool A pointer to the tMempool to which the tPulse should be initialized.
+     */
+    void    tPulse_initToPool  (tPulse* const osc, tMempool* const);
+    
+    
+    //! Free a tPulse from a specified mempool.
+    /*!
+     @param osc A pointer to the tPulse to be freed.
+     @param pool A pointer to the tMempool from which the tPulse should be freed.
+     */
+    void    tPulse_freeFromPool(tPulse* const osc, tMempool* const);
+    
+    
+    //! Tick a tPulse oscillator.
+    /*!
+     @param osc A pointer to the relevant tPulse.
+     @return The ticked sample as a float from -1 to 1.
+     */
+    float   tPulse_tick        (tPulse* const osc);
+    
+    
+    //! Set the frequency of a tPulse oscillator.
+    /*!
+     @param osc A pointer to the relevant tPulse.
+     @param freq The frequency to set the oscillator to.
+     */
+    void    tPulse_setFreq     (tPulse* const osc, float freq);
+    
+    void    tPulse_setWidth    (tPulse* const osc, float width);
+    
+    /*! @} */
+    
+    //==============================================================================
+    
+    /* tSawtooth: Anti-aliased Sawtooth waveform. */
+    typedef struct _tSaw
+    {
+        float phase;
+        float inc,freq;
+    } _tSaw;
+    
+    typedef _tSaw* tSaw;
+    
+    /*!
+     * @defgroup tsaw tSaw
+     * @ingroup oscillators
+     * @brief An anti-aliased sawtooth waveform oscillator. Uses wavetable synthesis.
+     * @{
+     */
+    
+    //! Initialize a tSaw to the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tSaw to be initialized.
+     */
+    void    tSaw_init          (tSaw* const osc);
+    
+    
+    //! Free a tSaw from the default LEAF mempool.
+    /*!
+     @param osc A pointer to the tSaw to be freed.
+     */
+    void    tSaw_free          (tSaw* const osc);
+    
+    
+    //! Initialize a tSaw to a specified mempool.
+    /*!
+     @param osc A pointer to the tSaw to be initialized.
+     @param pool A pointer to the tMempool to which the tSaw should be initialized.
+     */
+    void    tSaw_initToPool    (tSaw* const osc, tMempool* const pool);
+    
+    
+    //! Free a tSaw from a specified mempool.
+    /*!
+     @param osc A pointer to the tSaw to be freed.
+     @param pool A pointer to the tMempool from which the tSaw should be freed.
+     */
+    void    tSaw_freeFromPool  (tSaw* const osc, tMempool* const pool);
+    
+    
+    //! Tick a tSaw oscillator.
+    /*!
+     @param osc A pointer to the relevant tSaw.
+     @return The ticked sample as a float from -1 to 1.
+     */
+    float   tSaw_tick          (tSaw* const osc);
+    
+    
+    //! Set the frequency of a tSaw oscillator.
+    /*!
+     @param osc A pointer to the relevant tSaw.
+     @param freq The frequency to set the oscillator to.
+     */
+    void    tSaw_setFreq       (tSaw* const osc, float freq);
     
     /*! @} */
     
