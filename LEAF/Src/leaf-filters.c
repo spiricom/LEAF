@@ -1366,229 +1366,271 @@ float   tMedianFilter_tick           (tMedianFilter* const mf, float input)
 }
 
 
+/////
+
 void    tVZFilter_init           (tVZFilter* const vf, VZFilterType type, float freq, float bandWidth)
 {
-	tVZFilter_initToPool(vf, type, freq, bandWidth, &leaf.mempool);
+    tVZFilter_initToPool(vf, type, freq, bandWidth, &leaf.mempool);
 }
 
 void    tVZFilter_free           (tVZFilter* const vf)
 {
-	tVZFilter_freeFromPool(vf, &leaf.mempool);
+    tVZFilter_freeFromPool(vf, &leaf.mempool);
 }
 void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, float freq, float bandWidth, tMempool* const mp)
 {
 
-	 _tMempool* m = *mp;
-	 _tVZFilter* f = *vf = (_tVZFilter*) mpool_alloc(sizeof(_tVZFilter), m);
-	f->fc   = freq;
-	f->type = type;
-	f->G    = ONE_OVER_SQRT2;
-	f->B    = bandWidth;
-	f->m    = 0.0f;
-	f->s1 = 0.0f;
-	f->s2 = 0.0f;
-	f->sr = leaf.sampleRate;
-	f->inv_sr = leaf.invSampleRate;
-	tVZFilter_calcCoeffs(vf);
+     _tMempool* m = *mp;
+     _tVZFilter* f = *vf = (_tVZFilter*) mpool_alloc(sizeof(_tVZFilter), m);
+    f->fc   = freq;
+    f->type = type;
+    f->G    = ONE_OVER_SQRT2;
+    f->invG    = 1.0f/ONE_OVER_SQRT2;
+    f->B    = bandWidth;
+    f->m    = 0.0f;
+    f->s1 = 0.0f;
+    f->s2 = 0.0f;
+    f->sr = leaf.sampleRate;
+    f->inv_sr = leaf.invSampleRate;
+    tVZFilter_calcCoeffs(vf);
 
 
 }
 void    tVZFilter_freeFromPool   (tVZFilter* const vf, tMempool* const mp)
 {
-	 _tMempool* m = *mp;
-		 _tVZFilter* f = *vf = (_tVZFilter*) mpool_alloc(sizeof(_tVZFilter), m);
-		 mpool_free(f, m);
+     _tMempool* m = *mp;
+         _tVZFilter* f = *vf = (_tVZFilter*) mpool_alloc(sizeof(_tVZFilter), m);
+         mpool_free(f, m);
 }
 
-void 	tVZFilter_setSampleRate  (tVZFilter* const vf, float sampleRate)
+void    tVZFilter_setSampleRate  (tVZFilter* const vf, float sampleRate)
 {
-	_tVZFilter* f = *vf;
-	f->sr = sampleRate;
-	f->inv_sr = 1.0f/sampleRate;
+    _tVZFilter* f = *vf;
+    f->sr = sampleRate;
+    f->inv_sr = 1.0f/sampleRate;
 }
 
-float   tVZFilter_tick           	(tVZFilter* const vf, float in)
+float   tVZFilter_tick              (tVZFilter* const vf, float in)
 {
-	_tVZFilter* f = *vf;
+    _tVZFilter* f = *vf;
 
-	float yL, yB, yH;
+    float yL, yB, yH;
 
-	// compute highpass output via Eq. 5.1:
-	yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
+    // compute highpass output via Eq. 5.1:
+    yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
 
-	// compute bandpass output by applying 1st integrator to highpass output:
-	yB = tanhf(f->g*yH) + f->s1;
-	f->s1 = f->g*yH + yB; // state update in 1st integrator
+    // compute bandpass output by applying 1st integrator to highpass output:
+    yB = tanhf(f->g*yH) + f->s1;
+    f->s1 = f->g*yH + yB; // state update in 1st integrator
 
-	// compute lowpass output by applying 2nd integrator to bandpass output:
-	yL = tanhf(f->g*yB) + f->s2;
-	f->s2 = f->g*yB + yL; // state update in 2nd integrator
+    // compute lowpass output by applying 2nd integrator to bandpass output:
+    yL = tanhf(f->g*yB) + f->s2;
+    f->s2 = f->g*yB + yL; // state update in 2nd integrator
 
-	//according to the Vadim paper, we could add saturation to this model by adding a tanh in the integration stage.
-	//
-	//seems like that might look like this:
+    //according to the Vadim paper, we could add saturation to this model by adding a tanh in the integration stage.
+    //
+    //seems like that might look like this:
     // y = tanh(g*x) + s; // output computation
     // s = g*x + y; // state update
 
-	//instead of this:
+    //instead of this:
     // y = g*x + s; // output computation
     // s = g*x + y; // state update
 
-	return f->cL*yL + f->cB*yB + f->cH*yH;
+    return f->cL*yL + f->cB*yB + f->cH*yH;
 
 }
+
+float   tVZFilter_tickEfficient             (tVZFilter* const vf, float in)
+{
+    _tVZFilter* f = *vf;
+
+    float yL, yB, yH;
+
+    // compute highpass output via Eq. 5.1:
+    yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
+
+    // compute bandpass output by applying 1st integrator to highpass output:
+    yB = (f->g*yH) + f->s1;
+    f->s1 = f->g*yH + yB; // state update in 1st integrator
+
+    // compute lowpass output by applying 2nd integrator to bandpass output:
+    yL = (f->g*yB) + f->s2;
+    f->s2 = f->g*yB + yL; // state update in 2nd integrator
+
+    //according to the Vadim paper, we could add saturation to this model by adding a tanh in the integration stage.
+    //
+    //seems like that might look like this:
+    // y = tanh(g*x) + s; // output computation
+    // s = g*x + y; // state update
+
+    //instead of this:
+    // y = g*x + s; // output computation
+    // s = g*x + y; // state update
+
+    return f->cL*yL + f->cB*yB + f->cH*yH;
+
+}
+
 
 void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
 {
 
-	_tVZFilter* f = *vf;
-	f->g = tanf(PI * f->fc * f->inv_sr);  // embedded integrator gain (Fig 3.11)
+    _tVZFilter* f = *vf;
+    f->g = tanf(PI * f->fc * f->inv_sr);  // embedded integrator gain (Fig 3.11)
 
-	  switch( f->type )
-	  {
-	  case Bypass:
-		{
-		  f->R2 = f->invG;  // can we use an arbitrary value here, for example R2 = 1?
-		  f->cL = 1.0f;
-		  f->cB = f->R2;
-		  f->cH = 1.0f;
-		}
-		break;
-	  case Lowpass:
-		{
-			f->R2 = f->invG;
-			f->cL = 1.0f; f->cB = 0.0f; f->cH = 0.0f;
-		}
-		break;
-	  case Highpass:
-		{
-			f->R2 = f->invG;
-			f->cL = 0.0f; f->cB = 0.0f; f->cH = 1.0f;
-		}
-		break;
-	  case BandpassSkirt:
-		{
-			f->R2 = f->invG;
-			f->cL = 0.0f; f->cB = 1.0f; f->cH = 0.0f;
-		}
-		break;
-	  case BandpassPeak:
-		{
-			f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
-			f->cL = 0.0f; f->cB = f->R2; f->cH = 0.0f;
-		}
-		break;
-	  case BandReject:
-		{
-			f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
-			f->cL = 1.0f; f->cB = 0.0f; f->cH = 1.0f;
-		}
-		break;
-	  case Bell:
-		{
-			float fl = f->fc*powf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
-			float wl = tanf(PI*fl*f->inv_sr);   // warped radian lower bandedge frequency /(2*fs)
-			float r  = f->g/wl;
-			r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
-									   // warped upper bandedge, wc the center
-			f->R2 = 2.0f*sqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
-			f->cL = 1.0f; f->cB = f->R2*f->G; f->cH = 1.0f;
-		}
-		break;
-	  case Lowshelf:
-		{
-			float A = sqrtf(f->G);
-		  f->g /= sqrtf(A);               // scale SVF-cutoff frequency for shelvers
-		  f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f);
-		  f->cL = f->G; f->cB = f->R2*A; f->cH = 1.0f;
-		}
-		break;
-	  case Highshelf:
-		{
-		  float A = sqrtf(f->G);
-		  f->g *= sqrtf(A);               // scale SVF-cutoff frequency for shelvers
-		  f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f);
-		  f->cL = 1.0f; f->cB = f->R2*A; f->cH = f->G;
-		}
-		break;
-	  case Allpass:
-		{
-			f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
-			f->cL = 1.0f; f->cB = -f->R2; f->cH = 1.0f;
-		}
-		break;
+      switch( f->type )
+      {
+      case Bypass:
+        {
+          f->R2 = f->invG;  // can we use an arbitrary value here, for example R2 = 1?
+          f->cL = 1.0f;
+          f->cB = f->R2;
+          f->cH = 1.0f;
+        }
+        break;
+      case Lowpass:
+        {
+            f->R2 = f->invG;
+            f->cL = 1.0f; f->cB = 0.0f; f->cH = 0.0f;
+        }
+        break;
+      case Highpass:
+        {
+            f->R2 = f->invG;
+            f->cL = 0.0f; f->cB = 0.0f; f->cH = 1.0f;
+        }
+        break;
+      case BandpassSkirt:
+        {
+            f->R2 = f->invG;
+            f->cL = 0.0f; f->cB = 1.0f; f->cH = 0.0f;
+        }
+        break;
+      case BandpassPeak:
+        {
+            f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
+            f->cL = 0.0f; f->cB = f->R2; f->cH = 0.0f;
+        }
+        break;
+      case BandReject:
+        {
+            f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
+            f->cL = 1.0f; f->cB = 0.0f; f->cH = 1.0f;
+        }
+        break;
+      case Bell:
+        {
+            float fl = f->fc*powf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+            float wl = tanf(PI*fl*f->inv_sr);   // warped radian lower bandedge frequency /(2*fs)
+            float r  = f->g/wl;
+            r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+                                       // warped upper bandedge, wc the center
+            f->R2 = 2.0f*sqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
+            f->cL = 1.0f; f->cB = f->R2*f->G; f->cH = 1.0f;
+        }
+        break;
+      case Lowshelf:
+        {
+            float A = sqrtf(f->G);
+          f->g /= sqrtf(A);               // scale SVF-cutoff frequency for shelvers
+          f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f);
+          f->cL = f->G; f->cB = f->R2*A; f->cH = 1.0f;
+        }
+        break;
+      case Highshelf:
+        {
+          float A = sqrtf(f->G);
+          f->g *= sqrtf(A);               // scale SVF-cutoff frequency for shelvers
+          f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f);
+          f->cL = 1.0f; f->cB = f->R2*A; f->cH = f->G;
+        }
+        break;
+      case Allpass:
+        {
+            f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
+            f->cL = 1.0f; f->cB = -f->R2; f->cH = 1.0f;
+        }
+        break;
 
-		// experimental - maybe we must find better curves for cL, cB, cH:
-	  case Morph:
-		{
-			f->R2 = f->invG;
-		  float x  = 2.0f*f->m-1.0f;
+        // experimental - maybe we must find better curves for cL, cB, cH:
+      case Morph:
+        {
+            f->R2 = f->invG;
+          float x  = 2.0f*f->m-1.0f;
 
-		  f->cL = maximum(-x, 0.0f); /*cL *= cL;*/
-		  f->cH = minimum( x, 0.0f); /*cH *= cH;*/
-		  f->cB = 1.0f-x*x;
+          f->cL = maximum(-x, 0.0f); /*cL *= cL;*/
+          f->cH = minimum( x, 0.0f); /*cH *= cH;*/
+          f->cB = 1.0f-x*x;
 
-			// bottom line: we need to test different versions for how they feel when tweaking the
-			// morph parameter
+            // bottom line: we need to test different versions for how they feel when tweaking the
+            // morph parameter
 
-		  // this scaling ensures constant magnitude at the cutoff point (we divide the coefficients by
-		  // the magnitude response value at the cutoff frequency and scale back by the gain):
-		  float s = f->G * sqrtf((f->R2*f->R2) / (f->cL*f->cL + f->cB*f->cB + f->cH*f->cH - 2.0f*f->cL*f->cH));
-		  f->cL *= s; f->cB *= s; f->cH *= s;
-		}
-		break;
+          // this scaling ensures constant magnitude at the cutoff point (we divide the coefficients by
+          // the magnitude response value at the cutoff frequency and scale back by the gain):
+          float s = f->G * sqrtf((f->R2*f->R2) / (f->cL*f->cL + f->cB*f->cB + f->cH*f->cH - 2.0f*f->cL*f->cH));
+          f->cL *= s; f->cB *= s; f->cH *= s;
+        }
+        break;
 
-	  }
+      }
 
-	  f->h = 1.0f / (1.0f + f->R2*f->g + f->g*f->g);  // factor for feedback precomputation
+      f->h = 1.0f / (1.0f + f->R2*f->g + f->g*f->g);  // factor for feedback precomputation
 }
 
 
-void   tVZFilter_setBandwidth           	(tVZFilter* const vf, float B)
+void   tVZFilter_setBandwidth               (tVZFilter* const vf, float B)
 {
-	_tVZFilter* f = *vf;
-	f->B = LEAF_clip(0.0f, B, 100.0f);
-	tVZFilter_calcCoeffs(vf);
+    _tVZFilter* f = *vf;
+    f->B = LEAF_clip(0.0f, B, 100.0f);
+    tVZFilter_calcCoeffs(vf);
 }
 void   tVZFilter_setFreq           (tVZFilter* const vf, float freq)
 {
-	_tVZFilter* f = *vf;
-	f->fc = LEAF_clip(0.0f, freq, 0.5f*leaf.sampleRate);
-	tVZFilter_calcCoeffs(vf);
+    _tVZFilter* f = *vf;
+    f->fc = LEAF_clip(0.0f, freq, 0.5f*leaf.sampleRate);
+    tVZFilter_calcCoeffs(vf);
 }
-void   tVZFilter_setGain          		(tVZFilter* const vf, float gain)
+void   tVZFilter_setFreqAndBandwidth           (tVZFilter* const vf, float freq, float bw)
 {
-	_tVZFilter* f = *vf;
-	f->G = LEAF_clip(0.000001f, gain, 100.0f);
-	f->invG = 1.0f/f->G;
-	tVZFilter_calcCoeffs(vf);
-}
-
-void   tVZFilter_setMorph          		(tVZFilter* const vf, float morph)
-{
-	_tVZFilter* f = *vf;
-	f->m = LEAF_clip(0.0f, morph, 1.0f);
-	tVZFilter_calcCoeffs(vf);
+    _tVZFilter* f = *vf;
+    f->B = LEAF_clip(0.0f,bw, 100.0f);
+    f->fc = LEAF_clip(0.0f, freq, 0.5f*leaf.sampleRate);
+    tVZFilter_calcCoeffs(vf);
 }
 
-void tVZFilter_setType         		(tVZFilter* const vf, VZFilterType type)
+void   tVZFilter_setGain                (tVZFilter* const vf, float gain)
 {
-	_tVZFilter* f = *vf;
-	f->type = type;
-	tVZFilter_calcCoeffs(vf);
+    _tVZFilter* f = *vf;
+    f->G = LEAF_clip(0.000001f, gain, 100.0f);
+    f->invG = 1.0f/f->G;
+    tVZFilter_calcCoeffs(vf);
+}
+
+void   tVZFilter_setMorph               (tVZFilter* const vf, float morph)
+{
+    _tVZFilter* f = *vf;
+    f->m = LEAF_clip(0.0f, morph, 1.0f);
+    tVZFilter_calcCoeffs(vf);
+}
+
+void tVZFilter_setType              (tVZFilter* const vf, VZFilterType type)
+{
+    _tVZFilter* f = *vf;
+    f->type = type;
+    tVZFilter_calcCoeffs(vf);
 }
 
 float tVZFilter_BandwidthToR(tVZFilter* const vf, float B)
 {
-	_tVZFilter* f = *vf;
+    _tVZFilter* f = *vf;
   float fl = f->fc*powf(2.0f, -B*0.5f); // lower bandedge frequency (in Hz)
   float gl = tanf(PI*fl*f->inv_sr);   // warped radian lower bandedge frequency /(2*fs)
   float r  = gl/f->g;            // ratio between warped lower bandedge- and center-frequencies
-							   // unwarped: r = pow(2, -B/2) -> approximation for low
-							   // center-frequencies
+                               // unwarped: r = pow(2, -B/2) -> approximation for low
+                               // center-frequencies
   return sqrtf((1.0f-r*r)*(1.0f-r*r)/(4.0f*r*r));
 }
-
 
 
 void    tDiodeFilter_init           (tDiodeFilter* const vf, float cutoff, float resonance)
