@@ -653,7 +653,7 @@ int tPoly_getNumVoices(tPoly* const polyh)
 int tPoly_getNumActiveVoices(tPoly* const polyh)
 {
     _tPoly* poly = *polyh;
-    return tStack_getSize(&poly->stack);
+    return LEAF_clip(0, tStack_getSize(&poly->stack), poly->numVoices);
 }
 
 float tPoly_getPitch(tPoly* const polyh, uint8_t voice)
