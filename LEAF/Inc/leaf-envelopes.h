@@ -144,6 +144,7 @@ extern "C" {
         float minimum_time;
         float curr,dest;
         float time;
+        float factor;
         int samples_per_tick;
         
     } _tRamp;

@@ -533,7 +533,7 @@ void    tRamp_init(tRamp* const r, float time, int samples_per_tick)
     _tRamp* ramp = *r = (_tRamp*) leaf_alloc(sizeof(_tRamp));
     
     ramp->inv_sr_ms = 1.0f/(leaf.sampleRate*0.001f);
-	ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
+    ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
     ramp->curr = 0.0f;
     ramp->dest = 0.0f;
     
@@ -545,7 +545,7 @@ void    tRamp_init(tRamp* const r, float time, int samples_per_tick)
     {
         ramp->time = time;
     }
-    
+    ramp->factor = (1.0f / ramp->time) * ramp->inv_sr_ms;
     ramp->samples_per_tick = samples_per_tick;
     ramp->inc = ((ramp->dest - ramp->curr) / ramp->time * ramp->inv_sr_ms) * (float)ramp->samples_per_tick;
 }
@@ -575,9 +575,9 @@ void    tRamp_initToPool    (tRamp* const r, float time, int samples_per_tick, t
     {
         ramp->time = time;
     }
-    
     ramp->samples_per_tick = samples_per_tick;
-    ramp->inc = ((ramp->dest - ramp->curr) / ramp->time * ramp->inv_sr_ms) * (float)ramp->samples_per_tick;
+    ramp->factor = (1.0f / ramp->time) * ramp->inv_sr_ms * (float)ramp->samples_per_tick;
+    ramp->inc = (ramp->dest - ramp->curr) * ramp->factor;
 }
 
 void    tRamp_freeFromPool  (tRamp* const r, tMempool* const mp)
@@ -592,29 +592,31 @@ void     tRamp_setTime(tRamp* const ramp, float time)
 {
     _tRamp* r = *ramp;
     
-	if (time < r->minimum_time)
-	{
-		r->time = r->minimum_time;
-	}
-	else
-	{
-		r->time = time;
-	}
-    r->inc = ((r->dest-r->curr)/r->time * r->inv_sr_ms) * ((float)r->samples_per_tick);
+    if (time < r->minimum_time)
+    {
+        r->time = r->minimum_time;
+    }
+    else
+    {
+        r->time = time;
+    }
+    r->factor = (1.0f / r->time) * r->inv_sr_ms * (float)r->samples_per_tick;
+    r->inc = (r->dest - r->curr) * r->factor;
+
 }
 
 void     tRamp_setDest(tRamp* const ramp, float dest)
 {
     _tRamp* r = *ramp;
     r->dest = dest;
-    r->inc = ((r->dest-r->curr)/r->time * r->inv_sr_ms) * ((float)r->samples_per_tick);
+    r->inc = (r->dest - r->curr) * r->factor;
 }
 
 void     tRamp_setVal(tRamp* const ramp, float val)
 {
     _tRamp* r = *ramp;
     r->curr = val;
-    r->inc = ((r->dest-r->curr)/r->time * r->inv_sr_ms) * ((float)r->samples_per_tick);
+    r->inc = (r->dest - r->curr) * r->factor;
 }
 
 float   tRamp_tick(tRamp* const ramp)
@@ -624,10 +626,10 @@ float   tRamp_tick(tRamp* const ramp)
     r->curr += r->inc;
     
     if (((r->curr >= r->dest) && (r->inc > 0.0f)) || ((r->curr <= r->dest) && (r->inc < 0.0f)))
-	{
-		r->inc = 0.0f;
-		r->curr=r->dest;
-	}
+    {
+        r->inc = 0.0f;
+        r->curr=r->dest;
+    }
     
     return r->curr;
 }
@@ -642,8 +644,10 @@ void    tRampSampleRateChanged(tRamp* const ramp)
 {
     _tRamp* r = *ramp;
     r->inv_sr_ms = 1.0f / (leaf.sampleRate * 0.001f);
-    r->inc = ((r->dest-r->curr)/r->time * r->inv_sr_ms)*((float)r->samples_per_tick);
+    r->factor = (1.0f / r->time) * r->inv_sr_ms * (float)r->samples_per_tick;
+    r->inc = (r->dest - r->curr) * r->factor;
 }
+
 
 
 
