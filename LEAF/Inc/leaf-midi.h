@@ -362,6 +362,134 @@ extern "C" {
     /*! @} */
     
     //==============================================================================
+
+    
+    // simplified version of poly for more efficiency when we don't need ramps and pitch glide
+    /*!
+     * @defgroup tpoly tPoly
+     * @ingroup midi
+     * @brief An object for polyphonic handling.
+     * @{
+     */
+
+    /* tPoly */
+    typedef struct _tSimplePoly
+    {
+        tStack stack;
+
+        int numVoices;
+        int maxNumVoices;
+        int** voices;
+
+        int notes[128][2];
+    } _tSimplePoly;
+
+    typedef _tSimplePoly* tSimplePoly;
+
+    //! Initialize a tPoly to the default LEAF mempool.
+    /*!
+     @param poly A pointer to the tPoly to be initialized.
+     @param maxNumVoices The maximum number of voices this tPoly can handle at once.
+     */
+    void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices);
+
+
+    //! Free a tPoly from the default LEAF mempool.
+    /*!
+     @param poly A pointer to the tPoly to be freed.
+     */
+    void    tSimplePoly_free                  (tSimplePoly* const poly);
+
+
+    //! Initialize a tPoly to a specified mempool.
+    /*!
+     @param poly A pointer to the tPoly to be initialized.
+     @param pool A pointer to the tMempool to which the tPoly should be initialized.
+     */
+    void    tSimplePoly_initToPool            (tSimplePoly* const poly, int maxNumVoices, tMempool* const pool);
+
+
+    //! Free a tPoly from a specified mempool.
+    /*!
+     @param poly A pointer to the tPoly to be freed.
+     @param pool A pointer to the tMempool from which the tPoly should be freed.
+     */
+    void    tSimplePoly_freeFromPool          (tSimplePoly* const poly, tMempool* const pool);
+
+    //! Add a note with a given velocity to the poly handler.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param note The MIDI note number to add.
+     @param vel The MIDI velocity of the note to add.
+     @return The voice that will play the note.
+     */
+    int     tSimplePoly_noteOn                (tSimplePoly* const poly, int note, uint8_t vel);
+
+
+    //! Remove a note from the poly handler.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param note The MIDI note number to remove.
+     @return The voice that was playing the removed note.
+     */
+    int     tSimplePoly_noteOff               (tSimplePoly* const poly, uint8_t note);
+
+
+    //! Set the number of voices available to play notes.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param numVoices The new number of available voices. Cannot be greater than the max number voices given in tPoly_init().
+     */
+    void    tSimplePoly_setNumVoices          (tSimplePoly* const poly, uint8_t numVoices);
+
+    //! Set whether pitch glide over note changes in voices is active.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param isActive Whether pitch glide should be active or not.
+     */
+
+    //! Get the current number of voices available to play notes.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @return The current number of voices available to play notes.
+     */
+    int     tSimplePoly_getNumVoices          (tSimplePoly* const poly);
+
+    //! Get the number of voices currently playing notes.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @return The number of voices currently playing notes.
+     */
+    int     tSimplePoly_getNumActiveVoices    (tSimplePoly* const poly);
+
+    //! Get the current MIDI note number of a given voice.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param voice The voice to get the MIDI note number of.
+     @return The MIDI note number of the given voice.
+     */
+
+    int   tSimplePoly_getPitch              (tSimplePoly* const poly, uint8_t voice);
+
+    //! Get the current MIDI velocity of a given voice.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param voice The voice to get the MIDI velocity of.
+     @return The current MIDI velocity of the given voice.
+     */
+    int     tSimplePoly_getVelocity           (tSimplePoly* const poly, uint8_t voice);
+
+
+    //! Get the current play state of a given voice.
+    /*!
+     @param poly A pointer to the relevant tPoly.
+     @param voice The voice to get the state of.
+     @return The current play state of the given voice.
+     */
+    int     tSimplePoly_isOn                  (tSimplePoly* const poly, uint8_t voice);
+
+    /*! @} */
+    //==============================================================================
     
 #ifdef __cplusplus
 }
