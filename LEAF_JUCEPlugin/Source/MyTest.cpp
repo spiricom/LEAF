@@ -1,12 +1,10 @@
 /*
-  ==============================================================================
-
-    FM.c
-    Created: 23 Jan 2017 9:39:38am
-    Author:  Michael R Mulshine
-
-  ==============================================================================
-*/
+ ==============================================================================
+ FM.c
+ Created: 23 Jan 2017 9:39:38am
+ Author:  Michael R Mulshine
+ ==============================================================================
+ */
 
 #include "LEAFTest.h"
 #include "MyTest.h"
@@ -16,10 +14,20 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-tSine sine;
-tSaw saw;
-tTri tri;
-tPulse pulse;
+tNoise noise;
+tSVF bp1;
+tSVF bp2;
+tFormantShifter fs;
+
+tSampler samp;
+tBuffer buff;
+tEnvelope env;
+
+tAutotune at;
+
+tTriangle tri;
+
+tMinBLEP minblep;
 
 tPhasor phasor;
 
@@ -38,57 +46,111 @@ char memory[MSIZE];
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
-
     
-    tSine_init(&sine, 1000);
-    tSine_setFreq(&sine, 200);
+    tTriangle_init(&tri);
     
-    tSaw_init(&saw);
-    tSaw_setFreq(&saw, 200);
-    
-    tPulse_init(&pulse);
-    tPulse_setFreq(&pulse, 200);
-    
-    tTri_init(&tri);
-    tTri_setFreq(&tri, 200);
+    tMinBLEP_init(&minblep);
     
     tPhasor_init(&phasor);
+    //    tNoise_init(&noise, WhiteNoise);
+    //
+    //    tAutotune_init(&at, 1, 1024, 512);
+    
+    //    tSVF_init(&bp1, SVFTypeBandpass, 100, 4.0f);
+    //    tSVF_init(&bp2, SVFTypeBandpass, 1000, 4.0f);
+    //
+    //    tFormantShifter_init(&fs, 20);
+    //
+    //    // Init and set record
+    //    tBuffer_init (&buff, leaf.sampleRate); // init, 1 second buffer
+    //    tBuffer_setRecordMode (&buff, RecordOneShot); // RecordOneShot records once through
+    //
+    //    // Init and set play
+    //    tSampler_init (&samp, &buff); // init, give address of record buffer
+    //    tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
+    //    tSampler_setRate(&samp, 1.763f); // Rate of 1.0
+}
+
+inline double getSawFall(double angle) {
+    
+    angle = fmod(angle + double_Pi, 2*double_Pi); // shift x
+    double sample = angle/double_Pi - double(1); // computer as remainder
+    
+    return sample;
+    
 }
 
 float   LEAFTest_tick            (float input)
 {
-//    return tSine_tick(&sine);
-    tSaw_setFreq(&saw, x);
-    tPhasor_setFreq(&phasor, x);
-    return tSaw_tick(&saw);
-
-//    tTri_setFreq(&tri, x);
-//    tTri_setSkew(&tri, (y * 2.0f) - 1.0f);
-//    return tTri_tick(&tri);
+    //    float sample = tNoise_tick(&noise);
+    //    sample *= 0.5f;
+    //    float b = tSVF_tick(&bp1, sample);
+    //    b += tSVF_tick(&bp2, sample);
+    //
+    //    return (tFormantShifter_tick(&fs, input));
+    //
+    //    tBuffer_tick(&buff, input);
     
-//    tPulse_setFreq(&pulse, x);
-//    tPulse_setWidth(&pulse, y);
-//    return tPulse_tick(&pulse);
+    //    return tSampler_tick(&samp);
+    
+    //    tAutotune_setFreq(&at, 440.0f, 0);
+    
+    //    return tAutotune_tick(&at, input)[0];
+    
+    tPhasor_setFreq(&phasor, y);
+    
+    
+    float sample = tPhasor_tick(&phasor) * 2.0f - 1.0f;
+    
+    if (phasor->phaseDidReset)
+    {
+        float offset = 1.0f - ((phasor->inc - phasor->phase) / phasor->inc);
+        tMinBLEP_addBLEP(&minblep, offset, 2, 0.0f);
+    }
+    
+    return tMinBLEP_tick(&minblep, sample) - phasor->inc * 2.0f;
 }
 
 int firstFrame = 1;
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
+    //    if (firstFrame == 1)
+    //    {
+    //        tBuffer_record(&buff); // starts recording
+    //        tSampler_play(&samp); // start spitting samples out
+    //        firstFrame = 0;
+    //    }
+    
     float val = getSliderValue("mod freq");
     
-    x = val * 20000;
+    x = val ;
     
-    DBG(String(x));
+    //    a = val * tBuffer_getBufferLength(&buff);
+    
+    DBG("start: " + String(a));
     
     val = getSliderValue("mod depth");
     
-    y = val;;
+    y = val * 20000.0f + 20.0f;
+    
+    DBG(String(y));
+    //    b = val * tBuffer_getBufferLength(&buff);
+    
+    DBG("rate: " + String(b));
+    //
+    //    tSampler_setStart(&samp, a);
+    //    tSampler_setEnd(&samp, b);
+    //    tSampler_setRate(&samp, b);
+    
+    //    tFormantShifter_setShiftFactor(&fs, x);
+    //    tFormantShifter_setIntensity(&fs, y);
+    
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)
 {
-
+    
 }
 
 void    LEAFTest_pitchBendInput  (int pitchBend)
@@ -110,7 +172,7 @@ void    LEAFTest_noteOff         (int note)
 
 void    LEAFTest_end             (void)
 {
-
+    
 }
 
 // LEAF POOL UTILITIES

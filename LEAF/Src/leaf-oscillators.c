@@ -940,8 +940,8 @@ void    tMinBLEP_initToPool     (tMinBLEP* const minblep, tMempool* const mp)
     _tMempool* m = *mp;
     _tMinBLEP* mb = *minblep = (_tMinBLEP*) mpool_alloc(sizeof(_tMinBLEP), m);
     
-    mb->overSamplingRatio = 16;
-    mb->zeroCrossings = 16;
+    mb->overSamplingRatio = 64;
+    mb->zeroCrossings = 32;
     mb->returnDerivative = 0;
     mb->proportionalBlepFreq = 0.5; // defaults to NyQuist ....
     
