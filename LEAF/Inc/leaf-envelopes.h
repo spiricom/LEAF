@@ -95,25 +95,35 @@ extern "C" {
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    enum envState {
+        env_idle = 0,
+        env_attack,
+        env_decay,
+        env_sustain,
+        env_release
+    };
+
     /* ADSR */
     typedef struct _tADSR
     {
-       const float *exp_buff;
-       const float *inc_buff;
-        uint32_t buff_size;
-        
-        float next;
-        
-        float attackInc, decayInc, releaseInc, rampInc;
-        
-        oBool inAttack, inDecay, inSustain, inRelease, inRamp;
-        
-        float sustain, gain, rampPeak, releasePeak;
-        
-        float attackPhase, decayPhase, releasePhase, rampPhase;
-
+        float sampleRateInMs;
+        int state;
+        float output;
+        float attackRate;
+        float decayRate;
+        float releaseRate;
+        float attackCoef;
+        float decayCoef;
+        float releaseCoef;
+        float sustainLevel;
+        float targetRatioA;
+        float targetRatioDR;
+        float attackBase;
+        float decayBase;
+        float releaseBase;
         float leakFactor;
-
+        float gain;
 
     } _tADSR;
     
@@ -129,9 +139,10 @@ extern "C" {
     void    tADSR_setDecay      (tADSR* const, float decay);
     void    tADSR_setSustain    (tADSR* const, float sustain);
     void    tADSR_setRelease    (tADSR* const, float release);
-    void 	tADSR_setLeakFactor	(tADSR* const, float leakFactor);
+    void    tADSR_setLeakFactor (tADSR* const, float leakFactor);
     void    tADSR_on            (tADSR* const, float velocity);
     void    tADSR_off           (tADSR* const);
+    
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
