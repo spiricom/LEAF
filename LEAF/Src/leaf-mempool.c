@@ -87,7 +87,11 @@ void leaf_pool_init(char* memory, size_t size)
 void* mpool_alloc(size_t asize, _tMempool* pool)
 {
     // If the head is NULL, the mempool is full
-    if (pool->head == NULL) return NULL;
+    if (pool->head == NULL)
+    {
+        leaf_mempool_overrun();
+        return NULL;
+    }
     
     // Should we alloc the first block large enough or check all blocks and pick the one closest in size?
     size_t size_to_alloc = mpool_align(asize);
@@ -100,7 +104,11 @@ void* mpool_alloc(size_t asize, _tMempool* pool)
         
         // If we reach the end of the free list, there
         // are no blocks large enough, return NULL
-        if (node_to_alloc == NULL) return NULL;
+        if (node_to_alloc == NULL)
+        {
+            leaf_mempool_overrun();
+            return NULL;
+        }
     }
     
     // Create a new node after the node to be allocated if there is enough space
@@ -153,7 +161,11 @@ void* mpool_alloc(size_t asize, _tMempool* pool)
 void* mpool_calloc(size_t asize, _tMempool* pool)
 {
     // If the head is NULL, the mempool is full
-    if (pool->head == NULL) return NULL;
+    if (pool->head == NULL)
+    {
+        leaf_mempool_overrun();
+        return NULL;
+    }
     
     // Should we alloc the first block large enough or check all blocks and pick the one closest in size?
     size_t size_to_alloc = mpool_align(asize);
@@ -166,7 +178,11 @@ void* mpool_calloc(size_t asize, _tMempool* pool)
         
         // If we reach the end of the free list, there
         // are no blocks large enough, return NULL
-        if (node_to_alloc == NULL) return NULL;
+        if (node_to_alloc == NULL)
+        {
+            leaf_mempool_overrun();
+            return NULL;
+        }
     }
     
     // Create a new node after the node to be allocated if there is enough space
@@ -362,7 +378,8 @@ static inline void delink_node(mpool_node_t* node)
 
 void leaf_mempool_overrun(void)
 {
-    //TODO: we should set up some kind of leaf_error method that reaches user space to notify library users of things that failed.
+    LEAF_error(1);
+    //TODO: we should make a set of real error codes that are in an enum type
 }
 
 void tMempool_init(tMempool* const mp, char* memory, size_t size)

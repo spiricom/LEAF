@@ -52,3 +52,9 @@ float LEAF_getSampleRate()
     return leaf.sampleRate;
 }
 
+
+//implement a function called this in your user code to catch errors
+__attribute__((weak)) uint8_t LEAF_error(uint8_t whichone)
+{
+    return whichone;
+}
