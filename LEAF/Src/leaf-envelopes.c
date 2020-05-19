@@ -253,7 +253,19 @@ float   tEnvelope_tick(tEnvelope* const envlp)
     return env->next;
 }
 
+
 /* ADSR */
+//replaced our older ADSR that relied on a large lookup table with this one by Nigel Redmon from his blog. Thanks, Nigel!
+//-JS
+
+
+
+float calcADSRCoef(double rate, double targetRatio)
+{
+    return (rate <= 0.0f) ? 0.0f : exp(-log((1.0 + targetRatio) / targetRatio) / rate);
+}
+
+
 void    tADSR_init(tADSR* const adsrenv, float attack, float decay, float sustain, float release)
 {
     tADSR_initToPool(adsrenv, attack, decay, sustain, release, &leaf.mempool);
@@ -268,60 +280,27 @@ void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, fl
 {
     _tMempool* m = *mp;
     _tADSR* adsr = *adsrenv = (_tADSR*) mpool_alloc(sizeof(_tADSR), m);
+    adsr->sampleRateInMs =  leaf.sampleRate * 0.001f;
+    adsr->targetRatioA = 0.3f;
+    adsr->targetRatioDR = 0.0001f;
+    adsr->attackRate = attack * adsr->sampleRateInMs;
+    adsr->attackCoef = calcADSRCoef(attack * adsr->sampleRateInMs, adsr->targetRatioA);
+    adsr->attackBase = (1.0f + adsr->targetRatioA) * (1.0f - adsr->attackCoef);
     
-    adsr->exp_buff = __leaf_table_exp_decay;
-    adsr->inc_buff = __leaf_table_attack_decay_inc;
-    adsr->buff_size = sizeof(__leaf_table_exp_decay);
+    adsr->decayRate = decay * adsr->sampleRateInMs;
+    adsr->decayCoef = calcADSRCoef(decay * adsr->sampleRateInMs,adsr-> targetRatioDR);
+    adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
     
-    if (attack > 8192.0f)
-        attack = 8192.0f;
-    if (attack < 0.0f)
-        attack = 0.0f;
+    adsr->sustainLevel = sustain;
+    adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
     
-    if (decay > 8192.0f)
-        decay = 8192.0f;
-    if (decay < 0.0f)
-        decay = 0.0f;
-    
-    if (sustain > 1.0f)
-        sustain = 1.0f;
-    if (sustain < 0.0f)
-        sustain = 0.0f;
-    
-    if (release > 8192.0f)
-        release = 8192.0f;
-    if (release < 0.0f)
-        release = 0.0f;
-    
-    int16_t attackIndex = ((int16_t)(attack * 8.0f))-1;
-    int16_t decayIndex = ((int16_t)(decay * 8.0f))-1;
-    int16_t releaseIndex = ((int16_t)(release * 8.0f))-1;
-    int16_t rampIndex = ((int16_t)(2.0f * 8.0f))-1;
-    
-    if (attackIndex < 0)
-        attackIndex = 0;
-    if (decayIndex < 0)
-        decayIndex = 0;
-    if (releaseIndex < 0)
-        releaseIndex = 0;
-    if (rampIndex < 0)
-        rampIndex = 0;
-    
-    adsr->next = 0.0f;
-    
-    adsr->inRamp = OFALSE;
-    adsr->inAttack = OFALSE;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OFALSE;
-    
-    adsr->sustain = sustain;
-    
-    adsr->attackInc = adsr->inc_buff[attackIndex];
-    adsr->decayInc = adsr->inc_buff[decayIndex];
-    adsr->releaseInc = adsr->inc_buff[releaseIndex];
-    adsr->rampInc = adsr->inc_buff[rampIndex];
+    adsr->releaseRate = release * adsr->sampleRateInMs;
+    adsr->releaseCoef = calcADSRCoef(release * adsr->sampleRateInMs, adsr->targetRatioDR);
+    adsr->releaseBase = -adsr->targetRatioDR * (1.0f - adsr->releaseCoef);
 
+    adsr->state = env_idle;
+    adsr->gain = 1.0f;
+    adsr->output = 0.0f;
     adsr->leakFactor = 1.0f;
 }
 
@@ -335,61 +314,36 @@ void    tADSR_freeFromPool  (tADSR* const adsrenv, tMempool* const mp)
 void     tADSR_setAttack(tADSR* const adsrenv, float attack)
 {
     _tADSR* adsr = *adsrenv;
-    
-    int32_t attackIndex;
-    
-    if (attack < 0.0f) {
-        attackIndex = 0.0f;
-    } else if (attack < 8192.0f) {
-        attackIndex = ((int32_t)(attack * 8.0f))-1;
-    } else {
-        attackIndex = ((int32_t)(8192.0f * 8.0f))-1;
-    }
-    
-    adsr->attackInc = adsr->inc_buff[attackIndex];
+
+    adsr->attackRate = attack * adsr->sampleRateInMs;
+    adsr->attackCoef = calcADSRCoef(adsr->attackRate, adsr->targetRatioA);
+    adsr->attackBase = (1.0f + adsr->targetRatioA) * (1.0f - adsr->attackCoef);
 }
 
 void     tADSR_setDecay(tADSR* const adsrenv, float decay)
 {
     _tADSR* adsr = *adsrenv;
     
-    int32_t decayIndex;
-    
-    if (decay < 0.0f) {
-        decayIndex = 0.0f;
-    } else if (decay < 8192.0f) {
-        decayIndex = ((int32_t)(decay * 8.0f)) - 1;
-    } else {
-        decayIndex = ((int32_t)(8192.0f * 8.0f)) - 1;
-    }
-    
-    adsr->decayInc = adsr->inc_buff[decayIndex];
+    adsr->decayRate = decay * adsr->sampleRateInMs;
+    adsr->decayCoef = calcADSRCoef(adsr->decayRate,adsr-> targetRatioDR);
+    adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
 }
 
 void     tADSR_setSustain(tADSR* const adsrenv, float sustain)
 {
     _tADSR* adsr = *adsrenv;
     
-    if (sustain > 1.0f)      adsr->sustain = 1.0f;
-    else if (sustain < 0.0f) adsr->sustain = 0.0f;
-    else                     adsr->sustain = sustain;
+    adsr->sustainLevel = sustain;
+    adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
 }
 
 void     tADSR_setRelease(tADSR* const adsrenv, float release)
 {
     _tADSR* adsr = *adsrenv;
     
-    int32_t releaseIndex;
-    
-    if (release < 0.0f) {
-        releaseIndex = 0.0f;
-    } else if (release < 8192.0f) {
-        releaseIndex = ((int32_t)(release * 8.0f)) - 1;
-    } else {
-        releaseIndex = ((int32_t)(8192.0f * 8.0f)) - 1;
-    }
-    
-    adsr->releaseInc = adsr->inc_buff[releaseIndex];
+    adsr->releaseRate = release * adsr->sampleRateInMs;
+    adsr->releaseCoef = calcADSRCoef(adsr->releaseRate, adsr->targetRatioDR);
+    adsr->releaseBase = -adsr->targetRatioDR * (1.0f - adsr->releaseCoef);
 }
 
 // 0.999999 is slow leak, 0.9 is fast leak
@@ -397,46 +351,24 @@ void     tADSR_setLeakFactor(tADSR* const adsrenv, float leakFactor)
 {
     _tADSR* adsr = *adsrenv;
 
-
     adsr->leakFactor = leakFactor;
 }
 
 void tADSR_on(tADSR* const adsrenv, float velocity)
 {
     _tADSR* adsr = *adsrenv;
-    
-    if ((adsr->inAttack || adsr->inDecay) || (adsr->inSustain || adsr->inRelease)) // In case ADSR retriggered while it is still happening.
-    {
-        adsr->rampPhase = 0;
-        adsr->inRamp = OTRUE;
-        adsr->rampPeak = adsr->next;
-    }
-    else // Normal start.
-    {
-        adsr->inAttack = OTRUE;
-    }
-    
-    adsr->attackPhase = 0;
-    adsr->decayPhase = 0;
-    adsr->releasePhase = 0;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OFALSE;
+    adsr->state = env_attack;
     adsr->gain = velocity;
 }
 
 void tADSR_off(tADSR* const adsrenv)
 {
     _tADSR* adsr = *adsrenv;
-    
-    if (adsr->inRelease) return;
-    
-    adsr->inAttack = OFALSE;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OTRUE;
-    
-    adsr->releasePeak = adsr->next;
+
+    if (adsr->state != env_idle)
+    {
+        adsr->state = env_release;
+    }
 }
 
 float   tADSR_tick(tADSR* const adsrenv)
@@ -444,89 +376,42 @@ float   tADSR_tick(tADSR* const adsrenv)
     _tADSR* adsr = *adsrenv;
     
 
-    if (adsr->inRamp)
-    {
-        if (adsr->rampPhase > UINT16_MAX)
-        {
-            adsr->inRamp = OFALSE;
-            adsr->inAttack = OTRUE;
-            adsr->next = 0.0f;
-        }
-        else
-        {
-        	adsr->next = adsr->rampPeak * adsr->exp_buff[(uint32_t)adsr->rampPhase];
-        }
-        
-        adsr->rampPhase += adsr->rampInc;
+    switch (adsr->state) {
+        case env_idle:
+            break;
+        case env_attack:
+            adsr->output = adsr->attackBase + adsr->output * adsr->attackCoef;
+            if (adsr->output >= 1.0f) {
+                adsr->output = 1.0f;
+                adsr->state = env_decay;
+            }
+            break;
+        case env_decay:
+            adsr->output = adsr->decayBase + adsr->output * adsr->decayCoef * adsr->leakFactor;
+            if (adsr->output <= adsr->sustainLevel) {
+                adsr->output = adsr->sustainLevel;
+                adsr->state = env_sustain;
+            }
+            break;
+        case env_sustain:
+            adsr->output = adsr->output * adsr->leakFactor;
+            break;
+        case env_release:
+            adsr->output = adsr->releaseBase + adsr->output * adsr->releaseCoef;
+            if (adsr->output <= 0.0f) {
+                adsr->output = 0.0f;
+                adsr->state = env_idle;
+            }
     }
-    
-    if (adsr->inAttack)
-    {
-        
-        // If attack done, time to turn around.
-        if (adsr->attackPhase > UINT16_MAX)
-        {
-            adsr->inDecay = OTRUE;
-            adsr->inAttack = OFALSE;
-            adsr->next = adsr->gain * 1.0f;
-        }
-        else
-        {
-            // do interpolation !
-        	adsr->next = adsr->gain * adsr->exp_buff[UINT16_MAX - (uint32_t)adsr->attackPhase]; // inverted and backwards to get proper rising exponential shape/perception
-        }
-        
-        // Increment ADSR attack.
-        adsr->attackPhase += adsr->attackInc;
-        
-    }
-    
-    if (adsr->inDecay)
-    {
-        
-        // If decay done, sustain.
-        if (adsr->decayPhase >= UINT16_MAX)
-        {
-            adsr->inDecay = OFALSE;
-            adsr->inSustain = OTRUE;
-            adsr->next = adsr->gain * adsr->sustain;
-        }
-        
-        else
-        {
-        	adsr->next = adsr->gain * (adsr->sustain + ((adsr->exp_buff[(uint32_t)adsr->decayPhase]) * (1 - adsr->sustain))); // do interpolation !
-        }
-        
-        // Increment ADSR decay.
-        adsr->decayPhase += adsr->decayInc;
-    }
-
-    if (adsr->inSustain)
-    {
-    	adsr->next = adsr->next * adsr->leakFactor;
-    }
-
-    if (adsr->inRelease)
-    {
-        // If release done, finish.
-        if (adsr->releasePhase >= UINT16_MAX)
-        {
-            adsr->inRelease = OFALSE;
-            adsr->next = 0.0f;
-        }
-        else {
-            
-        	adsr->next = adsr->releasePeak * (adsr->exp_buff[(uint32_t)adsr->releasePhase]); // do interpolation !
-        }
-        
-        // Increment envelope release;
-        adsr->releasePhase += adsr->releaseInc;
-    }
-
-
-    return adsr->next;
+    return adsr->output * adsr->gain;
 }
 
+
+
+
+
+
+/////-----------------
 /* Ramp */
 void    tRamp_init(tRamp* const r, float time, int samples_per_tick)
 {
