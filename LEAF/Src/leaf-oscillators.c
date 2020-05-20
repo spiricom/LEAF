@@ -1271,16 +1271,16 @@ float   tMinBLEP_tick           (tMinBLEP* const minblep, float input)
         float adjusted_Freq = m->overSamplingRatio*m->proportionalBlepFreq;//m->freqMultiple[i];
         float exactPosition = m->offset[i];
         
-        double blepPosExact = adjusted_Freq*(exactPosition + 1); // +1 because this needs to trigger on the LOW SAMPLE
-        double blepPosSample = 0;
-        double fraction = modf(blepPosExact, &blepPosSample);
+        float blepPosExact = adjusted_Freq*(exactPosition + 1); // +1 because this needs to trigger on the LOW SAMPLE
+        float blepPosSample = 0;
+        float fraction = modff(blepPosExact, &blepPosSample);
         
         // LIMIT the scaling on the derivative array
         // otherwise, it can get TOO large
-        double depthLimited = m->proportionalBlepFreq; //jlimit<double>(.1, 1, proportionalBlepFreq);
-        double blepDeriv_PosExact = depthLimited*m->overSamplingRatio*(exactPosition + 1);
-        double blepDeriv_Sample = 0;
-        double fraction_Deriv = modf(blepDeriv_PosExact, &blepDeriv_Sample);
+        float depthLimited = m->proportionalBlepFreq; //jlimit<double>(.1, 1, proportionalBlepFreq);
+        float blepDeriv_PosExact = depthLimited*m->overSamplingRatio*(exactPosition + 1);
+        float blepDeriv_Sample = 0;
+        float fraction_Deriv = modff(blepDeriv_PosExact, &blepDeriv_Sample);
         
         
         // DONE ... we reached the end ...
@@ -1371,7 +1371,7 @@ void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMempool* const mp)
     c->lastOut  =  0.0f;
     
     tMinBLEP_initToPool(&c->minBlep, 16, 32, mp);
-    tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
+    tHighpass_initToPool(&c->dcBlock, 5.0f, mp);
 }
 
 void    tMBTriangle_freeFromPool  (tMBTriangle* const cy, tMempool* const mp)
@@ -1390,7 +1390,7 @@ float   tMBTriangle_tick          (tMBTriangle* const osc)
     _tMBTriangle* c = *osc;
     
     float out;
-    
+
     c->phase += c->inc;
     if (c->phase >= 1.0f)
     {
@@ -1403,7 +1403,7 @@ float   tMBTriangle_tick          (tMBTriangle* const osc)
         float offset = 1.0f - ((c->inc - c->phase + c->skew) / c->inc);
         tMinBLEP_addBLEP(&c->minBlep, offset, 2, 0.0f);
     }
-    
+
     if (c->phase < c->skew)
     {
         out = (1.0f - c->skew) * 2.0f;
@@ -1412,15 +1412,37 @@ float   tMBTriangle_tick          (tMBTriangle* const osc)
     {
         out = -c->skew * 2.0f;
     }
-    
-    out = tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));// - phasor->inc * 2.0f;
-    
-//    out = tMinBLEP_tick(&c->minBlep, out) - c->inc * 2.0f;
+
+    out = tMinBLEP_tick(&c->minBlep, out);// - phasor->inc * 2.0f;
     
     out = (c->inc * out) + ((1 - c->inc) * c->lastOut);
     c->lastOut = out;
     
-    return out;
+    return tHighpass_tick(&c->dcBlock, out * 4.0f);
+    
+//    float offset;
+//    float vel = 2;
+//    c->phase += c->inc;
+//    if (c->phase >= 1.0f)
+//    {
+//        c->phase -= 1.0f;
+//        offset = 1.0f - ((c->inc - c->phase) / c->inc);
+//        tMinBLEP_addBLEP(&c->minBlep, offset, 0.0f, -vel);
+//    }
+//    if (c->skew <= c->phase && c->phase < c->skew + c->inc)
+//    {
+//        offset = 1.0f - ((c->inc - c->phase + c->skew) / c->inc);
+//        tMinBLEP_addBLEP(&c->minBlep, offset, 0.0f, vel);
+//    }
+//
+//    float out;
+//    if (c->phase < c->skew) out = 1.0f - (c->phase / c->skew);
+//    else out = (c->phase - c->skew) / (1 - c->skew);
+//
+//    out = (out - 0.5f) * 2.0f;
+//
+////    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));
+//    return tMinBLEP_tick(&c->minBlep, out);
 }
 
 void    tMBTriangle_setFreq       (tMBTriangle* const osc, float freq)
@@ -1442,22 +1464,27 @@ void    tMBTriangle_setSkew       (tMBTriangle* const osc, float skew)
 void    tMBTriangle_sync          (tMBTriangle* const osc, float phase)
 {
     _tMBTriangle* c = *osc;
-    LEAF_clip(0.0f, phase, 1.0f);
     
-    float last, next;
+    phase += 0.5f;
     
-    if (c->phase < c->skew) last = (1.0f - c->skew - c->phase) * 2.0f;
-    else last = -(c->phase - c->skew) * 2.0f;
+    int intPart = (int) phase;
+    phase = phase - (float) intPart;
+    
+    float before, after;
+    
+    if (c->phase < c->skew) before = (1.0f - c->skew - c->phase) * 2.0f;
+    else before = -(c->skew - c->phase) * 2.0f;
 
-    if (phase < c->skew) next = (1.0f - c->skew - phase) * 2.0f;
-    else next = -(phase - c->skew) * 2.0f;
+    if (phase < c->skew) after = (1.0f - c->skew - c->phase) * 2.0f;
+    else after = -(c->skew - c->phase) * 2.0f;
 
     c->phase = phase;
 
-    float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-    tMinBLEP_addBLEP(&c->minBlep, offset, last - next, 0.0f);
+    float offset = 0.0f;//1.0f - ((c->inc - c->phase) / c->inc);
+    tMinBLEP_addBLEP(&c->minBlep, offset, before - after, 0.0f);
     
-//    c->lastOut = 0.0f;
+    if (c->phase < c->skew) c->lastOut = 1.0f - (c->phase / c->skew);
+    else c->lastOut = (c->phase - c->skew) / (1.0f - c->skew);
 }
 
 //==============================================================================
@@ -1508,23 +1535,19 @@ float   tMBPulse_tick        (tMBPulse* const osc)
     {
         c->phase -= 1.0f;
         float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-        tMinBLEP_addBLEP(&c->minBlep, offset, -2, 0.0f);
+        tMinBLEP_addBLEP(&c->minBlep, offset, -2.0f, 0.0f);
     }
     if (c->width <= c->phase && c->phase < c->width + c->inc)
     {
         float offset = 1.0f - ((c->inc - c->phase + c->width) / c->inc);
-        tMinBLEP_addBLEP(&c->minBlep, offset, 2, 0.0f);
+        tMinBLEP_addBLEP(&c->minBlep, offset, 2.0f, 0.0f);
     }
     
     float out;
     if (c->phase < c->width) out = 1.0f;
     else out = -1.0f;
     
-    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));// - phasor->inc * 2.0f;
-    
-    
-    
-    return out;
+    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));
 }
 
 void    tMBPulse_setFreq     (tMBPulse* const osc, float freq)
@@ -1544,20 +1567,21 @@ void    tMBPulse_setWidth    (tMBPulse* const osc, float width)
 void    tMBPulse_sync          (tMBPulse* const osc, float phase)
 {
     _tMBPulse* c = *osc;
-    LEAF_clip(0.0f, phase, 1.0f);
+    int intPart = (int) phase;
+    phase = phase - (float) intPart;
     
-    float last, next;
+    float before, after;
     
-    if (c->phase < c->width) last = 1.0f;
-    else last = -1.0f;
+    if (c->phase < c->width) before = 1.0f;
+    else before = -1.0f;
     
-    if (phase < c->width) next = 1.0;
-    else next = -1.0f;
+    if (phase < c->width) after = 1.0;
+    else after = -1.0f;
+    
+    float offset = 0.0f;//1.0f - ((c->inc - c->phase) / c->inc);
+    tMinBLEP_addBLEP(&c->minBlep, offset, before - after, 0.0f);
     
     c->phase = phase;
-    
-    float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-    tMinBLEP_addBLEP(&c->minBlep, offset, last - next, 0.0f);
 }
 
 
@@ -1606,14 +1630,12 @@ float   tMBSaw_tick          (tMBSaw* const osc)
     {
         c->phase -= 1.0f;
         float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-        tMinBLEP_addBLEP(&c->minBlep, offset, 2, 0.0f);
+        tMinBLEP_addBLEP(&c->minBlep, offset, 2.0f, 0.0f);
     }
     
     float out = (c->phase * 2.0f) - 1.0f;
     
-    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));// - phasor->inc * 2.0f;
-    
-//    return tMinBLEP_tick(&c->minBlep, out) - c->inc * 2.0f;
+    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));
 }
 
 void    tMBSaw_setFreq       (tMBSaw* const osc, float freq)
@@ -1628,10 +1650,11 @@ void    tMBSaw_setFreq       (tMBSaw* const osc, float freq)
 void    tMBSaw_sync          (tMBSaw* const osc, float phase)
 {
     _tMBSaw* c = *osc;
-    LEAF_clip(0.0f, phase, 1.0f);
+    int intPart = (int) phase;
+    phase = phase - (float) intPart;
     
-    float offset = 1.0f - ((c->inc - phase) / c->inc);
-    tMinBLEP_addBLEP(&c->minBlep, offset, c->phase * 2.0f, 0.0f);
+    float offset = 0.0f;//1.0f - ((c->inc - phase +) / c->inc);
+    tMinBLEP_addBLEP(&c->minBlep, offset, (c->phase - phase) * 2.0f, 0.0f);
     
     c->phase = phase;
 }

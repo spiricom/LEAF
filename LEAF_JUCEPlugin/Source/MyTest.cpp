@@ -60,7 +60,7 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     tPhasor_init(&phasor);
     
-    tPhasor_setFreq(&phasor, 2000);
+    tPhasor_setFreq(&phasor, 200);
 }
 
 inline double getSawFall(double angle) {
@@ -78,14 +78,18 @@ float   LEAFTest_tick            (float input)
     tMBSaw_setFreq(&saw, y);
     tMBPulse_setWidth(&pulse, x);
     tMBPulse_setFreq(&pulse, y);
-    tMBTriangle_setSkew(&tri, x*2.0f - 1.0f);
+    tMBTriangle_setSkew(&tri, 0.0);//x*2.0f - 1.0f);
     tMBTriangle_setFreq(&tri, y);
     
     tPhasor_tick(&phasor);
     
 //    if (phasor->phaseDidReset) tMBSaw_sync(&saw, 0.0f);
+//    if (phasor->phaseDidReset) tMBPulse_sync(&pulse, 0.0f);
+    if (phasor->phaseDidReset) tMBTriangle_sync(&tri, 0.0f);
     
-    return tMBSaw_tick(&saw);// - phasor->inc * 2.0f;
+//    return tMBSaw_tick(&saw);
+//    return tMBPulse_tick(&pulse);
+    return tMBTriangle_tick(&tri);
 }
 
 int firstFrame = 1;
@@ -109,7 +113,7 @@ void    LEAFTest_block           (void)
     
     val = getSliderValue("mod depth");
     
-    y = val * 20000.0f + 20.0f;
+    y = val * 5000.0f + 20.0f;
     
     DBG(String(y));
     //    b = val * tBuffer_getBufferLength(&buff);
