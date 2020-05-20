@@ -622,20 +622,20 @@ float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const gp)
 	return output;
 }
 
-float   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const gp, float freq)
+void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const gp, float freq)
 {
 	_tRosenbergGlottalPulse* g = *gp;
 	g->freq = freq;
 	g->inc = freq * leaf.invSampleRate;
 }
 
-float   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const gp, float openLength)
+void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const gp, float openLength)
 {
 	_tRosenbergGlottalPulse* g = *gp;
 	g->openLength = openLength;
 }
 
-float   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const gp, float pulseLength)
+void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const gp, float pulseLength)
 {
 	_tRosenbergGlottalPulse* g = *gp;
 	g->pulseLength = pulseLength;

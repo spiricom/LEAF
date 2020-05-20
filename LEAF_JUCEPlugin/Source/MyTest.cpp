@@ -25,11 +25,16 @@ tEnvelope env;
 
 tAutotune at;
 
-tTriangle tri;
 
 tMinBLEP minblep;
 
 tPhasor phasor;
+
+tHighpass hipass;
+
+tMBSaw saw;
+tMBPulse pulse;
+tMBTriangle tri;
 
 float gain;
 float freq;
@@ -47,28 +52,15 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
-    tTriangle_init(&tri);
+    tMBSaw_init(&saw);
     
-    tMinBLEP_init(&minblep);
+    tMBPulse_init(&pulse);
+    
+    tMBTriangle_init(&tri);
     
     tPhasor_init(&phasor);
-    //    tNoise_init(&noise, WhiteNoise);
-    //
-    //    tAutotune_init(&at, 1, 1024, 512);
     
-    //    tSVF_init(&bp1, SVFTypeBandpass, 100, 4.0f);
-    //    tSVF_init(&bp2, SVFTypeBandpass, 1000, 4.0f);
-    //
-    //    tFormantShifter_init(&fs, 20);
-    //
-    //    // Init and set record
-    //    tBuffer_init (&buff, leaf.sampleRate); // init, 1 second buffer
-    //    tBuffer_setRecordMode (&buff, RecordOneShot); // RecordOneShot records once through
-    //
-    //    // Init and set play
-    //    tSampler_init (&samp, &buff); // init, give address of record buffer
-    //    tSampler_setMode (&samp, PlayLoop); //set in Loop Mode
-    //    tSampler_setRate(&samp, 1.763f); // Rate of 1.0
+    tPhasor_setFreq(&phasor, 2000);
 }
 
 inline double getSawFall(double angle) {
@@ -82,33 +74,18 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
-    //    float sample = tNoise_tick(&noise);
-    //    sample *= 0.5f;
-    //    float b = tSVF_tick(&bp1, sample);
-    //    b += tSVF_tick(&bp2, sample);
-    //
-    //    return (tFormantShifter_tick(&fs, input));
-    //
-    //    tBuffer_tick(&buff, input);
     
-    //    return tSampler_tick(&samp);
+    tMBSaw_setFreq(&saw, y);
+    tMBPulse_setWidth(&pulse, x);
+    tMBPulse_setFreq(&pulse, y);
+    tMBTriangle_setSkew(&tri, x*2.0f - 1.0f);
+    tMBTriangle_setFreq(&tri, y);
     
-    //    tAutotune_setFreq(&at, 440.0f, 0);
+    tPhasor_tick(&phasor);
     
-    //    return tAutotune_tick(&at, input)[0];
+//    if (phasor->phaseDidReset) tMBSaw_sync(&saw, 0.0f);
     
-    tPhasor_setFreq(&phasor, y);
-    
-    
-    float sample = tPhasor_tick(&phasor) * 2.0f - 1.0f;
-    
-    if (phasor->phaseDidReset)
-    {
-        float offset = 1.0f - ((phasor->inc - phasor->phase) / phasor->inc);
-        tMinBLEP_addBLEP(&minblep, offset, 2, 0.0f);
-    }
-    
-    return tMinBLEP_tick(&minblep, sample) - phasor->inc * 2.0f;
+    return tMBSaw_tick(&saw);// - phasor->inc * 2.0f;
 }
 
 int firstFrame = 1;

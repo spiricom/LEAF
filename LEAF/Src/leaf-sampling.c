@@ -609,7 +609,7 @@ void tSampler_setStart     (tSampler* const sp, int32_t start)
             if (start > p->idx)// start given is after current index or we're in a crossfade
             {
                 p->targetstart = start;
-                float tempLen = fabs(p->end - start) * 0.25f;
+                float tempLen = abs(p->end - start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;
@@ -622,7 +622,7 @@ void tSampler_setStart     (tSampler* const sp, int32_t start)
             if (start < p->idx)// start given is before current index or we're in a crossfade
             {
                 p->targetstart = start;
-                float tempLen = fabs(p->end - start) * 0.25f;
+                float tempLen = abs(p->end - start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;
@@ -680,7 +680,7 @@ void tSampler_setEnd       (tSampler* const sp, int32_t end)
             if (end < p->idx) // end given is before current index or we're in a crossfade
             {
                 p->targetend = end;
-                float tempLen = fabs(end - p->start) * 0.25f;
+                float tempLen = abs(end - p->start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;
@@ -693,7 +693,7 @@ void tSampler_setEnd       (tSampler* const sp, int32_t end)
             if (end > p->idx) // end given is after current index or we're in a crossfade
             {
                 p->targetend = end;
-                float tempLen = fabs(end - p->start) * 0.25f;
+                float tempLen = abs(end - p->start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;

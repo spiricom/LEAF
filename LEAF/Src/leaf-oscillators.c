@@ -925,9 +925,9 @@ void        tNeuron_setCurrent  (tNeuron* const nr, float current)
 
 
 
-void    tMinBLEP_init           (tMinBLEP* const minblep)
+void    tMinBLEP_init           (tMinBLEP* const minblep, int zeroCrossings, int oversamplerRatio)
 {
-    tMinBLEP_initToPool(minblep, &leaf.mempool);
+    tMinBLEP_initToPool(minblep, zeroCrossings, oversamplerRatio, &leaf.mempool);
 }
 
 void    tMinBLEP_free           (tMinBLEP* const minblep)
@@ -935,15 +935,15 @@ void    tMinBLEP_free           (tMinBLEP* const minblep)
     tMinBLEP_freeFromPool(minblep, &leaf.mempool);
 }
 
-void    tMinBLEP_initToPool     (tMinBLEP* const minblep, tMempool* const mp)
+void    tMinBLEP_initToPool     (tMinBLEP* const minblep, int zeroCrossings, int oversamplerRatio, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tMinBLEP* mb = *minblep = (_tMinBLEP*) mpool_alloc(sizeof(_tMinBLEP), m);
     
-    mb->overSamplingRatio = 64;
-    mb->zeroCrossings = 32;
+    mb->overSamplingRatio = zeroCrossings;
+    mb->zeroCrossings = oversamplerRatio;
     mb->returnDerivative = 0;
-    mb->proportionalBlepFreq = 0.5; // defaults to NyQuist ....
+    mb->proportionalBlepFreq = (float) mb->zeroCrossings / (float) mb->overSamplingRatio; // defaults to NyQuist ....
     
     mb->lastValue = 0;
     mb->lastDelta = 0;
@@ -963,8 +963,10 @@ void    tMinBLEP_initToPool     (tMinBLEP* const minblep, tMempool* const mp)
     mb->blepIndex = 0;
     mb->numActiveBleps = 0;
     //currentActiveBlepOffsets;
+    
+    // These probably don't need to be this large
     mb->offset = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    mb->freqMultiple = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
+//    mb->freqMultiple = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
     mb->pos_change_magnitude = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
     mb->vel_change_magnitude = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
     
@@ -979,6 +981,13 @@ void    tMinBLEP_freeFromPool   (tMinBLEP* const minblep, tMempool* const mp)
     _tMempool* m = *mp;
     _tMinBLEP* mb = *minblep;
     
+    mpool_free(mb->offset, m);
+//    mpool_free(mb->freqMultiple, m);
+    mpool_free(mb->pos_change_magnitude, m);
+    mpool_free(mb->vel_change_magnitude, m);
+    
+    mpool_free(mb->minBlepArray, m);
+    mpool_free(mb->minBlepDerivArray, m);
     
     mpool_free(mb, m);
 }
@@ -1236,7 +1245,7 @@ void    tMinBLEP_addBLEP        (tMinBLEP* const minblep, float offset, float po
     int n = m->minBlepSize;
     
     m->offset[m->blepIndex] = offset;
-    m->freqMultiple[m->blepIndex] = m->overSamplingRatio*m->proportionalBlepFreq;
+//    m->freqMultiple[m->blepIndex] = m->overSamplingRatio*m->proportionalBlepFreq;
     m->pos_change_magnitude[m->blepIndex] = posChange;
     m->vel_change_magnitude[m->blepIndex] = velChange;
     
@@ -1259,7 +1268,7 @@ float   tMinBLEP_tick           (tMinBLEP* const minblep, float input)
     for (int blep = 1; blep <= m->numActiveBleps; blep++)
     {
         int i = (m->blepIndex - blep + n) % n;
-        float adjusted_Freq = m->freqMultiple[i];
+        float adjusted_Freq = m->overSamplingRatio*m->proportionalBlepFreq;//m->freqMultiple[i];
         float exactPosition = m->offset[i];
         
         double blepPosExact = adjusted_Freq*(exactPosition + 1); // +1 because this needs to trigger on the LOW SAMPLE
@@ -1336,4 +1345,293 @@ float   tMinBLEP_tick           (tMinBLEP* const minblep, float input)
         }
     }
     return sample;
+}
+
+//==============================================================================
+
+/* tMBTriangle: Anti-aliased Triangle waveform. */
+void    tMBTriangle_init          (tMBTriangle* const osc)
+{
+    tMBTriangle_initToPool(osc, &leaf.mempool);
+}
+
+void    tMBTriangle_free          (tMBTriangle* const osc)
+{
+    tMBTriangle_freeFromPool(osc, &leaf.mempool);
+}
+
+void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tMBTriangle* c = *osc = (_tMBTriangle*) mpool_alloc(sizeof(_tMBTriangle), m);
+    
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+    c->skew     =  0.5f;
+    c->lastOut  =  0.0f;
+    
+    tMinBLEP_initToPool(&c->minBlep, 16, 32, mp);
+    tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
+}
+
+void    tMBTriangle_freeFromPool  (tMBTriangle* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tMBTriangle* c = *cy;
+    
+    tMinBLEP_freeFromPool(&c->minBlep, mp);
+    tHighpass_freeFromPool(&c->dcBlock, mp);
+    
+    mpool_free(c, m);
+}
+
+float   tMBTriangle_tick          (tMBTriangle* const osc)
+{
+    _tMBTriangle* c = *osc;
+    
+    float out;
+    
+    c->phase += c->inc;
+    if (c->phase >= 1.0f)
+    {
+        c->phase -= 1.0f;
+        float offset = 1.0f - ((c->inc - c->phase) / c->inc);
+        tMinBLEP_addBLEP(&c->minBlep, offset, -2, 0.0f);
+    }
+    if (c->skew <= c->phase && c->phase < c->skew + c->inc)
+    {
+        float offset = 1.0f - ((c->inc - c->phase + c->skew) / c->inc);
+        tMinBLEP_addBLEP(&c->minBlep, offset, 2, 0.0f);
+    }
+    
+    if (c->phase < c->skew)
+    {
+        out = (1.0f - c->skew) * 2.0f;
+    }
+    else
+    {
+        out = -c->skew * 2.0f;
+    }
+    
+    out = tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));// - phasor->inc * 2.0f;
+    
+//    out = tMinBLEP_tick(&c->minBlep, out) - c->inc * 2.0f;
+    
+    out = (c->inc * out) + ((1 - c->inc) * c->lastOut);
+    c->lastOut = out;
+    
+    return out;
+}
+
+void    tMBTriangle_setFreq       (tMBTriangle* const osc, float freq)
+{
+    _tMBTriangle* c = *osc;
+    
+    c->freq  = freq;
+    c->inc = freq * leaf.invSampleRate;
+    
+//    tHighpass_setFreq(&c->dcBlock, freq*0.5);
+}
+
+void    tMBTriangle_setSkew       (tMBTriangle* const osc, float skew)
+{
+    _tMBTriangle* c = *osc;
+    c->skew = (skew + 1.0f) * 0.5f;
+}
+
+void    tMBTriangle_sync          (tMBTriangle* const osc, float phase)
+{
+    _tMBTriangle* c = *osc;
+    LEAF_clip(0.0f, phase, 1.0f);
+    
+    float last, next;
+    
+    if (c->phase < c->skew) last = (1.0f - c->skew - c->phase) * 2.0f;
+    else last = -(c->phase - c->skew) * 2.0f;
+
+    if (phase < c->skew) next = (1.0f - c->skew - phase) * 2.0f;
+    else next = -(phase - c->skew) * 2.0f;
+
+    c->phase = phase;
+
+    float offset = 1.0f - ((c->inc - c->phase) / c->inc);
+    tMinBLEP_addBLEP(&c->minBlep, offset, last - next, 0.0f);
+    
+//    c->lastOut = 0.0f;
+}
+
+//==============================================================================
+
+/* tMBPulse: Anti-aliased pulse waveform. */
+void    tMBPulse_init        (tMBPulse* const osc)
+{
+    tMBPulse_initToPool(osc, &leaf.mempool);
+}
+
+void    tMBPulse_free        (tMBPulse* const osc)
+{
+    tMBPulse_freeFromPool(osc, &leaf.mempool);
+}
+
+void    tMBPulse_initToPool  (tMBPulse* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tMBPulse* c = *osc = (_tMBPulse*) mpool_alloc(sizeof(_tMBPulse), m);
+    
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+    c->width     =  0.5f;
+    
+    tMinBLEP_initToPool(&c->minBlep, 16, 32, mp);
+    tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
+}
+
+void    tMBPulse_freeFromPool(tMBPulse* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tMBPulse* c = *osc;
+    
+    tMinBLEP_freeFromPool(&c->minBlep, mp);
+    tHighpass_freeFromPool(&c->dcBlock, mp);
+    
+    mpool_free(c, m);
+}
+
+float   tMBPulse_tick        (tMBPulse* const osc)
+{
+    _tMBPulse* c = *osc;
+    
+
+    
+    c->phase += c->inc;
+    if (c->phase >= 1.0f)
+    {
+        c->phase -= 1.0f;
+        float offset = 1.0f - ((c->inc - c->phase) / c->inc);
+        tMinBLEP_addBLEP(&c->minBlep, offset, -2, 0.0f);
+    }
+    if (c->width <= c->phase && c->phase < c->width + c->inc)
+    {
+        float offset = 1.0f - ((c->inc - c->phase + c->width) / c->inc);
+        tMinBLEP_addBLEP(&c->minBlep, offset, 2, 0.0f);
+    }
+    
+    float out;
+    if (c->phase < c->width) out = 1.0f;
+    else out = -1.0f;
+    
+    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));// - phasor->inc * 2.0f;
+    
+    
+    
+    return out;
+}
+
+void    tMBPulse_setFreq     (tMBPulse* const osc, float freq)
+{
+    _tMBPulse* c = *osc;
+    
+    c->freq  = freq;
+    c->inc = freq * leaf.invSampleRate;
+}
+
+void    tMBPulse_setWidth    (tMBPulse* const osc, float width)
+{
+    _tMBPulse* c = *osc;
+    c->width = width;
+}
+
+void    tMBPulse_sync          (tMBPulse* const osc, float phase)
+{
+    _tMBPulse* c = *osc;
+    LEAF_clip(0.0f, phase, 1.0f);
+    
+    float last, next;
+    
+    if (c->phase < c->width) last = 1.0f;
+    else last = -1.0f;
+    
+    if (phase < c->width) next = 1.0;
+    else next = -1.0f;
+    
+    c->phase = phase;
+    
+    float offset = 1.0f - ((c->inc - c->phase) / c->inc);
+    tMinBLEP_addBLEP(&c->minBlep, offset, last - next, 0.0f);
+}
+
+
+//==============================================================================
+
+/* tMBSawtooth: Anti-aliased Sawtooth waveform. */
+void    tMBSaw_init          (tMBSaw* const osc)
+{
+    tMBSaw_initToPool(osc, &leaf.mempool);
+}
+
+void    tMBSaw_free          (tMBSaw* const osc)
+{
+    tMBSaw_freeFromPool(osc, &leaf.mempool);
+}
+
+void    tMBSaw_initToPool    (tMBSaw* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tMBSaw* c = *osc = (_tMBSaw*) mpool_alloc(sizeof(_tMBSaw), m);
+    
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+    
+    tMinBLEP_initToPool(&c->minBlep, 16, 32, mp);
+    tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
+}
+
+void    tMBSaw_freeFromPool  (tMBSaw* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tMBSaw* c = *osc;
+    
+    tMinBLEP_freeFromPool(&c->minBlep, mp);
+    tHighpass_freeFromPool(&c->dcBlock, mp);
+    
+    mpool_free(c, m);
+}
+
+float   tMBSaw_tick          (tMBSaw* const osc)
+{
+    _tMBSaw* c = *osc;
+    
+    c->phase += c->inc;
+    if (c->phase >= 1.0f)
+    {
+        c->phase -= 1.0f;
+        float offset = 1.0f - ((c->inc - c->phase) / c->inc);
+        tMinBLEP_addBLEP(&c->minBlep, offset, 2, 0.0f);
+    }
+    
+    float out = (c->phase * 2.0f) - 1.0f;
+    
+    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));// - phasor->inc * 2.0f;
+    
+//    return tMinBLEP_tick(&c->minBlep, out) - c->inc * 2.0f;
+}
+
+void    tMBSaw_setFreq       (tMBSaw* const osc, float freq)
+{
+    _tMBSaw* c = *osc;
+    
+    c->freq  = freq;
+    
+    c->inc = freq * leaf.invSampleRate;
+}
+
+void    tMBSaw_sync          (tMBSaw* const osc, float phase)
+{
+    _tMBSaw* c = *osc;
+    LEAF_clip(0.0f, phase, 1.0f);
+    
+    float offset = 1.0f - ((c->inc - phase) / c->inc);
+    tMinBLEP_addBLEP(&c->minBlep, offset, c->phase * 2.0f, 0.0f);
+    
+    c->phase = phase;
 }

@@ -17,7 +17,7 @@
 #include "../Inc/leaf-filters.h"
 #include "../Inc/leaf-tables.h"
 #include "../leaf.h"
-#include "tim.h"
+//#include "tim.h"
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
@@ -1728,24 +1728,24 @@ float   tDiodeFilter_tick           	(tDiodeFilter* const vf, float in)
 
 	// This formula gives the result for y3 thanks to MATLAB
 	float y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
-	if (isnan(y3))
-	{
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-	}
+//    if (isnan(y3))
+//    {
+//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+//    }
 	float tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
-	if (isnan(tempy3denom))
-	{
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-	}
+//    if (isnan(tempy3denom))
+//    {
+//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+//    }
 	if (tempy3denom == 0.0f)
 	{
 		tempy3denom = 0.000001f;
 	}
 	y3 = y3 / tempy3denom;
-	if (isnan(y3))
-	{
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-	}
+//    if (isnan(y3))
+//    {
+//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+//    }
 	if (t1 == 0.0f)
 	{
 		t1 = 0.000001f;
@@ -1766,15 +1766,15 @@ float   tDiodeFilter_tick           	(tDiodeFilter* const vf, float in)
 
 	// update state
 	f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
-	if (isnan(f->s0))
-	{
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-	}
+//    if (isnan(f->s0))
+//    {
+//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+//    }
 
-	if (isinf(f->s0))
-	{
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-	}
+//    if (isinf(f->s0))
+//    {
+//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
+//    }
 	f->s1 += 2.0f * (t2*(y2-y1) - t1*(y1-y0));
 	f->s2 += 2.0f * (t3*(y3-y2) - t2*(y2-y1));
 	f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));

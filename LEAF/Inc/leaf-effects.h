@@ -130,11 +130,11 @@ extern "C" {
 
 	float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const);
 
-	float   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq);
+	void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq);
 
-	float   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, float openLength);
+	void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, float openLength);
 
-	float   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const, float pulseLength);
+	void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const, float pulseLength);
     
     //==============================================================================
     
