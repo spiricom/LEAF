@@ -142,6 +142,8 @@ extern "C" {
     
     float fastexp2f(float f);
     
+    float fastPowf(float a, float b) ;
+    double fastPow(double a, double b);
     
     void LEAF_crossfade(float fade, float* volumes);
 

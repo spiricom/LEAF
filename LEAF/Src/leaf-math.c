@@ -152,6 +152,29 @@ float fastexp2f(float x)
 }
 
 
+float fastPowf(float a, float b) {
+    union 
+    { 
+        float d; int x; 
+    } 
+    u = { a };
+
+    u.x = (int)(b * (u.x - 1064866805) + 1064866805);
+    return u.d;
+}
+
+
+double fastPow(double a, double b) {
+    union {
+        double d;
+        int x[2];
+    } u = { a };
+
+    u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
+    
+    u.x[0] = 0;
+    return u.d;
+}
 /*
  you pass in a float array to get back two indexes representing the volumes of the left (index 0) and right (index 1) channels
  when t is -1, volumes[0] = 0, volumes[1] = 1
