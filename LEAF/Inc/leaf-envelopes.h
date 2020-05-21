@@ -105,47 +105,144 @@ extern "C" {
     };
 
     /* ADSR */
-    typedef struct _tADSR
-    {
-        float sampleRateInMs;
-        int state;
-        float output;
-        float attackRate;
-        float decayRate;
-        float releaseRate;
-        float attackCoef;
-        float decayCoef;
-        float releaseCoef;
-        float sustainLevel;
-        float targetRatioA;
-        float targetRatioDR;
-        float attackBase;
-        float decayBase;
-        float releaseBase;
-        float leakFactor;
-        float gain;
+        typedef struct _tADSR
+        {
+           const float *exp_buff;
+           const float *inc_buff;
+            uint32_t buff_size;
 
-    } _tADSR;
-    
-    typedef _tADSR* tADSR;
-    
-    void    tADSR_init          (tADSR* const, float attack, float decay, float sustain, float release);
-    void    tADSR_free          (tADSR* const);
-    void    tADSR_initToPool    (tADSR* const, float attack, float decay, float sustain, float release, tMempool* const);
-    void    tADSR_freeFromPool  (tADSR* const, tMempool* const);
-    
-    float   tADSR_tick          (tADSR* const);
-    void    tADSR_setAttack     (tADSR* const, float attack);
-    void    tADSR_setDecay      (tADSR* const, float decay);
-    void    tADSR_setSustain    (tADSR* const, float sustain);
-    void    tADSR_setRelease    (tADSR* const, float release);
-    void    tADSR_setLeakFactor (tADSR* const, float leakFactor);
-    void    tADSR_on            (tADSR* const, float velocity);
-    void    tADSR_off           (tADSR* const);
+            float next;
+
+            float attackInc, decayInc, releaseInc, rampInc;
+
+            oBool inAttack, inDecay, inSustain, inRelease, inRamp;
+
+            float sustain, gain, rampPeak, releasePeak;
+
+            float attackPhase, decayPhase, releasePhase, rampPhase;
+
+            float leakFactor;
+
+
+        } _tADSR;
+
+        typedef _tADSR* tADSR;
+
+        void    tADSR_init          (tADSR* const, float attack, float decay, float sustain, float release);
+        void    tADSR_free          (tADSR* const);
+        void    tADSR_initToPool    (tADSR* const, float attack, float decay, float sustain, float release, tMempool* const);
+        void    tADSR_freeFromPool  (tADSR* const, tMempool* const);
+
+        float   tADSR_tick          (tADSR* const);
+        void    tADSR_setAttack     (tADSR* const, float attack);
+        void    tADSR_setDecay      (tADSR* const, float decay);
+        void    tADSR_setSustain    (tADSR* const, float sustain);
+        void    tADSR_setRelease    (tADSR* const, float release);
+        void    tADSR_setLeakFactor (tADSR* const, float leakFactor);
+        void    tADSR_on            (tADSR* const, float velocity);
+        void    tADSR_off           (tADSR* const);
+
+
     
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
+
+
+    /* ADSR2 */
+     typedef struct _tADSR2
+     {
+         float sampleRateInMs;
+         float attack;
+         float decay;
+         float release;
+         float attackLambda;
+         float decayLambda;
+         float releaseLambda;
+         float sustain;
+         float leakGain;
+         float leakFactor;
+         float targetGainSquared;
+         float factor;
+         float oneMinusFactor;
+         float gain;
+         uint8_t attacking;
+         uint8_t gate;
+         float env;
+         float envTarget;
+     } _tADSR2;
+
+     typedef _tADSR2* tADSR2;
+
+     void    tADSR2_init          (tADSR2* const, float attack, float decay, float sustain, float release);
+     void    tADSR2_free          (tADSR2* const);
+     void    tADSR2_initToPool    (tADSR2* const, float attack, float decay, float sustain, float release, tMempool* const);
+     void    tADSR2_freeFromPool  (tADSR2* const, tMempool* const);
+
+     float   tADSR2_tick          (tADSR2* const);
+     void    tADSR2_setAttack     (tADSR2* const, float attack);
+     void    tADSR2_setDecay      (tADSR2* const, float decay);
+     void    tADSR2_setSustain    (tADSR2* const, float sustain);
+     void    tADSR2_setRelease    (tADSR2* const, float release);
+     void    tADSR2_setLeakFactor (tADSR2* const, float leakFactor);
+     void    tADSR2_on            (tADSR2* const, float velocity);
+     void    tADSR2_off           (tADSR2* const);
+
+
+     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+     enum envState {
+         env_idle = 0,
+         env_attack,
+         env_decay,
+         env_sustain,
+         env_release
+     };
+
+     /* ADSR3 */
+     typedef struct _tADSR3
+     {
+         float sampleRateInMs;
+         int state;
+         float output;
+         float attackRate;
+         float decayRate;
+         float releaseRate;
+         float attackCoef;
+         float decayCoef;
+         float releaseCoef;
+         float sustainLevel;
+         float targetRatioA;
+         float targetRatioDR;
+         float attackBase;
+         float decayBase;
+         float releaseBase;
+         float leakFactor;
+         float targetGainSquared;
+         float factor;
+         float oneMinusFactor;
+         float gain;
+
+     } _tADSR3;
+
+     typedef _tADSR3* tADSR3;
+
+     void    tADSR3_init          (tADSR3* const, float attack, float decay, float sustain, float release);
+     void    tADSR3_free          (tADSR3* const);
+     void    tADSR3_initToPool    (tADSR3* const, float attack, float decay, float sustain, float release, tMempool* const);
+     void    tADSR3_freeFromPool  (tADSR3* const, tMempool* const);
+
+     float   tADSR3_tick          (tADSR3* const);
+     void    tADSR3_setAttack     (tADSR3* const, float attack);
+     void    tADSR3_setDecay      (tADSR3* const, float decay);
+     void    tADSR3_setSustain    (tADSR3* const, float sustain);
+     void    tADSR3_setRelease    (tADSR3* const, float release);
+     void    tADSR3_setLeakFactor (tADSR3* const, float leakFactor);
+     void    tADSR3_on            (tADSR3* const, float velocity);
+     void    tADSR3_off           (tADSR3* const);
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /* Ramp */
