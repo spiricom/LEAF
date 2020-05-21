@@ -96,13 +96,7 @@ extern "C" {
 
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-    enum envState {
-        env_idle = 0,
-        env_attack,
-        env_decay,
-        env_sustain,
-        env_release
-    };
+
 
     /* ADSR */
         typedef struct _tADSR
