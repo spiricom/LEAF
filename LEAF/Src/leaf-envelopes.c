@@ -496,7 +496,7 @@ float   tADSR_tick(tADSR* const adsrenv)
 
         else
         {
-            adsr->next = adsr->gain * (adsr->sustain + ((adsr->exp_buff[(uint32_t)adsr->decayPhase]) * (1 - adsr->sustain))); // do interpolation !
+            adsr->next = (adsr->gain * (adsr->sustain + ((adsr->exp_buff[(uint32_t)adsr->decayPhase]) * (1.0f - adsr->sustain)))) * adsr->leakFactor; // do interpolation !
         }
 
         // Increment ADSR decay.
@@ -722,14 +722,14 @@ void    tADSR3_initToPool    (tADSR3* const adsrenv, float attack, float decay, 
     adsr->attackBase = (1.0f + adsr->targetRatioA) * (1.0f - adsr->attackCoef);
 
     adsr->decayRate = decay * adsr->sampleRateInMs;
-    adsr->decayCoef = calcADSRCoef(decay * adsr->sampleRateInMs,adsr-> targetRatioDR);
+    adsr->decayCoef = calcADSR3Coef(decay * adsr->sampleRateInMs,adsr-> targetRatioDR);
     adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
 
     adsr->sustainLevel = sustain;
     adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
 
     adsr->releaseRate = release * adsr->sampleRateInMs;
-    adsr->releaseCoef = calcADSRCoef(release * adsr->sampleRateInMs, adsr->targetRatioDR);
+    adsr->releaseCoef = calcADSR3Coef(release * adsr->sampleRateInMs, adsr->targetRatioDR);
     adsr->releaseBase = -adsr->targetRatioDR * (1.0f - adsr->releaseCoef);
 
     adsr->state = env_idle;
@@ -843,6 +843,382 @@ float   tADSR3_tick(tADSR3* const adsrenv)
     //smooth the gain value   -- this is not ideal, a retrigger while the envelope is still going with a new gain will cause a jump, although it will be smoothed quickly. Maybe doing the math so the range is computed based on the gain rather than 0.->1. is preferable? But that's harder to get the exponential curve right without a lookup.
     adsr->gain = (adsr->factor*adsr->targetGainSquared)+(adsr->oneMinusFactor*adsr->gain);
     return adsr->output * adsr->gain;
+}
+
+
+/* ADSR 4 */ // new version of our original table-based ADSR but with the table passed in by the user
+// use this if the size of the big ADSR tables is too much.
+void    tADSR4_init    (tADSR4* const adsrenv, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize)
+{
+	tADSR4_initToPool    (adsrenv, attack, decay, sustain, release, expBuffer, bufferSize, &leaf.mempool);
+}
+
+void tADSR4_free(tADSR4* const adsrenv)
+{
+    tADSR4_freeFromPool(adsrenv, &leaf.mempool);
+}
+
+//initialize with an exponential function that decays -- i.e. a call to LEAF_generate_exp(expBuffer, 0.001f, 0.0f, 1.0f, -0.0008f, EXP_BUFFER_SIZE);
+//times are in ms
+void    tADSR4_initToPool    (tADSR4* const adsrenv, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tADSR4* adsr = *adsrenv = (_tADSR4*) mpool_alloc(sizeof(_tADSR4), m);
+
+    adsr->exp_buff = expBuffer;
+    adsr->buff_size = bufferSize;
+    adsr->buff_sizeMinusOne = bufferSize - 1;
+
+    adsr->bufferSizeDividedBySampleRateInMs = bufferSize / (leaf.sampleRate * 0.001f);
+
+    if (attack < 0.0f)
+        attack = 0.0f;
+
+    if (decay < 0.0f)
+        decay = 0.0f;
+
+    if (sustain > 1.0f)
+        sustain = 1.0f;
+    if (sustain < 0.0f)
+        sustain = 0.0f;
+
+    if (release < 0.0f)
+        release = 0.0f;
+
+    adsr->next = 0.0f;
+
+    adsr->inRamp = OFALSE;
+    adsr->inAttack = OFALSE;
+    adsr->inDecay = OFALSE;
+    adsr->inSustain = OFALSE;
+    adsr->inRelease = OFALSE;
+
+    adsr->sustain = sustain;
+
+    adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / attack;
+    adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / decay;
+    adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / release;
+    adsr->rampInc = adsr->bufferSizeDividedBySampleRateInMs / 8.0f;
+
+    adsr->leakFactor = 1.0f;
+}
+
+void    tADSR4_freeFromPool  (tADSR4* const adsrenv, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tADSR4* adsr = *adsrenv;
+    mpool_free(adsr, m);
+}
+
+void     tADSR4_setAttack(tADSR4* const adsrenv, float attack)
+{
+    _tADSR4* adsr = *adsrenv;
+
+    if (attack < 0.0f)
+    {
+    	attack = 0.0f;
+    }
+
+    adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / attack;
+}
+
+void     tADSR4_setDecay(tADSR4* const adsrenv, float decay)
+{
+    _tADSR4* adsr = *adsrenv;
+
+    if (decay < 0.0f)
+    {
+    	decay = 0.0f;
+    }
+    adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / decay;
+}
+
+void     tADSR4_setSustain(tADSR4* const adsrenv, float sustain)
+{
+    _tADSR4* adsr = *adsrenv;
+
+    if (sustain > 1.0f)      adsr->sustain = 1.0f;
+    else if (sustain < 0.0f) adsr->sustain = 0.0f;
+    else                     adsr->sustain = sustain;
+}
+
+void     tADSR4_setRelease(tADSR4* const adsrenv, float release)
+{
+    _tADSR4* adsr = *adsrenv;
+
+    if (release < 0.0f)
+    {
+    	release = 0.0f;
+    }
+    adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / release;
+}
+
+// 0.999999 is slow leak, 0.9 is fast leak
+void     tADSR4_setLeakFactor(tADSR4* const adsrenv, float leakFactor)
+{
+    _tADSR4* adsr = *adsrenv;
+
+
+    adsr->leakFactor = leakFactor;
+}
+
+void tADSR4_on(tADSR4* const adsrenv, float velocity)
+{
+    _tADSR4* adsr = *adsrenv;
+
+    if ((adsr->inAttack || adsr->inDecay) || (adsr->inSustain || adsr->inRelease)) // In case ADSR retriggered while it is still happening.
+    {
+        adsr->rampPhase = 0;
+        adsr->inRamp = OTRUE;
+        adsr->rampPeak = adsr->next;
+    }
+    else // Normal start.
+    {
+        adsr->inAttack = OTRUE;
+    }
+
+    adsr->attackPhase = 0;
+    adsr->decayPhase = 0;
+    adsr->releasePhase = 0;
+    adsr->inDecay = OFALSE;
+    adsr->inSustain = OFALSE;
+    adsr->inRelease = OFALSE;
+    adsr->gain = velocity;
+}
+
+void tADSR4_off(tADSR4* const adsrenv)
+{
+    _tADSR4* adsr = *adsrenv;
+
+    if (adsr->inRelease) return;
+
+    adsr->inAttack = OFALSE;
+    adsr->inDecay = OFALSE;
+    adsr->inSustain = OFALSE;
+    adsr->inRelease = OTRUE;
+
+    adsr->releasePeak = adsr->next;
+}
+
+float   tADSR4_tick(tADSR4* const adsrenv)
+{
+    _tADSR4* adsr = *adsrenv;
+
+
+    if (adsr->inRamp)
+    {
+        if (adsr->rampPhase > adsr->buff_sizeMinusOne)
+        {
+            adsr->inRamp = OFALSE;
+            adsr->inAttack = OTRUE;
+            adsr->next = 0.0f;
+        }
+        else
+        {
+        	uint32_t intPart = (uint32_t)adsr->rampPhase;
+        	float floatPart = adsr->rampPhase - intPart;
+        	float secondValue;
+        	if (adsr->rampPhase + 1.0f > adsr->buff_sizeMinusOne)
+        	{
+        		secondValue = 0.0f;
+        	}
+        	else
+        	{
+        		secondValue = adsr->exp_buff[(uint32_t)((adsr->rampPhase)+1)];
+        	}
+        	adsr->next = adsr->rampPeak * LEAF_interpolation_linear(adsr->exp_buff[(uint32_t)(adsr->rampPhase)], secondValue, floatPart);
+        }
+
+        adsr->rampPhase += adsr->rampInc;
+    }
+
+    if (adsr->inAttack)
+    {
+
+        // If attack done, time to turn around.
+        if (adsr->attackPhase > adsr->buff_sizeMinusOne)
+        {
+            adsr->inDecay = OTRUE;
+            adsr->inAttack = OFALSE;
+            adsr->next = adsr->gain;
+        }
+        else
+        {
+            // do interpolation !
+        	uint32_t intPart = (uint32_t)adsr->attackPhase;
+        	float floatPart = adsr->attackPhase - intPart;
+        	float secondValue;
+        	if (adsr->attackPhase + 1.0f > adsr->buff_sizeMinusOne)
+        	{
+        		secondValue = 0.0f;
+        	}
+        	else
+        	{
+        		secondValue = adsr->exp_buff[(uint32_t)((adsr->attackPhase)+1)];
+        	}
+
+            adsr->next = adsr->gain * (1.0f - LEAF_interpolation_linear(adsr->exp_buff[(uint32_t)(adsr->attackPhase)], secondValue, floatPart)); // inverted and backwards to get proper rising exponential shape/perception
+        }
+
+        // Increment ADSR attack.
+        adsr->attackPhase += adsr->attackInc;
+
+    }
+
+    if (adsr->inDecay)
+    {
+
+        // If decay done, sustain.
+        if (adsr->decayPhase > adsr->buff_sizeMinusOne)
+        {
+            adsr->inDecay = OFALSE;
+            adsr->inSustain = OTRUE;
+            adsr->next = adsr->gain * adsr->sustain;
+        }
+
+        else
+        {
+        	uint32_t intPart = (uint32_t)adsr->decayPhase;
+			float floatPart = adsr->decayPhase - intPart;
+			float secondValue;
+			if (adsr->decayPhase + 1.0f > adsr->buff_sizeMinusOne)
+			{
+				secondValue = 0.0f;
+			}
+			else
+			{
+				secondValue = adsr->exp_buff[(uint32_t)((adsr->decayPhase)+1)];
+			}
+			float interpValue = (LEAF_interpolation_linear(adsr->exp_buff[(uint32_t)(adsr->decayPhase)], secondValue, floatPart));
+        	adsr->next = (adsr->gain * (adsr->sustain + (interpValue * (1.0f - adsr->sustain)))) * adsr->leakFactor; // do interpolation !
+        }
+
+        // Increment ADSR decay.
+        adsr->decayPhase += adsr->decayInc;
+    }
+
+    if (adsr->inSustain)
+    {
+        adsr->next = adsr->next * adsr->leakFactor;
+    }
+
+    if (adsr->inRelease)
+    {
+        // If release done, finish.
+        if (adsr->releasePhase > adsr->buff_sizeMinusOne)
+        {
+            adsr->inRelease = OFALSE;
+            adsr->next = 0.0f;
+        }
+        else {
+        	uint32_t intPart = (uint32_t)adsr->releasePhase;
+			float floatPart = adsr->releasePhase - intPart;
+			float secondValue;
+			if (adsr->releasePhase + 1.0f > adsr->buff_sizeMinusOne)
+			{
+				secondValue = 0.0f;
+			}
+			else
+			{
+				secondValue = adsr->exp_buff[(uint32_t)((adsr->releasePhase)+1)];
+			}
+            adsr->next = adsr->releasePeak * (LEAF_interpolation_linear(adsr->exp_buff[(uint32_t)(adsr->releasePhase)], secondValue, floatPart)); // do interpolation !
+        }
+
+        // Increment envelope release;
+        adsr->releasePhase += adsr->releaseInc;
+    }
+
+
+    return adsr->next;
+}
+
+float   tADSR4_tickNoInterp(tADSR4* const adsrenv)
+{
+    _tADSR4* adsr = *adsrenv;
+
+
+    if (adsr->inRamp)
+    {
+        if (adsr->rampPhase > adsr->buff_sizeMinusOne)
+        {
+            adsr->inRamp = OFALSE;
+            adsr->inAttack = OTRUE;
+            adsr->next = 0.0f;
+        }
+        else
+        {
+        	adsr->next = adsr->rampPeak * adsr->exp_buff[(uint32_t)(adsr->rampPhase)];
+        }
+
+        adsr->rampPhase += adsr->rampInc;
+    }
+
+    if (adsr->inAttack)
+    {
+
+        // If attack done, time to turn around.
+        if (adsr->attackPhase > adsr->buff_sizeMinusOne)
+        {
+            adsr->inDecay = OTRUE;
+            adsr->inAttack = OFALSE;
+            adsr->next = adsr->gain;
+        }
+        else
+        {
+            // do interpolation !
+            adsr->next = adsr->gain * (1.0f - adsr->exp_buff[(uint32_t)(adsr->attackPhase)]); // inverted and backwards to get proper rising exponential shape/perception
+        }
+
+        // Increment ADSR attack.
+        adsr->attackPhase += adsr->attackInc;
+
+    }
+
+    if (adsr->inDecay)
+    {
+
+        // If decay done, sustain.
+        if (adsr->decayPhase > adsr->buff_sizeMinusOne)
+        {
+            adsr->inDecay = OFALSE;
+            adsr->inSustain = OTRUE;
+            adsr->next = adsr->gain * adsr->sustain;
+        }
+
+        else
+        {
+            adsr->next = (adsr->gain * (adsr->sustain + ((adsr->exp_buff[(uint32_t)(adsr->decayPhase)]) * (1.0f - adsr->sustain)))) * adsr->leakFactor; // do interpolation !
+        }
+
+        // Increment ADSR decay.
+        adsr->decayPhase += adsr->decayInc;
+    }
+
+    if (adsr->inSustain)
+    {
+        adsr->next = adsr->next * adsr->leakFactor;
+    }
+
+    if (adsr->inRelease)
+    {
+        // If release done, finish.
+        if (adsr->releasePhase > adsr->buff_sizeMinusOne)
+        {
+            adsr->inRelease = OFALSE;
+            adsr->next = 0.0f;
+        }
+        else {
+
+            adsr->next = adsr->releasePeak * (adsr->exp_buff[(uint32_t)(adsr->releasePhase)]); // do interpolation !
+        }
+
+        // Increment envelope release;
+        adsr->releasePhase += adsr->releaseInc;
+    }
+
+
+    return adsr->next;
 }
 
 
@@ -1178,6 +1554,13 @@ void     tExpSmooth_setVal(tExpSmooth* const expsmooth, float val)
 {
     _tExpSmooth* smooth = *expsmooth;
 	smooth->curr=val;
+}
+
+void     tExpSmooth_setValAndDest(tExpSmooth* const expsmooth, float val)
+{
+    _tExpSmooth* smooth = *expsmooth;
+	smooth->curr=val;
+	smooth->dest=val;
 }
 
 float   tExpSmooth_tick(tExpSmooth* const expsmooth)

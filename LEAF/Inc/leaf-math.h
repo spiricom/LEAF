@@ -144,6 +144,7 @@ extern "C" {
     
     float fastPowf(float a, float b) ;
     double fastPow(double a, double b);
+
     
     void LEAF_crossfade(float fade, float* volumes);
 
@@ -153,6 +154,11 @@ extern "C" {
     void LEAF_generate_sawtooth(float* buffer, float basefreq, int size);
     void LEAF_generate_triangle(float* buffer, float basefreq, int size);
     void LEAF_generate_square(float* buffer, float basefreq, int size);
+
+    //0.001 base gives a good curve that goes from 1 to near zero
+    //1000 gives a good curve from -1.0 to 0.0
+    void LEAF_generate_exp(float* buffer, float base, float start, float end, float offset, int size);
+
     float LEAF_poly_blep(float t, float dt);
     float LEAF_midiToFrequency(float f);
 

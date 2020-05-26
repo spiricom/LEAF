@@ -175,6 +175,11 @@ double fastPow(double a, double b) {
     u.x[0] = 0;
     return u.d;
 }
+
+
+
+
+
 /*
  you pass in a float array to get back two indexes representing the volumes of the left (index 0) and right (index 1) channels
  when t is -1, volumes[0] = 0, volumes[1] = 1
@@ -213,7 +218,7 @@ float LEAF_CompoundChebyshevT(float in, int n, float* amps){
 
 float LEAF_frequencyToMidi(float f)
 {
-    return (69.0f + 12.0f * log2(f * INV_440));
+    return (69.0f + 12.0f * log2f(f * INV_440));
 }
 
 // Jones shaper
@@ -425,6 +430,20 @@ void LEAF_generate_square(float* buffer, float basefreq, int size)
         freq = harmonic * basefreq;
     }
 }
+
+
+//0.001 base gives a good curve that goes from 1 to near zero
+void LEAF_generate_exp(float* buffer, float base, float start, float end, float offset, int size)
+{
+	float increment = (end - start) / (float)size;
+	float x = start;
+	for (int i = 0; i < size; i++)
+	{
+		buffer[i] = powf(base, x) + offset;
+		x += increment;
+    }
+}
+
 
 // http://www.martin-finke.de/blog/articles/audio-plugins-018-polyblep-oscillator/
 // http://www.kvraudio.com/forum/viewtopic.php?t=375517

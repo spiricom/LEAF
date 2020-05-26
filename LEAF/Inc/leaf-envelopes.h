@@ -91,6 +91,7 @@ extern "C" {
     void    tExpSmooth_setFactor    (tExpSmooth* const, float factor);
     void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
     void    tExpSmooth_setVal       (tExpSmooth* const, float val);
+    void    tExpSmooth_setValAndDest(tExpSmooth* const expsmooth, float val);
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -122,9 +123,9 @@ extern "C" {
 
         typedef _tADSR* tADSR;
 
-        void    tADSR_init          (tADSR* const, float attack, float decay, float sustain, float release);
+        void    tADSR_init    (tADSR* const adsrenv, float attack, float decay, float sustain, float release);
         void    tADSR_free          (tADSR* const);
-        void    tADSR_initToPool    (tADSR* const, float attack, float decay, float sustain, float release, tMempool* const);
+        void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp);
         void    tADSR_freeFromPool  (tADSR* const, tMempool* const);
 
         float   tADSR_tick          (tADSR* const);
@@ -237,8 +238,47 @@ extern "C" {
      void    tADSR3_off           (tADSR3* const);
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
+     /* ADSR 4*/
+         typedef struct _tADSR4
+         {
+            const float *exp_buff;
+             uint32_t buff_size;
+             uint32_t buff_sizeMinusOne;
+             float bufferSizeDividedBySampleRateInMs;
+             float next;
+
+             float attackInc, decayInc, releaseInc, rampInc;
+
+             oBool inAttack, inDecay, inSustain, inRelease, inRamp;
+
+             float sustain, gain, rampPeak, releasePeak;
+
+             float attackPhase, decayPhase, releasePhase, rampPhase;
+
+             float leakFactor;
+
+
+         } _tADSR4;
+
+         typedef _tADSR4* tADSR4;
+
+         void    tADSR4_init          (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize);
+         void    tADSR4_free          (tADSR4* const);
+         void    tADSR4_initToPool    (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const);
+         void    tADSR4_freeFromPool  (tADSR4* const, tMempool* const);
+
+         float   tADSR4_tick          (tADSR4* const);
+         float   tADSR4_tickNoInterp  (tADSR4* const adsrenv);
+         void    tADSR4_setAttack     (tADSR4* const, float attack);
+         void    tADSR4_setDecay      (tADSR4* const, float decay);
+         void    tADSR4_setSustain    (tADSR4* const, float sustain);
+         void    tADSR4_setRelease    (tADSR4* const, float release);
+         void    tADSR4_setLeakFactor (tADSR4* const, float leakFactor);
+         void    tADSR4_on            (tADSR4* const, float velocity);
+         void    tADSR4_off           (tADSR4* const);
+     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
     /* Ramp */
     typedef struct _tRamp {
         float inc;
