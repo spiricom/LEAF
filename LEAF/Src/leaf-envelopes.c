@@ -850,7 +850,7 @@ float   tADSR3_tick(tADSR3* const adsrenv)
 // use this if the size of the big ADSR tables is too much.
 void    tADSR4_init    (tADSR4* const adsrenv, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize)
 {
-	tADSR4_initToPool    (adsrenv, attack, decay, sustain, release, expBuffer, bufferSize, &leaf.mempool);
+    tADSR4_initToPool    (adsrenv, attack, decay, sustain, release, expBuffer, bufferSize, &leaf.mempool);
 }
 
 void tADSR4_free(tADSR4* const adsrenv)
@@ -887,11 +887,7 @@ void    tADSR4_initToPool    (tADSR4* const adsrenv, float attack, float decay, 
 
     adsr->next = 0.0f;
 
-    adsr->inRamp = OFALSE;
-    adsr->inAttack = OFALSE;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OFALSE;
+    adsr->whichStage = env_idle;
 
     adsr->sustain = sustain;
 
@@ -916,7 +912,7 @@ void     tADSR4_setAttack(tADSR4* const adsrenv, float attack)
 
     if (attack < 0.0f)
     {
-    	attack = 0.0f;
+        attack = 0.0f;
     }
 
     adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / attack;
@@ -928,7 +924,7 @@ void     tADSR4_setDecay(tADSR4* const adsrenv, float decay)
 
     if (decay < 0.0f)
     {
-    	decay = 0.0f;
+        decay = 0.0f;
     }
     adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / decay;
 }
@@ -948,7 +944,7 @@ void     tADSR4_setRelease(tADSR4* const adsrenv, float release)
 
     if (release < 0.0f)
     {
-    	release = 0.0f;
+        release = 0.0f;
     }
     adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / release;
 }
@@ -966,23 +962,20 @@ void tADSR4_on(tADSR4* const adsrenv, float velocity)
 {
     _tADSR4* adsr = *adsrenv;
 
-    if ((adsr->inAttack || adsr->inDecay) || (adsr->inSustain || adsr->inRelease)) // In case ADSR retriggered while it is still happening.
+    if (adsr->whichStage != env_idle) // In case ADSR retriggered while it is still happening.
     {
         adsr->rampPhase = 0;
-        adsr->inRamp = OTRUE;
+        adsr->whichStage = env_ramp;
         adsr->rampPeak = adsr->next;
     }
     else // Normal start.
     {
-        adsr->inAttack = OTRUE;
+        adsr->whichStage = env_attack;
     }
 
     adsr->attackPhase = 0;
     adsr->decayPhase = 0;
     adsr->releasePhase = 0;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OFALSE;
     adsr->gain = velocity;
 }
 
@@ -990,146 +983,139 @@ void tADSR4_off(tADSR4* const adsrenv)
 {
     _tADSR4* adsr = *adsrenv;
 
-    if (adsr->inRelease) return;
-
-    adsr->inAttack = OFALSE;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OTRUE;
-
-    adsr->releasePeak = adsr->next;
+    if (adsr->whichStage == env_idle)
+    {
+        return;
+    }
+    else
+    {
+        adsr->whichStage = env_release;
+        adsr->releasePeak = adsr->next;
+    }
 }
 
 float   tADSR4_tick(tADSR4* const adsrenv)
 {
     _tADSR4* adsr = *adsrenv;
 
-
-    if (adsr->inRamp)
+    switch (adsr->whichStage)
     {
-        if (adsr->rampPhase > adsr->buff_sizeMinusOne)
-        {
-            adsr->inRamp = OFALSE;
-            adsr->inAttack = OTRUE;
-            adsr->next = 0.0f;
-        }
-        else
-        {
-        	uint32_t intPart = (uint32_t)adsr->rampPhase;
-        	float floatPart = adsr->rampPhase - intPart;
-        	float secondValue;
-        	if (adsr->rampPhase + 1.0f > adsr->buff_sizeMinusOne)
-        	{
-        		secondValue = 0.0f;
-        	}
-        	else
-        	{
-        		secondValue = adsr->exp_buff[(uint32_t)((adsr->rampPhase)+1)];
-        	}
-        	adsr->next = adsr->rampPeak * LEAF_interpolation_linear(adsr->exp_buff[(uint32_t)(adsr->rampPhase)], secondValue, floatPart);
-        }
+        case env_ramp:
+            if (adsr->rampPhase > adsr->buff_sizeMinusOne)
+            {
+                adsr->whichStage = env_attack;
+                adsr->next = 0.0f;
+            }
+            else
+            {
+                uint32_t intPart = (uint32_t)adsr->rampPhase;
+                float floatPart = adsr->rampPhase - intPart;
+                float secondValue;
+                if (adsr->rampPhase + 1.0f > adsr->buff_sizeMinusOne)
+                {
+                    secondValue = 0.0f;
+                }
+                else
+                {
+                    secondValue = adsr->exp_buff[(uint32_t)((adsr->rampPhase)+1)];
+                }
+                adsr->next = adsr->rampPeak * LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue, floatPart);
+            }
 
-        adsr->rampPhase += adsr->rampInc;
+            adsr->rampPhase += adsr->rampInc;
+            break;
+
+
+        case env_attack:
+
+            // If attack done, time to turn around.
+            if (adsr->attackPhase > adsr->buff_sizeMinusOne)
+            {
+                adsr->whichStage = env_decay;
+                adsr->next = adsr->gain;
+            }
+            else
+            {
+                // do interpolation !
+                uint32_t intPart = (uint32_t)adsr->attackPhase;
+                float floatPart = adsr->attackPhase - intPart;
+                float secondValue;
+                if (adsr->attackPhase + 1.0f > adsr->buff_sizeMinusOne)
+                {
+                    secondValue = 0.0f;
+                }
+                else
+                {
+                    secondValue = adsr->exp_buff[(uint32_t)((adsr->attackPhase)+1)];
+                }
+
+                adsr->next = adsr->gain * (1.0f - LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue, floatPart)); // inverted and backwards to get proper rising exponential shape/perception
+            }
+
+            // Increment ADSR attack.
+            adsr->attackPhase += adsr->attackInc;
+            break;
+
+        case env_decay:
+
+            // If decay done, sustain.
+            if (adsr->decayPhase > adsr->buff_sizeMinusOne)
+            {
+                adsr->whichStage = env_sustain;
+                adsr->next = adsr->gain * adsr->sustain;
+            }
+
+            else
+            {
+                uint32_t intPart = (uint32_t)adsr->decayPhase;
+                float floatPart = adsr->decayPhase - intPart;
+                float secondValue;
+                if (adsr->decayPhase + 1.0f > adsr->buff_sizeMinusOne)
+                {
+                    secondValue = 0.0f;
+                }
+                else
+                {
+                    secondValue = adsr->exp_buff[(uint32_t)((adsr->decayPhase)+1)];
+                }
+                float interpValue = (LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue, floatPart));
+                adsr->next = (adsr->gain * (adsr->sustain + (interpValue * (1.0f - adsr->sustain)))) * adsr->leakFactor; // do interpolation !
+            }
+
+            // Increment ADSR decay.
+            adsr->decayPhase += adsr->decayInc;
+            break;
+
+        case env_sustain:
+            adsr->next = adsr->next * adsr->leakFactor;
+            break;
+
+        case env_release:
+            // If release done, finish.
+            if (adsr->releasePhase > adsr->buff_sizeMinusOne)
+            {
+                adsr->whichStage = env_idle;
+                adsr->next = 0.0f;
+            }
+            else {
+                uint32_t intPart = (uint32_t)adsr->releasePhase;
+                float floatPart = adsr->releasePhase - intPart;
+                float secondValue;
+                if (adsr->releasePhase + 1.0f > adsr->buff_sizeMinusOne)
+                {
+                    secondValue = 0.0f;
+                }
+                else
+                {
+                    secondValue = adsr->exp_buff[(uint32_t)((adsr->releasePhase)+1)];
+                }
+                adsr->next = adsr->releasePeak * (LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue, floatPart)); // do interpolation !
+            }
+
+            // Increment envelope release;
+            adsr->releasePhase += adsr->releaseInc;
+            break;
     }
-
-    if (adsr->inAttack)
-    {
-
-        // If attack done, time to turn around.
-        if (adsr->attackPhase > adsr->buff_sizeMinusOne)
-        {
-            adsr->inDecay = OTRUE;
-            adsr->inAttack = OFALSE;
-            adsr->next = adsr->gain;
-        }
-        else
-        {
-            // do interpolation !
-        	uint32_t intPart = (uint32_t)adsr->attackPhase;
-        	float floatPart = adsr->attackPhase - intPart;
-        	float secondValue;
-        	if (adsr->attackPhase + 1.0f > adsr->buff_sizeMinusOne)
-        	{
-        		secondValue = 0.0f;
-        	}
-        	else
-        	{
-        		secondValue = adsr->exp_buff[(uint32_t)((adsr->attackPhase)+1)];
-        	}
-
-            adsr->next = adsr->gain * (1.0f - LEAF_interpolation_linear(adsr->exp_buff[(uint32_t)(adsr->attackPhase)], secondValue, floatPart)); // inverted and backwards to get proper rising exponential shape/perception
-        }
-
-        // Increment ADSR attack.
-        adsr->attackPhase += adsr->attackInc;
-
-    }
-
-    if (adsr->inDecay)
-    {
-
-        // If decay done, sustain.
-        if (adsr->decayPhase > adsr->buff_sizeMinusOne)
-        {
-            adsr->inDecay = OFALSE;
-            adsr->inSustain = OTRUE;
-            adsr->next = adsr->gain * adsr->sustain;
-        }
-
-        else
-        {
-        	uint32_t intPart = (uint32_t)adsr->decayPhase;
-			float floatPart = adsr->decayPhase - intPart;
-			float secondValue;
-			if (adsr->decayPhase + 1.0f > adsr->buff_sizeMinusOne)
-			{
-				secondValue = 0.0f;
-			}
-			else
-			{
-				secondValue = adsr->exp_buff[(uint32_t)((adsr->decayPhase)+1)];
-			}
-			float interpValue = (LEAF_interpolation_linear(adsr->exp_buff[(uint32_t)(adsr->decayPhase)], secondValue, floatPart));
-        	adsr->next = (adsr->gain * (adsr->sustain + (interpValue * (1.0f - adsr->sustain)))) * adsr->leakFactor; // do interpolation !
-        }
-
-        // Increment ADSR decay.
-        adsr->decayPhase += adsr->decayInc;
-    }
-
-    if (adsr->inSustain)
-    {
-        adsr->next = adsr->next * adsr->leakFactor;
-    }
-
-    if (adsr->inRelease)
-    {
-        // If release done, finish.
-        if (adsr->releasePhase > adsr->buff_sizeMinusOne)
-        {
-            adsr->inRelease = OFALSE;
-            adsr->next = 0.0f;
-        }
-        else {
-        	uint32_t intPart = (uint32_t)adsr->releasePhase;
-			float floatPart = adsr->releasePhase - intPart;
-			float secondValue;
-			if (adsr->releasePhase + 1.0f > adsr->buff_sizeMinusOne)
-			{
-				secondValue = 0.0f;
-			}
-			else
-			{
-				secondValue = adsr->exp_buff[(uint32_t)((adsr->releasePhase)+1)];
-			}
-            adsr->next = adsr->releasePeak * (LEAF_interpolation_linear(adsr->exp_buff[(uint32_t)(adsr->releasePhase)], secondValue, floatPart)); // do interpolation !
-        }
-
-        // Increment envelope release;
-        adsr->releasePhase += adsr->releaseInc;
-    }
-
-
     return adsr->next;
 }
 
@@ -1137,87 +1123,77 @@ float   tADSR4_tickNoInterp(tADSR4* const adsrenv)
 {
     _tADSR4* adsr = *adsrenv;
 
-
-    if (adsr->inRamp)
+    switch (adsr->whichStage)
     {
-        if (adsr->rampPhase > adsr->buff_sizeMinusOne)
-        {
-            adsr->inRamp = OFALSE;
-            adsr->inAttack = OTRUE;
-            adsr->next = 0.0f;
-        }
-        else
-        {
-        	adsr->next = adsr->rampPeak * adsr->exp_buff[(uint32_t)(adsr->rampPhase)];
-        }
+        case env_ramp:
+            if (adsr->rampPhase > adsr->buff_sizeMinusOne)
+            {
+                adsr->whichStage = env_attack;
+                adsr->next = 0.0f;
+            }
+            else
+            {
+                adsr->next = adsr->rampPeak * adsr->exp_buff[(uint32_t)adsr->rampPhase];
+            }
 
-        adsr->rampPhase += adsr->rampInc;
+            adsr->rampPhase += adsr->rampInc;
+            break;
+
+
+        case env_attack:
+
+            // If attack done, time to turn around.
+            if (adsr->attackPhase > adsr->buff_sizeMinusOne)
+            {
+                adsr->whichStage = env_decay;
+                adsr->next = adsr->gain;
+            }
+            else
+            {
+                adsr->next = adsr->gain * (1.0f - adsr->exp_buff[(uint32_t)adsr->attackPhase]); // inverted and backwards to get proper rising exponential shape/perception
+            }
+
+            // Increment ADSR attack.
+            adsr->attackPhase += adsr->attackInc;
+            break;
+
+        case env_decay:
+
+            // If decay done, sustain.
+            if (adsr->decayPhase > adsr->buff_sizeMinusOne)
+            {
+                adsr->whichStage = env_sustain;
+                adsr->next = adsr->gain * adsr->sustain;
+            }
+
+            else
+            {
+                adsr->next = (adsr->gain * (adsr->sustain + (adsr->exp_buff[(uint32_t)adsr->decayPhase] * (1.0f - adsr->sustain)))) * adsr->leakFactor;
+            }
+
+            // Increment ADSR decay.
+            adsr->decayPhase += adsr->decayInc;
+            break;
+
+        case env_sustain:
+            adsr->next = adsr->next * adsr->leakFactor;
+            break;
+
+        case env_release:
+            // If release done, finish.
+            if (adsr->releasePhase > adsr->buff_sizeMinusOne)
+            {
+                adsr->whichStage = env_idle;
+                adsr->next = 0.0f;
+            }
+            else {
+                adsr->next = adsr->releasePeak * adsr->exp_buff[(uint32_t)adsr->releasePhase];
+            }
+
+            // Increment envelope release;
+            adsr->releasePhase += adsr->releaseInc;
+            break;
     }
-
-    if (adsr->inAttack)
-    {
-
-        // If attack done, time to turn around.
-        if (adsr->attackPhase > adsr->buff_sizeMinusOne)
-        {
-            adsr->inDecay = OTRUE;
-            adsr->inAttack = OFALSE;
-            adsr->next = adsr->gain;
-        }
-        else
-        {
-            // do interpolation !
-            adsr->next = adsr->gain * (1.0f - adsr->exp_buff[(uint32_t)(adsr->attackPhase)]); // inverted and backwards to get proper rising exponential shape/perception
-        }
-
-        // Increment ADSR attack.
-        adsr->attackPhase += adsr->attackInc;
-
-    }
-
-    if (adsr->inDecay)
-    {
-
-        // If decay done, sustain.
-        if (adsr->decayPhase > adsr->buff_sizeMinusOne)
-        {
-            adsr->inDecay = OFALSE;
-            adsr->inSustain = OTRUE;
-            adsr->next = adsr->gain * adsr->sustain;
-        }
-
-        else
-        {
-            adsr->next = (adsr->gain * (adsr->sustain + ((adsr->exp_buff[(uint32_t)(adsr->decayPhase)]) * (1.0f - adsr->sustain)))) * adsr->leakFactor; // do interpolation !
-        }
-
-        // Increment ADSR decay.
-        adsr->decayPhase += adsr->decayInc;
-    }
-
-    if (adsr->inSustain)
-    {
-        adsr->next = adsr->next * adsr->leakFactor;
-    }
-
-    if (adsr->inRelease)
-    {
-        // If release done, finish.
-        if (adsr->releasePhase > adsr->buff_sizeMinusOne)
-        {
-            adsr->inRelease = OFALSE;
-            adsr->next = 0.0f;
-        }
-        else {
-
-            adsr->next = adsr->releasePeak * (adsr->exp_buff[(uint32_t)(adsr->releasePhase)]); // do interpolation !
-        }
-
-        // Increment envelope release;
-        adsr->releasePhase += adsr->releaseInc;
-    }
-
-
     return adsr->next;
 }
 

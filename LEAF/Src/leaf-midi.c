@@ -682,7 +682,8 @@ int tPoly_isOn(tPoly* const polyh, uint8_t voice)
 
 
 
-//tSimplePoly = more efficient implementation without ramps and glide
+
+//tSimplePoly = much more efficient implementation without ramps and glide
 
 
 // SIMPLE POLY
@@ -709,7 +710,8 @@ void    tSimplePoly_initToPool            (tSimplePoly* const polyh, int maxNumV
         poly->notes[i][0] = -1;
         poly->notes[i][1] = 0;
     }
-
+    poly->stealing_on = 1;
+    poly->recover_stolen = 1;
     poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, m);
 
     for (int i = 0; i < poly->maxNumVoices; ++i)
@@ -743,13 +745,11 @@ int tSimplePoly_noteOn(tSimplePoly* const polyh, int note, uint8_t vel)
     if (tStack_contains(&poly->stack, note) >= 0) return -1;
     else
     {
-        tStack_add(&poly->stack, note);
-
         alteredVoice = -1;
         oBool found = OFALSE;
         for (int i = 0; i < poly->numVoices; i++)
         {
-            if (poly->voices[i][0] < 0)    // if inactive voice, give this note to voice
+            if (poly->voices[i][0] == -1)    // if inactive voice, give this note to voice
             {
 
                 found = OTRUE;
@@ -757,15 +757,37 @@ int tSimplePoly_noteOn(tSimplePoly* const polyh, int note, uint8_t vel)
                 poly->voices[i][0] = note;
                 poly->voices[i][1] = vel;
                 poly->notes[note][0] = i;
-
+                poly->notes[note][1] = vel;
                 poly->voices[i][2] = note; // voices[i][2] is the output midi note, (avoiding the -1 when a voice is inactive)
 
                 alteredVoice = i;
+                tStack_add(&poly->stack, note);
                 break;
             }
         }
+        if (!found)
+        {
+            //second preference is grabbing one that is in release phase but not finished sounding yet
+            for (int i = 0 ; i < poly->numVoices; i++)
+            {
+                if (poly->voices[i][0] == -2)    // if voice is released but still sounding, take over this voice
+                {
 
-        if (!found) //steal
+                    found = OTRUE;
+
+                    poly->voices[i][0] = note;
+                    poly->voices[i][1] = vel;
+                    poly->notes[note][0] = i;
+                    poly->notes[note][1] = vel;
+                    poly->voices[i][2] = note; // voices[i][2] is the output midi note, (avoiding the -1 when a voice is inactive)
+
+                    alteredVoice = i;
+                    tStack_add(&poly->stack, note);
+                    break;
+                }
+            }
+        }
+        if ((!found) && (poly->stealing_on)) //steal
         {
             for (int j = tStack_getSize(&poly->stack) - 1; j >= 0; j--)
             {
@@ -776,14 +798,14 @@ int tSimplePoly_noteOn(tSimplePoly* const polyh, int note, uint8_t vel)
                     oldNote = poly->voices[whichVoice][0];
                     poly->voices[whichVoice][0] = note;
                     poly->voices[whichVoice][1] = vel;
-                    poly->notes[oldNote][0] = -1; //mark the stolen voice as inactive (in the second dimension of the notes array)
+                    poly->notes[oldNote][0] = -3; //mark the stolen voice as stolen (in the second dimension of the notes array)
                     poly->notes[note][0] = whichVoice;
                     poly->notes[note][1] = vel;
 
                     poly->voices[whichVoice][2] = note;
 
                     alteredVoice = whichVoice;
-
+                    tStack_add(&poly->stack, note);
                     break;
                 }
             }
@@ -794,16 +816,13 @@ int tSimplePoly_noteOn(tSimplePoly* const polyh, int note, uint8_t vel)
 
 
 
-
 int tSimplePoly_noteOff(tSimplePoly* const polyh, uint8_t note)
 {
     _tSimplePoly* poly = *polyh;
     int16_t noteToTest = -1;
 
-
     tStack_remove(&poly->stack, note);
     poly->notes[note][0] = -1;
-
 
     int deactivatedVoice = -1;
     for (int i = 0; i < poly->maxNumVoices; i++)
@@ -817,22 +836,100 @@ int tSimplePoly_noteOff(tSimplePoly* const polyh, uint8_t note)
         }
     }
 
-    //grab old notes off the stack if there are notes waiting to replace the free voice
-    if (deactivatedVoice >= 0)
+    if (poly->recover_stolen)
     {
-        for (int j = 0; j < tStack_getSize(&poly->stack); ++j)
+        //grab old notes off the stack if there are notes waiting to replace the free voice
+        if (deactivatedVoice >= 0)
         {
-            noteToTest = tStack_get(&poly->stack, j);
-
-            if (poly->notes[noteToTest][0] < 0) //if there is a stolen note waiting (marked inactive but on the stack)
+            for (int j = 0; j < tStack_getSize(&poly->stack); ++j)
             {
-                poly->voices[deactivatedVoice][0] = noteToTest; //set the newly free voice to use the old stolen note
-                poly->voices[deactivatedVoice][1] = poly->notes[noteToTest][1]; // set the velocity of the voice to be the velocity of that note
-                poly->voices[deactivatedVoice][2] = noteToTest;
-                poly->notes[noteToTest][0] = deactivatedVoice; //mark that it is no longer stolen and is now active
-                return -1;
+                noteToTest = tStack_get(&poly->stack, j);
+
+                if (poly->notes[noteToTest][0] == -3) //if there is a stolen note waiting (marked inactive but on the stack)
+                {
+                    poly->voices[deactivatedVoice][0] = noteToTest; //set the newly free voice to use the old stolen note
+                    poly->voices[deactivatedVoice][1] = poly->notes[noteToTest][1]; // set the velocity of the voice to be the velocity of that note
+                    poly->voices[deactivatedVoice][2] = noteToTest;
+                    poly->notes[noteToTest][0] = deactivatedVoice; //mark that it is no longer stolen and is now active
+                    return -1;
+                }
             }
         }
+    }
+    return deactivatedVoice;
+}
+
+
+void tSimplePoly_deactivateVoice(tSimplePoly* const polyh, uint8_t voice)
+{
+    _tSimplePoly* poly = *polyh;
+
+    if (poly->voices[voice][0] == -2) //only do this if the voice is waiting for deactivation (not already reassigned while waiting)
+    {
+        poly->voices[voice][0] = -1;
+        poly->voices[voice][1] = 0;
+        if (poly->recover_stolen)
+        {
+            //grab old notes off the stack if there are notes waiting to replace the free voice
+            for (int j = 0; j < tStack_getSize(&poly->stack); ++j)
+            {
+                noteToTest = tStack_get(&poly->stack, j);
+
+                if (poly->notes[noteToTest][0] == -3) //if there is a stolen note waiting (marked inactive but on the stack)
+                {
+                    poly->voices[voice][0] = noteToTest; //set the newly free voice to use the old stolen note
+                    poly->voices[voice][1] = poly->notes[noteToTest][1]; // set the velocity of the voice to be the velocity of that note
+                    poly->voices[voice][2] = noteToTest;
+                    poly->notes[noteToTest][0] = voice; //mark that it is no longer stolen and is now active
+                }
+            }
+        }
+    }
+}
+
+int tSimplePoly_findVoiceAssignedToNote(tSimplePoly* const polyh, uint8_t note)
+{
+    _tSimplePoly* poly = *polyh;
+
+
+    int voiceWithThatNote = -1;
+    for (int i = 0; i < poly->maxNumVoices; i++)
+    {
+        if (poly->voices[i][0] == note)
+        {
+            voiceWithThatNote = i;
+            break;
+        }
+    }
+    return voiceWithThatNote;
+}
+
+
+int tSimplePoly_markPendingNoteOff(tSimplePoly* const polyh, uint8_t note)
+{
+    _tSimplePoly* poly = *polyh;
+    int deactivatedVoice = -1;
+
+    if (tStack_remove(&poly->stack, note))
+
+    {
+
+        poly->notes[note][0] = -2;
+
+
+
+        for (int i = 0; i < poly->maxNumVoices; i++)
+        {
+            if (poly->voices[i][0] == note)
+            {
+                poly->voices[i][0] = -2;
+                poly->voices[i][1] = 0;
+                deactivatedVoice = i;
+                break;
+            }
+        }
+
+
     }
     return deactivatedVoice;
 }
@@ -861,6 +958,13 @@ int tSimplePoly_getPitch(tSimplePoly* const polyh, uint8_t voice)
 {
     _tSimplePoly* poly = *polyh;
     return poly->voices[voice][2];
+}
+
+//this one returns negative one if the voice is inactive
+int tSimplePoly_getPitchAndCheckActive(tSimplePoly* const polyh, uint8_t voice)
+{
+    _tSimplePoly* poly = *polyh;
+    return poly->voices[voice][0];
 }
 
 int tSimplePoly_getVelocity(tSimplePoly* const polyh, uint8_t voice)

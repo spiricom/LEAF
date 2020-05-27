@@ -239,8 +239,10 @@ extern "C" {
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
-     /* ADSR 4*/
-         typedef struct _tADSR4
+    //ADSR4
+
+     
+     typedef struct _tADSR4
          {
             const float *exp_buff;
              uint32_t buff_size;
@@ -250,7 +252,7 @@ extern "C" {
 
              float attackInc, decayInc, releaseInc, rampInc;
 
-             oBool inAttack, inDecay, inSustain, inRelease, inRamp;
+             uint32_t whichStage;
 
              float sustain, gain, rampPeak, releasePeak;
 

@@ -364,14 +364,6 @@ extern "C" {
     //==============================================================================
 
     
-    // simplified version of poly for more efficiency when we don't need ramps and pitch glide
-    /*!
-     * @defgroup tpoly tPoly
-     * @ingroup midi
-     * @brief An object for polyphonic handling.
-     * @{
-     */
-
     /* tPoly */
     typedef struct _tSimplePoly
     {
@@ -380,6 +372,8 @@ extern "C" {
         int numVoices;
         int maxNumVoices;
         int** voices;
+        int stealing_on;
+        int recover_stolen;
 
         int notes[128][2];
     } _tSimplePoly;
@@ -435,6 +429,15 @@ extern "C" {
     int     tSimplePoly_noteOff               (tSimplePoly* const poly, uint8_t note);
 
 
+
+    void tSimplePoly_deactivateVoice(tSimplePoly* const polyh, uint8_t voice);
+
+    int tSimplePoly_markPendingNoteOff(tSimplePoly* const polyh, uint8_t note);
+
+
+    //find if there is a voice with that note -- useful for note offs where you want to wait to remove it from the poly until the release phase of the envelope is finished
+    int tSimplePoly_findVoiceAssignedToNote(tSimplePoly* const polyh, uint8_t note);
+
     //! Set the number of voices available to play notes.
     /*!
      @param poly A pointer to the relevant tPoly.
@@ -470,6 +473,11 @@ extern "C" {
      */
 
     int   tSimplePoly_getPitch              (tSimplePoly* const poly, uint8_t voice);
+
+
+    //this one returns negative one if the voice is inactive
+    int tSimplePoly_getPitchAndCheckActive(tSimplePoly* const polyh, uint8_t voice);
+
 
     //! Get the current MIDI velocity of a given voice.
     /*!
