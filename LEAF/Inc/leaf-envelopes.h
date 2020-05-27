@@ -192,7 +192,8 @@ extern "C" {
          env_attack,
          env_decay,
          env_sustain,
-         env_release
+         env_release,
+         env_ramp
      };
 
      /* ADSR3 */
