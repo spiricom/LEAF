@@ -36,7 +36,7 @@ void tStack_free(tStack* const stack)
 {
     _tStack* ns = *stack;
     
-    leaf_free(ns);
+    leaf_free((char*)ns);
 }
 
 void    tStack_initToPool           (tStack* const stack, tMempool* const mp)
@@ -57,7 +57,7 @@ void    tStack_freeFromPool         (tStack* const stack, tMempool* const mp)
     _tMempool* m = *mp;
     _tStack* ns = *stack;
     
-    mpool_free(ns, m);
+    mpool_free((char*)ns, m);
 }
 
 // If stack contains note, returns index. Else returns -1;
@@ -322,18 +322,18 @@ void tPoly_free(tPoly* const polyh)
     for (int i = 0; i < poly->maxNumVoices; i++)
     {
         tRamp_free(&poly->ramps[i]);
-        leaf_free(poly->voices[i]);
+        leaf_free((char*)poly->voices[i]);
     }
     tRamp_free(&poly->pitchBendRamp);
     tStack_free(&poly->stack);
     tStack_free(&poly->orderStack);
     
-    leaf_free(poly->voices);
-    leaf_free(poly->ramps);
-    leaf_free(poly->rampVals);
-    leaf_free(poly->firstReceived);
+    leaf_free((char*)poly->voices);
+    leaf_free((char*)poly->ramps);
+    leaf_free((char*)poly->rampVals);
+    leaf_free((char*)poly->firstReceived);
     
-    leaf_free(poly);
+    leaf_free((char*)poly);
 }
 
 void    tPoly_initToPool            (tPoly* const polyh, int maxNumVoices, tMempool* const mp)
@@ -390,18 +390,18 @@ void    tPoly_freeFromPool  (tPoly* const polyh, tMempool* const mp)
     for (int i = 0; i < poly->maxNumVoices; i++)
     {
         tRamp_freeFromPool(&poly->ramps[i], mp);
-        mpool_free(poly->voices[i], m);
+        mpool_free((char*)poly->voices[i], m);
     }
     tRamp_freeFromPool(&poly->pitchBendRamp, mp);
     tStack_freeFromPool(&poly->stack, mp);
     tStack_freeFromPool(&poly->orderStack, mp);
     
-    mpool_free(poly->voices, m);
-    mpool_free(poly->ramps, m);
-    mpool_free(poly->rampVals, m);
-    mpool_free(poly->firstReceived, m);
+    mpool_free((char*)poly->voices, m);
+    mpool_free((char*)poly->ramps, m);
+    mpool_free((char*)poly->rampVals, m);
+    mpool_free((char*)poly->firstReceived, m);
     
-    mpool_free(poly, m);
+    mpool_free((char*)poly, m);
 }
 
 void tPoly_tickPitch(tPoly* polyh)
@@ -730,11 +730,11 @@ void    tSimplePoly_freeFromPool  (tSimplePoly* const polyh, tMempool* const mp)
 
     for (int i = 0; i < poly->maxNumVoices; i++)
     {
-        mpool_free(poly->voices[i], m);
+        mpool_free((char*)poly->voices[i], m);
     }
     tStack_freeFromPool(&poly->stack, mp);
-    mpool_free(poly->voices, m);
-    mpool_free(poly, m);
+    mpool_free((char*)poly->voices, m);
+    mpool_free((char*)poly, m);
 }
 
 int tSimplePoly_noteOn(tSimplePoly* const polyh, int note, uint8_t vel)

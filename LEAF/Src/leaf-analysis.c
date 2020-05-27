@@ -35,7 +35,7 @@ void tEnvelopeFollower_free(tEnvelopeFollower* const ef)
 {
     _tEnvelopeFollower* e = *ef;
     
-    leaf_free(e);
+    leaf_free((char*)e);
 }
 
 void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff, tMempool* const mp)
@@ -53,7 +53,7 @@ void    tEnvelopeFollower_freeFromPool  (tEnvelopeFollower* const ef, tMempool* 
     _tMempool* m = *mp;
     _tEnvelopeFollower* e = *ef;
     
-    mpool_free(e, m);
+    mpool_free((char*)e, m);
 }
 
 float   tEnvelopeFollower_tick(tEnvelopeFollower* const ef, float x)
@@ -118,9 +118,9 @@ void    tZeroCrossing_freeFromPool (tZeroCrossing* const zc, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tZeroCrossing* z = *zc;
-    mpool_free(z->inBuffer, m);
-    mpool_free(z->countBuffer, m);
-    mpool_free(z, m);
+    mpool_free((char*)z->inBuffer, m);
+    mpool_free((char*)z->countBuffer, m);
+    mpool_free((char*)z, m);
 }
 
 //returns proportion of zero crossings within window size (0.0 would be none in window, 1.0 would be all zero crossings)
@@ -197,7 +197,7 @@ void tPowerFollower_free(tPowerFollower* const pf)
 {
     _tPowerFollower* p = *pf;
     
-    leaf_free(p);
+    leaf_free((char*)p);
 }
 
 void    tPowerFollower_initToPool   (tPowerFollower* const pf, float factor, tMempool* const mp)
@@ -215,7 +215,7 @@ void    tPowerFollower_freeFromPool (tPowerFollower* const pf, tMempool* const m
     _tMempool* m = *mp;
     _tPowerFollower* p = *pf;
     
-    mpool_free(p, m);
+    mpool_free((char*)p, m);
 }
 
 int     tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
@@ -295,7 +295,7 @@ void tEnvPD_free (tEnvPD* const xpd)
 {
     _tEnvPD* x = *xpd;
     
-    leaf_free(x);
+    leaf_free((char*)x);
 }
 
 void    tEnvPD_initToPool       (tEnvPD* const xpd, int ws, int hs, int bs, tMempool* const mp)
@@ -346,7 +346,7 @@ void    tEnvPD_freeFromPool     (tEnvPD* const xpd, tMempool* const mp)
     _tMempool* m = *mp;
     _tEnvPD* x = *xpd;
     
-    mpool_free(x, m);
+    mpool_free((char*)x, m);
 }
 
 float tEnvPD_tick (tEnvPD* const xpd)
@@ -412,7 +412,7 @@ void tAttackDetection_free(tAttackDetection* const ad)
 {
     _tAttackDetection* a = *ad;
     
-    leaf_free(a);
+    leaf_free((char*)a);
 }
 
 void    tAttackDetection_initToPool     (tAttackDetection* const ad, int blocksize, int atk, int rel, tMempool* const mp)
@@ -428,7 +428,7 @@ void    tAttackDetection_freeFromPool   (tAttackDetection* const ad, tMempool* c
     _tMempool* m = *mp;
     _tAttackDetection* a = *ad;
     
-    mpool_free(a, m);
+    mpool_free((char*)a, m);
 }
 
 /*******Public Functions***********/
@@ -580,11 +580,11 @@ void tSNAC_free(tSNAC* const snac)
 {
     _tSNAC* s = *snac;
     
-    leaf_free(s->inputbuf);
-    leaf_free(s->processbuf);
-    leaf_free(s->spectrumbuf);
-    leaf_free(s->biasbuf);
-    leaf_free(s);
+    leaf_free((char*)s->inputbuf);
+    leaf_free((char*)s->processbuf);
+    leaf_free((char*)s->spectrumbuf);
+    leaf_free((char*)s->biasbuf);
+    leaf_free((char*)s);
 }
 
 void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const mp)
@@ -614,11 +614,11 @@ void    tSNAC_freeFromPool  (tSNAC* const snac, tMempool* const mp)
     _tMempool* m = *mp;
     _tSNAC* s = *snac;
     
-    mpool_free(s->inputbuf, m);
-    mpool_free(s->processbuf, m);
-    mpool_free(s->spectrumbuf, m);
-    mpool_free(s->biasbuf, m);
-    mpool_free(s, m);
+    mpool_free((char*)s->inputbuf, m);
+    mpool_free((char*)s->processbuf, m);
+    mpool_free((char*)s->spectrumbuf, m);
+    mpool_free((char*)s->biasbuf, m);
+    mpool_free((char*)s, m);
 }
 
 /******************************************************************************/
@@ -977,7 +977,7 @@ void    tPeriodDetection_freeFromPool       (tPeriodDetection* const pd, tMempoo
     
     tEnvPD_freeFromPool(&p->env, mp);
     tSNAC_freeFromPool(&p->snac, mp);
-    mpool_free(p, m);
+    mpool_free((char*)p, m);
 }
 
 float tPeriodDetection_tick (tPeriodDetection* pd, float sample)

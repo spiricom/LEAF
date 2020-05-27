@@ -56,8 +56,8 @@ void        tDelay_freeFromPool (tDelay* const dl, tMempool* const mp)
     _tMempool* m = *mp;
     _tDelay* d = *dl;
     
-    mpool_free(d->buff, m);
-    mpool_free(d, m);
+    mpool_free((char*)d->buff, m);
+    mpool_free((char*)d, m);
 }
 
 void    tDelay_clear(tDelay* const dl)
@@ -206,8 +206,8 @@ void    tLinearDelay_freeFromPool(tLinearDelay* const dl, tMempool* const mp)
     _tMempool* m = *mp;
     _tLinearDelay* d = *dl;
     
-    mpool_free(d->buff, m);
-    mpool_free(d, m);
+    mpool_free((char*)d->buff, m);
+    mpool_free((char*)d, m);
 }
 
 void    tLinearDelay_clear(tLinearDelay* const dl)
@@ -404,8 +404,8 @@ void    tHermiteDelay_freeFromPool(tHermiteDelay* const dl, tMempool* const mp)
     _tMempool* m = *mp;
     _tHermiteDelay* d = *dl;
 
-    mpool_free(d->buff, m);
-    mpool_free(d, m);
+    mpool_free((char*)d->buff, m);
+    mpool_free((char*)d, m);
 }
 
 
@@ -606,8 +606,8 @@ void    tAllpassDelay_freeFromPool(tAllpassDelay* const dl, tMempool* const mp)
     _tMempool* m = *mp;
     _tAllpassDelay* d = *dl;
     
-    mpool_free(d->buff, m);
-    mpool_free(d, m);
+    mpool_free((char*)d->buff, m);
+    mpool_free((char*)d, m);
 }
 
 void    tAllpassDelay_clear(tAllpassDelay* const dl)
@@ -781,8 +781,8 @@ void    tTapeDelay_freeFromPool(tTapeDelay* const dl, tMempool* const mp)
     _tMempool* m = *mp;
     _tTapeDelay* d = *dl;
     
-    mpool_free(d->buff, m);
-    mpool_free(d, m);
+    mpool_free((char*)d->buff, m);
+    mpool_free((char*)d, m);
 }
 
 void    tTapeDelay_clear(tTapeDelay* const dl)

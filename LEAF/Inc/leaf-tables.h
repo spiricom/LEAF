@@ -19,7 +19,11 @@ extern "C" {
 
 //==============================================================================
 
-
+#define USE_SAWTOOTH_TABLE 1
+#define USE_SQUARE_TABLE 1
+#define USE_TRIANGLE_TABLE 1
+#define USE_SHAPER_TABLE 1
+    
 #define SINE_TABLE_SIZE 2048
 #define SAW_TABLE_SIZE 2048
 #define SQR_TABLE_SIZE 2048

@@ -126,8 +126,8 @@ float fastexp2f(float x)
 {
     if (x >= -127.0)
     {
-        register float accumulator, xPower;
-        register union {float f; int32_t i;} xBits;
+        float accumulator, xPower;
+        union {float f; int32_t i;} xBits;
         
         xBits.i = (int32_t)(x + 4096.0f) - 4096L;               /* integer part */
         x -= (float)(xBits.i);                                             /* fractional part */

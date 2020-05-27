@@ -202,7 +202,7 @@ static void run_pool_test(void)
     {
         buffer[i] = (float)(i*2);
     }
-    leaf_free(buffer);
+    leaf_free((char*)buffer);
     
     leaf_pool_report();
     

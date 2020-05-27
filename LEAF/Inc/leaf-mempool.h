@@ -63,7 +63,7 @@ extern "C" {
     
     // node of free list
     typedef struct mpool_node_t {
-        void                *pool;     // memory pool field
+        char                *pool;     // memory pool field
         struct mpool_node_t *next;     // next node pointer
         struct mpool_node_t *prev;     // prev node pointer
         size_t size;
@@ -71,7 +71,7 @@ extern "C" {
     
     typedef struct _tMempool
     {
-        void*         mpool;       // start of the mpool
+        char*         mpool;       // start of the mpool
         size_t        usize;       // used size of the pool
         size_t        msize;       // max size of the pool
         mpool_node_t* head;        // first node of memory pool free list
@@ -117,7 +117,7 @@ extern "C" {
     //==============================================================================
 
     //    typedef struct mpool_t {
-    //        void*         mpool;       // start of the mpool
+    //        char*         mpool;       // start of the mpool
     //        size_t        usize;       // used size of the pool
     //        size_t        msize;       // max size of the pool
     //        mpool_node_t* head;        // first node of memory pool free list
@@ -125,25 +125,25 @@ extern "C" {
     
     void mpool_create (char* memory, size_t size, _tMempool* pool);
     
-    void* mpool_alloc(size_t size, _tMempool* pool);
-    void* mpool_calloc(size_t asize, _tMempool* pool);
+    char* mpool_alloc(size_t size, _tMempool* pool);
+    char* mpool_calloc(size_t asize, _tMempool* pool);
     
-    void mpool_free(void* ptr, _tMempool* pool);
+    void mpool_free(char* ptr, _tMempool* pool);
     
     size_t mpool_get_size(_tMempool* pool);
     size_t mpool_get_used(_tMempool* pool);
     
     void leaf_pool_init(char* memory, size_t size);
     
-    void* leaf_alloc(size_t size);
-    void* leaf_calloc(size_t size);
+    char* leaf_alloc(size_t size);
+    char* leaf_calloc(size_t size);
     
-    void leaf_free(void* ptr);
+    void leaf_free(char* ptr);
     
     size_t leaf_pool_get_size(void);
     size_t leaf_pool_get_used(void);
     
-    void* leaf_pool_get_pool(void);
+    char* leaf_pool_get_pool(void);
     
     void leaf_mempool_overrun(void);
     

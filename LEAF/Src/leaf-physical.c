@@ -56,7 +56,7 @@ void    tPluck_freeFromPool  (tPluck* const pl, tMempool* const mp)
     tOneZero_freeFromPool(&p->loopFilter, mp);
     tAllpassDelay_freeFromPool(&p->delayLine, mp);
     
-    mpool_free(p, m);
+    mpool_free((char*)p, m);
 }
 
 float   tPluck_getLastOut    (tPluck* const pl)
@@ -194,7 +194,7 @@ void    tKarplusStrong_freeFromPool (tKarplusStrong* const pl, tMempool* const m
         tBiQuad_freeFromPool(&p->biquad[i], mp);
     }
     
-    mpool_free(p, m);
+    mpool_free((char*)p, m);
 }
 
 float   tKarplusStrong_getLastOut    (tKarplusStrong* const pl)
@@ -396,7 +396,7 @@ void    tSimpleLivingString_freeFromPool    (tSimpleLivingString* const pl, tMem
     tHighpass_freeFromPool(&p->DCblocker, mp);
     tFeedbackLeveler_freeFromPool(&p->fbLev, mp);
     
-    mpool_free(p, m);
+    mpool_free((char*)p, m);
 }
 
 void     tSimpleLivingString_setFreq(tSimpleLivingString* const pl, float freq)
@@ -544,7 +544,7 @@ void    tLivingString_freeFromPool  (tLivingString* const pl, tMempool* const mp
     tFeedbackLeveler_freeFromPool(&p->fbLevU, mp);
     tFeedbackLeveler_freeFromPool(&p->fbLevL, mp);
     
-    mpool_free(p, m);
+    mpool_free((char*)p, m);
 }
 
 void     tLivingString_setFreq(tLivingString* const pl, float freq)
@@ -683,7 +683,7 @@ void    tReedTable_free      (tReedTable* const pm)
 {
     _tReedTable* p = *pm;
     
-    leaf_free(p);
+    leaf_free((char*)p);
 }
 
 void    tReedTable_initToPool   (tReedTable* const pm, float offset, float slope, tMempool* const mp)
@@ -700,7 +700,7 @@ void    tReedTable_freeFromPool (tReedTable* const pm, tMempool* const mp)
     _tMempool* m = *mp;
     _tReedTable* p = *pm;
     
-    mpool_free(p, m);
+    mpool_free((char*)p, m);
 }
 
 float   tReedTable_tick      (tReedTable* const pm, float input)

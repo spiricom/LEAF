@@ -52,13 +52,13 @@ void tTalkbox_free(tTalkbox* const voc)
 {
     _tTalkbox* v = *voc;
     
-    leaf_free(v->buf1);
-    leaf_free(v->buf0);
-    leaf_free(v->window);
-    leaf_free(v->car1);
-    leaf_free(v->car0);
+    leaf_free((char*)v->buf1);
+    leaf_free((char*)v->buf0);
+    leaf_free((char*)v->window);
+    leaf_free((char*)v->car1);
+    leaf_free((char*)v->car0);
     
-    leaf_free(v);
+    leaf_free((char*)v);
 }
 
 void    tTalkbox_initToPool     (tTalkbox* const voc, int bufsize, tMempool* const mp)
@@ -89,13 +89,13 @@ void    tTalkbox_freeFromPool   (tTalkbox* const voc, tMempool* const mp)
     _tMempool* m = *mp;
     _tTalkbox* v = *voc;
     
-    mpool_free(v->buf1, m);
-    mpool_free(v->buf0, m);
-    mpool_free(v->window, m);
-    mpool_free(v->car1, m);
-    mpool_free(v->car0, m);
+    mpool_free((char*)v->buf1, m);
+    mpool_free((char*)v->buf0, m);
+    mpool_free((char*)v->window, m);
+    mpool_free((char*)v->car1, m);
+    mpool_free((char*)v->car0, m);
     
-    mpool_free(v, m);
+    mpool_free((char*)v, m);
 }
 
 void tTalkbox_update(tTalkbox* const voc) ///update internal parameters...
@@ -373,7 +373,7 @@ void tVocoder_free (tVocoder* const voc)
 {
     _tVocoder* v = *voc;
     
-    leaf_free(v);
+    leaf_free((char*)v);
 }
 
 void    tVocoder_initToPool     (tVocoder* const voc, tMempool* const mp)
@@ -398,7 +398,7 @@ void    tVocoder_freeFromPool   (tVocoder* const voc, tMempool* const mp)
     _tMempool* m = *mp;
     _tVocoder* v = *voc;
     
-    mpool_free(v, m);
+    mpool_free((char*)v, m);
 }
 
 void        tVocoder_update      (tVocoder* const voc)
@@ -591,7 +591,7 @@ void    tRosenbergGlottalPulse_freeFromPool   (tRosenbergGlottalPulse* const gp,
 {
 	_tMempool* m = *mp;
 	_tRosenbergGlottalPulse* g = *gp;
-	mpool_free(g, m);
+	mpool_free((char*)g, m);
 }
 
 float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const gp)
@@ -675,8 +675,8 @@ void tSOLAD_free(tSOLAD* const wp)
 {
     _tSOLAD* w = *wp;
     
-    leaf_free(w->delaybuf);
-    leaf_free(w);
+    leaf_free((char*)w->delaybuf);
+    leaf_free((char*)w);
 }
 
 void    tSOLAD_initToPool       (tSOLAD* const wp, tMempool* const mp)
@@ -696,8 +696,8 @@ void    tSOLAD_freeFromPool     (tSOLAD* const wp, tMempool* const mp)
     _tMempool* m = *mp;
     _tSOLAD* w = *wp;
     
-    mpool_free(w->delaybuf, m);
-    mpool_free(w, m);
+    mpool_free((char*)w->delaybuf, m);
+    mpool_free((char*)w, m);
 }
 
 // send one block of input samples, receive one block of output samples
@@ -1059,7 +1059,7 @@ void tPitchShift_free(tPitchShift* const psr)
     
     tSOLAD_free(&ps->sola);
     tHighpass_free(&ps->hp);
-    leaf_free(ps);
+    leaf_free((char*)ps);
 }
 
 void    tPitchShift_initToPool      (tPitchShift* const psr, tPeriodDetection* const pd, float* out, int bufSize, tMempool* const mp)
@@ -1095,7 +1095,7 @@ void    tPitchShift_freeFromPool    (tPitchShift* const psr, tMempool* const mp)
     
     tSOLAD_freeFromPool(&ps->sola, mp);
     tHighpass_freeFromPool(&ps->hp, mp);
-    mpool_free(ps, m);
+    mpool_free((char*)ps, m);
 }
 
 void tPitchShift_setPitchFactor(tPitchShift* psr, float pf)
@@ -1269,14 +1269,14 @@ void    tRetune_freeFromPool    (tRetune* const rt, tMempool* const mp)
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_freeFromPool(&r->ps[i], mp);
-        mpool_free(r->outBuffers[i], m);
+        mpool_free((char*)r->outBuffers[i], m);
     }
-    mpool_free(r->tickOutput, m);
-    mpool_free(r->pitchFactor, m);
-    mpool_free(r->ps, m);
-    mpool_free(r->inBuffer, m);
-    mpool_free(r->outBuffers, m);
-    mpool_free(r, m);
+    mpool_free((char*)r->tickOutput, m);
+    mpool_free((char*)r->pitchFactor, m);
+    mpool_free((char*)r->ps, m);
+    mpool_free((char*)r->inBuffer, m);
+    mpool_free((char*)r->outBuffers, m);
+    mpool_free((char*)r, m);
 }
 
 float* tRetune_tick(tRetune* const rt, float sample)
@@ -1300,12 +1300,12 @@ void tRetune_setNumVoices(tRetune* const rt, int numVoices)
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_free(&r->ps[i]);
-        leaf_free(r->outBuffers[i]);
+        leaf_free((char*)r->outBuffers[i]);
     }
-    leaf_free(r->tickOutput);
-    leaf_free(r->pitchFactor);
-    leaf_free(r->ps);
-    leaf_free(r->outBuffers);
+    leaf_free((char*)r->tickOutput);
+    leaf_free((char*)r->pitchFactor);
+    leaf_free((char*)r->ps);
+    leaf_free((char*)r->outBuffers);
     
     r->numVoices = numVoices;
     
@@ -1442,14 +1442,14 @@ void    tAutotune_freeFromPool      (tAutotune* const rt, tMempool* const mp)
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_freeFromPool(&r->ps[i], mp);
-        mpool_free(r->outBuffers[i], m);
+        mpool_free((char*)r->outBuffers[i], m);
     }
-    mpool_free(r->tickOutput, m);
-    mpool_free(r->freq, m);
-    mpool_free(r->ps, m);
-    mpool_free(r->inBuffer, m);
-    mpool_free(r->outBuffers, m);
-    mpool_free(r, m);
+    mpool_free((char*)r->tickOutput, m);
+    mpool_free((char*)r->freq, m);
+    mpool_free((char*)r->ps, m);
+    mpool_free((char*)r->inBuffer, m);
+    mpool_free((char*)r->outBuffers, m);
+    mpool_free((char*)r, m);
 }
 
 float* tAutotune_tick(tAutotune* const rt, float sample)
@@ -1477,12 +1477,12 @@ void tAutotune_setNumVoices(tAutotune* const rt, int numVoices)
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_free(&r->ps[i]);
-        leaf_free(r->outBuffers[i]);
+        leaf_free((char*)r->outBuffers[i]);
     }
-    leaf_free(r->tickOutput);
-    leaf_free(r->freq);
-    leaf_free(r->ps);
-    leaf_free(r->outBuffers);
+    leaf_free((char*)r->tickOutput);
+    leaf_free((char*)r->freq);
+    leaf_free((char*)r->ps);
+    leaf_free((char*)r->outBuffers);
     
     r->numVoices = numVoices;
     
@@ -1611,20 +1611,20 @@ void tFormantShifter_free(tFormantShifter* const fsr)
 {
     _tFormantShifter* fs = *fsr;
     
-    leaf_free(fs->fk);
-    leaf_free(fs->fb);
-    leaf_free(fs->fc);
-    leaf_free(fs->frb);
-    leaf_free(fs->frc);
-    leaf_free(fs->fsig);
-    leaf_free(fs->fsmooth);
-    leaf_free(fs->ftvec);
-    leaf_free(fs->fbuff);
+    leaf_free((char*)fs->fk);
+    leaf_free((char*)fs->fb);
+    leaf_free((char*)fs->fc);
+    leaf_free((char*)fs->frb);
+    leaf_free((char*)fs->frc);
+    leaf_free((char*)fs->fsig);
+    leaf_free((char*)fs->fsmooth);
+    leaf_free((char*)fs->ftvec);
+    leaf_free((char*)fs->fbuff);
     tHighpass_free(&fs->hp);
     tHighpass_free(&fs->hp2);
 	tFeedbackLeveler_free(&fs->fbl1);
 	tFeedbackLeveler_free(&fs->fbl2);
-    leaf_free(fs);
+    leaf_free((char*)fs);
 }
 
 void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int order, tMempool* const mp)
@@ -1666,20 +1666,20 @@ void    tFormantShifter_freeFromPool    (tFormantShifter* const fsr, tMempool* c
     _tMempool* m = *mp;
     _tFormantShifter* fs = *fsr;
     
-    mpool_free(fs->fk, m);
-    mpool_free(fs->fb, m);
-    mpool_free(fs->fc, m);
-    mpool_free(fs->frb, m);
-    mpool_free(fs->frc, m);
-    mpool_free(fs->fsig, m);
-    mpool_free(fs->fsmooth, m);
-    mpool_free(fs->ftvec, m);
-    mpool_free(fs->fbuff, m);
+    mpool_free((char*)fs->fk, m);
+    mpool_free((char*)fs->fb, m);
+    mpool_free((char*)fs->fc, m);
+    mpool_free((char*)fs->frb, m);
+    mpool_free((char*)fs->frc, m);
+    mpool_free((char*)fs->fsig, m);
+    mpool_free((char*)fs->fsmooth, m);
+    mpool_free((char*)fs->ftvec, m);
+    mpool_free((char*)fs->fbuff, m);
     tHighpass_freeFromPool(&fs->hp, mp);
     tHighpass_freeFromPool(&fs->hp2, mp);
     tFeedbackLeveler_freeFromPool(&fs->fbl1, mp);
     tFeedbackLeveler_freeFromPool(&fs->fbl2, mp);
-    mpool_free(fs, m);
+    mpool_free((char*)fs, m);
 }
 
 float tFormantShifter_tick(tFormantShifter* const fsr, float in)

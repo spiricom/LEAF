@@ -42,7 +42,7 @@ void    tCycle_freeFromPool (tCycle* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tCycle* c = *cy;
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 void     tCycle_setFreq(tCycle* const cy, float freq)
@@ -116,7 +116,7 @@ void    tTriangle_freeFromPool  (tTriangle* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tTriangle* c = *cy;
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 void tTriangle_setFreq(tTriangle* const cy, float freq)
@@ -190,7 +190,7 @@ void    tSquare_freeFromPool(tSquare* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tSquare* c = *cy;
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 void    tSquare_setFreq(tSquare* const cy, float freq)
@@ -263,7 +263,7 @@ void    tSawtooth_freeFromPool  (tSawtooth* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tSawtooth* c = *cy;
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 void    tSawtooth_setFreq(tSawtooth* const cy, float freq)
@@ -338,8 +338,8 @@ void    tSine_freeFromPool (tSine* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tSine* c = *cy;
     
-    mpool_free(c->sine, m);
-    mpool_free(c, m);
+    mpool_free((char*)c->sine, m);
+    mpool_free((char*)c, m);
 }
 
 void     tSine_setFreq(tSine* const cy, float freq)
@@ -413,7 +413,7 @@ void    tTri_freeFromPool  (tTri* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tTri* c = *cy;
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 float   tTri_tick          (tTri* const osc)
@@ -492,7 +492,7 @@ void    tPulse_freeFromPool(tPulse* const osc, tMempool* const mp)
     _tMempool* m = *mp;
     _tPulse* c = *osc;
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 float   tPulse_tick        (tPulse* const osc)
@@ -556,7 +556,7 @@ void    tSaw_freeFromPool  (tSaw* const osc, tMempool* const mp)
     _tMempool* m = *mp;
     _tSaw* c = *osc;
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 float   tSaw_tick          (tSaw* const osc)
@@ -618,7 +618,7 @@ void    tPhasor_freeFromPool(tPhasor* const ph, tMempool* const mp)
     _tMempool* m = *mp;
     _tPhasor* p = *ph;
     
-    mpool_free(p, m);
+    mpool_free((char*)p, m);
 }
 
 void    tPhasor_setFreq(tPhasor* const ph, float freq)
@@ -672,7 +672,7 @@ void    tNoise_freeFromPool (tNoise* const ns, tMempool* const mp)
     _tMempool* m = *mp;
     _tNoise* n = *ns;
     
-    mpool_free(n, m);
+    mpool_free((char*)n, m);
 }
 
 float   tNoise_tick(tNoise* const ns)
@@ -752,7 +752,7 @@ void    tNeuron_freeFromPool(tNeuron* const nr, tMempool* const mp)
     _tNeuron* n = *nr;
     
     tPoleZero_free(&n->f);
-    mpool_free(n, m);
+    mpool_free((char*)n, m);
 }
 
 void   tNeuron_reset(tNeuron* const nr)
@@ -981,15 +981,15 @@ void    tMinBLEP_freeFromPool   (tMinBLEP* const minblep, tMempool* const mp)
     _tMempool* m = *mp;
     _tMinBLEP* mb = *minblep;
     
-    mpool_free(mb->offset, m);
+    mpool_free((char*)mb->offset, m);
 //    mpool_free(mb->freqMultiple, m);
-    mpool_free(mb->pos_change_magnitude, m);
-    mpool_free(mb->vel_change_magnitude, m);
+    mpool_free((char*)mb->pos_change_magnitude, m);
+    mpool_free((char*)mb->vel_change_magnitude, m);
     
-    mpool_free(mb->minBlepArray, m);
-    mpool_free(mb->minBlepDerivArray, m);
+    mpool_free((char*)mb->minBlepArray, m);
+    mpool_free((char*)mb->minBlepDerivArray, m);
     
-    mpool_free(mb, m);
+    mpool_free((char*)mb, m);
 }
 
 // SINC Function
@@ -1382,7 +1382,7 @@ void    tMBTriangle_freeFromPool  (tMBTriangle* const cy, tMempool* const mp)
     tMinBLEP_freeFromPool(&c->minBlep, mp);
     tHighpass_freeFromPool(&c->dcBlock, mp);
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 float   tMBTriangle_tick          (tMBTriangle* const osc)
@@ -1521,7 +1521,7 @@ void    tMBPulse_freeFromPool(tMBPulse* const osc, tMempool* const mp)
     tMinBLEP_freeFromPool(&c->minBlep, mp);
     tHighpass_freeFromPool(&c->dcBlock, mp);
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 float   tMBPulse_tick        (tMBPulse* const osc)
@@ -1618,7 +1618,7 @@ void    tMBSaw_freeFromPool  (tMBSaw* const osc, tMempool* const mp)
     tMinBLEP_freeFromPool(&c->minBlep, mp);
     tHighpass_freeFromPool(&c->dcBlock, mp);
     
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 float   tMBSaw_tick          (tMBSaw* const osc)

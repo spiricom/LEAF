@@ -60,7 +60,7 @@ void t808Cowebell_free(t808Cowbell* const cowbellInst)
     tHighpass_free(&cowbell->highpass);
     tNoise_free(&cowbell->stick);
     tEnvelope_free(&cowbell->envStick);
-    leaf_free(cowbell);
+    leaf_free((char*)cowbell);
 }
 
 void        t808Cowbell_initToPool      (t808Cowbell* const cowbellInst, int useStick, tMempool* const mp)
@@ -107,7 +107,7 @@ void        t808Cowbell_freeFromPool    (t808Cowbell* const cowbellInst, tMempoo
     tHighpass_freeFromPool(&cowbell->highpass, mp);
     tNoise_freeFromPool(&cowbell->stick, mp);
     tEnvelope_freeFromPool(&cowbell->envStick, mp);
-    mpool_free(cowbell, m);
+    mpool_free((char*)cowbell, m);
 }
 
 void t808Cowbell_on(t808Cowbell* const cowbellInst, float vel)
@@ -236,7 +236,7 @@ void t808Hihat_free(t808Hihat* const hihatInst)
     
     tHighpass_free(&hihat->highpass);
     
-    leaf_free(hihat);
+    leaf_free((char*)hihat);
 }
 
 void    t808Hihat_initToPool  (t808Hihat* const hihatInst, tMempool* const mp)
@@ -294,7 +294,7 @@ void    t808Hihat_freeFromPool  (t808Hihat* const hihatInst, tMempool* const mp)
     
     tHighpass_freeFromPool(&hihat->highpass, mp);
     
-    mpool_free(hihat, m);
+    mpool_free((char*)hihat, m);
 }
 
 void t808Hihat_on(t808Hihat* const hihatInst, float vel)
@@ -448,7 +448,7 @@ void        t808Snare_free                  (t808Snare* const snareInst)
     tEnvelope_free(&snare->noiseEnvGain);
     tEnvelope_free(&snare->noiseEnvFilter);
     
-    leaf_free(snare);
+    leaf_free((char*)snare);
 }
 
 void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
@@ -499,7 +499,7 @@ void    t808Snare_freeFromPool  (t808Snare* const snareInst, tMempool* const mp)
     tEnvelope_freeFromPool(&snare->noiseEnvGain, mp);
     tEnvelope_freeFromPool(&snare->noiseEnvFilter, mp);
     
-    mpool_free(snare, m);
+    mpool_free((char*)snare, m);
 }
 
 void t808Snare_on(t808Snare* const snareInst, float vel)
@@ -623,7 +623,7 @@ void        t808Kick_free                  (t808Kick* const kickInst)
 	tNoise_free(&kick->noiseOsc);
 	tEnvelope_free(&kick->noiseEnvGain);
     
-    leaf_free(kick);
+    leaf_free((char*)kick);
 }
 
 void    t808Kick_initToPool (t808Kick* const kickInst, tMempool* const mp)
@@ -658,7 +658,7 @@ void    t808Kick_freeFromPool   (t808Kick* const kickInst, tMempool* const mp)
     tNoise_freeFromPool(&kick->noiseOsc, mp);
     tEnvelope_freeFromPool(&kick->noiseEnvGain, mp);
     
-    mpool_free(kick, m);
+    mpool_free((char*)kick, m);
 }
 
 float       t808Kick_tick                  (t808Kick* const kickInst)

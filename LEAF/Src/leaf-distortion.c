@@ -36,7 +36,7 @@ void    tSampleReducer_free    (tSampleReducer* const sr)
 {
     _tSampleReducer* s = *sr;
     
-    leaf_free(s);
+    leaf_free((char*)s);
 }
 
 void    tSampleReducer_initToPool   (tSampleReducer* const sr, tMempool* const mp)
@@ -54,7 +54,7 @@ void    tSampleReducer_freeFromPool (tSampleReducer* const sr, tMempool* const m
     _tMempool* m = *mp;
     _tSampleReducer* s = *sr;
     
-    mpool_free(s, m);
+    mpool_free((char*)s, m);
 }
 
 float tSampleReducer_tick(tSampleReducer* const sr, float input)
@@ -97,8 +97,8 @@ void tOversampler_init(tOversampler* const osr, int ratio, oBool extraQuality)
         os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
         os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
-        os->upState = leaf_alloc(sizeof(float) * os->numTaps * 2);
-        os->downState = leaf_alloc(sizeof(float) * os->numTaps * 2);
+        os->upState = (float*) leaf_alloc(sizeof(float) * os->numTaps * 2);
+        os->downState = (float*) leaf_alloc(sizeof(float) * os->numTaps * 2);
     }
 }
 
@@ -106,9 +106,9 @@ void tOversampler_free(tOversampler* const osr)
 {
     _tOversampler* os = *osr;
     
-    leaf_free(os->upState);
-    leaf_free(os->downState);
-    leaf_free(os);
+    leaf_free((char*)os->upState);
+    leaf_free((char*)os->downState);
+    leaf_free((char*)os);
 }
 
 void    tOversampler_initToPool     (tOversampler* const osr, int ratio, oBool extraQuality, tMempool* const mp)
@@ -126,8 +126,8 @@ void    tOversampler_initToPool     (tOversampler* const osr, int ratio, oBool e
         os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
         os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
-        os->upState = mpool_alloc(sizeof(float) * os->numTaps * 2, m);
-        os->downState = mpool_alloc(sizeof(float) * os->numTaps * 2, m);
+        os->upState = (float*) mpool_alloc(sizeof(float) * os->numTaps * 2, m);
+        os->downState = (float*) mpool_alloc(sizeof(float) * os->numTaps * 2, m);
     }
 }
 
@@ -136,9 +136,9 @@ void    tOversampler_freeFromPool   (tOversampler* const osr, tMempool* const mp
     _tMempool* m = *mp;
     _tOversampler* os = *osr;
     
-    mpool_free(os->upState, m);
-    mpool_free(os->downState, m);
-    mpool_free(os, m);
+    mpool_free((char*)os->upState, m);
+    mpool_free((char*)os->downState, m);
+    mpool_free((char*)os, m);
 }
 
 float tOversampler_tick(tOversampler* const osr, float input, float (*effectTick)(float))
@@ -357,7 +357,7 @@ void tLockhartWavefolder_free(tLockhartWavefolder* const wf)
 {
     _tLockhartWavefolder* w = *wf;
     
-    leaf_free(w);
+    leaf_free((char*)w);
 }
 
 void    tLockhartWavefolder_initToPool   (tLockhartWavefolder* const wf, tMempool* const mp)
@@ -409,7 +409,7 @@ void    tLockhartWavefolder_freeFromPool (tLockhartWavefolder* const wf, tMempoo
     _tMempool* m = *mp;
     _tLockhartWavefolder* w = *wf;
     
-    mpool_free(w, m);
+    mpool_free((char*)w, m);
 }
 
 
@@ -613,7 +613,7 @@ void    tCrusher_free    (tCrusher* const cr)
 {
     _tCrusher* c = *cr;
     tSampleReducer_free(&c->sReducer);
-    leaf_free(c);
+    leaf_free((char*)c);
 }
 
 void    tCrusher_initToPool   (tCrusher* const cr, tMempool* const mp)
@@ -634,7 +634,7 @@ void    tCrusher_freeFromPool (tCrusher* const cr, tMempool* const mp)
     _tMempool* m = *mp;
     _tCrusher* c = *cr;
     tSampleReducer_freeFromPool(&c->sReducer, mp);
-    mpool_free(c, m);
+    mpool_free((char*)c, m);
 }
 
 float   tCrusher_tick    (tCrusher* const cr, float input)

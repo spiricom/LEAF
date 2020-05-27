@@ -44,7 +44,7 @@ extern "C" {
         tHighpass highpass;
         float oscMix;
         float filterCutoff;
-        oBool useStick;
+        uint8_t useStick;
         
     } _t808Cowbell;
     

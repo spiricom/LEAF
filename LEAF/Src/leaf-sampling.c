@@ -53,8 +53,8 @@ void  tBuffer_freeFromPool (tBuffer* const sb, tMempool* const mp)
     _tMempool* m = *mp;
     _tBuffer* s = *sb;
     
-    mpool_free(s->buff, m);
-    mpool_free(s, m);
+    mpool_free((char*)s->buff, m);
+    mpool_free((char*)s, m);
 }
 
 void tBuffer_tick (tBuffer* const sb, float sample)
@@ -206,7 +206,7 @@ void tSampler_freeFromPool         (tSampler* const sp, tMempool* const mp)
     _tSampler* p = *sp;
     tRamp_freeFromPool(&p->gain, mp);
     
-    mpool_free(p, m);
+    mpool_free((char*)p, m);
 }
 
 void tSampler_setSample (tSampler* const sp, tBuffer* const b)
@@ -768,7 +768,7 @@ void    tAutoSampler_freeFromPool       (tAutoSampler* const as, tMempool* const
     tEnvelopeFollower_freeFromPool(&a->ef, mp);
     tSampler_freeFromPool(&a->sampler, mp);
     
-    mpool_free(a, m);
+    mpool_free((char*)a, m);
 }
 
 float   tAutoSampler_tick               (tAutoSampler* const as, float input)

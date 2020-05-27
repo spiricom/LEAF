@@ -62,7 +62,7 @@ void tPRCReverb_free(tPRCReverb* const rev)
     tDelay_free(&r->allpassDelays[0]);
     tDelay_free(&r->allpassDelays[1]);
     tDelay_free(&r->combDelay);
-    leaf_free(r);
+    leaf_free((char*)r);
 }
 
 void    tPRCReverb_initToPool   (tPRCReverb* const rev, float t60, tMempool* const mp)
@@ -110,7 +110,7 @@ void    tPRCReverb_freeFromPool (tPRCReverb* const rev, tMempool* const mp)
     tDelay_freeFromPool(&r->allpassDelays[0], mp);
     tDelay_freeFromPool(&r->allpassDelays[1], mp);
     tDelay_freeFromPool(&r->combDelay, mp);
-    mpool_free(r, m);
+    mpool_free((char*)r, m);
 }
 
 void    tPRCRevert_clear(tPRCReverb* const rev)
@@ -237,7 +237,7 @@ void    tNReverb_free(tNReverb* const rev)
     	tLinearDelay_free(&r->allpassDelays[i]);
     }
     
-    leaf_free(r);
+    leaf_free((char*)r);
 }
 
 void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const mp)
@@ -296,7 +296,7 @@ void    tNReverb_freeFromPool   (tNReverb* const rev, tMempool* const mp)
         tLinearDelay_freeFromPool(&r->allpassDelays[i], mp);
     }
     
-    mpool_free(r, m);
+    mpool_free((char*)r, m);
 }
 
 void    tNReverb_setT60(tNReverb* const rev, float t60)
@@ -567,7 +567,7 @@ void    tDattorroReverb_freeFromPool      (tDattorroReverb* const rev, tMempool*
     
     tCycle_freeFromPool(&r->f2_lfo, mp);
     
-    mpool_free(r, m);
+    mpool_free((char*)r, m);
 }
 
 void    tDattorroReverb_clear             (tDattorroReverb* const rev)

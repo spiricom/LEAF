@@ -98,7 +98,7 @@ extern "C" {
         // Underlying phasor
         float phase;
         float inc,freq;
-        TableName oct;
+        int oct;
         float w;
     } _tTriangle;
     
@@ -166,7 +166,7 @@ extern "C" {
         // Underlying phasor
         float phase;
         float inc,freq;
-        TableName oct;
+        int oct;
         float w;
     } _tSquare;
     
@@ -234,7 +234,7 @@ extern "C" {
         // Underlying phasor
         float phase;
         float inc,freq;
-        TableName oct;
+        int oct;
         float w;
     } _tSawtooth;
     

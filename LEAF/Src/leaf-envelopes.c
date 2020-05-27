@@ -24,7 +24,7 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Envelope ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tEnvelope_init(tEnvelope* const envlp, float attack, float decay, oBool loop)
+void    tEnvelope_init(tEnvelope* const envlp, float attack, float decay, int loop)
 {
     _tEnvelope* env = *envlp = (_tEnvelope*) leaf_alloc(sizeof(_tEnvelope));
     
@@ -67,10 +67,10 @@ void    tEnvelope_init(tEnvelope* const envlp, float attack, float decay, oBool 
 void tEnvelope_free(tEnvelope* const envlp)
 {
     _tEnvelope* env = *envlp;
-    leaf_free(env);
+    leaf_free((char*)env);
 }
 
-void    tEnvelope_initToPool    (tEnvelope* const envlp, float attack, float decay, oBool loop, tMempool* const mp)
+void    tEnvelope_initToPool    (tEnvelope* const envlp, float attack, float decay, int loop, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tEnvelope* env = *envlp = (_tEnvelope*) mpool_alloc(sizeof(_tEnvelope), m);
@@ -115,7 +115,7 @@ void    tEnvelope_freeFromPool  (tEnvelope* const envlp, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tEnvelope* env = *envlp;
-    mpool_free(env, m);
+    mpool_free((char*)env, m);
 }
 
 void     tEnvelope_setAttack(tEnvelope* const envlp, float attack)
@@ -152,7 +152,7 @@ void     tEnvelope_setDecay(tEnvelope* const envlp, float decay)
     env->decayInc = env->inc_buff[decayIndex];
 }
 
-void     tEnvelope_loop(tEnvelope* const envlp, oBool loop)
+void     tEnvelope_loop(tEnvelope* const envlp, int loop)
 {
     _tEnvelope* env = *envlp;
     env->loop = loop;
@@ -331,7 +331,7 @@ void    tADSR_freeFromPool  (tADSR* const adsrenv, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tADSR* adsr = *adsrenv;
-    mpool_free(adsr, m);
+    mpool_free((char*)adsr, m);
 }
 
 void     tADSR_setAttack(tADSR* const adsrenv, float attack)
@@ -587,7 +587,7 @@ void    tADSR2_freeFromPool  (tADSR2* const adsrenv, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tADSR2* adsr = *adsrenv;
-    mpool_free(adsr, m);
+    mpool_free((char*)adsr, m);
 }
 
 void     tADSR2_setAttack(tADSR2* const adsrenv, float attack)
@@ -745,7 +745,7 @@ void    tADSR3_freeFromPool  (tADSR3* const adsrenv, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tADSR3* adsr = *adsrenv;
-    mpool_free(adsr, m);
+    mpool_free((char*)adsr, m);
 }
 
 void     tADSR3_setAttack(tADSR3* const adsrenv, float attack)
@@ -903,7 +903,7 @@ void    tADSR4_freeFromPool  (tADSR4* const adsrenv, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tADSR4* adsr = *adsrenv;
-    mpool_free(adsr, m);
+    mpool_free((char*)adsr, m);
 }
 
 void     tADSR4_setAttack(tADSR4* const adsrenv, float attack)
@@ -1227,7 +1227,7 @@ void tRamp_free(tRamp* const r)
 {
     _tRamp* ramp = *r;
     
-    leaf_free(ramp);
+    leaf_free((char*)ramp);
 }
 
 void    tRamp_initToPool    (tRamp* const r, float time, int samples_per_tick, tMempool* const mp)
@@ -1258,7 +1258,7 @@ void    tRamp_freeFromPool  (tRamp* const r, tMempool* const mp)
     _tMempool* m = *mp;
     _tRamp* ramp = *r;
     
-    mpool_free(ramp, m);
+    mpool_free((char*)ramp, m);
 }
 
 void     tRamp_setTime(tRamp* const ramp, float time)
@@ -1372,7 +1372,7 @@ void    tRampUpDown_freeFromPool  (tRampUpDown* const r, tMempool* const mp)
     _tMempool* m = *mp;
     _tRampUpDown* ramp = *r;
 
-    mpool_free(ramp, m);
+    mpool_free((char*)ramp, m);
 }
 
 void     tRampUpDown_setUpTime(tRampUpDown* const ramp, float upTime)
@@ -1484,7 +1484,7 @@ void tExpSmooth_free(tExpSmooth* const expsmooth)
 {
     _tExpSmooth* smooth = *expsmooth;
     
-    leaf_free(smooth);
+    leaf_free((char*)smooth);
 }
 
 void    tExpSmooth_initToPool   (tExpSmooth* const expsmooth, float val, float factor, tMempool* const mp)
@@ -1505,7 +1505,7 @@ void    tExpSmooth_freeFromPool (tExpSmooth* const expsmooth, tMempool* const mp
     _tMempool* m = *mp;
     _tExpSmooth* smooth = *expsmooth;
     
-    mpool_free(smooth, m);
+    mpool_free((char*)smooth, m);
 }
 
 void     tExpSmooth_setFactor(tExpSmooth* const expsmooth, float factor)
@@ -1588,7 +1588,7 @@ void    tSlide_freeFromPool  (tSlide* const sl, tMempool* const mp)
 	_tMempool* m = *mp;
 	    _tSlide* s = *sl;
 
-	    mpool_free(s, m);
+	    mpool_free((char*)s, m);
 }
 
 float tSlide_tick(tSlide* const sl, float in)

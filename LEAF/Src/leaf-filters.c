@@ -37,7 +37,7 @@ void tAllpass_free(tAllpass* const ft)
     _tAllpass* f = *ft;
     
     tLinearDelay_free(&f->delay);
-    leaf_free(f);
+    leaf_free((char*)f);
 }
 
 void    tAllpass_initToPool     (tAllpass* const ft, float initDelay, uint32_t maxDelay, tMempool* const mp)
@@ -58,7 +58,7 @@ void    tAllpass_freeFromPool   (tAllpass* const ft, tMempool* const mp)
     _tAllpass* f = *ft;
     
     tLinearDelay_freeFromPool(&f->delay, mp);
-    mpool_free(f, m);
+    mpool_free((char*)f, m);
 }
 
 void    tAllpass_setDelay(tAllpass* const ft, float delay)
@@ -106,7 +106,7 @@ void    tOnePole_free(tOnePole* const ft)
 {
     _tOnePole* f = *ft;
     
-    leaf_free(f);
+    leaf_free((char*)f);
 }
 
 void    tOnePole_initToPool     (tOnePole* const ft, float freq, tMempool* const mp)
@@ -128,7 +128,7 @@ void    tOnePole_freeFromPool   (tOnePole* const ft, tMempool* const mp)
     _tMempool* m = *mp;
     _tOnePole* f = *ft;
     
-    mpool_free(f, m);
+    mpool_free((char*)f, m);
 }
 
 void    tOnePole_setB0(tOnePole* const ft, float b0)
@@ -209,7 +209,7 @@ void    tTwoPole_free(tTwoPole* const ft)
 {
     _tTwoPole* f = *ft;
     
-    leaf_free(f);
+    leaf_free((char*)f);
 }
 
 void    tTwoPole_initToPool     (tTwoPole* const ft, tMempool* const mp)
@@ -230,7 +230,7 @@ void    tTwoPole_freeFromPool   (tTwoPole* const ft, tMempool* const mp)
     _tMempool* m = *mp;
     _tTwoPole* f = *ft;
     
-    mpool_free(f, m);
+    mpool_free((char*)f, m);
 }
 
 float   tTwoPole_tick(tTwoPole* const ft, float input)
@@ -335,7 +335,7 @@ void    tOneZero_free(tOneZero* const ft)
 {
     _tOneZero* f = *ft;
     
-    leaf_free(f);
+    leaf_free((char*)f);
 }
 
 void    tOneZero_initToPool     (tOneZero* const ft, float theZero, tMempool* const mp)
@@ -354,7 +354,7 @@ void    tOneZero_freeFromPool   (tOneZero* const ft, tMempool* const mp)
     _tMempool* m = *mp;
     _tOneZero* f = *ft;
     
-    mpool_free(f, m);
+    mpool_free((char*)f, m);
 }
 
 float   tOneZero_tick(tOneZero* const ft, float input)
@@ -450,7 +450,7 @@ void    tTwoZero_free(tTwoZero* const ft)
 {
     _tTwoZero* f = *ft;
     
-    leaf_free(f);
+    leaf_free((char*)f);
 }
 
 void    tTwoZero_initToPool     (tTwoZero* const ft, tMempool* const mp)
@@ -468,7 +468,7 @@ void    tTwoZero_freeFromPool   (tTwoZero* const ft, tMempool* const mp)
     _tMempool* m = *mp;
     _tTwoZero* f = *ft;
     
-    mpool_free(f, m);
+    mpool_free((char*)f, m);
 }
 
 float   tTwoZero_tick(tTwoZero* const ft, float input)
@@ -558,7 +558,7 @@ void   tPoleZero_free(tPoleZero* const pzf)
 {
     _tPoleZero* f = *pzf;
     
-    leaf_free(f);
+    leaf_free((char*)f);
 }
 
 void    tPoleZero_initToPool        (tPoleZero* const pzf, tMempool* const mp)
@@ -579,7 +579,7 @@ void    tPoleZero_freeFromPool      (tPoleZero* const pzf, tMempool* const mp)
     _tMempool* m = *mp;
     _tPoleZero* f = *pzf;
     
-    mpool_free(f, m);
+    mpool_free((char*)f, m);
 }
 
 void    tPoleZero_setB0(tPoleZero* const pzf, float b0)
@@ -689,7 +689,7 @@ void    tBiQuad_free(tBiQuad* const ft)
 {
     _tBiQuad* f = *ft;
     
-    leaf_free(f);
+    leaf_free((char*)f);
 }
 
 void    tBiQuad_initToPool     (tBiQuad* const ft, tMempool* const mp)
@@ -713,7 +713,7 @@ void    tBiQuad_freeFromPool   (tBiQuad* const ft, tMempool* const mp)
     _tMempool* m = *mp;
     _tBiQuad* f = *ft;
     
-    mpool_free(f, m);
+    mpool_free((char*)f, m);
 }
 
 float   tBiQuad_tick(tBiQuad* const ft, float input)
@@ -923,7 +923,7 @@ void    tSVF_freeFromPool   (tSVF* const svff, tMempool* const mp)
     _tMempool* m = *mp;
     _tSVF* svf = *svff;
     
-    mpool_free(svf, m);
+    mpool_free((char*)svf, m);
 }
 
 float   tSVF_tick(tSVF* const svff, float v0)
@@ -992,7 +992,7 @@ void tEfficientSVF_free(tEfficientSVF* const svff)
 {
     _tEfficientSVF* svf = *svff;
     
-    leaf_free(svf);
+    leaf_free((char*)svf);
 }
 
 void    tEfficientSVF_initToPool    (tEfficientSVF* const svff, SVFType type, uint16_t input, float Q, tMempool* const mp)
@@ -1017,7 +1017,7 @@ void    tEfficientSVF_freeFromPool  (tEfficientSVF* const svff, tMempool* const 
     _tMempool* m = *mp;
     _tEfficientSVF* svf = *svff;
     
-    mpool_free(svf, m);
+    mpool_free((char*)svf, m);
 }
 
 float   tEfficientSVF_tick(tEfficientSVF* const svff, float v0)
@@ -1076,7 +1076,7 @@ void    tHighpass_free(tHighpass* const ft)
 {
     _tHighpass* f = *ft;
     
-    leaf_free(f);
+    leaf_free((char*)f);
 }
 
 void    tHighpass_initToPool    (tHighpass* const ft, float freq, tMempool* const mp)
@@ -1096,7 +1096,7 @@ void    tHighpass_freeFromPool  (tHighpass* const ft, tMempool* const mp)
     _tMempool* m = *mp;
     _tHighpass* f = *ft;
     
-    mpool_free(f, m);
+    mpool_free((char*)f, m);
 }
 
 void     tHighpass_setFreq(tHighpass* const ft, float freq)
@@ -1157,7 +1157,7 @@ void tButterworth_free(tButterworth* const ft)
         tSVF_free(&f->high[i]);
     }
     
-    leaf_free(f);
+    leaf_free((char*)f);
 }
 
 void    tButterworth_initToPool     (tButterworth* const ft, int N, float f1, float f2, tMempool* const mp)
@@ -1191,7 +1191,7 @@ void    tButterworth_freeFromPool   (tButterworth* const ft, tMempool* const mp)
         tSVF_freeFromPool(&f->high[i], mp);
     }
     
-    mpool_free(f, m);
+    mpool_free((char*)f, m);
 }
 
 float tButterworth_tick(tButterworth* const ft, float samp)
@@ -1249,8 +1249,8 @@ void    tFIR_free(tFIR* const firf)
 {
     _tFIR* fir = *firf;
     
-    leaf_free(fir->past);
-    leaf_free(fir);
+    leaf_free((char*)fir->past);
+    leaf_free((char*)fir);
 }
 
 void    tFIR_initToPool     (tFIR* const firf, float* coeffs, int numTaps, tMempool* const mp)
@@ -1269,8 +1269,8 @@ void    tFIR_freeFromPool   (tFIR* const firf, tMempool* const mp)
     _tMempool* m = *mp;
     _tFIR* fir = *firf;
     
-    mpool_free(fir->past, m);
-    mpool_free(fir, m);
+    mpool_free((char*)fir->past, m);
+    mpool_free((char*)fir, m);
 }
 
 float	tFIR_tick(tFIR* const firf, float input)
@@ -1321,9 +1321,9 @@ void    tMedianFilter_freeFromPool   (tMedianFilter* const mf, tMempool* const m
     _tMempool* m = *mp;
     _tMedianFilter* f = *mf;
 
-    mpool_free(f->val, m);
-    mpool_free(f->age, m);
-    mpool_free(f, m);
+    mpool_free((char*)f->val, m);
+    mpool_free((char*)f->age, m);
+    mpool_free((char*)f, m);
 }
 
 float   tMedianFilter_tick           (tMedianFilter* const mf, float input)
@@ -1399,7 +1399,7 @@ void    tVZFilter_freeFromPool   (tVZFilter* const vf, tMempool* const mp)
 {
 	 _tMempool* m = *mp;
 		 _tVZFilter* f = *vf = (_tVZFilter*) mpool_alloc(sizeof(_tVZFilter), m);
-		 mpool_free(f, m);
+		 mpool_free((char*)f, m);
 }
 
 void 	tVZFilter_setSampleRate  (tVZFilter* const vf, float sampleRate)
@@ -1699,7 +1699,7 @@ void    tDiodeFilter_freeFromPool   (tDiodeFilter* const vf, tMempool* const mp)
 {
 	 _tMempool* m = *mp;
 	 _tDiodeFilter* f = *vf = (_tDiodeFilter*) mpool_alloc(sizeof(_tDiodeFilter), m);
-	 mpool_free(f, m);
+	 mpool_free((char*)f, m);
 }
 
 float tanhXdX(float x)

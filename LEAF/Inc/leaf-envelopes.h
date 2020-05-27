@@ -45,9 +45,9 @@ extern "C" {
         
         float attackInc, decayInc, rampInc;
         
-        oBool inAttack, inDecay, inRamp;
+        int inAttack, inDecay, inRamp;
         
-        oBool loop;
+        int loop;
         
         float gain, rampPeak;
         
@@ -57,15 +57,15 @@ extern "C" {
     
     typedef _tEnvelope* tEnvelope;
     
-    void    tEnvelope_init          (tEnvelope* const, float attack, float decay, oBool loop);
+    void    tEnvelope_init          (tEnvelope* const, float attack, float decay, int loop);
     void    tEnvelope_free          (tEnvelope* const);
-    void    tEnvelope_initToPool    (tEnvelope* const, float attack, float decay, oBool loop, tMempool* const);
+    void    tEnvelope_initToPool    (tEnvelope* const, float attack, float decay, int loop, tMempool* const);
     void    tEnvelope_freeFromPool  (tEnvelope* const, tMempool* const);
     
     float   tEnvelope_tick          (tEnvelope* const);
     void    tEnvelope_setAttack     (tEnvelope* const, float attack);
     void    tEnvelope_setDecay      (tEnvelope* const, float decay);
-    void    tEnvelope_loop          (tEnvelope* const, oBool loop);
+    void    tEnvelope_loop          (tEnvelope* const, int loop);
     void    tEnvelope_on            (tEnvelope* const, float velocity);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~

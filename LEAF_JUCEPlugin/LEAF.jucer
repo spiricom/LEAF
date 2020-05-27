@@ -76,6 +76,7 @@
           <FILE id="Oh72PT" name="leaf-electrical.c" compile="1" resource="0"
                 file="../LEAF/Src/leaf-electrical.c"/>
         </GROUP>
+        <FILE id="XvFyGq" name="leaf.cpp" compile="1" resource="0" file="../LEAF/leaf.cpp"/>
         <FILE id="dmljDQ" name="leaf.h" compile="0" resource="0" file="../LEAF/leaf.h"/>
       </GROUP>
       <GROUP id="{FFA9F0EC-F45A-74FC-5A10-9B3CAA731E7C}" name="External">
