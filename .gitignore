@@ -9,4 +9,5 @@
 *.zip
 *.swp
 */Builds
+*/JuceLibraryCode
 doxygen

@@ -20,6 +20,8 @@
 #include ".\Src\leaf-electrical.c"
 #include ".\Src\leaf.c"
 
+#include ".\Externals\d_fft_mayer.c"
+
 #else
 
 #include "./leaf.h"
@@ -41,5 +43,7 @@
 #include "./Src/leaf-physical.c"
 #include "./Src/leaf-electrical.c"
 #include "./Src/leaf.c"
+
+#include "./Externals/d_fft_mayer.c"
 
 #endif

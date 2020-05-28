@@ -23,6 +23,7 @@ extern "C" {
 #define USE_SQUARE_TABLE 1
 #define USE_TRIANGLE_TABLE 1
 #define USE_SHAPER_TABLE 1
+#define DECAY_TABLES_USED 1
     
 #define SINE_TABLE_SIZE 2048
 #define SAW_TABLE_SIZE 2048
