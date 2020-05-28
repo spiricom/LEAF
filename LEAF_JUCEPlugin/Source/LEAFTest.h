@@ -13,7 +13,7 @@
 
 #include "LEAFLink.h"
 
-#include "../../LEAF/leaf.h"
+#include "../../leaf/leaf.h"
 
 #include "Yin.h"
 

@@ -6,7 +6,7 @@
  name:
  description:
  website:
- license:        Proprietary
+ license:        
  
  dependencies:
  
