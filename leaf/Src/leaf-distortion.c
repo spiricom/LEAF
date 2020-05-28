@@ -141,19 +141,17 @@ void    tOversampler_freeFromPool   (tOversampler* const osr, tMempool* const mp
     mpool_free((char*)os, m);
 }
 
-float tOversampler_tick(tOversampler* const osr, float input, float (*effectTick)(float))
+float tOversampler_tick(tOversampler* const osr, float input, float* oversample, float (*effectTick)(float))
 {
     _tOversampler* os = *osr;
     
-    float buf[os->ratio];
-    
-    tOversampler_upsample(osr, input, buf);
+    tOversampler_upsample(osr, input, oversample);
     
     for (int i = 0; i < os->ratio; ++i) {
-        buf[i] = effectTick(buf[i]);
+        oversample[i] = effectTick(oversample[i]);
     }
     
-    return tOversampler_downsample(osr, buf);
+    return tOversampler_downsample(osr, oversample);
 }
 
 // From CMSIS DSP Library
