@@ -53,6 +53,9 @@ extern "C" {
         float wet, dry, FX;
         float d0, d1, d2, d3, d4;
         float u0, u1, u2, u3, u4;
+        
+        double* dl;
+        double* Rt;
 
         
     } _tTalkbox;
@@ -68,11 +71,11 @@ extern "C" {
     void    tTalkbox_update         (tTalkbox* const);
     void    tTalkbox_suspend        (tTalkbox* const);
     void    tTalkbox_lpcDurbin      (float *r, int p, float *k, float *g);
-    void 	tTalkbox_lpc			(float *buf, float *car, int32_t n, int32_t o, float warp, int warpOn);
+    void 	tTalkbox_lpc			(float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn);
     void    tTalkbox_setQuality     (tTalkbox* const, float quality);
     void 	tTalkbox_setWarpFactor		(tTalkbox* const voc, float warp);
     void 	tTalkbox_setWarpOn		(tTalkbox* const voc, float warpOn);
-    void 	tTalkbox_warpedAutocorrelate	(float * x, unsigned int L, float * R, unsigned int P, float lambda);
+    void 	tTalkbox_warpedAutocorrelate	(float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda);
     //==============================================================================
     
     /* tVocoder */

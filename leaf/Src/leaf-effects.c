@@ -8,7 +8,7 @@
 
 #if _WIN32 || _WIN64
 
-#include "..\Inc\leaf-effects.c"
+#include "..\Inc\leaf-effects.h"
 #include "..\leaf.h"
 
 #else
@@ -27,38 +27,12 @@
 //LPC vocoder adapted from MDA's excellent open source talkbox plugin code
 void tTalkbox_init(tTalkbox* const voc, int bufsize)
 {
-    
-    _tTalkbox* v = *voc = (_tTalkbox*) leaf_alloc(sizeof(_tTalkbox));
-    
-    v->param[0] = 0.5f;  //wet
-    v->param[1] = 0.0f;  //dry
-    v->param[2] = 0; // Swap
-    v->param[3] = 1.0f;  //quality
-    v->warpFactor = 0.0f;
-    v->warpOn = 0;
-    v->bufsize = bufsize;
-    
-    v->car0 =   (float*) leaf_alloc(sizeof(float) * v->bufsize);
-    v->car1 =   (float*) leaf_alloc(sizeof(float) * v->bufsize);
-    v->window = (float*) leaf_alloc(sizeof(float) * v->bufsize);
-    v->buf0 =   (float*) leaf_alloc(sizeof(float) * v->bufsize);
-    v->buf1 =   (float*) leaf_alloc(sizeof(float) * v->bufsize);
-    
-    tTalkbox_update(voc);
-    tTalkbox_suspend(voc);
+    tTalkbox_initToPool(voc, bufsize, &leaf.mempool);
 }
 
 void tTalkbox_free(tTalkbox* const voc)
 {
-    _tTalkbox* v = *voc;
-    
-    leaf_free((char*)v->buf1);
-    leaf_free((char*)v->buf0);
-    leaf_free((char*)v->window);
-    leaf_free((char*)v->car1);
-    leaf_free((char*)v->car0);
-    
-    leaf_free((char*)v);
+    tTalkbox_freeFromPool(voc, &leaf.mempool);
 }
 
 void    tTalkbox_initToPool     (tTalkbox* const voc, int bufsize, tMempool* const mp)
@@ -80,6 +54,9 @@ void    tTalkbox_initToPool     (tTalkbox* const voc, int bufsize, tMempool* con
     v->buf0 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
     v->buf1 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
     
+    v->dl = (double*) mpool_alloc(sizeof(double) * v->bufsize, m);
+    v->Rt = (double*) mpool_alloc(sizeof(double) * v->bufsize, m);
+    
     tTalkbox_update(voc);
     tTalkbox_suspend(voc);
 }
@@ -94,6 +71,9 @@ void    tTalkbox_freeFromPool   (tTalkbox* const voc, tMempool* const mp)
     mpool_free((char*)v->window, m);
     mpool_free((char*)v->car1, m);
     mpool_free((char*)v->car0, m);
+    
+    mpool_free((char*)v->dl, m);
+    mpool_free((char*)v->Rt, m);
     
     mpool_free((char*)v, m);
 }
@@ -150,10 +130,10 @@ void tTalkbox_suspend(tTalkbox* const voc) ///clear any buffers...
 // warped autocorrelation adapted from ten.enegatum@liam's post on music-dsp 2004-04-07 09:37:51
 //find the order-P autocorrelation array, R, for the sequence x of length L and warping of lambda
 //wAutocorrelate(&pfSrc[stIndex],siglen,R,P,0);
-void tTalkbox_warpedAutocorrelate(float * x, unsigned int L, float * R, unsigned int P, float lambda)
+void tTalkbox_warpedAutocorrelate(float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda)
 {
-    double dl[L];
-    double Rt[L];
+//    double dl[L];
+//    double Rt[L];
     double r1,r2,r1t;
     R[0]=0;
     Rt[0]=0;
@@ -196,7 +176,7 @@ void tTalkbox_warpedAutocorrelate(float * x, unsigned int L, float * R, unsigned
 // order is defined by the set_quality function.
 // it's set to max out at 0.0005 of sample rate (if you don't go above 1.0f in the quality setting) == at 48000 that's 24.
 // -JS
-void tTalkbox_lpc(float *buf, float *car, int32_t n, int32_t o, float warp, int warpOn)
+void tTalkbox_lpc(float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn)
 {
     float z[ORD_MAX], r[ORD_MAX], k[ORD_MAX], G, x;
     int32_t i, j, nn=n;
@@ -215,7 +195,7 @@ void tTalkbox_lpc(float *buf, float *car, int32_t n, int32_t o, float warp, int 
         {
             z[j] = r[j] = 0.0f;
         }
-    	tTalkbox_warpedAutocorrelate(buf, n, r, o, warp);
+    	tTalkbox_warpedAutocorrelate(buf, dl, Rt, n, r, o, warp);
     }
 
     r[0] *= 1.001f;  //stability fix
@@ -301,10 +281,10 @@ float tTalkbox_tick(tTalkbox* const voc, float synth, float voice)
         x = o - e;  e = o;  //6dB/oct pre-emphasis
         
         w = v->window[p0]; fx = v->buf0[p0] * w;  v->buf0[p0] = x * w;  //50% overlapping hanning windows
-        if(++p0 >= v->N) { tTalkbox_lpc(v->buf0, v->car0, v->N, v->O, v->warpFactor, v->warpOn);  p0 = 0; }
+        if(++p0 >= v->N) { tTalkbox_lpc(v->buf0, v->car0, v->dl, v->Rt, v->N, v->O, v->warpFactor, v->warpOn);  p0 = 0; }
         
         w = 1.0f - w;  fx += v->buf1[p1] * w;  v->buf1[p1] = x * w;
-        if(++p1 >= v->N) { tTalkbox_lpc(v->buf1, v->car1, v->N, v->O, v->warpFactor, v->warpOn);  p1 = 0; }
+        if(++p1 >= v->N) { tTalkbox_lpc(v->buf1, v->car1, v->dl, v->Rt, v->N, v->O, v->warpFactor, v->warpOn);  p1 = 0; }
     }
     
     p = v->u0 + h0 * fx; v->u0 = v->u1;  v->u1 = fx - h0 * p;
