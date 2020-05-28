@@ -12,8 +12,9 @@
 #define LEAFTEST1_H_INCLUDED
 
 #include "LEAFLink.h"
-//
-//#include "Yin.h"
+
+#include "Yin.h"
+#include "../../leaf/leaf.h"
 
 // LEAFTest API
 float   LEAFTest_tick            (float input);

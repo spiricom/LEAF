@@ -19,6 +19,65 @@
       <FILE id="mVSe2h" name="basic-oscillators.h" compile="0" resource="0"
             file="../Examples/basic-oscillators.h"/>
     </GROUP>
+    <GROUP id="{C0DBCE2E-4D9F-962C-C47E-F7CB38606873}" name="leaf">
+      <GROUP id="{7B669CEF-E494-BF27-3FB1-FB4DEF70B9B7}" name="Externals">
+        <FILE id="xtmyXT" name="d_fft_mayer.c" compile="1" resource="0" file="../leaf/Externals/d_fft_mayer.c"/>
+        <FILE id="aTs440" name="d_fft_mayer.h" compile="0" resource="0" file="../leaf/Externals/d_fft_mayer.h"/>
+        <FILE id="wY6CDV" name="trigtbl.h" compile="0" resource="0" file="../leaf/Externals/trigtbl.h"/>
+      </GROUP>
+      <GROUP id="{EC3EDB8A-0956-5284-C54A-F810600CDEC2}" name="Inc">
+        <FILE id="dAGT6G" name="leaf-analysis.h" compile="0" resource="0" file="../leaf/Inc/leaf-analysis.h"/>
+        <FILE id="MvUKeu" name="leaf-delay.h" compile="0" resource="0" file="../leaf/Inc/leaf-delay.h"/>
+        <FILE id="ignqP5" name="leaf-distortion.h" compile="0" resource="0"
+              file="../leaf/Inc/leaf-distortion.h"/>
+        <FILE id="d47X65" name="leaf-dynamics.h" compile="0" resource="0" file="../leaf/Inc/leaf-dynamics.h"/>
+        <FILE id="tuZYg3" name="leaf-effects.h" compile="0" resource="0" file="../leaf/Inc/leaf-effects.h"/>
+        <FILE id="WdUAOI" name="leaf-electrical.h" compile="0" resource="0"
+              file="../leaf/Inc/leaf-electrical.h"/>
+        <FILE id="twzKPd" name="leaf-envelopes.h" compile="0" resource="0"
+              file="../leaf/Inc/leaf-envelopes.h"/>
+        <FILE id="we0552" name="leaf-filters.h" compile="0" resource="0" file="../leaf/Inc/leaf-filters.h"/>
+        <FILE id="Vk1n2H" name="leaf-global.h" compile="0" resource="0" file="../leaf/Inc/leaf-global.h"/>
+        <FILE id="UlNd1m" name="leaf-instruments.h" compile="0" resource="0"
+              file="../leaf/Inc/leaf-instruments.h"/>
+        <FILE id="fcceOB" name="leaf-math.h" compile="0" resource="0" file="../leaf/Inc/leaf-math.h"/>
+        <FILE id="WlKgKp" name="leaf-mempool.h" compile="0" resource="0" file="../leaf/Inc/leaf-mempool.h"/>
+        <FILE id="iT0mBn" name="leaf-midi.h" compile="0" resource="0" file="../leaf/Inc/leaf-midi.h"/>
+        <FILE id="wTPDnU" name="leaf-oscillators.h" compile="0" resource="0"
+              file="../leaf/Inc/leaf-oscillators.h"/>
+        <FILE id="gUbVlK" name="leaf-physical.h" compile="0" resource="0" file="../leaf/Inc/leaf-physical.h"/>
+        <FILE id="hzGvBC" name="leaf-reverb.h" compile="0" resource="0" file="../leaf/Inc/leaf-reverb.h"/>
+        <FILE id="sARanP" name="leaf-sampling.h" compile="0" resource="0" file="../leaf/Inc/leaf-sampling.h"/>
+        <FILE id="nWsDBZ" name="leaf-tables.h" compile="0" resource="0" file="../leaf/Inc/leaf-tables.h"/>
+      </GROUP>
+      <GROUP id="{5AC3E39D-3FB8-4DBC-E4DF-58089B39F56B}" name="Src">
+        <FILE id="BmAeYw" name="leaf-analysis.c" compile="1" resource="0" file="../leaf/Src/leaf-analysis.c"/>
+        <FILE id="pMSfD5" name="leaf-delay.c" compile="1" resource="0" file="../leaf/Src/leaf-delay.c"/>
+        <FILE id="MEx2jO" name="leaf-distortion.c" compile="1" resource="0"
+              file="../leaf/Src/leaf-distortion.c"/>
+        <FILE id="QUsIVS" name="leaf-dynamics.c" compile="1" resource="0" file="../leaf/Src/leaf-dynamics.c"/>
+        <FILE id="v38T5a" name="leaf-effects.c" compile="1" resource="0" file="../leaf/Src/leaf-effects.c"/>
+        <FILE id="qsuYj8" name="leaf-electrical.c" compile="1" resource="0"
+              file="../leaf/Src/leaf-electrical.c"/>
+        <FILE id="ZwEDXC" name="leaf-envelopes.c" compile="1" resource="0"
+              file="../leaf/Src/leaf-envelopes.c"/>
+        <FILE id="bDhjVX" name="leaf-filters.c" compile="1" resource="0" file="../leaf/Src/leaf-filters.c"/>
+        <FILE id="nzT7TM" name="leaf-instruments.c" compile="1" resource="0"
+              file="../leaf/Src/leaf-instruments.c"/>
+        <FILE id="aYw0d5" name="leaf-math.c" compile="1" resource="0" file="../leaf/Src/leaf-math.c"/>
+        <FILE id="IkRPCc" name="leaf-mempool.c" compile="1" resource="0" file="../leaf/Src/leaf-mempool.c"/>
+        <FILE id="HICbDL" name="leaf-midi.c" compile="1" resource="0" file="../leaf/Src/leaf-midi.c"/>
+        <FILE id="u0k6ls" name="leaf-oscillators.c" compile="1" resource="0"
+              file="../leaf/Src/leaf-oscillators.c"/>
+        <FILE id="Nrklse" name="leaf-physical.c" compile="1" resource="0" file="../leaf/Src/leaf-physical.c"/>
+        <FILE id="VNUtY7" name="leaf-reverb.c" compile="1" resource="0" file="../leaf/Src/leaf-reverb.c"/>
+        <FILE id="Wpvq2o" name="leaf-sampling.c" compile="1" resource="0" file="../leaf/Src/leaf-sampling.c"/>
+        <FILE id="VTmuyj" name="leaf-tables.c" compile="1" resource="0" file="../leaf/Src/leaf-tables.c"/>
+        <FILE id="HKEtqp" name="leaf.c" compile="1" resource="0" file="../leaf/Src/leaf.c"/>
+      </GROUP>
+      <FILE id="a1IWV9" name="leaf.cpp" compile="1" resource="0" file="../leaf/leaf.cpp"/>
+      <FILE id="TzDyuj" name="leaf.h" compile="0" resource="0" file="../leaf/leaf.h"/>
+    </GROUP>
     <GROUP id="{14C5E2CD-5D51-3FD3-5677-28BECA29E95E}" name="Source">
       <GROUP id="{FFA9F0EC-F45A-74FC-5A10-9B3CAA731E7C}" name="External">
         <FILE id="ixwZea" name="Yin.h" compile="0" resource="0" file="Source/Yin.h"/>
@@ -68,7 +127,6 @@
         <MODULEPATH id="juce_audio_processors" path="../../../../JUCE/modules"/>
         <MODULEPATH id="juce_audio_plugin_client" path="../../../../JUCE/modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../../../JUCE/modules"/>
-        <MODULEPATH id="leaf" path="../../LEAF"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
@@ -96,7 +154,6 @@
         <MODULEPATH id="juce_audio_processors" path="../../../../JUCE/modules"/>
         <MODULEPATH id="juce_audio_plugin_client" path="../../../../JUCE/modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../../../JUCE/modules"/>
-        <MODULEPATH id="leaf" path="../../LEAF"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
     <VS2017 targetFolder="Builds/VisualStudio2017">
@@ -124,7 +181,6 @@
         <MODULEPATH id="juce_audio_formats" path="..\..\..\JUCE\modules"/>
         <MODULEPATH id="juce_audio_devices" path="..\..\..\JUCE\modules"/>
         <MODULEPATH id="juce_audio_basics" path="..\..\..\JUCE\modules"/>
-        <MODULEPATH id="leaf" path="../../LEAF"/>
       </MODULEPATHS>
     </VS2017>
   </EXPORTFORMATS>
@@ -145,7 +201,6 @@
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_video" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="leaf" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
   </MODULES>
   <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
   <LIVE_SETTINGS>
