@@ -973,6 +973,11 @@ void    tMinBLEP_initToPool     (tMinBLEP* const minblep, int zeroCrossings, int
     mb->minBlepArray = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
     mb->minBlepDerivArray = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
     
+    mb->realTime = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
+    mb->imagTime = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
+    mb->realFreq = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
+    mb->imagFreq = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
+    
     tMinBLEP_buildBLEP(minblep);
 }
 
@@ -988,6 +993,11 @@ void    tMinBLEP_freeFromPool   (tMinBLEP* const minblep, tMempool* const mp)
     
     mpool_free((char*)mb->minBlepArray, m);
     mpool_free((char*)mb->minBlepDerivArray, m);
+    
+    mpool_free((char*)mb->realTime, m);
+    mpool_free((char*)mb->imagTime, m);
+    mpool_free((char*)mb->realFreq, m);
+    mpool_free((char*)mb->imagFreq, m);
     
     mpool_free((char*)mb, m);
 }
@@ -1089,14 +1099,9 @@ static void complexexp(float x, float y, float *zx, float *zy)
 }
 
 // Compute Real Cepstrum Of Signal
-static void RealCepstrum(int n, float *signal, float *realCepstrum)
+static void RealCepstrum(int n, float *signal, float *realCepstrum, float* realTime, float* imagTime, float* realFreq, float* imagFreq)
 {
     int i;
-    
-    float realTime[n];
-    float imagTime[n];
-    float realFreq[n];
-    float imagFreq[n];
     
     // Compose Complex FFT Input
     
@@ -1128,13 +1133,9 @@ static void RealCepstrum(int n, float *signal, float *realCepstrum)
 }
 
 // Compute Minimum Phase Reconstruction Of Signal
-static void MinimumPhase(int n, float *realCepstrum, float *minimumPhase)
+static void MinimumPhase(int n, float *realCepstrum, float *minimumPhase, float* realTime, float* imagTime, float* realFreq, float* imagFreq)
 {
     int i, nd2;
-    float realTime[n];
-    float imagTime[n];
-    float realFreq[n];
-    float imagFreq[n];
     
     nd2 = n / 2;
     
@@ -1200,8 +1201,8 @@ void tMinBLEP_buildBLEP(tMinBLEP* const minblep)
     
     // Minimum Phase Reconstruction
     
-    RealCepstrum(n, m->minBlepArray, m->minBlepDerivArray);
-    MinimumPhase(n, m->minBlepDerivArray, m->minBlepArray);
+    RealCepstrum(n, m->minBlepArray, m->minBlepDerivArray, m->realTime, m->imagTime, m->realFreq, m->imagFreq);
+    MinimumPhase(n, m->minBlepDerivArray, m->minBlepArray, m->realTime, m->imagTime, m->realFreq, m->imagFreq);
     
     // Integrate Into MinBLEP
     a = 0.0f;

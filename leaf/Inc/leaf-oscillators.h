@@ -898,6 +898,11 @@ extern "C" {
         int minBlepSize;
         float* minBlepArray;
         float* minBlepDerivArray;
+        
+        float* realTime;
+        float* imagTime;
+        float* realFreq;
+        float* imagFreq;
     } _tMinBLEP;
     
     typedef _tMinBLEP* tMinBLEP;
