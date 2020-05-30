@@ -132,6 +132,10 @@ extern "C" {
     float interpolate3max(float *buf, const int peakindex);
     float interpolate3phase(float *buf, const int peakindex);
     
+
+    float fastcosf(float fAngle);
+
+    float fastercosf(float fAngle);
     // alternative implementation for abs()
     // REQUIRES: 32 bit integers
     int fastabs_int(int in);
@@ -159,6 +163,11 @@ extern "C" {
     //1000 gives a good curve from -1.0 to 0.0
     void LEAF_generate_exp(float* buffer, float base, float start, float end, float offset, int size);
 
+
+    void LEAF_generate_atodb(float* buffer, int size);
+    void LEAF_generate_atodbPositiveClipped(float* buffer, float lowerThreshold, float range, int size);
+
+    
     float LEAF_poly_blep(float t, float dt);
     float LEAF_midiToFrequency(float f);
 

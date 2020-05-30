@@ -64,6 +64,38 @@ float interpolate3phase(float *buf, const int peakindex)
     return(fraction);
 }
 
+
+// from http://www.wild-magic.com - found on music-dsp list
+float fastcosf(float fAngle)
+{
+    float fASqr = fAngle*fAngle;
+    float fResult = -2.605e-07f;
+    fResult *= fASqr;
+    fResult += 2.47609e-05f;
+    fResult *= fASqr;
+    fResult -= 1.3888397e-03f;
+    fResult *= fASqr;
+    fResult += 4.16666418e-02f;
+    fResult *= fASqr;
+    fResult -= 4.999999963e-01f;
+    fResult *= fASqr;
+    fResult += 1.0f;
+    return fResult;
+}
+
+float fastercosf(float fAngle)
+{
+    float fASqr = fAngle*fAngle;
+    float fResult = 3.705e-02f;
+    fResult *= fASqr;
+    fResult -= 4.967e-01f;
+    fResult *= fASqr;
+    fResult += 1.0f;
+    return fResult;
+}
+
+
+
 // alternative implementation for abs()
 // REQUIRES: 32 bit integers
 int fastabs_int(int in){
@@ -444,6 +476,31 @@ void LEAF_generate_exp(float* buffer, float base, float start, float end, float 
     }
 }
 
+void LEAF_generate_atodb(float* buffer, int size)
+{
+    float increment = 1.0f / (float)size;
+    float x = 0.0f;
+    for (int i = 0; i < size; i++)
+    {
+        buffer[i] = atodb(x);
+        x += increment;
+    }
+}
+
+
+void LEAF_generate_atodbPositiveClipped(float* buffer, float lowerThreshold, float range, int size)
+{
+    float increment = 1.0f / (float)size;
+    float x = 0.0f;
+    float scalar = range / fastabsf(lowerThreshold);
+    for (int i = 0; i < size; i++)
+    {
+        float temp = atodb(x);
+        temp = LEAF_clip(lowerThreshold, temp, 0.0f);
+        buffer[i] = (temp-lowerThreshold) * scalar;
+        x += increment;
+    }
+}
 
 // http://www.martin-finke.de/blog/articles/audio-plugins-018-polyblep-oscillator/
 // http://www.kvraudio.com/forum/viewtopic.php?t=375517
