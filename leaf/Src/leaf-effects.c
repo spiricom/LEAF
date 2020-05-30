@@ -621,6 +621,13 @@ void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* 
 	g->pulseLength = pulseLength;
 }
 
+void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergGlottalPulse* const gp, float openLength, float pulseLength)
+{
+    _tRosenbergGlottalPulse* g = *gp;
+    g->openLength = openLength;
+    g->pulseLength = pulseLength;
+    g->invPulseLengthMinusOpenLength = 1.0f / (g->pulseLength - g->openLength);
+}
 
 
 
