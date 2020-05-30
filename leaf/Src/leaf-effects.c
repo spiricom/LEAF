@@ -542,89 +542,82 @@ void        tVocoder_suspend     (tVocoder* const voc)
 }
 
 
-
 /// Glottal Pulse (Rosenberg model)
 
 void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const gp)
 {
-	tRosenbergGlottalPulse_initToPool(gp, &leaf.mempool);
+    tRosenbergGlottalPulse_initToPool(gp, &leaf.mempool);
 }
 void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const gp)
 {
-	tRosenbergGlottalPulse_freeFromPool(gp, &leaf.mempool);
+    tRosenbergGlottalPulse_freeFromPool(gp, &leaf.mempool);
 }
 void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const gp, tMempool* const mp)
 {
 
-	 _tMempool* m = *mp;
-	_tRosenbergGlottalPulse* g = *gp = (_tRosenbergGlottalPulse*) mpool_alloc(sizeof(_tRosenbergGlottalPulse), m);
+     _tMempool* m = *mp;
+    _tRosenbergGlottalPulse* g = *gp = (_tRosenbergGlottalPulse*) mpool_alloc(sizeof(_tRosenbergGlottalPulse), m);
 
-	g->phase  = 0.0f;
-	g->openLength = 0.0f;
-	g->pulseLength = 0.0f;
-	g->freq = 0.0f;
-	g->inc = 0.0f;
+    g->phase  = 0.0f;
+    g->openLength = 0.0f;
+    g->pulseLength = 0.0f;
+    g->freq = 0.0f;
+    g->inc = 0.0f;
 
 
 }
 void    tRosenbergGlottalPulse_freeFromPool   (tRosenbergGlottalPulse* const gp, tMempool* const mp)
 {
-	_tMempool* m = *mp;
-	_tRosenbergGlottalPulse* g = *gp;
-	mpool_free((char*)g, m);
+    _tMempool* m = *mp;
+    _tRosenbergGlottalPulse* g = *gp;
+    mpool_free(g, m);
 }
 
 float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const gp)
 {
-	_tRosenbergGlottalPulse* g = *gp;
+    _tRosenbergGlottalPulse* g = *gp;
 
-	float output = 0.0f;
+    float output = 0.0f;
 
     // Phasor increment
     g->phase += g->inc;
     while (g->phase >= 1.0f) g->phase -= 1.0f;
     while (g->phase < 0.0f) g->phase += 1.0f;
 
-	if (g->phase < g->openLength)
-	{
-		output = 0.5f*(1.0f-cosf(PI * g->phase));
-	}
+    if (g->phase < g->openLength)
+    {
+        output = 0.5f*(1.0f-fastercosf(PI * g->phase));
+    }
 
-	else if (g->phase < g->pulseLength)
-	{
-		output = cosf(HALF_PI * (g->phase-g->openLength)/(g->pulseLength-g->openLength));
-	}
+    else if (g->phase < g->pulseLength)
+    {
+        output = fastercosf(HALF_PI * (g->phase-g->openLength)* g->invPulseLengthMinusOpenLength);
+    }
 
-	else
-	{
-		output = 0.0f;
-	}
-	return output;
+    else
+    {
+        output = 0.0f;
+    }
+    return output;
 }
 
 void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const gp, float freq)
 {
-	_tRosenbergGlottalPulse* g = *gp;
-	g->freq = freq;
-	g->inc = freq * leaf.invSampleRate;
+    _tRosenbergGlottalPulse* g = *gp;
+    g->freq = freq;
+    g->inc = freq * leaf.invSampleRate;
 }
 
 void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const gp, float openLength)
 {
-	_tRosenbergGlottalPulse* g = *gp;
-	g->openLength = openLength;
+    _tRosenbergGlottalPulse* g = *gp;
+    g->openLength = openLength;
+    g->invPulseLengthMinusOpenLength = 1.0f / (g->pulseLength - g->openLength);
 }
 
 void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const gp, float pulseLength)
 {
-	_tRosenbergGlottalPulse* g = *gp;
-	g->pulseLength = pulseLength;
-}
-
-void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergGlottalPulse* const gp, float openLength, float pulseLength)
-{
     _tRosenbergGlottalPulse* g = *gp;
-    g->openLength = openLength;
     g->pulseLength = pulseLength;
     g->invPulseLengthMinusOpenLength = 1.0f / (g->pulseLength - g->openLength);
 }

@@ -114,12 +114,12 @@ extern "C" {
 
 	typedef struct _tRosenbergGlottalPulse
 	{
-
-		float phase;
-		float openLength;
-		float pulseLength;
-		float freq;
-		float inc;
+        float phase;
+        float openLength;
+        float pulseLength;
+        float invPulseLengthMinusOpenLength;
+        float freq;
+        float inc;
 
 
 	} _tRosenbergGlottalPulse;
