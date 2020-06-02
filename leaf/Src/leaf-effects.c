@@ -335,25 +335,12 @@ void tTalkbox_setWarpOn(tTalkbox* const voc, float warpOn)
 
 void   tVocoder_init        (tVocoder* const voc)
 {
-    _tVocoder* v = *voc = (_tVocoder*) leaf_alloc(sizeof(_tVocoder));
-    
-    v->param[0] = 0.33f;  //input select
-    v->param[1] = 0.50f;  //output dB
-    v->param[2] = 0.40f;  //hi thru
-    v->param[3] = 0.40f;  //hi band
-    v->param[4] = 0.16f;  //envelope
-    v->param[5] = 0.55f;  //filter q
-    v->param[6] = 0.6667f;//freq range
-    v->param[7] = 0.33f;  //num bands
-    
-    tVocoder_update(voc);
+    tVocoder_initToPool(voc, &leaf.mempool);
 }
 
 void tVocoder_free (tVocoder* const voc)
 {
-    _tVocoder* v = *voc;
-    
-    leaf_free((char*)v);
+    tVocoder_freeFromPool(voc, &leaf.mempool);
 }
 
 void    tVocoder_initToPool     (tVocoder* const voc, tMempool* const mp)
@@ -570,7 +557,7 @@ void    tRosenbergGlottalPulse_freeFromPool   (tRosenbergGlottalPulse* const gp,
 {
     _tMempool* m = *mp;
     _tRosenbergGlottalPulse* g = *gp;
-    mpool_free(g, m);
+    mpool_free((char*)g, m);
 }
 
 float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const gp)
@@ -651,20 +638,12 @@ static void pitchup(_tSOLAD *w, float *out);
 // init
 void     tSOLAD_init(tSOLAD* const wp)
 {
-    _tSOLAD* w = *wp = (_tSOLAD*) leaf_calloc(sizeof(_tSOLAD));
-    
-    w->pitchfactor = 1.;
-    w->delaybuf = (float*) leaf_calloc(sizeof(float) * (LOOPSIZE+16));
-    
-    solad_init(w);
+    tSOLAD_initToPool(wp, &leaf.mempool);
 }
 
 void tSOLAD_free(tSOLAD* const wp)
 {
-    _tSOLAD* w = *wp;
-    
-    leaf_free((char*)w->delaybuf);
-    leaf_free((char*)w);
+    tSOLAD_freeFromPool(wp, &leaf.mempool);
 }
 
 void    tSOLAD_initToPool       (tSOLAD* const wp, tMempool* const mp)
@@ -1020,42 +999,18 @@ static int pitchshift_attackdetect(_tPitchShift* ps)
 
 void tPitchShift_init (tPitchShift* const psr, tPeriodDetection* pd, float* out, int bufSize)
 {
-    _tPitchShift* ps = *psr = (_tPitchShift*) leaf_calloc(sizeof(_tPitchShift));
-    _tPeriodDetection* p = *pd;
-    
-    ps->p = pd;
-    
-    ps->outBuffer = out;
-    ps->bufSize = bufSize;
-    ps->frameSize = p->frameSize;
-    ps->framesPerBuffer = ps->bufSize / ps->frameSize;
-    ps->curBlock = 1;
-    ps->lastBlock = 0;
-    ps->index = 0;
-    ps->pitchFactor = 1.0f;
-    
-    tSOLAD_init(&ps->sola);
-    
-    tHighpass_init(&ps->hp, HPFREQ);
-    
-    tSOLAD_setPitchFactor(&ps->sola, DEFPITCHRATIO);
+    tPitchShift_freeFromPool(psr, &leaf.mempool);
 }
 
 void tPitchShift_free(tPitchShift* const psr)
 {
-    _tPitchShift* ps = *psr;
-    
-    tSOLAD_free(&ps->sola);
-    tHighpass_free(&ps->hp);
-    leaf_free((char*)ps);
+    tPitchShift_freeFromPool(psr, &leaf.mempool);
 }
 
 void    tPitchShift_initToPool      (tPitchShift* const psr, tPeriodDetection* const pd, float* out, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-
     _tPitchShift* ps = *psr = (_tPitchShift*) mpool_calloc(sizeof(_tPitchShift), m);
-
     _tPeriodDetection* p = *pd;
     
     ps->p = pd;
@@ -1217,6 +1172,7 @@ void    tRetune_initToPool      (tRetune* const rt, int numVoices, int bufSize, 
 {
     _tMempool* m = *mp;
     _tRetune* r = *rt = (_tRetune*) mpool_alloc(sizeof(_tRetune), m);
+    r->mempool = mp;
     
     r->bufSize = bufSize;
     r->frameSize = frameSize;
@@ -1285,27 +1241,37 @@ void tRetune_setNumVoices(tRetune* const rt, int numVoices)
 {
     _tRetune* r = *rt;
     
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        tPitchShift_free(&r->ps[i]);
-        leaf_free((char*)r->outBuffers[i]);
-    }
-    leaf_free((char*)r->tickOutput);
-    leaf_free((char*)r->pitchFactor);
-    leaf_free((char*)r->ps);
-    leaf_free((char*)r->outBuffers);
+    int bufSize = r->bufSize;
+    int frameSize = r->frameSize;
+    tMempool* mempool = r->mempool;
     
-    r->numVoices = numVoices;
+    tRetune_freeFromPool(rt, mempool);
+    tRetune_initToPool(rt, numVoices, bufSize, frameSize, mempool);
     
-    r->outBuffers = (float**) leaf_alloc(sizeof(float*) * r->numVoices);
-    r->ps = (tPitchShift*) leaf_alloc(sizeof(tPitchShift) * r->numVoices);
-    r->pitchFactor = (float*) leaf_alloc(sizeof(float) * r->numVoices);
-    r->tickOutput = (float*) leaf_alloc(sizeof(float) * r->numVoices);
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
-        tPitchShift_init(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize);
-    }
+    // Could this run into fragmentation problems?
+    // Trying out reiniting the whole object (above) since it shouldn't be much slower anyway.
+    
+//    for (int i = 0; i < r->numVoices; ++i)
+//    {
+//        tPitchShift_freeFromPool(&r->ps[i], r->mempool);
+//        mpool_free((char*)r->outBuffers[i], *r->mempool);
+//    }
+//    mpool_free((char*)r->tickOutput, *r->mempool);
+//    mpool_free((char*)r->pitchFactor, *r->mempool);
+//    mpool_free((char*)r->ps, *r->mempool);
+//    mpool_free((char*)r->outBuffers, *r->mempool);
+//
+//    r->numVoices = numVoices;
+//
+//    r->outBuffers = (float**) mpool_alloc(sizeof(float*) * r->numVoices, *r->mempool);
+//    r->ps = (tPitchShift*) mpool_alloc(sizeof(tPitchShift) * r->numVoices, *r->mempool);
+//    r->pitchFactor = (float*) mpool_alloc(sizeof(float) * r->numVoices, *r->mempool);
+//    r->tickOutput = (float*) mpool_alloc(sizeof(float) * r->numVoices, *r->mempool);
+//    for (int i = 0; i < r->numVoices; ++i)
+//    {
+//        r->outBuffers[i] = (float*) mpool_alloc(sizeof(float) * r->bufSize, *r->mempool);
+//        tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, r->mempool);
+//    }
 }
 
 void tRetune_setPitchFactors(tRetune* const rt, float pf)
@@ -1390,6 +1356,7 @@ void    tAutotune_initToPool        (tAutotune* const rt, int numVoices, int buf
 {
     _tMempool* m = *mp;
     _tAutotune* r = *rt = (_tAutotune*) mpool_alloc(sizeof(_tAutotune), m);
+    r->mempool = mp;
     
     r->bufSize = bufSize;
     r->frameSize = frameSize;
@@ -1462,27 +1429,36 @@ void tAutotune_setNumVoices(tAutotune* const rt, int numVoices)
 {
     _tAutotune* r = *rt;
     
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        tPitchShift_free(&r->ps[i]);
-        leaf_free((char*)r->outBuffers[i]);
-    }
-    leaf_free((char*)r->tickOutput);
-    leaf_free((char*)r->freq);
-    leaf_free((char*)r->ps);
-    leaf_free((char*)r->outBuffers);
+    int bufSize = r->bufSize;
+    int frameSize = r->frameSize;
+    tMempool* mempool = r->mempool;
     
-    r->numVoices = numVoices;
+    tAutotune_freeFromPool(rt, mempool);
+    tAutotune_initToPool(rt, numVoices, bufSize, frameSize, mempool);
     
-    r->outBuffers = (float**) leaf_alloc(sizeof(float*) * r->numVoices);
-    r->ps = (tPitchShift*) leaf_alloc(sizeof(tPitchShift) * r->numVoices);
-    r->freq = (float*) leaf_alloc(sizeof(float) * r->numVoices);
-    r->tickOutput = (float*) leaf_alloc(sizeof(float) * r->numVoices);
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        r->outBuffers[i] = (float*) leaf_alloc(sizeof(float) * r->bufSize);
-        tPitchShift_init(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize);
-    }
+    // Could this run into fragmentation problems?
+    // Trying out reiniting the whole object (above) since it shouldn't be much slower anyway.
+//    for (int i = 0; i < r->numVoices; ++i)
+//    {
+//        tPitchShift_freeFromPool(&r->ps[i], r->mempool);
+//        mpool_free((char*)r->outBuffers[i], *r->mempool);
+//    }
+//    mpool_free((char*)r->tickOutput, *r->mempool);
+//    mpool_free((char*)r->freq, *r->mempool);
+//    mpool_free((char*)r->ps, *r->mempool);
+//    mpool_free((char*)r->outBuffers, *r->mempool);
+//
+//    r->numVoices = numVoices;
+//
+//    r->outBuffers = (float**) mpool_alloc(sizeof(float*) * r->numVoices, *r->mempool);
+//    r->ps = (tPitchShift*) mpool_alloc(sizeof(tPitchShift) * r->numVoices, *r->mempool);
+//    r->freq = (float*) mpool_alloc(sizeof(float) * r->numVoices, *r->mempool);
+//    r->tickOutput = (float*) mpool_alloc(sizeof(float) * r->numVoices, *r->mempool);
+//    for (int i = 0; i < r->numVoices; ++i)
+//    {
+//        r->outBuffers[i] = (float*) mpool_alloc(sizeof(float) * r->bufSize, *r->mempool);
+//        tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, r->mempool);
+//    }
 }
 
 void tAutotune_setFreqs(tAutotune* const rt, float f)
@@ -1566,53 +1542,12 @@ float tAutotune_getInputFreq(tAutotune* const rt)
 
 void tFormantShifter_init(tFormantShifter* const fsr, int order)
 {
-    _tFormantShifter* fs = *fsr = (_tFormantShifter*) leaf_alloc(sizeof(_tFormantShifter));
-    
-    fs->ford = order;
-    fs->fk = (float*) leaf_calloc(sizeof(float) * fs->ford);
-    fs->fb = (float*) leaf_calloc(sizeof(float) * fs->ford);
-    fs->fc = (float*) leaf_calloc(sizeof(float) * fs->ford);
-    fs->frb = (float*) leaf_calloc(sizeof(float) * fs->ford);
-    fs->frc = (float*) leaf_calloc(sizeof(float) * fs->ford);
-    fs->fsig = (float*) leaf_calloc(sizeof(float) * fs->ford);
-    fs->fsmooth = (float*) leaf_calloc(sizeof(float) * fs->ford);
-    fs->ftvec = (float*) leaf_calloc(sizeof(float) * fs->ford);
-    fs->fbuff = (float*) leaf_calloc(sizeof(float*) * fs->ford);
-
-    fs->falph = powf(0.001f, 40.0f * leaf.invSampleRate);
-    fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
-    fs->fhp = 0.0f;
-    fs->flp = 0.0f;
-    fs->flpa = powf(0.001f, 10.0f * leaf.invSampleRate);
-    fs->fmute = 1.0f;
-    fs->fmutealph = powf(0.001f, 0.5f * leaf.invSampleRate);
-    fs->cbi = 0;
-    fs->intensity = 1.0f;
-	fs->invIntensity = 1.0f;
-	tHighpass_init(&fs->hp, 10.0f);
-	tHighpass_init(&fs->hp2, 10.0f);
-	tFeedbackLeveler_init(&fs->fbl1, 0.99f, 0.005f, 0.125f, 0);
-	tFeedbackLeveler_init(&fs->fbl2, 0.99f, 0.005f, 0.125f, 0);
+    tFormantShifter_initToPool(fsr, order, &leaf.mempool);
 }
 
 void tFormantShifter_free(tFormantShifter* const fsr)
 {
-    _tFormantShifter* fs = *fsr;
-    
-    leaf_free((char*)fs->fk);
-    leaf_free((char*)fs->fb);
-    leaf_free((char*)fs->fc);
-    leaf_free((char*)fs->frb);
-    leaf_free((char*)fs->frc);
-    leaf_free((char*)fs->fsig);
-    leaf_free((char*)fs->fsmooth);
-    leaf_free((char*)fs->ftvec);
-    leaf_free((char*)fs->fbuff);
-    tHighpass_free(&fs->hp);
-    tHighpass_free(&fs->hp2);
-	tFeedbackLeveler_free(&fs->fbl1);
-	tFeedbackLeveler_free(&fs->fbl2);
-    leaf_free((char*)fs);
+    tFormantShifter_freeFromPool(fsr, &leaf.mempool);
 }
 
 void    tFormantShifter_initToPool      (tFormantShifter* const fsr, int order, tMempool* const mp)

@@ -673,17 +673,12 @@ float   tLivingString_sample(tLivingString* const pl)
 
 void    tReedTable_init      (tReedTable* const pm, float offset, float slope)
 {
-    _tReedTable* p = *pm = (_tReedTable*) leaf_alloc(sizeof(_tReedTable));
-    
-    p->offset = offset;
-    p->slope = slope;
+    tReedTable_initToPool(pm, offset, slope, &leaf.mempool);
 }
 
 void    tReedTable_free      (tReedTable* const pm)
 {
-    _tReedTable* p = *pm;
-    
-    leaf_free((char*)p);
+    tReedTable_freeFromPool(pm, &leaf.mempool);
 }
 
 void    tReedTable_initToPool   (tReedTable* const pm, float offset, float slope, tMempool* const mp)

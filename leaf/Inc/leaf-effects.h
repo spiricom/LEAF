@@ -221,6 +221,7 @@ extern "C" {
     // Retune
     typedef struct _tRetune
     {
+        tMempool* mempool;
         tPeriodDetection pd;
         tPitchShift* ps;
         
@@ -264,6 +265,7 @@ extern "C" {
     // Autotune
     typedef struct _tAutotune
     {
+        tMempool* mempool;
         tPeriodDetection pd;
         tPitchShift* ps;
         

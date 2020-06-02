@@ -24,18 +24,12 @@
 
 void    tEnvelopeFollower_init(tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff)
 {
-    _tEnvelopeFollower* e = *ef = (_tEnvelopeFollower*) leaf_alloc(sizeof(_tEnvelopeFollower));
-    
-    e->y = 0.0f;
-    e->a_thresh = attackThreshold;
-    e->d_coeff = decayCoeff;
+    tEnvelopeFollower_initToPool(ef, attackThreshold, decayCoeff, &leaf.mempool);
 }
 
 void tEnvelopeFollower_free(tEnvelopeFollower* const ef)
 {
-    _tEnvelopeFollower* e = *ef;
-    
-    leaf_free((char*)e);
+    tEnvelopeFollower_freeFromPool(ef, &leaf.mempool);
 }
 
 void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff, tMempool* const mp)
@@ -186,18 +180,12 @@ void    tZeroCrossing_setWindow        (tZeroCrossing* const zc, float windowSiz
 //===========================================================================
 void    tPowerFollower_init(tPowerFollower* const pf, float factor)
 {
-    _tPowerFollower* p = *pf = (_tPowerFollower*) leaf_alloc(sizeof(_tPowerFollower));
-    
-    p->curr=0.0f;
-    p->factor=factor;
-    p->oneminusfactor=1.0f-factor;
+    tPowerFollower_initToPool(pf, factor, &leaf.mempool);
 }
 
 void tPowerFollower_free(tPowerFollower* const pf)
 {
-    _tPowerFollower* p = *pf;
-    
-    leaf_free((char*)p);
+    tPowerFollower_freeFromPool(pf, &leaf.mempool);
 }
 
 void    tPowerFollower_initToPool   (tPowerFollower* const pf, float factor, tMempool* const mp)
@@ -251,51 +239,12 @@ float   tPowerFollower_sample(tPowerFollower* const pf)
 
 void tEnvPD_init(tEnvPD* const xpd, int ws, int hs, int bs)
 {
-    _tEnvPD* x = *xpd = (_tEnvPD*) leaf_calloc(sizeof(_tEnvPD));
-    
-    int period = hs, npoints = ws;
-    
-    int i;
-    
-    if (npoints < 1) npoints = 1024;
-    if (period < 1) period = npoints/2;
-    if (period < npoints / MAXOVERLAP + 1)
-        period = npoints / MAXOVERLAP + 1;
-    
-    x->x_npoints = npoints;
-    x->x_phase = 0;
-    x->x_period = period;
-    
-    x->windowSize = npoints;
-    x->hopSize = period;
-    x->blockSize = bs;
-    
-    for (i = 0; i < MAXOVERLAP; i++) x->x_sumbuf[i] = 0.0f;
-    for (i = 0; i < npoints; i++)
-        x->buf[i] = (1.0f - cosf((TWO_PI * i) / npoints))/npoints;
-    for (; i < npoints+INITVSTAKEN; i++) x->buf[i] = 0.0f;
-    
-    x->x_f = 0.0f;
-    
-    x->x_allocforvs = INITVSTAKEN;
-    
-    // ~ ~ ~ dsp ~ ~ ~
-    if (x->x_period % x->blockSize)
-    {
-        x->x_realperiod = x->x_period + x->blockSize - (x->x_period % x->blockSize);
-    }
-    else
-    {
-        x->x_realperiod = x->x_period;
-    }
-    // ~ ~ ~ ~ ~ ~ ~ ~
+    tEnvPD_initToPool(xpd, ws, hs, bs, &leaf.mempool);
 }
 
 void tEnvPD_free (tEnvPD* const xpd)
 {
-    _tEnvPD* x = *xpd;
-    
-    leaf_free((char*)x);
+    tEnvPD_freeFromPool(xpd, &leaf.mempool);
 }
 
 void    tEnvPD_initToPool       (tEnvPD* const xpd, int ws, int hs, int bs, tMempool* const mp)
@@ -403,16 +352,12 @@ static void atkdtk_envelope(tAttackDetection* const a, float *in);
 
 void tAttackDetection_init(tAttackDetection* const ad, int blocksize, int atk, int rel)
 {
-    *ad = (_tAttackDetection*) leaf_alloc(sizeof(_tAttackDetection));
-    
-    atkdtk_init(ad, blocksize, atk, rel);
+    tAttackDetection_initToPool(ad, blocksize, atk, rel, &leaf.mempool);
 }
 
 void tAttackDetection_free(tAttackDetection* const ad)
 {
-    _tAttackDetection* a = *ad;
-    
-    leaf_free((char*)a);
+    tAttackDetection_freeFromPool(ad, &leaf.mempool);
 }
 
 void    tAttackDetection_initToPool     (tAttackDetection* const ad, int blocksize, int atk, int rel, tMempool* const mp)
@@ -557,34 +502,12 @@ static float snac_spectralpeak(tSNAC* const s, float periodlength);
 
 void tSNAC_init(tSNAC* const snac, int overlaparg)
 {
-    _tSNAC* s = *snac = (_tSNAC*) leaf_calloc(sizeof(_tSNAC));
-    
-    s->biasfactor = DEFBIAS;
-    s->timeindex = 0;
-    s->periodindex = 0;
-    s->periodlength = 0.;
-    s->fidelity = 0.;
-    s->minrms = DEFMINRMS;
-    s->framesize = SNAC_FRAME_SIZE;
-    
-    s->inputbuf = (float*) leaf_calloc(sizeof(float) * SNAC_FRAME_SIZE);
-    s->processbuf = (float*) leaf_calloc(sizeof(float) * (SNAC_FRAME_SIZE * 2));
-    s->spectrumbuf = (float*) leaf_calloc(sizeof(float) * (SNAC_FRAME_SIZE / 2));
-    s->biasbuf = (float*) leaf_calloc(sizeof(float) * SNAC_FRAME_SIZE);
-    
-    snac_biasbuf(snac);
-    tSNAC_setOverlap(snac, overlaparg);
+    tSNAC_initToPool(snac, overlaparg, &leaf.mempool);
 }
 
 void tSNAC_free(tSNAC* const snac)
 {
-    _tSNAC* s = *snac;
-    
-    leaf_free((char*)s->inputbuf);
-    leaf_free((char*)s->processbuf);
-    leaf_free((char*)s->spectrumbuf);
-    leaf_free((char*)s->biasbuf);
-    leaf_free((char*)s);
+    tSNAC_freeFromPool(snac, &leaf.mempool);
 }
 
 void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const mp)

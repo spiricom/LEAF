@@ -26,48 +26,12 @@
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Envelope ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 void    tEnvelope_init(tEnvelope* const envlp, float attack, float decay, int loop)
 {
-    _tEnvelope* env = *envlp = (_tEnvelope*) leaf_alloc(sizeof(_tEnvelope));
-    
-    env->exp_buff = __leaf_table_exp_decay;
-    env->inc_buff = __leaf_table_attack_decay_inc;
-    env->buff_size = sizeof(__leaf_table_exp_decay);
-    
-    env->loop = loop;
-    
-    if (attack > 8192.0f)
-        attack = 8192.0f;
-    if (attack < 0.0f)
-        attack = 0.0f;
-    
-    if (decay > 8192.0f)
-        decay = 8192.0f;
-    if (decay < 0.0f)
-        decay = 0.0f;
-    
-    int16_t attackIndex = ((int16_t)(attack * 8.0f))-1;
-    int16_t decayIndex = ((int16_t)(decay * 8.0f))-1;
-    int16_t rampIndex = ((int16_t)(2.0f * 8.0f))-1;
-    
-    if (attackIndex < 0)
-        attackIndex = 0;
-    if (decayIndex < 0)
-        decayIndex = 0;
-    if (rampIndex < 0)
-        rampIndex = 0;
-    
-    env->inRamp = OFALSE;
-    env->inAttack = OFALSE;
-    env->inDecay = OFALSE;
-    
-    env->attackInc = env->inc_buff[attackIndex];
-    env->decayInc = env->inc_buff[decayIndex];
-    env->rampInc = env->inc_buff[rampIndex];
+    tEnvelope_initToPool(envlp, attack, decay, loop, &leaf.mempool);
 }
 
 void tEnvelope_free(tEnvelope* const envlp)
 {
-    _tEnvelope* env = *envlp;
-    leaf_free((char*)env);
+    tEnvelope_freeFromPool(envlp, &leaf.mempool);
 }
 
 void    tEnvelope_initToPool    (tEnvelope* const envlp, float attack, float decay, int loop, tMempool* const mp)
@@ -1203,31 +1167,12 @@ float   tADSR4_tickNoInterp(tADSR4* const adsrenv)
 /* Ramp */
 void    tRamp_init(tRamp* const r, float time, int samples_per_tick)
 {
-    _tRamp* ramp = *r = (_tRamp*) leaf_alloc(sizeof(_tRamp));
-    
-    ramp->inv_sr_ms = 1.0f/(leaf.sampleRate*0.001f);
-	ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
-    ramp->curr = 0.0f;
-    ramp->dest = 0.0f;
-    
-    if (time < ramp->minimum_time)
-    {
-        ramp->time = ramp->minimum_time;
-    }
-    else
-    {
-        ramp->time = time;
-    }
-    ramp->factor = (1.0f / ramp->time) * ramp->inv_sr_ms;
-    ramp->samples_per_tick = samples_per_tick;
-    ramp->inc = ((ramp->dest - ramp->curr) / ramp->time * ramp->inv_sr_ms) * (float)ramp->samples_per_tick;
+    tRamp_initToPool(r, time, samples_per_tick, &leaf.mempool);
 }
 
 void tRamp_free(tRamp* const r)
 {
-    _tRamp* ramp = *r;
-    
-    leaf_free((char*)ramp);
+    tRamp_freeFromPool(r, &leaf.mempool);
 }
 
 void    tRamp_initToPool    (tRamp* const r, float time, int samples_per_tick, tMempool* const mp)
@@ -1470,21 +1415,12 @@ float   tRampUpDown_sample(tRampUpDown* const ramp)
 /* Exponential Smoother */
 void    tExpSmooth_init(tExpSmooth* const expsmooth, float val, float factor)
 {	// factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
-    _tExpSmooth* smooth = *expsmooth = (_tExpSmooth*) leaf_alloc(sizeof(_tExpSmooth));
-    
-	smooth->curr=val;
-	smooth->dest=val;
-	if (factor<0) factor=0;
-	if (factor>1) factor=1;
-	smooth->factor=factor;
-	smooth->oneminusfactor=1.0f-factor;
+    tExpSmooth_initToPool(expsmooth, val, factor, &leaf.mempool);
 }
 
 void tExpSmooth_free(tExpSmooth* const expsmooth)
 {
-    _tExpSmooth* smooth = *expsmooth;
-    
-    leaf_free((char*)smooth);
+    tExpSmooth_freeFromPool(expsmooth, &leaf.mempool);
 }
 
 void    tExpSmooth_initToPool   (tExpSmooth* const expsmooth, float val, float factor, tMempool* const mp)

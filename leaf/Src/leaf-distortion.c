@@ -25,18 +25,12 @@
 
 void tSampleReducer_init(tSampleReducer* const sr)
 {
-    _tSampleReducer* s = *sr = (_tSampleReducer*) leaf_alloc(sizeof(_tSampleReducer));
-    
-    s->invRatio = 1.0f;
-    s->hold = 0.0f;
-    s->count = 0;
+    tSampleReducer_initToPool(sr, &leaf.mempool);
 }
 
 void    tSampleReducer_free    (tSampleReducer* const sr)
 {
-    _tSampleReducer* s = *sr;
-    
-    leaf_free((char*)s);
+    tSampleReducer_freeFromPool(sr, &leaf.mempool);
 }
 
 void    tSampleReducer_initToPool   (tSampleReducer* const sr, tMempool* const mp)
@@ -85,30 +79,12 @@ void tSampleReducer_setRatio(tSampleReducer* const sr, float ratio)
 // Latency is equal to the phase length (numTaps / ratio)
 void tOversampler_init(tOversampler* const osr, int ratio, oBool extraQuality)
 {
-    _tOversampler* os = *osr = (_tOversampler*) leaf_alloc(sizeof(_tOversampler));
-    
-    uint8_t offset = 0;
-    if (extraQuality) offset = 6;
-    if (ratio == 2 || ratio == 4  ||
-        ratio == 8 || ratio == 16 ||
-        ratio == 32 || ratio == 64) {
-        os->ratio = ratio;
-        int idx = (int)(log2f(os->ratio))-1+offset;
-        os->numTaps = __leaf_tablesize_firNumTaps[idx];
-        os->phaseLength = os->numTaps / os->ratio;
-        os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
-        os->upState = (float*) leaf_alloc(sizeof(float) * os->numTaps * 2);
-        os->downState = (float*) leaf_alloc(sizeof(float) * os->numTaps * 2);
-    }
+    tOversampler_initToPool(osr, ratio, extraQuality, &leaf.mempool);
 }
 
 void tOversampler_free(tOversampler* const osr)
 {
-    _tOversampler* os = *osr;
-    
-    leaf_free((char*)os->upState);
-    leaf_free((char*)os->downState);
-    leaf_free((char*)os);
+    tOversampler_freeFromPool(osr, &leaf.mempool);
 }
 
 void    tOversampler_initToPool     (tOversampler* const osr, int ratio, oBool extraQuality, tMempool* const mp)
@@ -597,21 +573,12 @@ float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float in)
 
 void    tCrusher_init    (tCrusher* const cr)
 {
-    _tCrusher* c = *cr = (_tCrusher*) leaf_alloc(sizeof(_tCrusher));
-    
-    c->op = 4;
-    c->div = SCALAR;
-    c->rnd = 0.25f;
-    c->srr = 0.25f;
-    tSampleReducer_init(&c->sReducer);
-    c->gain = (c->div / SCALAR) * 0.7f + 0.3f;
+    tCrusher_freeFromPool(cr, &leaf.mempool);
 }
 
 void    tCrusher_free    (tCrusher* const cr)
 {
-    _tCrusher* c = *cr;
-    tSampleReducer_free(&c->sReducer);
-    leaf_free((char*)c);
+    tCrusher_freeFromPool(cr, &leaf.mempool);
 }
 
 void    tCrusher_initToPool   (tCrusher* const cr, tMempool* const mp)

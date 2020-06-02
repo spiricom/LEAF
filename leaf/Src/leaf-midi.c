@@ -22,21 +22,12 @@
 
 void tStack_init(tStack* const stack)
 {
-    _tStack* ns = *stack = (_tStack*) leaf_alloc(sizeof(_tStack));
-    
-    ns->ordered = OFALSE;
-    ns->size = 0;
-    ns->pos = 0;
-    ns->capacity = STACK_SIZE;
-    
-    for (int i = 0; i < STACK_SIZE; i++) ns->data[i] = -1;
+    tStack_initToPool(stack, &leaf.mempool);
 }
 
 void tStack_free(tStack* const stack)
 {
-    _tStack* ns = *stack;
-    
-    leaf_free((char*)ns);
+    tStack_freeFromPool(stack, &leaf.mempool);
 }
 
 void    tStack_initToPool           (tStack* const stack, tMempool* const mp)
@@ -272,68 +263,12 @@ int tStack_first(tStack* const stack)
 // POLY
 void tPoly_init(tPoly* const polyh, int maxNumVoices)
 {
-    _tPoly* poly = *polyh = (_tPoly*) leaf_alloc(sizeof(_tPoly));
-    
-    poly->numVoices = maxNumVoices;
-    poly->maxNumVoices = maxNumVoices;
-    poly->lastVoiceToChange = 0;
-    
-    // Arp mode stuff
-    poly->currentVoice = 0;
-    poly->maxLength = 128;
-    poly->currentNote = -1;
-    
-    //default learned CCs and notes are just the CCs 1-128 - notes are skipped
-    for (int i = 0; i < 128; i++)
-    {
-        poly->notes[i][0] = 0;
-        poly->notes[i][1] = -1;
-    }
-    
-    poly->glideTime = 5.0f;
-    
-    poly->ramps = (tRamp*) leaf_alloc(sizeof(tRamp) * poly->maxNumVoices);
-    poly->rampVals = (float*) leaf_alloc(sizeof(float) * poly->maxNumVoices);
-    poly->firstReceived = (oBool*) leaf_alloc(sizeof(oBool) * poly->maxNumVoices);
-    poly->voices = (int**) leaf_alloc(sizeof(int*) * poly->maxNumVoices);
-    
-    for (int i = 0; i < poly->maxNumVoices; ++i)
-    {
-        poly->voices[i] = (int*) leaf_alloc(sizeof(int) * 2);
-        poly->voices[i][0] = -1;
-        poly->firstReceived[i] = OFALSE;
-        
-        tRamp_init(&poly->ramps[i], poly->glideTime, 1);
-    }
-    
-    poly->pitchBend = 0.0f;
-    
-    tRamp_init(&poly->pitchBendRamp, 1.0f, 1);
-    tStack_init(&poly->stack);
-    tStack_init(&poly->orderStack);
-    
-    poly->pitchGlideIsActive = OFALSE;
+    tPoly_initToPool(polyh, maxNumVoices, &leaf.mempool);
 }
 
 void tPoly_free(tPoly* const polyh)
 {
-    _tPoly* poly = *polyh;
-    
-    for (int i = 0; i < poly->maxNumVoices; i++)
-    {
-        tRamp_free(&poly->ramps[i]);
-        leaf_free((char*)poly->voices[i]);
-    }
-    tRamp_free(&poly->pitchBendRamp);
-    tStack_free(&poly->stack);
-    tStack_free(&poly->orderStack);
-    
-    leaf_free((char*)poly->voices);
-    leaf_free((char*)poly->ramps);
-    leaf_free((char*)poly->rampVals);
-    leaf_free((char*)poly->firstReceived);
-    
-    leaf_free((char*)poly);
+    tPoly_freeFromPool(polyh, &leaf.mempool);
 }
 
 void    tPoly_initToPool            (tPoly* const polyh, int maxNumVoices, tMempool* const mp)

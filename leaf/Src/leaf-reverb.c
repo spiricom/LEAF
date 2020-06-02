@@ -21,48 +21,12 @@
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ PRCReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 void    tPRCReverb_init(tPRCReverb* const rev, float t60)
 {
-    _tPRCReverb* r = *rev = (_tPRCReverb*) leaf_alloc(sizeof(_tPRCReverb));
-    
-    if (t60 <= 0.0f) t60 = 0.001f;
-    
-    r->inv_441 = 1.0f/44100.0f;
-    
-    int lengths[4] = { 341, 613, 1557, 2137 }; // Delay lengths for 44100 Hz sample rate.
-    double scaler = leaf.sampleRate * r->inv_441;
-    
-    int delay, i;
-    if (scaler != 1.0f)
-    {
-        for (i=0; i<4; i++)
-        {
-            delay = (int) scaler * lengths[i];
-            
-            if ( (delay & 1) == 0)          delay++;
-            
-            while ( !LEAF_isPrime(delay) )  delay += 2;
-            
-            lengths[i] = delay;
-        }
-    }
-    
-    tDelay_init(&r->allpassDelays[0], lengths[0], lengths[0] * 2);
-    tDelay_init(&r->allpassDelays[1], lengths[1], lengths[1] * 2);
-    tDelay_init(&r->combDelay, lengths[2], lengths[2] * 2);
-    
-    tPRCReverb_setT60(rev, t60);
-    
-    r->allpassCoeff = 0.7f;
-    r->mix = 0.5f;
+    tPRCReverb_initToPool(rev, t60, &leaf.mempool);
 }
 
 void tPRCReverb_free(tPRCReverb* const rev)
 {
-    _tPRCReverb* r = *rev;
-    
-    tDelay_free(&r->allpassDelays[0]);
-    tDelay_free(&r->allpassDelays[1]);
-    tDelay_free(&r->combDelay);
-    leaf_free((char*)r);
+    tPRCReverb_freeFromPool(rev, &leaf.mempool);
 }
 
 void    tPRCReverb_initToPool   (tPRCReverb* const rev, float t60, tMempool* const mp)
@@ -183,61 +147,12 @@ void     tPRCReverbSampleRateChanged (tPRCReverb* const rev)
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ NReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 void    tNReverb_init(tNReverb* const rev, float t60)
 {
-    _tNReverb* r = *rev = (_tNReverb*) leaf_alloc(sizeof(_tNReverb));
-    
-    if (t60 <= 0.0f) t60 = 0.001f;
-    
-    r->inv_441 = 1.0f/44100.0f;
-    
-    int lengths[15] = {1433, 1601, 1867, 2053, 2251, 2399, 347, 113, 37, 59, 53, 43, 37, 29, 19}; // Delay lengths for 44100 Hz sample rate.
-    double scaler = leaf.sampleRate / 25641.0f;
-    
-    int delay, i;
-    
-    for (i=0; i < 15; i++)
-    {
-        delay = (int) scaler * lengths[i];
-        if ( (delay & 1) == 0)
-            delay++;
-        while ( !LEAF_isPrime(delay) )
-            delay += 2;
-        lengths[i] = delay;
-    }
-    
-    for ( i=0; i<6; i++ )
-    {
-    	tLinearDelay_init(&r->combDelays[i], lengths[i], lengths[i] * 2.0f);
-    	tLinearDelay_clear(&r->combDelays[i]);
-        r->combCoeffs[i] = pow(10.0, (-3 * lengths[i] * leaf.invSampleRate / t60));
-    }
-    
-    for ( i=0; i<8; i++ )
-    {
-    	tLinearDelay_init(&r->allpassDelays[i], lengths[i+6], lengths[i+6] * 2.0f);
-    	tLinearDelay_clear(&r->allpassDelays[i]);
-    }
-
-    
-    tNReverb_setT60(rev, t60);
-    r->allpassCoeff = 0.7f;
-    r->mix = 0.3f;
+    tNReverb_initToPool(rev, t60, &leaf.mempool);
 }
 
 void    tNReverb_free(tNReverb* const rev)
 {
-    _tNReverb* r = *rev;
-    
-    for (int i = 0; i < 6; i++)
-    {
-    	tLinearDelay_free(&r->combDelays[i]);
-    }
-    
-    for (int i = 0; i < 8; i++)
-    {
-    	tLinearDelay_free(&r->allpassDelays[i]);
-    }
-    
-    leaf_free((char*)r);
+    tNReverb_freeFromPool(rev, &leaf.mempool);
 }
 
 void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const mp)
@@ -267,12 +182,14 @@ void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const
     for ( i=0; i<6; i++ )
     {
         tLinearDelay_initToPool(&r->combDelays[i], lengths[i], lengths[i] * 2.0f, mp);
+        tLinearDelay_clear(&r->combDelays[i]);
         r->combCoeffs[i] = pow(10.0, (-3 * lengths[i] * leaf.invSampleRate / t60));
     }
     
     for ( i=0; i<8; i++ )
     {
         tLinearDelay_initToPool(&r->allpassDelays[i], lengths[i+6], lengths[i+6] * 2.0f, mp);
+        tLinearDelay_clear(&r->allpassDelays[i]);
     }
     
     
