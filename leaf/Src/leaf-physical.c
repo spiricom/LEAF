@@ -668,6 +668,252 @@ float   tLivingString_sample(tLivingString* const pl)
     return p->curr;
 }
 
+
+//////////---------------------------
+
+/* Complex Living String (has pick position and preparation position separated) */
+
+void    tComplexLivingString_init(tComplexLivingString* const pl, float freq, float pickPos, float prepPos, float prepIndex,
+                           float dampFreq, float decay, float targetLev, float levSmoothFactor,
+                           float levStrength, int levMode)
+{
+    tComplexLivingString_initToPool(pl, freq, pickPos, prepPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf.mempool);
+}
+
+void tComplexLivingString_free(tComplexLivingString* const pl)
+{
+    tComplexLivingString_freeFromPool(pl, &leaf.mempool);
+}
+
+void    tComplexLivingString_initToPool    (tComplexLivingString* const pl, float freq, float pickPos, float prepPos, float prepIndex,
+                                     float dampFreq, float decay, float targetLev, float levSmoothFactor,
+                                     float levStrength, int levMode, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tComplexLivingString* p = *pl = (_tComplexLivingString*) mpool_alloc(sizeof(_tComplexLivingString), m);
+
+    p->curr=0.0f;
+    tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tComplexLivingString_setFreq(pl, freq);
+    p->freq = freq;
+    tExpSmooth_initToPool(&p->pickPosSmooth, pickPos, 0.01f, mp); // smoother for pick position
+    tExpSmooth_initToPool(&p->prepPosSmooth, prepPos, 0.01f, mp); // smoother for pick position
+
+    tComplexLivingString_setPickPos(pl, pickPos);
+    tComplexLivingString_setPrepPos(pl, prepPos);
+
+    p->prepPos=prepPos;
+    p->pickPos=pickPos;
+    tLinearDelay_initToPool(&p->delLF,p->waveLengthInSamples, 2400, mp);
+    tLinearDelay_initToPool(&p->delMF,p->waveLengthInSamples, 2400, mp);
+    tLinearDelay_initToPool(&p->delUF,p->waveLengthInSamples, 2400, mp);
+    tLinearDelay_initToPool(&p->delUB,p->waveLengthInSamples, 2400, mp);
+    tLinearDelay_initToPool(&p->delMB,p->waveLengthInSamples, 2400, mp);
+    tLinearDelay_initToPool(&p->delLB,p->waveLengthInSamples, 2400, mp);
+    tLinearDelay_clear(&p->delLF);
+    tLinearDelay_clear(&p->delMF);
+    tLinearDelay_clear(&p->delUF);
+    tLinearDelay_clear(&p->delUB);
+    tLinearDelay_clear(&p->delMB);
+    tLinearDelay_clear(&p->delLB);
+    p->dampFreq = dampFreq;
+    tOnePole_initToPool(&p->bridgeFilter, dampFreq, mp);
+    tOnePole_initToPool(&p->nutFilter, dampFreq, mp);
+    tOnePole_initToPool(&p->prepFilterU, dampFreq, mp);
+    tOnePole_initToPool(&p->prepFilterL, dampFreq, mp);
+    tHighpass_initToPool(&p->DCblockerU,13, mp);
+    tHighpass_initToPool(&p->DCblockerL,13, mp);
+    p->decay=decay;
+    p->prepIndex = prepIndex;
+    tFeedbackLeveler_initToPool(&p->fbLevU, targetLev, levSmoothFactor, levStrength, levMode, mp);
+    tFeedbackLeveler_initToPool(&p->fbLevL, targetLev, levSmoothFactor, levStrength, levMode, mp);
+    p->levMode=levMode;
+}
+
+void    tComplexLivingString_freeFromPool  (tComplexLivingString* const pl, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tComplexLivingString* p = *pl;
+
+    tExpSmooth_freeFromPool(&p->wlSmooth, mp);
+    tExpSmooth_freeFromPool(&p->pickPosSmooth, mp);
+    tExpSmooth_freeFromPool(&p->prepPosSmooth, mp);
+    tLinearDelay_freeFromPool(&p->delLF, mp);
+    tLinearDelay_freeFromPool(&p->delMF, mp);
+    tLinearDelay_freeFromPool(&p->delUF, mp);
+    tLinearDelay_freeFromPool(&p->delUB, mp);
+    tLinearDelay_freeFromPool(&p->delMB, mp);
+    tLinearDelay_freeFromPool(&p->delLB, mp);
+    tOnePole_freeFromPool(&p->bridgeFilter, mp);
+    tOnePole_freeFromPool(&p->nutFilter, mp);
+    tOnePole_freeFromPool(&p->prepFilterU, mp);
+    tOnePole_freeFromPool(&p->prepFilterL, mp);
+    tHighpass_freeFromPool(&p->DCblockerU, mp);
+    tHighpass_freeFromPool(&p->DCblockerL, mp);
+    tFeedbackLeveler_freeFromPool(&p->fbLevU, mp);
+    tFeedbackLeveler_freeFromPool(&p->fbLevL, mp);
+
+    mpool_free((char*)p, m);
+}
+
+void     tComplexLivingString_setFreq(tComplexLivingString* const pl, float freq)
+{    // NOTE: It is faster to set wavelength in samples directly
+    _tComplexLivingString* p = *pl;
+    if (freq<20.0f) freq=20.0f;
+    else if (freq>10000.0f) freq=10000.0f;
+    p->waveLengthInSamples = leaf.sampleRate/freq;
+    tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+}
+
+void     tComplexLivingString_setWaveLength(tComplexLivingString* const pl, float waveLength)
+{
+    _tComplexLivingString* p = *pl;
+    if (waveLength<4.8f) waveLength=4.8f;
+    else if (waveLength>2400.0f) waveLength=2400.0f;
+    p->waveLengthInSamples = waveLength;
+    tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+}
+
+void     tComplexLivingString_setPickPos(tComplexLivingString* const pl, float pickPos)
+{    // between 0 and 1
+    _tComplexLivingString* p = *pl;
+    if (pickPos<0.5f) pickPos=0.5f;
+    else if (pickPos>1.f) pickPos=1.f;
+    p->pickPos = pickPos;
+    tExpSmooth_setDest(&p->pickPosSmooth, p->pickPos);
+}
+
+void     tComplexLivingString_setPrepPos(tComplexLivingString* const pl, float prepPos)
+{    // between 0 and 1
+    _tComplexLivingString* p = *pl;
+    if (prepPos<0.f) prepPos=0.f;
+    else if (prepPos>0.5f) prepPos=0.5f;
+    p->prepPos = prepPos;
+    tExpSmooth_setDest(&p->prepPosSmooth, p->prepPos);
+}
+
+void     tComplexLivingString_setPrepIndex(tComplexLivingString* const pl, float prepIndex)
+{    // between 0 and 1
+    _tComplexLivingString* p = *pl;
+    if (prepIndex<0.f) prepIndex=0.f;
+    else if (prepIndex>1.f) prepIndex=1.f;
+    p->prepIndex = prepIndex;
+}
+
+void     tComplexLivingString_setDampFreq(tComplexLivingString* const pl, float dampFreq)
+{
+    _tComplexLivingString* p = *pl;
+    tOnePole_setFreq(&p->bridgeFilter, dampFreq);
+    tOnePole_setFreq(&p->nutFilter, dampFreq);
+    tOnePole_setFreq(&p->prepFilterU, dampFreq);
+    tOnePole_setFreq(&p->prepFilterL, dampFreq);
+}
+
+void     tComplexLivingString_setDecay(tComplexLivingString* const pl, float decay)
+{
+    _tComplexLivingString* p = *pl;
+    p->decay=decay;
+}
+
+void     tComplexLivingString_setTargetLev(tComplexLivingString* const pl, float targetLev)
+{
+    _tComplexLivingString* p = *pl;
+    tFeedbackLeveler_setTargetLevel(&p->fbLevU, targetLev);
+    tFeedbackLeveler_setTargetLevel(&p->fbLevL, targetLev);
+}
+
+void     tComplexLivingString_setLevSmoothFactor(tComplexLivingString* const pl, float levSmoothFactor)
+{
+    _tComplexLivingString* p = *pl;
+    tFeedbackLeveler_setFactor(&p->fbLevU, levSmoothFactor);
+    tFeedbackLeveler_setFactor(&p->fbLevL, levSmoothFactor);
+}
+
+void     tComplexLivingString_setLevStrength(tComplexLivingString* const pl, float levStrength)
+{
+    _tComplexLivingString* p = *pl;
+    tFeedbackLeveler_setStrength(&p->fbLevU, levStrength);
+    tFeedbackLeveler_setStrength(&p->fbLevL, levStrength);
+}
+
+void     tComplexLivingString_setLevMode(tComplexLivingString* const pl, int levMode)
+{
+    _tComplexLivingString* p = *pl;
+    tFeedbackLeveler_setMode(&p->fbLevU, levMode);
+    tFeedbackLeveler_setMode(&p->fbLevL, levMode);
+    p->levMode=levMode;
+}
+
+float   tComplexLivingString_tick(tComplexLivingString* const pl, float input)
+{
+    _tComplexLivingString* p = *pl;
+
+    // from pickPos upwards=forwards
+    float fromLF=tLinearDelay_tickOut(&p->delLF);
+    float fromMF=tLinearDelay_tickOut(&p->delMF);
+    float fromUF=tLinearDelay_tickOut(&p->delUF);
+    float fromUB=tLinearDelay_tickOut(&p->delUB);
+    float fromMB=tLinearDelay_tickOut(&p->delMB);
+    float fromLB=tLinearDelay_tickOut(&p->delLB);
+
+    // into upper part of string, from bridge, going backwards
+    float fromBridge=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1)*tHighpass_tick(&p->DCblockerU, tOnePole_tick(&p->bridgeFilter, fromUF)));
+    tLinearDelay_tickIn(&p->delUB, fromBridge);
+
+    // into pick position, take input and add it into the waveguide, going to come out of middle segment
+    tLinearDelay_tickIn(&p->delMB, fromUB+input);
+
+    // into lower part of string, from prepPos, going backwards
+    float fromLowerPrep=-tOnePole_tick(&p->prepFilterL, fromLF);
+    float intoLower=p->prepIndex*fromLowerPrep+(1.0f - p->prepIndex)*fromMB;
+    tLinearDelay_tickIn(&p->delLB, intoLower);
+
+    // into lower part of string, from nut, going forwards toward prep position
+    float fromNut=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tOnePole_tick(&p->nutFilter, fromLB)));
+    tLinearDelay_tickIn(&p->delLF, fromNut);
+
+    // into middle part of string, from prep going toward pick position
+    float fromUpperPrep=-tOnePole_tick(&p->prepFilterU, fromUB);
+    float intoMiddle=p->prepIndex*fromUpperPrep+(1.0f - p->prepIndex)*fromLF;
+
+    //pick position, take input and add it into the waveguide, going to come out of middle segment
+    tLinearDelay_tickIn(&p->delMF, intoMiddle + input);
+
+    //take output of middle segment and put it into upper segment connecting to the bridge
+    tLinearDelay_tickIn(&p->delUF, fromMF);
+
+    // update all delay lengths
+    float pickP=tExpSmooth_tick(&p->pickPosSmooth);
+    float prepP=tExpSmooth_tick(&p->prepPosSmooth);
+    float wLen=tExpSmooth_tick(&p->wlSmooth);
+
+    float midLen = (pickP-prepP) * wLen; // the length between the pick and the prep;
+    float lowLen = prepP*wLen; // the length from prep to nut
+    float upLen = (1.0f-pickP)*wLen; // the length from pick to bridge
+
+
+    tLinearDelay_setDelay(&p->delLF, lowLen);
+    tLinearDelay_setDelay(&p->delLB, lowLen);
+
+    tLinearDelay_setDelay(&p->delMF, midLen);
+    tLinearDelay_setDelay(&p->delMB, midLen);
+
+    tLinearDelay_setDelay(&p->delUF, upLen);
+    tLinearDelay_setDelay(&p->delUB, upLen);
+
+    //update this to allow pickup position variation
+    p->curr = fromBridge;
+    return p->curr;
+}
+
+float   tComplexLivingString_sample(tComplexLivingString* const pl)
+{
+    _tComplexLivingString* p = *pl;
+    return p->curr;
+}
+
+
+
 ///Reed Table model
 //default values from STK are 0.6 offset and -0.8 slope
 

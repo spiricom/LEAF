@@ -228,7 +228,55 @@ extern "C" {
     void    tLivingString_setLevStrength        (tLivingString* const, float levStrength);
     void    tLivingString_setLevMode            (tLivingString* const, int levMode);
     
+
+
+        // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    /* Complex Living String */
+    typedef struct _tComplexLivingString {
+        float freq, waveLengthInSamples;        // the frequency of the whole string, determining delay length
+        float pickPos;    // the pick position, dividing the string, in ratio
+        float prepPos;    // preparation position, in ratio
+        int prepLower;
+        float prepIndex;    // the amount of pressure on the pickpoint of the string (near 0=soft obj, near 1=hard obj)
+        float dampFreq;    // frequency for the bridge LP filter, in Hz
+        float decay; // amplitude damping factor for the string (only active in mode 0)
+        float levMode;
+        float curr;
+        tLinearDelay delLF,delUF, delMF, delMB, delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
+        tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
+        tHighpass DCblockerL, DCblockerU;
+        tFeedbackLeveler fbLevU, fbLevL;
+        tExpSmooth wlSmooth, pickPosSmooth, prepPosSmooth;
+    } _tComplexLivingString;
+
+    typedef _tComplexLivingString* tComplexLivingString;
+
+    void    tComplexLivingString_init                  (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex,
+                                                 float dampFreq, float decay, float targetLev, float levSmoothFactor,
+                                                 float levStrength, int levMode);
+    void    tComplexLivingString_free                  (tComplexLivingString* const);
+    void    tComplexLivingString_initToPool            (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex,
+                                                 float dampFreq, float decay, float targetLev, float levSmoothFactor,
+                                                 float levStrength, int levMode, tMempool* const);
+    void    tComplexLivingString_freeFromPool          (tComplexLivingString* const, tMempool* const);
+
+    float   tComplexLivingString_tick                  (tComplexLivingString* const, float input);
+    float   tComplexLivingString_sample                (tComplexLivingString* const);
+    void    tComplexLivingString_setFreq               (tComplexLivingString* const, float freq);
+    void    tComplexLivingString_setWaveLength         (tComplexLivingString* const, float waveLength); // in samples
+    void    tComplexLivingString_setPickPos            (tComplexLivingString* const, float pickPos);
+    void    tComplexLivingString_setPrepPos            (tComplexLivingString* const, float prepPos);
+    void    tComplexLivingString_setPrepIndex          (tComplexLivingString* const, float prepIndex);
+    void    tComplexLivingString_setDampFreq           (tComplexLivingString* const, float dampFreq);
+    void    tComplexLivingString_setDecay              (tComplexLivingString* const, float decay); // should be near 1.0
+    void    tComplexLivingString_setTargetLev          (tComplexLivingString* const, float targetLev);
+    void    tComplexLivingString_setLevSmoothFactor    (tComplexLivingString* const, float levSmoothFactor);
+    void    tComplexLivingString_setLevStrength        (tComplexLivingString* const, float levStrength);
+    void    tComplexLivingString_setLevMode            (tComplexLivingString* const, int levMode);
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    
     
     //Reed Table - borrowed from STK
     typedef struct _tReedTable {
