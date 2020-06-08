@@ -69,6 +69,7 @@ extern "C" {
     void  tBuffer_record                (tBuffer* const);
     void  tBuffer_stop                  (tBuffer* const);
     int   tBuffer_getRecordPosition     (tBuffer* const);
+    void   tBuffer_setRecordPosition     (tBuffer* const, int pos);
     
     void  tBuffer_setRecordMode         (tBuffer* const, RecordMode mode);
     
@@ -76,6 +77,8 @@ extern "C" {
     
     uint32_t tBuffer_getBufferLength    (tBuffer* const);
     uint32_t tBuffer_getRecordedLength  (tBuffer* const sb);
+    void 	tBuffer_setRecordedLength	(tBuffer* const sb, int length);
+    int 	tBuffer_isActive			(tBuffer* const sb);
     
     //==============================================================================
     

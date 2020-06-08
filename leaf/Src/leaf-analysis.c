@@ -62,8 +62,10 @@ float   tEnvelopeFollower_tick(tEnvelopeFollower* const ef, float x)
     //ef->y = envelope_pow[(uint16_t)(ef->y * (float)UINT16_MAX)] * ef->d_coeff; //not quite the right behavior - too much loss of precision?
     //ef->y = powf(ef->y, 1.000009f) * ef->d_coeff;  // too expensive
     
+#ifdef NO_DENORMAL_CHECK
+#else
     if( e->y < VSF)   e->y = 0.0f;
-    
+#endif
     return e->y;
 }
 
@@ -887,7 +889,10 @@ void    tPeriodDetection_initToPool  (tPeriodDetection* const pd, float* in, flo
     tEnvPD_initToPool(&p->env, p->windowSize, p->hopSize, p->frameSize, mp);
     
     tSNAC_initToPool(&p->snac, DEFOVERLAP, mp);
-    
+
+    p->history = 0.0f;
+    p->alpha = 1.0f;
+    p->tolerance = 1.0f;
     p->timeConstant = DEFTIMECONSTANT;
     p->radius = expf(-1000.0f * p->hopSize * leaf.invSampleRate / p->timeConstant);
     p->fidelityThreshold = 0.95;
@@ -928,14 +933,16 @@ float tPeriodDetection_tick (tPeriodDetection* pd, float sample)
         tSNAC_ioSamples(&p->snac, &(p->inBuffer[i]), &(p->outBuffer[i]), p->frameSize);
         float fidelity = tSNAC_getFidelity(&p->snac);
         // Fidelity threshold recommended by Katja Vetters is 0.95 for most instruments/voices http://www.katjaas.nl/helmholtz/helmholtz.html
-        if (fidelity > p->fidelityThreshold) p->period = tSNAC_getPeriod(&p->snac);
+        if (fidelity > p->fidelityThreshold)
+        {
+        	p->period = tSNAC_getPeriod(&p->snac);
+        }
         
         p->curBlock++;
         if (p->curBlock >= p->framesPerBuffer) p->curBlock = 0;
         p->lastBlock++;
         if (p->lastBlock >= p->framesPerBuffer) p->lastBlock = 0;
     }
-    
     return p->period;
 }
 

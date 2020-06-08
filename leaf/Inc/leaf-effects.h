@@ -1,8 +1,7 @@
 /*==============================================================================
  
  leaf-effects.h
- Created: 20 Jan 2017 12:01:54pm
- Author:  Michael R Mulshine
+
  
  ==============================================================================*/
 
@@ -21,14 +20,8 @@ extern "C" {
 #include "leaf-analysis.h"
 #include "leaf-envelopes.h"
     
-    /*!
-     * @internal
-     * Header.
-     * @include basic-oscillators.h
-     * @example basic-oscillators.c
-     * An example.
-     */
-    
+
+
     //==============================================================================
     
     /* tTalkbox */
@@ -37,23 +30,23 @@ extern "C" {
     typedef struct _tTalkbox
     {
         float param[NUM_TALKBOX_PARAM];
-        
+
         int bufsize;
         float* car0;
         float* car1;
         float* window;
         float* buf0;
         float* buf1;
-        
+        float* k;
         float warpFactor;
         int32_t warpOn;
-
+        int freeze;
         float emphasis;
         int32_t K, N, O, pos;
         float wet, dry, FX;
         float d0, d1, d2, d3, d4;
         float u0, u1, u2, u3, u4;
-        
+        float G;
         double* dl;
         double* Rt;
 
@@ -68,16 +61,69 @@ extern "C" {
     void    tTalkbox_freeFromPool   (tTalkbox* const, tMempool* const);
     
     float   tTalkbox_tick           (tTalkbox* const, float synth, float voice);
+    float 	tTalkbox_tickFrozen		(tTalkbox* const voc, float synth, float voice);
     void    tTalkbox_update         (tTalkbox* const);
     void    tTalkbox_suspend        (tTalkbox* const);
     void    tTalkbox_lpcDurbin      (float *r, int p, float *k, float *g);
-    void 	tTalkbox_lpc			(float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn);
+    void 	tTalkbox_lpc			(float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G);
     void    tTalkbox_setQuality     (tTalkbox* const, float quality);
-    void 	tTalkbox_setWarpFactor		(tTalkbox* const voc, float warp);
+    void 	tTalkbox_setWarpFactor	(tTalkbox* const voc, float warp);
     void 	tTalkbox_setWarpOn		(tTalkbox* const voc, float warpOn);
+    void 	tTalkbox_setFreeze		(tTalkbox* const voc, float freeze);
     void 	tTalkbox_warpedAutocorrelate	(float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda);
     //==============================================================================
     
+
+    ///////
+
+    typedef struct _tTalkboxFloat
+      {
+          float param[NUM_TALKBOX_PARAM];
+
+          int bufsize;
+          float* car0;
+          float* car1;
+          float* window;
+          float* buf0;
+          float* buf1;
+          float* k;
+          float warpFactor;
+          int32_t warpOn;
+          int freeze;
+          float emphasis;
+          int32_t K, N, O, pos;
+          float wet, dry, FX;
+          float d0, d1, d2, d3, d4;
+          float u0, u1, u2, u3, u4;
+          float G;
+          float* dl;
+          float* Rt;
+
+
+      } _tTalkboxFloat;
+
+      typedef _tTalkboxFloat* tTalkboxFloat;
+
+      void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize);
+      void    tTalkboxFloat_free           (tTalkboxFloat* const);
+      void    tTalkboxFloat_initToPool     (tTalkboxFloat* const, int bufsize, tMempool* const);
+      void    tTalkboxFloat_freeFromPool   (tTalkboxFloat* const, tMempool* const);
+
+      float   tTalkboxFloat_tick           (tTalkboxFloat* const, float synth, float voice);
+      float 	tTalkboxFloat_tickFrozen		(tTalkboxFloat* const voc, float synth, float voice);
+      void    tTalkboxFloat_update         (tTalkboxFloat* const);
+      void    tTalkboxFloat_suspend        (tTalkboxFloat* const);
+      void    tTalkboxFloat_lpcDurbin      (float *r, int p, float *k, float *g);
+      void 	tTalkboxFloat_lpc			(float *buf, float *car, float* dl, float* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G);
+      void    tTalkboxFloat_setQuality     (tTalkboxFloat* const, float quality);
+      void 	tTalkboxFloat_setWarpFactor	(tTalkboxFloat* const voc, float warp);
+      void 	tTalkboxFloat_setWarpOn		(tTalkboxFloat* const voc, float warpOn);
+      void 	tTalkboxFloat_setFreeze		(tTalkboxFloat* const voc, float freeze);
+      void 	tTalkboxFloat_warpedAutocorrelate	(float * x, float* dl, float* Rt, unsigned int L, float * R, unsigned int P, float lambda);
+      //==============================================================================
+
+
+
     /* tVocoder */
 #define NUM_VOCODER_PARAM 8
 #define NBANDS 16
@@ -132,7 +178,7 @@ extern "C" {
 	void    tRosenbergGlottalPulse_freeFromPool   (tRosenbergGlottalPulse* const, tMempool* const);
 
 	float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const);
-
+	float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp);
 	void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq);
 
 	void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, float openLength);
@@ -284,7 +330,7 @@ extern "C" {
         float radius;
         
         float inputPeriod;
-        
+        int shiftOn;
         int numVoices;
     } _tAutotune;
     

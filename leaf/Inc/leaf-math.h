@@ -204,6 +204,8 @@ extern "C" {
 
     float fastdbtoa(float db);
 
+    float fasterdbtoa(float db);
+
     float maximum (float num1, float num2);
 
     float minimum (float num1, float num2);
