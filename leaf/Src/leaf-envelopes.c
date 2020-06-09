@@ -1506,6 +1506,7 @@ void    tSlide_initToPool    (tSlide* const sl, float upSlide, float downSlide, 
     s->prevIn = 0.0f;
     s->currentOut = 0.0f;
     s->prevOut = 0.0f;
+    s->dest = 0.0f;
     if (upSlide < 1.0f)
     {
     	upSlide = 1.0f;
@@ -1525,6 +1526,43 @@ void    tSlide_freeFromPool  (tSlide* const sl, tMempool* const mp)
 	    _tSlide* s = *sl;
 
 	    mpool_free((char*)s, m);
+}
+
+void tSlide_setUpSlide(tSlide* const sl, float upSlide)
+{
+	_tSlide* s = *sl;
+	s->invUpSlide = 1.0f / upSlide;
+}
+
+void tSlide_setDownSlide(tSlide* const sl, float downSlide)
+{
+	_tSlide* s = *sl;
+	s->invDownSlide = 1.0f / downSlide;
+}
+
+void tSlide_setDest(tSlide* const sl, float dest)
+{
+	_tSlide* s = *sl;
+	s->dest = dest;
+}
+
+float tSlide_tickNoInput(tSlide* const sl)
+{
+	_tSlide* s = *sl;
+	float in = s->dest;
+
+	if (in >= s->prevOut)
+	{
+		s->currentOut = s->prevOut + ((in - s->prevOut) * s->invUpSlide);
+	}
+	else
+	{
+		s->currentOut = s->prevOut + ((in - s->prevOut) * s->invDownSlide);
+	}
+	if (s->currentOut < VSF) s->currentOut = 0.0f;
+	s->prevIn = in;
+	s->prevOut = s->currentOut;
+	return s->currentOut;
 }
 
 float tSlide_tick(tSlide* const sl, float in)
