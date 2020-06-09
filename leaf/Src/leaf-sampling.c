@@ -78,6 +78,7 @@ void tBuffer_tick (tBuffer* const sb, float sample)
                 s->idx = 0;
             }
         }
+        s->recordedLength = s->idx;
     }
 }
 
@@ -110,13 +111,18 @@ void  tBuffer_stop(tBuffer* const sb)
 {
     _tBuffer* s = *sb;
     s->active = 0;
-    s->recordedLength = s->idx;
 }
 
 int   tBuffer_getRecordPosition(tBuffer* const sb)
 {
     _tBuffer* s = *sb;
     return s->idx;
+}
+
+void   tBuffer_setRecordPosition(tBuffer* const sb, int pos)
+{
+    _tBuffer* s = *sb;
+    s->idx = pos;
 }
 
 void  tBuffer_setRecordMode (tBuffer* const sb, RecordMode mode)
@@ -132,6 +138,7 @@ void  tBuffer_clear (tBuffer* const sb)
     {
         s->buff[i] = 0.f;
     }
+
 }
 
 uint32_t tBuffer_getBufferLength(tBuffer* const sb)
@@ -144,6 +151,18 @@ uint32_t tBuffer_getRecordedLength(tBuffer* const sb)
 {
     _tBuffer* s = *sb;
     return s->recordedLength;
+}
+
+void tBuffer_setRecordedLength(tBuffer* const sb, int length)
+{
+    _tBuffer* s = *sb;
+    s->recordedLength = length;
+}
+
+int tBuffer_isActive(tBuffer* const sb)
+{
+    _tBuffer* s = *sb;
+    return s->active;
 }
 
 //================================tSampler=====================================
@@ -224,7 +243,7 @@ void tSampler_setSample (tSampler* const sp, tBuffer* const b)
     p->idx = 0.f;
 }
 
-volatile uint32_t errorState = 0;
+
 
 float tSampler_tick        (tSampler* const sp)
 {
@@ -429,10 +448,11 @@ float tSampler_tick        (tSampler* const sp)
         }
     }
     
-    float ticksToEnd = rev ? ((idx - start) * p->iinc) : ((end - idx) * p->iinc);
+
     if (p->mode == PlayNormal)
     {
-        if (ticksToEnd < (0.007f * leaf.sampleRate))
+    	float ticksToEnd = rev ? ((idx - start) * p->iinc) : ((end - idx) * p->iinc);
+    	if (ticksToEnd < (0.007f * leaf.sampleRate))
         {
             tRamp_setDest(&p->gain, 0.f);
             p->active = -1;
@@ -472,10 +492,7 @@ float tSampler_tick        (tSampler* const sp)
         }
     }
     
-    if (fabsf(sample-p->last) > 0.1f)
-    {
-        errorState = 1;
-    }
+
     
     p->last = sample;
     

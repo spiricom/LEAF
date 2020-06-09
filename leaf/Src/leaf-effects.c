@@ -25,6 +25,13 @@
 //============================================================================================================
 
 //LPC vocoder adapted from MDA's excellent open source talkbox plugin code
+
+#define ORD_MAX           34 // Was 100.
+// order is defined by the set_quality function.
+// it's set to max out at 0.0005 of sample rate (if you don't go above 1.0f in the quality setting) == at 48000 that's 24.
+// -JS
+
+
 void tTalkbox_init(tTalkbox* const voc, int bufsize)
 {
     tTalkbox_initToPool(voc, bufsize, &leaf.mempool);
@@ -47,7 +54,8 @@ void    tTalkbox_initToPool     (tTalkbox* const voc, int bufsize, tMempool* con
     v->warpFactor = 0.0f;
     v->warpOn = 0;
     v->bufsize = bufsize;
-    
+    v->freeze = 0;
+    v->G = 0.0f;
     v->car0 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
     v->car1 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
     v->window = (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
@@ -56,7 +64,9 @@ void    tTalkbox_initToPool     (tTalkbox* const voc, int bufsize, tMempool* con
     
     v->dl = (double*) mpool_alloc(sizeof(double) * v->bufsize, m);
     v->Rt = (double*) mpool_alloc(sizeof(double) * v->bufsize, m);
-    
+
+    v->k = (float*) mpool_alloc(sizeof(float) * ORD_MAX, m);
+
     tTalkbox_update(voc);
     tTalkbox_suspend(voc);
 }
@@ -74,7 +84,7 @@ void    tTalkbox_freeFromPool   (tTalkbox* const voc, tMempool* const mp)
     
     mpool_free((char*)v->dl, m);
     mpool_free((char*)v->Rt, m);
-    
+    mpool_free((char*)v->k, m);
     mpool_free((char*)v, m);
 }
 
@@ -132,110 +142,57 @@ void tTalkbox_suspend(tTalkbox* const voc) ///clear any buffers...
 //wAutocorrelate(&pfSrc[stIndex],siglen,R,P,0);
 void tTalkbox_warpedAutocorrelate(float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda)
 {
-//    double dl[L];
-//    double Rt[L];
     double r1,r2,r1t;
     R[0]=0;
     Rt[0]=0;
     r1=0;
     r2=0;
     r1t=0;
-    for(int32_t k=0; k<L;k++)
+    for(uint32_t m=0; m<L;m++)
     {
-                    Rt[0] += (double)(x[k]) * (double)(x[k]);
+                    Rt[0] += (double)(x[m]) * (double)(x[m]);
 
-                    dl[k]= r1 - (double)(lambda) * (double)(x[k]-r2);
-                    r1 = x[k];
-                    r2 = dl[k];
+                    dl[m]= r1 - (double)(lambda) * (double)(x[m]-r2);
+                    r1 = x[m];
+                    r2 = dl[m];
     }
-    for(int32_t i=1; i<=P; i++)
+    for(uint32_t i=1; i<=P; i++)
     {
             Rt[i]=0;
             r1=0;
             r2=0;
-            for(unsigned int k=0; k<L;k++)
+            for(unsigned int m=0; m<L;m++)
             {
-                    Rt[i] += (double) (dl[k]) * (double)(x[k]);
+                    Rt[i] += (double) (dl[m]) * (double)(x[m]);
 
-                    r1t = dl[k];
-                    dl[k]= r1 - (double)(lambda) * (double)(r1t-r2);
+                    r1t = dl[m];
+                    dl[m]= r1 - (double)(lambda) * (double)(r1t-r2);
                     r1 = r1t;
-                    r2 = dl[k];
+                    r2 = dl[m];
             }
     }
-    for(int32_t i=0; i<=P; i++)
+    for(uint32_t i=0; i<=P; i++)
     {
             R[i]=(float)(Rt[i]);
     }
 
 }
 
-
-
-#define ORD_MAX           35 // Was 100.
-// order is defined by the set_quality function.
-// it's set to max out at 0.0005 of sample rate (if you don't go above 1.0f in the quality setting) == at 48000 that's 24.
-// -JS
-void tTalkbox_lpc(float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn)
-{
-    float z[ORD_MAX], r[ORD_MAX], k[ORD_MAX], G, x;
-    int32_t i, j, nn=n;
-    
-    if (warpOn == 0)
-    {
-        for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
-        {
-            z[j] = r[j] = 0.0f;
-            for(i=0; i<nn; i++) r[j] += buf[i] * buf[i+j]; //autocorrelation
-        }
-    }
-    else
-    {
-        for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
-        {
-            z[j] = r[j] = 0.0f;
-        }
-    	tTalkbox_warpedAutocorrelate(buf, dl, Rt, n, r, o, warp);
-    }
-
-    r[0] *= 1.001f;  //stability fix
-    
-    float min = 0.00001f;
-    if(r[0] < min) { for(i=0; i<n; i++) buf[i] = 0.0f; return; }
-    
-    tTalkbox_lpcDurbin(r, o, k, &G);  //calc reflection coeffs
-    
-    //this is for stability to keep reflection coefficients inside the unit circle
-    //but in Harma's papers I've seen 0.998.  just needs to be less than 1 it seems but maybe some wiggle room to avoid instability from floating point precision -JS
-    for(i=0; i<=o; i++)
-    {
-        if(k[i] > 0.995f) k[i] = 0.995f; else if(k[i] < -0.995f) k[i] = -.995f;
-    }
-    
-    for(i=0; i<n; i++)
-    {
-        x = G * car[i];
-        for(j=o; j>0; j--)  //lattice filter
-        {
-            x -= k[j] * z[j-1];
-            z[j] = z[j-1] + k[j] * x;
-        }
-        buf[i] = z[0] = x;  //output buf[] will be windowed elsewhere
-    }
-}
-
-
 void tTalkbox_lpcDurbin(float *r, int p, float *k, float *g)
 {
     int i, j;
     float a[ORD_MAX], at[ORD_MAX], e=r[0];
-    
-    for(i=0; i<=p; i++) a[i] = 0.0f; //probably don't need to clear at[] or k[]
+
+    for(i=0; i<=p; i++)
+    {
+    	a[i] = 0.0f; //probably don't need to clear at[] or k[]
+    }
+	k[0] = 0.0f;
     at[0] = 0.0f;
     for(i=1; i<=p; i++)
     {
         k[i] = -r[i];
-        
+
         for(j=1; j<i; j++)
         {
             at[j] = a[j];
@@ -243,13 +200,13 @@ void tTalkbox_lpcDurbin(float *r, int p, float *k, float *g)
         }
         if(fabs(e) < 1.0e-20f) { e = 0.0f;  break; }
         k[i] /= e;
-        
+
         a[i] = k[i];
         for(j=1; j<i; j++) a[j] = at[j] + k[i] * at[i-j];
-        
+
         e *= 1.0f - k[i] * k[i];
     }
-    
+
     if(e < 1.0e-20f) e = 0.0f;
     *g = sqrtf(e);
 }
@@ -281,10 +238,10 @@ float tTalkbox_tick(tTalkbox* const voc, float synth, float voice)
         x = o - e;  e = o;  //6dB/oct pre-emphasis
         
         w = v->window[p0]; fx = v->buf0[p0] * w;  v->buf0[p0] = x * w;  //50% overlapping hanning windows
-        if(++p0 >= v->N) { tTalkbox_lpc(v->buf0, v->car0, v->dl, v->Rt, v->N, v->O, v->warpFactor, v->warpOn);  p0 = 0; }
+        if(++p0 >= v->N) { tTalkbox_lpc(v->buf0, v->car0, v->dl, v->Rt, v->N, v->O, v->warpFactor, v->warpOn, v->k, v->freeze, &v->G);  p0 = 0; }
         
         w = 1.0f - w;  fx += v->buf1[p1] * w;  v->buf1[p1] = x * w;
-        if(++p1 >= v->N) { tTalkbox_lpc(v->buf1, v->car1, v->dl, v->Rt, v->N, v->O, v->warpFactor, v->warpOn);  p1 = 0; }
+        if(++p1 >= v->N) { tTalkbox_lpc(v->buf1, v->car1, v->dl, v->Rt, v->N, v->O, v->warpFactor, v->warpOn, v->k, v->freeze, &v->G);  p1 = 0; }
     }
     
     p = v->u0 + h0 * fx; v->u0 = v->u1;  v->u1 = fx - h0 * p;
@@ -302,10 +259,68 @@ float tTalkbox_tick(tTalkbox* const voc, float synth, float voice)
     return o;
 }
 
+
+void tTalkbox_lpc(float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G)
+{
+    float z[ORD_MAX], r[ORD_MAX], x;
+    int32_t i, j, nn=n;
+
+
+	if (warpOn == 0)
+	{
+		for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
+		{
+			z[j] = r[j] = 0.0f;
+			for(i=0; i<nn; i++) r[j] += buf[i] * buf[i+j]; //autocorrelation
+		}
+	}
+	else
+	{
+		for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
+		{
+			z[j] = r[j] = 0.0f;
+		}
+		tTalkbox_warpedAutocorrelate(buf, dl, Rt, n, r, o, warp);
+	}
+
+	r[0] *= 1.001f;  //stability fix
+
+	float min = 0.000001f;
+	if (!freeze)
+	{
+		if(r[0] < min)
+		{
+			for(i=0; i<n; i++)
+			{
+				buf[i] = 0.0f;
+				return;
+			}
+		}
+
+		tTalkbox_lpcDurbin(r, o, k, G);  //calc reflection coeffs
+
+		//this is for stability to keep reflection coefficients inside the unit circle
+		//in mda's code it's .995 but in Harma's papers I've seen 0.998.  just needs to be less than 1 it seems but maybe some wiggle room to avoid instability from floating point precision -JS
+		for(i=0; i<=o; i++)
+		{
+			if(k[i] > 0.998f) k[i] = 0.998f; else if(k[i] < -0.998f) k[i] = -.998f;
+		}
+    }
+    for(i=0; i<n; i++)
+    {
+        x = G[0] * car[i];
+        for(j=o; j>0; j--)  //lattice filter
+        {
+            x -= k[j] * z[j-1];
+            z[j] = z[j-1] + k[j] * x;
+        }
+        buf[i] = z[0] = x;  //output buf[] will be windowed elsewhere
+    }
+}
+
 void tTalkbox_setQuality(tTalkbox* const voc, float quality)
 {
     _tTalkbox* v = *voc;
-    
     v->param[3] = quality;
     v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf.sampleRate);
     if (v->O >= ORD_MAX)
@@ -326,6 +341,345 @@ void tTalkbox_setWarpOn(tTalkbox* const voc, float warpOn)
     _tTalkbox* v = *voc;
 
     v->warpOn = warpOn;
+}
+
+void tTalkbox_setFreeze(tTalkbox* const voc, float freeze)
+{
+    _tTalkbox* v = *voc;
+
+    v->freeze = freeze;
+}
+
+
+
+////
+
+// LPC vocoder adapted from MDA's excellent open source talkbox plugin code
+// order is defined by the set_quality function.
+// it's set to max out at 0.0005 of sample rate (if you don't go above 1.0f in the quality setting) == at 48000 that's 24.
+
+//the "float" version has no double calculations for faster computation on single-precision FPUs
+
+// -JS
+
+
+void tTalkboxFloat_init(tTalkboxFloat* const voc, int bufsize)
+{
+    tTalkboxFloat_initToPool(voc, bufsize, &leaf.mempool);
+}
+
+void tTalkboFloat_free(tTalkboxFloat* const voc)
+{
+    tTalkboxFloat_freeFromPool(voc, &leaf.mempool);
+}
+
+void    tTalkboxFloat_initToPool     (tTalkboxFloat* const voc, int bufsize, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTalkboxFloat* v = *voc = (_tTalkboxFloat*) mpool_alloc(sizeof(_tTalkboxFloat), m);
+
+    v->param[0] = 0.5f;  //wet
+    v->param[1] = 0.0f;  //dry
+    v->param[2] = 0; // Swap
+    v->param[3] = 1.0f;  //quality
+    v->warpFactor = 0.0f;
+    v->warpOn = 0;
+    v->bufsize = bufsize;
+    v->freeze = 0;
+    v->G = 0.0f;
+    v->car0 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+    v->car1 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+    v->window = (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+    v->buf0 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+    v->buf1 =   (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+
+    v->dl = (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+    v->Rt = (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
+
+    v->k = (float*) mpool_alloc(sizeof(float) * ORD_MAX, m);
+
+    tTalkboxFloat_update(voc);
+    tTalkboxFloat_suspend(voc);
+}
+
+void    tTalkboxFloat_freeFromPool   (tTalkboxFloat* const voc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTalkboxFloat* v = *voc;
+
+    mpool_free((char*)v->buf1, m);
+    mpool_free((char*)v->buf0, m);
+    mpool_free((char*)v->window, m);
+    mpool_free((char*)v->car1, m);
+    mpool_free((char*)v->car0, m);
+
+    mpool_free((char*)v->dl, m);
+    mpool_free((char*)v->Rt, m);
+    mpool_free((char*)v->k, m);
+    mpool_free((char*)v, m);
+}
+
+void tTalkboxFloat_update(tTalkboxFloat* const voc) ///update internal parameters...
+{
+    _tTalkboxFloat* v = *voc;
+
+    float fs = leaf.sampleRate;
+    if(fs <  8000.0f) fs =  8000.0f;
+    if(fs > 96000.0f) fs = 96000.0f;
+
+    int32_t n = (int32_t)(0.01633f * fs); //this sets the window time to 16ms if the buffer is large enough. Buffer needs to be at least 784 samples at 48000
+    if(n > v->bufsize) n = v->bufsize;
+
+    //O = (VstInt32)(0.0005f * fs);
+    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * fs);
+
+    if(n != v->N) //recalc hanning window
+    {
+        v->N = n;
+        float dp = TWO_PI / v->N;
+        float p = 0.0f;
+        for(n=0; n<v->N; n++)
+        {
+            v->window[n] = 0.5f - 0.5f * cosf(p);
+            p += dp;
+        }
+    }
+    v->wet = 0.5f * v->param[0] * v->param[0];
+    v->dry = 2.0f * v->param[1] * v->param[1];
+}
+
+void tTalkboxFloat_suspend(tTalkboxFloat* const voc) ///clear any buffers...
+{
+    _tTalkboxFloat* v = *voc;
+
+    v->pos = v->K = 0;
+    v->emphasis = 0.0f;
+    v->FX = 0;
+
+    v->u0 = v->u1 = v->u2 = v->u3 = v->u4 = 0.0f;
+    v->d0 = v->d1 = v->d2 = v->d3 = v->d4 = 0.0f;
+
+    for (int32_t i = 0; i < v->bufsize; i++)
+    {
+        v->buf0[i] = 0;
+        v->buf1[i] = 0;
+        v->car0[i] = 0;
+        v->car1[i] = 0;
+    }
+}
+
+// warped autocorrelation adapted from ten.enegatum@liam's post on music-dsp 2004-04-07 09:37:51
+//find the order-P autocorrelation array, R, for the sequence x of length L and warping of lambda
+//wAutocorrelate(&pfSrc[stIndex],siglen,R,P,0);
+void tTalkboxFloat_warpedAutocorrelate(float * x, float* dl, float* Rt, unsigned int L, float * R, unsigned int P, float lambda)
+{
+    float r1,r2,r1t;
+    R[0]=0;
+    Rt[0]=0;
+    r1=0;
+    r2=0;
+    r1t=0;
+    for(uint32_t m=0; m<L;m++)
+    {
+                    Rt[0] += (x[m]) * (x[m]);
+
+                    dl[m]= r1 - lambda * (x[m]-r2);
+                    r1 = x[m];
+                    r2 = dl[m];
+    }
+    for(uint32_t i=1; i<=P; i++)
+    {
+            Rt[i]=0;
+            r1=0;
+            r2=0;
+            for(unsigned int m=0; m<L;m++)
+            {
+                    Rt[i] +=  (dl[m]) * (x[m]);
+
+                    r1t = dl[m];
+                    dl[m]= r1 - lambda * (r1t-r2);
+                    r1 = r1t;
+                    r2 = dl[m];
+            }
+    }
+    for(uint32_t i=0; i<=P; i++)
+    {
+            R[i]=Rt[i];
+    }
+
+}
+
+void tTalkboxFloat_lpcDurbin(float *r, int p, float *k, float *g)
+{
+    int i, j;
+    float a[ORD_MAX], at[ORD_MAX], e=r[0];
+
+    for(i=0; i<=p; i++)
+    {
+    	a[i] = 0.0f; //probably don't need to clear at[]
+
+    }
+	k[0] = 0.0f;
+    at[0] = 0.0f;
+    for(i=1; i<=p; i++)
+    {
+        k[i] = -r[i];
+
+        for(j=1; j<i; j++)
+        {
+            at[j] = a[j];
+            k[i] -= a[j] * r[i-j];
+        }
+        if(fabs(e) < 1.0e-20f) { e = 0.0f;  break; }
+        k[i] /= e;
+
+        a[i] = k[i];
+        for(j=1; j<i; j++) a[j] = at[j] + k[i] * at[i-j];
+
+        e *= 1.0f - k[i] * k[i];
+    }
+
+    if(e < 1.0e-20f) e = 0.0f;
+    *g = sqrtf(e);
+}
+
+float tTalkboxFloat_tick(tTalkboxFloat* const voc, float synth, float voice)
+{
+    _tTalkboxFloat* v = *voc;
+
+    int32_t  p0=v->pos, p1 = (v->pos + v->N/2) % v->N;
+    float e=v->emphasis, w, o, x, fx=v->FX;
+    float p, q, h0=0.3f, h1=0.77f;
+
+    o = voice;
+    x = synth;
+
+
+
+    p = v->d0 + h0 *  x; v->d0 = v->d1;  v->d1 = x  - h0 * p;
+    q = v->d2 + h1 * v->d4; v->d2 = v->d3;  v->d3 = v->d4 - h1 * q;
+    v->d4 = x;
+    x = p + q;
+
+    if(v->K++)
+    {
+        v->K = 0;
+
+        v->car0[p0] = v->car1[p1] = x; //carrier input
+
+        x = o - e;  e = o;  //6dB/oct pre-emphasis
+
+        w = v->window[p0]; fx = v->buf0[p0] * w;  v->buf0[p0] = x * w;  //50% overlapping hanning windows
+        if(++p0 >= v->N) { tTalkboxFloat_lpc(v->buf0, v->car0, v->dl, v->Rt, v->N, v->O, v->warpFactor, v->warpOn, v->k, v->freeze, &v->G);  p0 = 0; }
+
+        w = 1.0f - w;  fx += v->buf1[p1] * w;  v->buf1[p1] = x * w;
+        if(++p1 >= v->N) { tTalkboxFloat_lpc(v->buf1, v->car1, v->dl, v->Rt, v->N, v->O, v->warpFactor, v->warpOn, v->k, v->freeze, &v->G);  p1 = 0; }
+    }
+
+    p = v->u0 + h0 * fx; v->u0 = v->u1;  v->u1 = fx - h0 * p;
+    q = v->u2 + h1 * v->u4; v->u2 = v->u3;  v->u3 = v->u4 - h1 * q;
+    v->u4 = fx;
+    x = p + q;
+
+    o = x;
+
+    v->emphasis = e;
+    v->pos = p0;
+    v->FX = fx;
+
+
+    return o;
+}
+
+
+void tTalkboxFloat_lpc(float *buf, float *car, float* dl, float* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G)
+{
+    float z[ORD_MAX], r[ORD_MAX], x;
+    int32_t i, j, nn=n;
+
+
+	if (warpOn == 0)
+	{
+		for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
+		{
+			z[j] = r[j] = 0.0f;
+			for(i=0; i<nn; i++) r[j] += buf[i] * buf[i+j]; //autocorrelation
+		}
+	}
+	else
+	{
+		for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
+		{
+			z[j] = r[j] = 0.0f;
+		}
+		tTalkboxFloat_warpedAutocorrelate(buf, dl, Rt, n, r, o, warp);
+	}
+
+	r[0] *= 1.001f;  //stability fix
+
+	float min = 0.000001f;
+	if (!freeze)
+	{
+		if(r[0] < min)
+		{
+			for(i=0; i<n; i++)
+			{
+				buf[i] = 0.0f;
+				return;
+			}
+		}
+
+		tTalkbox_lpcDurbin(r, o, k, G);  //calc reflection coeffs
+
+		//this is for stability to keep reflection coefficients inside the unit circle
+		//but in Harma's papers I've seen 0.998.  just needs to be less than 1 it seems but maybe some wiggle room to avoid instability from floating point precision -JS
+		for(i=0; i<=o; i++)
+		{
+			if(k[i] > 0.998f) k[i] = 0.998f; else if(k[i] < -0.998f) k[i] = -.998f;
+		}
+    }
+    for(i=0; i<n; i++)
+    {
+        x = G[0] * car[i];
+        for(j=o; j>0; j--)  //lattice filter
+        {
+            x -= k[j] * z[j-1];
+            z[j] = z[j-1] + k[j] * x;
+        }
+        buf[i] = z[0] = x;  //output buf[] will be windowed elsewhere
+    }
+}
+
+void tTalkboxFloat_setQuality(tTalkboxFloat* const voc, float quality)
+{
+    _tTalkboxFloat* v = *voc;
+    v->param[3] = quality;
+    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf.sampleRate);
+    if (v->O >= ORD_MAX)
+    {
+    	v->O = ORD_MAX-1;
+    }
+}
+
+void tTalkboxFloat_setWarpFactor(tTalkboxFloat* const voc, float warpFactor)
+{
+    _tTalkboxFloat* v = *voc;
+
+    v->warpFactor = warpFactor;
+}
+
+void tTalkboxFloat_setWarpOn(tTalkboxFloat* const voc, float warpOn)
+{
+    _tTalkboxFloat* v = *voc;
+
+    v->warpOn = warpOn;
+}
+
+void tTalkboxFloat_setFreeze(tTalkboxFloat* const voc, float freeze)
+{
+    _tTalkboxFloat* v = *voc;
+
+    v->freeze = freeze;
 }
 
 
@@ -374,7 +728,7 @@ void        tVocoder_update      (tVocoder* const voc)
     
     float tpofs = 6.2831853f * leaf.invSampleRate;
     
-    float rr, th, re;
+    float rr, th;
     
     float sh;
     
@@ -389,7 +743,7 @@ void        tVocoder_update      (tVocoder* const voc)
     if(v->param[7]<0.5f)
     {
         v->nbnd=8;
-        re=0.003f;
+
         v->f[1][2] = 3000.0f;
         v->f[2][2] = 2200.0f;
         v->f[3][2] = 1500.0f;
@@ -401,7 +755,7 @@ void        tVocoder_update      (tVocoder* const voc)
     else
     {
         v->nbnd=16;
-        re=0.0015f;
+
         v->f[ 1][2] = 5000.0f; //+1000
         v->f[ 2][2] = 4000.0f; //+750
         v->f[ 3][2] = 3250.0f; //+500
@@ -579,6 +933,35 @@ float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const gp)
     else if (g->phase < g->pulseLength)
     {
         output = fastercosf(HALF_PI * (g->phase-g->openLength)* g->invPulseLengthMinusOpenLength);
+    }
+
+    else
+    {
+        output = 0.0f;
+    }
+    return output;
+}
+
+
+float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp)
+{
+    _tRosenbergGlottalPulse* g = *gp;
+
+    float output = 0.0f;
+
+    // Phasor increment
+    g->phase += g->inc;
+    while (g->phase >= 1.0f) g->phase -= 1.0f;
+    while (g->phase < 0.0f) g->phase += 1.0f;
+
+    if (g->phase < g->openLength)
+    {
+        output = 0.5f*(1.0f-cosf(PI * g->phase));
+    }
+
+    else if (g->phase < g->pulseLength)
+    {
+        output = cosf(HALF_PI * (g->phase-g->openLength)* g->invPulseLengthMinusOpenLength);
     }
 
     else
@@ -999,7 +1382,7 @@ static int pitchshift_attackdetect(_tPitchShift* ps)
 
 void tPitchShift_init (tPitchShift* const psr, tPeriodDetection* pd, float* out, int bufSize)
 {
-    tPitchShift_freeFromPool(psr, &leaf.mempool);
+    tPitchShift_initToPool(psr, pd, out, bufSize, &leaf.mempool);
 }
 
 void tPitchShift_free(tPitchShift* const psr)
@@ -1386,6 +1769,7 @@ void    tAutotune_initToPool        (tAutotune* const rt, int numVoices, int buf
     }
     
     r->inputPeriod = 0.0f;
+    r->shiftOn = 0;
 }
 
 void    tAutotune_freeFromPool      (tAutotune* const rt, tMempool* const mp)

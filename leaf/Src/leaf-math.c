@@ -109,7 +109,7 @@ int fastabs_int(int in){
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit floats
-float fastabsf(float f)
+inline float fastabsf(float f)
 {
     union
     {
@@ -130,7 +130,7 @@ double fastexp(double x) {
     return x;
 }
 
-float fastexpf(float x) {
+inline float fastexpf(float x) {
     x = 1.0f + (x * 0.0009765625f);
     x *= x; x *= x; x *= x; x *= x;
     x *= x; x *= x; x *= x; x *= x;
@@ -145,7 +145,7 @@ double fasterexp(double x) {
     return x;
 }
 
-float fasterexpf(float x) {
+inline float fasterexpf(float x) {
     x = 1.0f + (x * 0.00390625f);
     x *= x; x *= x; x *= x; x *= x;
     x *= x; x *= x; x *= x; x *= x;
@@ -329,11 +329,16 @@ float   LEAF_clip(float min, float val, float max)
         tempmin = max;
         tempmax = min;
     }
-    if (val < tempmin) {
+    if (val < tempmin)
+    {
         return tempmin;
-    } else if (val > tempmax) {
+    }
+    else if (val > tempmax)
+    {
         return tempmax;
-    } else {
+    }
+    else
+    {
         return val;
     }
 }
@@ -696,6 +701,12 @@ float fastdbtoa(float db)
 {
     //return powf(10.0f, db * 0.05f);
     return expf(0.115129254649702f * db); //faster version from http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html
+}
+
+float fasterdbtoa(float db)
+{
+    //return powf(10.0f, db * 0.05f);
+    return fasterexpf(0.115129254649702f * db); //faster version from http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html
 }
 
 
