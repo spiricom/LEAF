@@ -268,12 +268,12 @@ float tSampler_tick        (tSampler* const sp)
     float* buff = p->samp->buff;
     
     // Variables so start is also before end
-    int32_t start = p->start;
-    int32_t end = p->end;
+    int myStart = p->start;
+    int myEnd = p->end;
     if (p->flip < 0)
     {
-        start = p->end;
-        end = p->start;
+    	myStart = p->end;
+    	myEnd = p->start;
     }
     
     // Get the direction and a reverse flag for some calcs
@@ -306,17 +306,17 @@ float tSampler_tick        (tSampler* const sp)
                                          buff[i4],
                                          alpha);
     
-    uint32_t cfxlen = p->cfxlen;
+    int32_t cfxlen = p->cfxlen;
     if (p->len * 0.25f < cfxlen) cfxlen = p->len * 0.25f;
     
     // Determine crossfade points
-    uint32_t fadeLeftStart = 0;
-    if (start >= cfxlen) fadeLeftStart = start - cfxlen;
-    uint32_t fadeLeftEnd = fadeLeftStart + cfxlen;
+    int32_t fadeLeftStart = 0;
+    if (myStart >= cfxlen) fadeLeftStart = myStart - cfxlen;
+    int32_t fadeLeftEnd = fadeLeftStart + cfxlen;
     
-    uint32_t fadeRightEnd = end;// + (fadeLeftEnd - start);
+    int32_t fadeRightEnd = myEnd;// + (fadeLeftEnd - start);
     //    if (fadeRightEnd >= length) fadeRightEnd = length - 1;
-    uint32_t fadeRightStart = fadeRightEnd - cfxlen;
+    int32_t fadeRightStart = fadeRightEnd - cfxlen;
     
 
 
@@ -401,7 +401,7 @@ float tSampler_tick        (tSampler* const sp)
         }
     }
     
-    float inc = fmod(p->inc, p->len);
+    float inc = fmodf(p->inc, (float)p->len);
     p->idx += (dir * inc);
     if (p->flipStart >= 0)
     {
@@ -424,11 +424,11 @@ float tSampler_tick        (tSampler* const sp)
 
     if (p->mode == PlayLoop)
     {
-        if((int)p->idx < start)
+        if((int)p->idx < myStart)
         {
             p->idx += (float)(fadeRightEnd - fadeLeftEnd);
         }
-        if((int)p->idx > end)
+        if((int)p->idx > myEnd)
         {
             
             p->idx -= (float)(fadeRightEnd - fadeLeftEnd);
@@ -436,22 +436,30 @@ float tSampler_tick        (tSampler* const sp)
     }
     else if (p->mode == PlayBackAndForth)
     {
-        if (p->idx < start)
+        if (p->idx < myStart)
         {
             p->bnf = -p->bnf;
-            p->idx = start + 1;
+            p->idx = myStart + 1;
         }
-        else if (p->idx > end)
+        else if (p->idx > myEnd)
         {
             p->bnf = -p->bnf;
-            p->idx = end - 1;
+            p->idx = myEnd - 1;
         }
     }
     
 
     if (p->mode == PlayNormal)
     {
-    	float ticksToEnd = rev ? ((idx - start) * p->iinc) : ((end - idx) * p->iinc);
+    	if (p->idx < myStart)
+    	{
+    		p->idx = myStart;
+    	}
+    	else if (p->idx > myEnd)
+    	{
+    		p->idx = myEnd;
+    	}
+    	float ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
     	if (ticksToEnd < (0.007f * leaf.sampleRate))
         {
             tRamp_setDest(&p->gain, 0.f);

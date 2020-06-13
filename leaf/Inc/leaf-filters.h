@@ -415,7 +415,6 @@ extern "C" {
 			float cL, cB, cH; // coefficients for low-, band-, and highpass signals
 
 			// parameters:
-			float fs;    // sample-rate
 			float fc;    // characteristic frequency
 			float G;     // gain
 			float invG;		//1/gain

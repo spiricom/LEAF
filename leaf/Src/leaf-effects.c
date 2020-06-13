@@ -859,12 +859,14 @@ float       tVocoder_tick        (tVocoder* const voc, float synth, float voice)
     
     v->kout = oo;
     v->kval = k & 0x1;
+#ifdef NO_DENORMAL_CHECK
+#else
     if(fabs(v->f[0][11])<1.0e-10) v->f[0][11] = 0.0f; //catch HF envelope denormal
     
     for(i=1;i<nb;i++)
         if(fabs(v->f[i][3])<1.0e-10 || fabs(v->f[i][7])<1.0e-10)
             for(k=3; k<12; k++) v->f[i][k] = 0.0f; //catch reson & envelope denormals
-    
+#endif
     if(fabs(o)>10.0f) tVocoder_suspend(voc); //catch instability
     
     return o;

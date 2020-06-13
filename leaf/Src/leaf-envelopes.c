@@ -1559,7 +1559,10 @@ float tSlide_tickNoInput(tSlide* const sl)
 	{
 		s->currentOut = s->prevOut + ((in - s->prevOut) * s->invDownSlide);
 	}
+#ifdef NO_DENORMAL_CHECK
+#else
 	if (s->currentOut < VSF) s->currentOut = 0.0f;
+#endif
 	s->prevIn = in;
 	s->prevOut = s->currentOut;
 	return s->currentOut;
@@ -1578,7 +1581,10 @@ float tSlide_tick(tSlide* const sl, float in)
 	{
 		s->currentOut = s->prevOut + ((in - s->prevOut) * s->invDownSlide);
 	}
+#ifdef NO_DENORMAL_CHECK
+#else
 	if (s->currentOut < VSF) s->currentOut = 0.0f;
+#endif
 	s->prevIn = in;
 	s->prevOut = s->currentOut;
 	return s->currentOut;
