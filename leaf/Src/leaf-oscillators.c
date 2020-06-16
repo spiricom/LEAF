@@ -924,83 +924,7 @@ void        tNeuron_setCurrent  (tNeuron* const nr, float current)
 }
 
 
-
-void    tMinBLEP_init           (tMinBLEP* const minblep, int zeroCrossings, int oversamplerRatio)
-{
-    tMinBLEP_initToPool(minblep, zeroCrossings, oversamplerRatio, &leaf.mempool);
-}
-
-void    tMinBLEP_free           (tMinBLEP* const minblep)
-{
-    tMinBLEP_freeFromPool(minblep, &leaf.mempool);
-}
-
-void    tMinBLEP_initToPool     (tMinBLEP* const minblep, int zeroCrossings, int oversamplerRatio, tMempool* const mp)
-{
-    _tMempool* m = *mp;
-    _tMinBLEP* mb = *minblep = (_tMinBLEP*) mpool_alloc(sizeof(_tMinBLEP), m);
-    
-    mb->overSamplingRatio = zeroCrossings;
-    mb->zeroCrossings = oversamplerRatio;
-    mb->returnDerivative = 0;
-    mb->proportionalBlepFreq = (float) mb->zeroCrossings / (float) mb->overSamplingRatio; // defaults to NyQuist ....
-    
-    mb->lastValue = 0;
-    mb->lastDelta = 0;
-    
-//     float* x1, x2, y1, y2;
-    // AA FILTER
-//    zeromem (coefficients, sizeof (coefficients));
-    
-    mb->minBlepSize = (mb->zeroCrossings * 2 * mb->overSamplingRatio) + 1;
-    
-    mb->ratio = 1;
-    mb->lastRatio = 1;
-    
-//    createLowPass (ratio);
-//    resetFilters();
-    
-    mb->blepIndex = 0;
-    mb->numActiveBleps = 0;
-    //currentActiveBlepOffsets;
-    
-    // These probably don't need to be this large
-    mb->offset = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-//    mb->freqMultiple = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    mb->pos_change_magnitude = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    mb->vel_change_magnitude = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    
-    mb->minBlepArray = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    mb->minBlepDerivArray = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    
-    mb->realTime = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    mb->imagTime = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    mb->realFreq = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    mb->imagFreq = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    
-    tMinBLEP_buildBLEP(minblep);
-}
-
-void    tMinBLEP_freeFromPool   (tMinBLEP* const minblep, tMempool* const mp)
-{
-    _tMempool* m = *mp;
-    _tMinBLEP* mb = *minblep;
-    
-    mpool_free((char*)mb->offset, m);
-//    mpool_free(mb->freqMultiple, m);
-    mpool_free((char*)mb->pos_change_magnitude, m);
-    mpool_free((char*)mb->vel_change_magnitude, m);
-    
-    mpool_free((char*)mb->minBlepArray, m);
-    mpool_free((char*)mb->minBlepDerivArray, m);
-    
-    mpool_free((char*)mb->realTime, m);
-    mpool_free((char*)mb->imagTime, m);
-    mpool_free((char*)mb->realFreq, m);
-    mpool_free((char*)mb->imagFreq, m);
-    
-    mpool_free((char*)mb, m);
-}
+/// MINBLEPS
 
 // SINC Function
 static float SINC(float x)
@@ -1172,15 +1096,36 @@ static void MinimumPhase(int n, float *realCepstrum, float *minimumPhase, float*
 }
 
 
-// Generate the MinBLEP
-void tMinBLEP_buildBLEP(tMinBLEP* const minblep)
+
+
+void tMinBLEPTable_init (tMinBLEPTable* const minblep, int zeroCrossings, int oversamplerRatio)
 {
-    _tMinBLEP* m = *minblep;
+    tMinBLEPTable_initToPool(minblep, zeroCrossings, oversamplerRatio, &leaf.mempool);
+}
+
+void tMinBLEPTable_initToPool (tMinBLEPTable* const minblep, int zeroCrossings, int overSamplingRatio, tMempool* const pool)
+{
+    _tMempool* mp = *pool;
+    _tMinBLEPTable* m = *minblep = (_tMinBLEPTable*) mpool_alloc(sizeof(_tMinBLEPTable), mp);
+    m->mempool = mp;
+    m->zeroCrossings = zeroCrossings;
+    m->overSamplingRatio = overSamplingRatio;
+    m->size = (zeroCrossings * 2 * overSamplingRatio) + 1;
+    
+    m->blepArray = (float*) mpool_alloc(sizeof(float) * m->size, mp);
+    m->blepDerivArray = (float*) mpool_alloc(sizeof(float) * m->size, mp);
+    
+    float* processBuf[4];
+    
+    processBuf[0] = (float*) mpool_alloc(sizeof(float) * m->size, mp);
+    processBuf[1] = (float*) mpool_alloc(sizeof(float) * m->size, mp);
+    processBuf[2] = (float*) mpool_alloc(sizeof(float) * m->size, mp);
+    processBuf[3] = (float*) mpool_alloc(sizeof(float) * m->size, mp);
     
     int i, n;
     float r, a, b;
     
-    n = m->minBlepSize;
+    n = (m->zeroCrossings * 2 * m->overSamplingRatio) + 1;
     
     // Generate Sinc
     
@@ -1189,61 +1134,131 @@ void tMinBLEP_buildBLEP(tMinBLEP* const minblep)
     for(i = 0; i < n; i++)
     {
         r = ((float)i) / ((float)(n - 1));
-        m->minBlepArray[i] = SINC(a + (r * (b - a)));
-        m->minBlepDerivArray[i] = 0;
+        m->blepArray[i] = SINC(a + (r * (b - a)));
+        m->blepDerivArray[i] = 0;
     }
     
     // Window Sinc
     
-    BlackmanWindow(n, m->minBlepDerivArray);
+    BlackmanWindow(n, m->blepDerivArray);
     for(i = 0; i < n; i++)
-        m->minBlepArray[i] *= m->minBlepDerivArray[i];
+        m->blepArray[i] *= m->blepDerivArray[i];
     
     // Minimum Phase Reconstruction
     
-    RealCepstrum(n, m->minBlepArray, m->minBlepDerivArray, m->realTime, m->imagTime, m->realFreq, m->imagFreq);
-    MinimumPhase(n, m->minBlepDerivArray, m->minBlepArray, m->realTime, m->imagTime, m->realFreq, m->imagFreq);
+    RealCepstrum(n, m->blepArray, m->blepDerivArray, processBuf[0], processBuf[1], processBuf[2], processBuf[3]);
+    MinimumPhase(n, m->blepDerivArray, m->blepArray, processBuf[0], processBuf[1], processBuf[2], processBuf[3]);
+    
+    mpool_free((char*)processBuf[0], mp);
+    mpool_free((char*)processBuf[1], mp);
+    mpool_free((char*)processBuf[2], mp);
+    mpool_free((char*)processBuf[3], mp);
     
     // Integrate Into MinBLEP
     a = 0.0f;
     float secondInt = 0.0f;
     for(i = 0; i < n; i++)
     {
-        a += m->minBlepArray[i];
-        m->minBlepArray[i] = a;
+        a += m->blepArray[i];
+        m->blepArray[i] = a;
         
         secondInt += a;
-        m->minBlepDerivArray[i] = secondInt;
+        m->blepDerivArray[i] = secondInt;
     }
     
     // Normalize
-    a = m->minBlepArray[n - 1];
+    a = m->blepArray[n - 1];
     a = 1.0f / a;
     b = 0.0f;
     for(i = 0; i < n; i++)
     {
-        m->minBlepArray[i] *= a;
-        b = fmaxf(b, m->minBlepDerivArray[i]);
+        m->blepArray[i] *= a;
+        b = fmaxf(b, m->blepDerivArray[i]);
     }
     
     // Normalize ...
     b = 1.0f/b;
     for (i = 0; i < n; i++)
     {
-        m->minBlepDerivArray[i] *= b;
-        m->minBlepDerivArray[i] -= ((float)i) / ((float) n-1);
+        m->blepDerivArray[i] *= b;
+        m->blepDerivArray[i] -= ((float)i) / ((float) n-1);
         
         // SUBTRACT 1 and invert so the signal (so it goes 1->0)
-        m->minBlepArray[i] -= 1.0f;
-        m->minBlepArray[i] = -m->minBlepArray[i];
+        m->blepArray[i] -= 1.0f;
+        m->blepArray[i] = -m->blepArray[i];
     }
+    
 }
 
-void    tMinBLEP_addBLEP        (tMinBLEP* const minblep, float offset, float posChange, float velChange)
+void tMinBLEPTable_free (tMinBLEPTable* const minblep)
 {
-    _tMinBLEP* m = *minblep;
+    _tMinBLEPTable* m = *minblep;
     
-    int n = m->minBlepSize;
+    mpool_free((char*)m->blepArray, m->mempool);
+    mpool_free((char*)m->blepDerivArray, m->mempool);
+    mpool_free((char*)m, m->mempool);
+}
+
+
+
+
+void    tMinBLEPHandler_init           (tMinBLEPHandler* const minblep, tMinBLEPTable* const table, int oversamplerRatio)
+{
+    tMinBLEPHandler_initToPool(minblep, table, &leaf.mempool);
+}
+
+void    tMinBLEPHandler_initToPool     (tMinBLEPHandler* const minblep, tMinBLEPTable* const table, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tMinBLEPHandler* mb = *minblep = (_tMinBLEPHandler*) mpool_alloc(sizeof(_tMinBLEPHandler), m);
+    _tMinBLEPTable* t = *table;
+    
+    mb->mempool = m;
+    mb->table = t;
+    mb->returnDerivative = 0;
+    mb->proportionalBlepFreq = (float) t->zeroCrossings / (float) t->overSamplingRatio; // defaults to NyQuist ....
+    
+    mb->lastValue = 0;
+    mb->lastDelta = 0;
+    
+//     float* x1, x2, y1, y2;
+    // AA FILTER
+//    zeromem (coefficients, sizeof (coefficients));
+    
+    mb->ratio = 1;
+    mb->lastRatio = 1;
+    
+//    createLowPass (ratio);
+//    resetFilters();
+    
+    mb->blepIndex = 0;
+    mb->numActiveBleps = 0;
+    //currentActiveBlepOffsets;
+    
+    // These probably don't need to be this large
+    mb->offset = (float*) mpool_alloc(sizeof(float) * t->size, m);
+//    mb->freqMultiple = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
+    mb->pos_change_magnitude = (float*) mpool_alloc(sizeof(float) * t->size, m);
+    mb->vel_change_magnitude = (float*) mpool_alloc(sizeof(float) * t->size, m);
+}
+
+void    tMinBLEPHandler_free           (tMinBLEPHandler* const minblep)
+{
+    _tMinBLEPHandler* mb = *minblep;
+    
+    mpool_free((char*)mb->offset, mb->mempool);
+    //    mpool_free(mb->freqMultiple, m);
+    mpool_free((char*)mb->pos_change_magnitude, mb->mempool);
+    mpool_free((char*)mb->vel_change_magnitude, mb->mempool);
+    
+    mpool_free((char*)mb, mb->mempool);
+}
+
+void    tMinBLEPHandler_addBLEP        (tMinBLEPHandler* const minblep, float offset, float posChange, float velChange)
+{
+    _tMinBLEPHandler* m = *minblep;
+    
+    int n = m->table->size;
     
     m->offset[m->blepIndex] = offset;
 //    m->freqMultiple[m->blepIndex] = m->overSamplingRatio*m->proportionalBlepFreq;
@@ -1256,20 +1271,20 @@ void    tMinBLEP_addBLEP        (tMinBLEP* const minblep, float offset, float po
     m->numActiveBleps++;
 }
 
-float   tMinBLEP_tick           (tMinBLEP* const minblep, float input)
+float tMinBLEPHandler_tick (tMinBLEPHandler* const minblep, float input)
 {
-    _tMinBLEP* m = *minblep;
+    _tMinBLEPHandler* m = *minblep;
     // PROCESS ALL BLEPS -
     /// for each offset, copy a portion of the blep array to the output ....
     
     float sample = input;
     
-    int n = m->minBlepSize;
+    int n = m->table->size;
 
     for (int blep = 1; blep <= m->numActiveBleps; blep++)
     {
         int i = (m->blepIndex - blep + n) % n;
-        float adjusted_Freq = m->overSamplingRatio*m->proportionalBlepFreq;//m->freqMultiple[i];
+        float adjusted_Freq = m->table->overSamplingRatio*m->proportionalBlepFreq;//m->freqMultiple[i];
         float exactPosition = m->offset[i];
         
         float blepPosExact = adjusted_Freq*(exactPosition + 1); // +1 because this needs to trigger on the LOW SAMPLE
@@ -1279,7 +1294,7 @@ float   tMinBLEP_tick           (tMinBLEP* const minblep, float input)
         // LIMIT the scaling on the derivative array
         // otherwise, it can get TOO large
         float depthLimited = m->proportionalBlepFreq; //jlimit<double>(.1, 1, proportionalBlepFreq);
-        float blepDeriv_PosExact = depthLimited*m->overSamplingRatio*(exactPosition + 1);
+        float blepDeriv_PosExact = depthLimited*m->table->overSamplingRatio*(exactPosition + 1);
         float blepDeriv_Sample = 0;
         float fraction_Deriv = modff(blepDeriv_PosExact, &blepDeriv_Sample);
         
@@ -1298,11 +1313,11 @@ float   tMinBLEP_tick           (tMinBLEP* const minblep, float input)
         if ( fabs(m->pos_change_magnitude[i]) > 0 && blepPosSample < n)
         {
             // LINEAR INTERPOLATION ::::
-            float lowValue = m->minBlepArray[(int) blepPosSample];
+            float lowValue = m->table->blepArray[(int) blepPosSample];
             float hiValue = lowValue;
             
             if ((int) blepPosSample + 1 < n)
-                hiValue = m->minBlepArray[(int) blepPosSample + 1];
+                hiValue = m->table->blepArray[(int) blepPosSample + 1];
             
             float delta = hiValue - lowValue;
             float exactValue = lowValue + fraction*delta;
@@ -1321,11 +1336,11 @@ float   tMinBLEP_tick           (tMinBLEP* const minblep, float input)
         {
             
             // LINEAR INTERPOLATION ::::
-            double lowValue = m->minBlepDerivArray[(int) blepDeriv_PosExact];
+            double lowValue = m->table->blepDerivArray[(int) blepDeriv_PosExact];
             double hiValue = lowValue;
             
             if ((int) blepDeriv_PosExact + 1 < n)
-                hiValue = m->minBlepDerivArray[(int) blepDeriv_PosExact + 1];
+                hiValue = m->table->blepDerivArray[(int) blepDeriv_PosExact + 1];
             
             double delta = hiValue - lowValue;
             double exactValue = lowValue + fraction_Deriv*delta;
@@ -1351,9 +1366,9 @@ float   tMinBLEP_tick           (tMinBLEP* const minblep, float input)
 //==============================================================================
 
 /* tMBTriangle: Anti-aliased Triangle waveform. */
-void    tMBTriangle_init          (tMBTriangle* const osc)
+void    tMBTriangle_init          (tMBTriangle* const osc, tMinBLEPTable* const table)
 {
-    tMBTriangle_initToPool(osc, &leaf.mempool);
+    tMBTriangle_initToPool(osc, table, &leaf.mempool);
 }
 
 void    tMBTriangle_free          (tMBTriangle* const osc)
@@ -1361,7 +1376,7 @@ void    tMBTriangle_free          (tMBTriangle* const osc)
     tMBTriangle_freeFromPool(osc, &leaf.mempool);
 }
 
-void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMempool* const mp)
+void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMinBLEPTable* const table, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tMBTriangle* c = *osc = (_tMBTriangle*) mpool_alloc(sizeof(_tMBTriangle), m);
@@ -1371,7 +1386,7 @@ void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMempool* const mp)
     c->skew     =  0.5f;
     c->lastOut  =  0.0f;
     
-    tMinBLEP_initToPool(&c->minBlep, 16, 32, mp);
+    tMinBLEPHandler_initToPool(&c->minBlep, table, mp);
     tHighpass_initToPool(&c->dcBlock, 5.0f, mp);
 }
 
@@ -1380,7 +1395,7 @@ void    tMBTriangle_freeFromPool  (tMBTriangle* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tMBTriangle* c = *cy;
     
-    tMinBLEP_freeFromPool(&c->minBlep, mp);
+    tMinBLEPHandler_free(&c->minBlep);
     tHighpass_freeFromPool(&c->dcBlock, mp);
     
     mpool_free((char*)c, m);
@@ -1397,12 +1412,12 @@ float   tMBTriangle_tick          (tMBTriangle* const osc)
     {
         c->phase -= 1.0f;
         float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-        tMinBLEP_addBLEP(&c->minBlep, offset, -2, 0.0f);
+        tMinBLEPHandler_addBLEP(&c->minBlep, offset, -2, 0.0f);
     }
     if (c->skew <= c->phase && c->phase < c->skew + c->inc)
     {
         float offset = 1.0f - ((c->inc - c->phase + c->skew) / c->inc);
-        tMinBLEP_addBLEP(&c->minBlep, offset, 2, 0.0f);
+        tMinBLEPHandler_addBLEP(&c->minBlep, offset, 2, 0.0f);
     }
 
     if (c->phase < c->skew)
@@ -1414,7 +1429,7 @@ float   tMBTriangle_tick          (tMBTriangle* const osc)
         out = -c->skew * 2.0f;
     }
 
-    out = tMinBLEP_tick(&c->minBlep, out);// - phasor->inc * 2.0f;
+    out = tMinBLEPHandler_tick(&c->minBlep, out);// - phasor->inc * 2.0f;
     
     out = (c->inc * out) + ((1 - c->inc) * c->lastOut);
     c->lastOut = out;
@@ -1482,7 +1497,7 @@ void    tMBTriangle_sync          (tMBTriangle* const osc, float phase)
     c->phase = phase;
 
     float offset = 0.0f;//1.0f - ((c->inc - c->phase) / c->inc);
-    tMinBLEP_addBLEP(&c->minBlep, offset, before - after, 0.0f);
+    tMinBLEPHandler_addBLEP(&c->minBlep, offset, before - after, 0.0f);
     
     if (c->phase < c->skew) c->lastOut = 1.0f - (c->phase / c->skew);
     else c->lastOut = (c->phase - c->skew) / (1.0f - c->skew);
@@ -1491,9 +1506,9 @@ void    tMBTriangle_sync          (tMBTriangle* const osc, float phase)
 //==============================================================================
 
 /* tMBPulse: Anti-aliased pulse waveform. */
-void    tMBPulse_init        (tMBPulse* const osc)
+void    tMBPulse_init        (tMBPulse* const osc, tMinBLEPTable* const table)
 {
-    tMBPulse_initToPool(osc, &leaf.mempool);
+    tMBPulse_initToPool(osc, table, &leaf.mempool);
 }
 
 void    tMBPulse_free        (tMBPulse* const osc)
@@ -1501,7 +1516,7 @@ void    tMBPulse_free        (tMBPulse* const osc)
     tMBPulse_freeFromPool(osc, &leaf.mempool);
 }
 
-void    tMBPulse_initToPool  (tMBPulse* const osc, tMempool* const mp)
+void    tMBPulse_initToPool  (tMBPulse* const osc, tMinBLEPTable* const table, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tMBPulse* c = *osc = (_tMBPulse*) mpool_alloc(sizeof(_tMBPulse), m);
@@ -1510,7 +1525,7 @@ void    tMBPulse_initToPool  (tMBPulse* const osc, tMempool* const mp)
     c->phase    =  0.0f;
     c->width     =  0.5f;
     
-    tMinBLEP_initToPool(&c->minBlep, 16, 32, mp);
+    tMinBLEPHandler_initToPool(&c->minBlep, table, mp);
     tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
 }
 
@@ -1519,7 +1534,7 @@ void    tMBPulse_freeFromPool(tMBPulse* const osc, tMempool* const mp)
     _tMempool* m = *mp;
     _tMBPulse* c = *osc;
     
-    tMinBLEP_freeFromPool(&c->minBlep, mp);
+    tMinBLEPHandler_free(&c->minBlep);
     tHighpass_freeFromPool(&c->dcBlock, mp);
     
     mpool_free((char*)c, m);
@@ -1536,19 +1551,19 @@ float   tMBPulse_tick        (tMBPulse* const osc)
     {
         c->phase -= 1.0f;
         float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-        tMinBLEP_addBLEP(&c->minBlep, offset, -2.0f, 0.0f);
+        tMinBLEPHandler_addBLEP(&c->minBlep, offset, -2.0f, 0.0f);
     }
     if (c->width <= c->phase && c->phase < c->width + c->inc)
     {
         float offset = 1.0f - ((c->inc - c->phase + c->width) / c->inc);
-        tMinBLEP_addBLEP(&c->minBlep, offset, 2.0f, 0.0f);
+        tMinBLEPHandler_addBLEP(&c->minBlep, offset, 2.0f, 0.0f);
     }
     
     float out;
     if (c->phase < c->width) out = 1.0f;
     else out = -1.0f;
     
-    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));
+    return tHighpass_tick(&c->dcBlock, tMinBLEPHandler_tick(&c->minBlep, out));
 }
 
 void    tMBPulse_setFreq     (tMBPulse* const osc, float freq)
@@ -1580,7 +1595,7 @@ void    tMBPulse_sync          (tMBPulse* const osc, float phase)
     else after = -1.0f;
     
     float offset = 0.0f;//1.0f - ((c->inc - c->phase) / c->inc);
-    tMinBLEP_addBLEP(&c->minBlep, offset, before - after, 0.0f);
+    tMinBLEPHandler_addBLEP(&c->minBlep, offset, before - after, 0.0f);
     
     c->phase = phase;
 }
@@ -1589,9 +1604,9 @@ void    tMBPulse_sync          (tMBPulse* const osc, float phase)
 //==============================================================================
 
 /* tMBSawtooth: Anti-aliased Sawtooth waveform. */
-void    tMBSaw_init          (tMBSaw* const osc)
+void    tMBSaw_init          (tMBSaw* const osc, tMinBLEPTable* const table)
 {
-    tMBSaw_initToPool(osc, &leaf.mempool);
+    tMBSaw_initToPool(osc, table, &leaf.mempool);
 }
 
 void    tMBSaw_free          (tMBSaw* const osc)
@@ -1599,7 +1614,7 @@ void    tMBSaw_free          (tMBSaw* const osc)
     tMBSaw_freeFromPool(osc, &leaf.mempool);
 }
 
-void    tMBSaw_initToPool    (tMBSaw* const osc, tMempool* const mp)
+void    tMBSaw_initToPool    (tMBSaw* const osc, tMinBLEPTable* const table, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tMBSaw* c = *osc = (_tMBSaw*) mpool_alloc(sizeof(_tMBSaw), m);
@@ -1607,7 +1622,7 @@ void    tMBSaw_initToPool    (tMBSaw* const osc, tMempool* const mp)
     c->inc      =  0.0f;
     c->phase    =  0.0f;
     
-    tMinBLEP_initToPool(&c->minBlep, 16, 32, mp);
+    tMinBLEPHandler_initToPool(&c->minBlep, table, mp);
     tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
 }
 
@@ -1616,7 +1631,7 @@ void    tMBSaw_freeFromPool  (tMBSaw* const osc, tMempool* const mp)
     _tMempool* m = *mp;
     _tMBSaw* c = *osc;
     
-    tMinBLEP_freeFromPool(&c->minBlep, mp);
+    tMinBLEPHandler_free(&c->minBlep);
     tHighpass_freeFromPool(&c->dcBlock, mp);
     
     mpool_free((char*)c, m);
@@ -1631,12 +1646,12 @@ float   tMBSaw_tick          (tMBSaw* const osc)
     {
         c->phase -= 1.0f;
         float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-        tMinBLEP_addBLEP(&c->minBlep, offset, 2.0f, 0.0f);
+        tMinBLEPHandler_addBLEP(&c->minBlep, offset, 2.0f, 0.0f);
     }
     
     float out = (c->phase * 2.0f) - 1.0f;
     
-    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));
+    return tHighpass_tick(&c->dcBlock, tMinBLEPHandler_tick(&c->minBlep, out));
 }
 
 void    tMBSaw_setFreq       (tMBSaw* const osc, float freq)
@@ -1655,7 +1670,7 @@ void    tMBSaw_sync          (tMBSaw* const osc, float phase)
     phase = phase - (float) intPart;
     
     float offset = 0.0f;//1.0f - ((c->inc - phase +) / c->inc);
-    tMinBLEP_addBLEP(&c->minBlep, offset, (c->phase - phase) * 2.0f, 0.0f);
+    tMinBLEPHandler_addBLEP(&c->minBlep, offset, (c->phase - phase) * 2.0f, 0.0f);
     
     c->phase = phase;
 }

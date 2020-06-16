@@ -868,17 +868,33 @@ extern "C" {
     
     //==============================================================================
     
-    typedef struct _tMinBLEP
+    typedef struct _tMinBLEPTable
     {
+        tMempool mempool;
+        float overSamplingRatio;
+        int zeroCrossings;
+        int size;
+        float* blepArray;
+        float* blepDerivArray;
+    } _tMinBLEPTable;
+    
+    typedef _tMinBLEPTable* tMinBLEPTable;
+    
+    void    tMinBLEPTable_init           (tMinBLEPTable* const minblep, int zeroCrossings, int oversamplerRatio);
+    void    tMinBLEPTable_initToPool     (tMinBLEPTable* const minblep, int zeroCrossings, int oversamplerRatio, tMempool* const pool);
+    void    tMinBLEPTable_free           (tMinBLEPTable* const minblep);
+    
+    typedef struct _tMinBLEPHandler
+    {
+        tMempool mempool;
+        tMinBLEPTable table;
+        
         float coeffs[6];
         
         // FilterState
         float* x1, x2, y1, y2;
         
         float ratio, lastRatio;
-        
-        float overSamplingRatio;
-        int zeroCrossings;
         
         float lastValue;
         float lastDelta; // previous derivative ...
@@ -895,30 +911,18 @@ extern "C" {
         float* pos_change_magnitude;
         float* vel_change_magnitude;
         
-        int minBlepSize;
-        float* minBlepArray;
-        float* minBlepDerivArray;
         
-        float* realTime;
-        float* imagTime;
-        float* realFreq;
-        float* imagFreq;
-    } _tMinBLEP;
+    } _tMinBLEPHandler;
     
-    typedef _tMinBLEP* tMinBLEP;
+    typedef _tMinBLEPHandler* tMinBLEPHandler;
     
-    void    tMinBLEP_init           (tMinBLEP* const minblep, int zeroCrossings, int oversamplerRatio);
-    void    tMinBLEP_free           (tMinBLEP* const minblep);
-    void    tMinBLEP_initToPool     (tMinBLEP* const minblep, int zeroCrossings, int oversamplerRatio, tMempool* const pool);
-    void    tMinBLEP_freeFromPool   (tMinBLEP* const minblep, tMempool* const pool);
+    void    tMinBLEPHandler_init           (tMinBLEPHandler* const minblep, tMinBLEPTable* const table, int oversamplerRatio);
+    void    tMinBLEPHandler_free           (tMinBLEPHandler* const minblep);
+    void    tMinBLEPHandler_initToPool     (tMinBLEPHandler* const minblep, tMinBLEPTable* const table, tMempool* const pool);
     
     // pass in audio, identify discontinuities and return the audio with minbleps inserted
-    float   tMinBLEP_tick           (tMinBLEP* const minblep, float input);
-    void    tMinBLEP_buildBLEP      (tMinBLEP* const minblep);
-    void    tMinBLEP_addBLEP        (tMinBLEP* const minblep, float offset, float posChange, float velChange);
-    
-    void    tMinBLEP_setOversamplingRatio   (tMinBLEP* const minblep, float ratio);
-    void    tMinBLEP_setNumZeroCrossings    (tMinBLEP* const minblep, int numCrossings);
+    float   tMinBLEPHandler_tick           (tMinBLEPHandler* const minblep, float input);
+    void    tMinBLEPHandler_addBLEP        (tMinBLEPHandler* const minblep, float offset, float posChange, float velChange);
     
     //==============================================================================
     
@@ -930,7 +934,7 @@ extern "C" {
         float skew;
         float lastOut;
         
-        tMinBLEP minBlep;
+        tMinBLEPHandler minBlep;
         tHighpass dcBlock;
     } _tMBTriangle;
     
@@ -947,7 +951,7 @@ extern "C" {
     /*!
      @param osc A pointer to the tMBTriangle to be initialized.
      */
-    void    tMBTriangle_init          (tMBTriangle* const osc);
+    void    tMBTriangle_init          (tMBTriangle* const osc, tMinBLEPTable* const table);
     
     
     //! Free a tMBTriangle from the default LEAF mempool.
@@ -962,7 +966,7 @@ extern "C" {
      @param osc A pointer to the tMBTriangle to be initialized.
      @param pool A pointer to the tMempool to which the tMBTriangle should be initialized.
      */
-    void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMempool* const pool);
+    void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMinBLEPTable* const table, tMempool* const pool);
     
     
     //! Free a tMBTriangle from a specified mempool.
@@ -1003,7 +1007,7 @@ extern "C" {
         float inc,freq;
         float width;
         
-        tMinBLEP minBlep;
+        tMinBLEPHandler minBlep;
         tHighpass dcBlock;
     } _tMBPulse;
     
@@ -1020,7 +1024,7 @@ extern "C" {
     /*!
      @param osc A pointer to the tMBPulse to be initialized.
      */
-    void    tMBPulse_init        (tMBPulse* const osc);
+    void    tMBPulse_init        (tMBPulse* const osc, tMinBLEPTable* const table);
     
     
     //! Free a tMBPulse from the default LEAF mempool.
@@ -1035,7 +1039,7 @@ extern "C" {
      @param osc A pointer to the tMBPulse to be initialized.
      @param pool A pointer to the tMempool to which the tMBPulse should be initialized.
      */
-    void    tMBPulse_initToPool  (tMBPulse* const osc, tMempool* const);
+    void    tMBPulse_initToPool  (tMBPulse* const osc, tMinBLEPTable* const table, tMempool* const);
     
     
     //! Free a tMBPulse from a specified mempool.
@@ -1076,7 +1080,7 @@ extern "C" {
         float phase;
         float inc,freq;
         
-        tMinBLEP minBlep;
+        tMinBLEPHandler minBlep;
         tHighpass dcBlock;
     } _tMBSaw;
     
@@ -1093,7 +1097,7 @@ extern "C" {
     /*!
      @param osc A pointer to the tMBSaw to be initialized.
      */
-    void    tMBSaw_init          (tMBSaw* const osc);
+    void    tMBSaw_init          (tMBSaw* const osc, tMinBLEPTable* const table);
     
     
     //! Free a tMBSaw from the default LEAF mempool.
@@ -1108,7 +1112,7 @@ extern "C" {
      @param osc A pointer to the tMBSaw to be initialized.
      @param pool A pointer to the tMempool to which the tMBSaw should be initialized.
      */
-    void    tMBSaw_initToPool    (tMBSaw* const osc, tMempool* const pool);
+    void    tMBSaw_initToPool    (tMBSaw* const osc, tMinBLEPTable* const table, tMempool* const pool);
     
     
     //! Free a tMBSaw from a specified mempool.

@@ -26,7 +26,7 @@ tEnvelope env;
 tAutotune at;
 
 
-tMinBLEP minblep;
+tMinBLEPTable minblep;
 
 tPhasor phasor;
 
@@ -52,11 +52,19 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
-    tMBSaw_init(&saw);
+    int zeroCrossings = 16;
+    int overSamplingRatio = 32;
     
-    tMBPulse_init(&pulse);
+    tMinBLEPTable_init(&minblep, zeroCrossings, overSamplingRatio);
     
-    tMBTriangle_init(&tri);
+    tMBSaw_init(&saw, &minblep);
+    tMBSaw_free(&saw);
+    
+    tMBPulse_init(&pulse, &minblep);
+    
+    tMBTriangle_init(&tri, &minblep);
+    tMBTriangle_free(&tri);
+    tMBTriangle_init(&tri, &minblep);
     
     tPhasor_init(&phasor);
     
@@ -85,7 +93,7 @@ float   LEAFTest_tick            (float input)
     
 //    if (phasor->phaseDidReset) tMBSaw_sync(&saw, 0.0f);
 //    if (phasor->phaseDidReset) tMBPulse_sync(&pulse, 0.0f);
-    if (phasor->phaseDidReset) tMBTriangle_sync(&tri, 0.0f);
+//    if (phasor->phaseDidReset) tMBTriangle_sync(&tri, 0.0f);
     
 //    return tMBSaw_tick(&saw);
 //    return tMBPulse_tick(&pulse);
