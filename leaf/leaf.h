@@ -140,7 +140,8 @@ extern "C" {
     float       LEAF_getSampleRate   (void);
     
 
-    __attribute__((weak)) uint8_t LEAF_error(uint8_t whichone);
+//    __attribute__((weak))
+    uint8_t LEAF_error(uint8_t whichone);
     
     /*!
      * @}

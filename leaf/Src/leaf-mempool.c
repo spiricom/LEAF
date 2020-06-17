@@ -261,6 +261,12 @@ void mpool_free(char* ptr, _tMempool* pool)
     mpool_node_t* next_node;
     while (other_node != NULL)
     {
+        if ((char*)other_node < (char*)pool->head ||
+            (char*)other_node >= ((char*)pool->head + pool->msize))
+        {
+            LEAF_error(2);
+            return;
+        }
         next_node = other_node->next;
         // Check if a node is directly after the freed node
         if ((long) freed_node + (leaf.header_size + freed_node->size) == (long) other_node)
