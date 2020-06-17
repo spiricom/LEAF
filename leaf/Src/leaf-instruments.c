@@ -23,15 +23,11 @@ void t808Cowbell_init(t808Cowbell* const cowbellInst, int useStick)
     t808Cowbell_initToPool(cowbellInst, useStick, &leaf.mempool);
 }
 
-void t808Cowebell_free(t808Cowbell* const cowbellInst)
-{
-    t808Cowbell_freeFromPool(cowbellInst, &leaf.mempool);
-}
-
 void        t808Cowbell_initToPool      (t808Cowbell* const cowbellInst, int useStick, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _t808Cowbell* cowbell = *cowbellInst = (_t808Cowbell*) mpool_alloc(sizeof(_t808Cowbell), m);
+    cowbell->mempool = m;
     
     tSquare_initToPool(&cowbell->p[0], mp);
     tSquare_setFreq(&cowbell->p[0], 540.0f);
@@ -58,21 +54,20 @@ void        t808Cowbell_initToPool      (t808Cowbell* const cowbellInst, int use
     cowbell->useStick = useStick;
 }
 
-void        t808Cowbell_freeFromPool    (t808Cowbell* const cowbellInst, tMempool* const mp)
+void        t808Cowbell_free    (t808Cowbell* const cowbellInst)
 {
-    _tMempool* m = *mp;
     _t808Cowbell* cowbell = *cowbellInst;
     
-    tSquare_freeFromPool(&cowbell->p[0], mp);
-    tSquare_freeFromPool(&cowbell->p[1], mp);
-    tSVF_freeFromPool(&cowbell->bandpassOsc, mp);
-    tSVF_freeFromPool(&cowbell->bandpassStick, mp);
-    tEnvelope_freeFromPool(&cowbell->envGain, mp);
-    tEnvelope_freeFromPool(&cowbell->envFilter, mp);
-    tHighpass_freeFromPool(&cowbell->highpass, mp);
-    tNoise_freeFromPool(&cowbell->stick, mp);
-    tEnvelope_freeFromPool(&cowbell->envStick, mp);
-    mpool_free((char*)cowbell, m);
+    tSquare_free(&cowbell->p[0]);
+    tSquare_free(&cowbell->p[1]);
+    tSVF_free(&cowbell->bandpassOsc);
+    tSVF_free(&cowbell->bandpassStick);
+    tEnvelope_free(&cowbell->envGain);
+    tEnvelope_free(&cowbell->envFilter);
+    tHighpass_free(&cowbell->highpass);
+    tNoise_free(&cowbell->stick);
+    tEnvelope_free(&cowbell->envStick);
+    mpool_free((char*)cowbell, cowbell->mempool);
 }
 
 void t808Cowbell_on(t808Cowbell* const cowbellInst, float vel)
@@ -153,15 +148,11 @@ void t808Hihat_init(t808Hihat* const hihatInst)
     t808Hihat_initToPool(hihatInst, &leaf.mempool);
 }
 
-void t808Hihat_free(t808Hihat* const hihatInst)
-{
-    t808Hihat_freeFromPool(hihatInst, &leaf.mempool);
-}
-
 void    t808Hihat_initToPool  (t808Hihat* const hihatInst, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _t808Hihat* hihat = *hihatInst = (_t808Hihat*) mpool_alloc(sizeof(_t808Hihat), m);
+    hihat->mempool = m;
     
     for (int i = 0; i < 6; i++)
     {
@@ -192,28 +183,27 @@ void    t808Hihat_initToPool  (t808Hihat* const hihatInst, tMempool* const mp)
     tSquare_setFreq(&hihat->p[5], 8.21f * hihat->freq);
 }
 
-void    t808Hihat_freeFromPool  (t808Hihat* const hihatInst, tMempool* const mp)
+void    t808Hihat_free  (t808Hihat* const hihatInst)
 {
-    _tMempool* m = *mp;
     _t808Hihat* hihat = *hihatInst;
     
     for (int i = 0; i < 6; i++)
     {
-        tSquare_freeFromPool(&hihat->p[i], mp);
+        tSquare_free(&hihat->p[i]);
     }
     
-    tNoise_freeFromPool(&hihat->stick, mp);
-    tNoise_freeFromPool(&hihat->n, mp);
+    tNoise_free(&hihat->stick);
+    tNoise_free(&hihat->n);
     
     // need to fix SVF to be generic
-    tSVF_freeFromPool(&hihat->bandpassStick, mp);
-    tSVF_freeFromPool(&hihat->bandpassOsc, mp);
-    tEnvelope_freeFromPool(&hihat->envGain, mp);
-    tEnvelope_freeFromPool(&hihat->envStick, mp);
+    tSVF_free(&hihat->bandpassStick);
+    tSVF_free(&hihat->bandpassOsc);
+    tEnvelope_free(&hihat->envGain);
+    tEnvelope_free(&hihat->envStick);
     
-    tHighpass_freeFromPool(&hihat->highpass, mp);
+    tHighpass_free(&hihat->highpass);
     
-    mpool_free((char*)hihat, m);
+    mpool_free((char*)hihat, hihat->mempool);
 }
 
 void t808Hihat_on(t808Hihat* const hihatInst, float vel)
@@ -326,15 +316,11 @@ void t808Snare_init (t808Snare* const snareInst)
     t808Snare_initToPool(snareInst, &leaf.mempool);
 }
 
-void t808Snare_free (t808Snare* const snareInst)
-{
-    t808Snare_freeFromPool(snareInst, &leaf.mempool);
-}
-
 void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _t808Snare* snare = *snareInst = (_t808Snare*) mpool_alloc(sizeof(_t808Snare), m);
+    snare->mempool = m;
     
     float ratio[2] = {1.0, 1.5};
     for (int i = 0; i < 2; i++)
@@ -360,26 +346,25 @@ void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
     snare->noiseGain = 1.0f;
 }
 
-void    t808Snare_freeFromPool  (t808Snare* const snareInst, tMempool* const mp)
+void    t808Snare_free  (t808Snare* const snareInst)
 {
-    _tMempool* m = *mp;
     _t808Snare* snare = *snareInst;
     
     for (int i = 0; i < 2; i++)
     {
-        tTriangle_freeFromPool(&snare->tone[i], mp);
-        tSVF_freeFromPool(&snare->toneLowpass[i], mp);
-        tEnvelope_freeFromPool(&snare->toneEnvOsc[i], mp);
-        tEnvelope_freeFromPool(&snare->toneEnvGain[i], mp);
-        tEnvelope_freeFromPool(&snare->toneEnvFilter[i], mp);
+        tTriangle_free(&snare->tone[i]);
+        tSVF_free(&snare->toneLowpass[i]);
+        tEnvelope_free(&snare->toneEnvOsc[i]);
+        tEnvelope_free(&snare->toneEnvGain[i]);
+        tEnvelope_free(&snare->toneEnvFilter[i]);
     }
     
-    tNoise_freeFromPool(&snare->noiseOsc, mp);
-    tSVF_freeFromPool(&snare->noiseLowpass, mp);
-    tEnvelope_freeFromPool(&snare->noiseEnvGain, mp);
-    tEnvelope_freeFromPool(&snare->noiseEnvFilter, mp);
+    tNoise_free(&snare->noiseOsc);
+    tSVF_free(&snare->noiseLowpass);
+    tEnvelope_free(&snare->noiseEnvGain);
+    tEnvelope_free(&snare->noiseEnvFilter);
     
-    mpool_free((char*)snare, m);
+    mpool_free((char*)snare, snare->mempool);
 }
 
 void t808Snare_on(t808Snare* const snareInst, float vel)
@@ -478,15 +463,11 @@ void t808Kick_init (t808Kick* const kickInst)
     t808Kick_initToPool(kickInst, &leaf.mempool);
 }
 
-void t808Kick_free (t808Kick* const kickInst)
-{
-    t808Kick_freeFromPool(kickInst, &leaf.mempool);
-}
-
 void t808Kick_initToPool (t808Kick* const kickInst, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _t808Kick* kick = *kickInst = (_t808Kick*) mpool_alloc(sizeof(_t808Kick), m);
+    kick->mempool = m;
     
     tCycle_initToPool(&kick->tone, mp);
     kick->toneInitialFreq = 40.0f;
@@ -502,20 +483,19 @@ void t808Kick_initToPool (t808Kick* const kickInst, tMempool* const mp)
     kick->noiseGain = 0.3f;
 }
 
-void    t808Kick_freeFromPool   (t808Kick* const kickInst, tMempool* const mp)
+void    t808Kick_free   (t808Kick* const kickInst)
 {
-    _tMempool* m = *mp;
     _t808Kick* kick = *kickInst;
     
-    tCycle_freeFromPool(&kick->tone, mp);
-    tSVF_freeFromPool(&kick->toneLowpass, mp);
-    tEnvelope_freeFromPool(&kick->toneEnvOscChirp, mp);
-    tEnvelope_freeFromPool(&kick->toneEnvOscSigh, mp);
-    tEnvelope_freeFromPool(&kick->toneEnvGain, mp);
-    tNoise_freeFromPool(&kick->noiseOsc, mp);
-    tEnvelope_freeFromPool(&kick->noiseEnvGain, mp);
+    tCycle_free(&kick->tone);
+    tSVF_free(&kick->toneLowpass);
+    tEnvelope_free(&kick->toneEnvOscChirp);
+    tEnvelope_free(&kick->toneEnvOscSigh);
+    tEnvelope_free(&kick->toneEnvGain);
+    tNoise_free(&kick->noiseOsc);
+    tEnvelope_free(&kick->noiseEnvGain);
     
-    mpool_free((char*)kick, m);
+    mpool_free((char*)kick, kick->mempool);
 }
 
 float       t808Kick_tick                  (t808Kick* const kickInst)

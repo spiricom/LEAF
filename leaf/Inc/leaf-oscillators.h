@@ -29,6 +29,7 @@ extern "C" {
     
     typedef struct _tCycle
     {
+        tMempool mempool;
         // Underlying phasor
         float phase;
         float inc,freq;
@@ -50,13 +51,6 @@ extern "C" {
     void    tCycle_init         (tCycle* const osc);
     
     
-    //! Free a tCycle from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tCycle to be freed.
-     */
-    void    tCycle_free         (tCycle* const osc);
-    
-    
     //! Initialize a tCycle to a specified mempool.
     /*!
      @param osc A pointer to the tCycle to be initialized.
@@ -65,12 +59,11 @@ extern "C" {
     void    tCycle_initToPool   (tCycle* const osc, tMempool* const pool);
     
     
-    //! Free a tCycle from a specified mempool.
+    //! Free a tCycle from the default LEAF mempool.
     /*!
      @param osc A pointer to the tCycle to be freed.
-     @param pool A pointer to the tMempool from which the tCycle should be freed.
      */
-    void    tCycle_freeFromPool (tCycle* const osc, tMempool* const pool);
+    void    tCycle_free         (tCycle* const osc);
     
     
     //! Tick a tCycle oscillator.
@@ -95,6 +88,7 @@ extern "C" {
     /* tTriangle: Anti-aliased Triangle waveform using wavetable interpolation. Wavetables constructed from sine components. */
     typedef struct _tTriangle
     {
+        tMempool mempool;
         // Underlying phasor
         float phase;
         float inc,freq;
@@ -118,13 +112,6 @@ extern "C" {
     void    tTriangle_init          (tTriangle* const osc);
     
     
-    //! Free a tTriangle from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tTriangle to be freed.
-     */
-    void    tTriangle_free          (tTriangle* const osc);
-    
-    
     //! Initialize a tTriangle to a specified mempool.
     /*!
      @param osc A pointer to the tTriangle to be initialized.
@@ -133,12 +120,11 @@ extern "C" {
     void    tTriangle_initToPool    (tTriangle* const osc, tMempool* const pool);
     
     
-    //! Free a tTriangle from a specified mempool.
+    //! Free a tTriangle from the default LEAF mempool.
     /*!
      @param osc A pointer to the tTriangle to be freed.
-     @param pool A pointer to the tMempool from which the tTriangle should be freed.
      */
-    void    tTriangle_freeFromPool  (tTriangle* const osc, tMempool* const pool);
+    void    tTriangle_free          (tTriangle* const osc);
     
     
     //! Tick a tTriangle oscillator.
@@ -163,6 +149,7 @@ extern "C" {
     /* tSquare: Anti-aliased Square waveform using wavetable interpolation. Wavetables constructed from sine components. */
     typedef struct _tSquare
     {
+        tMempool mempool;
         // Underlying phasor
         float phase;
         float inc,freq;
@@ -186,13 +173,6 @@ extern "C" {
     void    tSquare_init        (tSquare* const osc);
     
     
-    //! Free a tSquare from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tSquare to be freed.
-     */
-    void    tSquare_free        (tSquare* const osc);
-    
-    
     //! Initialize a tSquare to a specified mempool.
     /*!
      @param osc A pointer to the tSquare to be initialized.
@@ -201,12 +181,11 @@ extern "C" {
     void    tSquare_initToPool  (tSquare* const osc, tMempool* const);
     
     
-    //! Free a tSquare from a specified mempool.
+    //! Free a tSquare from the default LEAF mempool.
     /*!
      @param osc A pointer to the tSquare to be freed.
-     @param pool A pointer to the tMempool from which the tSquare should be freed.
      */
-    void    tSquare_freeFromPool(tSquare* const osc, tMempool* const);
+    void    tSquare_free        (tSquare* const osc);
     
     
     //! Tick a tSquare oscillator.
@@ -231,6 +210,7 @@ extern "C" {
     /* tSawtooth: Anti-aliased Sawtooth waveform using wavetable interpolation. Wavetables constructed from sine components. */
     typedef struct _tSawtooth
     {
+        tMempool mempool;
         // Underlying phasor
         float phase;
         float inc,freq;
@@ -254,13 +234,6 @@ extern "C" {
     void    tSawtooth_init          (tSawtooth* const osc);
     
     
-    //! Free a tSawtooth from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tSawtooth to be freed.
-     */
-    void    tSawtooth_free          (tSawtooth* const osc);
-    
-    
     //! Initialize a tSawtooth to a specified mempool.
     /*!
      @param osc A pointer to the tSawtooth to be initialized.
@@ -269,12 +242,11 @@ extern "C" {
     void    tSawtooth_initToPool    (tSawtooth* const osc, tMempool* const pool);
     
     
-    //! Free a tSawtooth from a specified mempool.
+    //! Free a tSawtooth from the default LEAF mempool.
     /*!
      @param osc A pointer to the tSawtooth to be freed.
-     @param pool A pointer to the tMempool from which the tSawtooth should be freed.
      */
-    void    tSawtooth_freeFromPool  (tSawtooth* const osc, tMempool* const pool);
+    void    tSawtooth_free          (tSawtooth* const osc);
     
     
     //! Tick a tSawtooth oscillator.
@@ -298,6 +270,7 @@ extern "C" {
     
     typedef struct _tSine
     {
+        tMempool mempool;
         float* sine;
         int size;
         float phase;
@@ -320,13 +293,6 @@ extern "C" {
     void    tSine_init         (tSine* const osc, int size);
     
     
-    //! Free a tSine from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tSine to be freed.
-     */
-    void    tSine_free         (tSine* const osc);
-    
-    
     //! Initialize a tSine to a specified mempool.
     /*!
      @param osc A pointer to the tSine to be initialized.
@@ -335,12 +301,11 @@ extern "C" {
     void    tSine_initToPool   (tSine* const osc, int size, tMempool* const pool);
     
     
-    //! Free a tSine from a specified mempool.
+    //! Free a tSine from the default LEAF mempool.
     /*!
      @param osc A pointer to the tSine to be freed.
-     @param pool A pointer to the tMempool from which the tSine should be freed.
      */
-    void    tSine_freeFromPool (tSine* const osc, tMempool* const pool);
+    void    tSine_free         (tSine* const osc);
     
     
     //! Tick a tSine oscillator.
@@ -365,6 +330,7 @@ extern "C" {
     /* tTri: Anti-aliased Triangle waveform using wavetable interpolation. */
     typedef struct _tTri
     {
+        tMempool mempool;
         float phase;
         float inc,freq;
         float skew;
@@ -387,13 +353,6 @@ extern "C" {
     void    tTri_init          (tTri* const osc);
     
     
-    //! Free a tTri from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tTri to be freed.
-     */
-    void    tTri_free          (tTri* const osc);
-    
-    
     //! Initialize a tTri to a specified mempool.
     /*!
      @param osc A pointer to the tTri to be initialized.
@@ -402,12 +361,11 @@ extern "C" {
     void    tTri_initToPool    (tTri* const osc, tMempool* const pool);
     
     
-    //! Free a tTri from a specified mempool.
+    //! Free a tTri from the default LEAF mempool.
     /*!
      @param osc A pointer to the tTri to be freed.
-     @param pool A pointer to the tMempool from which the tTri should be freed.
      */
-    void    tTri_freeFromPool  (tTri* const osc, tMempool* const pool);
+    void    tTri_free          (tTri* const osc);
     
     
     //! Tick a tTri oscillator.
@@ -434,6 +392,7 @@ extern "C" {
     /* tPulse: Anti-aliased Square waveform. */
     typedef struct _tPulse
     {
+        tMempool mempool;
         float phase;
         float inc,freq;
         float width;
@@ -455,13 +414,6 @@ extern "C" {
     void    tPulse_init        (tPulse* const osc);
     
     
-    //! Free a tPulse from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tPulse to be freed.
-     */
-    void    tPulse_free        (tPulse* const osc);
-    
-    
     //! Initialize a tPulse to a specified mempool.
     /*!
      @param osc A pointer to the tPulse to be initialized.
@@ -470,12 +422,11 @@ extern "C" {
     void    tPulse_initToPool  (tPulse* const osc, tMempool* const);
     
     
-    //! Free a tPulse from a specified mempool.
+    //! Free a tPulse from the default LEAF mempool.
     /*!
      @param osc A pointer to the tPulse to be freed.
-     @param pool A pointer to the tMempool from which the tPulse should be freed.
      */
-    void    tPulse_freeFromPool(tPulse* const osc, tMempool* const);
+    void    tPulse_free        (tPulse* const osc);
     
     
     //! Tick a tPulse oscillator.
@@ -502,6 +453,7 @@ extern "C" {
     /* tSawtooth: Anti-aliased Sawtooth waveform. */
     typedef struct _tSaw
     {
+        tMempool mempool;
         float phase;
         float inc,freq;
     } _tSaw;
@@ -522,13 +474,6 @@ extern "C" {
     void    tSaw_init          (tSaw* const osc);
     
     
-    //! Free a tSaw from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tSaw to be freed.
-     */
-    void    tSaw_free          (tSaw* const osc);
-    
-    
     //! Initialize a tSaw to a specified mempool.
     /*!
      @param osc A pointer to the tSaw to be initialized.
@@ -537,12 +482,11 @@ extern "C" {
     void    tSaw_initToPool    (tSaw* const osc, tMempool* const pool);
     
     
-    //! Free a tSaw from a specified mempool.
+    //! Free a tSaw from the default LEAF mempool.
     /*!
      @param osc A pointer to the tSaw to be freed.
-     @param pool A pointer to the tMempool from which the tSaw should be freed.
      */
-    void    tSaw_freeFromPool  (tSaw* const osc, tMempool* const pool);
+    void    tSaw_free          (tSaw* const osc);
     
     
     //! Tick a tSaw oscillator.
@@ -567,10 +511,10 @@ extern "C" {
     /* tPhasor: Aliasing phasor [0.0, 1.0) */
     typedef struct _tPhasor
     {
+        tMempool mempool;
         float phase;
         float inc,freq;
         uint8_t phaseDidReset;
-        
     } _tPhasor;
     
     typedef _tPhasor* tPhasor;
@@ -589,13 +533,6 @@ extern "C" {
     void    tPhasor_init        (tPhasor* const osc);
     
     
-    //! Free a tPhasor from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tPhasor to be freed.
-     */
-    void    tPhasor_free        (tPhasor* const osc);
-    
-    
     //! Initialize a tPhasor to a specified mempool.
     /*!
      @param osc A pointer to the tPhasor to be initialized.
@@ -604,14 +541,13 @@ extern "C" {
     void    tPhasor_initToPool  (tPhasor* const osc, tMempool* const);
     
     
-    //! Free a tPhasor from a specified mempool.
+    //! Free a tPhasor from the default LEAF mempool.
     /*!
      @param osc A pointer to the tPhasor to be freed.
-     @param pool A pointer to the tMempool from which the tPhasor should be freed.
      */
-    void    tPhasor_freeFromPool(tPhasor* const osc, tMempool* const);
+    void    tPhasor_free        (tPhasor* const osc);
     
-    
+
     //! Tick a tPhasor oscillator.
     /*!
      @param osc A pointer to the relevant tPhasor.
@@ -653,10 +589,10 @@ extern "C" {
     
     typedef struct _tNoise
     {
+        tMempool mempool;
         NoiseType type;
         float pinkb0, pinkb1, pinkb2;
         float(*rand)(void);
-        
     } _tNoise;
     
     typedef _tNoise* tNoise;
@@ -668,13 +604,6 @@ extern "C" {
     void    tNoise_init         (tNoise* const noise, NoiseType type);
     
     
-    //! Free a tNoise from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tNoise to be freed.
-     */
-    void    tNoise_free         (tNoise* const noise);
-    
-    
     //! Initialize a tNoise to a specified mempool.
     /*!
      @param osc A pointer to the tNoise to be initialized.
@@ -683,12 +612,11 @@ extern "C" {
     void    tNoise_initToPool   (tNoise* const noise, NoiseType type, tMempool* const);
     
     
-    //! Free a tNoise from a specified mempool.
+    //! Free a tNoise from the default LEAF mempool.
     /*!
      @param osc A pointer to the tNoise to be freed.
-     @param pool A pointer to the tMempool from which the tNoise should be freed.
      */
-    void    tNoise_freeFromPool (tNoise* const noise, tMempool* const);
+    void    tNoise_free         (tNoise* const noise);
     
     
     //! Tick a tNoise oscillator.
@@ -723,6 +651,8 @@ extern "C" {
     
     typedef struct _tNeuron
     {
+        tMempool mempool;
+        
         tPoleZero f;
         
         NeuronMode mode;
@@ -747,13 +677,6 @@ extern "C" {
     void    tNeuron_init        (tNeuron* const neuron);
     
     
-    //! Free a tNeuron from the default LEAF mempool.
-    /*!
-     @param neuron A pointer to the tNeuron to be freed.
-     */
-    void    tNeuron_free        (tNeuron* const neuron);
-    
-    
     //! Initialize a tNeuron to a specified mempool.
     /*!
      @param neuron A pointer to the tNeuron to be initialized.
@@ -762,12 +685,11 @@ extern "C" {
     void    tNeuron_initToPool  (tNeuron* const neuron, tMempool* const pool);
     
     
-    //! Free a tNeuron from a specified mempool.
+    //! Free a tNeuron from the default LEAF mempool.
     /*!
      @param neuron A pointer to the tNeuron to be freed.
-     @param pool A pointer to the tMempool from which the tNeuron should be freed.
      */
-    void    tNeuron_freeFromPool(tNeuron* const neuron, tMempool* const pool);
+    void    tNeuron_free        (tNeuron* const neuron);
     
     
     //! Reset the neuron model.
@@ -916,7 +838,7 @@ extern "C" {
     
     typedef _tMinBLEPHandler* tMinBLEPHandler;
     
-    void    tMinBLEPHandler_init           (tMinBLEPHandler* const minblep, tMinBLEPTable* const table, int oversamplerRatio);
+    void    tMinBLEPHandler_init           (tMinBLEPHandler* const minblep, tMinBLEPTable* const table);
     void    tMinBLEPHandler_free           (tMinBLEPHandler* const minblep);
     void    tMinBLEPHandler_initToPool     (tMinBLEPHandler* const minblep, tMinBLEPTable* const table, tMempool* const pool);
     
@@ -929,6 +851,8 @@ extern "C" {
     /* tMBTriangle: Anti-aliased Triangle waveform using wavetable interpolation. */
     typedef struct _tMBTriangle
     {
+        tMempool mempool;
+        
         float phase;
         float inc,freq;
         float skew;
@@ -954,27 +878,19 @@ extern "C" {
     void    tMBTriangle_init          (tMBTriangle* const osc, tMinBLEPTable* const table);
     
     
-    //! Free a tMBTriangle from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tMBTriangle to be freed.
-     */
-    void    tMBTriangle_free          (tMBTriangle* const osc);
-    
-    
     //! Initialize a tMBTriangle to a specified mempool.
     /*!
      @param osc A pointer to the tMBTriangle to be initialized.
      @param pool A pointer to the tMempool to which the tMBTriangle should be initialized.
      */
     void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMinBLEPTable* const table, tMempool* const pool);
+
     
-    
-    //! Free a tMBTriangle from a specified mempool.
+    //! Free a tMBTriangle from the default LEAF mempool.
     /*!
      @param osc A pointer to the tMBTriangle to be freed.
-     @param pool A pointer to the tMempool from which the tMBTriangle should be freed.
      */
-    void    tMBTriangle_freeFromPool  (tMBTriangle* const osc, tMempool* const pool);
+    void    tMBTriangle_free          (tMBTriangle* const osc);
     
     
     //! Tick a tMBTriangle oscillator.
@@ -1003,6 +919,8 @@ extern "C" {
     /* tMBPulse: Anti-aliased Square waveform. */
     typedef struct _tMBPulse
     {
+        tMempool mempool;
+        
         float phase;
         float inc,freq;
         float width;
@@ -1027,13 +945,6 @@ extern "C" {
     void    tMBPulse_init        (tMBPulse* const osc, tMinBLEPTable* const table);
     
     
-    //! Free a tMBPulse from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tMBPulse to be freed.
-     */
-    void    tMBPulse_free        (tMBPulse* const osc);
-    
-    
     //! Initialize a tMBPulse to a specified mempool.
     /*!
      @param osc A pointer to the tMBPulse to be initialized.
@@ -1042,12 +953,11 @@ extern "C" {
     void    tMBPulse_initToPool  (tMBPulse* const osc, tMinBLEPTable* const table, tMempool* const);
     
     
-    //! Free a tMBPulse from a specified mempool.
+    //! Free a tMBPulse from the default LEAF mempool.
     /*!
      @param osc A pointer to the tMBPulse to be freed.
-     @param pool A pointer to the tMempool from which the tMBPulse should be freed.
      */
-    void    tMBPulse_freeFromPool(tMBPulse* const osc, tMempool* const);
+    void    tMBPulse_free        (tMBPulse* const osc);
     
     
     //! Tick a tMBPulse oscillator.
@@ -1077,6 +987,8 @@ extern "C" {
     /* tMBSawtooth: Anti-aliased Sawtooth waveform. */
     typedef struct _tMBSaw
     {
+        tMempool mempool;
+        
         float phase;
         float inc,freq;
         
@@ -1100,13 +1012,6 @@ extern "C" {
     void    tMBSaw_init          (tMBSaw* const osc, tMinBLEPTable* const table);
     
     
-    //! Free a tMBSaw from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tMBSaw to be freed.
-     */
-    void    tMBSaw_free          (tMBSaw* const osc);
-    
-    
     //! Initialize a tMBSaw to a specified mempool.
     /*!
      @param osc A pointer to the tMBSaw to be initialized.
@@ -1115,12 +1020,11 @@ extern "C" {
     void    tMBSaw_initToPool    (tMBSaw* const osc, tMinBLEPTable* const table, tMempool* const pool);
     
     
-    //! Free a tMBSaw from a specified mempool.
+    //! Free a tMBSaw from the default LEAF mempool.
     /*!
      @param osc A pointer to the tMBSaw to be freed.
-     @param pool A pointer to the tMempool from which the tMBSaw should be freed.
      */
-    void    tMBSaw_freeFromPool  (tMBSaw* const osc, tMempool* const pool);
+    void    tMBSaw_free          (tMBSaw* const osc);
     
     
     //! Tick a tMBSaw oscillator.

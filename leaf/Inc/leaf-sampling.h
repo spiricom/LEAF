@@ -42,6 +42,8 @@ extern "C" {
     
     typedef struct _tBuffer
     {
+        tMempool mempool;
+        
         float* buff;
         
         uint32_t idx;
@@ -50,15 +52,13 @@ extern "C" {
         RecordMode mode;
         
         int active;
-        
     } _tBuffer;
     
     typedef _tBuffer* tBuffer;
     
     void  tBuffer_init                  (tBuffer* const, uint32_t length);
-    void  tBuffer_free                  (tBuffer* const);
     void  tBuffer_initToPool            (tBuffer* const, uint32_t length, tMempool* const);
-    void  tBuffer_freeFromPool          (tBuffer* const, tMempool* const);
+    void  tBuffer_free                  (tBuffer* const);
     
     void  tBuffer_tick                  (tBuffer* const, float sample);
     
@@ -92,6 +92,8 @@ extern "C" {
     
     typedef struct _tSampler
     {
+        tMempool mempool;
+        
         tBuffer samp;
         
         tRamp gain;
@@ -119,15 +121,13 @@ extern "C" {
         
         float flipStart;
         float flipIdx;
-        
     } _tSampler;
     
     typedef _tSampler* tSampler;
     
     void    tSampler_init               (tSampler* const, tBuffer* const);
-    void    tSampler_free               (tSampler* const);
     void    tSampler_initToPool         (tSampler* const, tBuffer* const, tMempool* const);
-    void    tSampler_freeFromPool       (tSampler* const, tMempool* const);
+    void    tSampler_free               (tSampler* const);
     
     float   tSampler_tick               (tSampler* const);
     
@@ -150,6 +150,7 @@ extern "C" {
     
     typedef struct _tAutoSampler
     {
+        tMempool mempool;
         tSampler sampler;
         tEnvelopeFollower ef;
         uint32_t windowSize;
@@ -163,9 +164,8 @@ extern "C" {
     typedef _tAutoSampler* tAutoSampler;
     
     void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const);
-    void    tAutoSampler_free               (tAutoSampler* const);
     void    tAutoSampler_initToPool         (tAutoSampler* const, tBuffer* const, tMempool* const);
-    void    tAutoSampler_freeFromPool       (tAutoSampler* const, tMempool* const);
+    void    tAutoSampler_free               (tAutoSampler* const);
     
     float   tAutoSampler_tick               (tAutoSampler* const, float input);
     

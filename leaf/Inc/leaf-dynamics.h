@@ -36,6 +36,8 @@ extern "C" {
     /* Compressor */
     typedef struct _tCompressor
     {
+        tMempool mempool;
+        
         float tauAttack, tauRelease;
         float T, R, W, M; // Threshold, compression Ratio, decibel Width of knee transition, decibel Make-up gain
         
@@ -48,9 +50,8 @@ extern "C" {
     typedef _tCompressor* tCompressor;
     
     void    tCompressor_init        (tCompressor* const);
-    void    tCompressor_free        (tCompressor* const);
     void    tCompressor_initToPool  (tCompressor* const, tMempool* const);
-    void    tCompressor_freeFromPool(tCompressor* const, tMempool* const);
+    void    tCompressor_free        (tCompressor* const);
     
     float   tCompressor_tick        (tCompressor* const, float input);
     
@@ -62,7 +63,9 @@ extern "C" {
     // The latter option allows for decaying strings, which can never exceed
     // a specific level.
     
-    typedef struct _tFeedbackLeveler {
+    typedef struct _tFeedbackLeveler
+    {
+        tMempool mempool;
         float targetLevel;    // target power level
         float strength;        // how strongly level difference affects the VCA
         int      mode;            // 0 for upwards limiting only, 1 for biderctional limiting
@@ -74,9 +77,8 @@ extern "C" {
     typedef _tFeedbackLeveler* tFeedbackLeveler;
     
     void    tFeedbackLeveler_init           (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode);
-    void    tFeedbackLeveler_free           (tFeedbackLeveler* const);
     void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, tMempool* const);
-    void    tFeedbackLeveler_freeFromPool   (tFeedbackLeveler* const, tMempool* const);
+    void    tFeedbackLeveler_free           (tFeedbackLeveler* const);
     
     float   tFeedbackLeveler_tick           (tFeedbackLeveler* const, float input);
     float   tFeedbackLeveler_sample         (tFeedbackLeveler* const);
@@ -91,18 +93,18 @@ extern "C" {
 
     //Threshold with hysteresis (like Max/MSP thresh~ object)
 
-    typedef struct _tThreshold {
+    typedef struct _tThreshold
+    {
+        tMempool mempool;
         float highThresh, lowThresh;
 		int currentValue;
-
     } _tThreshold;
 
     typedef _tThreshold* tThreshold;
 
     void    tThreshold_init        (tThreshold* const, float low, float high);
-    void    tThreshold_free        (tThreshold* const);
     void    tThreshold_initToPool  (tThreshold* const, float low, float high, tMempool* const);
-    void    tThreshold_freeFromPool(tThreshold* const, tMempool* const);
+    void    tThreshold_free        (tThreshold* const);
 
     int   tThreshold_tick        (tThreshold* const, float input);
     void   tThreshold_setLow        (tThreshold* const, float low);

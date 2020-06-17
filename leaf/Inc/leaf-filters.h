@@ -33,20 +33,20 @@ extern "C" {
     /* tAllpass: Schroeder allpass. Comb-filter with feedforward and feedback. */
     typedef struct _tAllpass
     {
+        tMempool mempool;
+        
         float gain;
         
         tLinearDelay delay;
         
         float lastOut;
-        
     } _tAllpass;
     
     typedef _tAllpass* tAllpass;
     
     void    tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay);
-    void    tAllpass_free           (tAllpass* const);
     void    tAllpass_initToPool     (tAllpass* const, float initDelay, uint32_t maxDelay, tMempool* const);
-    void    tAllpass_freeFromPool   (tAllpass* const, tMempool* const);
+    void    tAllpass_free           (tAllpass* const);
     
     float   tAllpass_tick           (tAllpass* const, float input);
     void    tAllpass_setGain        (tAllpass* const, float gain);
@@ -58,20 +58,18 @@ extern "C" {
     /* tOnePole: OnePole filter, reimplemented from STK (Cook and Scavone). */
     typedef struct _tOnePole
     {
+        tMempool mempool;
         float gain;
         float a0,a1;
         float b0,b1;
         float lastIn, lastOut;
-
-        
     } _tOnePole;
     
     typedef _tOnePole* tOnePole;
     
     void    tOnePole_init           (tOnePole* const, float thePole);
-    void    tOnePole_free           (tOnePole* const);
     void    tOnePole_initToPool     (tOnePole* const, float thePole, tMempool* const);
-    void    tOnePole_freeFromPool   (tOnePole* const, tMempool* const);
+    void    tOnePole_free           (tOnePole* const);
     
     float   tOnePole_tick           (tOnePole* const, float input);
     void    tOnePole_setB0          (tOnePole* const, float b0);
@@ -86,6 +84,8 @@ extern "C" {
     /* TwoPole filter, reimplemented from STK (Cook and Scavone). */
     typedef struct _tTwoPole
     {
+        tMempool mempool;
+        
         float gain;
         float a0, a1, a2;
         float b0;
@@ -94,15 +94,13 @@ extern "C" {
         oBool normalize;
 
         float lastOut[2];
-        
     } _tTwoPole;
     
     typedef _tTwoPole* tTwoPole;
     
     void    tTwoPole_init           (tTwoPole* const);
-    void    tTwoPole_free           (tTwoPole* const);
     void    tTwoPole_initToPool     (tTwoPole* const, tMempool* const);
-    void    tTwoPole_freeFromPool   (tTwoPole* const, tMempool* const);
+    void    tTwoPole_free           (tTwoPole* const);
     
     float   tTwoPole_tick           (tTwoPole* const, float input);
     void    tTwoPole_setB0          (tTwoPole* const, float b0);
@@ -117,18 +115,17 @@ extern "C" {
     /* OneZero filter, reimplemented from STK (Cook and Scavone). */
     typedef struct _tOneZero
     {
+        tMempool mempool;
         float gain;
         float b0,b1;
         float lastIn, lastOut, frequency;
-        
     } _tOneZero;
     
     typedef _tOneZero* tOneZero;
     
     void    tOneZero_init           (tOneZero* const, float theZero);
-    void    tOneZero_free           (tOneZero* const);
     void    tOneZero_initToPool     (tOneZero* const, float theZero, tMempool* const);
-    void    tOneZero_freeFromPool   (tOneZero* const, tMempool* const);
+    void    tOneZero_free           (tOneZero* const);
     
     float   tOneZero_tick           (tOneZero* const, float input);
     void    tOneZero_setB0          (tOneZero* const, float b0);
@@ -143,21 +140,21 @@ extern "C" {
     /* TwoZero filter, reimplemented from STK (Cook and Scavone). */
     typedef struct _tTwoZero
     {
+        tMempool mempool;
+        
         float gain;
         float b0, b1, b2;
         
         float frequency, radius;
         
         float lastIn[2];
-        
     } _tTwoZero;
     
     typedef _tTwoZero* tTwoZero;
     
     void    tTwoZero_init           (tTwoZero* const);
-    void    tTwoZero_free           (tTwoZero* const);
     void    tTwoZero_initToPool     (tTwoZero* const, tMempool* const);
-    void    tTwoZero_freeFromPool   (tTwoZero* const, tMempool* const);
+    void    tTwoZero_free           (tTwoZero* const);
     
     float   tTwoZero_tick           (tTwoZero* const, float input);
     void    tTwoZero_setB0          (tTwoZero* const, float b0);
@@ -172,20 +169,20 @@ extern "C" {
     /* PoleZero filter, reimplemented from STK (Cook and Scavone). */
     typedef struct _tPoleZero
     {
+        tMempool mempool;
+        
         float gain;
         float a0,a1;
         float b0,b1;
         
         float lastIn, lastOut;
-        
     } _tPoleZero;
     
     typedef _tPoleZero* tPoleZero;
     
     void    tPoleZero_init              (tPoleZero* const);
-    void    tPoleZero_free              (tPoleZero* const);
     void    tPoleZero_initToPool        (tPoleZero* const, tMempool* const);
-    void    tPoleZero_freeFromPool      (tPoleZero* const, tMempool* const);
+    void    tPoleZero_free              (tPoleZero* const);
     
     float   tPoleZero_tick              (tPoleZero* const, float input);
     void    tPoleZero_setB0             (tPoleZero* const, float b0);
@@ -201,6 +198,8 @@ extern "C" {
     /* BiQuad filter, reimplemented from STK (Cook and Scavone). */
     typedef struct _tBiQuad
     {
+        tMempool mempool;
+        
         float gain;
         float a0, a1, a2;
         float b0, b1, b2;
@@ -215,9 +214,8 @@ extern "C" {
     typedef _tBiQuad* tBiQuad;
     
     void    tBiQuad_init           (tBiQuad* const);
-    void    tBiQuad_free           (tBiQuad* const);
     void    tBiQuad_initToPool     (tBiQuad* const, tMempool* const);
-    void    tBiQuad_freeFromPool   (tBiQuad* const, tMempool* const);
+    void    tBiQuad_free           (tBiQuad* const);
     
     float   tBiQuad_tick           (tBiQuad* const, float input);
     void    tBiQuad_setB0          (tBiQuad* const, float b0);
@@ -246,20 +244,18 @@ extern "C" {
     
     typedef struct _tSVF
     {
+        tMempool mempool;
         SVFType type;
         float cutoff, Q;
         float ic1eq,ic2eq;
         float g,k,a1,a2,a3,cH,cB,cL,cBK;
-
-        
     } _tSVF;
     
     typedef _tSVF* tSVF;
     
     void    tSVF_init           (tSVF* const, SVFType type, float freq, float Q);
-    void    tSVF_free           (tSVF* const);
     void    tSVF_initToPool     (tSVF* const, SVFType type, float freq, float Q, tMempool* const);
-    void    tSVF_freeFromPool   (tSVF* const, tMempool* const);
+    void    tSVF_free           (tSVF* const);
     
     float   tSVF_tick           (tSVF* const, float v0);
     void    tSVF_setFreq        (tSVF* const, float freq);
@@ -270,19 +266,18 @@ extern "C" {
     /* Efficient State Variable Filter for 14-bit control input, [0, 4096). */
     typedef struct _tEfficientSVF
     {
+        tMempool mempool;
         SVFType type;
         float cutoff, Q;
         float ic1eq,ic2eq;
         float g,k,a1,a2,a3;
-        
     } _tEfficientSVF;
     
     typedef _tEfficientSVF* tEfficientSVF;
     
     void    tEfficientSVF_init          (tEfficientSVF* const, SVFType type, uint16_t input, float Q);
-    void    tEfficientSVF_free          (tEfficientSVF* const);
     void    tEfficientSVF_initToPool    (tEfficientSVF* const, SVFType type, uint16_t input, float Q, tMempool* const);
-    void    tEfficientSVF_freeFromPool  (tEfficientSVF* const, tMempool* const);
+    void    tEfficientSVF_free          (tEfficientSVF* const);
     
     float   tEfficientSVF_tick          (tEfficientSVF* const, float v0);
     void    tEfficientSVF_setFreq       (tEfficientSVF* const, uint16_t controlFreq);
@@ -293,17 +288,16 @@ extern "C" {
     /* Simple Highpass filter. */
     typedef struct _tHighpass
     {
+        tMempool mempool;
         float xs, ys, R;
         float frequency;
-        
     } _tHighpass;
     
     typedef _tHighpass* tHighpass;
     
     void    tHighpass_init          (tHighpass* const, float freq);
-    void    tHighpass_free          (tHighpass* const);
     void    tHighpass_initToPool    (tHighpass* const, float freq, tMempool* const);
-    void    tHighpass_freeFromPool  (tHighpass* const, tMempool* const);
+    void    tHighpass_free          (tHighpass* const);
     
     float   tHighpass_tick          (tHighpass* const, float x);
     void    tHighpass_setFreq       (tHighpass* const, float freq);
@@ -315,6 +309,8 @@ extern "C" {
 #define NUM_SVF_BW 16
     typedef struct _tButterworth
     {
+        tMempool mempool;
+        
         float gain;
         
         int N;
@@ -323,15 +319,13 @@ extern "C" {
         tSVF high[NUM_SVF_BW];
         
         float f1,f2;
-        
     } _tButterworth;
     
     typedef _tButterworth* tButterworth;
     
     void    tButterworth_init           (tButterworth* const, int N, float f1, float f2);
-    void    tButterworth_free           (tButterworth* const);
     void    tButterworth_initToPool     (tButterworth* const, int N, float f1, float f2, tMempool* const);
-    void    tButterworth_freeFromPool   (tButterworth* const, tMempool* const);
+    void    tButterworth_free           (tButterworth* const);
     
     float   tButterworth_tick           (tButterworth* const, float input);
     void    tButterworth_setF1          (tButterworth* const, float in);
@@ -342,6 +336,7 @@ extern "C" {
     
     typedef struct _tFIR
     {
+        tMempool mempool;
         float* past;
         float* coeff;
         int numTaps;
@@ -350,9 +345,8 @@ extern "C" {
     typedef _tFIR* tFIR;
     
     void    tFIR_init           (tFIR* const, float* coeffs, int numTaps);
-    void    tFIR_free           (tFIR* const);
     void    tFIR_initToPool     (tFIR* const, float* coeffs, int numTaps, tMempool* const);
-    void    tFIR_freeFromPool   (tFIR* const, tMempool* const);
+    void    tFIR_free           (tFIR* const);
     
     float   tFIR_tick           (tFIR* const, float input);
 
@@ -362,6 +356,7 @@ extern "C" {
 
     typedef struct _tMedianFilter
     {
+        tMempool mempool;
     	float* val;
     	int* age;
     	int m;
@@ -374,9 +369,8 @@ extern "C" {
     typedef _tMedianFilter* tMedianFilter;
 
     void    tMedianFilter_init           (tMedianFilter* const, int size);
-	void    tMedianFilter_free           (tMedianFilter* const);
 	void    tMedianFilter_initToPool     (tMedianFilter* const, int size, tMempool* const);
-	void    tMedianFilter_freeFromPool   (tMedianFilter* const, tMempool* const);
+	void    tMedianFilter_free           (tMedianFilter* const);
 
 	float   tMedianFilter_tick           (tMedianFilter* const, float input);
 
@@ -404,6 +398,8 @@ extern "C" {
 
 	typedef struct _tVZFilter
 	    {
+            tMempool mempool;
+            
 			VZFilterType type;
 			// state:
 			float s1, s2;
@@ -423,15 +419,14 @@ extern "C" {
 
 			float sr;    //local sampling rate of filter (may be different from leaf sr if oversampled)
 			float inv_sr;
-
 	    } _tVZFilter;
 
 	    typedef _tVZFilter* tVZFilter;
 
 	    void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q);
-		void    tVZFilter_free           (tVZFilter* const);
 		void    tVZFilter_initToPool     (tVZFilter* const, VZFilterType type, float freq, float Q, tMempool* const);
-		void    tVZFilter_freeFromPool   (tVZFilter* const, tMempool* const);
+		void    tVZFilter_free           (tVZFilter* const);
+    
 		void 	tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate);
 		float   tVZFilter_tick           	(tVZFilter* const, float input);
 		float   tVZFilter_tickEfficient           	(tVZFilter* const vf, float in);
@@ -449,26 +444,24 @@ extern "C" {
 		//diode ladder filter
 		typedef struct _tDiodeFilter
 		    {
-
-			 	 float f;
-			 	 float r;
-			 	 float Vt;
-			 	 float n;
-			 	 float gamma;
-			 	 float zi;
-			 	 float g0inv;
-			 	 float g1inv;
-			 	 float g2inv;
-			 	 float s0, s1, s2, s3;
-
+                tMempool mempool;
+                float f;
+                float r;
+                float Vt;
+                float n;
+                float gamma;
+                float zi;
+                float g0inv;
+                float g1inv;
+                float g2inv;
+                float s0, s1, s2, s3;
 		    } _tDiodeFilter;
 
 		    typedef _tDiodeFilter* tDiodeFilter;
 
 		    void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q);
-			void    tDiodeFilter_free           (tDiodeFilter* const);
 			void    tDiodeFilter_initToPool     (tDiodeFilter* const, float freq, float Q, tMempool* const);
-			void    tDiodeFilter_freeFromPool   (tDiodeFilter* const, tMempool* const);
+			void    tDiodeFilter_free           (tDiodeFilter* const);
 
 			float   tDiodeFilter_tick           	(tDiodeFilter* const, float input);
 			void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff);

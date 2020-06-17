@@ -22,15 +22,11 @@ void    tPluck_init         (tPluck* const pl, float lowestFrequency)
     tPluck_initToPool(pl, lowestFrequency, &leaf.mempool);
 }
 
-void tPluck_free (tPluck* const pl)
-{
-    tPluck_freeFromPool(pl, &leaf.mempool);
-}
-
 void    tPluck_initToPool    (tPluck* const pl, float lowestFrequency, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPluck* p = *pl = (_tPluck*) mpool_alloc(sizeof(_tPluck), m);
+    p->mempool = m;
     
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 10.0f;
     
@@ -46,17 +42,16 @@ void    tPluck_initToPool    (tPluck* const pl, float lowestFrequency, tMempool*
     tPluck_setFrequency(pl, 220.0f);
 }
 
-void    tPluck_freeFromPool  (tPluck* const pl, tMempool* const mp)
+void    tPluck_free (tPluck* const pl)
 {
-    _tMempool* m = *mp;
     _tPluck* p = *pl;
     
-    tNoise_freeFromPool(&p->noise, mp);
-    tOnePole_freeFromPool(&p->pickFilter, mp);
-    tOneZero_freeFromPool(&p->loopFilter, mp);
-    tAllpassDelay_freeFromPool(&p->delayLine, mp);
+    tNoise_free(&p->noise);
+    tOnePole_free(&p->pickFilter);
+    tOneZero_free(&p->loopFilter);
+    tAllpassDelay_free(&p->delayLine);
     
-    mpool_free((char*)p, m);
+    mpool_free((char*)p, p->mempool);
 }
 
 float   tPluck_getLastOut    (tPluck* const pl)
@@ -142,15 +137,11 @@ void    tKarplusStrong_init (tKarplusStrong* const pl, float lowestFrequency)
     tKarplusStrong_initToPool(pl, lowestFrequency, &leaf.mempool);
 }
 
-void tKarplusStrong_free (tKarplusStrong* const pl)
-{
-    tKarplusStrong_freeFromPool(pl, &leaf.mempool);
-}
-
 void    tKarplusStrong_initToPool   (tKarplusStrong* const pl, float lowestFrequency, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tKarplusStrong* p = *pl = (_tKarplusStrong*) mpool_alloc(sizeof(_tKarplusStrong), m);
+    p->mempool = m;
     
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 8.0f;
     
@@ -179,22 +170,21 @@ void    tKarplusStrong_initToPool   (tKarplusStrong* const pl, float lowestFrequ
     tKarplusStrong_setFrequency( pl, 220.0f );
 }
 
-void    tKarplusStrong_freeFromPool (tKarplusStrong* const pl, tMempool* const mp)
+void    tKarplusStrong_free (tKarplusStrong* const pl)
 {
-    _tMempool* m = *mp;
     _tKarplusStrong* p = *pl;
     
-    tAllpassDelay_freeFromPool(&p->delayLine, mp);
-    tLinearDelay_freeFromPool(&p->combDelay, mp);
-    tOneZero_freeFromPool(&p->filter, mp);
-    tNoise_freeFromPool(&p->noise, mp);
+    tAllpassDelay_free(&p->delayLine);
+    tLinearDelay_free(&p->combDelay);
+    tOneZero_free(&p->filter);
+    tNoise_free(&p->noise);
     
     for (int i = 0; i < 4; i++)
     {
-        tBiQuad_freeFromPool(&p->biquad[i], mp);
+        tBiQuad_free(&p->biquad[i]);
     }
     
-    mpool_free((char*)p, m);
+    mpool_free((char*)p, p->mempool);
 }
 
 float   tKarplusStrong_getLastOut    (tKarplusStrong* const pl)
@@ -361,17 +351,13 @@ void    tSimpleLivingString_init(tSimpleLivingString* const pl, float freq, floa
     tSimpleLivingString_initToPool(pl, freq, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf.mempool);
 }
 
-void tSimpleLivingString_free(tSimpleLivingString* const pl)
-{
-    tSimpleLivingString_freeFromPool(pl, &leaf.mempool);
-}
-
 void    tSimpleLivingString_initToPool  (tSimpleLivingString* const pl, float freq, float dampFreq,
                                          float decay, float targetLev, float levSmoothFactor,
                                          float levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSimpleLivingString* p = *pl = (_tSimpleLivingString*) mpool_alloc(sizeof(_tSimpleLivingString), m);
+    p->mempool = m;
     
     p->curr=0.0f;
     tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
@@ -385,18 +371,17 @@ void    tSimpleLivingString_initToPool  (tSimpleLivingString* const pl, float fr
     p->levMode=levMode;
 }
 
-void    tSimpleLivingString_freeFromPool    (tSimpleLivingString* const pl, tMempool* const mp)
+void    tSimpleLivingString_free (tSimpleLivingString* const pl)
 {
-    _tMempool* m = *mp;
     _tSimpleLivingString* p = *pl;
     
-    tExpSmooth_freeFromPool(&p->wlSmooth, mp);
-    tLinearDelay_freeFromPool(&p->delayLine, mp);
-    tOnePole_freeFromPool(&p->bridgeFilter, mp);
-    tHighpass_freeFromPool(&p->DCblocker, mp);
-    tFeedbackLeveler_freeFromPool(&p->fbLev, mp);
+    tExpSmooth_free(&p->wlSmooth);
+    tLinearDelay_free(&p->delayLine);
+    tOnePole_free(&p->bridgeFilter);
+    tHighpass_free(&p->DCblocker);
+    tFeedbackLeveler_free(&p->fbLev);
     
-    mpool_free((char*)p, m);
+    mpool_free((char*)p, p->mempool);
 }
 
 void     tSimpleLivingString_setFreq(tSimpleLivingString* const pl, float freq)
@@ -483,17 +468,13 @@ void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, f
     tLivingString_initToPool(pl, freq, pickPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf.mempool);
 }
 
-void tLivingString_free(tLivingString* const pl)
-{
-    tLivingString_freeFromPool(pl, &leaf.mempool);
-}
-
 void    tLivingString_initToPool    (tLivingString* const pl, float freq, float pickPos, float prepIndex,
                                      float dampFreq, float decay, float targetLev, float levSmoothFactor,
                                      float levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tLivingString* p = *pl = (_tLivingString*) mpool_alloc(sizeof(_tLivingString), m);
+    p->mempool = m;
     
     p->curr=0.0f;
     tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
@@ -524,27 +505,26 @@ void    tLivingString_initToPool    (tLivingString* const pl, float freq, float 
     p->levMode=levMode;
 }
 
-void    tLivingString_freeFromPool  (tLivingString* const pl, tMempool* const mp)
+void    tLivingString_free (tLivingString* const pl)
 {
-    _tMempool* m = *mp;
     _tLivingString* p = *pl;
     
-    tExpSmooth_freeFromPool(&p->wlSmooth, mp);
-    tExpSmooth_freeFromPool(&p->ppSmooth, mp);
-    tLinearDelay_freeFromPool(&p->delLF, mp);
-    tLinearDelay_freeFromPool(&p->delUF, mp);
-    tLinearDelay_freeFromPool(&p->delUB, mp);
-    tLinearDelay_freeFromPool(&p->delLB, mp);
-    tOnePole_freeFromPool(&p->bridgeFilter, mp);
-    tOnePole_freeFromPool(&p->nutFilter, mp);
-    tOnePole_freeFromPool(&p->prepFilterU, mp);
-    tOnePole_freeFromPool(&p->prepFilterL, mp);
-    tHighpass_freeFromPool(&p->DCblockerU, mp);
-    tHighpass_freeFromPool(&p->DCblockerL, mp);
-    tFeedbackLeveler_freeFromPool(&p->fbLevU, mp);
-    tFeedbackLeveler_freeFromPool(&p->fbLevL, mp);
+    tExpSmooth_free(&p->wlSmooth);
+    tExpSmooth_free(&p->ppSmooth);
+    tLinearDelay_free(&p->delLF);
+    tLinearDelay_free(&p->delUF);
+    tLinearDelay_free(&p->delUB);
+    tLinearDelay_free(&p->delLB);
+    tOnePole_free(&p->bridgeFilter);
+    tOnePole_free(&p->nutFilter);
+    tOnePole_free(&p->prepFilterU);
+    tOnePole_free(&p->prepFilterL);
+    tHighpass_free(&p->DCblockerU);
+    tHighpass_free(&p->DCblockerL);
+    tFeedbackLeveler_free(&p->fbLevU);
+    tFeedbackLeveler_free(&p->fbLevL);
     
-    mpool_free((char*)p, m);
+    mpool_free((char*)p, p->mempool);
 }
 
 void     tLivingString_setFreq(tLivingString* const pl, float freq)
@@ -680,17 +660,13 @@ void    tComplexLivingString_init(tComplexLivingString* const pl, float freq, fl
     tComplexLivingString_initToPool(pl, freq, pickPos, prepPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf.mempool);
 }
 
-void tComplexLivingString_free(tComplexLivingString* const pl)
-{
-    tComplexLivingString_freeFromPool(pl, &leaf.mempool);
-}
-
 void    tComplexLivingString_initToPool    (tComplexLivingString* const pl, float freq, float pickPos, float prepPos, float prepIndex,
                                      float dampFreq, float decay, float targetLev, float levSmoothFactor,
                                      float levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tComplexLivingString* p = *pl = (_tComplexLivingString*) mpool_alloc(sizeof(_tComplexLivingString), m);
+    p->mempool = m;
 
     p->curr=0.0f;
     tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
@@ -730,30 +706,29 @@ void    tComplexLivingString_initToPool    (tComplexLivingString* const pl, floa
     p->levMode=levMode;
 }
 
-void    tComplexLivingString_freeFromPool  (tComplexLivingString* const pl, tMempool* const mp)
+void    tComplexLivingString_free (tComplexLivingString* const pl)
 {
-    _tMempool* m = *mp;
     _tComplexLivingString* p = *pl;
 
-    tExpSmooth_freeFromPool(&p->wlSmooth, mp);
-    tExpSmooth_freeFromPool(&p->pickPosSmooth, mp);
-    tExpSmooth_freeFromPool(&p->prepPosSmooth, mp);
-    tLinearDelay_freeFromPool(&p->delLF, mp);
-    tLinearDelay_freeFromPool(&p->delMF, mp);
-    tLinearDelay_freeFromPool(&p->delUF, mp);
-    tLinearDelay_freeFromPool(&p->delUB, mp);
-    tLinearDelay_freeFromPool(&p->delMB, mp);
-    tLinearDelay_freeFromPool(&p->delLB, mp);
-    tOnePole_freeFromPool(&p->bridgeFilter, mp);
-    tOnePole_freeFromPool(&p->nutFilter, mp);
-    tOnePole_freeFromPool(&p->prepFilterU, mp);
-    tOnePole_freeFromPool(&p->prepFilterL, mp);
-    tHighpass_freeFromPool(&p->DCblockerU, mp);
-    tHighpass_freeFromPool(&p->DCblockerL, mp);
-    tFeedbackLeveler_freeFromPool(&p->fbLevU, mp);
-    tFeedbackLeveler_freeFromPool(&p->fbLevL, mp);
+    tExpSmooth_free(&p->wlSmooth);
+    tExpSmooth_free(&p->pickPosSmooth);
+    tExpSmooth_free(&p->prepPosSmooth);
+    tLinearDelay_free(&p->delLF);
+    tLinearDelay_free(&p->delMF);
+    tLinearDelay_free(&p->delUF);
+    tLinearDelay_free(&p->delUB);
+    tLinearDelay_free(&p->delMB);
+    tLinearDelay_free(&p->delLB);
+    tOnePole_free(&p->bridgeFilter);
+    tOnePole_free(&p->nutFilter);
+    tOnePole_free(&p->prepFilterU);
+    tOnePole_free(&p->prepFilterL);
+    tHighpass_free(&p->DCblockerU);
+    tHighpass_free(&p->DCblockerL);
+    tFeedbackLeveler_free(&p->fbLevU);
+    tFeedbackLeveler_free(&p->fbLevL);
 
-    mpool_free((char*)p, m);
+    mpool_free((char*)p, p->mempool);
 }
 
 void     tComplexLivingString_setFreq(tComplexLivingString* const pl, float freq)
@@ -922,26 +897,21 @@ void    tReedTable_init      (tReedTable* const pm, float offset, float slope)
     tReedTable_initToPool(pm, offset, slope, &leaf.mempool);
 }
 
-void    tReedTable_free      (tReedTable* const pm)
-{
-    tReedTable_freeFromPool(pm, &leaf.mempool);
-}
-
 void    tReedTable_initToPool   (tReedTable* const pm, float offset, float slope, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tReedTable* p = *pm = (_tReedTable*) mpool_alloc(sizeof(_tReedTable), m);
+    p->mempool = m;
     
     p->offset = offset;
     p->slope = slope;
 }
 
-void    tReedTable_freeFromPool (tReedTable* const pm, tMempool* const mp)
+void    tReedTable_free (tReedTable* const pm)
 {
-    _tMempool* m = *mp;
     _tReedTable* p = *pm;
     
-    mpool_free((char*)p, m);
+    mpool_free((char*)p, p->mempool);
 }
 
 float   tReedTable_tick      (tReedTable* const pm, float input)

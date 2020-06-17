@@ -22,27 +22,21 @@ void    tCycle_init(tCycle* const cy)
     tCycle_initToPool(cy, &leaf.mempool);
 }
 
-void    tCycle_free(tCycle* const cy)
-{
-    tCycle_freeFromPool(cy, &leaf.mempool);
-}
-
 void    tCycle_initToPool   (tCycle* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tCycle* c = *cy = (_tCycle*) mpool_alloc(sizeof(_tCycle), m);
+    c->mempool = m;
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
-
 }
 
-void    tCycle_freeFromPool (tCycle* const cy, tMempool* const mp)
+void    tCycle_free (tCycle* const cy)
 {
-    _tMempool* m = *mp;
     _tCycle* c = *cy;
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 void     tCycle_setFreq(tCycle* const cy, float freq)
@@ -79,7 +73,6 @@ float   tCycle_tick(tCycle* const cy)
 	samp1 = __leaf_table_sinewave[intPart];
 
     return (samp0 + (samp1 - samp0) * fracPart);
-
 }
 
 void     tCycleSampleRateChanged (tCycle* const cy)
@@ -96,27 +89,22 @@ void   tTriangle_init(tTriangle* const cy)
     tTriangle_initToPool(cy, &leaf.mempool);
 }
 
-void   tTriangle_free(tTriangle* const cy)
-{
-    tTriangle_freeFromPool(cy, &leaf.mempool);
-}
-
 void    tTriangle_initToPool    (tTriangle* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tTriangle* c = *cy = (_tTriangle*) mpool_alloc(sizeof(_tTriangle), m);
+    c->mempool = m;
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
     tTriangle_setFreq(cy, 220);
 }
 
-void    tTriangle_freeFromPool  (tTriangle* const cy, tMempool* const mp)
+void    tTriangle_free  (tTriangle* const cy)
 {
-    _tMempool* m = *mp;
     _tTriangle* c = *cy;
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 void tTriangle_setFreq(tTriangle* const cy, float freq)
@@ -170,27 +158,22 @@ void   tSquare_init(tSquare* const cy)
     tSquare_initToPool(cy, &leaf.mempool);
 }
 
-void   tSquare_free(tSquare* const cy)
-{
-    tSquare_freeFromPool(cy, &leaf.mempool);
-}
-
 void    tSquare_initToPool  (tSquare* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSquare* c = *cy = (_tSquare*) mpool_alloc(sizeof(_tSquare), m);
+    c->mempool = m;
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
     tSquare_setFreq(cy, 220);
 }
 
-void    tSquare_freeFromPool(tSquare* const cy, tMempool* const mp)
+void    tSquare_free (tSquare* const cy)
 {
-    _tMempool* m = *mp;
     _tSquare* c = *cy;
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 void    tSquare_setFreq(tSquare* const cy, float freq)
@@ -243,27 +226,22 @@ void    tSawtooth_init(tSawtooth* const cy)
     tSawtooth_initToPool(cy, &leaf.mempool);
 }
 
-void    tSawtooth_free(tSawtooth* const cy)
-{
-    tSawtooth_freeFromPool(cy, &leaf.mempool);
-}
-
 void    tSawtooth_initToPool    (tSawtooth* const cy, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSawtooth* c = *cy = (_tSawtooth*) mpool_alloc(sizeof(_tSawtooth), m);
+    c->mempool = m;
     
     c->inc      = 0.0f;
     c->phase    = 0.0f;
     tSawtooth_setFreq(cy, 220);
 }
 
-void    tSawtooth_freeFromPool  (tSawtooth* const cy, tMempool* const mp)
+void    tSawtooth_free (tSawtooth* const cy)
 {
-    _tMempool* m = *mp;
     _tSawtooth* c = *cy;
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 void    tSawtooth_setFreq(tSawtooth* const cy, float freq)
@@ -316,15 +294,11 @@ void    tSine_init(tSine* const cy, int size)
     tSine_initToPool(cy, size, &leaf.mempool);
 }
 
-void    tSine_free(tSine* const cy)
-{
-    tSine_freeFromPool(cy, &leaf.mempool);
-}
-
 void    tSine_initToPool   (tSine* const cy, int size, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSine* c = *cy = (_tSine*) mpool_alloc(sizeof(_tSine), m);
+    c->mempool = m;
     
     c->size = size;
     c->sine = (float*) mpool_alloc(sizeof(float) * c->size, m);
@@ -333,13 +307,12 @@ void    tSine_initToPool   (tSine* const cy, int size, tMempool* const mp)
     c->phase    =  0.0f;
 }
 
-void    tSine_freeFromPool (tSine* const cy, tMempool* const mp)
+void    tSine_free (tSine* const cy)
 {
-    _tMempool* m = *mp;
     _tSine* c = *cy;
     
-    mpool_free((char*)c->sine, m);
-    mpool_free((char*)c, m);
+    mpool_free((char*)c->sine, c->mempool);
+    mpool_free((char*)c, c->mempool);
 }
 
 void     tSine_setFreq(tSine* const cy, float freq)
@@ -392,15 +365,11 @@ void    tTri_init          (tTri* const osc)
     tTri_initToPool(osc, &leaf.mempool);
 }
 
-void    tTri_free          (tTri* const osc)
-{
-    tTri_freeFromPool(osc, &leaf.mempool);
-}
-
 void    tTri_initToPool    (tTri* const osc, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tTri* c = *osc = (_tTri*) mpool_alloc(sizeof(_tTri), m);
+    c->mempool = m;
 
     c->inc      =  0.0f;
     c->phase    =  0.0f;
@@ -408,12 +377,11 @@ void    tTri_initToPool    (tTri* const osc, tMempool* const mp)
     c->lastOut  =  0.0f;
 }
 
-void    tTri_freeFromPool  (tTri* const cy, tMempool* const mp)
+void    tTri_free (tTri* const cy)
 {
-    _tMempool* m = *mp;
     _tTri* c = *cy;
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 float   tTri_tick          (tTri* const osc)
@@ -472,27 +440,22 @@ void    tPulse_init        (tPulse* const osc)
     tPulse_initToPool(osc, &leaf.mempool);
 }
 
-void    tPulse_free        (tPulse* const osc)
-{
-    tPulse_freeFromPool(osc, &leaf.mempool);
-}
-
 void    tPulse_initToPool  (tPulse* const osc, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPulse* c = *osc = (_tPulse*) mpool_alloc(sizeof(_tPulse), m);
+    c->mempool = m;
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
     c->width     =  0.5f;
 }
 
-void    tPulse_freeFromPool(tPulse* const osc, tMempool* const mp)
+void    tPulse_free (tPulse* const osc)
 {
-    _tMempool* m = *mp;
     _tPulse* c = *osc;
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 float   tPulse_tick        (tPulse* const osc)
@@ -537,26 +500,21 @@ void    tSaw_init          (tSaw* const osc)
     tSaw_initToPool(osc, &leaf.mempool);
 }
 
-void    tSaw_free          (tSaw* const osc)
-{
-    tSaw_freeFromPool(osc, &leaf.mempool);
-}
-
 void    tSaw_initToPool    (tSaw* const osc, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSaw* c = *osc = (_tSaw*) mpool_alloc(sizeof(_tSaw), m);
+    c->mempool = m;
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
 }
 
-void    tSaw_freeFromPool  (tSaw* const osc, tMempool* const mp)
+void    tSaw_free  (tSaw* const osc)
 {
-    _tMempool* m = *mp;
     _tSaw* c = *osc;
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 float   tSaw_tick          (tSaw* const osc)
@@ -598,27 +556,22 @@ void    tPhasor_init(tPhasor* const ph)
     tPhasor_initToPool(ph, &leaf.mempool);
 }
 
-void    tPhasor_free(tPhasor* const ph)
-{
-    tPhasor_freeFromPool(ph, &leaf.mempool);
-}
-
 void    tPhasor_initToPool  (tPhasor* const ph, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPhasor* p = *ph = (_tPhasor*) mpool_alloc(sizeof(_tPhasor), m);
+    p->mempool = m;
     
     p->phase = 0.0f;
     p->inc = 0.0f;
     p->phaseDidReset = 0;
 }
 
-void    tPhasor_freeFromPool(tPhasor* const ph, tMempool* const mp)
+void    tPhasor_free (tPhasor* const ph)
 {
-    _tMempool* m = *mp;
     _tPhasor* p = *ph;
     
-    mpool_free((char*)p, m);
+    mpool_free((char*)p, p->mempool);
 }
 
 void    tPhasor_setFreq(tPhasor* const ph, float freq)
@@ -653,26 +606,21 @@ void    tNoise_init(tNoise* const ns, NoiseType type)
     tNoise_initToPool(ns, type, &leaf.mempool);
 }
 
-void    tNoise_free(tNoise* const ns)
-{
-    tNoise_freeFromPool(ns, &leaf.mempool);
-}
-
 void    tNoise_initToPool   (tNoise* const ns, NoiseType type, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tNoise* n = *ns = (_tNoise*) mpool_alloc(sizeof(_tNoise), m);
+    n->mempool = m;
     
     n->type = type;
     n->rand = leaf.random;
 }
 
-void    tNoise_freeFromPool (tNoise* const ns, tMempool* const mp)
+void    tNoise_free (tNoise* const ns)
 {
-    _tMempool* m = *mp;
     _tNoise* n = *ns;
     
-    mpool_free((char*)n, m);
+    mpool_free((char*)n, n->mempool);
 }
 
 float   tNoise_tick(tNoise* const ns)
@@ -709,15 +657,11 @@ void    tNeuron_init(tNeuron* const nr)
     tNeuron_initToPool(nr, &leaf.mempool);
 }
 
-void    tNeuron_free(tNeuron* const nr)
-{
-    tNeuron_freeFromPool(nr, &leaf.mempool);
-}
-
 void    tNeuron_initToPool  (tNeuron* const nr, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tNeuron* n = *nr = (_tNeuron*) mpool_alloc(sizeof(_tNeuron), m);
+    n->mempool = m;
     
     tPoleZero_initToPool(&n->f, mp);
     
@@ -746,13 +690,12 @@ void    tNeuron_initToPool  (tNeuron* const nr, tMempool* const mp)
     n->rate[2] = n->gL/n->C;
 }
 
-void    tNeuron_freeFromPool(tNeuron* const nr, tMempool* const mp)
+void    tNeuron_free (tNeuron* const nr)
 {
-    _tMempool* m = *mp;
     _tNeuron* n = *nr;
     
     tPoleZero_free(&n->f);
-    mpool_free((char*)n, m);
+    mpool_free((char*)n, n->mempool);
 }
 
 void   tNeuron_reset(tNeuron* const nr)
@@ -1096,8 +1039,9 @@ static void MinimumPhase(int n, float *realCepstrum, float *minimumPhase, float*
 }
 
 
-
-
+// good values for this are:
+// zeroCrossings = 16
+// oversamplerRatio = 32 (or 64 for slightly better antialiasing, but higher memory usage)
 void tMinBLEPTable_init (tMinBLEPTable* const minblep, int zeroCrossings, int oversamplerRatio)
 {
     tMinBLEPTable_initToPool(minblep, zeroCrossings, oversamplerRatio, &leaf.mempool);
@@ -1200,9 +1144,7 @@ void tMinBLEPTable_free (tMinBLEPTable* const minblep)
 }
 
 
-
-
-void    tMinBLEPHandler_init           (tMinBLEPHandler* const minblep, tMinBLEPTable* const table, int oversamplerRatio)
+void    tMinBLEPHandler_init           (tMinBLEPHandler* const minblep, tMinBLEPTable* const table)
 {
     tMinBLEPHandler_initToPool(minblep, table, &leaf.mempool);
 }
@@ -1371,15 +1313,11 @@ void    tMBTriangle_init          (tMBTriangle* const osc, tMinBLEPTable* const 
     tMBTriangle_initToPool(osc, table, &leaf.mempool);
 }
 
-void    tMBTriangle_free          (tMBTriangle* const osc)
-{
-    tMBTriangle_freeFromPool(osc, &leaf.mempool);
-}
-
 void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMinBLEPTable* const table, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tMBTriangle* c = *osc = (_tMBTriangle*) mpool_alloc(sizeof(_tMBTriangle), m);
+    c->mempool = m;
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
@@ -1390,15 +1328,14 @@ void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMinBLEPTable* const 
     tHighpass_initToPool(&c->dcBlock, 5.0f, mp);
 }
 
-void    tMBTriangle_freeFromPool  (tMBTriangle* const cy, tMempool* const mp)
+void    tMBTriangle_free (tMBTriangle* const cy)
 {
-    _tMempool* m = *mp;
     _tMBTriangle* c = *cy;
     
     tMinBLEPHandler_free(&c->minBlep);
-    tHighpass_freeFromPool(&c->dcBlock, mp);
+    tHighpass_free(&c->dcBlock);
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 float   tMBTriangle_tick          (tMBTriangle* const osc)
@@ -1511,15 +1448,11 @@ void    tMBPulse_init        (tMBPulse* const osc, tMinBLEPTable* const table)
     tMBPulse_initToPool(osc, table, &leaf.mempool);
 }
 
-void    tMBPulse_free        (tMBPulse* const osc)
-{
-    tMBPulse_freeFromPool(osc, &leaf.mempool);
-}
-
 void    tMBPulse_initToPool  (tMBPulse* const osc, tMinBLEPTable* const table, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tMBPulse* c = *osc = (_tMBPulse*) mpool_alloc(sizeof(_tMBPulse), m);
+    c->mempool = m;
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
@@ -1529,15 +1462,14 @@ void    tMBPulse_initToPool  (tMBPulse* const osc, tMinBLEPTable* const table, t
     tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
 }
 
-void    tMBPulse_freeFromPool(tMBPulse* const osc, tMempool* const mp)
+void    tMBPulse_free (tMBPulse* const osc)
 {
-    _tMempool* m = *mp;
     _tMBPulse* c = *osc;
     
     tMinBLEPHandler_free(&c->minBlep);
-    tHighpass_freeFromPool(&c->dcBlock, mp);
+    tHighpass_free(&c->dcBlock);
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 float   tMBPulse_tick        (tMBPulse* const osc)
@@ -1609,15 +1541,11 @@ void    tMBSaw_init          (tMBSaw* const osc, tMinBLEPTable* const table)
     tMBSaw_initToPool(osc, table, &leaf.mempool);
 }
 
-void    tMBSaw_free          (tMBSaw* const osc)
-{
-    tMBSaw_freeFromPool(osc, &leaf.mempool);
-}
-
 void    tMBSaw_initToPool    (tMBSaw* const osc, tMinBLEPTable* const table, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tMBSaw* c = *osc = (_tMBSaw*) mpool_alloc(sizeof(_tMBSaw), m);
+    c->mempool = m;
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
@@ -1626,15 +1554,14 @@ void    tMBSaw_initToPool    (tMBSaw* const osc, tMinBLEPTable* const table, tMe
     tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
 }
 
-void    tMBSaw_freeFromPool  (tMBSaw* const osc, tMempool* const mp)
+void    tMBSaw_free (tMBSaw* const osc)
 {
-    _tMempool* m = *mp;
     _tMBSaw* c = *osc;
     
     tMinBLEPHandler_free(&c->minBlep);
-    tHighpass_freeFromPool(&c->dcBlock, mp);
+    tHighpass_free(&c->dcBlock);
     
-    mpool_free((char*)c, m);
+    mpool_free((char*)c, c->mempool);
 }
 
 float   tMBSaw_tick          (tMBSaw* const osc)

@@ -29,15 +29,11 @@ void  tBuffer_init (tBuffer* const sb, uint32_t length)
     tBuffer_initToPool(sb, length, &leaf.mempool);
 }
 
-void  tBuffer_free (tBuffer* const sb)
-{
-    tBuffer_freeFromPool(sb, &leaf.mempool);
-}
-
 void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tBuffer* s = *sb = (_tBuffer*) mpool_alloc(sizeof(_tBuffer), m);
+    s->mempool = m;
     
     s->buff = (float*) mpool_alloc( sizeof(float) * length, m);
     
@@ -48,13 +44,12 @@ void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp
     s->mode = RecordOneShot;
 }
 
-void  tBuffer_freeFromPool (tBuffer* const sb, tMempool* const mp)
+void  tBuffer_free (tBuffer* const sb)
 {
-    _tMempool* m = *mp;
     _tBuffer* s = *sb;
     
-    mpool_free((char*)s->buff, m);
-    mpool_free((char*)s, m);
+    mpool_free((char*)s->buff, s->mempool);
+    mpool_free((char*)s, s->mempool);
 }
 
 void tBuffer_tick (tBuffer* const sb, float sample)
@@ -176,15 +171,12 @@ void tSampler_init(tSampler* const sp, tBuffer* const b)
     tSampler_initToPool(sp, b, &leaf.mempool);
 }
 
-void tSampler_free         (tSampler* const sp)
-{
-    tSampler_freeFromPool(sp, &leaf.mempool);
-}
-
 void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSampler* p = *sp = (_tSampler*) mpool_alloc(sizeof(_tSampler), m);
+    p->mempool = m;
+    
     _tBuffer* s = *b;
     
     p->samp = s;
@@ -219,13 +211,12 @@ void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const m
     p->flipIdx = -1;
 }
 
-void tSampler_freeFromPool         (tSampler* const sp, tMempool* const mp)
+void tSampler_free (tSampler* const sp)
 {
-    _tMempool* m = *mp;
     _tSampler* p = *sp;
-    tRamp_freeFromPool(&p->gain, mp);
+    tRamp_free(&p->gain);
     
-    mpool_free((char*)p, m);
+    mpool_free((char*)p, p->mempool);
 }
 
 void tSampler_setSample (tSampler* const sp, tBuffer* const b)
@@ -769,15 +760,11 @@ void    tAutoSampler_init   (tAutoSampler* const as, tBuffer* const b)
     tAutoSampler_initToPool(as, b, &leaf.mempool);
 }
 
-void    tAutoSampler_free   (tAutoSampler* const as)
-{
-    tAutoSampler_freeFromPool(as, &leaf.mempool);
-}
-
 void    tAutoSampler_initToPool (tAutoSampler* const as, tBuffer* const b, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tAutoSampler* a = *as = (_tAutoSampler*) mpool_alloc(sizeof(_tAutoSampler), m);
+    a->mempool = m;
     
     tBuffer_setRecordMode(b, RecordOneShot);
     tSampler_initToPool(&a->sampler, b, mp);
@@ -785,15 +772,14 @@ void    tAutoSampler_initToPool (tAutoSampler* const as, tBuffer* const b, tMemp
     tEnvelopeFollower_initToPool(&a->ef, 0.05f, 0.9999f, mp);
 }
 
-void    tAutoSampler_freeFromPool       (tAutoSampler* const as, tMempool* const mp)
+void    tAutoSampler_free (tAutoSampler* const as)
 {
-    _tMempool* m = *mp;
     _tAutoSampler* a = *as;
     
-    tEnvelopeFollower_freeFromPool(&a->ef, mp);
-    tSampler_freeFromPool(&a->sampler, mp);
+    tEnvelopeFollower_free(&a->ef);
+    tSampler_free(&a->sampler);
     
-    mpool_free((char*)a, m);
+    mpool_free((char*)a, a->mempool);
 }
 
 float   tAutoSampler_tick               (tAutoSampler* const as, float input)

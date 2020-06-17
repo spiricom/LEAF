@@ -35,6 +35,8 @@ extern "C" {
     /* PRCReverb: Reverb, reimplemented from STK (Cook and Scavone). */
     typedef struct _tPRCReverb
     {
+        tMempool mempool;
+        
         float mix, t60;
         
         float inv_441;
@@ -45,15 +47,13 @@ extern "C" {
         float combCoeff;
         
         float lastIn, lastOut;
-        
     } _tPRCReverb;
     
     typedef _tPRCReverb* tPRCReverb;
     
     void    tPRCReverb_init         (tPRCReverb* const, float t60);
-    void    tPRCReverb_free         (tPRCReverb* const);
     void    tPRCReverb_initToPool   (tPRCReverb* const, float t60, tMempool* const);
-    void    tPRCReverb_freeFromPool (tPRCReverb* const, tMempool* const);
+    void    tPRCReverb_free         (tPRCReverb* const);
     
     void    tPRCReverb_clear        (tPRCReverb* const);
     float   tPRCReverb_tick         (tPRCReverb* const, float input);
@@ -69,6 +69,8 @@ extern "C" {
     /* NReverb: Reverb, reimplemented from STK (Cook and Scavone). */
     typedef struct _tNReverb
     {
+        tMempool mempool;
+        
         float mix, t60;
         
         float inv_sr, inv_441;
@@ -80,15 +82,13 @@ extern "C" {
         float lowpassState;
         
         float lastIn, lastOut;
-        
     } _tNReverb;
     
     typedef _tNReverb* tNReverb;
     
     void    tNReverb_init           (tNReverb* const, float t60);
-    void    tNReverb_free           (tNReverb* const);
     void    tNReverb_initToPool     (tNReverb* const, float t60, tMempool* const);
-    void    tNReverb_freeFromPool   (tNReverb* const, tMempool* const);
+    void    tNReverb_free           (tNReverb* const);
     
     void    tNReverb_clear          (tNReverb* const);
     float   tNReverb_tick           (tNReverb* const, float input);
@@ -104,6 +104,8 @@ extern "C" {
     
     typedef struct _tDattorroReverb
     {
+        tMempool mempool;
+        
         float   predelay;
         float   input_filter;
         float   feedback_filter;
@@ -143,15 +145,13 @@ extern "C" {
         tHighpass   f2_hp;
         
         tCycle      f2_lfo;
-        
     } _tDattorroReverb;
     
     typedef _tDattorroReverb* tDattorroReverb;
     
     void    tDattorroReverb_init              (tDattorroReverb* const);
-    void    tDattorroReverb_free              (tDattorroReverb* const);
     void    tDattorroReverb_initToPool        (tDattorroReverb* const, tMempool* const);
-    void    tDattorroReverb_freeFromPool      (tDattorroReverb* const, tMempool* const);
+    void    tDattorroReverb_free              (tDattorroReverb* const);
     
     void    tDattorroReverb_clear             (tDattorroReverb* const);
     float   tDattorroReverb_tick              (tDattorroReverb* const, float input);

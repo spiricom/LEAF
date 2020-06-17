@@ -29,6 +29,8 @@ extern "C" {
     
     typedef struct _tTalkbox
     {
+        tMempool mempool;
+        
         float param[NUM_TALKBOX_PARAM];
 
         int bufsize;
@@ -56,9 +58,8 @@ extern "C" {
     typedef _tTalkbox* tTalkbox;
     
     void    tTalkbox_init           (tTalkbox* const, int bufsize);
-    void    tTalkbox_free           (tTalkbox* const);
     void    tTalkbox_initToPool     (tTalkbox* const, int bufsize, tMempool* const);
-    void    tTalkbox_freeFromPool   (tTalkbox* const, tMempool* const);
+    void    tTalkbox_free           (tTalkbox* const);
     
     float   tTalkbox_tick           (tTalkbox* const, float synth, float voice);
     float 	tTalkbox_tickFrozen		(tTalkbox* const voc, float synth, float voice);
@@ -78,6 +79,8 @@ extern "C" {
 
     typedef struct _tTalkboxFloat
       {
+          tMempool mempool;
+          
           float param[NUM_TALKBOX_PARAM];
 
           int bufsize;
@@ -105,9 +108,8 @@ extern "C" {
       typedef _tTalkboxFloat* tTalkboxFloat;
 
       void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize);
-      void    tTalkboxFloat_free           (tTalkboxFloat* const);
       void    tTalkboxFloat_initToPool     (tTalkboxFloat* const, int bufsize, tMempool* const);
-      void    tTalkboxFloat_freeFromPool   (tTalkboxFloat* const, tMempool* const);
+      void    tTalkboxFloat_free           (tTalkboxFloat* const);
 
       float   tTalkboxFloat_tick           (tTalkboxFloat* const, float synth, float voice);
       float 	tTalkboxFloat_tickFrozen		(tTalkboxFloat* const voc, float synth, float voice);
@@ -130,6 +132,8 @@ extern "C" {
     
     typedef struct _tVocoder
     {
+        tMempool mempool;
+        
         float param[NUM_VOCODER_PARAM];
         
         float gain;         //output level
@@ -146,9 +150,8 @@ extern "C" {
     typedef _tVocoder* tVocoder;
     
     void    tVocoder_init           (tVocoder* const);
-    void    tVocoder_free           (tVocoder* const);
     void    tVocoder_initToPool     (tVocoder* const, tMempool* const);
-    void    tVocoder_freeFromPool   (tVocoder* const, tMempool* const);
+    void    tVocoder_free           (tVocoder* const);
     
     float   tVocoder_tick           (tVocoder* const, float synth, float voice);
     void    tVocoder_update         (tVocoder* const);
@@ -160,22 +163,20 @@ extern "C" {
 
 	typedef struct _tRosenbergGlottalPulse
 	{
+        tMempool mempool;
         float phase;
         float openLength;
         float pulseLength;
         float invPulseLengthMinusOpenLength;
         float freq;
         float inc;
-
-
 	} _tRosenbergGlottalPulse;
 
 	typedef _tRosenbergGlottalPulse* tRosenbergGlottalPulse;
 
 	void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const);
-	void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const);
 	void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const, tMempool* const);
-	void    tRosenbergGlottalPulse_freeFromPool   (tRosenbergGlottalPulse* const, tMempool* const);
+	void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const);
 
 	float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const);
 	float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp);
@@ -200,6 +201,8 @@ extern "C" {
     
     typedef struct _tSOLAD
     {
+        tMempool mempool;
+        
         uint16_t timeindex;              // current reference time, write index
         uint16_t blocksize;              // signal input / output block size
         float pitchfactor;        // pitch factor between 0.25 and 4
@@ -216,9 +219,8 @@ extern "C" {
     typedef _tSOLAD* tSOLAD;
     
     void    tSOLAD_init             (tSOLAD* const);
-    void    tSOLAD_free             (tSOLAD* const);
     void    tSOLAD_initToPool       (tSOLAD* const, tMempool* const);
-    void    tSOLAD_freeFromPool     (tSOLAD* const, tMempool* const);
+    void    tSOLAD_free             (tSOLAD* const);
     
     // send one block of input samples, receive one block of output samples
     void    tSOLAD_ioSamples        (tSOLAD *w, float* in, float* out, int blocksize);
@@ -234,6 +236,8 @@ extern "C" {
     // Pitch shift
     typedef struct _tPitchShift
     {
+        tMempool mempool;
+        
         tSOLAD sola;
         tHighpass hp;
         tPeriodDetection* p;
@@ -255,9 +259,8 @@ extern "C" {
     typedef _tPitchShift* tPitchShift;
     
     void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize);
-    void    tPitchShift_free            (tPitchShift* const);
     void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, tMempool* const);
-    void    tPitchShift_freeFromPool    (tPitchShift* const, tMempool* const);
+    void    tPitchShift_free            (tPitchShift* const);
     
     float   tPitchShift_shift           (tPitchShift* const);
     float   tPitchShift_shiftToFunc     (tPitchShift* const, float (*fun)(float));
@@ -267,7 +270,8 @@ extern "C" {
     // Retune
     typedef struct _tRetune
     {
-        tMempool* mempool;
+        tMempool mempool;
+        
         tPeriodDetection pd;
         tPitchShift* ps;
         
@@ -293,9 +297,8 @@ extern "C" {
     typedef _tRetune* tRetune;
     
     void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize);
-    void    tRetune_free                (tRetune* const);
     void    tRetune_initToPool          (tRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
-    void    tRetune_freeFromPool        (tRetune* const, tMempool* const);
+    void    tRetune_free                (tRetune* const);
     
     float*  tRetune_tick                (tRetune* const, float sample);
     void    tRetune_setNumVoices        (tRetune* const, int numVoices);
@@ -311,7 +314,8 @@ extern "C" {
     // Autotune
     typedef struct _tAutotune
     {
-        tMempool* mempool;
+        tMempool mempool;
+        
         tPeriodDetection pd;
         tPitchShift* ps;
         
@@ -337,9 +341,8 @@ extern "C" {
     typedef _tAutotune* tAutotune;
     
     void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize);
-    void    tAutotune_free                  (tAutotune* const);
     void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
-    void    tAutotune_freeFromPool          (tAutotune* const, tMempool* const);
+    void    tAutotune_free                  (tAutotune* const);
     
     float*  tAutotune_tick                  (tAutotune* const, float sample);
     void    tAutotune_setNumVoices          (tAutotune* const, int numVoices);
@@ -359,6 +362,7 @@ extern "C" {
     
     typedef struct _tFormantShifter
     {
+        tMempool mempool;
         int ford;
         float falph;
         float flamb;
@@ -383,15 +387,13 @@ extern "C" {
         tHighpass hp2;
         tFeedbackLeveler fbl1;
         tFeedbackLeveler fbl2;
-        
     } _tFormantShifter;
     
     typedef _tFormantShifter* tFormantShifter;
     
     void    tFormantShifter_init            (tFormantShifter* const, int order);
-    void    tFormantShifter_free            (tFormantShifter* const);
     void    tFormantShifter_initToPool      (tFormantShifter* const, int order, tMempool* const);
-    void    tFormantShifter_freeFromPool    (tFormantShifter* const, tMempool* const);
+    void    tFormantShifter_free            (tFormantShifter* const);
     
     float   tFormantShifter_tick            (tFormantShifter* const, float input);
     float   tFormantShifter_remove          (tFormantShifter* const, float input);

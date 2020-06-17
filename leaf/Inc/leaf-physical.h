@@ -39,6 +39,8 @@ extern "C" {
     /* Karplus Strong model */
     typedef struct _tPluck
     {
+        tMempool mempool;
+        
         tAllpassDelay     delayLine; // Allpass or Linear??  big difference...
         tOneZero    loopFilter;
         tOnePole    pickFilter;
@@ -49,15 +51,13 @@ extern "C" {
         float lastFreq;
         
         float sr;
-        
     } _tPluck;
     
     typedef _tPluck* tPluck;
     
     void    tPluck_init          (tPluck* const, float lowestFrequency); //float delayBuff[DELAY_LENGTH]);
-    void    tPluck_free          (tPluck* const);
     void    tPluck_initToPool    (tPluck* const, float lowestFrequency, tMempool* const);
-    void    tPluck_freeFromPool  (tPluck* const, tMempool* const);
+    void    tPluck_free          (tPluck* const);
     
     float       tPluck_tick          (tPluck* const);
     
@@ -92,6 +92,8 @@ extern "C" {
     /* Stif Karplus Strong model */
     typedef struct _tKarplusStrong
     {
+        tMempool mempool;
+        
         tAllpassDelay  delayLine;
         tLinearDelay combDelay;
         tOneZero filter;
@@ -108,15 +110,13 @@ extern "C" {
         float pickupPosition;
         
         float lastOut;
-        
     } _tKarplusStrong;
     
     typedef _tKarplusStrong* tKarplusStrong;
     
     void    tKarplusStrong_init               (tKarplusStrong* const, float lowestFrequency); // float delayBuff[2][DELAY_LENGTH]);
-    void    tKarplusStrong_free               (tKarplusStrong* const);
     void    tKarplusStrong_initToPool         (tKarplusStrong* const, float lowestFrequency, tMempool* const);
-    void    tKarplusStrong_freeFromPool       (tKarplusStrong* const, tMempool* const);
+    void    tKarplusStrong_free               (tKarplusStrong* const);
     
     float   tKarplusStrong_tick               (tKarplusStrong* const);
     
@@ -151,7 +151,9 @@ extern "C" {
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /* Simple Living String */
-    typedef struct _tSimpleLivingString {
+    typedef struct _tSimpleLivingString
+    {
+        tMempool mempool;
         float freq, waveLengthInSamples;        // the frequency of the string, determining delay length
         float dampFreq;    // frequency for the bridge LP filter, in Hz
         float decay; // amplitude damping factor for the string (only active in mode 0)
@@ -169,11 +171,10 @@ extern "C" {
     void    tSimpleLivingString_init                (tSimpleLivingString* const, float freq, float dampFreq,
                                                      float decay, float targetLev, float levSmoothFactor,
                                                      float levStrength, int levMode);
-    void    tSimpleLivingString_free                (tSimpleLivingString* const);
     void    tSimpleLivingString_initToPool          (tSimpleLivingString* const, float freq, float dampFreq,
                                                      float decay, float targetLev, float levSmoothFactor,
                                                      float levStrength, int levMode, tMempool* const);
-    void    tSimpleLivingString_freeFromPool        (tSimpleLivingString* const, tMempool* const);
+    void    tSimpleLivingString_free                (tSimpleLivingString* const);
     
     float   tSimpleLivingString_tick                (tSimpleLivingString* const, float input);
     float   tSimpleLivingString_sample              (tSimpleLivingString* const);
@@ -189,7 +190,9 @@ extern "C" {
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /* Living String */
-    typedef struct _tLivingString {
+    typedef struct _tLivingString
+    {
+        tMempool mempool;
         float freq, waveLengthInSamples;        // the frequency of the whole string, determining delay length
         float pickPos;    // the pick position, dividing the string in two, in ratio
         float prepIndex;    // the amount of pressure on the pickpoint of the string (near 0=soft obj, near 1=hard obj)
@@ -209,11 +212,10 @@ extern "C" {
     void    tLivingString_init                  (tLivingString* const, float freq, float pickPos, float prepIndex,
                                                  float dampFreq, float decay, float targetLev, float levSmoothFactor,
                                                  float levStrength, int levMode);
-    void    tLivingString_free                  (tLivingString* const);
     void    tLivingString_initToPool            (tLivingString* const, float freq, float pickPos, float prepIndex,
                                                  float dampFreq, float decay, float targetLev, float levSmoothFactor,
                                                  float levStrength, int levMode, tMempool* const);
-    void    tLivingString_freeFromPool          (tLivingString* const, tMempool* const);
+    void    tLivingString_free                  (tLivingString* const);
     
     float   tLivingString_tick                  (tLivingString* const, float input);
     float   tLivingString_sample                (tLivingString* const);
@@ -233,7 +235,9 @@ extern "C" {
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     /* Complex Living String */
-    typedef struct _tComplexLivingString {
+    typedef struct _tComplexLivingString
+    {
+        tMempool mempool;
         float freq, waveLengthInSamples;        // the frequency of the whole string, determining delay length
         float pickPos;    // the pick position, dividing the string, in ratio
         float prepPos;    // preparation position, in ratio
@@ -255,11 +259,10 @@ extern "C" {
     void    tComplexLivingString_init                  (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex,
                                                  float dampFreq, float decay, float targetLev, float levSmoothFactor,
                                                  float levStrength, int levMode);
-    void    tComplexLivingString_free                  (tComplexLivingString* const);
     void    tComplexLivingString_initToPool            (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex,
                                                  float dampFreq, float decay, float targetLev, float levSmoothFactor,
                                                  float levStrength, int levMode, tMempool* const);
-    void    tComplexLivingString_freeFromPool          (tComplexLivingString* const, tMempool* const);
+    void    tComplexLivingString_free                  (tComplexLivingString* const);
 
     float   tComplexLivingString_tick                  (tComplexLivingString* const, float input);
     float   tComplexLivingString_sample                (tComplexLivingString* const);
@@ -279,16 +282,17 @@ extern "C" {
     
     
     //Reed Table - borrowed from STK
-    typedef struct _tReedTable {
+    typedef struct _tReedTable
+    {
+        tMempool mempool;
         float offset, slope;
     } _tReedTable;
     
     typedef _tReedTable* tReedTable;
     
     void    tReedTable_init         (tReedTable* const, float offset, float slope);
-    void    tReedTable_free         (tReedTable* const);
     void    tReedTable_initToPool   (tReedTable* const, float offset, float slope, tMempool* const);
-    void    tReedTable_freeFromPool (tReedTable* const, tMempool* const);
+    void    tReedTable_free         (tReedTable* const);
     
     float   tReedTable_tick         (tReedTable* const, float input);
     float   tReedTable_tanh_tick    (tReedTable* const, float input); //tanh softclip version of reed table - replacing the hard clip in original stk code

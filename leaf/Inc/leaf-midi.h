@@ -43,12 +43,12 @@ extern "C" {
 #define STACK_SIZE 128
     typedef struct _tStack
     {
+        tMempool mempool;
         int data[STACK_SIZE];
         uint16_t pos;
         uint16_t size;
         uint16_t capacity;
         oBool ordered;
-        
     } _tStack;
     
     typedef _tStack* tStack;
@@ -60,13 +60,6 @@ extern "C" {
     void    tStack_init                 (tStack* const stack);
     
     
-    //! Free a tStack from the default LEAF mempool.
-    /*!
-     @param stack A pointer to the tStack to be freed.
-     */
-    void    tStack_free                 (tStack* const stack);
-    
-    
     //! Initialize a tStack to a specified mempool.
     /*!
      @param stack A pointer to the tStack to be initialized.
@@ -75,12 +68,12 @@ extern "C" {
     void    tStack_initToPool           (tStack* const stack, tMempool* const pool);
     
     
-    //! Free a tStack from a specified mempool.
+    //! Free a tStack from the default LEAF mempool.
     /*!
      @param stack A pointer to the tStack to be freed.
-     @param pool A pointer to the tMempool from which the tStack should be freed.
      */
-    void    tStack_freeFromPool         (tStack* const stack, tMempool* const pool);
+    void    tStack_free                 (tStack* const stack);
+    
     
     //! Set the capacity of the stack.
     /*!
@@ -171,6 +164,8 @@ extern "C" {
     /* tPoly */
     typedef struct _tPoly
     {
+        tMempool mempool;
+        
         tStack stack;
         tStack orderStack;
         
@@ -201,7 +196,6 @@ extern "C" {
         int currentVoice;
         int currentVelocity;
         int maxLength;
-        
     } _tPoly;
     
     typedef _tPoly* tPoly;
@@ -215,13 +209,6 @@ extern "C" {
     void    tPoly_init                  (tPoly* const poly, int maxNumVoices);
     
     
-    //! Free a tPoly from the default LEAF mempool.
-    /*!
-     @param poly A pointer to the tPoly to be freed.
-     */
-    void    tPoly_free                  (tPoly* const poly);
-    
-    
     //! Initialize a tPoly to a specified mempool.
     /*!
      @param poly A pointer to the tPoly to be initialized.
@@ -230,12 +217,12 @@ extern "C" {
     void    tPoly_initToPool            (tPoly* const poly, int maxNumVoices, tMempool* const pool);
     
     
-    //! Free a tPoly from a specified mempool.
+    //! Free a tPoly from the default LEAF mempool.
     /*!
      @param poly A pointer to the tPoly to be freed.
-     @param pool A pointer to the tMempool from which the tPoly should be freed.
      */
-    void    tPoly_freeFromPool          (tPoly* const poly, tMempool* const pool);
+    void    tPoly_free                  (tPoly* const poly);
+    
     
     //! Add a note with a given velocity to the poly handler.
     /*!
@@ -367,6 +354,8 @@ extern "C" {
     /* tPoly */
     typedef struct _tSimplePoly
     {
+        tMempool mempool;
+        
         tStack stack;
 
         int numVoices;
@@ -388,13 +377,6 @@ extern "C" {
     void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices);
 
 
-    //! Free a tPoly from the default LEAF mempool.
-    /*!
-     @param poly A pointer to the tPoly to be freed.
-     */
-    void    tSimplePoly_free                  (tSimplePoly* const poly);
-
-
     //! Initialize a tPoly to a specified mempool.
     /*!
      @param poly A pointer to the tPoly to be initialized.
@@ -403,13 +385,13 @@ extern "C" {
     void    tSimplePoly_initToPool            (tSimplePoly* const poly, int maxNumVoices, tMempool* const pool);
 
 
-    //! Free a tPoly from a specified mempool.
+    //! Free a tPoly from the default LEAF mempool.
     /*!
      @param poly A pointer to the tPoly to be freed.
-     @param pool A pointer to the tMempool from which the tPoly should be freed.
      */
-    void    tSimplePoly_freeFromPool          (tSimplePoly* const poly, tMempool* const pool);
-
+    void    tSimplePoly_free                  (tSimplePoly* const poly);
+    
+    
     //! Add a note with a given velocity to the poly handler.
     /*!
      @param poly A pointer to the relevant tPoly.

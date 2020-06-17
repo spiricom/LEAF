@@ -31,6 +31,8 @@ extern "C" {
     /* Non-interpolating delay, reimplemented from STK (Cook and Scavone). */
     typedef struct _tDelay
     {
+        tMempool mempool;
+        
         float gain;
         float* buff;
         
@@ -45,9 +47,8 @@ extern "C" {
     typedef _tDelay* tDelay;
     
     void        tDelay_init         (tDelay* const, uint32_t delay, uint32_t maxDelay);
-    void        tDelay_free         (tDelay* const);
     void        tDelay_initToPool   (tDelay* const, uint32_t delay, uint32_t maxDelay, tMempool* const);
-    void        tDelay_freeFromPool (tDelay* const, tMempool* const);
+    void        tDelay_free         (tDelay* const);
     
     void        tDelay_clear        (tDelay* const);
     int         tDelay_setDelay     (tDelay* const, uint32_t delay);
@@ -64,6 +65,8 @@ extern "C" {
     /* Linearly-interpolating delay, reimplemented from STK (Cook and Scavone). */
     typedef struct _tLinearDelay
     {
+        tMempool mempool;
+        
         float gain;
         float* buff;
         
@@ -82,9 +85,9 @@ extern "C" {
     typedef _tLinearDelay* tLinearDelay;
     
     void    tLinearDelay_init        (tLinearDelay* const, float delay, uint32_t maxDelay);
-    void    tLinearDelay_free        (tLinearDelay* const);
     void    tLinearDelay_initToPool  (tLinearDelay* const, float delay, uint32_t maxDelay, tMempool* const);
-    void    tLinearDelay_freeFromPool(tLinearDelay* const, tMempool* const);
+    void    tLinearDelay_free        (tLinearDelay* const);
+    
     void    tLinearDelay_clear		 (tLinearDelay* const dl);
     int     tLinearDelay_setDelay    (tLinearDelay* const, float delay);
     float   tLinearDelay_getDelay    (tLinearDelay* const);
@@ -104,6 +107,8 @@ extern "C" {
     /* Hermite-interpolating delay, created by adapting STK linear delay with Hermite interpolation */
     typedef struct _tHermiteDelay
     {
+        tMempool mempool;
+        
         float gain;
         float* buff;
 
@@ -116,15 +121,14 @@ extern "C" {
         float delay;
 
         float alpha, omAlpha;
-
     } _tHermiteDelay;
 
     typedef _tHermiteDelay* tHermiteDelay;
 
     void   	tHermiteDelay_init 			(tHermiteDelay* const dl, float delay, uint32_t maxDelay);
-    void 	tHermiteDelay_free			(tHermiteDelay* const dl);
     void    tHermiteDelay_initToPool  	(tHermiteDelay* const dl, float delay, uint32_t maxDelay, tMempool* const mp);
-    void    tHermiteDelay_freeFromPool	(tHermiteDelay* const dl, tMempool* const mp);
+    void     tHermiteDelay_free            (tHermiteDelay* const dl);
+    
     void    tHermiteDelay_clear			(tHermiteDelay* const dl);
     float   tHermiteDelay_tick 			(tHermiteDelay* const dl, float input);
     void   	tHermiteDelay_tickIn 		(tHermiteDelay* const dl, float input);
@@ -145,6 +149,8 @@ extern "C" {
     /* Allpass-interpolating delay, reimplemented from STK (Cook and Scavone). */
     typedef struct _tAllpassDelay
     {
+        tMempool mempool;
+        
         float gain;
         float* buff;
         
@@ -165,9 +171,8 @@ extern "C" {
     typedef _tAllpassDelay* tAllpassDelay;
     
     void    tAllpassDelay_init        (tAllpassDelay* const, float delay, uint32_t maxDelay);
-    void    tAllpassDelay_free        (tAllpassDelay* const);
     void    tAllpassDelay_initToPool  (tAllpassDelay* const, float delay, uint32_t maxDelay, tMempool* const);
-    void    tAllpassDelay_freeFromPool(tAllpassDelay* const, tMempool* const);
+    void    tAllpassDelay_free        (tAllpassDelay* const);
     
     void    tAllpassDelay_clear       (tAllpassDelay* const);
     int     tAllpassDelay_setDelay    (tAllpassDelay* const, float delay);
@@ -184,6 +189,8 @@ extern "C" {
     /* Linear interpolating delay with fixed read and write pointers, variable rate. */
     typedef struct _tTapeDelay
     {
+        tMempool mempool;
+        
         float gain;
         float* buff;
         
@@ -202,9 +209,8 @@ extern "C" {
     typedef _tTapeDelay* tTapeDelay;
     
     void    tTapeDelay_init        (tTapeDelay* const, float delay, uint32_t maxDelay);
-    void    tTapeDelay_free        (tTapeDelay* const);
     void    tTapeDelay_initToPool  (tTapeDelay* const, float delay, uint32_t maxDelay, tMempool* const);
-    void    tTapeDelay_freeFromPool(tTapeDelay* const, tMempool* const);
+    void    tTapeDelay_free        (tTapeDelay* const);
     
     void    tTapeDelay_clear       (tTapeDelay* const);
     void    tTapeDelay_setDelay    (tTapeDelay* const, float delay);

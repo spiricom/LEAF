@@ -169,11 +169,6 @@ void tWDF_init(tWDF* const wdf, WDFComponentType type, float value, tWDF* const 
     tWDF_initToPool(wdf, type, value, rL, rR, &leaf.mempool);
 }
 
-void tWDF_free(tWDF* const wdf)
-{
-    tWDF_freeFromPool(wdf, &leaf.mempool);
-}
-
 void    tWDF_initToPool(tWDF* const wdf, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const mp)
 {
     _tMempool* m = *mp;
@@ -182,12 +177,11 @@ void    tWDF_initToPool(tWDF* const wdf, WDFComponentType type, float value, tWD
     wdf_init(wdf, type, value, rL, rR);
 }
 
-void    tWDF_freeFromPool           (tWDF* const wdf, tMempool* const mp)
+void    tWDF_free (tWDF* const wdf)
 {
-    _tMempool* m = *mp;
     _tWDF* r = *wdf;
     
-    mpool_free((char*)r, m);
+    mpool_free((char*)r, r->mempool);
 }
 
 float tWDF_tick(tWDF* const wdf, float sample, tWDF* const outputPoint, uint8_t paramsChanged)

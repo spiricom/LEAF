@@ -32,8 +32,9 @@ extern "C" {
     //==============================================================================
     
     // 808 Cowbell
-    typedef struct _t808Cowbell {
-        
+    typedef struct _t808Cowbell
+    {
+        tMempool mempool;
         tSquare p[2];
         tNoise stick;
         tSVF bandpassOsc;
@@ -45,15 +46,13 @@ extern "C" {
         float oscMix;
         float filterCutoff;
         uint8_t useStick;
-        
     } _t808Cowbell;
     
     typedef _t808Cowbell* t808Cowbell;
     
     void    t808Cowbell_init            (t808Cowbell* const, int useStick);
-    void    t808Cowbell_free            (t808Cowbell* const);
     void    t808Cowbell_initToPool      (t808Cowbell* const, int useStick, tMempool* const);
-    void    t808Cowbell_freeFromPool    (t808Cowbell* const, tMempool* const);
+    void    t808Cowbell_free            (t808Cowbell* const);
     
     float   t808Cowbell_tick            (t808Cowbell* const);
     void    t808Cowbell_on              (t808Cowbell* const, float vel);
@@ -67,8 +66,9 @@ extern "C" {
     //==============================================================================
     
     // 808 Hihat
-    typedef struct _t808Hihat {
-        
+    typedef struct _t808Hihat
+    {
+        tMempool mempool;
         // 6 Square waves
         tSquare p[6];
         tNoise n;
@@ -84,15 +84,13 @@ extern "C" {
         float stretch;
         float FM_amount;
         float oscNoiseMix;
-        
     } _t808Hihat;
     
     typedef _t808Hihat* t808Hihat;
     
     void    t808Hihat_init                  (t808Hihat* const);
-    void    t808Hihat_free                  (t808Hihat* const);
     void    t808Hihat_initToPool            (t808Hihat* const, tMempool* const);
-    void    t808Hihat_freeFromPool          (t808Hihat* const, tMempool* const);
+    void    t808Hihat_free                  (t808Hihat* const);
     
     float   t808Hihat_tick                  (t808Hihat* const);
     void    t808Hihat_on                    (t808Hihat* const, float vel);
@@ -110,8 +108,9 @@ extern "C" {
     //==============================================================================
     
     // 808 Snare
-    typedef struct _t808Snare {
-        
+    typedef struct _t808Snare
+    {
+        tMempool mempool;
         // Tone 1, Tone 2, Noise
         tTriangle tone[2]; // Tri (not yet antialiased or wavetabled)
         tNoise noiseOsc;
@@ -131,15 +130,13 @@ extern "C" {
         float tone1Freq, tone2Freq;
         
         float noiseFilterFreq;
-        
     } _t808Snare;
     
     typedef _t808Snare* t808Snare;
     
     void    t808Snare_init                  (t808Snare* const);
-    void    t808Snare_free                  (t808Snare* const);
     void    t808Snare_initToPool            (t808Snare* const, tMempool* const);
-    void    t808Snare_freeFromPool          (t808Snare* const, tMempool* const);
+    void    t808Snare_free                  (t808Snare* const);
     
     float   t808Snare_tick                  (t808Snare* const);
     void    t808Snare_on                    (t808Snare* const, float vel);
@@ -155,8 +152,9 @@ extern "C" {
     //==============================================================================
     
     // 808 Kick
-    typedef struct _t808Kick {
-        
+    typedef struct _t808Kick
+    {
+        tMempool mempool;
         
         tCycle tone; // Tri
         tNoise noiseOsc;
@@ -174,15 +172,13 @@ extern "C" {
         float sighAmountInHz;
         float chirpRatioMinusOne;
         float noiseFilterFreq;
-        
     } _t808Kick;
     
     typedef _t808Kick* t808Kick;
     
     void    t808Kick_init               (t808Kick* const);
-    void    t808Kick_free               (t808Kick* const);
     void    t808Kick_initToPool         (t808Kick* const, tMempool* const);
-    void    t808Kick_freeFromPool       (t808Kick* const, tMempool* const);
+    void    t808Kick_free               (t808Kick* const);
     
     float   t808Kick_tick               (t808Kick* const);
     void    t808Kick_on                 (t808Kick* const, float vel);

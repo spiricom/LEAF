@@ -31,6 +31,7 @@ extern "C" {
     
     typedef struct _tSampleReducer
     {
+        tMempool mempool;
         float invRatio;
         float hold;
         uint32_t count;
@@ -39,9 +40,8 @@ extern "C" {
     typedef _tSampleReducer* tSampleReducer;
     
     void    tSampleReducer_init    (tSampleReducer* const);
-    void    tSampleReducer_free    (tSampleReducer* const);
     void    tSampleReducer_initToPool   (tSampleReducer* const, tMempool* const);
-    void    tSampleReducer_freeFromPool (tSampleReducer* const, tMempool* const);
+    void    tSampleReducer_free    (tSampleReducer* const);
     
     float   tSampleReducer_tick    (tSampleReducer* const, float input);
     
@@ -52,6 +52,7 @@ extern "C" {
     
     typedef struct _tOversampler
     {
+        tMempool mempool;
         int ratio;
         float* pCoeffs;
         float* upState;
@@ -63,9 +64,8 @@ extern "C" {
     typedef _tOversampler* tOversampler;
     
     void    tOversampler_init           (tOversampler* const, int order, oBool extraQuality);
-    void    tOversampler_free           (tOversampler* const);
     void    tOversampler_initToPool     (tOversampler* const, int order, oBool extraQuality, tMempool* const);
-    void    tOversampler_freeFromPool   (tOversampler* const, tMempool* const);
+    void    tOversampler_free           (tOversampler* const);
     
     void    tOversampler_upsample       (tOversampler* const, float input, float* output);
     float   tOversampler_downsample     (tOversampler* const os, float* input);
@@ -78,6 +78,8 @@ extern "C" {
     
     typedef struct _tLockhartWavefolder
     {
+        tMempool mempool;
+        
         double Ln1;
         double Fn1;
         double xn1;
@@ -108,9 +110,8 @@ extern "C" {
     typedef _tLockhartWavefolder* tLockhartWavefolder;
     
     void    tLockhartWavefolder_init    (tLockhartWavefolder* const);
-    void    tLockhartWavefolder_free    (tLockhartWavefolder* const);
     void    tLockhartWavefolder_initToPool   (tLockhartWavefolder* const, tMempool* const);
-    void    tLockhartWavefolder_freeFromPool (tLockhartWavefolder* const, tMempool* const);
+    void    tLockhartWavefolder_free    (tLockhartWavefolder* const);
     
     float   tLockhartWavefolder_tick    (tLockhartWavefolder* const, float samp);
 
@@ -118,6 +119,8 @@ extern "C" {
 
     typedef struct _tCrusher
     {
+        tMempool mempool;
+        
         float srr;
         float mult, div;
         float rnd;
@@ -132,9 +135,8 @@ extern "C" {
     typedef _tCrusher* tCrusher;
     
     void    tCrusher_init    (tCrusher* const);
-    void    tCrusher_free    (tCrusher* const);
     void    tCrusher_initToPool   (tCrusher* const, tMempool* const);
-    void    tCrusher_freeFromPool (tCrusher* const, tMempool* const);
+    void    tCrusher_free    (tCrusher* const);
     
     float   tCrusher_tick    (tCrusher* const, float input);
     

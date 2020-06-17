@@ -48,6 +48,7 @@ extern "C" {
     typedef _tWDF* tWDF;
     struct _tWDF
     {
+        tMempool mempool;
         WDFComponentType type;
         float port_resistance_up;
         float port_resistance_left;
@@ -74,9 +75,8 @@ extern "C" {
     
     //WDF Linear Components
     void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR);
-    void    tWDF_free                   (tWDF* const);
     void    tWDF_initToPool             (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const);
-    void    tWDF_freeFromPool           (tWDF* const, tMempool* const);
+    void    tWDF_free                   (tWDF* const);
     
     float   tWDF_tick                   (tWDF* const, float sample, tWDF* const outputPoint, uint8_t paramsChanged);
     

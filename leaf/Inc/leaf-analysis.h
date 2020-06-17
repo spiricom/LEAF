@@ -34,6 +34,7 @@ extern "C" {
     /* Envelope Follower */
     typedef struct _tEnvelopeFollower
     {
+        tMempool mempool;
         float y;
         float a_thresh;
         float d_coeff;
@@ -43,10 +44,9 @@ extern "C" {
     typedef _tEnvelopeFollower* tEnvelopeFollower;
     
     void    tEnvelopeFollower_init          (tEnvelopeFollower* const, float attackThreshold, float decayCoeff);
-    void    tEnvelopeFollower_free          (tEnvelopeFollower* const);
     void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const, float attackThreshold, float decayCoeff, tMempool* const);
-    void    tEnvelopeFollower_freeFromPool  (tEnvelopeFollower* const, tMempool* const);
-    
+    void    tEnvelopeFollower_free          (tEnvelopeFollower* const);
+
     float   tEnvelopeFollower_tick          (tEnvelopeFollower* const, float x);
     int     tEnvelopeFollower_decayCoeff    (tEnvelopeFollower* const, float decayCoeff);
     int     tEnvelopeFollower_attackThresh  (tEnvelopeFollower* const, float attackThresh);
@@ -55,6 +55,7 @@ extern "C" {
 
     /* Zero Crossing Detector */
     typedef struct _tZeroCrossing {
+        tMempool mempool;
         int count;
         int maxWindowSize;
         int currentWindowSize;
@@ -68,9 +69,8 @@ extern "C" {
     typedef _tZeroCrossing* tZeroCrossing;
 
     void    tZeroCrossing_init         (tZeroCrossing* const, int maxWindowSize);
-    void    tZeroCrossing_free         (tZeroCrossing* const);
     void    tZeroCrossing_initToPool   (tZeroCrossing* const, int maxWindowSize, tMempool* const);
-    void    tZeroCrossing_freeFromPool (tZeroCrossing* const, tMempool* const);
+    void    tZeroCrossing_free         (tZeroCrossing* const);
 
     float   tZeroCrossing_tick         (tZeroCrossing* const, float input);
     void    tZeroCrossing_setWindow        (tZeroCrossing* const, float windowSize);
@@ -78,7 +78,9 @@ extern "C" {
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /* PowerEnvelopeFollower */
-    typedef struct _tPowerFollower {
+    typedef struct _tPowerFollower
+    {
+        tMempool mempool;
         float factor, oneminusfactor;
         float curr;
         
@@ -87,9 +89,8 @@ extern "C" {
     typedef _tPowerFollower* tPowerFollower;
     
     void    tPowerFollower_init         (tPowerFollower* const, float factor);
-    void    tPowerFollower_free         (tPowerFollower* const);
     void    tPowerFollower_initToPool   (tPowerFollower* const, float factor, tMempool* const);
-    void    tPowerFollower_freeFromPool (tPowerFollower* const, tMempool* const);
+    void    tPowerFollower_free         (tPowerFollower* const);
     
     float   tPowerFollower_tick         (tPowerFollower* const, float input);
     float   tPowerFollower_sample       (tPowerFollower* const);
@@ -105,6 +106,7 @@ extern "C" {
     
     typedef struct _tEnvPD
     {
+        tMempool mempool;
         float buf[ENV_WINDOW_SIZE + INITVSTAKEN];
         uint16_t x_phase;                    /* number of points since last output */
         uint16_t x_period;                   /* requested period of output */
@@ -120,9 +122,8 @@ extern "C" {
     typedef _tEnvPD* tEnvPD;
     
     void    tEnvPD_init             (tEnvPD* const, int windowSize, int hopSize, int blockSize);
-    void    tEnvPD_free             (tEnvPD* const);
     void    tEnvPD_initToPool       (tEnvPD* const, int windowSize, int hopSize, int blockSize, tMempool* const);
-    void    tEnvPD_freeFromPool     (tEnvPD* const, tMempool* const);
+    void    tEnvPD_free             (tEnvPD* const);
     
     float   tEnvPD_tick             (tEnvPD* const);
     void    tEnvPD_processBlock     (tEnvPD* const, float* in);
@@ -137,6 +138,8 @@ extern "C" {
     
     typedef struct _tAttackDetection
     {
+        tMempool mempool;
+        
         float env;
         
         //Attack & Release times in msec
@@ -159,9 +162,8 @@ extern "C" {
     typedef _tAttackDetection* tAttackDetection;
     
     void    tAttackDetection_init           (tAttackDetection* const, int blocksize, int atk, int rel);
-    void    tAttackDetection_free           (tAttackDetection* const);
     void    tAttackDetection_initToPool     (tAttackDetection* const, int blocksize, int atk, int rel, tMempool* const);
-    void    tAttackDetection_freeFromPool   (tAttackDetection* const, tMempool* const);
+    void    tAttackDetection_free           (tAttackDetection* const);
     
     // set expected input blocksize
     void    tAttackDetection_setBlocksize   (tAttackDetection* const, int size);
@@ -193,6 +195,8 @@ extern "C" {
     
     typedef struct _tSNAC
     {
+        tMempool mempool;
+        
         float* inputbuf;
         float* processbuf;
         float* spectrumbuf;
@@ -212,9 +216,8 @@ extern "C" {
     typedef _tSNAC* tSNAC;
     
     void    tSNAC_init          (tSNAC* const, int overlaparg);
-    void    tSNAC_free          (tSNAC* const);
     void    tSNAC_initToPool    (tSNAC* const, int overlaparg, tMempool* const);
-    void    tSNAC_freeFromPool  (tSNAC* const, tMempool* const);
+    void    tSNAC_free          (tSNAC* const);
     
     void    tSNAC_ioSamples     (tSNAC *s, float *in, float *out, int size);
     void    tSNAC_setOverlap    (tSNAC *s, int lap);
@@ -236,6 +239,8 @@ extern "C" {
     // Period detection
     typedef struct _tPeriodDetection
     {
+        tMempool mempool;
+        
         tEnvPD env;
         tSNAC snac;
         float* inBuffer;
@@ -272,9 +277,8 @@ extern "C" {
     typedef _tPeriodDetection* tPeriodDetection;
     
     void    tPeriodDetection_init               (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize);
-    void    tPeriodDetection_free               (tPeriodDetection* const);
     void    tPeriodDetection_initToPool         (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, tMempool* const);
-    void    tPeriodDetection_freeFromPool       (tPeriodDetection* const, tMempool* const);
+    void    tPeriodDetection_free               (tPeriodDetection* const);
     
     float   tPeriodDetection_tick               (tPeriodDetection* const, float sample);
     float   tPeriodDetection_getPeriod          (tPeriodDetection* const);

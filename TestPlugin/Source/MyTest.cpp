@@ -58,7 +58,6 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tMinBLEPTable_init(&minblep, zeroCrossings, overSamplingRatio);
     
     tMBSaw_init(&saw, &minblep);
-    tMBSaw_free(&saw);
     
     tMBPulse_init(&pulse, &minblep);
     
@@ -95,9 +94,9 @@ float   LEAFTest_tick            (float input)
 //    if (phasor->phaseDidReset) tMBPulse_sync(&pulse, 0.0f);
 //    if (phasor->phaseDidReset) tMBTriangle_sync(&tri, 0.0f);
     
-//    return tMBSaw_tick(&saw);
+    return tMBSaw_tick(&saw);
 //    return tMBPulse_tick(&pulse);
-    return tMBTriangle_tick(&tri);
+//    return tMBTriangle_tick(&tri);
 }
 
 int firstFrame = 1;
