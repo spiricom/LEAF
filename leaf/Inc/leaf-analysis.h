@@ -285,8 +285,8 @@ extern "C" {
     void    tPeriodDetection_setHopSize         (tPeriodDetection* const, int hs);
     void    tPeriodDetection_setWindowSize      (tPeriodDetection* const, int ws);
     void    tPeriodDetection_setFidelityThreshold(tPeriodDetection* const, float threshold);
-    void     tPeriodDetection_setAlpha            (tPeriodDetection* const, float alpha);
-    void     tPeriodDetection_setTolerance        (tPeriodDetection* const, float tolerance);
+    void    tPeriodDetection_setAlpha           (tPeriodDetection* const, float alpha);
+    void    tPeriodDetection_setTolerance       (tPeriodDetection* const, float tolerance);
     
     //==============================================================================
     

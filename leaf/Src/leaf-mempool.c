@@ -261,15 +261,15 @@ void mpool_free(char* ptr, _tMempool* pool)
     mpool_node_t* next_node;
     while (other_node != NULL)
     {
-        if ((char*)other_node < (char*)pool->head ||
-            (char*)other_node >= ((char*)pool->head + pool->msize))
+        if ((long) other_node < (long) pool->mpool ||
+            (long) other_node >= (((long) pool->mpool) + pool->msize))
         {
             LEAF_error(2);
             return;
         }
         next_node = other_node->next;
         // Check if a node is directly after the freed node
-        if ((long) freed_node + (leaf.header_size + freed_node->size) == (long) other_node)
+        if (((long) freed_node) + (leaf.header_size + freed_node->size) == (long) other_node)
         {
             // Increase freed node's size
             freed_node->size += leaf.header_size + other_node->size;
@@ -280,7 +280,7 @@ void mpool_free(char* ptr, _tMempool* pool)
         }
         
         // Check if a node is directly before the freed node
-        else if ((long) other_node + (leaf.header_size + other_node->size) == (long) freed_node)
+        else if (((long) other_node) + (leaf.header_size + other_node->size) == (long) freed_node)
         {
             // Increase the merging node's size
             other_node->size += leaf.header_size + freed_node->size;
