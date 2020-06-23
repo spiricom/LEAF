@@ -869,735 +869,599 @@ void        tNeuron_setCurrent  (tNeuron* const nr, float current)
 
 /// MINBLEPS
 
-// SINC Function
-static float SINC(float x)
-{
-    float pix;
-    
-    if(x == 0.0f)
-        return 1.0f;
-    else
-    {
-        pix = PI * x;
-        return sinf(pix) / pix;
-    }
-}
+// https://github.com/MrBlueXav/Dekrispator_v2 blepvco.c
 
-// Generate Blackman Window
-static void BlackmanWindow(int n, float *w)
-{
-    int m = n - 1;
-    int i;
-    float f1, f2, fm;
-    
-    fm = (float)m;
-    for(i = 0; i <= m; i++)
-    {
-        f1 = (2.0f * PI * (float)i) / fm;
-        f2 = 2.0f * f1;
-        w[i] = 0.42f - (0.5f * cosf(f1)) + (0.08f * cosf(f2));
-    }
-}
 
-// Discrete Fourier Transform
-static void DFT(int n, float *realTime, float *imagTime, float *realFreq, float *imagFreq)
+static void place_step_dd(float *buffer, int index, float phase, float w, float scale)
 {
-    int k, i;
-    float sr, si, p;
-    
-    for(k = 0; k < n; k++)
-    {
-        realFreq[k] = 0.0f;
-        imagFreq[k] = 0.0f;
-    }
-    
-    for(k = 0; k < n; k++)
-        for(i = 0; i < n; i++)
-        {
-            p = (2.0f * PI * (float)(k * i)) / n;
-            sr = cosf(p);
-            si = -sinf(p);
-            realFreq[k] += (realTime[i] * sr) - (imagTime[i] * si);
-            imagFreq[k] += (realTime[i] * si) + (imagTime[i] * sr);
-        }
-}
-
-// Inverse Discrete Fourier Transform
-static void InverseDFT(int n, float *realTime, float *imagTime, float *realFreq, float *imagFreq)
-{
-    int k, i;
-    float sr, si, p;
-    
-    for(k = 0; k < n; k++)
-    {
-        realTime[k] = 0.0f;
-        imagTime[k] = 0.0f;
-    }
-    
-    for(k = 0; k < n; k++)
-    {
-        for(i = 0; i < n; i++)
-        {
-            p = (2.0f * PI * (float)(k * i)) / n;
-            sr = cosf(p);
-            si = -sinf(p);
-            realTime[k] += (realFreq[i] * sr) + (imagFreq[i] * si);
-            imagTime[k] += (realFreq[i] * si) - (imagFreq[i] * sr);
-        }
-        realTime[k] /= n;
-        imagTime[k] /= n;
-    }
-}
-
-// Complex Absolute Value
-static float complexabs(float x, float y)
-{
-    return sqrtf((x * x) + (y * y));
-}
-
-// Complex Exponential
-static void complexexp(float x, float y, float *zx, float *zy)
-{
-    float expx;
-    
-    expx = expf(x);
-    *zx = expx * cosf(y);
-    *zy = expx * sinf(y);
-}
-
-// Compute Real Cepstrum Of Signal
-static void RealCepstrum(int n, float *signal, float *realCepstrum, float* realTime, float* imagTime, float* realFreq, float* imagFreq)
-{
+    float r;
     int i;
     
-    // Compose Complex FFT Input
+    r = MINBLEP_PHASES * phase / w;
+    i = rintf(r - 0.5f);
+    r -= (float)i;
+    i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+    /* this would be better than the above, but more expensive:
+     *  while (i < 0) {
+     *    i += MINBLEP_PHASES;
+     *    index++;
+     *  }
+     */
     
-    for(i = 0; i < n; i++)
-    {
-        realTime[i] = signal[i];
-        imagTime[i] = 0.0f;
+    while (i < MINBLEP_PHASES * STEP_DD_PULSE_LENGTH) {
+        buffer[index] += scale * (step_dd_table[i].value + r * step_dd_table[i].delta);
+        i += MINBLEP_PHASES;
+        index++;
     }
+}
+//----------------------------------------------------------------------------------------------------------
+
+static void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta)
+{
+    float r;
+    int i;
     
-    // Perform DFT
+    r = MINBLEP_PHASES * phase / w;
+    i = rintf(r - 0.5f);
+    r -= (float)i;
+    i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
     
-    DFT(n, realTime, imagTime, realFreq, imagFreq);
+    slope_delta *= w;
     
-    // Calculate Log Of Absolute Value
-    
-    for(i = 0; i < n; i++)
-    {
-        realFreq[i] = logf(complexabs(realFreq[i], imagFreq[i]));
-        imagFreq[i] = 0.0f;
+    while (i < MINBLEP_PHASES * SLOPE_DD_PULSE_LENGTH) {
+        buffer[index] += slope_delta * (slope_dd_table[i] + r * (slope_dd_table[i + 1] - slope_dd_table[i]));
+        i += MINBLEP_PHASES;
+        index++;
     }
-    
-    // Perform Inverse FFT
-    
-    InverseDFT(n, realTime, imagTime, realFreq, imagFreq);
-    
-    // Output Real Part Of FFT
-    for(i = 0; i < n; i++)
-        realCepstrum[i] = realTime[i];
 }
+//----------------------------------------------------------------------------------------------------------
 
-// Compute Minimum Phase Reconstruction Of Signal
-static void MinimumPhase(int n, float *realCepstrum, float *minimumPhase, float* realTime, float* imagTime, float* realFreq, float* imagFreq)
+void tMBPulse_init(tMBPulse* const osc)
 {
-    int i, nd2;
-    
-    nd2 = n / 2;
-    
-    if((n % 2) == 1)
-    {
-        realTime[0] = realCepstrum[0];
-        for(i = 1; i < nd2; i++)
-            realTime[i] = 2.0f * realCepstrum[i];
-        for(i = nd2; i < n; i++)
-            realTime[i] = 0.0f;
-    }
-    else
-    {
-        realTime[0] = realCepstrum[0];
-        for(i = 1; i < nd2; i++)
-            realTime[i] = 2.0f * realCepstrum[i];
-        realTime[nd2] = realCepstrum[nd2];
-        for(i = nd2 + 1; i < n; i++)
-            realTime[i] = 0.0f;
-    }
-    
-    for(i = 0; i < n; i++)
-        imagTime[i] = 0.0f;
-    
-    DFT(n, realTime, imagTime, realFreq, imagFreq);
-    
-    for(i = 0; i < n; i++)
-        complexexp(realFreq[i], imagFreq[i], &realFreq[i], &imagFreq[i]);
-    
-    InverseDFT(n, realTime, imagTime, realFreq, imagFreq);
-    
-    for(i = 0; i < n; i++)
-        minimumPhase[i] = realTime[i];
+    tMBPulse_initToPool(osc, &leaf.mempool);
 }
-
-
-// good values for this are:
-// zeroCrossings = 16
-// oversamplerRatio = 32 (or 64 for slightly better antialiasing, but higher memory usage)
-void tMinBLEPTable_init (tMinBLEPTable* const minblep, int zeroCrossings, int oversamplerRatio)
+                          
+void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const pool)
 {
-    tMinBLEPTable_initToPool(minblep, zeroCrossings, oversamplerRatio, &leaf.mempool);
-}
-
-void tMinBLEPTable_initToPool (tMinBLEPTable* const minblep, int zeroCrossings, int overSamplingRatio, tMempool* const pool)
-{
-    _tMempool* mp = *pool;
-    _tMinBLEPTable* m = *minblep = (_tMinBLEPTable*) mpool_alloc(sizeof(_tMinBLEPTable), mp);
-    m->mempool = mp;
-    m->zeroCrossings = zeroCrossings;
-    m->overSamplingRatio = overSamplingRatio;
-    m->size = (zeroCrossings * 2 * overSamplingRatio) + 1;
-    
-    m->blepArray = (float*) mpool_alloc(sizeof(float) * m->size, mp);
-    m->blepDerivArray = (float*) mpool_alloc(sizeof(float) * m->size, mp);
-    
-    float* processBuf[4];
-    
-    processBuf[0] = (float*) mpool_alloc(sizeof(float) * m->size, mp);
-    processBuf[1] = (float*) mpool_alloc(sizeof(float) * m->size, mp);
-    processBuf[2] = (float*) mpool_alloc(sizeof(float) * m->size, mp);
-    processBuf[3] = (float*) mpool_alloc(sizeof(float) * m->size, mp);
-    
-    int i, n;
-    float r, a, b;
-    
-    n = (m->zeroCrossings * 2 * m->overSamplingRatio) + 1;
-    
-    // Generate Sinc
-    
-    a = -m->overSamplingRatio;
-    b = m->overSamplingRatio;
-    for(i = 0; i < n; i++)
-    {
-        r = ((float)i) / ((float)(n - 1));
-        m->blepArray[i] = SINC(a + (r * (b - a)));
-        m->blepDerivArray[i] = 0;
-    }
-    
-    // Window Sinc
-    
-    BlackmanWindow(n, m->blepDerivArray);
-    for(i = 0; i < n; i++)
-        m->blepArray[i] *= m->blepDerivArray[i];
-    
-    // Minimum Phase Reconstruction
-    
-    RealCepstrum(n, m->blepArray, m->blepDerivArray, processBuf[0], processBuf[1], processBuf[2], processBuf[3]);
-    MinimumPhase(n, m->blepDerivArray, m->blepArray, processBuf[0], processBuf[1], processBuf[2], processBuf[3]);
-    
-    mpool_free((char*)processBuf[0], mp);
-    mpool_free((char*)processBuf[1], mp);
-    mpool_free((char*)processBuf[2], mp);
-    mpool_free((char*)processBuf[3], mp);
-    
-    // Integrate Into MinBLEP
-    a = 0.0f;
-    float secondInt = 0.0f;
-    for(i = 0; i < n; i++)
-    {
-        a += m->blepArray[i];
-        m->blepArray[i] = a;
-        
-        secondInt += a;
-        m->blepDerivArray[i] = secondInt;
-    }
-    
-    // Normalize
-    a = m->blepArray[n - 1];
-    a = 1.0f / a;
-    b = 0.0f;
-    for(i = 0; i < n; i++)
-    {
-        m->blepArray[i] *= a;
-        b = fmaxf(b, m->blepDerivArray[i]);
-    }
-    
-    // Normalize ...
-    b = 1.0f/b;
-    for (i = 0; i < n; i++)
-    {
-        m->blepDerivArray[i] *= b;
-        m->blepDerivArray[i] -= ((float)i) / ((float) n-1);
-        
-        // SUBTRACT 1 and invert so the signal (so it goes 1->0)
-        m->blepArray[i] -= 1.0f;
-        m->blepArray[i] = -m->blepArray[i];
-    }
-    
-}
-
-void tMinBLEPTable_free (tMinBLEPTable* const minblep)
-{
-    _tMinBLEPTable* m = *minblep;
-    
-    mpool_free((char*)m->blepArray, m->mempool);
-    mpool_free((char*)m->blepDerivArray, m->mempool);
-    mpool_free((char*)m, m->mempool);
-}
-
-
-void    tMinBLEPHandler_init           (tMinBLEPHandler* const minblep, tMinBLEPTable* const table)
-{
-    tMinBLEPHandler_initToPool(minblep, table, &leaf.mempool);
-}
-
-void    tMinBLEPHandler_initToPool     (tMinBLEPHandler* const minblep, tMinBLEPTable* const table, tMempool* const mp)
-{
-    _tMempool* m = *mp;
-    _tMinBLEPHandler* mb = *minblep = (_tMinBLEPHandler*) mpool_alloc(sizeof(_tMinBLEPHandler), m);
-    _tMinBLEPTable* t = *table;
-    
-    mb->mempool = m;
-    mb->table = t;
-    mb->returnDerivative = 0;
-    mb->proportionalBlepFreq = (float) t->zeroCrossings / (float) t->overSamplingRatio; // defaults to NyQuist ....
-    
-    mb->lastValue = 0;
-    mb->lastDelta = 0;
-    
-//     float* x1, x2, y1, y2;
-    // AA FILTER
-//    zeromem (coefficients, sizeof (coefficients));
-    
-    mb->ratio = 1;
-    mb->lastRatio = 1;
-    
-//    createLowPass (ratio);
-//    resetFilters();
-    
-    mb->blepIndex = 0;
-    mb->numActiveBleps = 0;
-    //currentActiveBlepOffsets;
-    
-    // These probably don't need to be this large
-    mb->offset = (float*) mpool_alloc(sizeof(float) * t->size, m);
-//    mb->freqMultiple = (float*) mpool_alloc(sizeof(float) * mb->minBlepSize, m);
-    mb->pos_change_magnitude = (float*) mpool_alloc(sizeof(float) * t->size, m);
-    mb->vel_change_magnitude = (float*) mpool_alloc(sizeof(float) * t->size, m);
-}
-
-void    tMinBLEPHandler_free           (tMinBLEPHandler* const minblep)
-{
-    _tMinBLEPHandler* mb = *minblep;
-    
-    mpool_free((char*)mb->offset, mb->mempool);
-    //    mpool_free(mb->freqMultiple, m);
-    mpool_free((char*)mb->pos_change_magnitude, mb->mempool);
-    mpool_free((char*)mb->vel_change_magnitude, mb->mempool);
-    
-    mpool_free((char*)mb, mb->mempool);
-}
-
-void    tMinBLEPHandler_addBLEP        (tMinBLEPHandler* const minblep, float offset, float posChange, float velChange)
-{
-    _tMinBLEPHandler* m = *minblep;
-    
-    int n = m->table->size;
-    
-    m->offset[m->blepIndex] = offset;
-//    m->freqMultiple[m->blepIndex] = m->overSamplingRatio*m->proportionalBlepFreq;
-    m->pos_change_magnitude[m->blepIndex] = posChange;
-    m->vel_change_magnitude[m->blepIndex] = velChange;
-    
-    m->blepIndex++;
-    if (m->blepIndex >= n) m->blepIndex = 0;
-    
-    m->numActiveBleps++;
-}
-
-float tMinBLEPHandler_tick (tMinBLEPHandler* const minblep, float input)
-{
-    _tMinBLEPHandler* m = *minblep;
-    // PROCESS ALL BLEPS -
-    /// for each offset, copy a portion of the blep array to the output ....
-    
-    float sample = input;
-    
-    int n = m->table->size;
-
-    for (int blep = 1; blep <= m->numActiveBleps; blep++)
-    {
-        int i = (m->blepIndex - blep + n) % n;
-        float adjusted_Freq = m->table->overSamplingRatio*m->proportionalBlepFreq;//m->freqMultiple[i];
-        float exactPosition = m->offset[i];
-        
-        float blepPosExact = adjusted_Freq*(exactPosition + 1); // +1 because this needs to trigger on the LOW SAMPLE
-        float blepPosSample = 0;
-        float fraction = modff(blepPosExact, &blepPosSample);
-        
-        // LIMIT the scaling on the derivative array
-        // otherwise, it can get TOO large
-        float depthLimited = m->proportionalBlepFreq; //jlimit<double>(.1, 1, proportionalBlepFreq);
-        float blepDeriv_PosExact = depthLimited*m->table->overSamplingRatio*(exactPosition + 1);
-        float blepDeriv_Sample = 0;
-        float fraction_Deriv = modff(blepDeriv_PosExact, &blepDeriv_Sample);
-        
-        
-        // DONE ... we reached the end ...
-        if (((int) blepPosExact > n) && ((int) blepDeriv_PosExact > n))
-            break;
-        
-        // BLEP has not yet occurred ...
-        if (blepPosExact < 0)
-            continue;
-        
-        
-        // 0TH ORDER COMPENSATION ::::
-        /// add the BLEP to compensate for discontinuties in the POSITION
-        if ( fabs(m->pos_change_magnitude[i]) > 0 && blepPosSample < n)
-        {
-            // LINEAR INTERPOLATION ::::
-            float lowValue = m->table->blepArray[(int) blepPosSample];
-            float hiValue = lowValue;
-            
-            if ((int) blepPosSample + 1 < n)
-                hiValue = m->table->blepArray[(int) blepPosSample + 1];
-            
-            float delta = hiValue - lowValue;
-            float exactValue = lowValue + fraction*delta;
-            
-            // SCALE by the discontinuity magnitude
-            exactValue *= m->pos_change_magnitude[i];
-            
-            // ADD to the thruput
-            sample += exactValue;
-        }
-        
-        
-        // 1ST ORDER COMPENSATION ::::
-        /// add the BLEP DERIVATIVE to compensate for discontinuties in the VELOCITY
-        if ( fabs(m->vel_change_magnitude[i]) > 0 && blepDeriv_PosExact < n)
-        {
-            
-            // LINEAR INTERPOLATION ::::
-            double lowValue = m->table->blepDerivArray[(int) blepDeriv_PosExact];
-            double hiValue = lowValue;
-            
-            if ((int) blepDeriv_PosExact + 1 < n)
-                hiValue = m->table->blepDerivArray[(int) blepDeriv_PosExact + 1];
-            
-            double delta = hiValue - lowValue;
-            double exactValue = lowValue + fraction_Deriv*delta;
-            
-            // SCALE by the discontinuity magnitude`
-            exactValue *= m->vel_change_magnitude[i];
-            
-            // ADD to the thruput
-            sample += exactValue;
-            
-        }
-    
-        // UPDATE ::::
-        m->offset[i] += 1.0f;
-        if (m->offset[i] * adjusted_Freq > n)
-        {
-            m->numActiveBleps--;
-        }
-    }
-    return sample;
-}
-
-//==============================================================================
-
-/* tMBTriangle: Anti-aliased Triangle waveform. */
-void    tMBTriangle_init          (tMBTriangle* const osc, tMinBLEPTable* const table)
-{
-    tMBTriangle_initToPool(osc, table, &leaf.mempool);
-}
-
-void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMinBLEPTable* const table, tMempool* const mp)
-{
-    _tMempool* m = *mp;
-    _tMBTriangle* c = *osc = (_tMBTriangle*) mpool_alloc(sizeof(_tMBTriangle), m);
-    c->mempool = m;
-    
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
-    c->skew     =  0.5f;
-    c->lastOut  =  0.0f;
-    
-    tMinBLEPHandler_initToPool(&c->minBlep, table, mp);
-    tHighpass_initToPool(&c->dcBlock, 5.0f, mp);
-}
-
-void    tMBTriangle_free (tMBTriangle* const cy)
-{
-    _tMBTriangle* c = *cy;
-    
-    tMinBLEPHandler_free(&c->minBlep);
-    tHighpass_free(&c->dcBlock);
-    
-    mpool_free((char*)c, c->mempool);
-}
-
-float   tMBTriangle_tick          (tMBTriangle* const osc)
-{
-    _tMBTriangle* c = *osc;
-    
-    float out;
-
-    c->phase += c->inc;
-    if (c->phase >= 1.0f)
-    {
-        c->phase -= 1.0f;
-        float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-        tMinBLEPHandler_addBLEP(&c->minBlep, offset, -2, 0.0f);
-    }
-    if (c->skew <= c->phase && c->phase < c->skew + c->inc)
-    {
-        float offset = 1.0f - ((c->inc - c->phase + c->skew) / c->inc);
-        tMinBLEPHandler_addBLEP(&c->minBlep, offset, 2, 0.0f);
-    }
-
-    if (c->phase < c->skew)
-    {
-        out = (1.0f - c->skew) * 2.0f;
-    }
-    else
-    {
-        out = -c->skew * 2.0f;
-    }
-
-    out = tMinBLEPHandler_tick(&c->minBlep, out);// - phasor->inc * 2.0f;
-    
-    out = (c->inc * out) + ((1 - c->inc) * c->lastOut);
-    c->lastOut = out;
-    
-    return tHighpass_tick(&c->dcBlock, out * 4.0f);
-    
-//    float offset;
-//    float vel = 2;
-//    c->phase += c->inc;
-//    if (c->phase >= 1.0f)
-//    {
-//        c->phase -= 1.0f;
-//        offset = 1.0f - ((c->inc - c->phase) / c->inc);
-//        tMinBLEP_addBLEP(&c->minBlep, offset, 0.0f, -vel);
-//    }
-//    if (c->skew <= c->phase && c->phase < c->skew + c->inc)
-//    {
-//        offset = 1.0f - ((c->inc - c->phase + c->skew) / c->inc);
-//        tMinBLEP_addBLEP(&c->minBlep, offset, 0.0f, vel);
-//    }
-//
-//    float out;
-//    if (c->phase < c->skew) out = 1.0f - (c->phase / c->skew);
-//    else out = (c->phase - c->skew) / (1 - c->skew);
-//
-//    out = (out - 0.5f) * 2.0f;
-//
-////    return tHighpass_tick(&c->dcBlock, tMinBLEP_tick(&c->minBlep, out));
-//    return tMinBLEP_tick(&c->minBlep, out);
-}
-
-void    tMBTriangle_setFreq       (tMBTriangle* const osc, float freq)
-{
-    _tMBTriangle* c = *osc;
-    
-    c->freq  = freq;
-    c->inc = freq * leaf.invSampleRate;
-    
-//    tHighpass_setFreq(&c->dcBlock, freq*0.5);
-}
-
-void    tMBTriangle_setSkew       (tMBTriangle* const osc, float skew)
-{
-    _tMBTriangle* c = *osc;
-    c->skew = (skew + 1.0f) * 0.5f;
-}
-
-void    tMBTriangle_sync          (tMBTriangle* const osc, float phase)
-{
-    _tMBTriangle* c = *osc;
-    
-    phase += 0.5f;
-    
-    int intPart = (int) phase;
-    phase = phase - (float) intPart;
-    
-    float before, after;
-    
-    if (c->phase < c->skew) before = (1.0f - c->skew - c->phase) * 2.0f;
-    else before = -(c->skew - c->phase) * 2.0f;
-
-    if (phase < c->skew) after = (1.0f - c->skew - c->phase) * 2.0f;
-    else after = -(c->skew - c->phase) * 2.0f;
-
-    c->phase = phase;
-
-    float offset = 0.0f;//1.0f - ((c->inc - c->phase) / c->inc);
-    tMinBLEPHandler_addBLEP(&c->minBlep, offset, before - after, 0.0f);
-    
-    if (c->phase < c->skew) c->lastOut = 1.0f - (c->phase / c->skew);
-    else c->lastOut = (c->phase - c->skew) / (1.0f - c->skew);
-}
-
-//==============================================================================
-
-/* tMBPulse: Anti-aliased pulse waveform. */
-void    tMBPulse_init        (tMBPulse* const osc, tMinBLEPTable* const table)
-{
-    tMBPulse_initToPool(osc, table, &leaf.mempool);
-}
-
-void    tMBPulse_initToPool  (tMBPulse* const osc, tMinBLEPTable* const table, tMempool* const mp)
-{
-    _tMempool* m = *mp;
+    _tMempool* m = *pool;
     _tMBPulse* c = *osc = (_tMBPulse*) mpool_alloc(sizeof(_tMBPulse), m);
     c->mempool = m;
     
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
-    c->width     =  0.5f;
-    
-    tMinBLEPHandler_initToPool(&c->minBlep, table, mp);
-    tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
+    c->_init = true;
+    c->amp = 1.0f;
+    c->freq = 440.f;
+    c->syncin = 0.0f;
+    c->waveform = 0.0f;
+    c->_z = 0.0f;
+    c->_j = 0;
+    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
 }
 
-void    tMBPulse_free (tMBPulse* const osc)
+void tMBPulse_free(tMBPulse* const osc)
 {
     _tMBPulse* c = *osc;
-    
-    tMinBLEPHandler_free(&c->minBlep);
-    tHighpass_free(&c->dcBlock);
-    
     mpool_free((char*)c, c->mempool);
 }
 
-float   tMBPulse_tick        (tMBPulse* const osc)
+float tMBPulse_tick(tMBPulse* const osc)
 {
     _tMBPulse* c = *osc;
     
-
+    int    j, k;
+    float  freq, syncin;
+    float  a, b, db, p, t, w, dw, x, z;
     
-    c->phase += c->inc;
-    if (c->phase >= 1.0f)
-    {
-        c->phase -= 1.0f;
-        float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-        tMinBLEPHandler_addBLEP(&c->minBlep, offset, -2.0f, 0.0f);
+    syncin  = c->syncin;
+    freq = c->freq;
+    p = c->_p;  /* phase [0, 1) */
+    w = c->_w;  /* phase increment */
+    b = c->_b;  /* duty cycle (0, 1) */
+    x = c->_x;  /* temporary output variable */
+    z = c->_z;  /* low pass filter state */
+    j = c->_j;  /* index into buffer _f */
+    k = c->_k;  /* output state, 0 = high (0.5f), 1 = low (-0.5f) */
+    //
+    if (c->_init) {
+        p = 0.0f;
+        
+        w = freq / leaf.sampleRate;
+        if (w < 1e-5) w = 1e-5;
+        if (w > 0.5) w = 0.5;
+        b = 0.5 * (1.0 + c->waveform );
+        if (b < w) b = w;
+        if (b > 1.0f - w) b = 1.0f - w;
+        /* for variable-width rectangular wave, we could do DC compensation with:
+         *     x = 1.0f - b;
+         * but that doesn't work well with highly modulated hard sync.  Instead,
+         * we keep things in the range [-0.5f, 0.5f]. */
+        x = 0.5f;
+        /* if we valued alias-free startup over low startup time, we could do:
+         *   p -= w;
+         *   place_step_dd(_f, j, 0.0f, w, 0.5f); */
+        k = 0;
+        c->_init = false;
     }
-    if (c->width <= c->phase && c->phase < c->width + c->inc)
+    //
+    //    a = 0.2 + 0.8 * vco->_port [FILT];
+    a = 0.5f; // when a = 1, LPfilter is disabled
+    
+    t = freq / leaf.sampleRate;
+    if (t < 1e-5) t = 1e-5;
+    if (t > 0.5) t = 0.5;
+    dw = (t - w) ;
+    t = 0.5 * (1.0 + c->waveform );
+    if (t < w) t = w;
+    if (t > 1.0f - w) t = 1.0f - w;
+    db = (t - b) ;
+    
+    w += dw;
+    b += db;
+    p += w;
+    
+    if (syncin >= 1e-20f) {  /* sync to master */
+        //
+        float eof_offset = (syncin - 1e-20f) * w;
+        float p_at_reset = p - eof_offset;
+        p = eof_offset;
+        
+        /* place any DDs that may have occurred in subsample before reset */
+        if (!k) {
+            if (p_at_reset >= b) {
+                place_step_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f);
+                k = 1;
+                x = -0.5f;
+            }
+            if (p_at_reset >= 1.0f) {
+                p_at_reset -= 1.0f;
+                place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
+                k = 0;
+                x = 0.5f;
+            }
+        } else {
+            if (p_at_reset >= 1.0f) {
+                p_at_reset -= 1.0f;
+                place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
+                k = 0;
+                x = 0.5f;
+            }
+            if (!k && p_at_reset >= b) {
+                place_step_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f);
+                k = 1;
+                x = -0.5f;
+            }
+        }
+        
+        /* now place reset DD */
+        if (k) {
+            place_step_dd(c->_f, j, p, w, 1.0f);
+            k = 0;
+            x = 0.5f;
+        }
+        if (p >= b) {
+            place_step_dd(c->_f, j, p - b, w, -1.0f);
+            k = 1;
+            x = -0.5f;
+        }
+        
+        c->syncout = syncin;  /* best we can do is pass on upstream sync */
+        
+    } else if (!k) {  /* normal operation, signal currently high */
+        
+        if (p >= b) {
+            place_step_dd(c->_f, j, p - b, w, -1.0f);
+            k = 1;
+            x = -0.5f;
+        }
+        if (p >= 1.0f) {
+            p -= 1.0f;
+            c->syncout = p / w + 1e-20f;
+            place_step_dd(c->_f, j, p, w, 1.0f);
+            k = 0;
+            x = 0.5f;
+        } else {
+            c->syncout = 0.0f;
+        }
+        
+    } else {  /* normal operation, signal currently low */
+        
+        if (p >= 1.0f) {
+            p -= 1.0f;
+            c->syncout = p / w + 1e-20f;
+            place_step_dd(c->_f, j, p, w, 1.0f);
+            k = 0;
+            x = 0.5f;
+        } else {
+            c->syncout = 0.0f;
+        }
+        if (!k && p >= b) {
+            place_step_dd(c->_f, j, p - b, w, -1.0f);
+            k = 1;
+            x = -0.5f;
+        }
+    }
+    c->_f[j + DD_SAMPLE_DELAY] += x;
+    
+    z += a * (c->_f[j] - z);
+    c->out = c->amp * z;
+    
+    if (++j == FILLEN)
     {
-        float offset = 1.0f - ((c->inc - c->phase + c->width) / c->inc);
-        tMinBLEPHandler_addBLEP(&c->minBlep, offset, 2.0f, 0.0f);
+        j = 0;
+        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (float));
+        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (float));
     }
     
-    float out;
-    if (c->phase < c->width) out = 1.0f;
-    else out = -1.0f;
+    c->_p = p;
+    c->_w = w;
+    c->_b = b;
+    c->_x = x;
+    c->_z = z;
+    c->_j = j;
+    c->_k = k;
     
-    return tHighpass_tick(&c->dcBlock, tMinBLEPHandler_tick(&c->minBlep, out));
+    return c->out;
 }
 
-void    tMBPulse_setFreq     (tMBPulse* const osc, float freq)
+void tMBPulse_setFreq(tMBPulse* const osc, float f)
 {
     _tMBPulse* c = *osc;
-    
-    c->freq  = freq;
-    c->inc = freq * leaf.invSampleRate;
+    c->freq = f;
 }
 
-void    tMBPulse_setWidth    (tMBPulse* const osc, float width)
+void tMBPulse_setWidth(tMBPulse* const osc, float w)
 {
     _tMBPulse* c = *osc;
-    c->width = width;
+    c->waveform = w;
 }
 
-void    tMBPulse_sync          (tMBPulse* const osc, float phase)
+void tMBPulse_syncIn(tMBPulse* const osc, float sync)
 {
     _tMBPulse* c = *osc;
-    int intPart = (int) phase;
-    phase = phase - (float) intPart;
+    c->syncin = sync;
+}
+
+float tMBPulse_syncOut(tMBPulse* const osc)
+{
+    _tMBPulse* c = *osc;
+    return c->syncout;
+}
+
+//----------------------------------------------------------------------------------------------------------
+
+void tMBTriangle_init(tMBTriangle* const osc)
+{
+    tMBTriangle_initToPool(osc, &leaf.mempool);
+}
+
+void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const pool)
+{
+    _tMempool* m = *pool;
+    _tMBTriangle* c = *osc = (_tMBTriangle*) mpool_alloc(sizeof(_tMBTriangle), m);
+    c->mempool = m;
     
-    float before, after;
+    c->amp = 1.0f;
+    c->freq = 440.f;
+    c->syncin = 0.0f;
+    c->waveform = 0.0f;
+    c->_init = true;
+    c->_z = 0.0f;
+    c->_j = 0;
+    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
+}
+
+void tMBTriangle_free(tMBTriangle* const osc)
+{
+    _tMBTriangle* c = *osc;
+    mpool_free((char*)c, c->mempool);
+}
+
+float tMBTriangle_tick(tMBTriangle* const osc)
+{
+    _tMBTriangle* c = *osc;
     
-    if (c->phase < c->width) before = 1.0f;
-    else before = -1.0f;
+    int    j, k;
+    float  freq, syncin;
+    float  a, b, b1, db, p, t, w, dw, x, z;
     
-    if (phase < c->width) after = 1.0;
-    else after = -1.0f;
+    syncin  = c->syncin;
+    freq = c->freq;
+    p = c->_p;  /* phase [0, 1) */
+    w = c->_w;  /* phase increment */
+    b = c->_b;  /* duty cycle (0, 1) */
+    z = c->_z;  /* low pass filter state */
+    j = c->_j;  /* index into buffer _f */
+    k = c->_k;  /* output state, 0 = positive slope, 1 = negative slope */
     
-    float offset = 0.0f;//1.0f - ((c->inc - c->phase) / c->inc);
-    tMinBLEPHandler_addBLEP(&c->minBlep, offset, before - after, 0.0f);
+    if (c->_init) {
+        //        w = (exp2ap (freq[1] + vco->_port[OCTN] + vco->_port[TUNE] + expm[1] * vco->_port[EXPG] + 8.03136)
+        //                + 1e3 * linm[1] * vco->_port[LING]) / SAMPLERATE;
+        w = freq / leaf.sampleRate;
+        if (w < 1e-5) w = 1e-5;
+        if (w > 0.5) w = 0.5;
+        b = 0.5 * (1.0 + c->waveform);
+        if (b < w) b = w;
+        if (b > 1.0f - w) b = 1.0f - w;
+        p = 0.5f * b;
+        /* if we valued alias-free startup over low startup time, we could do:
+         *   p -= w;
+         *   place_slope_dd(_f, j, 0.0f, w, 1.0f / b); */
+        k = 0;
+        c->_init = false;
+    }
     
-    c->phase = phase;
+    //    a = 0.2 + 0.8 * vco->_port [FILT];
+    a = 0.5f; // when a = 1, LPfilter is disabled
+    
+    t = freq / leaf.sampleRate;
+    if (t < 1e-5) t = 1e-5;
+    if (t > 0.5) t = 0.5;
+    dw = (t - w) ;
+    t = 0.5 * (1.0 + c->waveform );
+    if (t < w) t = w;
+    if (t > 1.0f - w) t = 1.0f - w;
+    db = (t - b) ;
+    
+    w += dw;
+    b += db;
+    b1 = 1.0f - b;
+    p += w;
+    
+    if (syncin >= 1e-20f) {  /* sync to master */
+        
+        float eof_offset = (syncin - 1e-20f) * w;
+        float p_at_reset = p - eof_offset;
+        p = eof_offset;
+        //
+        /* place any DDs that may have occurred in subsample before reset */
+        if (!k) {
+            x = -0.5f + p_at_reset / b;
+            if (p_at_reset >= b) {
+                x = 0.5f - (p_at_reset - b) / b1;
+                place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f / b1 - 1.0f / b);
+                k = 1;
+            }
+            if (p_at_reset >= 1.0f) {
+                p_at_reset -= 1.0f;
+                x = -0.5f + p_at_reset / b;
+                place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f / b + 1.0f / b1);
+                k = 0;
+            }
+        } else {
+            x = 0.5f - (p_at_reset - b) / b1;
+            if (p_at_reset >= 1.0f) {
+                p_at_reset -= 1.0f;
+                x = -0.5f + p_at_reset / b;
+                place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f / b + 1.0f / b1);
+                k = 0;
+            }
+            if (!k && p_at_reset >= b) {
+                x = 0.5f - (p_at_reset - b) / b1;
+                place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f / b1 - 1.0f / b);
+                k = 1;
+            }
+        }
+        
+        /* now place reset DDs */
+        if (k)
+            place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
+        place_step_dd(c->_f, j, p, w, -0.5f - x);
+        x = -0.5f + p / b;
+        k = 0;
+        if (p >= b) {
+            x = 0.5f - (p - b) / b1;
+            place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
+            k = 1;
+        }
+        c->syncout = syncin;  /* best we can do is pass on upstream sync */
+        
+    } else if (!k) {  /* normal operation, slope currently up */
+        
+        x = -0.5f + p / b;
+        if (p >= b) {
+            x = 0.5f - (p - b) / b1;
+            place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
+            k = 1;
+        }
+        if (p >= 1.0f) {
+            p -= 1.0f;
+            c->syncout = p / w + 1e-20f;
+            x = -0.5f + p / b;
+            place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
+            k = 0;
+        } else {
+            c->syncout = 0.0f;
+        }
+        
+    } else {  /* normal operation, slope currently down */
+        
+        x = 0.5f - (p - b) / b1;
+        if (p >= 1.0f) {
+            p -= 1.0f;
+            c->syncout = p / w + 1e-20f;
+            x = -0.5f + p / b;
+            place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
+            k = 0;
+        } else {
+            c->syncout = 0.0f;
+        }
+        if (!k && p >= b) {
+            x = 0.5f - (p - b) / b1;
+            place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
+            k = 1;
+        }
+    }
+    c->_f[j + DD_SAMPLE_DELAY] += x;
+    
+    z += a * (c->_f[j] - z);
+    c->out = c->amp * z;
+    
+    if (++j == FILLEN)
+    {
+        j = 0;
+        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (float));
+        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (float));
+    }
+    
+    c->_p = p;
+    c->_w = w;
+    c->_b = b;
+    c->_z = z;
+    c->_j = j;
+    c->_k = k;
+    
+    return c->out;
+}
+
+void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
+{
+    _tMBTriangle* c = *osc;
+    c->freq = f;
+}
+
+void tMBTriangle_setWidth(tMBTriangle* const osc, float w)
+{
+    _tMBTriangle* c = *osc;
+    c->waveform = w;
+}
+
+void tMBTriangle_syncIn(tMBTriangle* const osc, float sync)
+{
+    _tMBTriangle* c = *osc;
+    c->syncin = sync;
+}
+
+float tMBTriangle_syncOut(tMBTriangle* const osc)
+{
+    _tMBTriangle* c = *osc;
+    return c->syncout;
 }
 
 
-//==============================================================================
+//----------------------------------------------------------------------------------------------------------
 
-/* tMBSawtooth: Anti-aliased Sawtooth waveform. */
-void    tMBSaw_init          (tMBSaw* const osc, tMinBLEPTable* const table)
+void tMBSaw_init(tMBSaw* const osc)
 {
-    tMBSaw_initToPool(osc, table, &leaf.mempool);
+    tMBSaw_initToPool(osc, &leaf.mempool);
 }
 
-void    tMBSaw_initToPool    (tMBSaw* const osc, tMinBLEPTable* const table, tMempool* const mp)
+void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const pool)
 {
-    _tMempool* m = *mp;
+    _tMempool* m = *pool;
     _tMBSaw* c = *osc = (_tMBSaw*) mpool_alloc(sizeof(_tMBSaw), m);
     c->mempool = m;
     
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
-    
-    tMinBLEPHandler_initToPool(&c->minBlep, table, mp);
-    tHighpass_initToPool(&c->dcBlock, 10.0f, mp);
+    c->_init = true;
+    c->amp = 1.0f;
+    c->freq = 440.f;
+    c->syncin = 0.0f;
+    c->_z = 0.0f;
+    c->_j = 0;
+    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
 }
 
-void    tMBSaw_free (tMBSaw* const osc)
+void tMBSaw_free(tMBSaw* const osc)
 {
     _tMBSaw* c = *osc;
-    
-    tMinBLEPHandler_free(&c->minBlep);
-    tHighpass_free(&c->dcBlock);
-    
     mpool_free((char*)c, c->mempool);
 }
 
-float   tMBSaw_tick          (tMBSaw* const osc)
+float tMBSaw_tick(tMBSaw* const osc)
 {
     _tMBSaw* c = *osc;
     
-    c->phase += c->inc;
-    if (c->phase >= 1.0f)
-    {
-        c->phase -= 1.0f;
-        float offset = 1.0f - ((c->inc - c->phase) / c->inc);
-        tMinBLEPHandler_addBLEP(&c->minBlep, offset, 2.0f, 0.0f);
+    int    j;
+    float  freq, syncin;
+    float  a, p, t, w, dw, z;
+    syncin  = c->syncin;
+    freq = c->freq;
+    
+    p = c->_p;  /* phase [0, 1) */
+    w = c->_w;  /* phase increment */
+    z = c->_z;  /* low pass filter state */
+    j = c->_j;  /* index into buffer _f */
+    
+    if (c->_init) {
+        p = 0.5f;
+        w = freq / leaf.sampleRate;
+        if (w < 1e-5) w = 1e-5;
+        if (w > 0.5) w = 0.5;
+        /* if we valued alias-free startup over low startup time, we could do:
+         *   p -= w;
+         *   place_slope_dd(_f, j, 0.0f, w, -1.0f); */
+        c->_init = false;
     }
     
-    float out = (c->phase * 2.0f) - 1.0f;
+    //a = 0.2 + 0.8 * vco->_port [FILT];
+    a = 0.5f; // when a = 1, LPfilter is disabled
     
-    return tHighpass_tick(&c->dcBlock, tMinBLEPHandler_tick(&c->minBlep, out));
+    t = freq / leaf.sampleRate;
+    if (t < 1e-5) t = 1e-5;
+    if (t > 0.5) t = 0.5;
+    dw = (t - w); // n= 1
+    w += dw;
+    p += w;
+    
+    if (syncin >= 1e-20f) {  /* sync to master */
+        
+        float eof_offset = (syncin - 1e-20f) * w;
+        float p_at_reset = p - eof_offset;
+        p = eof_offset;
+        
+        /* place any DD that may have occurred in subsample before reset */
+        if (p_at_reset >= 1.0f) {
+            p_at_reset -= 1.0f;
+            place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
+        }
+        
+        /* now place reset DD */
+        place_step_dd(c->_f, j, p, w, p_at_reset);
+        
+        c->syncout = syncin;  /* best we can do is pass on upstream sync */
+        
+    } else if (p >= 1.0f) {  /* normal phase reset */
+        
+        p -= 1.0f;
+        c->syncout = p / w + 1e-20f;
+        place_step_dd(c->_f, j, p, w, 1.0f);
+        
+    } else {
+        
+        c->syncout = 0.0f;
+    }
+    c->_f[j + DD_SAMPLE_DELAY] += 0.5f - p;
+    
+    z += a * (c->_f[j] - z); // LP filtering
+    c->out = c->amp * z;
+    
+    if (++j == FILLEN)
+    {
+        j = 0;
+        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (float));
+        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (float));
+    }
+    
+    c->_p = p;
+    c->_w = w;
+    c->_z = z;
+    c->_j = j;
+    
+    return c->out;
 }
 
-void    tMBSaw_setFreq       (tMBSaw* const osc, float freq)
+void tMBSaw_setFreq(tMBSaw* const osc, float f)
 {
     _tMBSaw* c = *osc;
-    
-    c->freq  = freq;
-    
-    c->inc = freq * leaf.invSampleRate;
+    c->freq = f;
 }
 
-void    tMBSaw_sync          (tMBSaw* const osc, float phase)
+void tMBSaw_syncIn(tMBSaw* const osc, float sync)
 {
     _tMBSaw* c = *osc;
-    int intPart = (int) phase;
-    phase = phase - (float) intPart;
-    
-    float offset = 0.0f;//1.0f - ((c->inc - phase +) / c->inc);
-    tMinBLEPHandler_addBLEP(&c->minBlep, offset, (c->phase - phase) * 2.0f, 0.0f);
-    
-    c->phase = phase;
+    c->syncin = sync;
+}
+
+float tMBSaw_syncOut(tMBSaw* const osc)
+{
+    _tMBSaw* c = *osc;
+    return c->syncout;
 }

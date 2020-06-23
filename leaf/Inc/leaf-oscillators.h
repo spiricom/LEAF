@@ -790,261 +790,95 @@ extern "C" {
     
     //==============================================================================
     
-    typedef struct _tMinBLEPTable
-    {
-        tMempool mempool;
-        float overSamplingRatio;
-        int zeroCrossings;
-        int size;
-        float* blepArray;
-        float* blepDerivArray;
-    } _tMinBLEPTable;
+#define FILLEN 256
     
-    typedef _tMinBLEPTable* tMinBLEPTable;
-    
-    void    tMinBLEPTable_init           (tMinBLEPTable* const minblep, int zeroCrossings, int oversamplerRatio);
-    void    tMinBLEPTable_initToPool     (tMinBLEPTable* const minblep, int zeroCrossings, int oversamplerRatio, tMempool* const pool);
-    void    tMinBLEPTable_free           (tMinBLEPTable* const minblep);
-    
-    typedef struct _tMinBLEPHandler
-    {
-        tMempool mempool;
-        tMinBLEPTable table;
-        
-        float coeffs[6];
-        
-        // FilterState
-        float* x1, x2, y1, y2;
-        
-        float ratio, lastRatio;
-        
-        float lastValue;
-        float lastDelta; // previous derivative ...
-        
-        // Tweaking the Blep F
-        float proportionalBlepFreq;
-        uint8_t returnDerivative; // set this to return the FIRST DERIVATIVE of the blep (for first der. discontinuities)
-        
-        int blepIndex;
-        int numActiveBleps;
-        //currentActiveBlepOffsets;
-        float* offset;
-        float* freqMultiple;
-        float* pos_change_magnitude;
-        float* vel_change_magnitude;
-        
-        
-    } _tMinBLEPHandler;
-    
-    typedef _tMinBLEPHandler* tMinBLEPHandler;
-    
-    void    tMinBLEPHandler_init           (tMinBLEPHandler* const minblep, tMinBLEPTable* const table);
-    void    tMinBLEPHandler_free           (tMinBLEPHandler* const minblep);
-    void    tMinBLEPHandler_initToPool     (tMinBLEPHandler* const minblep, tMinBLEPTable* const table, tMempool* const pool);
-    
-    // pass in audio, identify discontinuities and return the audio with minbleps inserted
-    float   tMinBLEPHandler_tick           (tMinBLEPHandler* const minblep, float input);
-    void    tMinBLEPHandler_addBLEP        (tMinBLEPHandler* const minblep, float offset, float posChange, float velChange);
-    
-    //==============================================================================
-    
-    /* tMBTriangle: Anti-aliased Triangle waveform using wavetable interpolation. */
-    typedef struct _tMBTriangle
-    {
-        tMempool mempool;
-        
-        float phase;
-        float inc,freq;
-        float skew;
-        float lastOut;
-        
-        tMinBLEPHandler minBlep;
-        tHighpass dcBlock;
-    } _tMBTriangle;
-    
-    typedef _tMBTriangle* tMBTriangle;
-    
-    /*!
-     * @defgroup tMBTriangle tMBTriangle
-     * @ingroup oscillators
-     * @brief An anti-aliased triangle waveform oscillator.
-     * @{
-     */
-    
-    //! Initialize a tMBTriangle to the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tMBTriangle to be initialized.
-     */
-    void    tMBTriangle_init          (tMBTriangle* const osc, tMinBLEPTable* const table);
-    
-    
-    //! Initialize a tMBTriangle to a specified mempool.
-    /*!
-     @param osc A pointer to the tMBTriangle to be initialized.
-     @param pool A pointer to the tMempool to which the tMBTriangle should be initialized.
-     */
-    void    tMBTriangle_initToPool    (tMBTriangle* const osc, tMinBLEPTable* const table, tMempool* const pool);
-
-    
-    //! Free a tMBTriangle from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tMBTriangle to be freed.
-     */
-    void    tMBTriangle_free          (tMBTriangle* const osc);
-    
-    
-    //! Tick a tMBTriangle oscillator.
-    /*!
-     @param osc A pointer to the relevant tMBTriangle.
-     @return The ticked sample as a float from -1 to 1.
-     */
-    float   tMBTriangle_tick          (tMBTriangle* const osc);
-    
-    
-    //! Set the frequency of a tMBTriangle oscillator.
-    /*!
-     @param osc A pointer to the relevant tMBTriangleangle.
-     @param freq The frequency to set the oscillator to.
-     */
-    void    tMBTriangle_setFreq       (tMBTriangle* const osc, float freq);
-    
-    void    tMBTriangle_setSkew       (tMBTriangle* const osc, float skew);
-    
-    void    tMBTriangle_sync          (tMBTriangle* const osc, float phase);
-    
-    /*! @} */
-    
-    //==============================================================================
-    
-    /* tMBPulse: Anti-aliased Square waveform. */
     typedef struct _tMBPulse
     {
         tMempool mempool;
-        
-        float phase;
-        float inc,freq;
-        float width;
-        
-        tMinBLEPHandler minBlep;
-        tHighpass dcBlock;
+        float    out;
+        float    amp;
+        float    last_amp;
+        float    freq;
+        float    waveform;    // duty cycle, must be in [-1, 1]
+        float    syncin;
+        float    syncout;
+        float   _p, _w, _b, _x, _z;
+        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
+        int     _j, _k;
+        bool    _init;
     } _tMBPulse;
     
     typedef _tMBPulse* tMBPulse;
     
-    /*!
-     * @defgroup tMBPulse tMBPulse
-     * @ingroup oscillators
-     * @brief An anti-aliased pulse waveform oscillator with changeable pulse width.
-     * @{
-     */
+    void tMBPulse_init(tMBPulse* const osc);
+    void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const pool);
+    void tMBPulse_free(tMBPulse* const osc);
     
-    //! Initialize a tMBPulse to the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tMBPulse to be initialized.
-     */
-    void    tMBPulse_init        (tMBPulse* const osc, tMinBLEPTable* const table);
+    float tMBPulse_tick(tMBPulse* const osc);
+    void tMBPulse_setFreq(tMBPulse* const osc, float f);
+    void tMBPulse_setWidth(tMBPulse* const osc, float w);
+    void tMBPulse_syncIn(tMBPulse* const osc, float sync);
+    float tMBPulse_syncOut(tMBPulse* const osc);
     
     
-    //! Initialize a tMBPulse to a specified mempool.
-    /*!
-     @param osc A pointer to the tMBPulse to be initialized.
-     @param pool A pointer to the tMempool to which the tMBPulse should be initialized.
-     */
-    void    tMBPulse_initToPool  (tMBPulse* const osc, tMinBLEPTable* const table, tMempool* const);
+    typedef struct _tMBTriangle
+    {
+        tMempool mempool;
+        float    out;
+        float    amp;
+        float    last_amp;
+        float    freq;
+        float    waveform;    // duty cycle, must be in [-1, 1]
+        float    syncin;
+        float    syncout;
+        float   _p, _w, _b, _z;
+        float   _f [FILLEN + LONGEST_DD_PULSE_LENGTH];
+        int     _j, _k;
+        bool    _init;
+    } _tMBTriangle;
+    
+    typedef _tMBTriangle* tMBTriangle;
+    
+    void tMBTriangle_init(tMBTriangle* const osc);
+    void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const pool);
+    void tMBTriangle_free(tMBTriangle* const osc);
+    
+    float tMBTriangle_tick(tMBTriangle* const osc);
+    void tMBTriangle_setFreq(tMBTriangle* const osc, float f);
+    void tMBTriangle_setWidth(tMBTriangle* const osc, float w);
+    void tMBTriangle_syncIn(tMBTriangle* const osc, float sync);
+    float tMBTriangle_syncOut(tMBTriangle* const osc);
     
     
-    //! Free a tMBPulse from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tMBPulse to be freed.
-     */
-    void    tMBPulse_free        (tMBPulse* const osc);
     
-    
-    //! Tick a tMBPulse oscillator.
-    /*!
-     @param osc A pointer to the relevant tMBPulse.
-     @return The ticked sample as a float from -1 to 1.
-     */
-    float   tMBPulse_tick        (tMBPulse* const osc);
-    
-    
-    //! Set the frequency of a tMBPulse oscillator.
-    /*!
-     @param osc A pointer to the relevant tMBPulse.
-     @param freq The frequency to set the oscillator to.
-     */
-    void    tMBPulse_setFreq     (tMBPulse* const osc, float freq);
-    
-    void    tMBPulse_setWidth    (tMBPulse* const osc, float width);
-    
-    void    tMBPulse_sync          (tMBPulse* const osc, float phase);
-    
-    
-    /*! @} */
-    
-    //==============================================================================
-    
-    /* tMBSawtooth: Anti-aliased Sawtooth waveform. */
     typedef struct _tMBSaw
     {
         tMempool mempool;
-        
-        float phase;
-        float inc,freq;
-        
-        tMinBLEPHandler minBlep;
-        tHighpass dcBlock;
+        float    out;
+        float    amp;
+        float    last_amp;
+        float    freq;
+        float    syncin;
+        float    syncout;
+        float   _p, _w, _z;
+        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
+        int     _j;
+        bool    _init;
     } _tMBSaw;
     
     typedef _tMBSaw* tMBSaw;
     
-    /*!
-     * @defgroup tMBSaw tMBSaw
-     * @ingroup oscillators
-     * @brief An anti-aliased sawtooth waveform oscillator. Uses wavetable synthesis.
-     * @{
-     */
+    void tMBSaw_init(tMBSaw* const osc);
+    void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const pool);
+    void tMBSaw_free(tMBSaw* const osc);
     
-    //! Initialize a tMBSaw to the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tMBSaw to be initialized.
-     */
-    void    tMBSaw_init          (tMBSaw* const osc, tMinBLEPTable* const table);
+    float tMBSaw_tick(tMBSaw* const osc);
+    void tMBSaw_setFreq(tMBSaw* const osc, float f);
+    void tMBSaw_syncIn(tMBSaw* const osc, float sync);
+    float tMBSaw_syncOut(tMBSaw* const osc);
     
     
-    //! Initialize a tMBSaw to a specified mempool.
-    /*!
-     @param osc A pointer to the tMBSaw to be initialized.
-     @param pool A pointer to the tMempool to which the tMBSaw should be initialized.
-     */
-    void    tMBSaw_initToPool    (tMBSaw* const osc, tMinBLEPTable* const table, tMempool* const pool);
     
-    
-    //! Free a tMBSaw from the default LEAF mempool.
-    /*!
-     @param osc A pointer to the tMBSaw to be freed.
-     */
-    void    tMBSaw_free          (tMBSaw* const osc);
-    
-    
-    //! Tick a tMBSaw oscillator.
-    /*!
-     @param osc A pointer to the relevant tMBSaw.
-     @return The ticked sample as a float from -1 to 1.
-     */
-    float   tMBSaw_tick          (tMBSaw* const osc);
-    
-    
-    //! Set the frequency of a tMBSaw oscillator.
-    /*!
-     @param osc A pointer to the relevant tMBSaw.
-     @param freq The frequency to set the oscillator to.
-     */
-    void    tMBSaw_setFreq       (tMBSaw* const osc, float freq);
-    
-    void    tMBSaw_sync          (tMBSaw* const osc, float phase);
-    
-    /*! @} */
     
 #ifdef __cplusplus
 }

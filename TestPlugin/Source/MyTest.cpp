@@ -25,16 +25,13 @@ tEnvelope env;
 
 tAutotune at;
 
-
-tMinBLEPTable minblep;
-
 tPhasor phasor;
 
 tHighpass hipass;
 
-tMBSaw saw;
-tMBPulse pulse;
-tMBTriangle tri;
+tMBSaw bsaw;
+tMBTriangle btri;
+tMBPulse bpulse;
 
 float gain;
 float freq;
@@ -45,29 +42,16 @@ float x = 0.0f;
 float y = 0.0f;
 float a, b, c, d;
 
-#define MSIZE 500000
+#define MSIZE 50000
 char memory[MSIZE];
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
-    int zeroCrossings = 16;
-    int overSamplingRatio = 32;
-    
-    tMinBLEPTable_init(&minblep, zeroCrossings, overSamplingRatio);
-    
-    tMBSaw_init(&saw, &minblep);
-    
-    tMBPulse_init(&pulse, &minblep);
-    
-    tMBTriangle_init(&tri, &minblep);
-    tMBTriangle_free(&tri);
-    tMBTriangle_init(&tri, &minblep);
-    
-    tPhasor_init(&phasor);
-    
-    tPhasor_setFreq(&phasor, 200);
+    tMBSaw_init(&bsaw);
+    tMBTriangle_init(&btri);
+    tMBPulse_init(&bpulse);
 }
 
 inline double getSawFall(double angle) {
@@ -81,22 +65,16 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
+    tMBSaw_setFreq(&bsaw, x);
+    tMBTriangle_setFreq(&btri, x);
+    tMBPulse_setFreq(&bpulse, x);
     
-    tMBSaw_setFreq(&saw, y);
-    tMBPulse_setWidth(&pulse, x);
-    tMBPulse_setFreq(&pulse, y);
-    tMBTriangle_setSkew(&tri, 0.0);//x*2.0f - 1.0f);
-    tMBTriangle_setFreq(&tri, y);
-    
-    tPhasor_tick(&phasor);
-    
-//    if (phasor->phaseDidReset) tMBSaw_sync(&saw, 0.0f);
-//    if (phasor->phaseDidReset) tMBPulse_sync(&pulse, 0.0f);
-//    if (phasor->phaseDidReset) tMBTriangle_sync(&tri, 0.0f);
-    
-    return tMBSaw_tick(&saw);
-//    return tMBPulse_tick(&pulse);
-//    return tMBTriangle_tick(&tri);
+    tMBTriangle_setWidth(&btri, y);
+    tMBPulse_setWidth(&bpulse, y);
+
+//    return tMBSaw_tick(&bsaw);
+//    return tMBTriangle_tick(&btri);
+    return tMBPulse_tick(&bpulse);
 }
 
 int firstFrame = 1;
@@ -112,7 +90,7 @@ void    LEAFTest_block           (void)
     
     float val = getSliderValue("mod freq");
     
-    x = val ;
+    x = val * 20000.0f + 220.0f;
     
     //    a = val * tBuffer_getBufferLength(&buff);
     
@@ -120,8 +98,7 @@ void    LEAFTest_block           (void)
     
     val = getSliderValue("mod depth");
     
-    y = val * 5000.0f + 20.0f;
-    
+    y = val * 2.0f - 1.0f;
     DBG(String(y));
     //    b = val * tBuffer_getBufferLength(&buff);
     
