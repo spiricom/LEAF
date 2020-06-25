@@ -79,7 +79,7 @@
  *
  * \section intro_sec Introduction
  *
- * This is the introduction.
+ * This is the work in progress documentation of LEAF.
  *
  * \section install_sec Installation
  *
