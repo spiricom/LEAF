@@ -1,17 +1,23 @@
-/* USE THE BELOW DEFAULT STYLING AS REFERENCE AND ONLY OVERRIDE AS NEEDED AT 
-THE BOTTOM OF THIS FILE TO AVOID ISSUES IF DOXYGEN UPDATES ITS DEFAULT CSS */
-
 /* The standard CSS for doxygen 1.8.18 */
 
 body, table, div, p, dl {
-	font: 400 14px/22px Roboto,sans-serif;
+	font: inherit;
+	font-family: -apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'helvetica neue', helvetica, ubuntu, roboto, noto, 'segoe ui', arial, sans-serif;
 }
 
 p.reference, p.definition {
-	font: 400 14px/22px Roboto,sans-serif;
+	font: inherit;
 }
 
 /* @group Heading Levels */
+
+h1 {
+	display: block;
+	padding-bottom: calc(1rem + 2px) !important;
+    font-size: 2em; 
+    margin: .60em 0;
+    font-weight: bold;
+}
 
 h1.groupheader {
 	font-size: 150%;
@@ -21,7 +27,7 @@ h1.groupheader {
 	font: 400 14px/28px Roboto,sans-serif;
 	font-size: 150%;
 	font-weight: bold;
-	margin: 10px 2px;
+	margin: 10px 0px;
 }
 
 h2.groupheader {
@@ -123,7 +129,7 @@ div.qindex, div.navtab{
 
 div.qindex, div.navpath {
 	width: 100%;
-	line-height: 140%;
+	line-height: 100%;
 }
 
 div.navtab {
@@ -134,7 +140,7 @@ div.navtab {
 
 a {
 	color: #3D578C;
-	font-weight: normal;
+	font-weight: inherit;
 	text-decoration: none;
 }
 
@@ -322,18 +328,22 @@ div.groupText {
 }
 
 body {
-	background-color: white;
+	background-color: #e8fdf5;
 	color: black;
         margin: 0;
 }
 
 div.contents {
 	margin-top: 10px;
-	margin-left: 12px;
+	margin-left: 1px;
 	margin-right: 8px;
+	margin-bottom: 12px;
+	padding-left: 2rem;
 }
 
-td.indexkey {
+
+
+.indexkey {
 	background-color: #EBEFF6;
 	font-weight: bold;
 	border: 1px solid #C4CFE5;
@@ -768,47 +778,52 @@ span.mlabel {
 /* these are for tree view inside a (index) page */
 
 div.directory {
-        margin: 10px 0px;
-        border-top: 1px solid #9CAFD4;
-        border-bottom: 1px solid #9CAFD4;
-        width: 100%;
+    margin: 0px 0px;
+    border-top: none;
+    border-bottom: none;
+    width: 100%;
 }
 
 .directory table {
-        border-collapse:collapse;
+    border-collapse:collapse;
 }
 
 .directory td {
-        margin: 0px;
-        padding: 0px;
+    margin: 0px;
+    padding: 0px;
 	vertical-align: top;
 }
 
 .directory td.entry {
-        white-space: nowrap;
-        padding-right: 6px;
+    white-space: nowrap;
+    padding-right: 6px;
 	padding-top: 3px;
 }
 
 .directory td.entry a {
-        outline:none;
+    outline:none;
 }
 
 .directory td.entry a img {
-        border: none;
+    border: none;
 }
 
 .directory td.desc {
-        width: 100%;
-        padding-left: 6px;
+    width: 100%;
+    padding-left: 6px;
 	padding-right: 6px;
 	padding-top: 3px;
-	border-left: 1px solid rgba(0,0,0,0.05);
+	border-left: 1px solid rgba(0,0,0,0.1);
+}
+
+.directory tr {
+	padding-left: 6px;
+	padding-top: 6px;
+
 }
 
 .directory tr.even {
-	padding-left: 6px;
-	background-color: #F7F8FB;
+	background-color: #e8fdf5;
 }
 
 .directory img {
@@ -819,7 +834,7 @@ div.directory {
         white-space: nowrap;
         width: 100%;
         text-align: right;
-        font-size: 9pt;
+        font-size: 10pt;
 }
 
 .directory .levels span {
@@ -989,7 +1004,7 @@ table.fieldtable {
 .fieldtable th {
         background-image:url('nav_f.png');
         background-repeat:repeat-x;
-        background-color: #E2E8F2;
+        background-color: #e8fdf5;
         font-size: 90%;
         color: #253555;
         padding-bottom: 4px;
@@ -1019,13 +1034,14 @@ table.fieldtable {
 .navpath ul
 {
 	font-size: 11px;
-	background-image:url('tab_b.png');
-	background-repeat:repeat-x;
-	background-position: 0 -5px;
-	height:30px;
-	line-height:30px;
+	background-image:none;
+	height:0px;
+	line-height:0px;
 	color:#8AA0CC;
-	border:solid 1px #C2CDE4;
+	border-top:solid 1px #C2CDE4;
+	border-left: none;
+	border-right: none;
+	border-bottom: none;
 	overflow:hidden;
 	margin:0px;
 	padding:0px;
@@ -1037,7 +1053,7 @@ table.fieldtable {
 	float:left;
 	padding-left:10px;
 	padding-right:15px;
-	background-image:url('bc_s.png');
+	background-image:none;
 	background-repeat:no-repeat;
 	background-position:right;
 	color:#364D7C;
@@ -1114,9 +1130,8 @@ div.ingroups a
 
 div.header
 {
-        background-image:url('nav_h.png');
-        background-repeat:repeat-x;
-	background-color: #F9FAFC;
+    background-image:none;
+	background-color: #e8fdf5;
 	margin:  0px;
 	border-bottom: 1px solid #C4CFE5;
 }
@@ -1124,6 +1139,7 @@ div.header
 div.headertitle
 {
 	padding: 5px 5px 5px 10px;
+	padding-left: 2rem;
 }
 
 .PageDocRTL-title div.headertitle {
@@ -1731,9 +1747,226 @@ u {
 	text-decoration: underline;
 }
 
-/* USE THE ABOVE DEFAULT STYLING AS REFERENCE AND ONLY OVERRIDE AS 
-NEEDED BELOW TO AVOID ISSUES IF DOXYGEN UPDATES ITS DEFAULT CSS */
 
 
+
+
+/* NAVTREE */
+
+
+#nav-tree .children_ul {
+  margin:0;
+  padding:4px;
+}
+
+#nav-tree ul {
+  list-style:none outside none;
+  margin:0px;
+  padding:0px;
+}
+
+#nav-tree li {
+  white-space:nowrap;
+  margin:0px;
+  padding:0px;
+}
+
+#nav-tree .plus {
+  margin:0px;
+}
+
+#nav-tree .selected {
+  background-image: none;
+  background-repeat:repeat-x;
+  color: #fff;
+}
+
+#nav-tree img {
+  margin:0px;
+  padding:0px;
+  border:0px;
+  vertical-align: middle;
+}
+
+#nav-tree a {
+  text-decoration:none;
+  padding:0px;
+  margin:0px;
+  outline:none;
+}
+
+#nav-tree .label {
+  margin:0px;
+  padding:0px;
+  font: 12px 'Lucida Grande',Geneva,Helvetica,Arial,sans-serif;
+}
+
+#nav-tree .label a {
+  padding:2px;
+}
+
+#nav-tree .selected a {
+  text-decoration:none;
+  color:#fff;
+}
+
+#nav-tree .children_ul {
+  margin:0px;
+  padding:0px;
+}
+
+#nav-tree .item {
+  margin:0px;
+  padding:0px;
+}
+
+#nav-tree {
+  padding: 0px 0px;
+  background-color: #e8fdf5; 
+  font-size:14px;
+  overflow:auto;
+}
+
+#doc-content {
+  overflow:auto;
+  display:block;
+  padding:0px;
+  margin:0px;
+  -webkit-overflow-scrolling : touch; /* iOS 5+ */
+}
+
+#side-nav {
+  padding:0 6px 0 0;
+  margin: 0px;
+  display:block;
+  position: absolute;
+  left: 0px;
+  width: 250px;
+}
+
+.ui-resizable .ui-resizable-handle {
+  display:block;
+}
+
+.ui-resizable-e {
+  background-image:url("splitbar.png");
+  background-size:100%;
+  background-repeat:repeat-y;
+  background-attachment: scroll;
+  cursor:ew-resize;
+  height:100%;
+  right:0;
+  top:0;
+  width:6px;
+}
+
+.ui-resizable-handle {
+  display:none;
+  font-size:0.1px;
+  position:absolute;
+  z-index:1;
+}
+
+#nav-tree-contents {
+  margin: 6px 0px 0px 0px;
+}
+
+#nav-tree {
+  background-image:url('nav_h.png');
+  background-repeat:repeat-x;
+  background-color: #e8fdf5;
+  -webkit-overflow-scrolling : touch; /* iOS 5+ */
+}
+
+#nav-sync {
+  position:absolute;
+  top:5px;
+  right:24px;
+  z-index:0;
+}
+
+#nav-sync img {
+  opacity:0.3;
+}
+
+#nav-sync img:hover {
+  opacity:0.9;
+}
+
+@media print
+{
+  #nav-tree { display: none; }
+  div.ui-resizable-handle { display: none; position: relative; }
+}
+
+
+
+
+
+
+/* TABS */
+
+.tabs, .tabs2, .tabs3 {
+    background-image: none;
+    background-color: #096e48;
+    width: 100%;
+    z-index: 101;
+    font-size: 14px;
+    font-family: 'Lucida Grande',Geneva,Helvetica,Arial,sans-serif;
+}
+
+.tabs2 {
+	background-color: rgba( 0, 0, 0, 0.7 );
+    font-size: 12px;
+}
+.tabs3 {
+    font-size: 10px;
+}
+
+.tablist {
+	width: 100%;
+    margin: 0;
+    padding: 0;
+    display: table;
+}
+
+.tablist li {
+    float: left;
+    display: table-cell;
+    background-image: none;
+    line-height: 36px;
+    list-style: none;
+}
+
+.tablist a {
+    display: block;
+    padding: 0 20px;
+    padding-left: 4rem;
+    font-weight: bold;
+    background-image: none;
+    color: #fff;
+    text-shadow: none;
+    text-decoration: none;
+    outline: none;
+}
+
+.tabs3 .tablist a {
+    padding: 0 10px;
+}
+
+.tablist a:hover {
+    background-image: none;
+    background-repeat:repeat-x;
+    color: #ffb700;
+    text-shadow: none;
+    text-decoration: none;
+}
+
+.tablist li.current a {
+    background-image: none;
+    background-repeat:repeat-x;
+    color: #ffb700;
+    text-shadow: none;
+}
 
 
