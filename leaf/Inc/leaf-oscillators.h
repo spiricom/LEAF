@@ -303,6 +303,51 @@ extern "C" {
     void    tSine_setFreq      (tSine* const osc, float freq);
     
     //==============================================================================
+    
+    /*!
+     @defgroup ttri tTri
+     @ingroup oscillators
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void    tTri_init          (tTri* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tTri_initToPool    (tTri* const osc, tMempool* const pool)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tTri_free          (tTri* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tTri_tick          (tTri* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tTri_setFreq       (tTri* const osc, float freq)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tTri_setSkew       (tTri* const osc, float skew)
+     @brief
+     @param
+     */
+    
+    /*! @} */
 
     typedef struct _tTri
     {
@@ -323,9 +368,52 @@ extern "C" {
     void    tTri_setFreq       (tTri* const osc, float freq);
     void    tTri_setSkew       (tTri* const osc, float skew);
     
-    /*! @} */
-    
     //==============================================================================
+    
+    /*!
+     @defgroup tpulse tPulse
+     @ingroup oscillators
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void    tPulse_init        (tPulse* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tPulse_initToPool  (tPulse* const osc, tMempool* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tPulse_free        (tPulse* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tPulse_tick        (tPulse* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tPulse_setFreq     (tPulse* const osc, float freq)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tPulse_setWidth    (tPulse* const osc, float width)
+     @brief
+     @param
+     */
+    
+    /*! @} */
     
     typedef struct _tPulse
     {
@@ -347,6 +435,45 @@ extern "C" {
     
     //==============================================================================
     
+    /*!
+     @defgroup tsaw tSaw
+     @ingroup oscillators
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void    tSaw_init          (tSaw* const osc)
+     @brief
+     @param
+     */
+     
+    /*!
+     @fn void    tSaw_initToPool    (tSaw* const osc, tMempool* const pool)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tSaw_free          (tSaw* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tSaw_tick          (tSaw* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tSaw_setFreq       (tSaw* const osc, float freq)
+     @brief
+     @param
+     */
+    
+    /*! @} */
+    
     typedef struct _tSaw
     {
         tMempool mempool;
@@ -364,6 +491,45 @@ extern "C" {
     void    tSaw_setFreq       (tSaw* const osc, float freq);
     
     //==============================================================================
+    
+    /*!
+     @defgroup tphasor tPhasor
+     @ingroup oscillators
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void    tPhasor_init        (tPhasor* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tPhasor_initToPool  (tPhasor* const osc, tMempool* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tPhasor_free        (tPhasor* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tPhasor_tick        (tPhasor* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tPhasor_setFreq     (tPhasor* const osc, float freq)
+     @brief
+     @param
+     */
+    
+    /*! @} */
     
     typedef struct _tPhasor
     {
@@ -384,6 +550,37 @@ extern "C" {
     
     //==============================================================================
     
+    /*!
+     @defgroup tnoise tNoise
+     @ingroup oscillators
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void    tNoise_init         (tNoise* const noise, NoiseType type)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tNoise_initToPool   (tNoise* const noise, NoiseType type, tMempool* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tNoise_free         (tNoise* const noise)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tNoise_tick         (tNoise* const noise)
+     @brief
+     @param
+     */
+    
     /* tNoise. WhiteNoise, PinkNoise. */
     /*!
      * Noise types
@@ -394,6 +591,8 @@ extern "C" {
         PinkNoise, //!< Pink noise. Inverse frequency-proportional spectrum.
         NoiseTypeNil,
     };
+    
+     /*! @} */
     
     typedef enum NoiseType NoiseType;
     
@@ -581,7 +780,65 @@ extern "C" {
     
     //==============================================================================
     
+    
 #define FILLEN 256
+    
+    /*!
+     @defgroup tmbpulse tMBPulse
+     @ingroup oscillators
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void tMBPulse_init(tMBPulse* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const pool)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBPulse_free(tMBPulse* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float tMBPulse_tick(tMBPulse* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBPulse_setFreq(tMBPulse* const osc, float f)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBPulse_setWidth(tMBPulse* const osc, float w)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBPulse_syncIn(tMBPulse* const osc, float sync)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float tMBPulse_syncOut(tMBPulse* const osc)
+     @brief
+     @param
+     */
+    
+    /*! @} */
     
     typedef struct _tMBPulse
     {
@@ -611,6 +868,62 @@ extern "C" {
     void tMBPulse_syncIn(tMBPulse* const osc, float sync);
     float tMBPulse_syncOut(tMBPulse* const osc);
     
+    /*!
+     @defgroup tmbtriangle tMBTriangle
+     @ingroup oscillators
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void tMBTriangle_init(tMBTriangle* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const pool)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBTriangle_free(tMBTriangle* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float tMBTriangle_tick(tMBTriangle* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBTriangle_setWidth(tMBTriangle* const osc, float w)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBTriangle_syncIn(tMBTriangle* const osc, float sync)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float tMBTriangle_syncOut(tMBTriangle* const osc)
+     @brief
+     @param
+     */
+    
+    /*! @} */
     
     typedef struct _tMBTriangle
     {
@@ -641,6 +954,56 @@ extern "C" {
     float tMBTriangle_syncOut(tMBTriangle* const osc);
     
     
+    /*!
+     @defgroup tmbsaw tMBSaw
+     @ingroup oscillators
+     @brief
+     @{
+     */
+
+    /*!
+     @fn void tMBSaw_init(tMBSaw* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const pool)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBSaw_free(tMBSaw* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float tMBSaw_tick(tMBSaw* const osc)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBSaw_setFreq(tMBSaw* const osc, float f)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tMBSaw_syncIn(tMBSaw* const osc, float sync)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float tMBSaw_syncOut(tMBSaw* const osc)
+     @brief
+     @param
+     */
+    
+    /*! @} */
     
     typedef struct _tMBSaw
     {

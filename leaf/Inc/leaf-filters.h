@@ -30,7 +30,15 @@ extern "C" {
     
     //==============================================================================
     
-    /* tAllpass: Schroeder allpass. Comb-filter with feedforward and feedback. */
+    /*!
+     @defgroup tallpass tAllpass
+     @ingroup filters
+     @brief Schroeder allpass. Comb-filter with feedforward and feedback.
+     @{
+     */
+    
+    /*! @} */
+    
     typedef struct _tAllpass
     {
         tMempool mempool;
@@ -55,7 +63,15 @@ extern "C" {
     
     //==============================================================================
     
-    /* tOnePole: OnePole filter, reimplemented from STK (Cook and Scavone). */
+    /*!
+     @defgroup tonepole tOnePole
+     @ingroup filters
+     @brief OnePole filter, reimplemented from STK (Cook and Scavone).
+     @{
+     */
+    
+    /*! @} */
+    
     typedef struct _tOnePole
     {
         tMempool mempool;
@@ -81,7 +97,15 @@ extern "C" {
     
     //==============================================================================
     
-    /* TwoPole filter, reimplemented from STK (Cook and Scavone). */
+    /*!
+     @defgroup ttwopole tTwoPole
+     @ingroup filters
+     @brief TwoPole filter, reimplemented from STK (Cook and Scavone).
+     @{
+     */
+    
+    /*! @} */
+
     typedef struct _tTwoPole
     {
         tMempool mempool;
@@ -92,7 +116,7 @@ extern "C" {
         
         float radius, frequency;
         oBool normalize;
-
+        
         float lastOut[2];
     } _tTwoPole;
     
@@ -112,7 +136,15 @@ extern "C" {
     
     //==============================================================================
     
-    /* OneZero filter, reimplemented from STK (Cook and Scavone). */
+    /*!
+     @defgroup tonezero tOneZero
+     @ingroup filters
+     @brief OneZero filter, reimplemented from STK (Cook and Scavone).
+     @{
+     */
+    
+    /*! @} */
+    
     typedef struct _tOneZero
     {
         tMempool mempool;
@@ -137,7 +169,15 @@ extern "C" {
     
     //==============================================================================
     
-    /* TwoZero filter, reimplemented from STK (Cook and Scavone). */
+    /*!
+     @defgroup ttwozero tTwoZero
+     @ingroup filters
+     @brief TwoZero filter, reimplemented from STK (Cook and Scavone).
+     @{
+     */
+    
+    /*! @} */
+
     typedef struct _tTwoZero
     {
         tMempool mempool;
@@ -166,7 +206,15 @@ extern "C" {
     
     //==============================================================================
     
-    /* PoleZero filter, reimplemented from STK (Cook and Scavone). */
+    /*!
+     @defgroup tpolezero tPoleZero
+     @ingroup filters
+     @brief PoleZero filter, reimplemented from STK (Cook and Scavone).
+     @{
+     */
+    
+    /*! @} */
+    
     typedef struct _tPoleZero
     {
         tMempool mempool;
@@ -195,7 +243,15 @@ extern "C" {
     
     //==============================================================================
     
-    /* BiQuad filter, reimplemented from STK (Cook and Scavone). */
+    /*!
+     @defgroup tbiquad tBiQuad
+     @ingroup filters
+     @brief BiQuad filter, reimplemented from STK (Cook and Scavone).
+     @{
+     */
+    
+    /*! @} */
+    
     typedef struct _tBiQuad
     {
         tMempool mempool;
@@ -230,7 +286,15 @@ extern "C" {
     
     //==============================================================================
     
-/* State Variable Filter, algorithm from Andy Simper. */
+    /*!
+     @defgroup tsvf tSVF
+     @ingroup filters
+     @brief State Variable Filter, algorithm from Andy Simper.
+     @{
+     */
+    
+    /*! @} */
+    
     typedef enum SVFType
     {
         SVFTypeHighpass = 0,
@@ -263,7 +327,15 @@ extern "C" {
     void    tSVF_setFreqAndQ    (tSVF* const svff, float freq, float Q);
     //==============================================================================
     
-    /* Efficient State Variable Filter for 14-bit control input, [0, 4096). */
+    /*!
+     @defgroup tefficientsvf tEfficientSVF
+     @ingroup filters
+     @brief Efficient State Variable Filter for 14-bit control input, [0, 4096).
+     @{
+     */
+    
+    /*! @} */
+    
     typedef struct _tEfficientSVF
     {
         tMempool mempool;
@@ -285,7 +357,15 @@ extern "C" {
     
     //==============================================================================
     
-    /* Simple Highpass filter. */
+    /*!
+     @defgroup thighpass tHighpass
+     @ingroup filters
+     @brief Simple Highpass filter.
+     @{
+     */
+    
+    /*! @} */
+    
     typedef struct _tHighpass
     {
         tMempool mempool;
@@ -305,7 +385,15 @@ extern "C" {
     
     //==============================================================================
     
-    // Butterworth Filter
+    /*!
+     @defgroup tbutterworth tButterworth
+     @ingroup filters
+     @brief
+     @{
+     */
+    
+    /*! @} */
+    
 #define NUM_SVF_BW 16
     typedef struct _tButterworth
     {
@@ -334,6 +422,15 @@ extern "C" {
     
     //==============================================================================
     
+    /*!
+     @defgroup tfir tFIR
+     @ingroup filters
+     @brief
+     @{
+     */
+    
+    /*! @} */
+    
     typedef struct _tFIR
     {
         tMempool mempool;
@@ -349,125 +446,146 @@ extern "C" {
     void    tFIR_free           (tFIR* const);
     
     float   tFIR_tick           (tFIR* const, float input);
-
+    
     
     //==============================================================================
     
-
+    /*!
+     @defgroup tmedianfilter tMedianFilter
+     @ingroup filters
+     @brief
+     @{
+     */
+    
+    /*! @} */
+    
     typedef struct _tMedianFilter
     {
         tMempool mempool;
-    	float* val;
-    	int* age;
-    	int m;
-    	int size;
-    	int middlePosition;
-    	int last;
-    	int pos;
+        float* val;
+        int* age;
+        int m;
+        int size;
+        int middlePosition;
+        int last;
+        int pos;
     } _tMedianFilter;
-
+    
     typedef _tMedianFilter* tMedianFilter;
-
+    
     void    tMedianFilter_init           (tMedianFilter* const, int size);
-	void    tMedianFilter_initToPool     (tMedianFilter* const, int size, tMempool* const);
-	void    tMedianFilter_free           (tMedianFilter* const);
-
-	float   tMedianFilter_tick           (tMedianFilter* const, float input);
-
-
-
-
-
-	//Vadim Zavalishin style from VA book (from implementation in RSlib posted to kvr forum)
-
+    void    tMedianFilter_initToPool     (tMedianFilter* const, int size, tMempool* const);
+    void    tMedianFilter_free           (tMedianFilter* const);
+    
+    float   tMedianFilter_tick           (tMedianFilter* const, float input);
+    
+    
+    /*!
+     @defgroup tvzfilter tVZFilter
+     @ingroup filters
+     @brief
+     @{
+     */
+    
+    /*! @} */
+    
+    //Vadim Zavalishin style from VA book (from implementation in RSlib posted to kvr forum)
+    
     typedef enum VZFilterType
     {
-    	Highpass = 0,
+        Highpass = 0,
         Lowpass,
         BandpassSkirt,
-		BandpassPeak,
-		BandReject,
+        BandpassPeak,
+        BandReject,
         Bell,
-		Lowshelf,
-		Highshelf,
-		Morph,
-		Bypass,
-		Allpass
+        Lowshelf,
+        Highshelf,
+        Morph,
+        Bypass,
+        Allpass
     } VZFilterType;
-
-
-	typedef struct _tVZFilter
-	    {
-            tMempool mempool;
-            
-			VZFilterType type;
-			// state:
-			float s1, s2;
-
-			// filter coefficients:
-			float g;          // embedded integrator gain
-			float R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
-			float h;          // factor for feedback (== 1/(1+2*R*g+g*g))
-			float cL, cB, cH; // coefficients for low-, band-, and highpass signals
-
-			// parameters:
-			float fc;    // characteristic frequency
-			float G;     // gain
-			float invG;		//1/gain
-			float B;     // bandwidth (in octaves)
-			float m;     // morph parameter (0...1)
-
-			float sr;    //local sampling rate of filter (may be different from leaf sr if oversampled)
-			float inv_sr;
-	    } _tVZFilter;
-
-	    typedef _tVZFilter* tVZFilter;
-
-	    void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q);
-		void    tVZFilter_initToPool     (tVZFilter* const, VZFilterType type, float freq, float Q, tMempool* const);
-		void    tVZFilter_free           (tVZFilter* const);
     
-		void 	tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate);
-		float   tVZFilter_tick           	(tVZFilter* const, float input);
-		float   tVZFilter_tickEfficient           	(tVZFilter* const vf, float in);
-		void   tVZFilter_calcCoeffs           (tVZFilter* const);
-		void   tVZFilter_setBandwidth        	(tVZFilter* const, float bandWidth);
-		void   tVZFilter_setFreq           (tVZFilter* const, float freq);
-		void   tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, float freq, float bw);
-		void   tVZFilter_setGain          		(tVZFilter* const, float gain);
-		void   tVZFilter_setType          		(tVZFilter* const, VZFilterType type);
-		float 	tVZFilter_BandwidthToR		(tVZFilter* const vf, float B);
-
-
-
-
-		//diode ladder filter
-		typedef struct _tDiodeFilter
-		    {
-                tMempool mempool;
-                float f;
-                float r;
-                float Vt;
-                float n;
-                float gamma;
-                float zi;
-                float g0inv;
-                float g1inv;
-                float g2inv;
-                float s0, s1, s2, s3;
-		    } _tDiodeFilter;
-
-		    typedef _tDiodeFilter* tDiodeFilter;
-
-		    void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q);
-			void    tDiodeFilter_initToPool     (tDiodeFilter* const, float freq, float Q, tMempool* const);
-			void    tDiodeFilter_free           (tDiodeFilter* const);
-
-			float   tDiodeFilter_tick           	(tDiodeFilter* const, float input);
-			void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff);
-			void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance);
-
-
+    
+    typedef struct _tVZFilter
+    {
+        tMempool mempool;
+        
+        VZFilterType type;
+        // state:
+        float s1, s2;
+        
+        // filter coefficients:
+        float g;          // embedded integrator gain
+        float R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+        float h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+        float cL, cB, cH; // coefficients for low-, band-, and highpass signals
+        
+        // parameters:
+        float fc;    // characteristic frequency
+        float G;     // gain
+        float invG;        //1/gain
+        float B;     // bandwidth (in octaves)
+        float m;     // morph parameter (0...1)
+        
+        float sr;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+        float inv_sr;
+    } _tVZFilter;
+    
+    typedef _tVZFilter* tVZFilter;
+    
+    void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q);
+    void    tVZFilter_initToPool     (tVZFilter* const, VZFilterType type, float freq, float Q, tMempool* const);
+    void    tVZFilter_free           (tVZFilter* const);
+    
+    void     tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate);
+    float   tVZFilter_tick               (tVZFilter* const, float input);
+    float   tVZFilter_tickEfficient               (tVZFilter* const vf, float in);
+    void   tVZFilter_calcCoeffs           (tVZFilter* const);
+    void   tVZFilter_setBandwidth            (tVZFilter* const, float bandWidth);
+    void   tVZFilter_setFreq           (tVZFilter* const, float freq);
+    void   tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, float freq, float bw);
+    void   tVZFilter_setGain                  (tVZFilter* const, float gain);
+    void   tVZFilter_setType                  (tVZFilter* const, VZFilterType type);
+    float     tVZFilter_BandwidthToR        (tVZFilter* const vf, float B);
+    
+    
+    /*!
+     @defgroup tdiodefilter tDiodeFilter
+     @ingroup filters
+     @brief
+     @{
+     */
+    
+    /*! @} */
+    
+    //diode ladder filter
+    typedef struct _tDiodeFilter
+    {
+        tMempool mempool;
+        float f;
+        float r;
+        float Vt;
+        float n;
+        float gamma;
+        float zi;
+        float g0inv;
+        float g1inv;
+        float g2inv;
+        float s0, s1, s2, s3;
+    } _tDiodeFilter;
+    
+    typedef _tDiodeFilter* tDiodeFilter;
+    
+    void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q);
+    void    tDiodeFilter_initToPool     (tDiodeFilter* const, float freq, float Q, tMempool* const);
+    void    tDiodeFilter_free           (tDiodeFilter* const);
+    
+    float   tDiodeFilter_tick               (tDiodeFilter* const, float input);
+    void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff);
+    void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance);
+    
+    
 #ifdef __cplusplus
 }
 #endif
@@ -475,4 +593,5 @@ extern "C" {
 #endif  // LEAF_FILTERS_H_INCLUDED
 
 //==============================================================================
+
 
