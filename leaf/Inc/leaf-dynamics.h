@@ -31,9 +31,39 @@ extern "C" {
     
     //==============================================================================
     
-    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    /*!
+     @defgroup tcompressor tCompressor
+     @ingroup dynamics
+     @brief
+     @{
+     */
     
-    /* Compressor */
+    /*!
+     @fn void    tCompressor_init        (tCompressor* const)
+     @brief
+     @param
+     */
+     
+    /*!
+     @fn void    tCompressor_initToPool  (tCompressor* const, tMempool* const)
+     @brief
+     @param
+     */
+     
+    /*!
+     @fn void    tCompressor_free        (tCompressor* const)
+     @brief
+     @param
+     */
+
+    /*!
+     @fn float   tCompressor_tick        (tCompressor* const, float input)
+     @brief
+     @param
+     */
+    
+    /*! @} */
+   
     typedef struct _tCompressor
     {
         tMempool mempool;
@@ -55,13 +85,70 @@ extern "C" {
     
     float   tCompressor_tick        (tCompressor* const, float input);
     
-    ///
-    /* Feedback leveller */
-    // An auto VCA that you put into a feedback circuit to make it stay at the same level.
-    // It can enforce level bidirectionally (amplifying and attenuating as needed) or
-    // just attenutating. The former option allows for infinite sustain strings, for example, while
-    // The latter option allows for decaying strings, which can never exceed
-    // a specific level.
+    
+    /*!
+     @defgroup tfeedbackleveler tFeedbackLeveler
+     @ingroup dynamics
+     @brief
+     @detail An auto VCA that you put into a feedback circuit to make it stay at the same level. It can enforce level bidirectionally (amplifying and attenuating as needed) or just attenutating. The former option allows for infinite sustain strings, for example, while The latter option allows for decaying strings, which can never exceed a specific level.
+     @{
+     */
+    
+    /*!
+     @fn void tFeedbackLeveler_init (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void tFeedbackLeveler_initToPool (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, tMempool* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tFeedbackLeveler_free           (tFeedbackLeveler* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tFeedbackLeveler_tick           (tFeedbackLeveler* const, float input)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tFeedbackLeveler_sample         (tFeedbackLeveler* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tFeedbackLeveler_setTargetLevel (tFeedbackLeveler* const, float TargetLevel)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tFeedbackLeveler_setFactor      (tFeedbackLeveler* const, float factor)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tFeedbackLeveler_setMode        (tFeedbackLeveler* const, int mode)
+     @brief
+     @param
+     */ // 0 for upwards limiting only, 1 for biderctional limiting
+    
+    /*!
+     @fn void    tFeedbackLeveler_setStrength    (tFeedbackLeveler* const, float strength)
+     @brief
+     @param
+     */
+    
+    /*! @} */
     
     typedef struct _tFeedbackLeveler
     {
@@ -91,7 +178,50 @@ extern "C" {
     //==============================================================================
     
 
-    //Threshold with hysteresis (like Max/MSP thresh~ object)
+    /*!
+     @defgroup tthreshold tThreshold
+     @ingroup dynamics
+     @brief Threshold with hysteresis (like Max/MSP thresh~ object)
+     @{
+     */
+    
+    /*!
+     @fn void    tThreshold_init        (tThreshold* const, float low, float high)
+     @brief
+     @param
+     */
+     
+    /*!
+     @fn void    tThreshold_initToPool  (tThreshold* const, float low, float high, tMempool* const)
+     @brief
+     @param
+     */
+     
+    /*!
+     @fn void    tThreshold_free        (tThreshold* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn int   tThreshold_tick        (tThreshold* const, float input)
+     @brief
+     @param
+     */
+     
+    /*!
+     @fn void   tThreshold_setLow        (tThreshold* const, float low)
+     @brief
+     @param
+     */
+     
+    /*!
+     @fn void   tThreshold_setHigh       (tThreshold* const, float high)
+     @brief
+     @param
+     */
+
+    /*! @} */
 
     typedef struct _tThreshold
     {

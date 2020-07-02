@@ -1329,7 +1329,7 @@ dl.section dd {
 	padding: 0px;
 	margin: 0px;
 	width: 100%;
-	border-bottom: 1px solid #5373B4;
+	border-bottom: 0px solid #5373B4;
 }
 
 .image
@@ -1908,7 +1908,7 @@ u {
 
 .tabs, .tabs2, .tabs3 {
     background-image: none;
-    background-color: #096e48;
+    background-color: transparent;
     width: 100%;
     z-index: 101;
     font-size: 14px;
@@ -1924,6 +1924,7 @@ u {
 }
 
 .tablist {
+	background-color: #096e48;
 	width: 100%;
     margin: 0;
     padding: 0;

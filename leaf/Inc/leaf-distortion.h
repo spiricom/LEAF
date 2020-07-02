@@ -29,6 +29,45 @@ extern "C" {
     
     //==============================================================================
     
+    /*!
+     @defgroup tsamplereducer tSampleReducer
+     @ingroup distortion
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void    tSampleReducer_init    (tSampleReducer* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tSampleReducer_initToPool   (tSampleReducer* const, tMempool* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tSampleReducer_free    (tSampleReducer* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tSampleReducer_tick    (tSampleReducer* const, float input)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tSampleReducer_setRatio (tSampleReducer* const, float ratio)
+     @brief
+     @param
+     */
+    
+    /*! @} */
+    
     typedef struct _tSampleReducer
     {
         tMempool mempool;
@@ -44,11 +83,60 @@ extern "C" {
     void    tSampleReducer_free    (tSampleReducer* const);
     
     float   tSampleReducer_tick    (tSampleReducer* const, float input);
-    
-    // sampling ratio
     void    tSampleReducer_setRatio (tSampleReducer* const, float ratio);
     
     //==============================================================================
+    
+    /*!
+     @defgroup toversampler tOversampler
+     @ingroup distortion
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void    tOversampler_init           (tOversampler* const, int order, oBool extraQuality)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tOversampler_initToPool     (tOversampler* const, int order, oBool extraQuality, tMempool* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tOversampler_free           (tOversampler* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tOversampler_upsample       (tOversampler* const, float input, float* output)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tOversampler_downsample     (tOversampler* const os, float* input)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tOversampler_tick           (tOversampler* const, float input, float* oversample, float (*effectTick)(float))
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn int     tOversampler_getLatency     (tOversampler* const os)
+     @brief
+     @param
+     */
+    
+    /*! @} */
     
     typedef struct _tOversampler
     {
@@ -74,7 +162,38 @@ extern "C" {
     
     //==============================================================================
     
-    /* tLockhartWavefolder */
+    /*!
+     @defgroup tlockhartwavefolder tLockhartWavefolder
+     @ingroup distortion
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void    tLockhartWavefolder_init    (tLockhartWavefolder* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tLockhartWavefolder_initToPool   (tLockhartWavefolder* const, tMempool* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tLockhartWavefolder_free    (tLockhartWavefolder* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tLockhartWavefolder_tick    (tLockhartWavefolder* const, float samp)
+     @brief
+     @param
+     */
+    
+    /*! @} */
     
     typedef struct _tLockhartWavefolder
     {
@@ -117,6 +236,63 @@ extern "C" {
 
     //==============================================================================
 
+    /*!
+     @defgroup tcrusher tCrusher
+     @ingroup distortion
+     @brief
+     @{
+     */
+    
+    /*!
+     @fn void    tCrusher_init    (tCrusher* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tCrusher_initToPool   (tCrusher* const, tMempool* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tCrusher_free    (tCrusher* const)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn float   tCrusher_tick    (tCrusher* const, float input)
+     @brief
+     @param
+     */
+    
+    /*!
+     @fn void    tCrusher_setOperation (tCrusher* const, float op)
+     @brief
+     @param 0.0 - 1.0
+     */
+    
+    /*!
+     @fn void    tCrusher_setQuality (tCrusher* const, float val)
+     @brief
+     @param 0.0 - 1.0
+     */
+    
+    /*!
+     @fn void    tCrusher_setRound (tCrusher* const, float rnd)
+     @brief
+     @param what division to round to
+     */
+    
+    /*!
+     @fn void    tCrusher_setSamplingRatio (tCrusher* const, float ratio)
+     @brief
+     @param sampling ratio
+     */
+    
+    /*! @} */
+    
     typedef struct _tCrusher
     {
         tMempool mempool;
@@ -139,21 +315,12 @@ extern "C" {
     void    tCrusher_free    (tCrusher* const);
     
     float   tCrusher_tick    (tCrusher* const, float input);
-    
-    // 0.0 - 1.0
     void    tCrusher_setOperation (tCrusher* const, float op);
-    
-    // 0.0 - 1.0
     void    tCrusher_setQuality (tCrusher* const, float val);
-    
-    // what division to round to
     void    tCrusher_setRound (tCrusher* const, float rnd);
-    
-    // sampling ratio
     void    tCrusher_setSamplingRatio (tCrusher* const, float ratio);
     
     //==============================================================================
-
     
 #ifdef __cplusplus
 }
