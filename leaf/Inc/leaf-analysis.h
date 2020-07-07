@@ -639,6 +639,124 @@ extern "C" {
     
     //==============================================================================
     
+    typedef struct _tZeroCrossing2
+    {
+        tMempool mempool;
+        
+        float _before_crossing;
+        float _after_crossing;
+        
+        float             _peak;
+        int               _leading_edge;// = undefined_edge; int_min
+        int               _trailing_edge;// = undefined_edge;
+        float             _width;// = 0.0f;
+    } _tZeroCrossing2;
+    
+    typedef _tZeroCrossing2* tZeroCrossing2;
+    
+    void    tZeroCrossing2_init  (tZeroCrossing2* const);
+    void    tZeroCrossing2_initToPool    (tZeroCrossing2* const, tMempool* const);
+    void    tZeroCrossing2_free  (tZeroCrossing2* const);
+    
+    int     tZeroCrossing2_tick(tZeroCrossing2* const, float s);
+    int     tZeroCrossing2_getState(tZeroCrossing2* const);
+    void    tZeroCrossing2_updatePeak(tZeroCrossing2* const, float s, int pos);
+    int     tZeroCrossing2_period(tZeroCrossing2* const, tZeroCrossing2* const next);
+    float   tZeroCrossing2_fractionalPeriod(tZeroCrossing2* const, tZeroCrossing2* const next);
+    int     tZeroCrossing2_getWidth(tZeroCrossing2* const);
+    int     tZeroCrossing2_isSimilar(tZeroCrossing2* const, tZeroCrossing2* const next);
+    
+    //==============================================================================
+    
+#define PULSE_HEIGHT_DIFF 0.8
+#define PULSE_WIDTH_DIFF 0.85
+    
+    typedef struct _tZeroCrossings
+    {
+        tMempool mempool;
+        
+        _tZeroCrossing2* _info;
+        
+        int index;
+        
+        float                _prev;// = 0.0f;
+        float                _hysteresis;
+        bool                 _state;// = false;
+        int                  _num_edges;// = 0;
+        int                  _window_size;
+        int                  _frame;// = 0;
+        bool                 _ready;// = false;
+        float                _peak_update;// = 0.0f;
+        float                _peak;// = 0.0f;
+    } _tZeroCrossings;
+    
+    typedef _tZeroCrossings* tZeroCrossings;
+    
+    void    tZeroCrossings_init  (tZeroCrossings* const, int windowSize, float hysteresis);
+    void    tZeroCrossings_initToPool    (tZeroCrossings* const, int windowSize, float hysteresis, tMempool* const);
+    void    tZeroCrossings_free  (tZeroCrossings* const);
+    
+    int     tZeroCrossings_tick(tZeroCrossings* const, float s);
+    int     tZeroCrossings_getState(tZeroCrossings* const);
+    
+    int     tZeroCrossings_getNumEdges(tZeroCrossings* const zc);
+    int     tZeroCrossings_getCapacity(tZeroCrossings* const zc);
+    int     tZeroCrossings_getFrame(tZeroCrossings* const zc);
+    int     tZeroCrossings_getWindowSize(tZeroCrossings* const zc);
+    
+    int     tZeroCrossings_isReady(tZeroCrossings* const zc);
+    float   tZeroCrossings_getPeak(tZeroCrossings* const zc);
+    int     tZeroCrossings_isReset(tZeroCrossings* const zc);
+    
+    tZeroCrossing2* const tZeroCrossings_getCrossing(int index);
+    
+    //==============================================================================
+    
+    typedef struct _tBitset
+    {
+        tMempool mempool;
+        
+        unsigned int* _bits;
+    } _tBitset;
+    
+    typedef _tBitset* tBitset;
+    
+    void    tBitset_init    (tBitset* const bitset, int numBits);
+    void    tBitset_initToPool  (tBitset* const bitset, int numBits, tMempool* const mempool);
+    void    tBitset_free    (tBitset* const bitset);
+    
+    int     tBitset_getSize (tBitset* const bitset);
+//    bitset&        operator=(bitset const& rhs) = default;
+//    bitset&        operator=(bitset&& rhs) = default;
+//
+//    std::size_t    size() const;
+//    void           clear();
+//    void           set(std::size_t i, bool val);
+//    void           set(std::size_t i, std::size_t n, bool val);
+//    bool           get(std::size_t i) const;
+//
+//    T*             data();
+//    T const*       data() const;
+    
+    //==============================================================================
+    
+    typedef struct _tBACF
+    {
+        tMempool mempool;
+        
+        int windowSize;
+        
+        
+    } _tBACF;
+    
+    typedef _tBACF* tBACF;
+    
+    void    tBACF_init  (tBACF* const, int windowSize);
+    void    tBACF_initToPool    (tBACF* const, int windowSize, tMempool* const);
+    void    tBACF_free  (tBACF* const);
+    
+    
+    
 #ifdef __cplusplus
 }
 #endif

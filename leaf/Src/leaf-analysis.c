@@ -950,3 +950,261 @@ void tPeriodDetection_setTolerance        (tPeriodDetection* pd, float tolerance
     if (tolerance < 0.0f) p->tolerance = 0.0f;
     else p->tolerance = tolerance;
 }
+
+
+void    tZeroCrossing2_init  (tZeroCrossing2* const zc)
+{
+    tZeroCrossing2_initToPool(zc, &leaf.mempool);
+}
+
+void    tZeroCrossing2_initToPool    (tZeroCrossing2* const zc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tZeroCrossing2* z = *zc = (_tZeroCrossing2*) mpool_alloc(sizeof(_tZeroCrossing2), m);
+    z->mempool = m;
+
+    z->_leading_edge = INT_MIN;
+    z->_trailing_edge = INT_MIN;
+    z->_width = 0.0f;
+}
+
+void    tZeroCrossing2_free  (tZeroCrossing2* const zc)
+{
+    _tZeroCrossing2* z = *zc;
+    
+    mpool_free((char*)z, z->mempool);
+}
+
+void    tZeroCrossing2_updatePeak(tZeroCrossing2* const zc, float s, int pos)
+{
+    _tZeroCrossing2* z = *zc;
+    
+    z->_peak = fmax(s, z->_peak);
+    if ((z->_width == 0.0f) && (s < (z->_peak * 0.3f)))
+        z->_width = pos - z->_leading_edge;
+}
+
+int     tZeroCrossing2_period(tZeroCrossing2* const zc, tZeroCrossing2* const next)
+{
+    _tZeroCrossing2* z = *zc;
+    _tZeroCrossing2* n = *next;
+    
+    return n->_leading_edge - z->_leading_edge;
+}
+
+float   tZeroCrossing2_fractionalPeriod(tZeroCrossing2* const zc, tZeroCrossing2* const next)
+{
+    _tZeroCrossing2* z = *zc;
+    _tZeroCrossing2* n = *next;
+    
+    // Get the start edge
+    float prev1 = z->_before_crossing;
+    float curr1 = z->_after_crossing;
+    float dy1 = curr1 - prev1;
+    float dx1 = -prev1 / dy1;
+    
+    // Get the next edge
+    float prev2 = n->_before_crossing;
+    float curr2 = n->_after_crossing;
+    float dy2 = curr2 - prev2;
+    float dx2 = -prev2 / dy2;
+    
+    // Calculate the fractional period
+    float result = n->_leading_edge - z->_leading_edge;
+    return result + (dx2 - dx1);
+}
+
+int     tZeroCrossing2_getWidth(tZeroCrossing2* const zc)
+{
+    _tZeroCrossing2* z = *zc;
+    
+    return z->_width;
+}
+
+int     tZeroCrossing2_isSimilar(tZeroCrossing2* const zc, tZeroCrossing2* const next)
+{
+    _tZeroCrossing2* z = *zc;
+    _tZeroCrossing2* n = *next;
+    
+    int similarPeak = fabs(z->_peak - n->_peak) <= ((1.0f - PULSE_HEIGHT_DIFF) * fmax(fabs(z->_peak), fabs(n->_peak)));
+    
+    int similarWidth = fabs(z->_width - n->_width) <= ((1.0f - PULSE_WIDTH_DIFF) * fmax(fabs(z->_width), fabs(n->_width)));
+    
+    return similarPeak && similarWidth;
+}
+
+
+static void update_state(tZeroCrossings* const zc, float s);
+static void shift(tZeroCrossings* const zc, int n);
+static void reset(tZeroCrossings* const zc);
+
+void    tZeroCrossings_init  (tZeroCrossings* const zc, int windowSize, float hysteresis)
+{
+    tZeroCrossings_initToPool(zc, windowSize, hysteresis, &leaf.mempool);
+}
+
+void    tZeroCrossings_initToPool    (tZeroCrossings* const zc, int windowSize, float hysteresis, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tZeroCrossings* z = *zc = (_tZeroCrossings*) mpool_alloc(sizeof(_tZeroCrossings), m);
+    z->mempool = m;
+    
+    z->_hysteresis = hysteresis;
+    int bits = CHAR_BIT * sizeof(unsigned int);
+    z->_window_size = fmax(2, (windowSize + bits - 1) / bits) * bits;
+    
+    // The current ring buffer and indexing implementation for this is less efficient than the original source
+    // May be worth porting over the ring buffer class from https://github.com/cycfi/q/tree/develop
+    z->_info = (_tZeroCrossing2*) mpool_alloc(sizeof(_tZeroCrossing2) * (z->_window_size / 2), m);
+    z->index = -1;
+}
+
+void    tZeroCrossings_free  (tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    mpool_free((char*)z, z->mempool);
+}
+
+int     tZeroCrossings_tick(tZeroCrossings* const zc, float s)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return z->_state;
+}
+
+int     tZeroCrossings_getState(tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return z->_state;
+}
+
+int     tZeroCrossings_getNumEdges(tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return z->_num_edges;
+}
+
+int     tZeroCrossings_getCapacity(tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return z->_window_size / 2;
+}
+
+int     tZeroCrossings_getFrame(tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return z->_frame;
+}
+
+int     tZeroCrossings_getWindowSize(tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return z->_window_size;
+}
+
+int     tZeroCrossings_isReady(tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return z->_ready;
+}
+
+float   tZeroCrossings_getPeak(tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return fmax(z->_peak, z->_peak_update);
+}
+
+int     tZeroCrossings_isReset(tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return z->_frame == 0;
+}
+
+static void update_state(tZeroCrossings* const zc, float s)
+{
+    _tZeroCrossings* z = *zc;
+    
+    int capacity = z->_window_size / 2;
+    if (z->_ready)
+    {
+        shift(zc, capacity);
+        z->_ready = 0;
+        z->_peak = z->_peak_update;
+        z->_peak_update = 0.0f;
+    }
+    
+    if (z->_num_edges >= capacity)
+        reset(zc);
+    
+    if (s > 0.0f)
+    {
+        if (!z->_state)
+        {
+            ++z->index;
+            _tZeroCrossing2 crossing = z->_info[z->index];
+            crossing._before_crossing = z->_prev;
+            crossing._after_crossing = s;
+            crossing._peak = s;
+            crossing._leading_edge = (int) z->_frame;
+            ++z->_num_edges;
+            z->_state = 1;
+        }
+        else
+        {
+            tZeroCrossing2 ptr = &z->_info[z->index];
+            tZeroCrossing2_updatePeak(&ptr, s, z->_frame);
+        }
+        if (s > z->_peak_update)
+        {
+            z->_peak_update = s;
+        }
+    }
+    else if (z->_state && (s < z->_hysteresis))
+    {
+        z->_state = 0;
+        z->_info[z->index]._trailing_edge = z->_frame;
+        if (z->_peak == 0.0f)
+            z->_peak = z->_peak_update;
+    }
+    
+    z->_prev = s;
+}
+
+static void shift(tZeroCrossings* const zc, int n)
+{
+    _tZeroCrossings* z = *zc;
+    
+    _tZeroCrossing2 crossing = z->_info[z->index];
+    
+    crossing._leading_edge -= n;
+    if (!z->_state)
+        crossing._trailing_edge -= n;
+    int i = 1;
+    for (; i != z->_num_edges; ++i)
+    {
+        int idx = (z->index + i) % (z->_window_size / 2);
+        z->_info[idx]._leading_edge -= n;
+        int edge = (z->_info[idx]._trailing_edge -= n);
+        if (edge < 0.0f)
+            break;
+    }
+    z->_num_edges = i;
+}
+
+static void reset(tZeroCrossings* const zc)
+{
+    _tZeroCrossings* z = *zc;
+    
+    z->_num_edges = 0;
+    z->_state = 0;
+    z->_frame = 0;
+}
