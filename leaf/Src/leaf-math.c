@@ -720,4 +720,14 @@ float minimum (float num1, float num2)
     return (num1 < num2 ) ? num1 : num2;
 }
 
-
+// built in compiler popcount functions should be faster but we want this to be portable
+// could try to add some define that call the correct function depending on compiler
+// or let the user pointer popcount() to whatever they want
+// something to look into...
+int popcount(unsigned int x)
+{
+    int c = 0;
+    for (; x != 0; x &= x - 1)
+        c++;
+    return c;
+}

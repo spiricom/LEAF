@@ -20,6 +20,7 @@ extern "C" {
 #include "leaf-math.h"
 #include "leaf-filters.h"
 #include "leaf-envelopes.h"
+#include "leaf-delay.h"
     
     /*!
      * @internal
@@ -675,9 +676,10 @@ extern "C" {
     {
         tMempool mempool;
         
-        _tZeroCrossing2* _info;
-        
-        int index;
+        tZeroCrossing2* _info;
+        unsigned int _size;
+        unsigned int _pos;
+        unsigned int _mask;
         
         float                _prev;// = 0.0f;
         float                _hysteresis;
@@ -708,7 +710,7 @@ extern "C" {
     float   tZeroCrossings_getPeak(tZeroCrossings* const zc);
     int     tZeroCrossings_isReset(tZeroCrossings* const zc);
     
-    tZeroCrossing2* const tZeroCrossings_getCrossing(int index);
+    tZeroCrossing2 const tZeroCrossings_getCrossing(tZeroCrossings* const zc, int index);
     
     //==============================================================================
     
@@ -716,6 +718,9 @@ extern "C" {
     {
         tMempool mempool;
         
+        unsigned int _value_size;
+        unsigned int _size;
+        unsigned int _bit_size;
         unsigned int* _bits;
     } _tBitset;
     
@@ -725,18 +730,15 @@ extern "C" {
     void    tBitset_initToPool  (tBitset* const bitset, int numBits, tMempool* const mempool);
     void    tBitset_free    (tBitset* const bitset);
     
+    int     tBitset_get     (tBitset* const bitset, int index);
+    unsigned int*   tBitset_getData   (tBitset* const bitset);
+    
+    void    tBitset_set     (tBitset* const bitset, int index, unsigned int val);
+    void    tBitset_setMultiple (tBitset* const bitset, int index, int n, unsigned int val);
+
     int     tBitset_getSize (tBitset* const bitset);
-//    bitset&        operator=(bitset const& rhs) = default;
-//    bitset&        operator=(bitset&& rhs) = default;
-//
-//    std::size_t    size() const;
-//    void           clear();
-//    void           set(std::size_t i, bool val);
-//    void           set(std::size_t i, std::size_t n, bool val);
-//    bool           get(std::size_t i) const;
-//
-//    T*             data();
-//    T const*       data() const;
+    void    tBitset_clear   (tBitset* const bitset);
+
     
     //==============================================================================
     
@@ -744,16 +746,74 @@ extern "C" {
     {
         tMempool mempool;
         
-        int windowSize;
-        
-        
+        tBitset _bitset;
+        unsigned int _mid_array;
     } _tBACF;
     
     typedef _tBACF* tBACF;
     
-    void    tBACF_init  (tBACF* const, int windowSize);
-    void    tBACF_initToPool    (tBACF* const, int windowSize, tMempool* const);
-    void    tBACF_free  (tBACF* const);
+    void    tBACF_init  (tBACF* const bacf, tBitset* const bitset);
+    void    tBACF_initToPool    (tBACF* const bacf, tBitset* const bitset, tMempool* const mempool);
+    void    tBACF_free  (tBACF* const bacf);
+    
+    int    tBACF_tick  (tBACF* const bacf, int pos);
+    
+    //==============================================================================
+    
+#define PULSE_THRESHOLD 0.6f
+#define HARMONIC_PERIODICITY_FACTOR 16
+#define PERIODICITY_DIFF_FACTOR 0.008f
+    
+    typedef struct _auto_correlation_info
+    {
+        int               _i1;// = -1;
+        int               _i2;// = -1;
+        int               _period;// = -1;
+        float             _periodicity;// = 0.0f;
+        unsigned int      _harmonic;
+    } _auto_correlation_info;
+    
+    typedef struct _sub_collector
+    {
+        tMempool mempool;
+        
+        float             _first_period;
+        
+        _auto_correlation_info _fundamental;
+        
+        // passed in, not initialized
+        tZeroCrossing           _zc;
+        
+        float             _harmonic_threshold;
+        float             _periodicity_diff_threshold;
+        int               _range;
+    } _sub_collector;
+
+    typedef struct _tPeriodDetector
+    {
+        tMempool mempool;
+        
+        tZeroCrossings          _zc;
+        float                   _period;
+        float                   _periodicity;
+        unsigned int            _min_period;
+        int                     _range;
+        tBitset                 _bits;
+        float                   _weight;
+        unsigned int            _mid_point;
+        float                   _periodicity_diff_threshold;
+        float                   _predicted_period;// = -1.0f;
+        unsigned int            _edge_mark;// = 0;
+        unsigned int            _predict_edge;// = 0;
+    } _tPeriodDetector;
+    
+    typedef _tPeriodDetector* tPeriodDetector;
+    
+    void    tPeriodDetector_init    (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis);
+    void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool);
+    void    tPeriodDetector_free    (tPeriodDetector* const detector);
+    
+    float   tPeriodDetector_tick    (tPeriodDetector* const detector, float sample);
     
     
     

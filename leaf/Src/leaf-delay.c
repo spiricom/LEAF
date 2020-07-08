@@ -901,3 +901,69 @@ float tTapeDelay_getGain (tTapeDelay* const dl)
     return d->gain;
 }
 
+
+
+void    tRingBuffer_init     (tRingBuffer* const ring, int size)
+{
+    tRingBuffer_initToPool(ring, size, &leaf.mempool);
+}
+
+void    tRingBuffer_initToPool   (tRingBuffer* const ring, int size, tMempool* const mempool)
+{
+    _tMempool* m = *mempool;
+    _tRingBuffer* r = *ring = (_tRingBuffer*) mpool_alloc(sizeof(_tRingBuffer), m);
+    r->mempool = m;
+    
+    // Ensure size is a power of 2
+    if (size <= 0) r->size = 1;
+    else r->size = pow(2, ceil(log2(size)));
+    r->mask = r->size - 1;
+    
+    r->buffer = (float*) mpool_calloc(sizeof(float) * r->size, m);
+    r->pos = 0;
+}
+
+void    tRingBuffer_free     (tRingBuffer* const ring)
+{
+    _tRingBuffer* r = *ring;
+    
+    mpool_free((char*) r->buffer, r->mempool);
+    mpool_free((char*) r, r->mempool);
+}
+
+void   tRingBuffer_push     (tRingBuffer* const ring, float val)
+{
+    _tRingBuffer* r = *ring;
+    
+    --r->pos;
+    r->pos &= r->mask;
+    r->buffer[r->pos] = val;
+}
+
+float   tRingBuffer_getNewest    (tRingBuffer* const ring)
+{
+    _tRingBuffer* r = *ring;
+    
+    return r->buffer[r->pos];
+}
+
+float   tRingBuffer_getOldest    (tRingBuffer* const ring)
+{
+    _tRingBuffer* r = *ring;
+    
+    return r->buffer[(r->pos + r->size - 1) & r->mask];
+}
+
+float   tRingBuffer_get      (tRingBuffer* const ring, int index)
+{
+    _tRingBuffer* r = *ring;
+    
+    return r->buffer[(r->pos + index) & r->mask];
+}
+
+int     tRingBuffer_getSize  (tRingBuffer* const ring)
+{
+    _tRingBuffer* r = *ring;
+    
+    return r->size;
+}

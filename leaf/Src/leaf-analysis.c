@@ -1034,9 +1034,9 @@ int     tZeroCrossing2_isSimilar(tZeroCrossing2* const zc, tZeroCrossing2* const
 }
 
 
-static void update_state(tZeroCrossings* const zc, float s);
-static void shift(tZeroCrossings* const zc, int n);
-static void reset(tZeroCrossings* const zc);
+static inline void update_state(tZeroCrossings* const zc, float s);
+static inline void shift(tZeroCrossings* const zc, int n);
+static inline void reset(tZeroCrossings* const zc);
 
 void    tZeroCrossings_init  (tZeroCrossings* const zc, int windowSize, float hysteresis)
 {
@@ -1053,10 +1053,16 @@ void    tZeroCrossings_initToPool    (tZeroCrossings* const zc, int windowSize, 
     int bits = CHAR_BIT * sizeof(unsigned int);
     z->_window_size = fmax(2, (windowSize + bits - 1) / bits) * bits;
     
-    // The current ring buffer and indexing implementation for this is less efficient than the original source
-    // May be worth porting over the ring buffer class from https://github.com/cycfi/q/tree/develop
-    z->_info = (_tZeroCrossing2*) mpool_alloc(sizeof(_tZeroCrossing2) * (z->_window_size / 2), m);
-    z->index = -1;
+    int size = z->_window_size / 2;
+    
+    // Ensure size is a power of 2
+    z->_size = pow(2, ceil(log2(size)));
+    z->_mask = z->_size - 1;
+
+    z->_info = (tZeroCrossing2*) mpool_alloc(sizeof(tZeroCrossing2) * z->_size, m);
+    for (int i = 0; i < z->_size; i++)
+        tZeroCrossing2_initToPool(&z->_info[i], mp);
+    z->_pos = 0;
 }
 
 void    tZeroCrossings_free  (tZeroCrossings* const zc)
@@ -1070,6 +1076,30 @@ int     tZeroCrossings_tick(tZeroCrossings* const zc, float s)
 {
     _tZeroCrossings* z = *zc;
     
+    // Offset s by half of hysteresis, so that zero cross detection is
+    // centered on the actual zero.
+    s += z->_hysteresis * 0.5f;
+    
+    if (z->_num_edges >= z->_size)
+        reset(zc);
+    
+    if ((z->_frame == z->_window_size/2) && z->_num_edges == 0)
+        reset(zc);
+    
+    update_state(zc, s);
+    
+    if (++z->_frame >= z->_window_size && !z->_state)
+    {
+        // Remove half the size from _frame, so we can continue seamlessly
+        z->_frame -= z->_window_size / 2;
+        
+        // We need at least two rising edges.
+        if (z->_num_edges > 1)
+            z->_ready = true;
+        else
+            reset(zc);
+    }
+    
     return z->_state;
 }
 
@@ -1078,6 +1108,13 @@ int     tZeroCrossings_getState(tZeroCrossings* const zc)
     _tZeroCrossings* z = *zc;
     
     return z->_state;
+}
+
+tZeroCrossing2 const tZeroCrossings_getCrossing(tZeroCrossings* const zc, int index)
+{
+    _tZeroCrossings* z = *zc;
+    
+    return z->_info[(z->_num_edges - 1) - index];
 }
 
 int     tZeroCrossings_getNumEdges(tZeroCrossings* const zc)
@@ -1091,7 +1128,7 @@ int     tZeroCrossings_getCapacity(tZeroCrossings* const zc)
 {
     _tZeroCrossings* z = *zc;
     
-    return z->_window_size / 2;
+    return z->_size;
 }
 
 int     tZeroCrossings_getFrame(tZeroCrossings* const zc)
@@ -1129,7 +1166,7 @@ int     tZeroCrossings_isReset(tZeroCrossings* const zc)
     return z->_frame == 0;
 }
 
-static void update_state(tZeroCrossings* const zc, float s)
+static inline void update_state(tZeroCrossings* const zc, float s)
 {
     _tZeroCrossings* z = *zc;
     
@@ -1149,8 +1186,9 @@ static void update_state(tZeroCrossings* const zc, float s)
     {
         if (!z->_state)
         {
-            ++z->index;
-            _tZeroCrossing2 crossing = z->_info[z->index];
+            --z->_pos;
+            z->_pos &= z->_mask;
+            _tZeroCrossing2 crossing = *z->_info[z->_pos];
             crossing._before_crossing = z->_prev;
             crossing._after_crossing = s;
             crossing._peak = s;
@@ -1160,8 +1198,7 @@ static void update_state(tZeroCrossings* const zc, float s)
         }
         else
         {
-            tZeroCrossing2 ptr = &z->_info[z->index];
-            tZeroCrossing2_updatePeak(&ptr, s, z->_frame);
+            tZeroCrossing2_updatePeak(&z->_info[z->_pos], s, z->_frame);
         }
         if (s > z->_peak_update)
         {
@@ -1171,7 +1208,7 @@ static void update_state(tZeroCrossings* const zc, float s)
     else if (z->_state && (s < z->_hysteresis))
     {
         z->_state = 0;
-        z->_info[z->index]._trailing_edge = z->_frame;
+        z->_info[z->_pos]->_trailing_edge = z->_frame;
         if (z->_peak == 0.0f)
             z->_peak = z->_peak_update;
     }
@@ -1179,32 +1216,338 @@ static void update_state(tZeroCrossings* const zc, float s)
     z->_prev = s;
 }
 
-static void shift(tZeroCrossings* const zc, int n)
+static inline void shift(tZeroCrossings* const zc, int n)
 {
     _tZeroCrossings* z = *zc;
     
-    _tZeroCrossing2 crossing = z->_info[z->index];
+    tZeroCrossing2 crossing = z->_info[z->_pos];
     
-    crossing._leading_edge -= n;
+    crossing->_leading_edge -= n;
     if (!z->_state)
-        crossing._trailing_edge -= n;
+        crossing->_trailing_edge -= n;
     int i = 1;
     for (; i != z->_num_edges; ++i)
     {
-        int idx = (z->index + i) % (z->_window_size / 2);
-        z->_info[idx]._leading_edge -= n;
-        int edge = (z->_info[idx]._trailing_edge -= n);
+        int idx = (z->_pos + i) & z->_mask;
+        z->_info[idx]->_leading_edge -= n;
+        int edge = (z->_info[idx]->_trailing_edge -= n);
         if (edge < 0.0f)
             break;
     }
     z->_num_edges = i;
 }
 
-static void reset(tZeroCrossings* const zc)
+static inline void reset(tZeroCrossings* const zc)
 {
     _tZeroCrossings* z = *zc;
     
     z->_num_edges = 0;
     z->_state = 0;
     z->_frame = 0;
+}
+
+
+
+void    tBitset_init    (tBitset* const bitset, int numBits)
+{
+    tBitset_initToPool(bitset, numBits, &leaf.mempool);
+}
+
+void    tBitset_initToPool  (tBitset* const bitset, int numBits, tMempool* const mempool)
+{
+    _tMempool* m = *mempool;
+    _tBitset* b = *bitset = (_tBitset*) mpool_alloc(sizeof(_tBitset), m);
+    b->mempool = m;
+    
+    // Size of the array value in bits
+    b->_value_size = (CHAR_BIT * sizeof(unsigned int));
+    
+    // Size of the array needed to store numBits bits
+    b->_size = (numBits + b->_value_size - 1) / b->_value_size;
+    
+    // Siz of the array in bits
+    b->_bit_size = b->_size * b->_value_size;
+    
+    b->_bits = (unsigned int*) mpool_calloc(sizeof(unsigned int) * b->_size, m);
+}
+
+void    tBitset_free    (tBitset* const bitset)
+{
+    _tBitset* b = *bitset;
+    
+    mpool_free((char*) b->_bits, b->mempool);
+    mpool_free((char*) b, b->mempool);
+}
+
+int     tBitset_get     (tBitset* const bitset, int index)
+{
+    _tBitset* b = *bitset;
+    
+    // Check we don't get past the storage
+    if (index > b->_bit_size)
+        return -1;
+    
+    unsigned int mask = 1 << (index % b->_value_size);
+    return (b->_bits[index / b->_value_size] & mask) != 0;
+}
+
+unsigned int*   tBitset_getData   (tBitset* const bitset)
+{
+    _tBitset* b = *bitset;
+    
+    return b->_bits;
+}
+
+void     tBitset_set     (tBitset* const bitset, int index, unsigned int val)
+{
+    _tBitset* b = *bitset;
+    
+    if (index > b->_bit_size)
+        return;
+    
+    unsigned int mask = 1 << (index % b->_value_size);
+    int i = index / b->_value_size;
+    b->_bits[i] ^= (-val ^ b->_bits[i]) & mask;
+}
+
+void     tBitset_setMultiple (tBitset* const bitset, int index, int n, unsigned int val)
+{
+    _tBitset* b = *bitset;
+    
+    // Check that the index (i) does not get past size
+    if (index > b->_bit_size)
+        return;
+    
+    // Check that the n does not get past the size
+    if ((index+n) > b->_bit_size)
+        n = b->_bit_size - index;
+    
+    // index is the bit index, i is the integer index
+    int i = index / b->_value_size;
+    
+    // Do the first partial int
+    int mod = index & (b->_value_size - 1);
+    if (mod)
+    {
+        // mask off the high n bits we want to set
+        mod = b->_value_size - mod;
+        
+        // Calculate the mask
+        unsigned int mask = ~(UINT_MAX >> mod);
+        
+        // Adjust the mask if we're not going to reach the end of this int
+        if (n < mod)
+            mask &= (UINT_MAX >> (mod - n));
+        
+        if (val)
+            b->_bits[i] |= mask;
+        else
+            b->_bits[i] &= ~mask;
+        
+        // Fast exit if we're done here!
+        if (n < mod)
+            return;
+        
+        n -= mod;
+        ++i;
+    }
+    
+    // Write full ints while we can - effectively doing value_size bits at a time
+    if (n >= b->_value_size)
+    {
+        // Store a local value to work with
+        unsigned int val_ = val ? UINT_MAX : 0;
+        
+        do
+        {
+            b->_bits[i++] = val_;
+            n -= b->_value_size;
+        }
+        while (n >= b->_value_size);
+    }
+    
+    // Now do the final partial int, if necessary
+    if (n)
+    {
+        mod = n & (b->_value_size - 1);
+        
+        // Calculate the mask
+        unsigned int mask = (1 << mod) - 1;
+        
+        if (val)
+            b->_bits[i] |= mask;
+        else
+            b->_bits[i] &= ~mask;
+    }
+}
+
+int     tBitset_getSize (tBitset* const bitset)
+{
+    _tBitset* b = *bitset;
+    
+    return b->_bit_size;
+}
+
+void    tBitset_clear   (tBitset* const bitset)
+{
+    _tBitset* b = *bitset;
+    
+    for (int i = 0; i < b->_size; ++i)
+    {
+        b->_bits[i] = 0;
+    }
+}
+
+
+
+void    tBACF_init  (tBACF* const bacf, tBitset* const bitset)
+{
+    tBACF_initToPool(bacf, bitset, &leaf.mempool);
+}
+
+void    tBACF_initToPool    (tBACF* const bacf, tBitset* const bitset, tMempool* const mempool)
+{
+    _tMempool* m = *mempool;
+    _tBACF* b = *bacf = (_tBACF*) mpool_alloc(sizeof(_tBACF), m);
+    b->mempool = m;
+    
+    b->_bitset = *bitset;
+    b->_mid_array = ((b->_bitset->_bit_size / b->_bitset->_value_size) / 2) - 1;
+}
+
+void    tBACF_free  (tBACF* const bacf)
+{
+    _tBACF* b = *bacf;
+    
+    mpool_free((char*) b, b->mempool);
+}
+
+int    tBACF_tick  (tBACF* const bacf, int pos)
+{
+    _tBACF* b = *bacf;
+    
+    int value_size = b->_bitset->_value_size;
+    const int index = pos / value_size;
+    const int shift = pos % value_size;
+    
+    const unsigned int* p1 = b->_bitset->_bits;
+    const unsigned int* p2 = b->_bitset->_bits + index;
+    int count = 0;
+    
+    if (shift == 0)
+    {
+        for (int i = 0; i != b->_mid_array; ++i)
+            // built in compiler popcount functions should be faster but we want this to be portable
+            // could try to add some define that call the correct function depending on compiler
+            // or let the user pointer popcount() to whatever they want
+            // something to look into...
+            count += popcount(*p1++ ^ *p2++);
+    }
+    else
+    {
+        const int shift2 = value_size - shift;
+        for (int i = 0; i != b->_mid_array; ++i)
+        {
+            unsigned int v = *p2++ >> shift;
+            v |= *p2 << shift2;
+            count += popcount(*p1++ ^ v);
+        }
+    }
+    return count;
+    
+}
+
+static inline void set_bitstream(tPeriodDetector* const detector);
+static inline void autocorrelate(tPeriodDetector* const detector);
+static inline void sub_collector_init(_sub_collector collector, tZeroCrossings* const crossings, float pdt, int range);
+
+void    tPeriodDetector_init    (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis)
+{
+    tPeriodDetector_initToPool(detector, lowestFreq, highestFreq, hysteresis, &leaf.mempool);
+}
+
+void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool)
+{
+    _tMempool* m = *mempool;
+    _tPeriodDetector* p = *detector = (_tPeriodDetector*) mpool_alloc(sizeof(_tPeriodDetector), m);
+    p->mempool = m;
+    
+    tZeroCrossings_initToPool(&p->_zc, (1.0f / lowestFreq) * leaf.sampleRate * 2.0f, hysteresis, mempool);
+    p->_min_period = (1.0f / highestFreq) * leaf.sampleRate;
+    p->_range = highestFreq / lowestFreq;
+    
+    int windowSize = tZeroCrossings_getWindowSize(&p->_zc);
+    tBitset_initToPool(&p->_bits, windowSize, mempool);
+    p->_weight = 2.0f / windowSize;
+    p->_mid_point = windowSize / 2;
+    p->_periodicity_diff_threshold = p->_mid_point * PERIODICITY_DIFF_FACTOR;
+    
+    p->_predicted_period = -1.0f;
+    p->_edge_mark = 0;
+    p->_predict_edge = 0;
+}
+
+void    tPeriodDetector_free    (tPeriodDetector* const detector)
+{
+    _tPeriodDetector* p = *detector;
+    
+    tZeroCrossings_free(&p->_zc);
+    tBitset_free(&p->_bits);
+    
+    mpool_free((char*) p, p->mempool);
+}
+
+float   tPeriodDetector_tick    (tPeriodDetector* const detector, float s)
+{
+    _tPeriodDetector* p = *detector;
+    
+    // Zero crossing
+    int prev = tZeroCrossings_getState(&p->_zc);
+    int zc = tZeroCrossings_tick(&p->_zc, s);
+    
+    if (!zc && prev != zc)
+    {
+        ++p->_edge_mark;
+        p->_predicted_period = -1.0f;
+    }
+    
+    if (tZeroCrossings_isReset(&p->_zc))
+    {
+        p->_period = -1;
+        p->_periodicity = 0.0f;
+    }
+    
+    if (tZeroCrossings_isReady(&p->_zc))
+    {
+        set_bitstream(detector);
+        autocorrelate(detector);
+        return true;
+    }
+    return false;
+}
+
+
+static inline void set_bitstream(tPeriodDetector* const detector)
+{
+    _tPeriodDetector* p = *detector;
+    
+    float threshold = tZeroCrossings_getPeak(&p->_zc) * PULSE_THRESHOLD;
+    
+    tBitset_clear(&p->_bits);
+
+    for (int i = 0; i != tZeroCrossings_getNumEdges(&p->_zc); ++i)
+    {
+        tZeroCrossing2 info = tZeroCrossings_getCrossing(&p->_zc, i);
+        if (info->_peak >= threshold)
+        {
+            int pos = fmax(info->_leading_edge, 0);
+            int n = info->_trailing_edge - pos;
+            tBitset_setMultiple(&p->_bits, pos, n, 1);
+        }
+    }
+}
+
+static inline void autocorrelate(tPeriodDetector* const detector)
+{
+    _tPeriodDetector* p = *detector;
 }

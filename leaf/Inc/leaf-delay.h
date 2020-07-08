@@ -667,6 +667,29 @@ extern "C" {
     
     //==============================================================================
     
+    typedef struct _tRingBuffer
+    {
+        tMempool mempool;
+        
+        float* buffer;
+        unsigned int size;
+        unsigned int pos;
+        unsigned int mask;
+    } _tRingBuffer;
+    
+    typedef _tRingBuffer* tRingBuffer;
+    
+    void    tRingBuffer_init     (tRingBuffer* const ring, int size);
+    void    tRingBuffer_initToPool   (tRingBuffer* const ring, int size, tMempool* const mempool);
+    void    tRingBuffer_free     (tRingBuffer* const ring);
+    
+    void    tRingBuffer_push     (tRingBuffer* const ring, float val);
+    float   tRingBuffer_getNewest    (tRingBuffer* const ring);
+    float   tRingBuffer_getOldest    (tRingBuffer* const ring);
+    float   tRingBuffer_get      (tRingBuffer* const ring, int index);
+    float   tRingBuffer_clear    (tRingBuffer* const ring);
+    int     tRingBuffer_getSize  (tRingBuffer* const ring);
+    
 #ifdef __cplusplus
 }
 #endif

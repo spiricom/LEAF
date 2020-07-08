@@ -210,6 +210,12 @@ extern "C" {
     float maximum (float num1, float num2);
 
     float minimum (float num1, float num2);
+    
+    // built in compiler popcount functions should be faster but we want this to be portable
+    // could try to add some define that call the correct function depending on compiler
+    // or let the user pointer popcount() to whatever they want
+    // something to look into...
+    int popcount(unsigned int x);
 
 
     //==============================================================================
