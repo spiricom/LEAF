@@ -66,10 +66,9 @@ void OopsAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
     LEAFTest_block();
     
     MidiMessage m;
-    int time;
-    
-    for (MidiBuffer::Iterator i (midiMessages); i.getNextEvent (m, time);)
+    for (MidiMessageMetadata metadata : midiMessages)
     {
+        m = metadata.getMessage();
         int noteNumber = m.getNoteNumber();
         float velocity = m.getFloatVelocity();
         

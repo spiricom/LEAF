@@ -33,6 +33,8 @@ tMBSaw bsaw;
 tMBTriangle btri;
 tMBPulse bpulse;
 
+tPitchDetector detector;
+
 float gain;
 float freq;
 float dtime;
@@ -42,7 +44,7 @@ float x = 0.0f;
 float y = 0.0f;
 float a, b, c, d;
 
-#define MSIZE 50000
+#define MSIZE 500000
 char memory[MSIZE];
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
@@ -52,6 +54,8 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tMBSaw_init(&bsaw);
     tMBTriangle_init(&btri);
     tMBPulse_init(&bpulse);
+    
+    tPitchDetector_init(&detector, 1000.0f, 5000.0f, 0.0f);
 }
 
 inline double getSawFall(double angle) {
@@ -65,22 +69,30 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
-    tMBSaw_setFreq(&bsaw, x);
-    tMBTriangle_setFreq(&btri, x);
-    tMBPulse_setFreq(&bpulse, x);
+//    tMBSaw_setFreq(&bsaw, x);
+//    tMBTriangle_setFreq(&btri, x);
+//    tMBPulse_setFreq(&bpulse, x);
+//
+//    tMBTriangle_setWidth(&btri, y);
+//    tMBPulse_setWidth(&bpulse, y);
+//
+////    return tMBSaw_tick(&bsaw);
+////    return tMBTriangle_tick(&btri);
+//    return tMBPulse_tick(&bpulse);
     
-    tMBTriangle_setWidth(&btri, y);
-    tMBPulse_setWidth(&bpulse, y);
+    tPitchDetector_tick(&detector, input);
 
-//    return tMBSaw_tick(&bsaw);
-//    return tMBTriangle_tick(&btri);
-    return tMBPulse_tick(&bpulse);
+    tMBTriangle_setFreq(&btri, tPitchDetector_getFrequency(&detector));
+    
+    return input + tMBTriangle_tick(&btri) * 0.25;
 }
 
 int firstFrame = 1;
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
+    DBG(tPitchDetector_getFrequency(&detector));
+    DBG(tPitchDetector_getPeriodicity(&detector));
     //    if (firstFrame == 1)
     //    {
     //        tBuffer_record(&buff); // starts recording
@@ -94,15 +106,15 @@ void    LEAFTest_block           (void)
     
     //    a = val * tBuffer_getBufferLength(&buff);
     
-    DBG("start: " + String(a));
+//    DBG("start: " + String(a));
     
     val = getSliderValue("mod depth");
     
     y = val * 2.0f - 1.0f;
-    DBG(String(y));
+//    DBG(String(y));
     //    b = val * tBuffer_getBufferLength(&buff);
     
-    DBG("rate: " + String(b));
+//    DBG("rate: " + String(b));
     //
     //    tSampler_setStart(&samp, a);
     //    tSampler_setEnd(&samp, b);

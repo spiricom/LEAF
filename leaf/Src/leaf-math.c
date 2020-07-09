@@ -731,3 +731,8 @@ int popcount(unsigned int x)
         c++;
     return c;
 }
+
+float median3f(float a, float b, float c)
+{
+    return fmax(fmin(a, b), fmin(fmax(a, b), c));
+}

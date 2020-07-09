@@ -683,11 +683,11 @@ extern "C" {
         
         float                _prev;// = 0.0f;
         float                _hysteresis;
-        bool                 _state;// = false;
+        int                  _state;// = false;
         int                  _num_edges;// = 0;
         int                  _window_size;
         int                  _frame;// = 0;
-        bool                 _ready;// = false;
+        int                  _ready;// = false;
         float                _peak_update;// = 0.0f;
         float                _peak;// = 0.0f;
     } _tZeroCrossings;
@@ -756,7 +756,8 @@ extern "C" {
     void    tBACF_initToPool    (tBACF* const bacf, tBitset* const bitset, tMempool* const mempool);
     void    tBACF_free  (tBACF* const bacf);
     
-    int    tBACF_tick  (tBACF* const bacf, int pos);
+    int     tBACF_getCorrelation    (tBACF* const bacf, int pos);
+    void    tBACF_set  (tBACF* const bacf, tBitset* const bitset);
     
     //==============================================================================
     
@@ -782,7 +783,7 @@ extern "C" {
         _auto_correlation_info _fundamental;
         
         // passed in, not initialized
-        tZeroCrossing           _zc;
+        tZeroCrossings    _zc;
         
         float             _harmonic_threshold;
         float             _periodicity_diff_threshold;
@@ -794,8 +795,7 @@ extern "C" {
         tMempool mempool;
         
         tZeroCrossings          _zc;
-        float                   _period;
-        float                   _periodicity;
+        float                   _period_info[2]; // i0 is period, i1 is periodicity
         unsigned int            _min_period;
         int                     _range;
         tBitset                 _bits;
@@ -805,6 +805,9 @@ extern "C" {
         float                   _predicted_period;// = -1.0f;
         unsigned int            _edge_mark;// = 0;
         unsigned int            _predict_edge;// = 0;
+        
+        tBACF                   _bacf;
+        
     } _tPeriodDetector;
     
     typedef _tPeriodDetector* tPeriodDetector;
@@ -813,7 +816,49 @@ extern "C" {
     void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool);
     void    tPeriodDetector_free    (tPeriodDetector* const detector);
     
-    float   tPeriodDetector_tick    (tPeriodDetector* const detector, float sample);
+    int     tPeriodDetector_tick    (tPeriodDetector* const detector, float sample);
+    
+    // get the periodicity for a given harmonic
+    float   tPeriodDetector_getPeriod   (tPeriodDetector* const detector);
+    float   tPeriodDetector_getPeriodicity  (tPeriodDetector* const detector);
+    float   tPeriodDetector_harmonic    (tPeriodDetector* const detector, int harmonicIndex);
+    float   tPeriodDetector_predictPeriod   (tPeriodDetector* const detector);
+    int     tPeriodDetector_isReady (tPeriodDetector* const detector);
+    
+    //==============================================================================
+    
+#define MAX_DEVIATION 0.9f
+#define MIN_PERIODICITY 0.8f
+    
+    typedef struct _tPitchDetector
+    {
+        tMempool mempool;
+        
+        tPeriodDetector _pd;
+        float _frequency;
+        float _median, _median_b, _median_c;
+        float _predict_median, _predict_median_b, _predict_median_c;
+        int _frames_after_shift;// = 0;
+        
+    } _tPitchDetector;
+    
+    typedef _tPitchDetector* tPitchDetector;
+    
+    void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis);
+    void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool);
+    void    tPitchDetector_free (tPitchDetector* const detector);
+    
+    int     tPitchDetector_tick    (tPitchDetector* const detector, float sample);
+    float   tPitchDetector_getFrequency    (tPitchDetector* const detector);
+    float   tPitchDetector_getPeriodicity  (tPitchDetector* const detector);
+    float   tPitchDetector_harmonic    (tPitchDetector* const detector, int harmonicIndex);
+    float   tPitchDetector_predictFrequency (tPitchDetector* const detector, int init);
+    void    tPitchDetector_reset    (tPitchDetector* const detector);
+    
+    
+    
+    
+    
     
     
     

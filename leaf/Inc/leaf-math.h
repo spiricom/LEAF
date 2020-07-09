@@ -216,6 +216,8 @@ extern "C" {
     // or let the user pointer popcount() to whatever they want
     // something to look into...
     int popcount(unsigned int x);
+    
+    float median3f(float a, float b, float c);
 
 
     //==============================================================================
