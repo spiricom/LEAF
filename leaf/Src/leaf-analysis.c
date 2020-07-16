@@ -1049,7 +1049,7 @@ void    tZeroCrossings_initToPool    (tZeroCrossings* const zc, int windowSize, 
     _tZeroCrossings* z = *zc = (_tZeroCrossings*) mpool_alloc(sizeof(_tZeroCrossings), m);
     z->mempool = m;
     
-    z->_hysteresis = hysteresis;
+    z->_hysteresis = -hysteresis;
     int bits = CHAR_BIT * sizeof(unsigned int);
     z->_window_size = fmax(2, (windowSize + bits - 1) / bits) * bits;
     
@@ -1091,12 +1091,12 @@ int     tZeroCrossings_tick(tZeroCrossings* const zc, float s)
     if (z->_num_edges >= z->_size)
         reset(zc);
     
-    if ((z->_frame == z->_window_size/2) && z->_num_edges == 0)
+    if ((z->_frame == z->_window_size/2) && (z->_num_edges == 0))
         reset(zc);
     
     update_state(zc, s);
     
-    if (++z->_frame >= z->_window_size && !z->_state)
+    if ((++z->_frame >= z->_window_size) && !z->_state)
     {
         // Remove half the size from _frame, so we can continue seamlessly
         z->_frame -= z->_window_size / 2;
@@ -1122,7 +1122,8 @@ tZeroCrossing2 const tZeroCrossings_getCrossing(tZeroCrossings* const zc, int in
 {
     _tZeroCrossings* z = *zc;
     
-    return z->_info[(z->_num_edges - 1) - index];
+    int i = (z->_num_edges - 1) - index;
+    return z->_info[(z->_pos + i) & z->_mask];
 }
 
 int     tZeroCrossings_getNumEdges(tZeroCrossings* const zc)
@@ -1178,16 +1179,15 @@ static inline void update_state(tZeroCrossings* const zc, float s)
 {
     _tZeroCrossings* z = *zc;
     
-    int capacity = z->_window_size / 2;
     if (z->_ready)
     {
-        shift(zc, capacity);
+        shift(zc, z->_window_size / 2);
         z->_ready = 0;
         z->_peak = z->_peak_update;
         z->_peak_update = 0.0f;
     }
     
-    if (z->_num_edges >= capacity)
+    if (z->_num_edges >= z->_size)
         reset(zc);
     
     if (s > 0.0f)
@@ -1201,6 +1201,8 @@ static inline void update_state(tZeroCrossings* const zc, float s)
             crossing->_after_crossing = s;
             crossing->_peak = s;
             crossing->_leading_edge = (int) z->_frame;
+            crossing->_trailing_edge = INT_MIN;
+            crossing->_width = 0.0f;
             ++z->_num_edges;
             z->_state = 1;
         }

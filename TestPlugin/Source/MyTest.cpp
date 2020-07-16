@@ -35,6 +35,8 @@ tMBPulse bpulse;
 
 tPitchDetector detector;
 
+tPeriodDetection pd;
+
 float gain;
 float freq;
 float dtime;
@@ -43,6 +45,9 @@ int ratio = 2;
 float x = 0.0f;
 float y = 0.0f;
 float a, b, c, d;
+
+float bufIn[4096];
+float bufOut[4096];
 
 #define MSIZE 500000
 char memory[MSIZE];
@@ -55,7 +60,11 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tMBTriangle_init(&btri);
     tMBPulse_init(&bpulse);
     
-    tPitchDetector_init(&detector, 1000.0f, 5000.0f, 0.0f);
+    
+    // lowestFreq, highestFreq, hysteresis (width of hysteresis region around 0.0 for zero crossing detection)
+    tPitchDetector_init(&detector, mtof(48), mtof(84), 0.01f);
+    
+    tPeriodDetection_init(&pd, bufIn, bufOut, 4096, 1024);
 }
 
 inline double getSawFall(double angle) {
@@ -81,10 +90,13 @@ float   LEAFTest_tick            (float input)
 //    return tMBPulse_tick(&bpulse);
     
     tPitchDetector_tick(&detector, input);
-
+    
     tMBTriangle_setFreq(&btri, tPitchDetector_getFrequency(&detector));
     
-    return input + tMBTriangle_tick(&btri) * 0.25;
+//    float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
+//    tMBTriangle_setFreq(&btri, freq);
+
+    return tMBTriangle_tick(&btri);// * 0.25;
 }
 
 int firstFrame = 1;
