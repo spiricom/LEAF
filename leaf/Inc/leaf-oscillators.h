@@ -25,7 +25,69 @@ extern "C" {
      @example basic-oscillators.c
      An example.
      */
+    
+    //==============================================================================
+    
+    /*!
+     @defgroup ttable tTable
+     @ingroup oscillators
+     @brief A general wavetable oscillator.
+     @{
+     */
+    
+    /*!
+     @fn void    tTable_init         (tTable* const osc)
+     @brief Initialize a tTable to the default LEAF mempool.
+     @param osc A pointer to the tTable to be initialized.
+     */
+    
+    /*!
+     @fn void    tTable_initToPool   (tTable* const osc, tMempool* const mempool)
+     @brief Initialize a tTable to a specified mempool.
+     @param osc A pointer to the tTable to be initialized.
+     @param pool A pointer to the tMempool to which the tTable should be initialized.
+     */
+    
+    /*!
+     @fn void    tTable_free         (tTable* const osc)
+     @brief Free a tTable from the default LEAF mempool.
+     @param osc A pointer to the tTable to be freed.
+     */
+    
+    /*!
+     @fn float   tTable_tick         (tTable* const osc)
+     @brief Tick a tTable oscillator.
+     @param osc A pointer to the relevant tTable.
+     @return The ticked sample as a float from -1 to 1.
+     */
+    
+    /*!
+     @fn void    tTable_setFreq      (tTable* const osc, float freq)
+     @brief Set the frequency of a tTable oscillator.
+     @param osc A pointer to the relevant tTable.
+     @param freq The frequency to set the oscillator to.
+     */
+    
+    /*! @} */
+    
+    typedef struct _tTable
+    {
+        tMempool mempool;
+        
+        float* waveTable;
+        int size;
+        float inc, freq;
+        float phase;
+    } _tTable;
+    
+    typedef _tTable* tTable;
 
+     void    tTable_init(tTable* const osc, float* waveTable, int size);
+     void    tTable_initToPool(tTable* const osc, float* waveTable, int size, tMempool* const mempool);
+     void    tTable_free(tTable* const osc);
+    
+     float   tTable_tick(tTable* const osc);
+     void    tTable_setFreq(tTable* const osc, float freq);
     
     //==============================================================================
     

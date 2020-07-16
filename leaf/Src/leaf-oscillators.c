@@ -16,6 +16,73 @@
 
 #endif
 
+// WaveTable
+void    tTable_init(tTable* const cy, float* waveTable, int size)
+{
+    tTable_initToPool(cy, waveTable, size, &leaf.mempool);
+}
+
+void    tTable_initToPool(tTable* const cy, float* waveTable, int size, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTable* c = *cy = (_tTable*)mpool_alloc(sizeof(_tTable), m);
+    c->mempool = m;
+    
+    c->waveTable = waveTable;
+    c->size = size;
+    c->inc = 0.0f;
+    c->phase = 0.0f;
+}
+
+void    tTable_free(tTable* const cy)
+{
+    _tTable* c = *cy;
+    
+    mpool_free((char*)c, c->mempool);
+}
+
+void     tTable_setFreq(tTable* const cy, float freq)
+{
+    _tTable* c = *cy;
+    
+    c->freq = freq;
+    c->inc = freq * leaf.invSampleRate;
+}
+
+float   tTable_tick(tTable* const cy)
+{
+    _tTable* c = *cy;
+    float temp;
+    int intPart;
+    float fracPart;
+    float samp0;
+    float samp1;
+    
+    // Phasor increment
+    c->phase += c->inc;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase < 0.0f) c->phase += 1.0f;
+    
+    // Wavetable synthesis
+    
+    temp = c->size * c->phase;
+    intPart = (int)temp;
+    fracPart = temp - (float)intPart;
+    samp0 = c->waveTable[intPart];
+    if (++intPart >= c->size) intPart = 0;
+    samp1 = c->waveTable[intPart];
+    
+    return (samp0 + (samp1 - samp0) * fracPart);
+    
+}
+
+void     tTableSampleRateChanged(tTable* const cy)
+{
+    _tTable* c = *cy;
+    
+    c->inc = c->freq * leaf.invSampleRate;
+}
+
 // Cycle
 void    tCycle_init(tCycle* const cy)
 {
