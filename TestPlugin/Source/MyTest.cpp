@@ -37,8 +37,10 @@ tPitchDetector detector;
 
 tPeriodDetection pd;
 
+tZeroCrossing zc;
+tEnvelopeFollower ef;
+
 float gain;
-float freq;
 float dtime;
 bool buttonState;
 int ratio = 2;
@@ -46,8 +48,8 @@ float x = 0.0f;
 float y = 0.0f;
 float a, b, c, d;
 
-float bufIn[4096];
-float bufOut[4096];
+float* bufIn;
+float* bufOut;
 
 #define MSIZE 500000
 char memory[MSIZE];
@@ -60,11 +62,15 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tMBTriangle_init(&btri);
     tMBPulse_init(&bpulse);
     
-    
+    bufIn = (float*) leaf_alloc(sizeof(float) * 4096);
+    bufOut = (float*) leaf_alloc(sizeof(float) * 4096);
     // lowestFreq, highestFreq, hysteresis (width of hysteresis region around 0.0 for zero crossing detection)
     tPitchDetector_init(&detector, mtof(48), mtof(84), 0.01f);
     
     tPeriodDetection_init(&pd, bufIn, bufOut, 4096, 1024);
+    
+    tZeroCrossing_init(&zc, 128);
+    tEnvelopeFollower_init(&ef, 0.02f, 0.9999f);
 }
 
 inline double getSawFall(double angle) {
@@ -88,15 +94,28 @@ float   LEAFTest_tick            (float input)
 ////    return tMBSaw_tick(&bsaw);
 ////    return tMBTriangle_tick(&btri);
 //    return tMBPulse_tick(&bpulse);
-    
-    tPitchDetector_tick(&detector, input);
-    
-    tMBTriangle_setFreq(&btri, tPitchDetector_getFrequency(&detector));
-    
-//    float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
-//    tMBTriangle_setFreq(&btri, freq);
 
-    return tMBTriangle_tick(&btri);// * 0.25;
+    
+    if (x > 0.5)
+    {
+        tPitchDetector_tick(&detector, input);
+        if (tPitchDetector_getPeriodicity(&detector) > 0.99 &&  (tZeroCrossing_tick(&zc, input) < 0.05))
+        {
+            float freq = tPitchDetector_getFrequency(&detector);
+            if (freq != 0.0f)
+                tMBTriangle_setFreq(&btri, freq);
+        }
+    
+    }
+    else
+    {
+        float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
+        if (tZeroCrossing_tick(&zc, input) < 0.05)
+            tMBTriangle_setFreq(&btri, freq);
+    }
+
+    float g = tEnvelopeFollower_tick(&ef, input);
+    return input + tMBTriangle_tick(&btri) * g * 10.0f;
 }
 
 int firstFrame = 1;
@@ -114,7 +133,9 @@ void    LEAFTest_block           (void)
     
     float val = getSliderValue("mod freq");
     
-    x = val * 20000.0f + 220.0f;
+    x = val;
+    
+        
     
     //    a = val * tBuffer_getBufferLength(&buff);
     

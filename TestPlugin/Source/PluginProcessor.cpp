@@ -86,7 +86,6 @@ void OopsAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
         }
     }
     
-
    const float* inPointerL = buffer.getReadPointer (0);
    const float* inPointerR = buffer.getReadPointer (1);
     
@@ -95,7 +94,7 @@ void OopsAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
     
     for (int samp = 0; samp < buffer.getNumSamples(); ++samp)
     {
-        outPointerL[samp] = LEAFTest_tick( (inPointerL[samp] +inPointerR[samp]) * 0.5f);
+        outPointerL[samp] = LEAFTest_tick( (inPointerL[samp] ));
         outPointerR[samp] = outPointerL[samp];
     }
 }
