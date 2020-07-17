@@ -32,7 +32,42 @@ extern "C" {
 
     //==============================================================================
     
-    /* PRCReverb: Reverb, reimplemented from STK (Cook and Scavone). */
+    /*!
+     @defgroup tprcreverb tPRCReverb
+     @ingroup reverb
+     @brief Reverb, reimplemented from STK (Cook and Scavone).
+     @{
+     
+     @fn void    tPRCReverb_init         (tPRCReverb* const, float t60)
+     @brief
+     @param
+     
+     @fn void    tPRCReverb_initToPool   (tPRCReverb* const, float t60, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tPRCReverb_free         (tPRCReverb* const)
+     @brief
+     @param
+     
+     @fn void    tPRCReverb_clear        (tPRCReverb* const)
+     @brief
+     @param
+     
+     @fn float   tPRCReverb_tick         (tPRCReverb* const, float input)
+     @brief
+     @param
+
+     @fn void    tPRCReverb_setT60       (tPRCReverb* const, float t60)
+     @brief Set reverb time in seconds.
+     @param
+    
+     @fn void    tPRCReverb_setMix       (tPRCReverb* const, float mix)
+     @brief Set mix between dry input and wet output signal.
+     @param
+     
+     @} */
+    
     typedef struct _tPRCReverb
     {
         tMempool mempool;
@@ -57,16 +92,51 @@ extern "C" {
     
     void    tPRCReverb_clear        (tPRCReverb* const);
     float   tPRCReverb_tick         (tPRCReverb* const, float input);
-    
-    // Set reverb time in seconds.
     void    tPRCReverb_setT60       (tPRCReverb* const, float t60);
-    
-    // Set mix between dry input and wet output signal.
     void    tPRCReverb_setMix       (tPRCReverb* const, float mix);
     
     //==============================================================================
     
-    /* NReverb: Reverb, reimplemented from STK (Cook and Scavone). */
+    /*!
+     @defgroup tnreverb tNReverb
+     @ingroup reverb
+     @brief Reverb, reimplemented from STK (Cook and Scavone).
+     @{
+     
+     @fn void    tNReverb_init           (tNReverb* const, float t60)
+     @brief
+     @param
+     
+     @fn void    tNReverb_initToPool     (tNReverb* const, float t60, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tNReverb_free           (tNReverb* const)
+     @brief
+     @param
+     
+     @fn void    tNReverb_clear          (tNReverb* const)
+     @brief
+     @param
+     
+     @fn float   tNReverb_tick           (tNReverb* const, float input)
+     @brief
+     @param
+     
+     @fn void    tNReverb_tickStereo     (tNReverb* const rev, float input, float* output)
+     @brief
+     @param
+     
+     @fn void    tNReverb_setT60         (tNReverb* const, float t60)
+     @brief Set reverb time in seconds.
+     @param
+     
+     @fn void    tNReverb_setMix         (tNReverb* const, float mix)
+     @brief Set mix between dry input and wet output signal.
+     @param
+     
+     @} */
+    
     typedef struct _tNReverb
     {
         tMempool mempool;
@@ -93,14 +163,74 @@ extern "C" {
     void    tNReverb_clear          (tNReverb* const);
     float   tNReverb_tick           (tNReverb* const, float input);
     void    tNReverb_tickStereo     (tNReverb* const rev, float input, float* output);
-    
-    // Set reverb time in seconds.
     void    tNReverb_setT60         (tNReverb* const, float t60);
-    
-    // Set mix between dry input and wet output signal.
     void    tNReverb_setMix         (tNReverb* const, float mix);
     
     //==============================================================================
+    
+    /*!
+     @defgroup tdattorroreverb tDattorroReverb
+     @ingroup reverb
+     @brief
+     @{
+     
+     @fn void    tDattorroReverb_init              (tDattorroReverb* const)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_initToPool        (tDattorroReverb* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_free              (tDattorroReverb* const)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_clear             (tDattorroReverb* const)
+     @brief
+     @param
+     
+     @fn float   tDattorroReverb_tick              (tDattorroReverb* const, float input)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, float input, float* output)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_setMix            (tDattorroReverb* const, float mix)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_setFreeze         (tDattorroReverb* const rev, uint32_t freeze)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_setHP             (tDattorroReverb* const, float freq)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_setSize           (tDattorroReverb* const, float size)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, float preDelay)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_setInputFilter    (tDattorroReverb* const, float freq)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const, float freq)
+     @brief
+     @param
+     
+     @fn void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const, float gain)
+     @brief
+     @param
+     
+     @} */
     
     typedef struct _tDattorroReverb
     {

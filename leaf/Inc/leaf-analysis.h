@@ -37,45 +37,32 @@ extern "C" {
      @ingroup analysis
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tEnvelopeFollower_init          (tEnvelopeFollower* const, float attackThreshold, float decayCoeff)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const, float attackThreshold, float decayCoeff, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tEnvelopeFollower_free          (tEnvelopeFollower* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tEnvelopeFollower_tick          (tEnvelopeFollower* const, float x)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn int     tEnvelopeFollower_decayCoeff    (tEnvelopeFollower* const, float decayCoeff)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn int     tEnvelopeFollower_attackThresh  (tEnvelopeFollower* const, float attackThresh)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     typedef struct _tEnvelopeFollower
     {
@@ -103,39 +90,28 @@ extern "C" {
      @ingroup analysis
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tZeroCrossing_init         (tZeroCrossing* const, int maxWindowSize)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tZeroCrossing_initToPool   (tZeroCrossing* const, int maxWindowSize, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tZeroCrossing_free         (tZeroCrossing* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tZeroCrossing_tick         (tZeroCrossing* const, float input)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tZeroCrossing_setWindow        (tZeroCrossing* const, float windowSize)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     /* Zero Crossing Detector */
     typedef struct _tZeroCrossing {
@@ -166,45 +142,32 @@ extern "C" {
      @ingroup analysis
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tPowerFollower_init         (tPowerFollower* const, float factor)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPowerFollower_initToPool   (tPowerFollower* const, float factor, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPowerFollower_free         (tPowerFollower* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tPowerFollower_tick         (tPowerFollower* const, float input)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tPowerFollower_sample       (tPowerFollower* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn int     tPowerFollower_setFactor    (tPowerFollower* const, float factor)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     /* PowerEnvelopeFollower */
     typedef struct _tPowerFollower
@@ -232,40 +195,28 @@ extern "C" {
      @ingroup analysis
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tEnvPD_init             (tEnvPD* const, int windowSize, int hopSize, int blockSize)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tEnvPD_initToPool       (tEnvPD* const, int windowSize, int hopSize, int blockSize, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tEnvPD_free             (tEnvPD* const)
      @brief
      @param
-     */
-    
-    
-    /*!
+     
      @fn float   tEnvPD_tick             (tEnvPD* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tEnvPD_processBlock     (tEnvPD* const, float* in)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     // ENV~ from PD, modified for LEAF
 #define MAXOVERLAP 32
@@ -304,63 +255,44 @@ extern "C" {
      @ingroup analysis
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tAttackDetection_init           (tAttackDetection* const, int blocksize, int atk, int rel)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tAttackDetection_initToPool     (tAttackDetection* const, int blocksize, int atk, int rel, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tAttackDetection_free           (tAttackDetection* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tAttackDetection_setBlocksize   (tAttackDetection* const, int size)
      @brief Set expected input blocksize
      @param
-     */
-    
-    /*!
+     
      @fn void    tAttackDetection_setSamplerate  (tAttackDetection* const, int inRate)
      @brief Set attack detection sample rate
      @param
-     */
-    
-    /*!
+     
      @fn void    tAttackDetection_setAttack      (tAttackDetection* const, int inAtk)
      @brief Set attack time and coeff
      @param
-     */
-    
-    /*!
+     
      @fn void    tAttackDetection_setRelease     (tAttackDetection* const, int inRel)
      @brief Set release time and coeff
      @param
-     */
-    
-    /*!
+     
      @fn void    tAttackDetection_setThreshold   (tAttackDetection* const, float thres)
      @brief Set level above which values are identified as attacks
      @param
-     */
-    
-    /*!
+     
      @fn int     tAttackDetection_detect         (tAttackDetection* const, float *in)
      @brief Find the largest transient in input block, return index of attack
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
 #define DEFBLOCKSIZE 1024
 #define DEFTHRESHOLD 6
@@ -410,63 +342,44 @@ extern "C" {
      @ingroup analysis
      @brief Period detection algorithm from Katja Vetters http://www.katjaas.nl/helmholtz/helmholtz.html
      @{
-     */
-    
-    /*!
+     
      @fn void    tSNAC_init          (tSNAC* const, int overlaparg)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tSNAC_initToPool    (tSNAC* const, int overlaparg, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tSNAC_free          (tSNAC* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tSNAC_ioSamples     (tSNAC *s, float *in, float *out, int size)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tSNAC_setOverlap    (tSNAC *s, int lap)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tSNAC_setBias       (tSNAC *s, float bias)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tSNAC_setMinRMS     (tSNAC *s, float rms)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tSNAC_getPeriod     (tSNAC *s)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tSNAC_getFidelity   (tSNAC *s)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
 #define SNAC_FRAME_SIZE 1024           // default analysis framesize // should be the same as (or smaller than?) PS_FRAME_SIZE
 #define DEFOVERLAP 1                // default overlap
@@ -522,63 +435,44 @@ extern "C" {
      @fn void    tPeriodDetection_init               (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPeriodDetection_initToPool         (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPeriodDetection_free               (tPeriodDetection* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tPeriodDetection_tick               (tPeriodDetection* const, float sample)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tPeriodDetection_getPeriod          (tPeriodDetection* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPeriodDetection_setHopSize         (tPeriodDetection* const, int hs)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPeriodDetection_setWindowSize      (tPeriodDetection* const, int ws)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPeriodDetection_setFidelityThreshold(tPeriodDetection* const, float threshold)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPeriodDetection_setAlpha           (tPeriodDetection* const, float alpha)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPeriodDetection_setTolerance       (tPeriodDetection* const, float tolerance)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
 #define DEFPITCHRATIO 2.0f
 #define DEFTIMECONSTANT 100.0f
@@ -639,6 +533,8 @@ extern "C" {
     void    tPeriodDetection_setTolerance       (tPeriodDetection* const, float tolerance);
     
     //==============================================================================
+    
+    // Maybe keep these up to PeriodDetector internal?
     
     typedef struct _tZeroCrossing2
     {
@@ -761,6 +657,50 @@ extern "C" {
     
     //==============================================================================
     
+    /*!
+     @defgroup tperioddetector tPeriodDetector
+     @ingroup analysis
+     @brief
+     @{
+     
+     @fn void    tPeriodDetector_init    (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis)
+     @brief
+     @param
+     
+     @fn void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool)
+     @brief
+     @param
+     
+     @fn void    tPeriodDetector_free    (tPeriodDetector* const detector)
+     @brief
+     @param
+     
+     @fn int     tPeriodDetector_tick    (tPeriodDetector* const detector, float sample)
+     @brief
+     @param
+     
+     @fn float   tPeriodDetector_getPeriod   (tPeriodDetector* const detector)
+     @brief Get the periodicity for a given harmonic of the detected pitch.
+     @param
+     
+     @fn float   tPeriodDetector_getPeriodicity  (tPeriodDetector* const detector)
+     @brief
+     @param
+     
+     @fn float   tPeriodDetector_harmonic    (tPeriodDetector* const detector, int harmonicIndex)
+     @brief
+     @param
+     
+     @fn float   tPeriodDetector_predictPeriod   (tPeriodDetector* const detector)
+     @brief
+     @param
+     
+     @fn int     tPeriodDetector_isReady (tPeriodDetector* const detector)
+     @brief
+     @param
+     ￼￼￼
+     @} */
+    
 #define PULSE_THRESHOLD 0.6f
 #define HARMONIC_PERIODICITY_FACTOR 16
 #define PERIODICITY_DIFF_FACTOR 0.008f
@@ -826,6 +766,50 @@ extern "C" {
     int     tPeriodDetector_isReady (tPeriodDetector* const detector);
     
     //==============================================================================
+    
+    /*!
+     @defgroup tpitchdetector tPitchDetector
+     @ingroup analysis
+     @brief
+     @{
+     
+     @fn void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis)
+     @brief
+     @param
+     
+     @fn void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool)
+     @brief
+     @param
+     
+     @fn void    tPitchDetector_free (tPitchDetector* const detector)
+     @brief
+     @param
+     
+     @fn int     tPitchDetector_tick    (tPitchDetector* const detector, float sample)
+     @brief
+     @param
+     
+     @fn float   tPitchDetector_getFrequency    (tPitchDetector* const detector)
+     @brief
+     @param
+     
+     @fn float   tPitchDetector_getPeriodicity  (tPitchDetector* const detector)
+     @brief
+     @param
+     
+     @fn float   tPitchDetector_harmonic    (tPitchDetector* const detector, int harmonicIndex)
+     @brief
+     @param
+     
+     @fn float   tPitchDetector_predictFrequency (tPitchDetector* const detector, int init)
+     @brief
+     @param
+     
+     @fn void    tPitchDetector_reset    (tPitchDetector* const detector)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
 #define MAX_DEVIATION 0.9f
 #define MIN_PERIODICITY 0.8f

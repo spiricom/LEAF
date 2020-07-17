@@ -33,42 +33,31 @@ extern "C" {
      @ingroup oscillators
      @brief A general wavetable oscillator.
      @{
-     */
-    
-    /*!
-     @fn void    tTable_init         (tTable* const osc)
+
+     @fn void    tTable_init         (tTable* const osc, float* waveTable, int size)
      @brief Initialize a tTable to the default LEAF mempool.
      @param osc A pointer to the tTable to be initialized.
-     */
-    
-    /*!
-     @fn void    tTable_initToPool   (tTable* const osc, tMempool* const mempool)
+
+     @fn void    tTable_initToPool   (tTable* const osc, float* waveTable, int size, tMempool* const mempool)
      @brief Initialize a tTable to a specified mempool.
      @param osc A pointer to the tTable to be initialized.
      @param pool A pointer to the tMempool to which the tTable should be initialized.
-     */
-    
-    /*!
+
      @fn void    tTable_free         (tTable* const osc)
      @brief Free a tTable from the default LEAF mempool.
      @param osc A pointer to the tTable to be freed.
-     */
-    
-    /*!
+ 
      @fn float   tTable_tick         (tTable* const osc)
      @brief Tick a tTable oscillator.
      @param osc A pointer to the relevant tTable.
      @return The ticked sample as a float from -1 to 1.
-     */
-    
-    /*!
+
      @fn void    tTable_setFreq      (tTable* const osc, float freq)
      @brief Set the frequency of a tTable oscillator.
      @param osc A pointer to the relevant tTable.
      @param freq The frequency to set the oscillator to.
-     */
-    
-    /*! @} */
+     
+     @} */
     
     typedef struct _tTable
     {
@@ -96,42 +85,32 @@ extern "C" {
      @ingroup oscillators
      @brief A cycle/sine waveform oscillator. Uses wavetable synthesis.
      @{
-     */
-    
-    /*!
+
      @fn void    tCycle_init         (tCycle* const osc)
      @brief Initialize a tCycle to the default LEAF mempool.
      @param osc A pointer to the tCycle to be initialized.
-     */
-    
-    /*!
+     
      @fn void    tCycle_initToPool   (tCycle* const osc, tMempool* const pool)
      @brief Initialize a tCycle to a specified mempool.
      @param osc A pointer to the tCycle to be initialized.
      @param pool A pointer to the tMempool to which the tCycle should be initialized.
-     */
-    
-    /*!
+
      @fn void    tCycle_free         (tCycle* const osc)
      @brief Free a tCycle from the default LEAF mempool.
      @param osc A pointer to the tCycle to be freed.
-     */
-    
-    /*!
+     
      @fn float   tCycle_tick         (tCycle* const osc)
      @brief Tick a tCycle oscillator.
      @param osc A pointer to the relevant tCycle.
      @return The ticked sample as a float from -1 to 1.
-     */
-    
-    /*!
+
      @fn void    tCycle_setFreq      (tCycle* const osc, float freq)
      @brief Set the frequency of a tCycle oscillator.
      @param osc A pointer to the relevant tCycle.
      @param freq The frequency to set the oscillator to.
-     */
-    
-    /*! @} */
+     
+    ￼￼￼
+     @} */
     
     typedef struct _tCycle
     {
@@ -157,42 +136,31 @@ extern "C" {
      @ingroup oscillators
      @brief Anti-aliased Triangle waveform using wavetable interpolation. Wavetables constructed from sine components.
      @{
-     */
-    
-    /*!
+     
      @fn void    tTriangle_init         (tTriangle* const osc)
      @brief Initialize a tTriangle to the default LEAF mempool.
      @param osc A pointer to the tTriangle to be initialized.
-     */
-    
-    /*!
+     
      @fn void    tTriangle_initToPool   (tTriangle* const osc, tMempool* const pool)
      @brief Initialize a tTriangle to a specified mempool.
      @param osc A pointer to the tTriangle to be initialized.
      @param pool A pointer to the tMempool to which the tTriangle should be initialized.
-     */
-    
-    /*!
+     
      @fn void    tTriangle_free         (tTriangle* const osc)
      @brief Free a tTriangle from the default LEAF mempool.
      @param osc A pointer to the tTriangle to be freed.
-     */
-    
-    /*!
+     
      @fn float   tTriangle_tick         (tTriangle* const osc)
      @brief Tick a tTriangle oscillator.
      @param osc A pointer to the relevant tTriangle.
      @return The ticked sample as a float from -1 to 1.
-     */
-    
-    /*!
+     
      @fn void    tTriangle_setFreq      (tTriangle* const osc, float freq)
      @brief Set the frequency of a tTriangle oscillator.
      @param osc A pointer to the relevant tTriangle.
      @param freq The frequency to set the oscillator to.
-     */
-    
-    /*! @} */
+     
+     @} */
 
     typedef struct _tTriangle
     {
@@ -221,42 +189,31 @@ extern "C" {
      @ingroup oscillators
      @brief Anti-aliased Square waveform using wavetable interpolation. Wavetables constructed from sine components.
      @{
-     */
-    
-    /*!
+     
      @fn void    tSquare_init         (tSquare* const osc)
      @brief Initialize a tSquare to the default LEAF mempool.
      @param osc A pointer to the tSquare to be initialized.
-     */
-    
-    /*!
+     
      @fn void    tSquare_initToPool   (tSquare* const osc, tMempool* const pool)
      @brief Initialize a tSquare to a specified mempool.
      @param osc A pointer to the tSquare to be initialized.
      @param pool A pointer to the tMempool to which the tSquare should be initialized.
-     */
-    
-    /*!
+     
      @fn void    tSquare_free         (tSquare* const osc)
      @brief Free a tSquare from the default LEAF mempool.
      @param osc A pointer to the tSquare to be freed.
-     */
-    
-    /*!
+     
      @fn float   tSquare_tick         (tSquare* const osc)
      @brief Tick a tSquare oscillator.
      @param osc A pointer to the relevant tSquare.
      @return The ticked sample as a float from -1 to 1.
-     */
-    
-    /*!
+     
      @fn void    tSquare_setFreq      (tSquare* const osc, float freq)
      @brief Set the frequency of a tSquare oscillator.
      @param osc A pointer to the relevant tSquare.
      @param freq The frequency to set the oscillator to.
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     typedef struct _tSquare
     {
@@ -277,7 +234,8 @@ extern "C" {
     float   tSquare_tick        (tSquare* const osc);
     void    tSquare_setFreq     (tSquare* const osc, float freq);
     
-    /*! @} */
+    /*!￼￼￼
+     @} */
     
     //==============================================================================
     
@@ -286,42 +244,31 @@ extern "C" {
      @ingroup oscillators
      @brief Anti-aliased Square waveform using wavetable interpolation. Wavetables constructed from sine components.
      @{
-     */
-    
-    /*!
+     
      @fn void    tSawtooth_init         (tSawtooth* const osc)
      @brief Initialize a tSawtooth to the default LEAF mempool.
      @param osc A pointer to the tSawtooth to be initialized.
-     */
-    
-    /*!
+     
      @fn void    tSawtooth_initToPool   (tSawtooth* const osc, tMempool* const pool)
      @brief Initialize a tSawtooth to a specified mempool.
      @param osc A pointer to the tSawtooth to be initialized.
      @param pool A pointer to the tMempool to which the tSawtooth should be initialized.
-     */
-    
-    /*!
+     
      @fn void    tSawtooth_free         (tSawtooth* const osc)
      @brief Free a tSawtooth from the default LEAF mempool.
      @param osc A pointer to the tSawtooth to be freed.
-     */
-    
-    /*!
+     
      @fn float   tSawtooth_tick         (tSawtooth* const osc)
      @brief Tick a tSawtooth oscillator.
      @param osc A pointer to the relevant tSawtooth.
      @return The ticked sample as a float from -1 to 1.
-     */
-    
-    /*!
+     
      @fn void    tSawtooth_setFreq      (tSawtooth* const osc, float freq)
      @brief Set the frequency of a tSawtooth oscillator.
      @param osc A pointer to the relevant tSawtooth.
      @param freq The frequency to set the oscillator to.
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     typedef struct _tSawtooth
     {
@@ -344,72 +291,37 @@ extern "C" {
     
     //==============================================================================
     
-    
-    // TO BE REMOVED
-    typedef struct _tSine
-    {
-        tMempool mempool;
-        float* sine;
-        int size;
-        float phase;
-        float inc,freq;
-    } _tSine;
-    
-    typedef _tSine* tSine;
-    
-    void    tSine_init         (tSine* const osc, int size);
-    void    tSine_initToPool   (tSine* const osc, int size, tMempool* const pool);
-
-    void    tSine_free         (tSine* const osc);
-    float   tSine_tick         (tSine* const osc);
-    void    tSine_setFreq      (tSine* const osc, float freq);
-    
-    //==============================================================================
-    
     /*!
      @defgroup ttri tTri
      @ingroup oscillators
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tTri_init          (tTri* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tTri_initToPool    (tTri* const osc, tMempool* const pool)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tTri_free          (tTri* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tTri_tick          (tTri* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tTri_setFreq       (tTri* const osc, float freq)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tTri_setSkew       (tTri* const osc, float skew)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
 
     typedef struct _tTri
     {
@@ -437,45 +349,32 @@ extern "C" {
      @ingroup oscillators
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tPulse_init        (tPulse* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPulse_initToPool  (tPulse* const osc, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPulse_free        (tPulse* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tPulse_tick        (tPulse* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPulse_setFreq     (tPulse* const osc, float freq)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPulse_setWidth    (tPulse* const osc, float width)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     typedef struct _tPulse
     {
@@ -502,39 +401,28 @@ extern "C" {
      @ingroup oscillators
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tSaw_init          (tSaw* const osc)
      @brief
      @param
-     */
      
-    /*!
      @fn void    tSaw_initToPool    (tSaw* const osc, tMempool* const pool)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tSaw_free          (tSaw* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tSaw_tick          (tSaw* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tSaw_setFreq       (tSaw* const osc, float freq)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     typedef struct _tSaw
     {
@@ -559,39 +447,28 @@ extern "C" {
      @ingroup oscillators
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tPhasor_init        (tPhasor* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPhasor_initToPool  (tPhasor* const osc, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPhasor_free        (tPhasor* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tPhasor_tick        (tPhasor* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tPhasor_setFreq     (tPhasor* const osc, float freq)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     typedef struct _tPhasor
     {
@@ -617,27 +494,19 @@ extern "C" {
      @ingroup oscillators
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void    tNoise_init         (tNoise* const noise, NoiseType type)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tNoise_initToPool   (tNoise* const noise, NoiseType type, tMempool* const)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void    tNoise_free         (tNoise* const noise)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float   tNoise_tick         (tNoise* const noise)
      @brief
      @param
@@ -654,7 +523,7 @@ extern "C" {
         NoiseTypeNil,
     };
     
-     /*! @} */
+     /*!￼￼￼ @} */
     
     typedef enum NoiseType NoiseType;
     
@@ -681,111 +550,79 @@ extern "C" {
      @ingroup oscillators
      @brief A model of a neuron, adapted to act as an oscillator.
      @{
-     */
-    
-    /*!
+     
      @fn void    tNeuron_init        (tNeuron* const neuron)
      @brief Initialize a tNeuron to the default LEAF mempool.
      @param neuron A pointer to the tNeuron to be initialized.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_initToPool  (tNeuron* const neuron, tMempool* const pool)
      @brief Initialize a tNeuron to a specified mempool.
      @param neuron A pointer to the tNeuron to be initialized.
      @param pool A pointer to the tMempool to which the tNeuron should be initialized.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_free        (tNeuron* const neuron)
      @brief Free a tNeuron from the default LEAF mempool.
      @param neuron A pointer to the tNeuron to be freed.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_reset       (tNeuron* const neuron)
      @brief Reset the neuron model.
      @param neuron A pointer to the relevant tNeuron.
-     */
-    
-    /*!
+     
      @fn float   tNeuron_tick        (tNeuron* const neuron)
      @brief Tick a tNeuron oscillator.
      @param neuron A pointer to the relevant tNeuron.
      @return The ticked sample as a float from -1 to 1.
-     */
-
-    /*!
+     
      @fn void    tNeuron_setMode     (tNeuron* const neuron, NeuronMode mode)
      @brief Set the tNeuron shaping mode.
      @param neuron A pointer to the relevant tNeuron.
      @param mode The mode to set the tNeuron to.
-     */
-
-    /*!
+     
      @fn void    tNeuron_setCurrent  (tNeuron* const neuron, float current)
      @brief Set the current.
      @param neuron A pointer to the relevant tNeuron.
      @param current The new current.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_setK        (tNeuron* const neuron, float K)
      @brief Set the potassium value.
      @param neuron A pointer to the relevant tNeuron.
      @param K The new potassium.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_setL        (tNeuron* const neuron, float L)
      @brief Set the chloride value.
      @param neuron A pointer to the relevant tNeuron.
      @param L The new chloride value.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_setN        (tNeuron* const neuron, float N)
      @brief Set the sodium value.
      @param neuron A pointer to the relevant tNeuron.
      @param N The new sodium value.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_setC        (tNeuron* const neuron, float C)
      @brief Set the calcium value.
      @param neuron A pointer to the relevant tNeuron.
      @param C The new calcium.
-     */
-    
-    /*!
+     
      @fn  void    tNeuron_setV1       (tNeuron* const neuron, float V1)
      @brief Set the V1 value.
      @param neuron A pointer to the relevant tNeuron.
      @param V1 The new V1.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_setV2       (tNeuron* const neuron, float V2)
      @brief Set the V2 value.
      @param neuron A pointer to the relevant tNeuron.
      @param V2 The new V2.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_setV3       (tNeuron* const neuron, float V3)
      @brief Set the V3 value.
      @param neuron A pointer to the relevant tNeuron.
      @param V3 The new V3.
-     */
-    
-    /*!
+     
      @fn void    tNeuron_setTimeStep (tNeuron* const neuron, float timestep)
      @brief Set the time step of the model.
      @param neuron A pointer to the relevant tNeuron.
      @param timestep The new time step.
-     */
-    
-    /*!
+     
      @brief Shaping modes for tNeuron output.
      */
     enum NeuronMode
@@ -796,7 +633,7 @@ extern "C" {
         NeuronModeNil
     };
     
-    /*! @} */
+    /*!￼￼￼ @} */
     
     typedef enum NeuronMode NeuronMode;
     
@@ -850,57 +687,40 @@ extern "C" {
      @ingroup oscillators
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void tMBPulse_init(tMBPulse* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const pool)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBPulse_free(tMBPulse* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float tMBPulse_tick(tMBPulse* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBPulse_setFreq(tMBPulse* const osc, float f)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBPulse_setWidth(tMBPulse* const osc, float w)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBPulse_syncIn(tMBPulse* const osc, float sync)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float tMBPulse_syncOut(tMBPulse* const osc)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     typedef struct _tMBPulse
     {
@@ -935,57 +755,40 @@ extern "C" {
      @ingroup oscillators
      @brief
      @{
-     */
-    
-    /*!
+     
      @fn void tMBTriangle_init(tMBTriangle* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const pool)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBTriangle_free(tMBTriangle* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float tMBTriangle_tick(tMBTriangle* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBTriangle_setWidth(tMBTriangle* const osc, float w)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBTriangle_syncIn(tMBTriangle* const osc, float sync)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float tMBTriangle_syncOut(tMBTriangle* const osc)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     typedef struct _tMBTriangle
     {
@@ -1021,51 +824,36 @@ extern "C" {
      @ingroup oscillators
      @brief
      @{
-     */
-
-    /*!
+     
      @fn void tMBSaw_init(tMBSaw* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const pool)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBSaw_free(tMBSaw* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float tMBSaw_tick(tMBSaw* const osc)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBSaw_setFreq(tMBSaw* const osc, float f)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn void tMBSaw_syncIn(tMBSaw* const osc, float sync)
      @brief
      @param
-     */
-    
-    /*!
+     
      @fn float tMBSaw_syncOut(tMBSaw* const osc)
      @brief
      @param
-     */
-    
-    /*! @} */
+     ￼￼￼
+     @} */
     
     typedef struct _tMBSaw
     {

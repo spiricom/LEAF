@@ -41,9 +41,9 @@ void        t808Cowbell_initToPool      (t808Cowbell* const cowbellInst, int use
     
     tSVF_initToPool(&cowbell->bandpassStick, SVFTypeBandpass, 1800, 1.0f, mp);
     
-    tEnvelope_initToPool(&cowbell->envGain, 5.0f, 100.0f, OFALSE, mp);
+    tEnvelope_initToPool(&cowbell->envGain, 5.0f, 100.0f, 0, mp);
     
-    tEnvelope_initToPool(&cowbell->envFilter, 5.0, 100.0f, OFALSE, mp);
+    tEnvelope_initToPool(&cowbell->envFilter, 5.0, 100.0f, 0, mp);
     
     tHighpass_initToPool(&cowbell->highpass, 1000.0f, mp);
     
@@ -166,8 +166,8 @@ void    t808Hihat_initToPool  (t808Hihat* const hihatInst, tMempool* const mp)
     tSVF_initToPool(&hihat->bandpassStick, SVFTypeBandpass,2500.0f,1.2f, mp);
     tSVF_initToPool(&hihat->bandpassOsc, SVFTypeBandpass,3500.0f,0.3f, mp);
     
-    tEnvelope_initToPool(&hihat->envGain, 0.0f, 50.0f, OFALSE, mp);
-    tEnvelope_initToPool(&hihat->envStick, 0.0f, 7.0f, OFALSE, mp);
+    tEnvelope_initToPool(&hihat->envGain, 0.0f, 50.0f, 0, mp);
+    tEnvelope_initToPool(&hihat->envStick, 0.0f, 7.0f, 0, mp);
     
     
     tHighpass_initToPool(&hihat->highpass, 7000.0f, mp);
@@ -329,9 +329,9 @@ void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
         
         tTriangle_setFreq(&snare->tone[i], ratio[i] * 400.0f);
         tSVF_initToPool(&snare->toneLowpass[i], SVFTypeLowpass, 4000, 1.0f, mp);
-        tEnvelope_initToPool(&snare->toneEnvOsc[i], 0.0f, 50.0f, OFALSE, mp);
-        tEnvelope_initToPool(&snare->toneEnvGain[i], 1.0f, 150.0f, OFALSE, mp);
-        tEnvelope_initToPool(&snare->toneEnvFilter[i], 1.0f, 2000.0f, OFALSE, mp);
+        tEnvelope_initToPool(&snare->toneEnvOsc[i], 0.0f, 50.0f, 0, mp);
+        tEnvelope_initToPool(&snare->toneEnvGain[i], 1.0f, 150.0f, 0, mp);
+        tEnvelope_initToPool(&snare->toneEnvFilter[i], 1.0f, 2000.0f, 0, mp);
         
         snare->toneGain[i] = 0.5f;
     }
@@ -341,8 +341,8 @@ void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
     snare->noiseFilterFreq = 3000.0f;
     tNoise_initToPool(&snare->noiseOsc, WhiteNoise, mp);
     tSVF_initToPool(&snare->noiseLowpass, SVFTypeLowpass, 12000.0f, 0.8f, mp);
-    tEnvelope_initToPool(&snare->noiseEnvGain, 0.0f, 100.0f, OFALSE, mp);
-    tEnvelope_initToPool(&snare->noiseEnvFilter, 0.0f, 1000.0f, OFALSE, mp);
+    tEnvelope_initToPool(&snare->noiseEnvGain, 0.0f, 100.0f, 0, mp);
+    tEnvelope_initToPool(&snare->noiseEnvFilter, 0.0f, 1000.0f, 0, mp);
     snare->noiseGain = 1.0f;
 }
 
@@ -475,11 +475,11 @@ void t808Kick_initToPool (t808Kick* const kickInst, tMempool* const mp)
     kick->chirpRatioMinusOne = 3.3f;
     tCycle_setFreq(&kick->tone, 50.0f);
     tSVF_initToPool(&kick->toneLowpass, SVFTypeLowpass, 2000.0f, 0.5f, mp);
-    tEnvelope_initToPool(&kick->toneEnvOscChirp, 0.0f, 20.0f, OFALSE, mp);
-    tEnvelope_initToPool(&kick->toneEnvOscSigh, 0.0f, 2500.0f, OFALSE, mp);
-    tEnvelope_initToPool(&kick->toneEnvGain, 0.0f, 800.0f, OFALSE, mp);
+    tEnvelope_initToPool(&kick->toneEnvOscChirp, 0.0f, 20.0f, 0, mp);
+    tEnvelope_initToPool(&kick->toneEnvOscSigh, 0.0f, 2500.0f, 0, mp);
+    tEnvelope_initToPool(&kick->toneEnvGain, 0.0f, 800.0f, 0, mp);
     tNoise_initToPool(&kick->noiseOsc, PinkNoise, mp);
-    tEnvelope_initToPool(&kick->noiseEnvGain, 0.0f, 1.0f, OFALSE, mp);
+    tEnvelope_initToPool(&kick->noiseEnvGain, 0.0f, 1.0f, 0, mp);
     kick->noiseGain = 0.3f;
 }
 

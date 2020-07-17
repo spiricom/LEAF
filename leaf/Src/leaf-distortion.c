@@ -72,12 +72,12 @@ void tSampleReducer_setRatio(tSampleReducer* const sr, float ratio)
 // Oversampler
 //============================================================================================================
 // Latency is equal to the phase length (numTaps / ratio)
-void tOversampler_init (tOversampler* const osr, int ratio, oBool extraQuality)
+void tOversampler_init (tOversampler* const osr, int ratio, int extraQuality)
 {
     tOversampler_initToPool(osr, ratio, extraQuality, &leaf.mempool);
 }
 
-void tOversampler_initToPool (tOversampler* const osr, int ratio, oBool extraQuality, tMempool* const mp)
+void tOversampler_initToPool (tOversampler* const osr, int ratio, int extraQuality, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tOversampler* os = *osr = (_tOversampler*) mpool_alloc(sizeof(_tOversampler), m);

@@ -28,6 +28,66 @@ extern "C" {
     
     //==============================================================================
     
+    /*!
+     @defgroup twdf tWDF
+     @ingroup electrical
+     @brief
+     @{
+     
+     @fn void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
+     @brief
+     @param
+     
+     @fn void    tWDF_initToPool             (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tWDF_free                   (tWDF* const)
+     @brief
+     @param
+     
+     @fn float   tWDF_tick                   (tWDF* const, float sample, tWDF* const outputPoint, uint8_t paramsChanged)
+     @brief
+     @param
+     
+     @fn void    tWDF_setValue               (tWDF* const, float value)
+     @brief
+     @param
+     
+     @fn void    tWDF_setSampleRate          (tWDF* const, float sample_rate)
+     @brief
+     @param
+     
+     @fn uint8_t tWDF_isLeaf                 (tWDF* const)
+     @brief
+     @param
+     
+     @fn float   tWDF_getPortResistance      (tWDF* const)
+     @brief
+     @param
+     
+     @fn float   tWDF_getReflectedWaveUp     (tWDF* const, float input)
+     @brief
+     @param
+     
+     @fn float   tWDF_getReflectedWaveDown   (tWDF* const, float input, float incident_wave)
+     @brief
+     @param
+     
+     @fn void    tWDF_setIncidentWave        (tWDF* const, float incident_wave, float input)
+     @brief
+     @param
+     
+     @fn float   tWDF_getVoltage             (tWDF* const)
+     @brief
+     @param
+     
+     @fn float   tWDF_getCurrent             (tWDF* const)
+     @brief
+     @param
+     
+     @} */
+    
     typedef enum WDFComponentType
     {
         SeriesAdaptor = 0,

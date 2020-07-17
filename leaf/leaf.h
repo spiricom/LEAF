@@ -75,15 +75,15 @@
 
 #endif
 
-/*! \mainpage LEAF
+/*! @mainpage LEAF
  *
- * \section intro_sec Introduction
+ * @section intro_sec Introduction
  *
  * This is the work in progress documentation of LEAF.
  *
- * \section install_sec Installation
+ * @section install_sec Installation
  *
- * \subsection step1 Step 1: Opening the box
+ * @subsection step1 Step 1: Opening the box
  *
  * etc...
  */
@@ -106,6 +106,7 @@
  * @defgroup electrical Electrical Models
  * @defgroup mempool Mempool
  * @defgroup math Math
+ * @defgroup tables Tables
  */
 
 #ifdef __cplusplus
@@ -113,8 +114,8 @@ extern "C" {
 #endif
     
     /*!
-     * @ingroup leaf
-     * @{
+     @ingroup leaf
+     @{
      */
     
     //! Initialize the LEAF instance.
@@ -143,9 +144,7 @@ extern "C" {
 //    __attribute__((weak))
     uint8_t LEAF_error(uint8_t whichone);
     
-    /*!
-     * @}
-     */
+    /*! @} */
     
 #ifdef __cplusplus
 }

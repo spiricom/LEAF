@@ -222,7 +222,7 @@ void    tTwoPole_setA2(tTwoPole* const ft, float a2)
 }
 
 
-void    tTwoPole_setResonance(tTwoPole* const ft, float frequency, float radius, oBool normalize)
+void    tTwoPole_setResonance(tTwoPole* const ft, float frequency, float radius, int normalize)
 {
     _tTwoPole* f = *ft;
     
@@ -636,7 +636,7 @@ float   tBiQuad_tick(tBiQuad* const ft, float input)
     return out;
 }
 
-void    tBiQuad_setResonance(tBiQuad* const ft, float freq, float radius, oBool normalize)
+void    tBiQuad_setResonance(tBiQuad* const ft, float freq, float radius, int normalize)
 {
     _tBiQuad* f = *ft;
     

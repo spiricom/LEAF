@@ -361,15 +361,15 @@ int   LEAF_clipInt(int min, int val, int max)
     }
 }
 
-oBool     LEAF_isPrime(uint64_t number )
+int     LEAF_isPrime(uint64_t number )
 {
-    if ( number == 2 ) return OTRUE;
+    if ( number == 2 ) return 1;
     if ( number & 1 ) {
         for ( int i=3; i<(int)sqrt((double)number)+1; i+=2 )
-            if ( (number % i) == 0 ) return OFALSE;
-        return OTRUE; // prime
+            if ( (number % i) == 0 ) return 0;
+        return 1; // prime
     }
-    else return OFALSE; // even
+    else return 0; // even
 }
 
 // Adapted from MusicDSP: http://www.musicdsp.org/showone.php?id=238

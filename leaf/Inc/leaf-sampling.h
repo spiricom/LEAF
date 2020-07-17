@@ -33,6 +33,78 @@ extern "C" {
     
     //==============================================================================
     
+    /*!
+     @defgroup tbuffer tBuffer
+     @ingroup sampling
+     @brief
+     @{
+     
+     @fn void  tBuffer_init                  (tBuffer* const, uint32_t length)
+     @brief
+     @param
+     
+     @fn void  tBuffer_initToPool            (tBuffer* const, uint32_t length, tMempool* const)
+     @brief
+     @param
+     
+     @fn void  tBuffer_free                  (tBuffer* const)
+     @brief
+     @param
+     
+     @fn void  tBuffer_tick                  (tBuffer* const, float sample)
+     @brief
+     @param
+     
+     @fn void  tBuffer_read                  (tBuffer* const, float* buff, uint32_t len)
+     @brief
+     @param
+     
+     @fn float tBuffer_get                   (tBuffer* const, int idx)
+     @brief
+     @param
+     
+     @fn void  tBuffer_record                (tBuffer* const)
+     @brief
+     @param
+     
+     @fn void  tBuffer_stop                  (tBuffer* const)
+     @brief
+     @param
+     
+     @fn int   tBuffer_getRecordPosition     (tBuffer* const)
+     @brief
+     @param
+     
+     @fn void   tBuffer_setRecordPosition    (tBuffer* const, int pos)
+     @brief
+     @param
+     
+     @fn void  tBuffer_setRecordMode         (tBuffer* const, RecordMode mode)
+     @brief
+     @param
+     
+     @fn void  tBuffer_clear                 (tBuffer* const)
+     @brief
+     @param
+     
+     @fn uint32_t tBuffer_getBufferLength    (tBuffer* const)
+     @brief
+     @param
+     
+     @fn uint32_t tBuffer_getRecordedLength  (tBuffer* const sb)
+     @brief
+     @param
+     
+     @fn void     tBuffer_setRecordedLength    (tBuffer* const sb, int length)
+     @brief
+     @param
+     
+     @fn int     tBuffer_isActive            (tBuffer* const sb)
+     @brief
+     @param
+     
+     @} */
+    
     typedef enum RecordMode
     {
         RecordOneShot = 0,
@@ -61,26 +133,80 @@ extern "C" {
     void  tBuffer_free                  (tBuffer* const);
     
     void  tBuffer_tick                  (tBuffer* const, float sample);
-    
     void  tBuffer_read                  (tBuffer* const, float* buff, uint32_t len);
-    
     float tBuffer_get                   (tBuffer* const, int idx);
-    
     void  tBuffer_record                (tBuffer* const);
     void  tBuffer_stop                  (tBuffer* const);
     int   tBuffer_getRecordPosition     (tBuffer* const);
-    void   tBuffer_setRecordPosition     (tBuffer* const, int pos);
-    
+    void   tBuffer_setRecordPosition    (tBuffer* const, int pos);
     void  tBuffer_setRecordMode         (tBuffer* const, RecordMode mode);
-    
     void  tBuffer_clear                 (tBuffer* const);
-    
     uint32_t tBuffer_getBufferLength    (tBuffer* const);
     uint32_t tBuffer_getRecordedLength  (tBuffer* const sb);
     void 	tBuffer_setRecordedLength	(tBuffer* const sb, int length);
     int 	tBuffer_isActive			(tBuffer* const sb);
     
     //==============================================================================
+    
+    /*!
+     @defgroup tsampler tSampler
+     @ingroup sampling
+     @brief
+     @{
+     
+     @fn void    tSampler_init               (tSampler* const, tBuffer* const)
+     @brief
+     @param
+     
+     @fn void    tSampler_initToPool         (tSampler* const, tBuffer* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tSampler_free               (tSampler* const)
+     @brief
+     @param
+     
+     @fn float   tSampler_tick               (tSampler* const)
+     @brief
+     @param
+     
+     @fn void    tSampler_setSample          (tSampler* const, tBuffer* const)
+     @brief
+     @param
+     
+     @fn void    tSampler_setMode            (tSampler* const, PlayMode mode)
+     @brief
+     @param
+     
+     @fn void    tSampler_play               (tSampler* const)
+     @brief
+     @param
+     
+     @fn void    tSampler_stop               (tSampler* const)
+     @brief
+     @param
+     
+     @fn void    tSampler_setStart           (tSampler* const, int32_t start)
+     @brief
+     @param
+     
+     @fn void    tSampler_setEnd             (tSampler* const, int32_t end)
+     @brief
+     @param
+     
+     @fn void    tSampler_setLength             (tSampler* const, int32_t length)
+     @brief
+     @param
+     
+     @fn void    tSampler_setCrossfadeLength (tSampler* const sp, uint32_t length)
+     @brief
+     @param
+     
+     @fn void    tSampler_setRate            (tSampler* const, float rate)
+     @brief
+     @param
+     
+     @} */
     
     typedef enum PlayMode
     {
@@ -130,23 +256,73 @@ extern "C" {
     void    tSampler_free               (tSampler* const);
     
     float   tSampler_tick               (tSampler* const);
-    
     void    tSampler_setSample          (tSampler* const, tBuffer* const);
-    
     void    tSampler_setMode            (tSampler* const, PlayMode mode);
-    
     void    tSampler_play               (tSampler* const);
     void    tSampler_stop               (tSampler* const);
-    
     void    tSampler_setStart           (tSampler* const, int32_t start);
     void    tSampler_setEnd             (tSampler* const, int32_t end);
     void    tSampler_setLength             (tSampler* const, int32_t length);
-    
     void    tSampler_setCrossfadeLength (tSampler* const sp, uint32_t length);
-    
     void    tSampler_setRate            (tSampler* const, float rate);
     
     //==============================================================================
+    
+    /*!
+     @defgroup tautosampler tAutoSampler
+     @ingroup sampling
+     @brief
+     @{
+     
+     @fn void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_initToPool         (tAutoSampler* const, tBuffer* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_free               (tAutoSampler* const)
+     @brief
+     @param
+     
+     @fn float   tAutoSampler_tick               (tAutoSampler* const, float input)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_setBuffer          (tAutoSampler* const, tBuffer* const)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_setMode            (tAutoSampler* const, PlayMode mode)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_play               (tAutoSampler* const)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_stop               (tAutoSampler* const)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_setThreshold       (tAutoSampler* const, float thresh)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_setWindowSize      (tAutoSampler* const, uint32_t size)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_setCrossfadeLength (tAutoSampler* const, uint32_t length)
+     @brief
+     @param
+     
+     @fn void    tAutoSampler_setRate            (tAutoSampler* const, float rate)
+     @brief
+     @param
+     
+     @} */
     
     typedef struct _tAutoSampler
     {
@@ -168,18 +344,13 @@ extern "C" {
     void    tAutoSampler_free               (tAutoSampler* const);
     
     float   tAutoSampler_tick               (tAutoSampler* const, float input);
-    
     void    tAutoSampler_setBuffer          (tAutoSampler* const, tBuffer* const);
-    
     void    tAutoSampler_setMode            (tAutoSampler* const, PlayMode mode);
-    
     void    tAutoSampler_play               (tAutoSampler* const);
     void    tAutoSampler_stop               (tAutoSampler* const);
-    
     void    tAutoSampler_setThreshold       (tAutoSampler* const, float thresh);
     void    tAutoSampler_setWindowSize      (tAutoSampler* const, uint32_t size);
     void    tAutoSampler_setCrossfadeLength (tAutoSampler* const, uint32_t length);
-    
     void    tAutoSampler_setRate            (tAutoSampler* const, float rate);
     
 #ifdef __cplusplus

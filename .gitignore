@@ -10,4 +10,4 @@
 *.swp
 */Builds
 */JuceLibraryCode
-doxygen/html
+doxygen/leaf

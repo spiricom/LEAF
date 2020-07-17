@@ -31,7 +31,58 @@ extern "C" {
     
     //==============================================================================
     
-    // 808 Cowbell
+    /*!
+     @defgroup t808cowbell t808Cowbell
+     @ingroup instruments
+     @brief
+     @{
+     
+     @fn void    t808Cowbell_init            (t808Cowbell* const, int useStick)
+     @brief
+     @param
+     
+     @fn void    t808Cowbell_initToPool      (t808Cowbell* const, int useStick, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    t808Cowbell_free            (t808Cowbell* const)
+     @brief
+     @param
+     
+     @fn float   t808Cowbell_tick            (t808Cowbell* const)
+     @brief
+     @param
+     
+     @fn void    t808Cowbell_on              (t808Cowbell* const, float vel)
+     @brief
+     @param
+     
+     @fn void    t808Cowbell_setDecay        (t808Cowbell* const, float decay)
+     @brief
+     @param
+     
+     @fn void    t808Cowbell_setHighpassFreq (t808Cowbell* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Cowbell_setBandpassFreq (t808Cowbell* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Cowbell_setFreq         (t808Cowbell* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Cowbell_setOscMix       (t808Cowbell* const, float oscMix)
+     @brief
+     @param
+     
+     @fn void    t808Cowbell_setStick        (t808Cowbell* const, int useStick)
+     @brief
+     @param
+     
+     @} */
+    
     typedef struct _t808Cowbell
     {
         tMempool mempool;
@@ -65,7 +116,74 @@ extern "C" {
     
     //==============================================================================
     
-    // 808 Hihat
+    /*!
+     @defgroup t808hihat t808Hihat
+     @ingroup instruments
+     @brief
+     @{
+     
+     @fn void    t808Hihat_init                  (t808Hihat* const)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_initToPool            (t808Hihat* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_free                  (t808Hihat* const)
+     @brief
+     @param
+     
+     @fn float   t808Hihat_tick                  (t808Hihat* const)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_on                    (t808Hihat* const, float vel)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setOscNoiseMix        (t808Hihat* const, float oscNoiseMix)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setDecay              (t808Hihat* const, float decay)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setHighpassFreq       (t808Hihat* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setOscBandpassFreq    (t808Hihat* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setOscBandpassQ       (t808Hihat* const hihat, float Q)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setStickBandPassFreq  (t808Hihat* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setStickBandPassQ     (t808Hihat* const hihat, float Q)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setOscFreq            (t808Hihat* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setStretch            (t808Hihat* const hihat, float stretch)
+     @brief
+     @param
+     
+     @fn void    t808Hihat_setFM                 (t808Hihat* const hihat, float FM_amount)
+     @brief
+     @param
+    
+     @} */
+    
     typedef struct _t808Hihat
     {
         tMempool mempool;
@@ -107,7 +225,66 @@ extern "C" {
     
     //==============================================================================
     
-    // 808 Snare
+    /*!
+     @defgroup t808snare t808Snare
+     @ingroup instruments
+     @brief
+     @{
+     
+     @fn void    t808Snare_init                  (t808Snare* const)
+     @brief
+     @param
+     
+     @fn void    t808Snare_initToPool            (t808Snare* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    t808Snare_free                  (t808Snare* const)
+     @brief
+     @param
+     
+     @fn float   t808Snare_tick                  (t808Snare* const)
+     @brief
+     @param
+     
+     @fn void    t808Snare_on                    (t808Snare* const, float vel)
+     @brief
+     @param
+     
+     @fn void    t808Snare_setTone1Freq          (t808Snare* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Snare_setTone2Freq          (t808Snare* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Snare_setTone1Decay         (t808Snare* const, float decay)
+     @brief
+     @param
+     
+     @fn void    t808Snare_setTone2Decay         (t808Snare* const, float decay)
+     @brief
+     @param
+     
+     @fn void    t808Snare_setNoiseDecay         (t808Snare* const, float decay)
+     @brief
+     @param
+     
+     @fn void    t808Snare_setToneNoiseMix       (t808Snare* const, float toneNoiseMix)
+     @brief
+     @param
+     
+     @fn void    t808Snare_setNoiseFilterFreq    (t808Snare* const, float noiseFilterFreq)
+     @brief
+     @param
+     
+     @fn void    t808Snare_setNoiseFilterQ       (t808Snare* const, float noiseFilterQ)
+     @brief
+     @param
+     
+     @} */
+    
     typedef struct _t808Snare
     {
         tMempool mempool;
@@ -151,7 +328,66 @@ extern "C" {
     
     //==============================================================================
     
-    // 808 Kick
+    /*!
+     @defgroup t808kick t808Kick
+     @ingroup instruments
+     @brief
+     @{
+     
+     @fn void    t808Kick_init               (t808Kick* const)
+     @brief
+     @param
+     
+     @fn void    t808Kick_initToPool         (t808Kick* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    t808Kick_free               (t808Kick* const)
+     @brief
+     @param
+     
+     @fn float   t808Kick_tick               (t808Kick* const)
+     @brief
+     @param
+     
+     @fn void    t808Kick_on                 (t808Kick* const, float vel)
+     @brief
+     @param
+     
+     @fn void    t808Kick_setToneFreq        (t808Kick* const, float freq)
+     @brief
+     @param
+     
+     @fn void    t808Kick_setToneDecay       (t808Kick* const, float decay)
+     @brief
+     @param
+     
+     @fn void    t808Kick_setNoiseDecay      (t808Kick* const, float decay)
+     @brief
+     @param
+     
+     @fn void    t808Kick_setSighAmount      (t808Kick* const, float sigh)
+     @brief
+     @param
+     
+     @fn void    t808Kick_setChirpAmount     (t808Kick* const, float chirp)
+     @brief
+     @param
+     
+     @fn void    t808Kick_setToneNoiseMix    (t808Kick* const, float toneNoiseMix)
+     @brief
+     @param
+     
+     @fn void    t808Kick_setNoiseFilterFreq (t808Kick* const, float noiseFilterFreq)
+     @brief
+     @param
+     
+     @fn void    t808Kick_setNoiseFilterQ    (t808Kick* const, float noiseFilterQ)
+     @brief
+     @param
+     
+     @} */
+    
     typedef struct _t808Kick
     {
         tMempool mempool;

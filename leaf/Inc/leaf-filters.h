@@ -35,9 +35,32 @@ extern "C" {
      @ingroup filters
      @brief Schroeder allpass. Comb-filter with feedforward and feedback.
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay)
+     @brief
+     @param
+     
+     @fn void    tAllpass_initToPool     (tAllpass* const, float initDelay, uint32_t maxDelay, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tAllpass_free           (tAllpass* const)
+     @brief
+     @param
+     
+     @fn float   tAllpass_tick           (tAllpass* const, float input)
+     @brief
+     @param
+     
+     @fn void    tAllpass_setGain        (tAllpass* const, float gain)
+     @brief
+     @param
+     
+     @fn void    tAllpass_setDelay       (tAllpass* const, float delay)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     typedef struct _tAllpass
     {
@@ -68,9 +91,48 @@ extern "C" {
      @ingroup filters
      @brief OnePole filter, reimplemented from STK (Cook and Scavone).
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tOnePole_init           (tOnePole* const, float thePole)
+     @brief
+     @param
+     
+     @fn void    tOnePole_initToPool     (tOnePole* const, float thePole, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tOnePole_free           (tOnePole* const)
+     @brief
+     @param
+     
+     @fn float   tOnePole_tick           (tOnePole* const, float input)
+     @brief
+     @param
+     
+     @fn void    tOnePole_setB0          (tOnePole* const, float b0)
+     @brief
+     @param
+     
+     @fn void    tOnePole_setA1          (tOnePole* const, float a1)
+     @brief
+     @param
+     
+     @fn void    tOnePole_setPole        (tOnePole* const, float thePole)
+     @brief
+     @param
+     
+     @fn void    tOnePole_setFreq        (tOnePole* const, float freq)
+     @brief
+     @param
+     
+     @fn void    tOnePole_setCoefficients(tOnePole* const, float b0, float a1)
+     @brief
+     @param
+     
+     @fn void    tOnePole_setGain        (tOnePole* const, float gain)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     typedef struct _tOnePole
     {
@@ -102,9 +164,48 @@ extern "C" {
      @ingroup filters
      @brief TwoPole filter, reimplemented from STK (Cook and Scavone).
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tTwoPole_init           (tTwoPole* const)
+     @brief
+     @param
+     
+     @fn void    tTwoPole_initToPool     (tTwoPole* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tTwoPole_free           (tTwoPole* const)
+     @brief
+     @param
+     
+     @fn float   tTwoPole_tick           (tTwoPole* const, float input)
+     @brief
+     @param
+     
+     @fn void    tTwoPole_setB0          (tTwoPole* const, float b0)
+     @brief
+     @param
+     
+     @fn void    tTwoPole_setA1          (tTwoPole* const, float a1)
+     @brief
+     @param
+     
+     @fn void    tTwoPole_setA2          (tTwoPole* const, float a2)
+     @brief
+     @param
+     
+     @fn void    tTwoPole_setResonance   (tTwoPole* const, float freq, float radius, int normalize)
+     @brief
+     @param
+     
+     @fn void    tTwoPole_setCoefficients(tTwoPole* const, float b0, float a1, float a2)
+     @brief
+     @param
+     
+     @fn void    tTwoPole_setGain        (tTwoPole* const, float gain)
+     @brief
+     @param
+     ￼￼￼
+     @} */
 
     typedef struct _tTwoPole
     {
@@ -115,7 +216,7 @@ extern "C" {
         float b0;
         
         float radius, frequency;
-        oBool normalize;
+        int normalize;
         
         float lastOut[2];
     } _tTwoPole;
@@ -130,7 +231,7 @@ extern "C" {
     void    tTwoPole_setB0          (tTwoPole* const, float b0);
     void    tTwoPole_setA1          (tTwoPole* const, float a1);
     void    tTwoPole_setA2          (tTwoPole* const, float a2);
-    void    tTwoPole_setResonance   (tTwoPole* const, float freq, float radius, oBool normalize);
+    void    tTwoPole_setResonance   (tTwoPole* const, float freq, float radius, int normalize);
     void    tTwoPole_setCoefficients(tTwoPole* const, float b0, float a1, float a2);
     void    tTwoPole_setGain        (tTwoPole* const, float gain);
     
@@ -141,9 +242,48 @@ extern "C" {
      @ingroup filters
      @brief OneZero filter, reimplemented from STK (Cook and Scavone).
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tOneZero_init           (tOneZero* const, float theZero)
+     @brief
+     @param
+     
+     @fn void    tOneZero_initToPool     (tOneZero* const, float theZero, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tOneZero_free           (tOneZero* const)
+     @brief
+     @param
+     
+     @fn float   tOneZero_tick           (tOneZero* const, float input)
+     @brief
+     @param
+     
+     @fn void    tOneZero_setB0          (tOneZero* const, float b0)
+     @brief
+     @param
+     
+     @fn void    tOneZero_setB1          (tOneZero* const, float b1)
+     @brief
+     @param
+     
+     @fn void    tOneZero_setZero        (tOneZero* const, float theZero)
+     @brief
+     @param
+     
+     @fn void    tOneZero_setCoefficients(tOneZero* const, float b0, float b1)
+     @brief
+     @param
+     
+     @fn void    tOneZero_setGain        (tOneZero* const, float gain)
+     @brief
+     @param
+     
+     @fn float   tOneZero_getPhaseDelay  (tOneZero *f, float frequency)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     typedef struct _tOneZero
     {
@@ -165,7 +305,7 @@ extern "C" {
     void    tOneZero_setZero        (tOneZero* const, float theZero);
     void    tOneZero_setCoefficients(tOneZero* const, float b0, float b1);
     void    tOneZero_setGain        (tOneZero* const, float gain);
-    float   tOneZero_getPhaseDelay  (tOneZero *f, float frequency );
+    float   tOneZero_getPhaseDelay  (tOneZero *f, float frequency);
     
     //==============================================================================
     
@@ -174,9 +314,49 @@ extern "C" {
      @ingroup filters
      @brief TwoZero filter, reimplemented from STK (Cook and Scavone).
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tTwoZero_init           (tTwoZero* const)
+     @brief
+     @param
+     
+     @fn void    tTwoZero_initToPool     (tTwoZero* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tTwoZero_free           (tTwoZero* const)
+     @brief
+     @param
+     
+     @fn float   tTwoZero_tick           (tTwoZero* const, float input)
+     @brief
+     @param
+     
+     @fn void    tTwoZero_setB0          (tTwoZero* const, float b0)
+     @brief
+     @param
+     
+     @fn void    tTwoZero_setB1          (tTwoZero* const, float b1)
+     @brief
+     @param
+     
+     @fn void    tTwoZero_setB2          (tTwoZero* const, float b2)
+     @brief
+     @param
+     
+     @fn void    tTwoZero_setNotch       (tTwoZero* const, float frequency, float radius)
+     @brief
+     @param
+     
+     @fn void    tTwoZero_setCoefficients(tTwoZero* const, float b0, float b1, float b2)
+     @brief
+     @param
+     
+     @fn void    tTwoZero_setGain        (tTwoZero* const, float gain)
+     @brief
+     @param
+     
+     ￼￼￼
+     @} */
 
     typedef struct _tTwoZero
     {
@@ -211,9 +391,54 @@ extern "C" {
      @ingroup filters
      @brief PoleZero filter, reimplemented from STK (Cook and Scavone).
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tPoleZero_init              (tPoleZero* const)
+     @brief
+     @param
+     
+     @fn void    tPoleZero_initToPool        (tPoleZero* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tPoleZero_free              (tPoleZero* const)
+     @brief
+     @param
+     
+     
+     @fn float   tPoleZero_tick              (tPoleZero* const, float input)
+     @brief
+     @param
+     
+     @fn void    tPoleZero_setB0             (tPoleZero* const, float b0)
+     @brief
+     @param
+     
+     @fn void    tPoleZero_setB1             (tPoleZero* const, float b1)
+     @brief
+     @param
+     
+     @fn void    tPoleZero_setA1             (tPoleZero* const, float a1)
+     @brief
+     @param
+     
+     @fn void    tPoleZero_setCoefficients   (tPoleZero* const, float b0, float b1, float a1)
+     @brief
+     @param
+     
+     @fn void    tPoleZero_setAllpass        (tPoleZero* const, float coeff)
+     @brief
+     @param
+     
+     @fn void    tPoleZero_setBlockZero      (tPoleZero* const, float thePole)
+     @brief
+     @param
+     
+     @fn void    tPoleZero_setGain           (tPoleZero* const, float gain)
+     @brief
+     @param
+     
+     ￼￼￼
+     @} */
     
     typedef struct _tPoleZero
     {
@@ -248,9 +473,62 @@ extern "C" {
      @ingroup filters
      @brief BiQuad filter, reimplemented from STK (Cook and Scavone).
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tBiQuad_init           (tBiQuad* const)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_initToPool     (tBiQuad* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_free           (tBiQuad* const)
+     @brief
+     @param
+     
+     
+     @fn float   tBiQuad_tick           (tBiQuad* const, float input)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_setB0          (tBiQuad* const, float b0)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_setB1          (tBiQuad* const, float b1)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_setB2          (tBiQuad* const, float b2)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_setA1          (tBiQuad* const, float a1)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_setA2          (tBiQuad* const, float a2)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_setNotch       (tBiQuad* const, float freq, float radius)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_setResonance   (tBiQuad* const, float freq, float radius, int normalize)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_setCoefficients(tBiQuad* const, float b0, float b1, float b2, float a1, float a2)
+     @brief
+     @param
+     
+     @fn void    tBiQuad_setGain        (tBiQuad* const, float gain)
+     @brief
+     @param
+     
+     ￼￼￼
+     @} */
     
     typedef struct _tBiQuad
     {
@@ -264,7 +542,7 @@ extern "C" {
         float lastOut[2];
         
         float frequency, radius;
-        oBool normalize;
+        int normalize;
     } _tBiQuad;
     
     typedef _tBiQuad* tBiQuad;
@@ -280,7 +558,7 @@ extern "C" {
     void    tBiQuad_setA1          (tBiQuad* const, float a1);
     void    tBiQuad_setA2          (tBiQuad* const, float a2);
     void    tBiQuad_setNotch       (tBiQuad* const, float freq, float radius);
-    void    tBiQuad_setResonance   (tBiQuad* const, float freq, float radius, oBool normalize);
+    void    tBiQuad_setResonance   (tBiQuad* const, float freq, float radius, int normalize);
     void    tBiQuad_setCoefficients(tBiQuad* const, float b0, float b1, float b2, float a1, float a2);
     void    tBiQuad_setGain        (tBiQuad* const, float gain);
     
@@ -291,9 +569,36 @@ extern "C" {
      @ingroup filters
      @brief State Variable Filter, algorithm from Andy Simper.
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tSVF_init           (tSVF* const, SVFType type, float freq, float Q)
+     @brief
+     @param
+     
+     @fn void    tSVF_initToPool     (tSVF* const, SVFType type, float freq, float Q, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tSVF_free           (tSVF* const)
+     @brief
+     @param
+     
+     @fn float   tSVF_tick           (tSVF* const, float v0)
+     
+     @brief
+     @param
+     @fn void    tSVF_setFreq        (tSVF* const, float freq)
+     @brief
+     @param
+     
+     @fn void    tSVF_setQ           (tSVF* const, float Q)
+     @brief
+     @param
+     
+     @fn void    tSVF_setFreqAndQ    (tSVF* const svff, float freq, float Q)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     typedef enum SVFType
     {
@@ -325,6 +630,7 @@ extern "C" {
     void    tSVF_setFreq        (tSVF* const, float freq);
     void    tSVF_setQ           (tSVF* const, float Q);
     void    tSVF_setFreqAndQ    (tSVF* const svff, float freq, float Q);
+    
     //==============================================================================
     
     /*!
@@ -332,9 +638,32 @@ extern "C" {
      @ingroup filters
      @brief Efficient State Variable Filter for 14-bit control input, [0, 4096).
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tEfficientSVF_init          (tEfficientSVF* const, SVFType type, uint16_t input, float Q)
+     @brief
+     @param
+     
+     @fn void    tEfficientSVF_initToPool    (tEfficientSVF* const, SVFType type, uint16_t input, float Q, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tEfficientSVF_free          (tEfficientSVF* const)
+     @brief
+     @param
+     
+     @fn float   tEfficientSVF_tick          (tEfficientSVF* const, float v0)
+     @brief
+     @param
+     
+     @fn void    tEfficientSVF_setFreq       (tEfficientSVF* const, uint16_t controlFreq)
+     @brief
+     @param
+     
+     @fn void    tEfficientSVF_setQ          (tEfficientSVF* const, float Q)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     typedef struct _tEfficientSVF
     {
@@ -362,9 +691,32 @@ extern "C" {
      @ingroup filters
      @brief Simple Highpass filter.
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tHighpass_init          (tHighpass* const, float freq)
+     @brief
+     @param
+     
+     @fn void    tHighpass_initToPool    (tHighpass* const, float freq, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tHighpass_free          (tHighpass* const)
+     @brief
+     @param
+     
+     @fn float   tHighpass_tick          (tHighpass* const, float x)
+     @brief
+     @param
+     
+     @fn void    tHighpass_setFreq       (tHighpass* const, float freq)
+     @brief
+     @param
+     
+     @fn float   tHighpass_getFreq       (tHighpass* const)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     typedef struct _tHighpass
     {
@@ -390,9 +742,36 @@ extern "C" {
      @ingroup filters
      @brief
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tButterworth_init           (tButterworth* const, int N, float f1, float f2)
+     @brief
+     @param
+     
+     @fn void    tButterworth_initToPool     (tButterworth* const, int N, float f1, float f2, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tButterworth_free           (tButterworth* const)
+     @brief
+     @param
+     
+     @fn float   tButterworth_tick           (tButterworth* const, float input)
+     @brief
+     @param
+     
+     @fn void    tButterworth_setF1          (tButterworth* const, float in)
+     @brief
+     @param
+     
+     @fn void    tButterworth_setF2          (tButterworth* const, float in)
+     @brief
+     @param
+     
+     @fn void    tButterworth_setFreqs       (tButterworth* const, float f1, float f2)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
 #define NUM_SVF_BW 16
     typedef struct _tButterworth
@@ -427,9 +806,24 @@ extern "C" {
      @ingroup filters
      @brief
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tFIR_init           (tFIR* const, float* coeffs, int numTaps)
+     @brief
+     @param
+     
+     @fn void    tFIR_initToPool     (tFIR* const, float* coeffs, int numTaps, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tFIR_free           (tFIR* const)
+     @brief
+     @param
+     
+     @fn float   tFIR_tick           (tFIR* const, float input)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     typedef struct _tFIR
     {
@@ -455,9 +849,24 @@ extern "C" {
      @ingroup filters
      @brief
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tMedianFilter_init           (tMedianFilter* const, int size)
+     @brief
+     @param
+     
+     @fn void    tMedianFilter_initToPool     (tMedianFilter* const, int size, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tMedianFilter_free           (tMedianFilter* const)
+     @brief
+     @param
+     
+     @fn float   tMedianFilter_tick           (tMedianFilter* const, float input)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     typedef struct _tMedianFilter
     {
@@ -483,13 +892,60 @@ extern "C" {
     /*!
      @defgroup tvzfilter tVZFilter
      @ingroup filters
-     @brief
+     @brief Vadim Zavalishin style from VA book (from implementation in RSlib posted to kvr forum)
      @{
-     */
-    
-    /*! @} */
-    
-    //Vadim Zavalishin style from VA book (from implementation in RSlib posted to kvr forum)
+     
+     @fn void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q)
+     @brief
+     @param
+     
+     @fn void    tVZFilter_initToPool     (tVZFilter* const, VZFilterType type, float freq, float Q, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tVZFilter_free           (tVZFilter* const)
+     @brief
+     @param
+     
+     @fn void    tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate)
+     @brief
+     @param
+     
+     @fn float   tVZFilter_tick               (tVZFilter* const, float input)
+     @brief
+     @param
+     
+     @fn float   tVZFilter_tickEfficient               (tVZFilter* const vf, float in)
+     @brief
+     @param
+     
+     @fn void    tVZFilter_calcCoeffs           (tVZFilter* const)
+     @brief
+     @param
+     
+     @fn void    tVZFilter_setBandwidth            (tVZFilter* const, float bandWidth)
+     @brief
+     @param
+     
+     @fn void    tVZFilter_setFreq           (tVZFilter* const, float freq)
+     @brief
+     @param
+     
+     @fn void    tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, float freq, float bw)
+     @brief
+     @param
+     @fn void    tVZFilter_setGain                  (tVZFilter* const, float gain)
+     @brief
+     @param
+     @fn void    tVZFilter_setType                  (tVZFilter* const, VZFilterType type)
+     @brief
+     @param
+     
+     @fn float   tVZFilter_BandwidthToR        (tVZFilter* const vf, float B)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     typedef enum VZFilterType
     {
@@ -538,16 +994,16 @@ extern "C" {
     void    tVZFilter_initToPool     (tVZFilter* const, VZFilterType type, float freq, float Q, tMempool* const);
     void    tVZFilter_free           (tVZFilter* const);
     
-    void     tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate);
+    void    tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate);
     float   tVZFilter_tick               (tVZFilter* const, float input);
     float   tVZFilter_tickEfficient               (tVZFilter* const vf, float in);
-    void   tVZFilter_calcCoeffs           (tVZFilter* const);
-    void   tVZFilter_setBandwidth            (tVZFilter* const, float bandWidth);
-    void   tVZFilter_setFreq           (tVZFilter* const, float freq);
-    void   tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, float freq, float bw);
-    void   tVZFilter_setGain                  (tVZFilter* const, float gain);
-    void   tVZFilter_setType                  (tVZFilter* const, VZFilterType type);
-    float     tVZFilter_BandwidthToR        (tVZFilter* const vf, float B);
+    void    tVZFilter_calcCoeffs           (tVZFilter* const);
+    void    tVZFilter_setBandwidth            (tVZFilter* const, float bandWidth);
+    void    tVZFilter_setFreq           (tVZFilter* const, float freq);
+    void    tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, float freq, float bw);
+    void    tVZFilter_setGain                  (tVZFilter* const, float gain);
+    void    tVZFilter_setType                  (tVZFilter* const, VZFilterType type);
+    float   tVZFilter_BandwidthToR        (tVZFilter* const vf, float B);
     
     
     /*!
@@ -555,9 +1011,32 @@ extern "C" {
      @ingroup filters
      @brief
      @{
-     */
-    
-    /*! @} */
+     
+     @fn void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q)
+     @brief
+     @param
+     
+     @fn void    tDiodeFilter_initToPool     (tDiodeFilter* const, float freq, float Q, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tDiodeFilter_free           (tDiodeFilter* const)
+     @brief
+     @param
+     
+     @fn float   tDiodeFilter_tick               (tDiodeFilter* const, float input)
+     @brief
+     @param
+     
+     @fn void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff)
+     @brief
+     @param
+     
+     @fn void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance)
+     @brief
+     @param
+     ￼￼￼
+     @} */
     
     //diode ladder filter
     typedef struct _tDiodeFilter

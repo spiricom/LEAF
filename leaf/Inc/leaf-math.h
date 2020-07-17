@@ -23,11 +23,10 @@ extern "C" {
     
     //==============================================================================
     
-    typedef enum oBool
-    {
-        OTRUE  = 1,
-        OFALSE = 0
-    }oBool;
+    /*!
+     @ingroup math
+     @{
+     */
     
     // Allows for bitwise operations on floats
     union unholy_t { /* a union between a float and an integer */
@@ -110,8 +109,8 @@ extern "C" {
     
     float       LEAF_clip               (float min, float val, float max);
     int         LEAF_clipInt            (int min, int val, int max);
-    float       LEAF_softClip            (float val, float thresh);
-    oBool       LEAF_isPrime            (uint64_t number );
+    float       LEAF_softClip           (float val, float thresh);
+    int         LEAF_isPrime            (uint64_t number );
     
     float       LEAF_midiToFrequency    (float f);
     float       LEAF_frequencyToMidi(float f);
@@ -219,6 +218,7 @@ extern "C" {
     
     float median3f(float a, float b, float c);
 
+    /*! @} */
 
     //==============================================================================
     

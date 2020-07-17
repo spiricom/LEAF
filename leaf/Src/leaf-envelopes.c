@@ -62,9 +62,9 @@ void    tEnvelope_initToPool    (tEnvelope* const envlp, float attack, float dec
     if (rampIndex < 0)
         rampIndex = 0;
     
-    env->inRamp = OFALSE;
-    env->inAttack = OFALSE;
-    env->inDecay = OFALSE;
+    env->inRamp = 0;
+    env->inAttack = 0;
+    env->inDecay = 0;
     
     env->attackInc = env->inc_buff[attackIndex];
     env->decayInc = env->inc_buff[decayIndex];
@@ -125,18 +125,18 @@ void     tEnvelope_on(tEnvelope* const envlp, float velocity)
     if (env->inAttack || env->inDecay) // In case envelope retriggered while it is still happening.
     {
         env->rampPhase = 0;
-        env->inRamp = OTRUE;
+        env->inRamp = 1;
         env->rampPeak = env->next;
     }
     else // Normal start.
     {
-        env->inAttack = OTRUE;
+        env->inAttack = 1;
     }
     
     
     env->attackPhase = 0;
     env->decayPhase = 0;
-    env->inDecay = OFALSE;
+    env->inDecay = 0;
     env->gain = velocity;
 }
 
@@ -148,8 +148,8 @@ float   tEnvelope_tick(tEnvelope* const envlp)
     {
         if (env->rampPhase > UINT16_MAX)
         {
-            env->inRamp = OFALSE;
-            env->inAttack = OTRUE;
+            env->inRamp = 0;
+            env->inAttack = 1;
             env->next = 0.0f;
         }
         else
@@ -166,8 +166,8 @@ float   tEnvelope_tick(tEnvelope* const envlp)
         // If attack done, time to turn around.
         if (env->attackPhase > UINT16_MAX)
         {
-            env->inDecay = OTRUE;
-            env->inAttack = OFALSE;
+            env->inDecay = 1;
+            env->inAttack = 0;
             env->next = env->gain * 1.0f;
         }
         else
@@ -187,13 +187,13 @@ float   tEnvelope_tick(tEnvelope* const envlp)
         // If decay done, finish.
         if (env->decayPhase >= UINT16_MAX)
         {
-            env->inDecay = OFALSE;
+            env->inDecay = 0;
             
             if (env->loop)
             {
                 env->attackPhase = 0;
                 env->decayPhase = 0;
-                env->inAttack = OTRUE;
+                env->inAttack = 1;
             }
             else
             {
@@ -266,11 +266,11 @@ void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, fl
 
     adsr->next = 0.0f;
 
-    adsr->inRamp = OFALSE;
-    adsr->inAttack = OFALSE;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OFALSE;
+    adsr->inRamp = 0;
+    adsr->inAttack = 0;
+    adsr->inDecay = 0;
+    adsr->inSustain = 0;
+    adsr->inRelease = 0;
 
     adsr->sustain = sustain;
 
@@ -364,20 +364,20 @@ void tADSR_on(tADSR* const adsrenv, float velocity)
     if ((adsr->inAttack || adsr->inDecay) || (adsr->inSustain || adsr->inRelease)) // In case ADSR retriggered while it is still happening.
     {
         adsr->rampPhase = 0;
-        adsr->inRamp = OTRUE;
+        adsr->inRamp = 1;
         adsr->rampPeak = adsr->next;
     }
     else // Normal start.
     {
-        adsr->inAttack = OTRUE;
+        adsr->inAttack = 1;
     }
 
     adsr->attackPhase = 0;
     adsr->decayPhase = 0;
     adsr->releasePhase = 0;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OFALSE;
+    adsr->inDecay = 0;
+    adsr->inSustain = 0;
+    adsr->inRelease = 0;
     adsr->gain = velocity;
 }
 
@@ -387,10 +387,10 @@ void tADSR_off(tADSR* const adsrenv)
 
     if (adsr->inRelease) return;
 
-    adsr->inAttack = OFALSE;
-    adsr->inDecay = OFALSE;
-    adsr->inSustain = OFALSE;
-    adsr->inRelease = OTRUE;
+    adsr->inAttack = 0;
+    adsr->inDecay = 0;
+    adsr->inSustain = 0;
+    adsr->inRelease = 1;
 
     adsr->releasePeak = adsr->next;
 }
@@ -404,8 +404,8 @@ float   tADSR_tick(tADSR* const adsrenv)
     {
         if (adsr->rampPhase > UINT16_MAX)
         {
-            adsr->inRamp = OFALSE;
-            adsr->inAttack = OTRUE;
+            adsr->inRamp = 0;
+            adsr->inAttack = 1;
             adsr->next = 0.0f;
         }
         else
@@ -422,8 +422,8 @@ float   tADSR_tick(tADSR* const adsrenv)
         // If attack done, time to turn around.
         if (adsr->attackPhase > UINT16_MAX)
         {
-            adsr->inDecay = OTRUE;
-            adsr->inAttack = OFALSE;
+            adsr->inDecay = 1;
+            adsr->inAttack = 0;
             adsr->next = adsr->gain * 1.0f;
         }
         else
@@ -443,8 +443,8 @@ float   tADSR_tick(tADSR* const adsrenv)
         // If decay done, sustain.
         if (adsr->decayPhase >= UINT16_MAX)
         {
-            adsr->inDecay = OFALSE;
-            adsr->inSustain = OTRUE;
+            adsr->inDecay = 0;
+            adsr->inSustain = 1;
             adsr->next = adsr->gain * adsr->sustain;
         }
 
@@ -467,7 +467,7 @@ float   tADSR_tick(tADSR* const adsrenv)
         // If release done, finish.
         if (adsr->releasePhase >= UINT16_MAX)
         {
-            adsr->inRelease = OFALSE;
+            adsr->inRelease = 0;
             adsr->next = 0.0f;
         }
         else {

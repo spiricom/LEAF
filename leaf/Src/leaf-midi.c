@@ -31,7 +31,7 @@ void    tStack_initToPool           (tStack* const stack, tMempool* const mp)
     _tStack* ns = *stack = (_tStack*) mpool_alloc(sizeof(_tStack), m);
     ns->mempool = m;
     
-    ns->ordered = OFALSE;
+    ns->ordered = 0;
     ns->size = 0;
     ns->pos = 0;
     ns->capacity = STACK_SIZE;
@@ -287,14 +287,14 @@ void    tPoly_initToPool            (tPoly* const polyh, int maxNumVoices, tMemp
     
     poly->ramps = (tRamp*) mpool_alloc(sizeof(tRamp) * poly->maxNumVoices, m);
     poly->rampVals = (float*) mpool_alloc(sizeof(float) * poly->maxNumVoices, m);
-    poly->firstReceived = (oBool*) mpool_alloc(sizeof(oBool) * poly->maxNumVoices, m);
+    poly->firstReceived = (int*) mpool_alloc(sizeof(int) * poly->maxNumVoices, m);
     poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, m);
     
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
         poly->voices[i] = (int*) mpool_alloc(sizeof(int) * 2, m);
         poly->voices[i][0] = -1;
-        poly->firstReceived[i] = OFALSE;
+        poly->firstReceived[i] = 0;
         
         tRamp_initToPool(&poly->ramps[i], poly->glideTime, 1, mp);
     }
@@ -305,7 +305,7 @@ void    tPoly_initToPool            (tPoly* const polyh, int maxNumVoices, tMemp
     tStack_initToPool(&poly->stack, mp);
     tStack_initToPool(&poly->orderStack, mp);
     
-    poly->pitchGlideIsActive = OFALSE;
+    poly->pitchGlideIsActive = 0;
 }
 
 void    tPoly_free  (tPoly* const polyh)
@@ -369,7 +369,7 @@ int tPoly_noteOn(tPoly* const polyh, int note, uint8_t vel)
         tStack_add(&poly->stack, note);
         
         int alteredVoice = -1;
-        oBool found = OFALSE;
+        int found = 0;
         for (int i = 0; i < poly->numVoices; i++)
         {
             if (poly->voices[i][0] < 0)    // if inactive voice, give this note to voice
@@ -377,10 +377,10 @@ int tPoly_noteOn(tPoly* const polyh, int note, uint8_t vel)
                 if (!poly->firstReceived[i] || !poly->pitchGlideIsActive)
                 {
                     tRamp_setVal(&poly->ramps[i], note);
-                    poly->firstReceived[i] = OTRUE;
+                    poly->firstReceived[i] = 1;
                 }
                 
-                found = OTRUE;
+                found = 1;
                 
                 poly->voices[i][0] = note;
                 poly->voices[i][1] = vel;
@@ -541,7 +541,7 @@ void tPoly_setNumVoices(tPoly* const polyh, uint8_t numVoices)
     poly->numVoices = (numVoices > poly->maxNumVoices) ? poly->maxNumVoices : numVoices;
 }
 
-void tPoly_setPitchGlideActive(tPoly* const polyh, oBool isActive)
+void tPoly_setPitchGlideActive(tPoly* const polyh, int isActive)
 {
     _tPoly* poly = *polyh;
     poly->pitchGlideIsActive = isActive;
@@ -666,13 +666,13 @@ int tSimplePoly_noteOn(tSimplePoly* const polyh, int note, uint8_t vel)
     else
     {
         alteredVoice = -1;
-        oBool found = OFALSE;
+        int found = 0;
         for (int i = 0; i < poly->numVoices; i++)
         {
             if (poly->voices[i][0] == -1)    // if inactive voice, give this note to voice
             {
 
-                found = OTRUE;
+                found = 1;
 
                 poly->voices[i][0] = note;
                 poly->voices[i][1] = vel;
@@ -693,7 +693,7 @@ int tSimplePoly_noteOn(tSimplePoly* const polyh, int note, uint8_t vel)
                 if (poly->voices[i][0] == -2)    // if voice is released but still sounding, take over this voice
                 {
 
-                    found = OTRUE;
+                    found = 1;
 
                     poly->voices[i][0] = note;
                     poly->voices[i][1] = vel;

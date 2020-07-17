@@ -112,7 +112,8 @@ extern "C" {
      */
     void    tMempool_freeFromPool   (tMempool* const pool, tMempool* const poolFrom);
     
-    /*! @} */
+    /*!￼￼￼
+     @} */
     
     //==============================================================================
 

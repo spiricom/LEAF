@@ -24,7 +24,70 @@ extern "C" {
 
     //==============================================================================
     
-    /* tTalkbox */
+    /*!
+     @defgroup ttalkbox tTalkbox
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tTalkbox_init           (tTalkbox* const, int bufsize)
+     @brief
+     @param
+     
+     @fn void    tTalkbox_initToPool     (tTalkbox* const, int bufsize, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tTalkbox_free           (tTalkbox* const)
+     @brief
+     @param
+     
+     @fn float   tTalkbox_tick           (tTalkbox* const, float synth, float voice)
+     @brief
+     @param
+     
+     @fn float     tTalkbox_tickFrozen        (tTalkbox* const voc, float synth, float voice)
+     @brief
+     @param
+     
+     @fn void    tTalkbox_update         (tTalkbox* const)
+     @brief
+     @param
+     
+     @fn void    tTalkbox_suspend        (tTalkbox* const)
+     @brief
+     @param
+     
+     @fn void    tTalkbox_lpcDurbin      (float *r, int p, float *k, float *g)
+     @brief
+     @param
+     
+     @fn void     tTalkbox_lpc            (float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G)
+     @brief
+     @param
+     
+     @fn void    tTalkbox_setQuality     (tTalkbox* const, float quality)
+     @brief
+     @param
+     
+     @fn void     tTalkbox_setWarpFactor    (tTalkbox* const voc, float warp)
+     @brief
+     @param
+     
+     @fn void     tTalkbox_setWarpOn        (tTalkbox* const voc, float warpOn)
+     @brief
+     @param
+     
+     @fn void     tTalkbox_setFreeze        (tTalkbox* const voc, float freeze)
+     @brief
+     @param
+     
+     @fn void     tTalkbox_warpedAutocorrelate    (float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda)
+     @brief
+     @param
+     
+     @} */
+     
 #define NUM_TALKBOX_PARAM 4
     
     typedef struct _tTalkbox
@@ -72,10 +135,74 @@ extern "C" {
     void 	tTalkbox_setWarpOn		(tTalkbox* const voc, float warpOn);
     void 	tTalkbox_setFreeze		(tTalkbox* const voc, float freeze);
     void 	tTalkbox_warpedAutocorrelate	(float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda);
+    
+    
     //==============================================================================
     
 
-    ///////
+    /*!
+     @defgroup ttalkboxfloat tTalkboxFloat
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize)
+     @brief
+     @param
+     
+     @fn void    tTalkboxFloat_initToPool     (tTalkboxFloat* const, int bufsize, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tTalkboxFloat_free           (tTalkboxFloat* const)
+     @brief
+     @param
+     
+     @fn float   tTalkboxFloat_tick           (tTalkboxFloat* const, float synth, float voice)
+     @brief
+     @param
+     
+     @fn float     tTalkboxFloat_tickFrozen        (tTalkboxFloat* const voc, float synth, float voice)
+     @brief
+     @param
+     
+     @fn void    tTalkboxFloat_update         (tTalkboxFloat* const)
+     @brief
+     @param
+     
+     @fn void    tTalkboxFloat_suspend        (tTalkboxFloat* const)
+     @brief
+     @param
+     
+     @fn void    tTalkboxFloat_lpcDurbin      (float *r, int p, float *k, float *g)
+     @brief
+     @param
+     
+     @fn void     tTalkboxFloat_lpc            (float *buf, float *car, float* dl, float* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G)
+     @brief
+     @param
+     
+     @fn void    tTalkboxFloat_setQuality     (tTalkboxFloat* const, float quality)
+     @brief
+     @param
+     
+     @fn void     tTalkboxFloat_setWarpFactor    (tTalkboxFloat* const voc, float warp)
+     @brief
+     @param
+     
+     @fn void     tTalkboxFloat_setWarpOn        (tTalkboxFloat* const voc, float warpOn)
+     @brief
+     @param
+     
+     @fn void     tTalkboxFloat_setFreeze        (tTalkboxFloat* const voc, float freeze)
+     @brief
+     @param
+     
+     @fn void     tTalkboxFloat_warpedAutocorrelate    (float * x, float* dl, float* Rt, unsigned int L, float * R, unsigned int P, float lambda)
+     @brief
+     @param
+     
+     @} */
 
     typedef struct _tTalkboxFloat
       {
@@ -102,7 +229,6 @@ extern "C" {
           float* dl;
           float* Rt;
 
-
       } _tTalkboxFloat;
 
       typedef _tTalkboxFloat* tTalkboxFloat;
@@ -125,8 +251,38 @@ extern "C" {
       //==============================================================================
 
 
-
-    /* tVocoder */
+    /*!
+     @defgroup tvocoder tVocoder
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tVocoder_init           (tVocoder* const)
+     @brief
+     @param
+     
+     @fn void    tVocoder_initToPool     (tVocoder* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tVocoder_free           (tVocoder* const)
+     @brief
+     @param
+     
+     @fn float   tVocoder_tick           (tVocoder* const, float synth, float voice)
+     @brief
+     @param
+     
+     @fn void    tVocoder_update         (tVocoder* const)
+     @brief
+     @param
+     
+     @fn void    tVocoder_suspend        (tVocoder* const)
+     @brief
+     @param
+     
+     @} */
+    
 #define NUM_VOCODER_PARAM 8
 #define NBANDS 16
     
@@ -159,7 +315,49 @@ extern "C" {
     
     //==============================================================================
     
-    // tRosenbergGlottalPulse
+    /*!
+     @defgroup trosenbergglottalpulse tRosenbergGlottalPulse
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const)
+     @brief
+     @param
+     
+     @fn void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const)
+     @brief
+     @param
+     
+     @fn float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const)
+     @brief
+     @param
+     
+     @fn float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp)
+     @brief
+     @param
+     
+     @fn void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq)
+     @brief
+     @param
+     
+     @fn void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, float openLength)
+     @brief
+     @param
+     
+     @fn void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const, float pulseLength)
+     @brief
+     @param
+     
+     @fn void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergGlottalPulse* const gp, float openLength, float pulseLength)
+     @brief
+     @param
+     
+     @} */
 
 	typedef struct _tRosenbergGlottalPulse
 	{
@@ -188,10 +386,46 @@ extern "C" {
     void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergGlottalPulse* const gp, float openLength, float pulseLength);
     //==============================================================================
     
-    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    /*!
+     @defgroup tsolad tSOLAD
+     @ingroup effects
+     @brief pitch shifting algorithm that underlies tRetune etc from Katja Vetters http://www.katjaas.nl/pitchshiftlowlatency/pitchshiftlowlatency.html
+     @{
+     
+     @fn void    tSOLAD_init             (tSOLAD* const)
+     @brief
+     @param
+     
+     @fn void    tSOLAD_initToPool       (tSOLAD* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tSOLAD_free             (tSOLAD* const)
+     @brief
+     @param
+     
+     @fn void    tSOLAD_ioSamples        (tSOLAD *w, float* in, float* out, int blocksize)
+     @brief send one block of input samples, receive one block of output samples
+     @param
+
+     @fn void    tSOLAD_setPeriod        (tSOLAD *w, float period)
+     @brief set periodicity analysis data
+     @param
+     
+     @fn void    tSOLAD_setPitchFactor   (tSOLAD *w, float pitchfactor)
+     @brief set pitch factor between 0.25 and 4
+     @param
+     
+     @fn void    tSOLAD_setReadLag       (tSOLAD *w, float readlag)
+     @brief force readpointer lag
+     @param
+     
+     @fn void    tSOLAD_resetState       (tSOLAD *w)
+     @brief reset state variables
+     @param
+     
+     @} */
     
-    /* tSOLAD : pitch shifting algorithm that underlies tRetune etc */
-    // from Katja Vetters http://www.katjaas.nl/pitchshiftlowlatency/pitchshiftlowlatency.html
 #define LOOPSIZE (2048*2)      // (4096*2) // loop size must be power of two
 #define LOOPMASK (LOOPSIZE - 1)
 #define PITCHFACTORDEFAULT 1.0f
@@ -233,7 +467,42 @@ extern "C" {
     // reset state variables
     void    tSOLAD_resetState       (tSOLAD *w);
     
-    // Pitch shift
+    /*!
+     @defgroup tpitchshift tPitchShift
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize)
+     @brief
+     @param
+     
+     @fn void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tPitchShift_free            (tPitchShift* const)
+     @brief
+     @param
+     
+     @fn float   tPitchShift_shift           (tPitchShift* const)
+     @brief
+     @param
+     
+     @fn float   tPitchShift_shiftToFunc     (tPitchShift* const, float (*fun)(float))
+     @brief
+     @param
+     
+     @fn float   tPitchShift_shiftToFreq     (tPitchShift* const, float freq)
+     @brief
+     @param
+     
+     @fn void    tPitchShift_setPitchFactor  (tPitchShift* const, float pf)
+     @brief
+     @param
+     
+     @} */
+    
     typedef struct _tPitchShift
     {
         tMempool mempool;
@@ -267,7 +536,66 @@ extern "C" {
     float   tPitchShift_shiftToFreq     (tPitchShift* const, float freq);
     void    tPitchShift_setPitchFactor  (tPitchShift* const, float pf);
     
-    // Retune
+    /*!
+     @defgroup tretune tRetune
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize)
+     @brief
+     @param
+     
+     @fn void    tRetune_initToPool          (tRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tRetune_free                (tRetune* const)
+     @brief
+     @param
+     
+     @fn float*  tRetune_tick                (tRetune* const, float sample)
+     @brief
+     @param
+     
+     @fn void    tRetune_setNumVoices        (tRetune* const, int numVoices)
+     @brief
+     @param
+     
+     @fn void    tRetune_setPitchFactors     (tRetune* const, float pf)
+     @brief
+     @param
+     
+     @fn void    tRetune_setPitchFactor      (tRetune* const, float pf, int voice)
+     @brief
+     @param
+     
+     @fn void    tRetune_setTimeConstant     (tRetune* const, float tc)
+     @brief
+     @param
+     
+     @fn void    tRetune_setHopSize          (tRetune* const, int hs)
+     @brief
+     @param
+     
+     @fn void    tRetune_setWindowSize       (tRetune* const, int ws)
+     @brief
+     @param
+     
+     @fn void    tRetune_setFidelityThreshold(tRetune* const, float threshold)
+     @brief
+     @param
+     
+     @fn float   tRetune_getInputPeriod      (tRetune* const)
+     @brief
+     @param
+     
+     @fn float   tRetune_getInputFreq        (tRetune* const)
+     @brief
+     @param
+     
+     @} */
+    
     typedef struct _tRetune
     {
         tMempool mempool;
@@ -311,7 +639,74 @@ extern "C" {
     float   tRetune_getInputPeriod      (tRetune* const);
     float   tRetune_getInputFreq        (tRetune* const);
     
-    // Autotune
+    /*!
+     @defgroup tautotune tAutotune
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize)
+     @brief
+     @param
+     
+     @fn void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tAutotune_free                  (tAutotune* const)
+     @brief
+     @param
+     
+     @fn float*  tAutotune_tick                  (tAutotune* const, float sample)
+     @brief
+     @param
+     
+     @fn void    tAutotune_setNumVoices          (tAutotune* const, int numVoices)
+     @brief
+     @param
+     
+     @fn void    tAutotune_setFreqs              (tAutotune* const, float f)
+     @brief
+     @param
+     
+     @fn void    tAutotune_setFreq               (tAutotune* const, float f, int voice)
+     @brief
+     @param
+     
+     @fn void    tAutotune_setTimeConstant       (tAutotune* const, float tc)
+     @brief
+     @param
+     
+     @fn void    tAutotune_setHopSize            (tAutotune* const, int hs)
+     @brief
+     @param
+     
+     @fn void    tAutotune_setWindowSize         (tAutotune* const, int ws)
+     @brief
+     @param
+     
+     @fn void    tAutotune_setFidelityThreshold  (tAutotune* const, float threshold)
+     @brief
+     @param
+     
+     @fn void    tAutotune_setAlpha              (tAutotune* const, float alpha)
+     @brief
+     @param
+     
+     @fn void    tAutotune_setTolerance          (tAutotune* const, float tolerance)
+     @brief
+     @param
+     
+     @fn float   tAutotune_getInputPeriod        (tAutotune* const)
+     @brief
+     @param
+     
+     @fn float   tAutotune_getInputFreq          (tAutotune* const)
+     @brief
+     @param
+     
+     @} */
+    
     typedef struct _tAutotune
     {
         tMempool mempool;
@@ -359,6 +754,49 @@ extern "C" {
     
     //==============================================================================
     
+    /*!
+     @defgroup tformantshifter tFormantShifter
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tFormantShifter_init            (tFormantShifter* const, int order)
+     @brief
+     @param
+     
+     @fn void    tFormantShifter_initToPool      (tFormantShifter* const, int order, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tFormantShifter_free            (tFormantShifter* const)
+     @brief
+     @param
+     
+     @fn float   tFormantShifter_tick            (tFormantShifter* const, float input)
+     @brief
+     @param
+     
+     @fn float   tFormantShifter_remove          (tFormantShifter* const, float input)
+     @brief
+     @param
+     
+     @fn float   tFormantShifter_add             (tFormantShifter* const, float input)
+     @brief
+     @param
+     
+     @fn void    tFormantShifter_ioSamples       (tFormantShifter* const, float* in, float* out, int size, float fwarp)
+     @brief
+     @param
+     
+     @fn void    tFormantShifter_setShiftFactor  (tFormantShifter* const, float shiftFactor)
+     @brief
+     @param
+     
+     @fn void    tFormantShifter_setIntensity    (tFormantShifter* const, float intensity)
+     @brief
+     @param
+     
+     @} */
     
     typedef struct _tFormantShifter
     {

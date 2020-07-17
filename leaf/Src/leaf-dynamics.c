@@ -55,7 +55,7 @@ void tCompressor_initToPool (tCompressor* const comp, tMempool* const mp)
     c->tauAttack = 100;
     c->tauRelease = 100;
     
-    c->isActive = OFALSE;
+    c->isActive = 0;
     
     c->T = 0.0f; // Threshold
     c->R = 0.5f; // compression Ratio
@@ -89,17 +89,17 @@ float tCompressor_tick(tCompressor* const comp, float in)
     if (overshoot <= -(c->W * 0.5f))
     {
         out_db = in_db;
-        c->isActive = OFALSE;
+        c->isActive = 0;
     }
     else if ((overshoot > -(c->W * 0.5f)) && (overshoot < (c->W * 0.5f)))
     {
         out_db = in_db + slope * (powf((overshoot + c->W*0.5f),2) / (2.0f * c->W)); // .^ 2 ???
-        c->isActive = OTRUE;
+        c->isActive = 1;
     }
     else if (overshoot >= (c->W * 0.5f))
     {
         out_db = in_db + slope * overshoot;
-        c->isActive = OTRUE;
+        c->isActive = 1;
     }
     
     

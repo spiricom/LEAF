@@ -25,6 +25,11 @@ extern "C" {
 #define USE_SHAPER_TABLE 1
 #define DECAY_TABLES_USED 1
     
+    /*!
+     @ingroup tables
+     @{
+     */
+    
 #define SINE_TABLE_SIZE 2048
 #define SAW_TABLE_SIZE 2048
 #define SQR_TABLE_SIZE 2048
@@ -118,6 +123,8 @@ extern "C" {
     /* in minblep_tables.c: */
     extern const float_value_delta step_dd_table[];
     extern const float             slope_dd_table[];
+    
+    /*! @} */
     
     //==============================================================================
     
