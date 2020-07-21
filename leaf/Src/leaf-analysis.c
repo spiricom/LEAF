@@ -952,15 +952,15 @@ void tPeriodDetection_setTolerance        (tPeriodDetection* pd, float tolerance
 }
 
 
-void    tZeroCrossing2_init  (tZeroCrossing2* const zc)
+void    tZeroCrossingInfo_init  (tZeroCrossingInfo* const zc)
 {
-    tZeroCrossing2_initToPool(zc, &leaf.mempool);
+    tZeroCrossingInfo_initToPool(zc, &leaf.mempool);
 }
 
-void    tZeroCrossing2_initToPool    (tZeroCrossing2* const zc, tMempool* const mp)
+void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo* const zc, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tZeroCrossing2* z = *zc = (_tZeroCrossing2*) mpool_alloc(sizeof(_tZeroCrossing2), m);
+    _tZeroCrossingInfo* z = *zc = (_tZeroCrossingInfo*) mpool_alloc(sizeof(_tZeroCrossingInfo), m);
     z->mempool = m;
 
     z->_leading_edge = INT_MIN;
@@ -968,34 +968,34 @@ void    tZeroCrossing2_initToPool    (tZeroCrossing2* const zc, tMempool* const 
     z->_width = 0.0f;
 }
 
-void    tZeroCrossing2_free  (tZeroCrossing2* const zc)
+void    tZeroCrossingInfo_free  (tZeroCrossingInfo* const zc)
 {
-    _tZeroCrossing2* z = *zc;
+    _tZeroCrossingInfo* z = *zc;
     
     mpool_free((char*)z, z->mempool);
 }
 
-void    tZeroCrossing2_updatePeak(tZeroCrossing2* const zc, float s, int pos)
+void    tZeroCrossingInfo_updatePeak(tZeroCrossingInfo* const zc, float s, int pos)
 {
-    _tZeroCrossing2* z = *zc;
+    _tZeroCrossingInfo* z = *zc;
     
     z->_peak = fmaxf(s, z->_peak);
     if ((z->_width == 0.0f) && (s < (z->_peak * 0.3f)))
         z->_width = pos - z->_leading_edge;
 }
 
-int     tZeroCrossing2_period(tZeroCrossing2* const zc, tZeroCrossing2* const next)
+int     tZeroCrossingInfo_period(tZeroCrossingInfo* const zc, tZeroCrossingInfo* const next)
 {
-    _tZeroCrossing2* z = *zc;
-    _tZeroCrossing2* n = *next;
+    _tZeroCrossingInfo* z = *zc;
+    _tZeroCrossingInfo* n = *next;
     
     return n->_leading_edge - z->_leading_edge;
 }
 
-float   tZeroCrossing2_fractionalPeriod(tZeroCrossing2* const zc, tZeroCrossing2* const next)
+float   tZeroCrossingInfo_fractionalPeriod(tZeroCrossingInfo* const zc, tZeroCrossingInfo* const next)
 {
-    _tZeroCrossing2* z = *zc;
-    _tZeroCrossing2* n = *next;
+    _tZeroCrossingInfo* z = *zc;
+    _tZeroCrossingInfo* n = *next;
     
     // Get the start edge
     float prev1 = z->_before_crossing;
@@ -1014,17 +1014,17 @@ float   tZeroCrossing2_fractionalPeriod(tZeroCrossing2* const zc, tZeroCrossing2
     return result + (dx2 - dx1);
 }
 
-int     tZeroCrossing2_getWidth(tZeroCrossing2* const zc)
+int     tZeroCrossingInfo_getWidth(tZeroCrossingInfo* const zc)
 {
-    _tZeroCrossing2* z = *zc;
+    _tZeroCrossingInfo* z = *zc;
     
     return z->_width;
 }
 
-int     tZeroCrossing2_isSimilar(tZeroCrossing2* const zc, tZeroCrossing2* const next)
+int     tZeroCrossingInfo_isSimilar(tZeroCrossingInfo* const zc, tZeroCrossingInfo* const next)
 {
-    _tZeroCrossing2* z = *zc;
-    _tZeroCrossing2* n = *next;
+    _tZeroCrossingInfo* z = *zc;
+    _tZeroCrossingInfo* n = *next;
     
     int similarPeak = fabs(z->_peak - n->_peak) <= ((1.0f - PULSE_HEIGHT_DIFF) * fmax(fabs(z->_peak), fabs(n->_peak)));
     
@@ -1034,19 +1034,19 @@ int     tZeroCrossing2_isSimilar(tZeroCrossing2* const zc, tZeroCrossing2* const
 }
 
 
-static inline void update_state(tZeroCrossings* const zc, float s);
-static inline void shift(tZeroCrossings* const zc, int n);
-static inline void reset(tZeroCrossings* const zc);
+static inline void update_state(tZeroCrossingCollector* const zc, float s);
+static inline void shift(tZeroCrossingCollector* const zc, int n);
+static inline void reset(tZeroCrossingCollector* const zc);
 
-void    tZeroCrossings_init  (tZeroCrossings* const zc, int windowSize, float hysteresis)
+void    tZeroCrossingCollector_init  (tZeroCrossingCollector* const zc, int windowSize, float hysteresis)
 {
-    tZeroCrossings_initToPool(zc, windowSize, hysteresis, &leaf.mempool);
+    tZeroCrossingCollector_initToPool(zc, windowSize, hysteresis, &leaf.mempool);
 }
 
-void    tZeroCrossings_initToPool    (tZeroCrossings* const zc, int windowSize, float hysteresis, tMempool* const mp)
+void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const zc, int windowSize, float hysteresis, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tZeroCrossings* z = *zc = (_tZeroCrossings*) mpool_alloc(sizeof(_tZeroCrossings), m);
+    _tZeroCrossingCollector* z = *zc = (_tZeroCrossingCollector*) mpool_alloc(sizeof(_tZeroCrossingCollector), m);
     z->mempool = m;
     
     z->_hysteresis = -hysteresis;
@@ -1059,9 +1059,11 @@ void    tZeroCrossings_initToPool    (tZeroCrossings* const zc, int windowSize, 
     z->_size = pow(2.0, ceil(log2((double)size)));
     z->_mask = z->_size - 1;
 
-    z->_info = (tZeroCrossing2*) mpool_alloc(sizeof(tZeroCrossing2) * z->_size, m);
+
+    z->_info = (tZeroCrossingInfo*) mpool_alloc(sizeof(tZeroCrossingInfo) * z->_size, m);
     for (uint i = 0; i < z->_size; i++)
-        tZeroCrossing2_initToPool(&z->_info[i], mp);
+        tZeroCrossingInfo_initToPool(&z->_info[i], mp);
+
     z->_pos = 0;
     
     z->_prev = 0.0f;
@@ -1073,16 +1075,16 @@ void    tZeroCrossings_initToPool    (tZeroCrossings* const zc, int windowSize, 
     z->_peak = 0.0f;
 }
 
-void    tZeroCrossings_free  (tZeroCrossings* const zc)
+void    tZeroCrossingCollector_free  (tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     mpool_free((char*)z, z->mempool);
 }
 
-int     tZeroCrossings_tick(tZeroCrossings* const zc, float s)
+int     tZeroCrossingCollector_tick(tZeroCrossingCollector* const zc, float s)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     // Offset s by half of hysteresis, so that zero cross detection is
     // centered on the actual zero.
@@ -1111,73 +1113,73 @@ int     tZeroCrossings_tick(tZeroCrossings* const zc, float s)
     return z->_state;
 }
 
-int     tZeroCrossings_getState(tZeroCrossings* const zc)
+int     tZeroCrossingCollector_getState(tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     return z->_state;
 }
 
-tZeroCrossing2 const tZeroCrossings_getCrossing(tZeroCrossings* const zc, int index)
+tZeroCrossingInfo const tZeroCrossingCollector_getCrossing(tZeroCrossingCollector* const zc, int index)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     int i = (z->_num_edges - 1) - index;
     return z->_info[(z->_pos + i) & z->_mask];
 }
 
-int     tZeroCrossings_getNumEdges(tZeroCrossings* const zc)
+int     tZeroCrossingCollector_getNumEdges(tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     return z->_num_edges;
 }
 
-int     tZeroCrossings_getCapacity(tZeroCrossings* const zc)
+int     tZeroCrossingCollector_getCapacity(tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     return (int)z->_size;
 }
 
-int     tZeroCrossings_getFrame(tZeroCrossings* const zc)
+int     tZeroCrossingCollector_getFrame(tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     return z->_frame;
 }
 
-int     tZeroCrossings_getWindowSize(tZeroCrossings* const zc)
+int     tZeroCrossingCollector_getWindowSize(tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     return z->_window_size;
 }
 
-int     tZeroCrossings_isReady(tZeroCrossings* const zc)
+int     tZeroCrossingCollector_isReady(tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     return z->_ready;
 }
 
-float   tZeroCrossings_getPeak(tZeroCrossings* const zc)
+float   tZeroCrossingCollector_getPeak(tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     return fmaxf(z->_peak, z->_peak_update);
 }
 
-int     tZeroCrossings_isReset(tZeroCrossings* const zc)
+int     tZeroCrossingCollector_isReset(tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     return z->_frame == 0;
 }
 
-static inline void update_state(tZeroCrossings* const zc, float s)
+static inline void update_state(tZeroCrossingCollector* const zc, float s)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     if (z->_ready)
     {
@@ -1196,7 +1198,7 @@ static inline void update_state(tZeroCrossings* const zc, float s)
         {
             --z->_pos;
             z->_pos &= z->_mask;
-            tZeroCrossing2 crossing = z->_info[z->_pos];
+            tZeroCrossingInfo crossing = z->_info[z->_pos];
             crossing->_before_crossing = z->_prev;
             crossing->_after_crossing = s;
             crossing->_peak = s;
@@ -1208,7 +1210,7 @@ static inline void update_state(tZeroCrossings* const zc, float s)
         }
         else
         {
-            tZeroCrossing2_updatePeak(&z->_info[z->_pos], s, z->_frame);
+            tZeroCrossingInfo_updatePeak(&z->_info[z->_pos], s, z->_frame);
         }
         if (s > z->_peak_update)
         {
@@ -1226,11 +1228,11 @@ static inline void update_state(tZeroCrossings* const zc, float s)
     z->_prev = s;
 }
 
-static inline void shift(tZeroCrossings* const zc, int n)
+static inline void shift(tZeroCrossingCollector* const zc, int n)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
-    tZeroCrossing2 crossing = z->_info[z->_pos];
+    tZeroCrossingInfo crossing = z->_info[z->_pos];
     
     crossing->_leading_edge -= n;
     if (!z->_state)
@@ -1247,9 +1249,9 @@ static inline void shift(tZeroCrossings* const zc, int n)
     z->_num_edges = i;
 }
 
-static inline void reset(tZeroCrossings* const zc)
+static inline void reset(tZeroCrossingCollector* const zc)
 {
-    _tZeroCrossings* z = *zc;
+    _tZeroCrossingCollector* z = *zc;
     
     z->_num_edges = 0;
     z->_state = 0;
@@ -1475,7 +1477,7 @@ void    tBACF_set  (tBACF* const bacf, tBitset* const bitset)
 static inline void set_bitstream(tPeriodDetector* const detector);
 static inline void autocorrelate(tPeriodDetector* const detector);
 
-static inline void sub_collector_init(_sub_collector* collector, tZeroCrossings* const crossings, float pdt, int range);
+static inline void sub_collector_init(_sub_collector* collector, tZeroCrossingCollector* const crossings, float pdt, int range);
 static inline float sub_collector_period_of(_sub_collector* collector, _auto_correlation_info info);
 static inline void sub_collector_save(_sub_collector* collector, _auto_correlation_info info);
 static inline int sub_collector_try_sub_harmonic(_sub_collector* collector, int harmonic, _auto_correlation_info info);
@@ -1494,11 +1496,11 @@ void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowe
     _tPeriodDetector* p = *detector = (_tPeriodDetector*) mpool_alloc(sizeof(_tPeriodDetector), m);
     p->mempool = m;
     
-    tZeroCrossings_initToPool(&p->_zc, (1.0f / lowestFreq) * leaf.sampleRate * 2.0f, hysteresis, mempool);
+    tZeroCrossingCollector_initToPool(&p->_zc, (1.0f / lowestFreq) * leaf.sampleRate * 2.0f, hysteresis, mempool);
     p->_min_period = (1.0f / highestFreq) * leaf.sampleRate;
     p->_range = highestFreq / lowestFreq;
     
-    int windowSize = tZeroCrossings_getWindowSize(&p->_zc);
+    int windowSize = tZeroCrossingCollector_getWindowSize(&p->_zc);
     tBitset_initToPool(&p->_bits, windowSize, mempool);
     p->_weight = 2.0f / windowSize;
     p->_mid_point = windowSize / 2;
@@ -1515,7 +1517,7 @@ void    tPeriodDetector_free    (tPeriodDetector* const detector)
 {
     _tPeriodDetector* p = *detector;
     
-    tZeroCrossings_free(&p->_zc);
+    tZeroCrossingCollector_free(&p->_zc);
     tBitset_free(&p->_bits);
     tBACF_free(&p->_bacf);
     
@@ -1527,8 +1529,8 @@ int   tPeriodDetector_tick    (tPeriodDetector* const detector, float s)
     _tPeriodDetector* p = *detector;
     
     // Zero crossing
-    int prev = tZeroCrossings_getState(&p->_zc);
-    int zc = tZeroCrossings_tick(&p->_zc, s);
+    int prev = tZeroCrossingCollector_getState(&p->_zc);
+    int zc = tZeroCrossingCollector_tick(&p->_zc, s);
     
     if (!zc && prev != zc)
     {
@@ -1536,13 +1538,13 @@ int   tPeriodDetector_tick    (tPeriodDetector* const detector, float s)
         p->_predicted_period = -1.0f;
     }
     
-    if (tZeroCrossings_isReset(&p->_zc))
+    if (tZeroCrossingCollector_isReset(&p->_zc))
     {
         p->_period_info[0] = -1.0f;
         p->_period_info[1] = 0.0f;
     }
     
-    if (tZeroCrossings_isReady(&p->_zc))
+    if (tZeroCrossingCollector_isReady(&p->_zc))
     {
         set_bitstream(detector);
         autocorrelate(detector);
@@ -1592,21 +1594,21 @@ float   tPeriodDetector_predictPeriod   (tPeriodDetector* const detector)
     if (p->_predicted_period == -1.0f && p->_edge_mark != p->_predict_edge)
     {
         p->_predict_edge = p->_edge_mark;
-        int n = tZeroCrossings_getNumEdges(&p->_zc);
+        int n = tZeroCrossingCollector_getNumEdges(&p->_zc);
         if (n > 1)
         {
-            float threshold = tZeroCrossings_getPeak(&p->_zc) * PULSE_THRESHOLD;
+            float threshold = tZeroCrossingCollector_getPeak(&p->_zc) * PULSE_THRESHOLD;
             for (int i = n - 1; i > 0; --i)
             {
-                tZeroCrossing2 edge2 = tZeroCrossings_getCrossing(&p->_zc, i);
+                tZeroCrossingInfo edge2 = tZeroCrossingCollector_getCrossing(&p->_zc, i);
                 if (edge2->_peak >= threshold)
                 {
                     for (int j = i-1; j >= 0; --j)
                     {
-                        tZeroCrossing2 edge1 = tZeroCrossings_getCrossing(&p->_zc, j);
-                        if (tZeroCrossing2_isSimilar(&edge1, &edge2))
+                        tZeroCrossingInfo edge1 = tZeroCrossingCollector_getCrossing(&p->_zc, j);
+                        if (tZeroCrossingInfo_isSimilar(&edge1, &edge2))
                         {
-                            p->_predicted_period = tZeroCrossing2_fractionalPeriod(&edge1, &edge2);
+                            p->_predicted_period = tZeroCrossingInfo_fractionalPeriod(&edge1, &edge2);
                             return p->_predicted_period;
                         }
                     }
@@ -1621,20 +1623,20 @@ int     tPeriodDetector_isReady (tPeriodDetector* const detector)
 {
     _tPeriodDetector* p = *detector;
     
-    return tZeroCrossings_isReady(&p->_zc);
+    return tZeroCrossingCollector_isReady(&p->_zc);
 }
 
 static inline void set_bitstream(tPeriodDetector* const detector)
 {
     _tPeriodDetector* p = *detector;
     
-    float threshold = tZeroCrossings_getPeak(&p->_zc) * PULSE_THRESHOLD;
+    float threshold = tZeroCrossingCollector_getPeak(&p->_zc) * PULSE_THRESHOLD;
     
     tBitset_clear(&p->_bits);
 
-    for (int i = 0; i != tZeroCrossings_getNumEdges(&p->_zc); ++i)
+    for (int i = 0; i != tZeroCrossingCollector_getNumEdges(&p->_zc); ++i)
     {
-        tZeroCrossing2 info = tZeroCrossings_getCrossing(&p->_zc, i);
+        tZeroCrossingInfo info = tZeroCrossingCollector_getCrossing(&p->_zc, i);
         if (info->_peak >= threshold)
         {
             int pos = fmax(info->_leading_edge, 0);
@@ -1648,24 +1650,24 @@ static inline void autocorrelate(tPeriodDetector* const detector)
 {
     _tPeriodDetector* p = *detector;
     
-    float threshold = tZeroCrossings_getPeak(&p->_zc) * PULSE_THRESHOLD;
+    float threshold = tZeroCrossingCollector_getPeak(&p->_zc) * PULSE_THRESHOLD;
     
     _sub_collector collect;
     sub_collector_init(&collect, &p->_zc, p->_periodicity_diff_threshold, p->_range);
     
     int shouldBreak = 0;
-    int n = tZeroCrossings_getNumEdges(&p->_zc);
+    int n = tZeroCrossingCollector_getNumEdges(&p->_zc);
     for (int i = 0; i != n - 1; ++i)
     {
-        tZeroCrossing2 first = tZeroCrossings_getCrossing(&p->_zc, i);
+        tZeroCrossingInfo first = tZeroCrossingCollector_getCrossing(&p->_zc, i);
         if (first->_peak >= threshold)
         {
             for (int j = i + 1; j != n; ++j)
             {
-                tZeroCrossing2 next = tZeroCrossings_getCrossing(&p->_zc, j);
+                tZeroCrossingInfo next = tZeroCrossingCollector_getCrossing(&p->_zc, j);
                 if (next->_peak >= threshold)
                 {
-                    int period = tZeroCrossing2_period(&first, &next);
+                    int period = tZeroCrossingInfo_period(&first, &next);
                     if (period > p->_mid_point)
                         break;
                     if (period >= p->_min_period)
@@ -1718,7 +1720,7 @@ static inline void autocorrelate(tPeriodDetector* const detector)
     sub_collector_get(&collect, collect._fundamental, p->_period_info);
 }
 
-static inline void sub_collector_init(_sub_collector* collector, tZeroCrossings* const crossings, float pdt, int range)
+static inline void sub_collector_init(_sub_collector* collector, tZeroCrossingCollector* const crossings, float pdt, int range)
 {
     collector->_zc = *crossings;
     collector->_harmonic_threshold = HARMONIC_PERIODICITY_FACTOR * 2.0f / (float)collector->_zc->_window_size;
@@ -1733,9 +1735,9 @@ static inline void sub_collector_init(_sub_collector* collector, tZeroCrossings*
 
 static inline float sub_collector_period_of(_sub_collector* collector, _auto_correlation_info info)
 {
-    tZeroCrossing2 first = tZeroCrossings_getCrossing(&collector->_zc, info._i1);
-    tZeroCrossing2 next = tZeroCrossings_getCrossing(&collector->_zc, info._i2);
-    return tZeroCrossing2_fractionalPeriod(&first, &next);
+    tZeroCrossingInfo first = tZeroCrossingCollector_getCrossing(&collector->_zc, info._i1);
+    tZeroCrossingInfo next = tZeroCrossingCollector_getCrossing(&collector->_zc, info._i2);
+    return tZeroCrossingInfo_fractionalPeriod(&first, &next);
 }
 
 static inline void sub_collector_save(_sub_collector* collector, _auto_correlation_info info)
