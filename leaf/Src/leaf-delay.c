@@ -58,7 +58,7 @@ void tDelay_free (tDelay* const dl)
 void    tDelay_clear(tDelay* const dl)
 {
     _tDelay* d = *dl;
-    for (int i = 0; i < d->maxDelay; i++)
+    for (uint i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
@@ -202,11 +202,11 @@ void tLinearDelay_free (tLinearDelay* const dl)
 
 void    tLinearDelay_clear(tLinearDelay* const dl)
 {
-	_tLinearDelay* d = *dl;
-	for (int i = 0; i < d->maxDelay; i++)
-	{
-		d->buff[i] = 0;
-	}
+    _tLinearDelay* d = *dl;
+    for (uint i = 0; i < d->maxDelay; i++)
+    {
+        d->buff[i] = 0;
+    }
 }
 
 float   tLinearDelay_tick (tLinearDelay* const dl, float input)
@@ -247,19 +247,19 @@ float   tLinearDelay_tickOut (tLinearDelay* const dl)
 {
     _tLinearDelay* d = *dl;
 
-	uint32_t idx = (uint32_t) d->outPoint;
-	// First 1/2 of interpolation
-	d->lastOut = d->buff[idx] * d->omAlpha;
-		// Second 1/2 of interpolation
-	if ((idx + 1) < d->maxDelay)
-		d->lastOut += d->buff[idx+1] * d->alpha;
-	else
-		d->lastOut += d->buff[0] * d->alpha;
+    uint32_t idx = (uint32_t) d->outPoint;
+    // First 1/2 of interpolation
+    d->lastOut = d->buff[idx] * d->omAlpha;
+        // Second 1/2 of interpolation
+    if ((idx + 1) < d->maxDelay)
+        d->lastOut += d->buff[idx+1] * d->alpha;
+    else
+        d->lastOut += d->buff[0] * d->alpha;
 
-	// Increment output pointer modulo length
-	if ( (++d->outPoint) >= d->maxDelay )   d->outPoint = 0;
+    // Increment output pointer modulo length
+    if ( (++d->outPoint) >= d->maxDelay )   d->outPoint = 0;
 
-	return d->lastOut;
+    return d->lastOut;
 }
 
 int     tLinearDelay_setDelay (tLinearDelay* const dl, float delay)
@@ -287,7 +287,7 @@ float tLinearDelay_tapOut (tLinearDelay* const dl, uint32_t tapDelay)
 {
     _tLinearDelay* d = *dl;
 
-    uint32_t tap = d->inPoint - tapDelay - 1;
+    int32_t tap = d->inPoint - tapDelay - 1;
     // Check for wraparound.
     while ( tap < 0 )   tap += d->maxDelay;
 
@@ -298,7 +298,7 @@ void tLinearDelay_tapIn (tLinearDelay* const dl, float value, uint32_t tapDelay)
 {
     _tLinearDelay* d = *dl;
 
-    uint32_t tap = d->inPoint - tapDelay - 1;
+    int32_t tap = d->inPoint - tapDelay - 1;
 
     // Check for wraparound.
     while ( tap < 0 )   tap += d->maxDelay;
@@ -396,16 +396,16 @@ void tHermiteDelay_free (tHermiteDelay* const dl)
 
 void    tHermiteDelay_clear(tHermiteDelay* const dl)
 {
-	_tHermiteDelay* d = *dl;
-	for (int i = 0; i < d->maxDelay; i++)
-	{
-		d->buff[i] = 0;
-	}
+    _tHermiteDelay* d = *dl;
+    for (uint i = 0; i < d->maxDelay; i++)
+    {
+        d->buff[i] = 0;
+    }
 }
 
 float   tHermiteDelay_tick (tHermiteDelay* const dl, float input)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
 
     d->buff[d->inPoint] = input * d->gain;
 
@@ -428,7 +428,7 @@ float   tHermiteDelay_tick (tHermiteDelay* const dl, float input)
 
 void   tHermiteDelay_tickIn (tHermiteDelay* const dl, float input)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
 
     d->buff[d->inPoint] = input * d->gain;
 
@@ -438,7 +438,7 @@ void   tHermiteDelay_tickIn (tHermiteDelay* const dl, float input)
 
 float   tHermiteDelay_tickOut (tHermiteDelay* const dl)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
 
     uint32_t idx = (uint32_t) d->outPoint;
 
@@ -458,7 +458,7 @@ float   tHermiteDelay_tickOut (tHermiteDelay* const dl)
 
 int     tHermiteDelay_setDelay (tHermiteDelay* const dl, float delay)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
 
     d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
 
@@ -479,9 +479,9 @@ int     tHermiteDelay_setDelay (tHermiteDelay* const dl, float delay)
 
 float tHermiteDelay_tapOut (tHermiteDelay* const dl, uint32_t tapDelay)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
 
-    uint32_t tap = d->inPoint - tapDelay - 1;
+    int32_t tap = d->inPoint - tapDelay - 1;
 
     // Check for wraparound.
     while ( tap < 0 )   tap += d->maxDelay;
@@ -492,7 +492,7 @@ float tHermiteDelay_tapOut (tHermiteDelay* const dl, uint32_t tapDelay)
 
 void tHermiteDelay_tapIn (tHermiteDelay* const dl, float value, uint32_t tapDelay)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
 
     int32_t tap = d->inPoint - tapDelay - 1;
 
@@ -504,7 +504,7 @@ void tHermiteDelay_tapIn (tHermiteDelay* const dl, float value, uint32_t tapDela
 
 float tHermiteDelay_addTo (tHermiteDelay* const dl, float value, uint32_t tapDelay)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
 
     int32_t tap = d->inPoint - tapDelay - 1;
 
@@ -522,26 +522,26 @@ float   tHermiteDelay_getDelay (tHermiteDelay* const dl)
 
 float   tHermiteDelay_getLastOut (tHermiteDelay* const dl)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
     return d->lastOut;
 }
 
 float   tHermiteDelay_getLastIn (tHermiteDelay* const dl)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
     return d->lastIn;
 }
 
 void tHermiteDelay_setGain (tHermiteDelay* const dl, float gain)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
 float tHermiteDelay_getGain (tHermiteDelay* const dl)
 {
-	_tHermiteDelay* d = *dl;
+    _tHermiteDelay* d = *dl;
     return d->gain;
 }
 
@@ -593,7 +593,7 @@ void tAllpassDelay_free (tAllpassDelay* const dl)
 void tAllpassDelay_clear(tAllpassDelay* const dl)
 {
     _tAllpassDelay* d = *dl;
-    for (int i = 0; i < d->maxDelay; i++)
+    for (uint i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
@@ -763,7 +763,7 @@ void tTapeDelay_free (tTapeDelay* const dl)
 void tTapeDelay_clear(tTapeDelay* const dl)
 {
     _tTapeDelay* d = *dl;
-    for (int i = 0; i < d->maxDelay; i++)
+    for (uint i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }

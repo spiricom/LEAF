@@ -38,7 +38,7 @@ extern "C" {
 #define WSCALE 1.30612244898f
 #define PI              (3.14159265358979f)
 #define TWO_PI          (6.28318530717958f)
-#define HALF_PI			(1.570796326794897f)
+#define HALF_PI         (1.570796326794897f)
 
 #define VSF             1.0e-38f
     
@@ -91,9 +91,11 @@ extern "C" {
 #define TWO_TO_32        4294967296.0f
 #define INV_TWO_TO_32    0.000000000232831f
     
-#define ONE_OVER_SQRT2	0.707106781186548f
+#define ONE_OVER_SQRT2  0.707106781186548f
 
 #define LOGTEN 2.302585092994
+    float log2f_approx(float X);
+    float log2f_approx2(float x);
 
     // Jones shaper
     float LEAF_shaper     (float input, float m_drive);

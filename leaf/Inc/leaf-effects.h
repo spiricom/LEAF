@@ -125,16 +125,16 @@ extern "C" {
     void    tTalkbox_free           (tTalkbox* const);
     
     float   tTalkbox_tick           (tTalkbox* const, float synth, float voice);
-    float 	tTalkbox_tickFrozen		(tTalkbox* const voc, float synth, float voice);
+    float   tTalkbox_tickFrozen     (tTalkbox* const voc, float synth, float voice);
     void    tTalkbox_update         (tTalkbox* const);
     void    tTalkbox_suspend        (tTalkbox* const);
     void    tTalkbox_lpcDurbin      (float *r, int p, float *k, float *g);
-    void 	tTalkbox_lpc			(float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G);
+    void    tTalkbox_lpc            (float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G);
     void    tTalkbox_setQuality     (tTalkbox* const, float quality);
-    void 	tTalkbox_setWarpFactor	(tTalkbox* const voc, float warp);
-    void 	tTalkbox_setWarpOn		(tTalkbox* const voc, float warpOn);
-    void 	tTalkbox_setFreeze		(tTalkbox* const voc, float freeze);
-    void 	tTalkbox_warpedAutocorrelate	(float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda);
+    void    tTalkbox_setWarpFactor  (tTalkbox* const voc, float warp);
+    void    tTalkbox_setWarpOn      (tTalkbox* const voc, float warpOn);
+    void    tTalkbox_setFreeze      (tTalkbox* const voc, float freeze);
+    void    tTalkbox_warpedAutocorrelate    (float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda);
     
     
     //==============================================================================
@@ -238,16 +238,16 @@ extern "C" {
       void    tTalkboxFloat_free           (tTalkboxFloat* const);
 
       float   tTalkboxFloat_tick           (tTalkboxFloat* const, float synth, float voice);
-      float 	tTalkboxFloat_tickFrozen		(tTalkboxFloat* const voc, float synth, float voice);
+      float     tTalkboxFloat_tickFrozen        (tTalkboxFloat* const voc, float synth, float voice);
       void    tTalkboxFloat_update         (tTalkboxFloat* const);
       void    tTalkboxFloat_suspend        (tTalkboxFloat* const);
       void    tTalkboxFloat_lpcDurbin      (float *r, int p, float *k, float *g);
-      void 	tTalkboxFloat_lpc			(float *buf, float *car, float* dl, float* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G);
+      void  tTalkboxFloat_lpc           (float *buf, float *car, float* dl, float* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G);
       void    tTalkboxFloat_setQuality     (tTalkboxFloat* const, float quality);
-      void 	tTalkboxFloat_setWarpFactor	(tTalkboxFloat* const voc, float warp);
-      void 	tTalkboxFloat_setWarpOn		(tTalkboxFloat* const voc, float warpOn);
-      void 	tTalkboxFloat_setFreeze		(tTalkboxFloat* const voc, float freeze);
-      void 	tTalkboxFloat_warpedAutocorrelate	(float * x, float* dl, float* Rt, unsigned int L, float * R, unsigned int P, float lambda);
+      void  tTalkboxFloat_setWarpFactor (tTalkboxFloat* const voc, float warp);
+      void  tTalkboxFloat_setWarpOn     (tTalkboxFloat* const voc, int warpOn);
+      void  tTalkboxFloat_setFreeze     (tTalkboxFloat* const voc, int freeze);
+      void  tTalkboxFloat_warpedAutocorrelate   (float * x, float* dl, float* Rt, unsigned int L, float * R, unsigned int P, float lambda);
       //==============================================================================
 
 
@@ -359,8 +359,8 @@ extern "C" {
      
      @} */
 
-	typedef struct _tRosenbergGlottalPulse
-	{
+    typedef struct _tRosenbergGlottalPulse
+    {
         tMempool mempool;
         float phase;
         float openLength;
@@ -368,21 +368,21 @@ extern "C" {
         float invPulseLengthMinusOpenLength;
         float freq;
         float inc;
-	} _tRosenbergGlottalPulse;
+    } _tRosenbergGlottalPulse;
 
-	typedef _tRosenbergGlottalPulse* tRosenbergGlottalPulse;
+    typedef _tRosenbergGlottalPulse* tRosenbergGlottalPulse;
 
-	void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const);
-	void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const, tMempool* const);
-	void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const);
+    void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const);
+    void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const, tMempool* const);
+    void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const);
 
-	float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const);
-	float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp);
-	void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq);
+    float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const);
+    float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp);
+    void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq);
 
-	void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, float openLength);
+    void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, float openLength);
 
-	void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const, float pulseLength);
+    void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const, float pulseLength);
     void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergGlottalPulse* const gp, float openLength, float pulseLength);
     //==============================================================================
     

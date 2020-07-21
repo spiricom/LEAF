@@ -80,7 +80,7 @@ void tBuffer_tick (tBuffer* const sb, float sample)
 void  tBuffer_read(tBuffer* const sb, float* buff, uint32_t len)
 {
     _tBuffer* s = *sb;
-    for (int i = 0; i < s->bufferLength; i++)
+    for (uint i = 0; i < s->bufferLength; i++)
     {
         if (i < len)    s->buff[i] = buff[i];
         else            s->buff[i] = 0.f;
@@ -91,7 +91,7 @@ void  tBuffer_read(tBuffer* const sb, float* buff, uint32_t len)
 float tBuffer_get (tBuffer* const sb, int idx)
 {
     _tBuffer* s = *sb;
-    if ((idx < 0) || (idx >= s->bufferLength)) return 0.f;
+    if ((idx < 0) || (idx >= (int) s->bufferLength)) return 0.f;
     return s->buff[idx];
 }
 
@@ -129,7 +129,7 @@ void  tBuffer_setRecordMode (tBuffer* const sb, RecordMode mode)
 void  tBuffer_clear (tBuffer* const sb)
 {
     _tBuffer* s = *sb;
-    for (int i = 0; i < s->bufferLength; i++)
+    for (uint i = 0; i < s->bufferLength; i++)
     {
         s->buff[i] = 0.f;
     }
@@ -263,8 +263,8 @@ float tSampler_tick        (tSampler* const sp)
     int myEnd = p->end;
     if (p->flip < 0)
     {
-    	myStart = p->end;
-    	myEnd = p->start;
+        myStart = p->end;
+        myEnd = p->start;
     }
     
     // Get the direction and a reverse flag for some calcs
@@ -442,16 +442,16 @@ float tSampler_tick        (tSampler* const sp)
 
     if (p->mode == PlayNormal)
     {
-    	if (p->idx < myStart)
-    	{
-    		p->idx = myStart;
-    	}
-    	else if (p->idx > myEnd)
-    	{
-    		p->idx = myEnd;
-    	}
-    	float ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
-    	if (ticksToEnd < (0.007f * leaf.sampleRate))
+        if (p->idx < myStart)
+        {
+            p->idx = myStart;
+        }
+        else if (p->idx > myEnd)
+        {
+            p->idx = myEnd;
+        }
+        float ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
+        if (ticksToEnd < (0.007f * leaf.sampleRate))
         {
             tRamp_setDest(&p->gain, 0.f);
             p->active = -1;

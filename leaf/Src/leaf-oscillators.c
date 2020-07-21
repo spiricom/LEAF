@@ -132,12 +132,12 @@ float   tCycle_tick(tCycle* const cy)
 
     // Wavetable synthesis
 
-	temp = SINE_TABLE_SIZE * c->phase;
-	intPart = (int)temp;
-	fracPart = temp - (float)intPart;
-	samp0 = __leaf_table_sinewave[intPart];
-	if (++intPart >= SINE_TABLE_SIZE) intPart = 0;
-	samp1 = __leaf_table_sinewave[intPart];
+    temp = SINE_TABLE_SIZE * c->phase;
+    intPart = (int)temp;
+    fracPart = temp - (float)intPart;
+    samp0 = __leaf_table_sinewave[intPart];
+    if (++intPart >= SINE_TABLE_SIZE) intPart = 0;
+    samp1 = __leaf_table_sinewave[intPart];
 
     return (samp0 + (samp1 - samp0) * fracPart);
 }
@@ -400,7 +400,7 @@ float   tTri_tick          (tTri* const osc)
     }
     
     out += LEAF_poly_blep(c->phase, c->inc);
-    out -= LEAF_poly_blep(fmod(c->phase + (1.0f - c->skew), 1.0f), c->inc);
+    out -= LEAF_poly_blep(fmodf(c->phase + (1.0f - c->skew), 1.0f), c->inc);
     
     out = (skew * c->inc * out) + ((1 - c->inc) * c->lastOut);
     c->lastOut = out;
@@ -463,7 +463,7 @@ float   tPulse_tick        (tPulse* const osc)
     if (c->phase < c->width) out = 1.0f;
     else out = -1.0f;
     out += LEAF_poly_blep(c->phase, c->inc);
-    out -= LEAF_poly_blep(fmod(c->phase + (1.0f - c->width), 1.0f), c->inc);
+    out -= LEAF_poly_blep(fmodf(c->phase + (1.0f - c->width), 1.0f), c->inc);
     
     c->phase += c->inc;
     if (c->phase >= 1.0f)
@@ -962,9 +962,9 @@ float tMBPulse_tick(tMBPulse* const osc)
         p = 0.0f;
         
         w = freq / leaf.sampleRate;
-        if (w < 1e-5) w = 1e-5;
-        if (w > 0.5) w = 0.5;
-        b = 0.5 * (1.0 + c->waveform );
+        if (w < 1e-5f) w = 1e-5f;
+        if (w > 0.5f) w = 0.5f;
+        b = 0.5f * (1.0f + c->waveform );
         if (b < w) b = w;
         if (b > 1.0f - w) b = 1.0f - w;
         /* for variable-width rectangular wave, we could do DC compensation with:
@@ -983,10 +983,10 @@ float tMBPulse_tick(tMBPulse* const osc)
     a = 0.5f; // when a = 1, LPfilter is disabled
     
     t = freq / leaf.sampleRate;
-    if (t < 1e-5) t = 1e-5;
-    if (t > 0.5) t = 0.5;
+    if (t < 1e-5f) t = 1e-5f;
+    if (t > 0.5f) t = 0.5f;
     dw = (t - w) ;
-    t = 0.5 * (1.0 + c->waveform );
+    t = 0.5f * (1.0f + c->waveform );
     if (t < w) t = w;
     if (t > 1.0f - w) t = 1.0f - w;
     db = (t - b) ;
@@ -1173,9 +1173,9 @@ float tMBTriangle_tick(tMBTriangle* const osc)
         //        w = (exp2ap (freq[1] + vco->_port[OCTN] + vco->_port[TUNE] + expm[1] * vco->_port[EXPG] + 8.03136)
         //                + 1e3 * linm[1] * vco->_port[LING]) / SAMPLERATE;
         w = freq / leaf.sampleRate;
-        if (w < 1e-5) w = 1e-5;
-        if (w > 0.5) w = 0.5;
-        b = 0.5 * (1.0 + c->waveform);
+        if (w < 1e-5f) w = 1e-5f;
+        if (w > 0.5f) w = 0.5f;
+        b = 0.5f * (1.0f + c->waveform);
         if (b < w) b = w;
         if (b > 1.0f - w) b = 1.0f - w;
         p = 0.5f * b;
@@ -1190,10 +1190,10 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     a = 0.5f; // when a = 1, LPfilter is disabled
     
     t = freq / leaf.sampleRate;
-    if (t < 1e-5) t = 1e-5;
-    if (t > 0.5) t = 0.5;
+    if (t < 1e-5f) t = 1e-5f;
+    if (t > 0.5f) t = 0.5f;
     dw = (t - w) ;
-    t = 0.5 * (1.0 + c->waveform );
+    t = 0.5f * (1.0f + c->waveform );
     if (t < w) t = w;
     if (t > 1.0f - w) t = 1.0f - w;
     db = (t - b) ;
@@ -1380,8 +1380,8 @@ float tMBSaw_tick(tMBSaw* const osc)
     if (c->_init) {
         p = 0.5f;
         w = freq / leaf.sampleRate;
-        if (w < 1e-5) w = 1e-5;
-        if (w > 0.5) w = 0.5;
+        if (w < 1e-5f) w = 1e-5f;
+        if (w > 0.5f) w = 0.5f;
         /* if we valued alias-free startup over low startup time, we could do:
          *   p -= w;
          *   place_slope_dd(_f, j, 0.0f, w, -1.0f); */
@@ -1392,8 +1392,8 @@ float tMBSaw_tick(tMBSaw* const osc)
     a = 0.5f; // when a = 1, LPfilter is disabled
     
     t = freq / leaf.sampleRate;
-    if (t < 1e-5) t = 1e-5;
-    if (t > 0.5) t = 0.5;
+    if (t < 1e-5f) t = 1e-5f;
+    if (t > 0.5f) t = 0.5f;
     dw = (t - w); // n= 1
     w += dw;
     p += w;

@@ -2,7 +2,6 @@
  
  leaf-math.c
  Created: 22 Jan 2017 7:02:56pm
- Author:  Michael R Mulshine
  
  ==============================================================================*/
 
@@ -38,6 +37,12 @@ float log2f_approx(float X) {
     Y += -3.13396450166353f;
     Y += E;
     return(Y);
+}
+
+//another log2Approximation
+float log2f_approx2(float x)
+{
+    return (0.1640425613334452f * x*x*x) + (-1.098865286222744f * x*x) + (3.148297929334117f * x) + -2.213475204444817f;
 }
 
 float interpolate3max(float *buf, const int peakindex)
@@ -472,12 +477,12 @@ void LEAF_generate_square(float* buffer, float basefreq, int size)
 //0.001 base gives a good curve that goes from 1 to near zero
 void LEAF_generate_exp(float* buffer, float base, float start, float end, float offset, int size)
 {
-	float increment = (end - start) / (float)size;
-	float x = start;
-	for (int i = 0; i < size; i++)
-	{
-		buffer[i] = powf(base, x) + offset;
-		x += increment;
+    float increment = (end - start) / (float)size;
+    float x = start;
+    for (int i = 0; i < size; i++)
+    {
+        buffer[i] = powf(base, x) + offset;
+        x += increment;
     }
 }
 

@@ -291,7 +291,7 @@ extern "C" {
         float freq, waveLengthInSamples;        // the frequency of the string, determining delay length
         float dampFreq;    // frequency for the bridge LP filter, in Hz
         float decay; // amplitude damping factor for the string (only active in mode 0)
-        float levMode;
+        int levMode;
         float curr;
         tLinearDelay delayLine;
         tOnePole bridgeFilter;
@@ -399,7 +399,7 @@ extern "C" {
         float prepIndex;    // the amount of pressure on the pickpoint of the string (near 0=soft obj, near 1=hard obj)
         float dampFreq;    // frequency for the bridge LP filter, in Hz
         float decay; // amplitude damping factor for the string (only active in mode 0)
-        float levMode;
+        int levMode;
         float curr;
         tLinearDelay delLF,delUF,delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
         tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
@@ -517,7 +517,7 @@ extern "C" {
         float prepIndex;    // the amount of pressure on the pickpoint of the string (near 0=soft obj, near 1=hard obj)
         float dampFreq;    // frequency for the bridge LP filter, in Hz
         float decay; // amplitude damping factor for the string (only active in mode 0)
-        float levMode;
+        int levMode;
         float curr;
         tLinearDelay delLF,delUF, delMF, delMB, delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
         tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;

@@ -544,7 +544,7 @@ void     tADSR2_setAttack(tADSR2* const adsrenv, float attack)
 {
     _tADSR2* adsr = *adsrenv;
     adsr->attack = LEAF_clip(0.0f, attack * 0.001f, 1.0f);
-    adsr->attackLambda = fastPow(ADSR2_LAMBDA_BASE, -adsr->attack) * ADSR2_INV_MIN_TIME;
+    adsr->attackLambda = fastPowf(ADSR2_LAMBDA_BASE, -adsr->attack) * ADSR2_INV_MIN_TIME;
 
 }
 
@@ -552,7 +552,7 @@ void     tADSR2_setDecay(tADSR2* const adsrenv, float decay)
 {
     _tADSR2* adsr = *adsrenv;
     adsr->decay = LEAF_clip(0.0f, decay * 0.001f, 1.0f);
-    adsr->decayLambda = fastPow(ADSR2_LAMBDA_BASE, -adsr->decay) * ADSR2_INV_MIN_TIME;
+    adsr->decayLambda = fastPowf(ADSR2_LAMBDA_BASE, -adsr->decay) * ADSR2_INV_MIN_TIME;
 
 }
 
@@ -574,7 +574,7 @@ void     tADSR2_setRelease(tADSR2* const adsrenv, float release)
 {
     _tADSR2* adsr = *adsrenv;
     adsr->release = LEAF_clip(0.0f, release * 0.001f, 1.0f);
-    adsr->releaseLambda = fastPow(ADSR2_LAMBDA_BASE, -adsr->release) * ADSR2_INV_MIN_TIME;
+    adsr->releaseLambda = fastPowf(ADSR2_LAMBDA_BASE, -adsr->release) * ADSR2_INV_MIN_TIME;
 }
 
 // 0.999999 is slow leak, 0.9 is fast leak
@@ -644,9 +644,9 @@ float   tADSR2_tick(tADSR2* const adsrenv)
 //This one doesn't use any lookup table - by Nigel Redmon from his blog. Thanks, Nigel!
 //-JS
 
-float calcADSR3Coef(double rate, double targetRatio)
+float calcADSR3Coef(float rate, float targetRatio)
 {
-    return (rate <= 0.0f) ? 0.0f : exp(-log((1.0 + targetRatio) / targetRatio) / rate);
+    return (rate <= 0.0f) ? 0.0f : expf(-logf((1.0f + targetRatio) / targetRatio) / rate);
 }
 
 
@@ -725,7 +725,7 @@ void     tADSR3_setRelease(tADSR3* const adsrenv, float release)
     _tADSR3* adsr = *adsrenv;
 
     adsr->releaseRate = release * adsr->sampleRateInMs;
-    adsr->releaseCoef = calcADSR3Coef(adsr->releaseRate, adsr->targetRatioDR);
+    adsr->releaseCoef = calcADSR3Coef(adsr->releaseRate, (float)adsr->targetRatioDR);
     adsr->releaseBase = -adsr->targetRatioDR * (1.0f - adsr->releaseCoef);
 }
 
@@ -785,6 +785,8 @@ float   tADSR3_tick(tADSR3* const adsrenv)
                 adsr->output = 0.0f;
                 adsr->state = env_idle;
             }
+        default:
+            break;
     }
     //smooth the gain value   -- this is not ideal, a retrigger while the envelope is still going with a new gain will cause a jump, although it will be smoothed quickly. Maybe doing the math so the range is computed based on the gain rather than 0.->1. is preferable? But that's harder to get the exponential curve right without a lookup.
     adsr->gain = (adsr->factor*adsr->targetGainSquared)+(adsr->oneMinusFactor*adsr->gain);
@@ -1182,14 +1184,14 @@ void     tRamp_setTime(tRamp* const ramp, float time)
 {
     _tRamp* r = *ramp;
     
-	if (time < r->minimum_time)
-	{
-		r->time = r->minimum_time;
-	}
-	else
-	{
-		r->time = time;
-	}
+    if (time < r->minimum_time)
+    {
+        r->time = r->minimum_time;
+    }
+    else
+    {
+        r->time = time;
+    }
     r->factor = (1.0f / r->time) * r->inv_sr_ms * (float)r->samples_per_tick;
     r->inc = (r->dest - r->curr) * r->factor;
 
@@ -1216,10 +1218,10 @@ float   tRamp_tick(tRamp* const ramp)
     r->curr += r->inc;
     
     if (((r->curr >= r->dest) && (r->inc > 0.0f)) || ((r->curr <= r->dest) && (r->inc < 0.0f)))
-	{
-		r->inc = 0.0f;
-		r->curr=r->dest;
-	}
+    {
+        r->inc = 0.0f;
+        r->curr=r->dest;
+    }
     
     return r->curr;
 }
@@ -1243,7 +1245,7 @@ void    tRampSampleRateChanged(tRamp* const ramp)
 /* RampUpDown */
 void    tRampUpDown_init(tRampUpDown* const r, float upTime, float downTime, int samples_per_tick)
 {
-	tRampUpDown_initToPool(r, upTime, downTime, samples_per_tick, &leaf.mempool);
+    tRampUpDown_initToPool(r, upTime, downTime, samples_per_tick, &leaf.mempool);
 }
 
 void    tRampUpDown_initToPool(tRampUpDown* const r, float upTime, float downTime, int samples_per_tick, tMempool* const mp)
@@ -1341,29 +1343,29 @@ float   tRampUpDown_tick(tRampUpDown* const ramp)
 
     if (r->dest < r->curr)
     {
-    	test = r->curr + r->downInc;
-    	if (test > r->dest)
-    	{
-    		r->curr = test;
-    	}
-    	else
-    	{
-    		r->downInc = 0.0f;
-    		r->curr = r->dest;
-    	}
+        test = r->curr + r->downInc;
+        if (test > r->dest)
+        {
+            r->curr = test;
+        }
+        else
+        {
+            r->downInc = 0.0f;
+            r->curr = r->dest;
+        }
     }
     else if (r->dest > r->curr)
     {
-    	test = r->curr + r->upInc;
-    	if (test < r->dest)
-    	{
-    		r->curr = test;
-    	}
-    	else
-    	{
-    		r->upInc = 0.0f;
-    		r->curr = r->dest;
-    	}
+        test = r->curr + r->upInc;
+        if (test < r->dest)
+        {
+            r->curr = test;
+        }
+        else
+        {
+            r->upInc = 0.0f;
+            r->curr = r->dest;
+        }
     }
     return r->curr;
 }
@@ -1381,7 +1383,7 @@ float   tRampUpDown_sample(tRampUpDown* const ramp)
 
 /* Exponential Smoother */
 void    tExpSmooth_init(tExpSmooth* const expsmooth, float val, float factor)
-{	// factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
+{   // factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
     tExpSmooth_initToPool(expsmooth, val, factor, &leaf.mempool);
 }
 
@@ -1407,34 +1409,34 @@ void    tExpSmooth_free (tExpSmooth* const expsmooth)
 }
 
 void     tExpSmooth_setFactor(tExpSmooth* const expsmooth, float factor)
-{	// factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
+{   // factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
     _tExpSmooth* smooth = *expsmooth;
     
-	if (factor<0)
-		factor=0;
-	else
-		if (factor>1) factor=1;
-	smooth->factor=factor;
-	smooth->oneminusfactor=1.0f-factor;
+    if (factor<0)
+        factor=0;
+    else
+        if (factor>1) factor=1;
+    smooth->factor=factor;
+    smooth->oneminusfactor=1.0f-factor;
 }
 
 void     tExpSmooth_setDest(tExpSmooth* const expsmooth, float dest)
 {
     _tExpSmooth* smooth = *expsmooth;
-	smooth->dest=dest;
+    smooth->dest=dest;
 }
 
 void     tExpSmooth_setVal(tExpSmooth* const expsmooth, float val)
 {
     _tExpSmooth* smooth = *expsmooth;
-	smooth->curr=val;
+    smooth->curr=val;
 }
 
 void     tExpSmooth_setValAndDest(tExpSmooth* const expsmooth, float val)
 {
     _tExpSmooth* smooth = *expsmooth;
-	smooth->curr=val;
-	smooth->dest=val;
+    smooth->curr=val;
+    smooth->dest=val;
 }
 
 float   tExpSmooth_tick(tExpSmooth* const expsmooth)
@@ -1455,7 +1457,7 @@ float   tExpSmooth_sample(tExpSmooth* const expsmooth)
 
 void    tSlide_init          (tSlide* const sl, float upSlide, float downSlide)
 {
-	tSlide_initToPool    (sl, upSlide, downSlide, &leaf.mempool);
+    tSlide_initToPool    (sl, upSlide, downSlide, &leaf.mempool);
 }
 
 void    tSlide_initToPool    (tSlide* const sl, float upSlide, float downSlide, tMempool* const mp)
@@ -1470,12 +1472,12 @@ void    tSlide_initToPool    (tSlide* const sl, float upSlide, float downSlide, 
     s->dest = 0.0f;
     if (upSlide < 1.0f)
     {
-    	upSlide = 1.0f;
+        upSlide = 1.0f;
     }
 
     if (downSlide < 1.0f)
     {
-    	downSlide = 1.0f;
+        downSlide = 1.0f;
     }
     s->invUpSlide = 1.0f / upSlide;
     s->invDownSlide = 1.0f / downSlide;
@@ -1490,63 +1492,63 @@ void    tSlide_free  (tSlide* const sl)
 
 void tSlide_setUpSlide(tSlide* const sl, float upSlide)
 {
-	_tSlide* s = *sl;
-	s->invUpSlide = 1.0f / upSlide;
+    _tSlide* s = *sl;
+    s->invUpSlide = 1.0f / upSlide;
 }
 
 void tSlide_setDownSlide(tSlide* const sl, float downSlide)
 {
-	_tSlide* s = *sl;
-	s->invDownSlide = 1.0f / downSlide;
+    _tSlide* s = *sl;
+    s->invDownSlide = 1.0f / downSlide;
 }
 
 void tSlide_setDest(tSlide* const sl, float dest)
 {
-	_tSlide* s = *sl;
-	s->dest = dest;
+    _tSlide* s = *sl;
+    s->dest = dest;
 }
 
 float tSlide_tickNoInput(tSlide* const sl)
 {
-	_tSlide* s = *sl;
-	float in = s->dest;
+    _tSlide* s = *sl;
+    float in = s->dest;
 
-	if (in >= s->prevOut)
-	{
-		s->currentOut = s->prevOut + ((in - s->prevOut) * s->invUpSlide);
-	}
-	else
-	{
-		s->currentOut = s->prevOut + ((in - s->prevOut) * s->invDownSlide);
-	}
+    if (in >= s->prevOut)
+    {
+        s->currentOut = s->prevOut + ((in - s->prevOut) * s->invUpSlide);
+    }
+    else
+    {
+        s->currentOut = s->prevOut + ((in - s->prevOut) * s->invDownSlide);
+    }
 #ifdef NO_DENORMAL_CHECK
 #else
-	if (s->currentOut < VSF) s->currentOut = 0.0f;
+    if (s->currentOut < VSF) s->currentOut = 0.0f;
 #endif
-	s->prevIn = in;
-	s->prevOut = s->currentOut;
-	return s->currentOut;
+    s->prevIn = in;
+    s->prevOut = s->currentOut;
+    return s->currentOut;
 }
 
 float tSlide_tick(tSlide* const sl, float in)
 {
-	_tSlide* s = *sl;
+    _tSlide* s = *sl;
 
 
-	if (in >= s->prevOut)
-	{
-		s->currentOut = s->prevOut + ((in - s->prevOut) * s->invUpSlide);
-	}
-	else
-	{
-		s->currentOut = s->prevOut + ((in - s->prevOut) * s->invDownSlide);
-	}
+    if (in >= s->prevOut)
+    {
+        s->currentOut = s->prevOut + ((in - s->prevOut) * s->invUpSlide);
+    }
+    else
+    {
+        s->currentOut = s->prevOut + ((in - s->prevOut) * s->invDownSlide);
+    }
 #ifdef NO_DENORMAL_CHECK
 #else
-	if (s->currentOut < VSF) s->currentOut = 0.0f;
+    if (s->currentOut < VSF) s->currentOut = 0.0f;
 #endif
-	s->prevIn = in;
-	s->prevOut = s->currentOut;
-	return s->currentOut;
+    s->prevIn = in;
+    s->prevOut = s->currentOut;
+    return s->currentOut;
 }
 

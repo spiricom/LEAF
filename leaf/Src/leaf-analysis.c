@@ -96,7 +96,7 @@ void    tZeroCrossing_initToPool   (tZeroCrossing* const zc, int maxWindowSize, 
     z->count = 0;
     z->maxWindowSize = maxWindowSize;
     z->currentWindowSize = maxWindowSize;
-    z->invCurrentWindowSize = 1.0f / maxWindowSize;
+    z->invCurrentWindowSize = 1.0f / (float)maxWindowSize;
     z->position = 0;
     z->prevPosition = maxWindowSize;
     z->inBuffer = (float*) mpool_calloc(sizeof(float) * maxWindowSize, m);
@@ -392,14 +392,14 @@ void tAttackDetection_setAttack(tAttackDetection* const ad, int inAtk)
 {
     _tAttackDetection* a = *ad;
     a->atk = inAtk;
-    a->atk_coeff = pow(0.01, 1.0/(a->atk * a->samplerate * 0.001));
+    a->atk_coeff = powf(0.01f, 1.0f/(a->atk * a->samplerate * 0.001f));
 }
 
 void tAttackDetection_setRelease(tAttackDetection* const ad, int inRel)
 {
     _tAttackDetection* a = *ad;
     a->rel = inRel;
-    a->rel_coeff = pow(0.01, 1.0/(a->rel * a->samplerate * 0.001));
+    a->rel_coeff = powf(0.01f, 1.0f/(a->rel * a->samplerate * 0.001f));
 }
 
 
@@ -602,7 +602,7 @@ static void snac_analyzeframe(tSNAC* const snac)
     int n, tindex = s->timeindex;
     int framesize = s->framesize;
     int mask = framesize - 1;
-    float norm = 1. / sqrt((float)(framesize * 2));
+    float norm = 1.f / sqrtf((float)(framesize * 2));
     
     float *inputbuf = s->inputbuf;
     float *processbuf = s->processbuf;
@@ -646,7 +646,7 @@ static void snac_autocorrelation(tSNAC* const snac)
     {
         processbuf[n] = processbuf[n] * processbuf[n]
         + processbuf[fftsize-n] * processbuf[fftsize-n]; // imag coefficients appear reversed
-        processbuf[fftsize-n] = 0.;
+        processbuf[fftsize-n] = 0.f;
     }
     
     // store power spectrum up to SR/4 for possible later use
@@ -677,7 +677,7 @@ static void snac_normalize(tSNAC* const snac)
     
     // minimum RMS implemented as minimum autocorrelation at index 0
     // functionally equivalent to white noise floor
-    float rms = s->minrms / sqrt(1.0f / (float)framesize);
+    float rms = s->minrms / sqrtf(1.0f / (float)framesize);
     float minrzero = rms * rms;
     float rzero = processbuf[0];
     if(rzero < minrzero) rzero = minrzero;
@@ -689,7 +689,7 @@ static void snac_normalize(tSNAC* const snac)
     for(n=1, m=s->timeindex+1; n<seek; n++, m++)
     {
         signal1 = inputbuf[(n + timeindexminusone)&mask];
-        signal2 = inputbuf[(framesizeplustimeindex - n)&mask];
+        signal2 = inputbuf[(framesizeplustimeindex - n)&mask]; //could this be switched to float resolution without issue? -JS
         normintegral -= (double)(signal1 * signal1 + signal2 * signal2);
         processbuf[n] /= (float)normintegral * 0.5f;
     }
@@ -824,7 +824,7 @@ static void snac_biasbuf(tSNAC* const snac)
     
     for(n=5; n<maxperiod; n++)
     {
-        biasbuf[n] = 1.0f - (float)logf(n - 4) * bias;
+        biasbuf[n] = 1.0f - (float)logf(n - 4.f) * bias;
     }
 }
 
@@ -864,7 +864,7 @@ void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, float* 
     p->tolerance = 1.0f;
     p->timeConstant = DEFTIMECONSTANT;
     p->radius = expf(-1000.0f * p->hopSize * leaf.invSampleRate / p->timeConstant);
-    p->fidelityThreshold = 0.95;
+    p->fidelityThreshold = 0.95f;
 }
 
 void tPeriodDetection_free (tPeriodDetection* const pd)
@@ -903,7 +903,7 @@ float tPeriodDetection_tick (tPeriodDetection* pd, float sample)
         // Fidelity threshold recommended by Katja Vetters is 0.95 for most instruments/voices http://www.katjaas.nl/helmholtz/helmholtz.html
         if (fidelity > p->fidelityThreshold)
         {
-        	p->period = tSNAC_getPeriod(&p->snac);
+            p->period = tSNAC_getPeriod(&p->snac);
         }
         
         p->curBlock++;
@@ -979,7 +979,7 @@ void    tZeroCrossing2_updatePeak(tZeroCrossing2* const zc, float s, int pos)
 {
     _tZeroCrossing2* z = *zc;
     
-    z->_peak = fmax(s, z->_peak);
+    z->_peak = fmaxf(s, z->_peak);
     if ((z->_width == 0.0f) && (s < (z->_peak * 0.3f)))
         z->_width = pos - z->_leading_edge;
 }
@@ -1056,11 +1056,11 @@ void    tZeroCrossings_initToPool    (tZeroCrossings* const zc, int windowSize, 
     int size = z->_window_size / 2;
     
     // Ensure size is a power of 2
-    z->_size = pow(2, ceil(log2(size)));
+    z->_size = pow(2.0, ceil(log2((double)size)));
     z->_mask = z->_size - 1;
 
     z->_info = (tZeroCrossing2*) mpool_alloc(sizeof(tZeroCrossing2) * z->_size, m);
-    for (int i = 0; i < z->_size; i++)
+    for (uint i = 0; i < z->_size; i++)
         tZeroCrossing2_initToPool(&z->_info[i], mp);
     z->_pos = 0;
     
@@ -1088,7 +1088,7 @@ int     tZeroCrossings_tick(tZeroCrossings* const zc, float s)
     // centered on the actual zero.
     s += z->_hysteresis * 0.5f;
     
-    if (z->_num_edges >= z->_size)
+    if (z->_num_edges >= (int)z->_size)
         reset(zc);
     
     if ((z->_frame == z->_window_size/2) && (z->_num_edges == 0))
@@ -1137,7 +1137,7 @@ int     tZeroCrossings_getCapacity(tZeroCrossings* const zc)
 {
     _tZeroCrossings* z = *zc;
     
-    return z->_size;
+    return (int)z->_size;
 }
 
 int     tZeroCrossings_getFrame(tZeroCrossings* const zc)
@@ -1165,7 +1165,7 @@ float   tZeroCrossings_getPeak(tZeroCrossings* const zc)
 {
     _tZeroCrossings* z = *zc;
     
-    return fmax(z->_peak, z->_peak_update);
+    return fmaxf(z->_peak, z->_peak_update);
 }
 
 int     tZeroCrossings_isReset(tZeroCrossings* const zc)
@@ -1187,7 +1187,7 @@ static inline void update_state(tZeroCrossings* const zc, float s)
         z->_peak_update = 0.0f;
     }
     
-    if (z->_num_edges >= z->_size)
+    if (z->_num_edges >= (int)z->_size)
         reset(zc);
     
     if (s > 0.0f)
@@ -1444,7 +1444,7 @@ int    tBACF_getCorrelation  (tBACF* const bacf, int pos)
     
     if (shift == 0)
     {
-        for (int i = 0; i != b->_mid_array; ++i)
+        for (uint i = 0; i != b->_mid_array; ++i)
             // built in compiler popcount functions should be faster but we want this to be portable
             // could try to add some define that call the correct function depending on compiler
             // or let the user pointer popcount() to whatever they want
@@ -1454,7 +1454,7 @@ int    tBACF_getCorrelation  (tBACF* const bacf, int pos)
     else
     {
         const int shift2 = value_size - shift;
-        for (int i = 0; i != b->_mid_array; ++i)
+        for (uint i = 0; i != b->_mid_array; ++i)
         {
             unsigned int v = *p2++ >> shift;
             v |= *p2 << shift2;
@@ -1721,7 +1721,7 @@ static inline void autocorrelate(tPeriodDetector* const detector)
 static inline void sub_collector_init(_sub_collector* collector, tZeroCrossings* const crossings, float pdt, int range)
 {
     collector->_zc = *crossings;
-    collector->_harmonic_threshold = HARMONIC_PERIODICITY_FACTOR * 2.0f / collector->_zc->_window_size;
+    collector->_harmonic_threshold = HARMONIC_PERIODICITY_FACTOR * 2.0f / (float)collector->_zc->_window_size;
     collector->_periodicity_diff_threshold = pdt;
     collector->_range = range;
     collector->_fundamental._i1 = -1;
@@ -1756,7 +1756,7 @@ static inline int sub_collector_try_sub_harmonic(_sub_collector* collector, int 
         if (info._periodicity > collector->_fundamental._periodicity &&
             harmonic != collector->_fundamental._harmonic)
         {
-            float periodicity_diff = fabs(info._periodicity - collector->_fundamental._periodicity);
+            float periodicity_diff = fabsf(info._periodicity - collector->_fundamental._periodicity);
             
             // If incoming periodicity is within the harmonic
             // periodicity threshold, then replace _fundamental with
