@@ -80,7 +80,7 @@ void tBuffer_tick (tBuffer* const sb, float sample)
 void  tBuffer_read(tBuffer* const sb, float* buff, uint32_t len)
 {
     _tBuffer* s = *sb;
-    for (uint i = 0; i < s->bufferLength; i++)
+    for (unsigned i = 0; i < s->bufferLength; i++)
     {
         if (i < len)    s->buff[i] = buff[i];
         else            s->buff[i] = 0.f;
@@ -129,7 +129,7 @@ void  tBuffer_setRecordMode (tBuffer* const sb, RecordMode mode)
 void  tBuffer_clear (tBuffer* const sb)
 {
     _tBuffer* s = *sb;
-    for (uint i = 0; i < s->bufferLength; i++)
+    for (unsigned i = 0; i < s->bufferLength; i++)
     {
         s->buff[i] = 0.f;
     }

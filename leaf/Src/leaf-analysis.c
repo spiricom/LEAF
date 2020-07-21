@@ -1061,7 +1061,7 @@ void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const zc, 
 
 
     z->_info = (tZeroCrossingInfo*) mpool_alloc(sizeof(tZeroCrossingInfo) * z->_size, m);
-    for (uint i = 0; i < z->_size; i++)
+    for (unsigned i = 0; i < z->_size; i++)
         tZeroCrossingInfo_initToPool(&z->_info[i], mp);
 
     z->_pos = 0;
@@ -1446,21 +1446,33 @@ int    tBACF_getCorrelation  (tBACF* const bacf, int pos)
     
     if (shift == 0)
     {
-        for (uint i = 0; i != b->_mid_array; ++i)
+        for (unsigned i = 0; i != b->_mid_array; ++i)
+        {
             // built in compiler popcount functions should be faster but we want this to be portable
             // could try to add some define that call the correct function depending on compiler
             // or let the user pointer popcount() to whatever they want
             // something to look into...
+#ifdef __GNUC__
+            count += __builtin_popcount(*p1++ ^ *p2++);
+#elif _MSC_VER
+            count += __popcnt(*p1++ ^ *p2++);
+#endif
             count += popcount(*p1++ ^ *p2++);
+        }
     }
     else
     {
         const int shift2 = value_size - shift;
-        for (uint i = 0; i != b->_mid_array; ++i)
+        for (unsigned i = 0; i != b->_mid_array; ++i)
         {
             unsigned int v = *p2++ >> shift;
             v |= *p2 << shift2;
-            count += popcount(*p1++ ^ v);
+#ifdef __GNUC__
+            count += __builtin_popcount(*p1++ ^ *p2++);
+#elif _MSC_VER
+            count += __popcnt(*p1++ ^ *p2++);
+#endif
+            count += popcount(*p1++ ^ *p2++);
         }
     }
     return count;

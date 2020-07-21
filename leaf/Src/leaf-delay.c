@@ -58,7 +58,7 @@ void tDelay_free (tDelay* const dl)
 void    tDelay_clear(tDelay* const dl)
 {
     _tDelay* d = *dl;
-    for (uint i = 0; i < d->maxDelay; i++)
+    for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
@@ -203,7 +203,7 @@ void tLinearDelay_free (tLinearDelay* const dl)
 void    tLinearDelay_clear(tLinearDelay* const dl)
 {
     _tLinearDelay* d = *dl;
-    for (uint i = 0; i < d->maxDelay; i++)
+    for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
@@ -397,7 +397,7 @@ void tHermiteDelay_free (tHermiteDelay* const dl)
 void    tHermiteDelay_clear(tHermiteDelay* const dl)
 {
     _tHermiteDelay* d = *dl;
-    for (uint i = 0; i < d->maxDelay; i++)
+    for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
@@ -593,7 +593,7 @@ void tAllpassDelay_free (tAllpassDelay* const dl)
 void tAllpassDelay_clear(tAllpassDelay* const dl)
 {
     _tAllpassDelay* d = *dl;
-    for (uint i = 0; i < d->maxDelay; i++)
+    for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
@@ -763,7 +763,7 @@ void tTapeDelay_free (tTapeDelay* const dl)
 void tTapeDelay_clear(tTapeDelay* const dl)
 {
     _tTapeDelay* d = *dl;
-    for (uint i = 0; i < d->maxDelay; i++)
+    for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }

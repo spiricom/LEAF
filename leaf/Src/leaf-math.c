@@ -731,10 +731,16 @@ float minimum (float num1, float num2)
 // something to look into...
 int popcount(unsigned int x)
 {
-    int c = 0;
-    for (; x != 0; x &= x - 1)
-        c++;
-    return c;
+//    int c = 0;
+//    for (; x != 0; x &= x - 1)
+//        c++;
+//    return c;
+    unsigned long long y;
+    y = x * 0x0002000400080010ULL;
+    y = y & 0x1111111111111111ULL;
+    y = y * 0x1111111111111111ULL;
+    y = y >> 60;
+    return (int) y;
 }
 
 float median3f(float a, float b, float c)
