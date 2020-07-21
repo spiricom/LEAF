@@ -36,6 +36,11 @@ void LEAF_init(float sr, int blocksize, char* memory, size_t memorysize, float(*
     leaf.random = random;
     
     leaf.clearOnAllocation = 0;
+    
+    leaf.errorCallback = &LEAF_defaultErrorCallback;
+    
+    for (int i = 0; i < LEAFErrorNil; ++i)
+        leaf.errorState[i] = 0;
 }
 
 
@@ -52,10 +57,19 @@ float LEAF_getSampleRate()
     return leaf.sampleRate;
 }
 
-
-//implement a function called this in your user code to catch errors
-//__attribute__((weak))
-uint8_t LEAF_error(uint8_t whichone)
+void LEAF_defaultErrorCallback(LEAFErrorType whichone)
 {
-    return whichone;
+    // Not sure what this should do if anything
+    // Maybe fine as a placeholder
+}
+
+void LEAF_internalErrorCallback(LEAFErrorType whichone)
+{
+    leaf.errorState[whichone] = 1;
+    leaf.errorCallback(whichone);
+}
+
+void LEAF_setErrorCallback(void (*callback)(LEAFErrorType))
+{
+    leaf.errorCallback = callback;
 }

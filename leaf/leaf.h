@@ -140,9 +140,19 @@ extern "C" {
      */
     float       LEAF_getSampleRate   (void);
     
-
-//    __attribute__((weak))
-    uint8_t LEAF_error(uint8_t whichone);
+    //! The default callback function for LEAF errors.
+    /*!
+     @param errorType The type of the error that has occurred.
+     */
+    void        LEAF_defaultErrorCallback(LEAFErrorType errorType);
+    
+    void        LEAF_internalErrorCallback(LEAFErrorType whichone);
+    
+    //! Set the callback function for LEAF errors.
+    /*!
+     @param callback A pointer to the callback function.
+     */
+    void LEAF_setErrorCallback(void (*callback)(LEAFErrorType))
     
     /*! @} */
     

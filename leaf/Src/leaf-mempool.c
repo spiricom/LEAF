@@ -79,9 +79,9 @@ void mpool_create (char* memory, size_t size, _tMempool* pool)
 
 void leaf_pool_init(char* memory, size_t size)
 {
-    mpool_create(memory, size, &leaf._mempool);
+    mpool_create(memory, size, &leaf._internal_mempool);
     
-    leaf.mempool = &leaf._mempool;
+    leaf.mempool = &leaf._internal_mempool;
 }
 
 /**
@@ -92,7 +92,14 @@ char* mpool_alloc(size_t asize, _tMempool* pool)
     // If the head is NULL, the mempool is full
     if (pool->head == NULL)
     {
-        leaf_mempool_overrun();
+        if ((pool->msize - pool->usize) > asize)
+        {
+            LEAF_internalErrorCallback(LEAFMempoolFragmentation);
+        }
+        else
+        {
+            LEAF_internalErrorCallback(LEAFMempoolOverrun);
+        }
         return NULL;
     }
     
@@ -109,7 +116,14 @@ char* mpool_alloc(size_t asize, _tMempool* pool)
         // are no blocks large enough, return NULL
         if (node_to_alloc == NULL)
         {
-            leaf_mempool_overrun();
+            if ((pool->msize - pool->usize) > asize)
+            {
+                LEAF_internalErrorCallback(LEAFMempoolFragmentation);
+            }
+            else
+            {
+                LEAF_internalErrorCallback(LEAFMempoolOverrun);
+            }
             return NULL;
         }
     }
@@ -166,7 +180,14 @@ char* mpool_calloc(size_t asize, _tMempool* pool)
     // If the head is NULL, the mempool is full
     if (pool->head == NULL)
     {
-        leaf_mempool_overrun();
+        if ((pool->msize - pool->usize) > asize)
+        {
+            LEAF_internalErrorCallback(LEAFMempoolFragmentation);
+        }
+        else
+        {
+            LEAF_internalErrorCallback(LEAFMempoolOverrun);
+        }
         return NULL;
     }
     
@@ -183,7 +204,14 @@ char* mpool_calloc(size_t asize, _tMempool* pool)
         // are no blocks large enough, return NULL
         if (node_to_alloc == NULL)
         {
-            leaf_mempool_overrun();
+            if ((pool->msize - pool->usize) > asize)
+            {
+                LEAF_internalErrorCallback(LEAFMempoolFragmentation);
+            }
+            else
+            {
+                LEAF_internalErrorCallback(LEAFMempoolOverrun);
+            }
             return NULL;
         }
     }
@@ -230,9 +258,7 @@ char* mpool_calloc(size_t asize, _tMempool* pool)
 char* leaf_alloc(size_t size)
 {
     //printf("alloc %i\n", size);
-    char* block = mpool_alloc(size, &leaf._mempool);
-    
-    if (block == NULL) leaf_mempool_overrun();
+    char* block = mpool_alloc(size, &leaf._internal_mempool);
     
     return block;
 }
@@ -240,11 +266,8 @@ char* leaf_alloc(size_t size)
 char* leaf_calloc(size_t size)
 {
     //printf("alloc %i\n", size);
-    char* block = mpool_calloc(size, &leaf._mempool);
-    
-    if (block == NULL) leaf_mempool_overrun();
-    
-    
+    char* block = mpool_calloc(size, &leaf._internal_mempool);
+
     return block;
 }
 
@@ -264,7 +287,7 @@ void mpool_free(char* ptr, _tMempool* pool)
         if ((long) other_node < (long) pool->mpool ||
             (long) other_node >= (((long) pool->mpool) + pool->msize))
         {
-            LEAF_error(2);
+            LEAF_internalErrorCallback(LEAFInvalidFree);
             return;
         }
         next_node = other_node->next;
@@ -318,7 +341,7 @@ void mpool_free(char* ptr, _tMempool* pool)
 
 void leaf_free(char* ptr)
 {
-    mpool_free(ptr, &leaf._mempool);
+    mpool_free(ptr, &leaf._internal_mempool);
 }
 
 size_t mpool_get_size(_tMempool* pool)
@@ -333,17 +356,17 @@ size_t mpool_get_used(_tMempool* pool)
 
 size_t leaf_pool_get_size(void)
 {
-    return mpool_get_size(&leaf._mempool);
+    return mpool_get_size(&leaf._internal_mempool);
 }
 
 size_t leaf_pool_get_used(void)
 {
-    return mpool_get_used(&leaf._mempool);
+    return mpool_get_used(&leaf._internal_mempool);
 }
 
 char* leaf_pool_get_pool(void)
 {
-    char* buff = leaf._mempool.mpool;
+    char* buff = leaf._internal_mempool.mpool;
     
     return buff;
 }
@@ -383,12 +406,6 @@ static inline void delink_node(mpool_node_t* node)
     
     node->next = NULL;
     node->prev = NULL;
-}
-
-void leaf_mempool_overrun(void)
-{
-    LEAF_error(1);
-    //TODO: we should make a set of real error codes that are in an enum type
 }
 
 void tMempool_init(tMempool* const mp, char* memory, size_t size)

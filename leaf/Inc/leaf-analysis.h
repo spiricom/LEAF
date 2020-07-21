@@ -536,7 +536,7 @@ extern "C" {
     
     // Maybe keep these up to PeriodDetector internal?
     
-    typedef struct _tZeroCrossing2
+    typedef struct _tZeroCrossingInfo
     {
         tMempool mempool;
         
@@ -547,32 +547,32 @@ extern "C" {
         int               _leading_edge;// = undefined_edge; int_min
         int               _trailing_edge;// = undefined_edge;
         float             _width;// = 0.0f;
-    } _tZeroCrossing2;
+    } _tZeroCrossingInfo;
     
-    typedef _tZeroCrossing2* tZeroCrossing2;
+    typedef _tZeroCrossingInfo* tZeroCrossingInfo;
     
-    void    tZeroCrossing2_init  (tZeroCrossing2* const);
-    void    tZeroCrossing2_initToPool    (tZeroCrossing2* const, tMempool* const);
-    void    tZeroCrossing2_free  (tZeroCrossing2* const);
+    void    tZeroCrossingInfo_init  (tZeroCrossingInfo* const);
+    void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo* const, tMempool* const);
+    void    tZeroCrossingInfo_free  (tZeroCrossingInfo* const);
     
-    int     tZeroCrossing2_tick(tZeroCrossing2* const, float s);
-    int     tZeroCrossing2_getState(tZeroCrossing2* const);
-    void    tZeroCrossing2_updatePeak(tZeroCrossing2* const, float s, int pos);
-    int     tZeroCrossing2_period(tZeroCrossing2* const, tZeroCrossing2* const next);
-    float   tZeroCrossing2_fractionalPeriod(tZeroCrossing2* const, tZeroCrossing2* const next);
-    int     tZeroCrossing2_getWidth(tZeroCrossing2* const);
-    int     tZeroCrossing2_isSimilar(tZeroCrossing2* const, tZeroCrossing2* const next);
+    int     tZeroCrossingInfo_tick(tZeroCrossingInfo* const, float s);
+    int     tZeroCrossingInfo_getState(tZeroCrossingInfo* const);
+    void    tZeroCrossingInfo_updatePeak(tZeroCrossingInfo* const, float s, int pos);
+    int     tZeroCrossingInfo_period(tZeroCrossingInfo* const, tZeroCrossingInfo* const next);
+    float   tZeroCrossingInfo_fractionalPeriod(tZeroCrossingInfo* const, tZeroCrossingInfo* const next);
+    int     tZeroCrossingInfo_getWidth(tZeroCrossingInfo* const);
+    int     tZeroCrossingInfo_isSimilar(tZeroCrossingInfo* const, tZeroCrossingInfo* const next);
     
     //==============================================================================
     
 #define PULSE_HEIGHT_DIFF 0.8
 #define PULSE_WIDTH_DIFF 0.85
     
-    typedef struct _tZeroCrossings
+    typedef struct _tZeroCrossingCollector
     {
         tMempool mempool;
         
-        tZeroCrossing2* _info;
+        tZeroCrossingInfo* _info;
         unsigned int _size;
         unsigned int _pos;
         unsigned int _mask;
@@ -586,27 +586,27 @@ extern "C" {
         int                  _ready;// = false;
         float                _peak_update;// = 0.0f;
         float                _peak;// = 0.0f;
-    } _tZeroCrossings;
+    } _tZeroCrossingCollector;
     
-    typedef _tZeroCrossings* tZeroCrossings;
+    typedef _tZeroCrossingCollector* tZeroCrossingCollector;
     
-    void    tZeroCrossings_init  (tZeroCrossings* const, int windowSize, float hysteresis);
-    void    tZeroCrossings_initToPool    (tZeroCrossings* const, int windowSize, float hysteresis, tMempool* const);
-    void    tZeroCrossings_free  (tZeroCrossings* const);
+    void    tZeroCrossingCollector_init  (tZeroCrossingCollector* const, int windowSize, float hysteresis);
+    void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const, int windowSize, float hysteresis, tMempool* const);
+    void    tZeroCrossingCollector_free  (tZeroCrossingCollector* const);
     
-    int     tZeroCrossings_tick(tZeroCrossings* const, float s);
-    int     tZeroCrossings_getState(tZeroCrossings* const);
+    int     tZeroCrossingCollector_tick(tZeroCrossingCollector* const, float s);
+    int     tZeroCrossingCollector_getState(tZeroCrossingCollector* const);
     
-    int     tZeroCrossings_getNumEdges(tZeroCrossings* const zc);
-    int     tZeroCrossings_getCapacity(tZeroCrossings* const zc);
-    int     tZeroCrossings_getFrame(tZeroCrossings* const zc);
-    int     tZeroCrossings_getWindowSize(tZeroCrossings* const zc);
+    int     tZeroCrossingCollector_getNumEdges(tZeroCrossingCollector* const zc);
+    int     tZeroCrossingCollector_getCapacity(tZeroCrossingCollector* const zc);
+    int     tZeroCrossingCollector_getFrame(tZeroCrossingCollector* const zc);
+    int     tZeroCrossingCollector_getWindowSize(tZeroCrossingCollector* const zc);
     
-    int     tZeroCrossings_isReady(tZeroCrossings* const zc);
-    float   tZeroCrossings_getPeak(tZeroCrossings* const zc);
-    int     tZeroCrossings_isReset(tZeroCrossings* const zc);
+    int     tZeroCrossingCollector_isReady(tZeroCrossingCollector* const zc);
+    float   tZeroCrossingCollector_getPeak(tZeroCrossingCollector* const zc);
+    int     tZeroCrossingCollector_isReset(tZeroCrossingCollector* const zc);
     
-    tZeroCrossing2 const tZeroCrossings_getCrossing(tZeroCrossings* const zc, int index);
+    tZeroCrossingInfo const tZeroCrossingCollector_getCrossing(tZeroCrossingCollector* const zc, int index);
     
     //==============================================================================
     
@@ -723,7 +723,7 @@ extern "C" {
         _auto_correlation_info _fundamental;
         
         // passed in, not initialized
-        tZeroCrossings    _zc;
+        tZeroCrossingCollector    _zc;
         
         float             _harmonic_threshold;
         float             _periodicity_diff_threshold;
@@ -734,7 +734,7 @@ extern "C" {
     {
         tMempool mempool;
         
-        tZeroCrossings          _zc;
+        tZeroCrossingCollector          _zc;
         float                   _period_info[2]; // i0 is period, i1 is periodicity
         unsigned int            _min_period;
         int                     _range;

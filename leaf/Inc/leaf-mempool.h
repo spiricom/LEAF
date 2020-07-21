@@ -54,6 +54,14 @@ extern "C" {
     
     //#define size_t unsigned long
     
+    typedef enum LEAFErrorType
+    {
+        LEAFMempoolOverrun = 0,
+        LEAFMempoolFragmentation,
+        LEAFInvalidFree,
+        LEAFErrorNil
+    } LEAFErrorType;
+    
     /*!
      * @defgroup tmempool tMempool
      * @ingroup mempool
@@ -145,8 +153,6 @@ extern "C" {
     size_t leaf_pool_get_used(void);
     
     char* leaf_pool_get_pool(void);
-    
-    void leaf_mempool_overrun(void);
     
 #ifdef __cplusplus
 }

@@ -94,7 +94,7 @@ void OopsAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
     
     for (int samp = 0; samp < buffer.getNumSamples(); ++samp)
     {
-        outPointerL[samp] = LEAFTest_tick( (inPointerL[samp] ));
+        outPointerL[samp] = LEAFTest_tick( (inPointerL[samp] + inPointerR[samp]) * 0.5f );
         outPointerR[samp] = outPointerL[samp];
     }
 }
