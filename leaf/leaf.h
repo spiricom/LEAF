@@ -152,7 +152,7 @@ extern "C" {
     /*!
      @param callback A pointer to the callback function.
      */
-    void LEAF_setErrorCallback(void (*callback)(LEAFErrorType))
+    void LEAF_setErrorCallback(void (*callback)(LEAFErrorType));
     
     /*! @} */
     
