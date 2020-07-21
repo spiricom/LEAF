@@ -228,15 +228,15 @@ extern "C" {
     {
         tMempool mempool;
         float buf[ENV_WINDOW_SIZE + INITVSTAKEN];
-        uint16_t x_phase;                    /* number of points since last output */
-        uint16_t x_period;                   /* requested period of output */
-        uint16_t x_realperiod;               /* period rounded up to vecsize multiple */
-        uint16_t x_npoints;                  /* analysis window size in samples */
+        int x_phase;                    /* number of points since last output */
+        int x_period;                   /* requested period of output */
+        int x_realperiod;               /* period rounded up to vecsize multiple */
+        int x_npoints;                  /* analysis window size in samples */
         float x_result;                 /* result to output */
         float x_sumbuf[MAXOVERLAP];     /* summing buffer */
         float x_f;
-        uint16_t windowSize, hopSize, blockSize;
-        uint16_t x_allocforvs;               /* extra buffer for DSP vector size */
+        int windowSize, hopSize, blockSize;
+        int x_allocforvs;               /* extra buffer for DSP vector size */
     } _tEnvPD;
     
     typedef _tEnvPD* tEnvPD;

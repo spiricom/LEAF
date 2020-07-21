@@ -288,7 +288,7 @@ void    tKarplusStrong_setStretch         (tKarplusStrong* const pl, float stret
         tBiQuad_setB0(&p->biquad[i], coefficient);
         tBiQuad_setB2(&p->biquad[i], 1.0f);
         
-        coefficient = -2.0f * temp * cos(TWO_PI * freq / leaf.sampleRate);
+        coefficient = -2.0f * temp * cosf(TWO_PI * freq / leaf.sampleRate);
         tBiQuad_setA1(&p->biquad[i], coefficient);
         tBiQuad_setB1(&p->biquad[i], coefficient);
         
