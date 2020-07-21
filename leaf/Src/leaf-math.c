@@ -389,6 +389,45 @@ float LEAF_tanh(float x)
         return x * ( 27.0f + x * x ) / ( 27.0f + 9.0f * x * x );
 }
 
+// Adapted from MusicDSP: http://www.musicdsp.org/showone.php?id=238
+float LEAF_tanhNoClip(float x)
+{
+        return x * ( 27.0f + x * x ) / ( 27.0f + 9.0f * x * x );
+}
+
+// https://math.stackexchange.com/questions/107292/rapid-approximation-of-tanhx
+float fast_tanh(float x){
+  float x2 = x * x;
+  float a = x * (135135.0f + x2 * (17325.0f + x2 * (378.0f + x2)));
+  float b = 135135.0f + x2 * (62370.0f + x2 * (3150.0f + x2 * 28.0f));
+  return a / b;
+}
+
+float fast_tanh2(float x)
+{
+    return x*(2027025.0f+270270.0f*x*x+6930.0f*x*x*x*x+36.0f*x*x*x*x*x*x)/(2027025.0f+945945.0f*x*x+51975.0f*x*x*x*x+630.0f*x*x*x*x*x*x+x*x*x*x*x*x*x*x);
+}
+
+float fast_tanh3(float x)
+{
+    float exp2x = fastexpf(2.0f*x);
+    return(exp2x - 1.0f) / (exp2x + 1.0f);
+}
+
+//from antto on KVR forum
+float   fast_tanh4 (float x)
+{
+    float xa = fabsf(x);
+    float x2 = xa * xa;
+    float x3 = xa * x2;
+    float x4 = x2 * x2;
+    float x7 = x3 * x4;
+    float res = (1.0f - 1.0f / (1.0f + xa + x2 + 0.58576695f * x3 + 0.55442112f * x4 + 0.057481508f * x7));
+    float   result = (x < 0) ? -res : res;
+
+    return (result);
+}
+
 
 void LEAF_generate_sine(float* buffer, int size)
 {

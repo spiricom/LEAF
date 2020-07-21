@@ -154,8 +154,13 @@ extern "C" {
     
     void LEAF_crossfade(float fade, float* volumes);
 
-
     float LEAF_tanh(float x);
+    float LEAF_tanhNoClip(float x);
+    float fast_tanh(float x);
+    float fast_tanh2(float x);
+    float fast_tanh3(float x);
+    float fast_tanh4(float x);
+    
     void LEAF_generate_sine(float* buffer, int size);
     void LEAF_generate_sawtooth(float* buffer, float basefreq, int size);
     void LEAF_generate_triangle(float* buffer, float basefreq, int size);
