@@ -59,7 +59,7 @@ LEAF objects assume that they will be "ticked" once per sample, and generally ta
 tCycle mySine;
 
 
-//also, create a memory pool array where you can store the data for the LEAF objects. It should be an array of chars. Note that you can also define multiple mempool objects in different memory locations in you want to, and initialize different LEAF objects in different places. However, LEAF needs at least one mempool, so the one you pass into the LEAF_init function is considered the default location for any LEAF-related memory, unless you specifically put something elsewhere by using an initToPool(), freeFromPool() function instead of init() or free(). 
+//also, create a memory pool array where you can store the data for the LEAF objects. It should be an array of chars. Note that you can also define multiple mempool objects in different memory locations in you want to, and initialize different LEAF objects in different places. However, LEAF needs at least one mempool, so the one you pass into the LEAF_init function is considered the default location for any LEAF-related memory, unless you specifically put something elsewhere by using an initToPool() function instead of init(). LEAF object store a pointer to which mempool they are in, so if you initToPool it will remember where you put it and the free() function will free it from the correct location.
 
 #define MEM_SIZE 500000
 char myMemory[MEM_SIZE];
