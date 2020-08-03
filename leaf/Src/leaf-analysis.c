@@ -1456,8 +1456,9 @@ int    tBACF_getCorrelation  (tBACF* const bacf, int pos)
             count += __builtin_popcount(*p1++ ^ *p2++);
 #elif _MSC_VER
             count += __popcnt(*p1++ ^ *p2++);
-#endif
+#else
             count += popcount(*p1++ ^ *p2++);
+#endif
         }
     }
     else
@@ -1468,11 +1469,12 @@ int    tBACF_getCorrelation  (tBACF* const bacf, int pos)
             unsigned int v = *p2++ >> shift;
             v |= *p2 << shift2;
 #ifdef __GNUC__
-            count += __builtin_popcount(*p1++ ^ *p2++);
+            count += __builtin_popcount(*p1++ ^ v++);
 #elif _MSC_VER
-            count += __popcnt(*p1++ ^ *p2++);
+            count += __popcnt(*p1++ ^ v++);
+#else
+            count += popcount(*p1++ ^ v++);
 #endif
-            count += popcount(*p1++ ^ *p2++);
         }
     }
     return count;
@@ -1906,6 +1908,13 @@ float   tPitchDetector_getPeriodicity  (tPitchDetector* const detector)
     _tPitchDetector* p = *detector;
     
     return p->_pd->_period_info[1];
+}
+
+float   tPitchDetector_harmonic (tPitchDetector* const detector, int harmonicIndex)
+{
+    _tPitchDetector* p = *detector;
+    
+    return tPeriodDetector_harmonic(&p->_pd, harmonicIndex);
 }
 
 float   tPitchDetector_predictFrequency (tPitchDetector* const detector, int init)

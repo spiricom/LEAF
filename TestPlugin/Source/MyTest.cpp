@@ -82,6 +82,7 @@ inline double getSawFall(double angle) {
     
 }
 
+float lastFreq;
 float   LEAFTest_tick            (float input)
 {
 //    tMBSaw_setFreq(&bsaw, x);
@@ -96,25 +97,25 @@ float   LEAFTest_tick            (float input)
 //    return tMBPulse_tick(&bpulse);
 
     
-    if (x > 0.5)
-    {
-        tPitchDetector_tick(&detector, input);
-        if (tPitchDetector_getPeriodicity(&detector) > 0.99 &&  (tZeroCrossing_tick(&zc, input) < 0.05))
-        {
-            float freq = tPitchDetector_getFrequency(&detector);
-            if (freq != 0.0f)
-                tMBTriangle_setFreq(&btri, freq);
-        }
+    float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
+    tPitchDetector_tick(&detector, input);
     
-    }
-    else
+    if (tPitchDetector_getPeriodicity(&detector) > 0.0)
     {
-        float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
-        if (tZeroCrossing_tick(&zc, input) < 0.05)
-            tMBTriangle_setFreq(&btri, freq);
+        float altFreq = tPitchDetector_getFrequency(&detector);
+        if (fabsf(lastFreq - freq) > fabsf(lastFreq - altFreq))
+            freq = altFreq;
+    }
+    
+    if (tZeroCrossing_tick(&zc, input) < 0.05 && freq > 0.0f)
+    {
+        tMBTriangle_setFreq(&btri, freq);
     }
 
     float g = tEnvelopeFollower_tick(&ef, input);
+    
+    lastFreq = freq;
+    
     return input + tMBTriangle_tick(&btri) * g * 10.0f;
 }
 
