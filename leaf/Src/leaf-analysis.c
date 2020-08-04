@@ -64,16 +64,16 @@ float   tEnvelopeFollower_tick(tEnvelopeFollower* const ef, float x)
     return e->y;
 }
 
-int     tEnvelopeFollower_decayCoeff(tEnvelopeFollower* const ef, float decayCoeff)
+void    tEnvelopeFollower_setDecayCoefficient(tEnvelopeFollower* const ef, float decayCoeff)
 {
     _tEnvelopeFollower* e = *ef;
-    return e->d_coeff = decayCoeff;
+    e->d_coeff = decayCoeff;
 }
 
-int     tEnvelopeFollower_attackThresh(tEnvelopeFollower* const ef, float attackThresh)
+void    tEnvelopeFollower_setAttackThreshold(tEnvelopeFollower* const ef, float attackThresh)
 {
     _tEnvelopeFollower* e = *ef;
-    return e->a_thresh = attackThresh;
+    e->a_thresh = attackThresh;
 }
 
 
@@ -82,15 +82,15 @@ int     tEnvelopeFollower_attackThresh(tEnvelopeFollower* const ef, float attack
 
 // zero crossing detector
 
-void    tZeroCrossing_init         (tZeroCrossing* const zc, int maxWindowSize)
+void    tZeroCrossingCounter_init         (tZeroCrossingCounter* const zc, int maxWindowSize)
 {
-    tZeroCrossing_initToPool   (zc, maxWindowSize, &leaf.mempool);
+    tZeroCrossingCounter_initToPool   (zc, maxWindowSize, &leaf.mempool);
 }
 
-void    tZeroCrossing_initToPool   (tZeroCrossing* const zc, int maxWindowSize, tMempool* const mp)
+void    tZeroCrossingCounter_initToPool   (tZeroCrossingCounter* const zc, int maxWindowSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tZeroCrossing* z = *zc = (_tZeroCrossing*) mpool_alloc(sizeof(_tZeroCrossing), m);
+    _tZeroCrossingCounter* z = *zc = (_tZeroCrossingCounter*) mpool_alloc(sizeof(_tZeroCrossing), m);
     z->mempool = m;
 
     z->count = 0;
@@ -103,9 +103,9 @@ void    tZeroCrossing_initToPool   (tZeroCrossing* const zc, int maxWindowSize, 
     z->countBuffer = (uint16_t*) mpool_calloc(sizeof(uint16_t) * maxWindowSize, m);
 }
 
-void    tZeroCrossing_free (tZeroCrossing* const zc)
+void    tZeroCrossingCounter_free (tZeroCrossingCounter* const zc)
 {
-    _tZeroCrossing* z = *zc;
+    _tZeroCrossingCounter* z = *zc;
     
     mpool_free((char*)z->inBuffer, z->mempool);
     mpool_free((char*)z->countBuffer, z->mempool);
@@ -113,9 +113,9 @@ void    tZeroCrossing_free (tZeroCrossing* const zc)
 }
 
 //returns proportion of zero crossings within window size (0.0 would be none in window, 1.0 would be all zero crossings)
-float   tZeroCrossing_tick         (tZeroCrossing* const zc, float input)
+float   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const zc, float input)
 {
-    _tZeroCrossing* z = *zc;
+    _tZeroCrossingCounter* z = *zc;
 
     z->inBuffer[z->position] = input;
     int futurePosition = ((z->position + 1) % z->currentWindowSize);
@@ -152,9 +152,9 @@ float   tZeroCrossing_tick         (tZeroCrossing* const zc, float input)
 }
 
 
-void    tZeroCrossing_setWindow        (tZeroCrossing* const zc, float windowSize)
+void    tZeroCrossingCounter_setWindowSize        (tZeroCrossingCounter* const zc, float windowSize)
 {
-    _tZeroCrossing* z = *zc;
+    _tZeroCrossingCounter* z = *zc;
     if (windowSize <= z->maxWindowSize)
         {
             z->currentWindowSize = windowSize;

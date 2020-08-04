@@ -96,7 +96,7 @@ extern "C" {
     void    tMempool_init           (tMempool* const pool, char* memory, size_t size);
     
     
-    //! Free a tMempool from the default LEAF mempool.
+    //! Free a tMempool from its mempool.
     /*!
      @param pool A pointer to the tMempool to be freed.
      */
@@ -115,7 +115,7 @@ extern "C" {
     
     //! Free a tMempool from a specified mempool.
     /*!
-     @param pool A pointer to the tMempool to be freed from the default LEAF mempool.
+     @param pool A pointer to the tMempool to be freed from its mempool.
      @param poolFrom A pointer to the tMempool from which a tMempool should be freed.
      */
     void    tMempool_freeFromPool   (tMempool* const pool, tMempool* const poolFrom);

@@ -48,7 +48,7 @@ extern "C" {
      @param mempool A pointer to the tMempool to which the tStack should be initialized.
      
      @fn void    tStack_free                 (tStack* const stack)
-     @brief Free a tStack from the default LEAF mempool.
+     @brief Free a tStack from its mempool.
      @param stack A pointer to the tStack to be freed.
      
      @fn void    tStack_setCapacity          (tStack* const stack, uint16_t cap)
@@ -149,7 +149,7 @@ extern "C" {
      @param pool A pointer to the tMempool to which the tPoly should be initialized.
      
      @fn void    tPoly_free                  (tPoly* const poly)
-     @brief Free a tPoly from the default LEAF mempool.
+     @brief Free a tPoly from its mempool.
      @param poly A pointer to the tPoly to be freed.
      
      @fn int     tPoly_noteOn                (tPoly* const poly, int note, uint8_t vel)
@@ -315,29 +315,29 @@ extern "C" {
      @{
      
      @fn void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices)
-     @brief Initialize a tPoly to the default LEAF mempool.
-     @param poly A pointer to the tPoly to be initialized.
-     @param maxNumVoices The maximum number of voices this tPoly can handle at once.
+     @brief Initialize a tSimplePoly to the default LEAF mempool.
+     @param poly A pointer to the tSimplePoly to be initialized.
+     @param maxNumVoices The maximum number of voices this tSimplePoly can handle at once.
      
      @fn void    tSimplePoly_initToPool            (tSimplePoly* const poly, int maxNumVoices, tMempool* const pool)
-     @brief Initialize a tPoly to a specified mempool.
-     @param poly A pointer to the tPoly to be initialized.
-     @param pool A pointer to the tMempool to which the tPoly should be initialized.
+     @brief Initialize a tSimplePoly to a specified mempool.
+     @param poly A pointer to the tSimplePoly to be initialized.
+     @param pool A pointer to the tMempool to which the tSimplePoly should be initialized.
      
      @fn void    tSimplePoly_free                  (tSimplePoly* const poly)
-     @brief Free a tPoly from the default LEAF mempool.
-     @param poly A pointer to the tPoly to be freed.
+     @brief Free a tSimplePoly from its mempool.
+     @param poly A pointer to the tSimplePoly to be freed.
      
      @fn int     tSimplePoly_noteOn                (tSimplePoly* const poly, int note, uint8_t vel)
      @brief Add a note with a given velocity to the poly handler.
-     @param poly A pointer to the relevant tPoly.
+     @param poly A pointer to the relevant tSimplePoly.
      @param note The MIDI note number to add.
      @param vel The MIDI velocity of the note to add.
      @return The voice that will play the note.
      
      @fn int     tSimplePoly_noteOff               (tSimplePoly* const poly, uint8_t note)
      @brief Remove a note from the poly handler.
-     @param poly A pointer to the relevant tPoly.
+     @param poly A pointer to the relevant tSimplePoly.
      @param note The MIDI note number to remove.
      @return The voice that was playing the removed note.
      
@@ -355,22 +355,22 @@ extern "C" {
      
      @fn void    tSimplePoly_setNumVoices          (tSimplePoly* const poly, uint8_t numVoices)
      @brief Set the number of voices available to play notes.
-     @param poly A pointer to the relevant tPoly.
-     @param numVoices The new number of available voices. Cannot be greater than the max number voices given in tPoly_init().
+     @param poly A pointer to the relevant tSimplePoly.
+     @param numVoices The new number of available voices. Cannot be greater than the max number voices given on initialization.
      
      @fn int     tSimplePoly_getNumVoices          (tSimplePoly* const poly)
      @brief Get the current number of voices available to play notes.
-     @param poly A pointer to the relevant tPoly.
+     @param poly A pointer to the relevant tSimplePoly.
      @return The current number of voices available to play notes.
      
      @fn int     tSimplePoly_getNumActiveVoices    (tSimplePoly* const poly)
      @brief Get the number of voices currently playing notes.
-     @param poly A pointer to the relevant tPoly.
+     @param poly A pointer to the relevant tSimplePoly.
      @return The number of voices currently playing notes.
      
      @fn int   tSimplePoly_getPitch              (tSimplePoly* const poly, uint8_t voice)
      @brief Get the current MIDI note number of a given voice.
-     @param poly A pointer to the relevant tPoly.
+     @param poly A pointer to the relevant tSimplePoly.
      @param voice The voice to get the MIDI note number of.
      @return The MIDI note number of the given voice.
      
@@ -379,13 +379,13 @@ extern "C" {
      
      @fn int     tSimplePoly_getVelocity           (tSimplePoly* const poly, uint8_t voice)
      @brief Get the current MIDI velocity of a given voice.
-     @param poly A pointer to the relevant tPoly.
+     @param poly A pointer to the relevant tSimplePoly.
      @param voice The voice to get the MIDI velocity of.
      @return The current MIDI velocity of the given voice.
      
      @fn int     tSimplePoly_isOn                  (tSimplePoly* const poly, uint8_t voice)
      @brief Get the current play state of a given voice.
-     @param poly A pointer to the relevant tPoly.
+     @param poly A pointer to the relevant tSimplePoly.
      @param voice The voice to get the state of.
      @return The current play state of the given voice.
      

@@ -37,7 +37,7 @@ extern "C" {
     /*!
      @defgroup tenvelope tEnvelope
      @ingroup envelopes
-     @brief Attack-decay envelope.
+     @brief Basic attack-decay envelope.
      @{
      
      @fn void    tEnvelope_init          (tEnvelope* const, float attack, float decay, int loop)

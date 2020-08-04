@@ -285,11 +285,11 @@ void tTalkbox_lpc(float *buf, float *car, double* dl, double* Rt, int32_t n, int
     {
         if(r[0] < min)
         {
-            for(i=0; i<n; i++)
-            {
+//            for(i=0; i<n; i++)
+//            {
                 buf[i] = 0.0f;
                 return;
-            }
+//            }
         }
 
         tTalkbox_lpcDurbin(r, o, k, G);  //calc reflection coeffs
@@ -612,11 +612,11 @@ void tTalkboxFloat_lpc(float *buf, float *car, float* dl, float* Rt, int32_t n, 
     {
         if(r[0] < min)
         {
-            for(i=0; i<n; i++)
-            {
+//            for(i=0; i<n; i++)
+//            {
                 buf[i] = 0.0f;
                 return;
-            }
+//            }
         }
 
         tTalkbox_lpcDurbin(r, o, k, G);  //calc reflection coeffs

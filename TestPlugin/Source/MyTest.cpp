@@ -37,7 +37,7 @@ tPitchDetector detector;
 
 tPeriodDetection pd;
 
-tZeroCrossing zc;
+tZeroCrossingCounter zc;
 tEnvelopeFollower ef;
 
 float gain;
@@ -69,7 +69,7 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     tPeriodDetection_init(&pd, bufIn, bufOut, 4096, 1024);
     
-    tZeroCrossing_init(&zc, 128);
+    tZeroCrossingCounter_init(&zc, 128);
     tEnvelopeFollower_init(&ef, 0.02f, 0.9999f);
 }
 
@@ -107,7 +107,7 @@ float   LEAFTest_tick            (float input)
             freq = altFreq;
     }
     
-    if (tZeroCrossing_tick(&zc, input) < 0.05 && freq > 0.0f)
+    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
     {
         tMBTriangle_setFreq(&btri, freq);
     }

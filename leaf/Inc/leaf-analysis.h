@@ -35,32 +35,40 @@ extern "C" {
     /*!
      @defgroup tenvelopefollower tEnvelopeFollower
      @ingroup analysis
-     @brief
+     @brief Detects and returns the basic envelope of incoming audio data.
      @{
      
-     @fn void    tEnvelopeFollower_init          (tEnvelopeFollower* const, float attackThreshold, float decayCoeff)
-     @brief
-     @param
+     @fn void    tEnvelopeFollower_init          (tEnvelopeFollower* const follower, float attackThreshold, float decayCoeff)
+     @brief Initialize a tEnvelopeFollower to the default LEAF mempool.
+     @param follower A pointer to the tEnvelopeFollower to be initialized.
+     @param attackThreshold Amplitude threshold for determining an envelope onset. 0.0 to 1.0
+     @param decayCoefficient Multiplier to determine the envelope rate of decay. 0.0 to 1.0, above 0.95 recommended.
      
-     @fn void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const, float attackThreshold, float decayCoeff, tMempool* const)
-     @brief
-     @param
+     @fn void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const follower, float attackThreshold, float decayCoeff, tMempool* const mempool)
+     @brief Initialize a tEnvelopeFollower to a specified mempool.
+     @param follower A pointer to the tEnvelopeFollower to be initialized.
+     @param attackThreshold Amplitude threshold for determining an envelope onset. 0.0 to 1.0
+     @param decayCoefficient Multiplier to determine the envelope rate of decay. 0.0 to 1.0, above 0.95 recommended.
+     @param mempool A pointer to the tMempool to which the tEnvelopeFollower should be initialized.
      
-     @fn void    tEnvelopeFollower_free          (tEnvelopeFollower* const)
-     @brief
-     @param
+     @fn void    tEnvelopeFollower_free          (tEnvelopeFollower* const follower)
+     @brief Free a tEnvelopeFollower from its mempool.
+     @param follower A pointer to the tEnvelopeFollower to be freed.
      
-     @fn float   tEnvelopeFollower_tick          (tEnvelopeFollower* const, float x)
-     @brief
-     @param
+     @fn float   tEnvelopeFollower_tick          (tEnvelopeFollower* const follower, float input)
+     @brief Tick the tEnvelopeFollower.
+     @param follower A pointer to the relevant tEnvelopeFollower.
+     @param input The input sample.
+     @return The envelope value.
      
-     @fn int     tEnvelopeFollower_decayCoeff    (tEnvelopeFollower* const, float decayCoeff)
-     @brief
-     @param
+     @fn void    tEnvelopeFollower_setDecayCoefficient    (tEnvelopeFollower* const follower, float decayCoeff)
+     @brief Set the envelope decay coefficient.
+     @param follower A pointer to the relevant tEnvelopeFollower.
+     @param decayCoefficient Multiplier to determine the envelope rate of decay. 0.0 to 1.0, above 0.95 recommended.
      
-     @fn int     tEnvelopeFollower_attackThresh  (tEnvelopeFollower* const, float attackThresh)
-     @brief
-     @param
+     @fn void    tEnvelopeFollower_setAttackThreshold  (tEnvelopeFollower* const follower, float attackThresh)
+     @brief Set the envelope attack  threshold.
+     @param follower A pointer to the relevant tEnvelopeFollower.
      ￼￼￼
      @} */
     
@@ -75,46 +83,50 @@ extern "C" {
     
     typedef _tEnvelopeFollower* tEnvelopeFollower;
     
-    void    tEnvelopeFollower_init          (tEnvelopeFollower* const, float attackThreshold, float decayCoeff);
-    void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const, float attackThreshold, float decayCoeff, tMempool* const);
-    void    tEnvelopeFollower_free          (tEnvelopeFollower* const);
+    void    tEnvelopeFollower_init          (tEnvelopeFollower* const follower, float attackThreshold, float decayCoefficient);
+    void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const follower, float attackThreshold, float decayCoefficient, tMempool* const mempool);
+    void    tEnvelopeFollower_free          (tEnvelopeFollower* const follower);
     
-    float   tEnvelopeFollower_tick          (tEnvelopeFollower* const, float x);
-    int     tEnvelopeFollower_decayCoeff    (tEnvelopeFollower* const, float decayCoeff);
-    int     tEnvelopeFollower_attackThresh  (tEnvelopeFollower* const, float attackThresh);
-    
-    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+    float   tEnvelopeFollower_tick          (tEnvelopeFollower* const follower, float sample);
+    void    tEnvelopeFollower_setDecayCoefficient    (tEnvelopeFollower* const follower, float decayCoefficient);
+    void    tEnvelopeFollower_setAttackThreshold  (tEnvelopeFollower* const follower, float attackThreshold);
     
     /*!
-     @defgroup tzerocrossing tZeroCrossing
+     @defgroup tzerocrossingcounter tZeroCrossingCounter
      @ingroup analysis
-     @brief
+     @brief Counts the amount of zero crossings within a window of the input audio data
      @{
      
-     @fn void    tZeroCrossing_init         (tZeroCrossing* const, int maxWindowSize)
-     @brief
-     @param
+     @fn void    tZeroCrossingCounter_init         (tZeroCrossingCounter* const counter, int maxWindowSize)
+     @brief Initialize a tZeroCrossingCounter to the default LEAF mempool.
+     @param counter A pointer to the tZeroCrossingCounter to be initialized.
+     @param maxWindowSize The max and initial size of the window.
      
-     @fn void    tZeroCrossing_initToPool   (tZeroCrossing* const, int maxWindowSize, tMempool* const)
-     @brief
-     @param
+     @fn void    tZeroCrossingCounter_initToPool   (tZeroCrossingCounter* const counter, int maxWindowSize, tMempool* const mempool)
+     @brief Initialize a tZeroCrossingCounter to a specified mempool.
+     @param counter A pointer to the tZeroCrossingCounter to be initialized.
+     @param maxWindowSize The max and initial size of the window.
+     @param mempool A pointer to the tMempool to which the tZeroCrossingCounter should be initialized.
      
-     @fn void    tZeroCrossing_free         (tZeroCrossing* const)
-     @brief
-     @param
+     @fn void    tZeroCrossingCounter_free         (tZeroCrossingCounter* const counter)
+     @brief Free a tZeroCrossingCounter from its mempool.
+     @param counter A pointer to the tZeroCrossingCounter to be freed.
      
-     @fn float   tZeroCrossing_tick         (tZeroCrossing* const, float input)
-     @brief
-     @param
+     @fn float   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const counter, float input)
+     @brief Tick the tZeroCrossingCounter.
+     @param counter A pointer to the relevant tZeroCrossingCounter.
+     @param input The input sample.
+     @return The amount of zero crossings as a proportion of the window.
      
-     @fn void    tZeroCrossing_setWindow        (tZeroCrossing* const, float windowSize)
-     @brief
-     @param
+     @fn void    tZeroCrossingCounter_setWindowSize (tZeroCrossingCounter* const counter, float windowSize)
+     @brief Set the size of the window. Cannot be greater than the max size given on initialization.
+     @param counter A pointer to the relevant tZeroCrossingCounter.
+     @param windowSize The new window size.
      ￼￼￼
      @} */
     
     /* Zero Crossing Detector */
-    typedef struct _tZeroCrossing {
+    typedef struct _tZeroCrossingCounter {
         tMempool mempool;
         int count;
         int maxWindowSize;
@@ -124,16 +136,16 @@ extern "C" {
         uint16_t* countBuffer;
         int prevPosition;
         int position;
-    } _tZeroCrossing;
+    } _tZeroCrossingCounter;
     
-    typedef _tZeroCrossing* tZeroCrossing;
+    typedef _tZeroCrossingCounter* tZeroCrossingCounter;
     
-    void    tZeroCrossing_init         (tZeroCrossing* const, int maxWindowSize);
-    void    tZeroCrossing_initToPool   (tZeroCrossing* const, int maxWindowSize, tMempool* const);
-    void    tZeroCrossing_free         (tZeroCrossing* const);
+    void    tZeroCrossingCounter_init         (tZeroCrossingCounter* const, int maxWindowSize);
+    void    tZeroCrossingCounter_initToPool   (tZeroCrossingCounter* const, int maxWindowSize, tMempool* const mempool);
+    void    tZeroCrossingCounter_free         (tZeroCrossingCounter* const);
     
-    float   tZeroCrossing_tick         (tZeroCrossing* const, float input);
-    void    tZeroCrossing_setWindow        (tZeroCrossing* const, float windowSize);
+    float   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const, float input);
+    void    tZeroCrossingCounter_setWindowSize    (tZeroCrossingCounter* const, float windowSize);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -144,11 +156,11 @@ extern "C" {
      @{
      
      @fn void    tPowerFollower_init         (tPowerFollower* const, float factor)
-     @brief
+     @brief Initialize a tPowerFollower to the default LEAF mempool.
      @param
      
      @fn void    tPowerFollower_initToPool   (tPowerFollower* const, float factor, tMempool* const)
-     @brief
+     @brief Initialize a tPowerFollower to a specified mempool.
      @param
      
      @fn void    tPowerFollower_free         (tPowerFollower* const)
@@ -193,15 +205,15 @@ extern "C" {
     /*!
      @defgroup tenvpd tEnvPD
      @ingroup analysis
-     @brief
+     @brief ENV~ from PD, modified for LEAF
      @{
      
      @fn void    tEnvPD_init             (tEnvPD* const, int windowSize, int hopSize, int blockSize)
-     @brief
+     @brief Initialize a tEnvPD to the default LEAF mempool.
      @param
      
      @fn void    tEnvPD_initToPool       (tEnvPD* const, int windowSize, int hopSize, int blockSize, tMempool* const)
-     @brief
+     @brief Initialize a tEnvPD to a specified mempool.
      @param
      
      @fn void    tEnvPD_free             (tEnvPD* const)
@@ -218,7 +230,6 @@ extern "C" {
      ￼￼￼
      @} */
     
-    // ENV~ from PD, modified for LEAF
 #define MAXOVERLAP 32
 #define INITVSTAKEN 64
 #define ENV_WINDOW_SIZE 1024
@@ -257,11 +268,11 @@ extern "C" {
      @{
      
      @fn void    tAttackDetection_init           (tAttackDetection* const, int blocksize, int atk, int rel)
-     @brief
+     @brief Initialize a tAttackDetection to the default LEAF mempool.
      @param
      
      @fn void    tAttackDetection_initToPool     (tAttackDetection* const, int blocksize, int atk, int rel, tMempool* const)
-     @brief
+     @brief Initialize a tAttackDetection to a specified mempool.
      @param
      
      @fn void    tAttackDetection_free           (tAttackDetection* const)
@@ -344,11 +355,11 @@ extern "C" {
      @{
      
      @fn void    tSNAC_init          (tSNAC* const, int overlaparg)
-     @brief
+     @brief Initialize a tSNAC to the default LEAF mempool.
      @param
      
      @fn void    tSNAC_initToPool    (tSNAC* const, int overlaparg, tMempool* const)
-     @brief
+     @brief Initialize a tSNAC to a specified mempool.
      @param
      
      @fn void    tSNAC_free          (tSNAC* const)
@@ -433,11 +444,11 @@ extern "C" {
     
     /*!
      @fn void    tPeriodDetection_init               (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize)
-     @brief
+     @brief Initialize a tPeriodDetection to the default LEAF mempool.
      @param
      
-     @fn void    tPeriodDetection_initToPool         (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, tMempool* const)
-     @brief
+     @fn void    tPeriodDetection_initToPool  (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, tMempool* const)
+     @brief Initialize a tPeriodDetection to a specified mempool.
      @param
      
      @fn void    tPeriodDetection_free               (tPeriodDetection* const)
@@ -664,11 +675,11 @@ extern "C" {
      @{
      
      @fn void    tPeriodDetector_init    (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis)
-     @brief
+     @brief Initialize a tPeriodDetector to the default LEAF mempool.
      @param
      
      @fn void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool)
-     @brief
+     @brief Initialize a tPeriodDetector to a specified mempool.
      @param
      
      @fn void    tPeriodDetector_free    (tPeriodDetector* const detector)
@@ -774,11 +785,11 @@ extern "C" {
      @{
      
      @fn void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis)
-     @brief
+     @brief Initialize a tPitchDetector to the default LEAF mempool.
      @param
      
      @fn void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool)
-     @brief
+     @brief Initialize a tPitchDetector to a specified mempool.
      @param
      
      @fn void    tPitchDetector_free (tPitchDetector* const detector)

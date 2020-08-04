@@ -34,17 +34,21 @@ extern "C" {
      @brief A general wavetable oscillator.
      @{
 
-     @fn void    tTable_init         (tTable* const osc, float* waveTable, int size)
+     @fn void    tTable_init         (tTable* const osc, float* table, int size)
      @brief Initialize a tTable to the default LEAF mempool.
      @param osc A pointer to the tTable to be initialized.
+     @param table A pointer to the wave table data.
+     @param size The number of samples in the wave table.
 
-     @fn void    tTable_initToPool   (tTable* const osc, float* waveTable, int size, tMempool* const mempool)
+     @fn void    tTable_initToPool   (tTable* const osc, float* table, int size, tMempool* const mempool)
      @brief Initialize a tTable to a specified mempool.
      @param osc A pointer to the tTable to be initialized.
-     @param pool A pointer to the tMempool to which the tTable should be initialized.
+     @param table A pointer to the wave table data.
+     @param size The number of samples in the wave table.
+     @param mempool A pointer to the tMempool to which the tTable should be initialized.
 
      @fn void    tTable_free         (tTable* const osc)
-     @brief Free a tTable from the default LEAF mempool.
+     @brief Free a tTable from its mempool.
      @param osc A pointer to the tTable to be freed.
  
      @fn float   tTable_tick         (tTable* const osc)
@@ -71,8 +75,8 @@ extern "C" {
     
     typedef _tTable* tTable;
 
-     void    tTable_init(tTable* const osc, float* waveTable, int size);
-     void    tTable_initToPool(tTable* const osc, float* waveTable, int size, tMempool* const mempool);
+     void    tTable_init(tTable* const osc, float* table, int size);
+     void    tTable_initToPool(tTable* const osc, float* table, int size, tMempool* const mempool);
      void    tTable_free(tTable* const osc);
     
      float   tTable_tick(tTable* const osc);
@@ -90,13 +94,13 @@ extern "C" {
      @brief Initialize a tCycle to the default LEAF mempool.
      @param osc A pointer to the tCycle to be initialized.
      
-     @fn void    tCycle_initToPool   (tCycle* const osc, tMempool* const pool)
+     @fn void    tCycle_initToPool   (tCycle* const osc, tMempool* const mempool)
      @brief Initialize a tCycle to a specified mempool.
      @param osc A pointer to the tCycle to be initialized.
-     @param pool A pointer to the tMempool to which the tCycle should be initialized.
+     @param mempool A pointer to the tMempool to which the tCycle should be initialized.
 
      @fn void    tCycle_free         (tCycle* const osc)
-     @brief Free a tCycle from the default LEAF mempool.
+     @brief Free a tCycle from its mempool.
      @param osc A pointer to the tCycle to be freed.
      
      @fn float   tCycle_tick         (tCycle* const osc)
@@ -123,7 +127,7 @@ extern "C" {
     typedef _tCycle* tCycle;
     
     void    tCycle_init         (tCycle* const osc);
-    void    tCycle_initToPool   (tCycle* const osc, tMempool* const pool);
+    void    tCycle_initToPool   (tCycle* const osc, tMempool* const mempool);
     void    tCycle_free         (tCycle* const osc);
     
     float   tCycle_tick         (tCycle* const osc);
@@ -141,13 +145,13 @@ extern "C" {
      @brief Initialize a tTriangle to the default LEAF mempool.
      @param osc A pointer to the tTriangle to be initialized.
      
-     @fn void    tTriangle_initToPool   (tTriangle* const osc, tMempool* const pool)
+     @fn void    tTriangle_initToPool   (tTriangle* const osc, tMempool* const mempool)
      @brief Initialize a tTriangle to a specified mempool.
      @param osc A pointer to the tTriangle to be initialized.
-     @param pool A pointer to the tMempool to which the tTriangle should be initialized.
+     @param mempool A pointer to the tMempool to which the tTriangle should be initialized.
      
      @fn void    tTriangle_free         (tTriangle* const osc)
-     @brief Free a tTriangle from the default LEAF mempool.
+     @brief Free a tTriangle from its mempool.
      @param osc A pointer to the tTriangle to be freed.
      
      @fn float   tTriangle_tick         (tTriangle* const osc)
@@ -175,7 +179,7 @@ extern "C" {
     typedef _tTriangle* tTriangle;
 
     void    tTriangle_init          (tTriangle* const osc);
-    void    tTriangle_initToPool    (tTriangle* const osc, tMempool* const pool);
+    void    tTriangle_initToPool    (tTriangle* const osc, tMempool* const mempool);
     void    tTriangle_free          (tTriangle* const osc);
     
     float   tTriangle_tick          (tTriangle* const osc);
@@ -194,13 +198,13 @@ extern "C" {
      @brief Initialize a tSquare to the default LEAF mempool.
      @param osc A pointer to the tSquare to be initialized.
      
-     @fn void    tSquare_initToPool   (tSquare* const osc, tMempool* const pool)
+     @fn void    tSquare_initToPool   (tSquare* const osc, tMempool* const mempool)
      @brief Initialize a tSquare to a specified mempool.
      @param osc A pointer to the tSquare to be initialized.
-     @param pool A pointer to the tMempool to which the tSquare should be initialized.
+     @param mempool A pointer to the tMempool to which the tSquare should be initialized.
      
      @fn void    tSquare_free         (tSquare* const osc)
-     @brief Free a tSquare from the default LEAF mempool.
+     @brief Free a tSquare from its mempool.
      @param osc A pointer to the tSquare to be freed.
      
      @fn float   tSquare_tick         (tSquare* const osc)
@@ -249,13 +253,13 @@ extern "C" {
      @brief Initialize a tSawtooth to the default LEAF mempool.
      @param osc A pointer to the tSawtooth to be initialized.
      
-     @fn void    tSawtooth_initToPool   (tSawtooth* const osc, tMempool* const pool)
+     @fn void    tSawtooth_initToPool   (tSawtooth* const osc, tMempool* const mempool)
      @brief Initialize a tSawtooth to a specified mempool.
      @param osc A pointer to the tSawtooth to be initialized.
-     @param pool A pointer to the tMempool to which the tSawtooth should be initialized.
+     @param mempool A pointer to the tMempool to which the tSawtooth should be initialized.
      
      @fn void    tSawtooth_free         (tSawtooth* const osc)
-     @brief Free a tSawtooth from the default LEAF mempool.
+     @brief Free a tSawtooth from its mempool.
      @param osc A pointer to the tSawtooth to be freed.
      
      @fn float   tSawtooth_tick         (tSawtooth* const osc)
@@ -283,7 +287,7 @@ extern "C" {
     typedef _tSawtooth* tSawtooth;
 
     void    tSawtooth_init          (tSawtooth* const osc);
-    void    tSawtooth_initToPool    (tSawtooth* const osc, tMempool* const pool);
+    void    tSawtooth_initToPool    (tSawtooth* const osc, tMempool* const mempool);
     void    tSawtooth_free          (tSawtooth* const osc);
 
     float   tSawtooth_tick          (tSawtooth* const osc);
@@ -301,7 +305,7 @@ extern "C" {
      @brief
      @param
      
-     @fn void    tTri_initToPool    (tTri* const osc, tMempool* const pool)
+     @fn void    tTri_initToPool    (tTri* const osc, tMempool* const mempool)
      @brief
      @param
      
@@ -335,7 +339,7 @@ extern "C" {
     typedef _tTri* tTri;
     
     void    tTri_init          (tTri* const osc);
-    void    tTri_initToPool    (tTri* const osc, tMempool* const pool);
+    void    tTri_initToPool    (tTri* const osc, tMempool* const mempool);
     void    tTri_free          (tTri* const osc);
     
     float   tTri_tick          (tTri* const osc);
@@ -406,7 +410,7 @@ extern "C" {
      @brief
      @param
      
-     @fn void    tSaw_initToPool    (tSaw* const osc, tMempool* const pool)
+     @fn void    tSaw_initToPool    (tSaw* const osc, tMempool* const mempool)
      @brief
      @param
      
@@ -434,7 +438,7 @@ extern "C" {
     typedef _tSaw* tSaw;
     
     void    tSaw_init          (tSaw* const osc);
-    void    tSaw_initToPool    (tSaw* const osc, tMempool* const pool);
+    void    tSaw_initToPool    (tSaw* const osc, tMempool* const mempool);
     void    tSaw_free          (tSaw* const osc);
     
     float   tSaw_tick          (tSaw* const osc);
@@ -555,13 +559,13 @@ extern "C" {
      @brief Initialize a tNeuron to the default LEAF mempool.
      @param neuron A pointer to the tNeuron to be initialized.
      
-     @fn void    tNeuron_initToPool  (tNeuron* const neuron, tMempool* const pool)
+     @fn void    tNeuron_initToPool  (tNeuron* const neuron, tMempool* const mempool)
      @brief Initialize a tNeuron to a specified mempool.
      @param neuron A pointer to the tNeuron to be initialized.
-     @param pool A pointer to the tMempool to which the tNeuron should be initialized.
+     @param mempool A pointer to the tMempool to which the tNeuron should be initialized.
      
      @fn void    tNeuron_free        (tNeuron* const neuron)
-     @brief Free a tNeuron from the default LEAF mempool.
+     @brief Free a tNeuron from its mempool.
      @param neuron A pointer to the tNeuron to be freed.
      
      @fn void    tNeuron_reset       (tNeuron* const neuron)
@@ -659,7 +663,7 @@ extern "C" {
     typedef _tNeuron* tNeuron;
     
     void    tNeuron_init        (tNeuron* const neuron);
-    void    tNeuron_initToPool  (tNeuron* const neuron, tMempool* const pool);
+    void    tNeuron_initToPool  (tNeuron* const neuron, tMempool* const mempool);
     void    tNeuron_free        (tNeuron* const neuron);
     
     void    tNeuron_reset       (tNeuron* const neuron);
@@ -692,7 +696,7 @@ extern "C" {
      @brief
      @param
      
-     @fn void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const pool)
+     @fn void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const mempool)
      @brief
      @param
      
@@ -741,7 +745,7 @@ extern "C" {
     typedef _tMBPulse* tMBPulse;
     
     void tMBPulse_init(tMBPulse* const osc);
-    void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const pool);
+    void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const mempool);
     void tMBPulse_free(tMBPulse* const osc);
     
     float tMBPulse_tick(tMBPulse* const osc);
@@ -760,7 +764,7 @@ extern "C" {
      @brief
      @param
      
-     @fn void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const pool)
+     @fn void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const mempool)
      @brief
      @param
      
@@ -809,7 +813,7 @@ extern "C" {
     typedef _tMBTriangle* tMBTriangle;
     
     void tMBTriangle_init(tMBTriangle* const osc);
-    void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const pool);
+    void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const mempool);
     void tMBTriangle_free(tMBTriangle* const osc);
     
     float tMBTriangle_tick(tMBTriangle* const osc);
@@ -829,7 +833,7 @@ extern "C" {
      @brief
      @param
      
-     @fn void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const pool)
+     @fn void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const mempool)
      @brief
      @param
      
@@ -873,7 +877,7 @@ extern "C" {
     typedef _tMBSaw* tMBSaw;
     
     void tMBSaw_init(tMBSaw* const osc);
-    void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const pool);
+    void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const mempool);
     void tMBSaw_free(tMBSaw* const osc);
     
     float tMBSaw_tick(tMBSaw* const osc);
