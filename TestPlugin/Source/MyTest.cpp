@@ -40,6 +40,8 @@ tPeriodDetection pd;
 tZeroCrossingCounter zc;
 tEnvelopeFollower ef;
 
+tCycle sine;
+
 float gain;
 float dtime;
 bool buttonState;
@@ -71,6 +73,9 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     tZeroCrossingCounter_init(&zc, 128);
     tEnvelopeFollower_init(&ef, 0.02f, 0.9999f);
+    
+    tCycle_init(&sine);
+    tCycle_setFreq(&sine, 100);
 }
 
 inline double getSawFall(double angle) {
@@ -99,32 +104,31 @@ float   LEAFTest_tick            (float input)
     
     float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
     tPitchDetector_tick(&detector, input);
+    float altFreq = tPitchDetector_getFrequency(&detector);
     
-    if (tPitchDetector_getPeriodicity(&detector) > 0.0)
-    {
-        float altFreq = tPitchDetector_getFrequency(&detector);
-//        if (fabsf(lastFreq - freq) > fabsf(lastFreq - altFreq))
-            freq = altFreq;
-    }
-    
+    if (fabsf(1.0f - (freq / altFreq)) < 0.05f)
 //    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
     {
-        tMBTriangle_setFreq(&btri, freq);
+        tCycle_setFreq(&sine, altFreq);
     }
 
     float g = tEnvelopeFollower_tick(&ef, input);
     
     lastFreq = freq;
     
-    return input + tMBTriangle_tick(&btri) * g * 10.0f;
+    return tCycle_tick(&sine) * g * 2.0f + input;
 }
 
 int firstFrame = 1;
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-    DBG(tPitchDetector_getFrequency(&detector));
-    DBG(tPitchDetector_getPeriodicity(&detector));
+    float periodicity = tPitchDetector_getPeriodicity(&detector);
+    if (periodicity > 0.99f)
+    {
+        DBG(tPitchDetector_getFrequency(&detector));
+        DBG(tPitchDetector_getPeriodicity(&detector));
+    }
     //    if (firstFrame == 1)
     //    {
     //        tBuffer_record(&buff); // starts recording

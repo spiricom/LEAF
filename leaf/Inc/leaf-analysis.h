@@ -713,8 +713,8 @@ extern "C" {
      @} */
     
 #define PULSE_THRESHOLD 0.6f
-#define HARMONIC_PERIODICITY_FACTOR 16
-#define PERIODICITY_DIFF_FACTOR 0.008f
+#define HARMONIC_PERIODICITY_FACTOR 16 //16
+#define PERIODICITY_DIFF_FACTOR 0.008f //0.008f
     
     typedef struct _auto_correlation_info
     {

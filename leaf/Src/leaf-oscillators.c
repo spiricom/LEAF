@@ -45,6 +45,8 @@ void     tTable_setFreq(tTable* const cy, float freq)
 {
     _tTable* c = *cy;
     
+    if (!isfinite(freq)) return;
+    
     c->freq = freq;
     c->inc = freq * leaf.invSampleRate;
 }
@@ -109,6 +111,8 @@ void    tCycle_free (tCycle* const cy)
 void     tCycle_setFreq(tCycle* const cy, float freq)
 {
     _tCycle* c = *cy;
+    
+    if (!isfinite(freq)) return;
     
     c->freq  = freq;
 
