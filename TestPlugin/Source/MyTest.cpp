@@ -103,11 +103,11 @@ float   LEAFTest_tick            (float input)
     if (tPitchDetector_getPeriodicity(&detector) > 0.0)
     {
         float altFreq = tPitchDetector_getFrequency(&detector);
-        if (fabsf(lastFreq - freq) > fabsf(lastFreq - altFreq))
+//        if (fabsf(lastFreq - freq) > fabsf(lastFreq - altFreq))
             freq = altFreq;
     }
     
-    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
+//    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
     {
         tMBTriangle_setFreq(&btri, freq);
     }

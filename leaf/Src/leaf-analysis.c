@@ -90,7 +90,7 @@ void    tZeroCrossingCounter_init         (tZeroCrossingCounter* const zc, int m
 void    tZeroCrossingCounter_initToPool   (tZeroCrossingCounter* const zc, int maxWindowSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tZeroCrossingCounter* z = *zc = (_tZeroCrossingCounter*) mpool_alloc(sizeof(_tZeroCrossing), m);
+    _tZeroCrossingCounter* z = *zc = (_tZeroCrossingCounter*) mpool_alloc(sizeof(_tZeroCrossingCounter), m);
     z->mempool = m;
 
     z->count = 0;
