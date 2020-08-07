@@ -225,6 +225,10 @@ extern "C" {
     
     float median3f(float a, float b, float c);
 
+    void place_step_dd(float *buffer, int index, float phase, float w, float scale);
+
+    void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta);
+
     /*! @} */
 
     //==============================================================================

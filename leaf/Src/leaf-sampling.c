@@ -875,3 +875,285 @@ void    tAutoSampler_setRate    (tAutoSampler* const as, float rate)
 {
     ;
 }
+
+
+
+void tMBSampler_init(tMBSampler* const sp, tBuffer* const b)
+{
+    tMBSampler_initToPool(sp, b, &leaf.mempool);
+}
+
+void tMBSampler_initToPool(tMBSampler* const sp, tBuffer* const b, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tMBSampler* c = *sp = (_tMBSampler*) mpool_alloc(sizeof(_tMBSampler), m);
+    c->mempool = m;
+    
+    c->samp = *b;
+    
+    c->mode = PlayLoop;
+    c->active = 0;
+        
+    tExpSmooth_initToPool(&c->gain, 0.0f, 0.01f, mp);
+    
+    c->amp = 1.0f;
+    c->_p = 0.0f;
+    c->_w = 1.0f;
+    c->syncin = 0.0f;
+    c->_z = 0.0f;
+    c->_j = 0;
+    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
+
+    c->start = 0;
+    tMBSampler_setEnd(sp, c->samp->bufferLength);
+}
+
+void tMBSampler_free (tMBSampler* const sp)
+{
+    _tMBSampler* p = *sp;
+    
+    tExpSmooth_free(&p->gain);
+    
+    mpool_free((char*)p, p->mempool);
+}
+
+void tMBSampler_setSample (tMBSampler* const sp, tBuffer* const b)
+{
+    _tMBSampler* p = *sp;
+    
+    p->samp = *b;;
+    
+    p->start = 0;
+    tMBSampler_setEnd(sp, p->samp->bufferLength);
+    
+    p->_p = 0.0f;
+}
+
+
+
+float tMBSampler_tick        (tMBSampler* const sp)
+{
+    _tMBSampler* c = *sp;
+    
+    if (c->gain->curr == 0.0f && !c->active) return 0.0f;
+    if (c->_w == 0.0f) return c->out;
+    
+    int start, end, length;
+    float* buff;
+    int    j;
+    float  syncin;
+    float  a, p, w, z;
+    syncin  = c->syncin;
+        
+    start = c->start;
+    end = c->end;
+
+    buff = c->samp->buff;
+    
+    p = c->_p;  /* position */
+    w = c->_w;  /* rate */
+    z = c->_z;  /* low pass filter state */
+    j = c->_j;  /* index into buffer _f */
+    
+    length = end - start;
+
+    //a = 0.2 + 0.8 * vco->_port [FILT];
+    a = 0.5f; // when a = 1, LPfilter is disabled
+    
+    p += w;
+    
+    float next;
+    
+//    if (syncin >= 1e-20f) {  /* sync to master */
+//
+//        float eof_offset = (syncin - 1e-20f) * w;
+//        float p_at_reset = p - eof_offset;
+//        p = eof_offset;
+//
+//        /* place any DD that may have occurred in subsample before reset */
+//        if (p_at_reset >= end) {
+//            while (p_at_reset >= (float) end) p_at_reset -= (float) length;
+//
+//            float f = p_at_reset + eof_offset;
+//            int i = (int) f;
+//            f -= i;
+//            float n = buff[i] * (1.0f - f) + buff[i+1] * f;
+//
+//            place_step_dd(c->_f, j, p_at_reset + eof_offset, w,
+//                          n - c->out);
+//            place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, (n - c->out) - c->last_delta);
+//        }
+//
+//        float f = p_at_reset;
+//        int i = (int) f;
+//        f -= i;
+//        next = buff[i] * (1.0f - f) + buff[i+1] * f;
+//
+//        /* now place reset DD */
+//        place_step_dd(c->_f, j, p, w, next - c->out);
+//        place_slope_dd(c->_f, j, p, w, (next - c->out) - c->last_delta);
+//
+//    } else
+    if (w > 0.0f) {
+    
+        if (p >= (float) end) {  /* normal phase reset */
+        
+            // start and end are never negative and end must also be greater than start
+            // so this loop is fine
+            while (p >= (float) end) p -= (float) length;
+            
+            float f = p;
+            int i = (int) f;
+            f -= i;
+            next = buff[i] * (1.0f - f) + buff[i+1] * f;
+            
+            place_step_dd(c->_f, j, p - start, w, next - c->out);
+            place_slope_dd(c->_f, j, p - start, w, (next - c->out) - c->last_delta);
+            
+            if (c->mode == PlayNormal) c->active = 0;
+            else if (c->mode == PlayBackAndForth) w = -w;
+        }
+//        else if (p < (float) start) { /* start has been set ahead of the current phase */
+//
+//            p = (float) start;
+//            next = buff[start];
+//
+//            place_step_dd(c->_f, j, p, w, next - c->last);
+//            place_slope_dd(c->_f, j, p, w, (next - c->last) - c->last_delta);
+//        }
+        else {
+            
+            float f = p;
+            int i = (int) f;
+            f -= i;
+            next = buff[i] * (1.0f - f) + buff[i+1] * f;
+        }
+
+        if (c->_last_w < 0.0f)
+        {
+            place_slope_dd(c->_f, j, p - start, w, (next - c->out) - c->last_delta);
+        }
+        
+    } else { // if (w < 0.0f) {
+        
+        if (p < (float) start) {
+        
+            while (p < (float) start) p += (float) length;
+            
+            float f = p;
+            int i = (int) f;
+            f -= i;
+            next = buff[i] * (1.0f - f) + buff[i+1] * f;
+            
+            place_step_dd(c->_f, j, end - p, w, next - c->out);
+            place_slope_dd(c->_f, j, end - p, w, (next - c->out) - c->last_delta);
+            
+            if (c->mode == PlayNormal) c->active = 0;
+            else if (c->mode == PlayBackAndForth) w = -w;
+        }
+//        else if (p >= (float) end) {
+//
+//            p = (float) end - 1;
+//            next = buff[end - 1];
+//            place_step_dd(c->_f, j, p, w, next - c->last);
+//            place_slope_dd(c->_f, j, p, w, (next - c->last) - c->last_delta);
+//        }
+        else {
+            
+            float f = p;
+            int i = (int) f;
+            f -= i;
+            next = buff[i] * (1.0f - f) + buff[i+1] * f;
+        }
+        
+        if (c->_last_w > 0.0f)
+        {
+            place_slope_dd(c->_f, j, end - p, w, (next - c->out) - c->last_delta);
+        }
+    }
+    
+    c->_f[j + DD_SAMPLE_DELAY] += next;
+    
+    z += a * (c->_f[j] - z); // LP filtering
+    next = c->amp * z;
+    
+    c->last_delta = next - c->out;
+    
+    c->out = next;
+    
+    if (++j == FILLEN)
+    {
+        j = 0;
+        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (float));
+        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (float));
+    }
+    
+    c->_p = p;
+    c->_w = c->_last_w = w;
+    c->_z = z;
+    c->_j = j;
+    
+    return c->out * tExpSmooth_tick(&c->gain);
+}
+
+void tMBSampler_setMode      (tMBSampler* const sp, PlayMode mode)
+{
+    _tMBSampler* p = *sp;
+    p->mode = mode;
+}
+
+void tMBSampler_play         (tMBSampler* const sp)
+{
+    _tMBSampler* p = *sp;
+    
+    if (p->active > 0)
+    {
+        p->syncin = 1e-20f;
+    }
+    tExpSmooth_setDest(&p->gain, 1.0f);
+    p->active = 1;
+    p->_p = p->start;
+    p->_z = 0.0f;
+    p->_j = 0;
+}
+
+void tMBSampler_stop         (tMBSampler* const sp)
+{
+    _tMBSampler* p = *sp;
+    
+    tExpSmooth_setDest(&p->gain, 0.0f);
+    p->active = 0;
+}
+
+void tMBSampler_setStart     (tMBSampler* const sp, int32_t start)
+{
+    _tMBSampler* p = *sp;
+    
+    if (start > p->end - 1) p->start = p->end - 1;
+    else if (start < 0) p->start = 0;
+    else p->start = start;
+}
+
+void tMBSampler_setEnd       (tMBSampler* const sp, int32_t end)
+{
+    _tMBSampler* p = *sp;
+    
+    if (end < p->start + 1) p->end = p->start + 1;
+    // always leave a trailing sample after the end
+    else if (end >= p->samp->bufferLength) p->end = p->samp->bufferLength - 1;
+    else p->end = end;
+}
+
+void    tMBSampler_setLength    (tMBSampler* const sp, int32_t length)
+{
+    _tMBSampler* p = *sp;
+    tMBSampler_setEnd(sp, p->start + length);
+}
+
+void tMBSampler_setRate      (tMBSampler* const sp, float rate)
+{
+    _tMBSampler* p = *sp;
+    
+    p->_w = rate;
+}
+

@@ -14,21 +14,6 @@ static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
 
-tNoise noise;
-tSVF bp1;
-tSVF bp2;
-tFormantShifter fs;
-
-tSampler samp;
-tBuffer buff;
-tEnvelope env;
-
-tAutotune at;
-
-tPhasor phasor;
-
-tHighpass hipass;
-
 tMBSaw bsaw;
 tMBTriangle btri;
 tMBPulse bpulse;
@@ -42,6 +27,9 @@ tEnvelopeFollower ef;
 
 tCycle sine;
 
+tBuffer samp;
+tMBSampler sampler;
+
 float gain;
 float dtime;
 bool buttonState;
@@ -53,7 +41,7 @@ float a, b, c, d;
 float* bufIn;
 float* bufOut;
 
-#define MSIZE 500000
+#define MSIZE 2048000
 char memory[MSIZE];
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
@@ -76,6 +64,12 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     tCycle_init(&sine);
     tCycle_setFreq(&sine, 100);
+    
+    tBuffer_init(&samp, 5.0f * leaf.sampleRate);
+    tMBSampler_init(&sampler, &samp);
+    
+    tMBSampler_setMode(&sampler, PlayLoop);
+    tMBSampler_setEnd(&sampler, samp->bufferLength);
 }
 
 inline double getSawFall(double angle) {
@@ -90,6 +84,11 @@ inline double getSawFall(double angle) {
 float lastFreq;
 float   LEAFTest_tick            (float input)
 {
+    tBuffer_tick(&samp, input);
+    
+    return tMBSampler_tick(&sampler);
+    
+    
 //    tMBSaw_setFreq(&bsaw, x);
 //    tMBTriangle_setFreq(&btri, x);
 //    tMBPulse_setFreq(&bpulse, x);
@@ -102,21 +101,21 @@ float   LEAFTest_tick            (float input)
 //    return tMBPulse_tick(&bpulse);
 
     
-    float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
-    tPitchDetector_tick(&detector, input);
-    float altFreq = tPitchDetector_getFrequency(&detector);
-    
-    if (fabsf(1.0f - (freq / altFreq)) < 0.05f)
-//    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
-    {
-        tCycle_setFreq(&sine, altFreq);
-    }
-
-    float g = tEnvelopeFollower_tick(&ef, input);
-    
-    lastFreq = freq;
-    
-    return tCycle_tick(&sine) * g * 2.0f + input;
+//    float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
+//    tPitchDetector_tick(&detector, input);
+//    float altFreq = tPitchDetector_getFrequency(&detector);
+//
+//    if (fabsf(1.0f - (freq / altFreq)) < 0.05f)
+////    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
+//    {
+//        tCycle_setFreq(&sine, altFreq);
+//    }
+//
+//    float g = tEnvelopeFollower_tick(&ef, input);
+//
+//    lastFreq = freq;
+//
+//    return tCycle_tick(&sine) * g * 2.0f + input;
 }
 
 int firstFrame = 1;
@@ -129,37 +128,27 @@ void    LEAFTest_block           (void)
         DBG(tPitchDetector_getFrequency(&detector));
         DBG(tPitchDetector_getPeriodicity(&detector));
     }
-    //    if (firstFrame == 1)
-    //    {
-    //        tBuffer_record(&buff); // starts recording
-    //        tSampler_play(&samp); // start spitting samples out
-    //        firstFrame = 0;
-    //    }
     
-    float val = getSliderValue("mod freq");
+    float val = getSliderValue("on/off");
     
-    x = val;
+    if (val > 0.5f && !sampler->active)
+    {
+        tBuffer_record(&samp);
+        tMBSampler_play(&sampler);
+    }
+    else if (val < 0.5f && sampler->active)
+    {
+        tMBSampler_stop(&sampler);
+    }
     
-        
+    val = getSliderValue("mod freq");
     
-    //    a = val * tBuffer_getBufferLength(&buff);
-    
-//    DBG("start: " + String(a));
+    tMBSampler_setStart(&sampler, val * 5.0f * leaf.sampleRate);
+
     
     val = getSliderValue("mod depth");
     
-    y = val * 2.0f - 1.0f;
-//    DBG(String(y));
-    //    b = val * tBuffer_getBufferLength(&buff);
-    
-//    DBG("rate: " + String(b));
-    //
-    //    tSampler_setStart(&samp, a);
-    //    tSampler_setEnd(&samp, b);
-    //    tSampler_setRate(&samp, b);
-    
-    //    tFormantShifter_setShiftFactor(&fs, x);
-    //    tFormantShifter_setIntensity(&fs, y);
+    tMBSampler_setRate(&sampler, val * 8.0f - 4.0f);
     
 }
 

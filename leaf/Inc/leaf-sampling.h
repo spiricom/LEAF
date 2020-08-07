@@ -352,6 +352,108 @@ extern "C" {
     void    tAutoSampler_setWindowSize      (tAutoSampler* const, uint32_t size);
     void    tAutoSampler_setCrossfadeLength (tAutoSampler* const, uint32_t length);
     void    tAutoSampler_setRate            (tAutoSampler* const, float rate);
+
+
+/*!
+     @defgroup tMBSampler tMBSampler
+     @ingroup sampling
+     @brief
+     @{
+     
+     @fn void    tMBSampler_init               (tMBSampler* const, tBuffer* const)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_initToPool         (tMBSampler* const, tBuffer* const, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_free               (tMBSampler* const)
+     @brief
+     @param
+     
+     @fn float   tMBSampler_tick               (tMBSampler* const)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_setSample          (tMBSampler* const, tBuffer* const)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_setMode            (tMBSampler* const, PlayMode mode)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_play               (tMBSampler* const)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_stop               (tMBSampler* const)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_setStart           (tMBSampler* const, int32_t start)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_setEnd             (tMBSampler* const, int32_t end)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_setLength             (tMBSampler* const, int32_t length)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_setCrossfadeLength (tMBSampler* const sp, uint32_t length)
+     @brief
+     @param
+     
+     @fn void    tMBSampler_setRate            (tMBSampler* const, float rate)
+     @brief
+     @param
+     
+     @} */
+    
+#define FILLEN 256
+
+    typedef struct _tMBSampler
+    {
+        tMempool mempool;
+        
+        tBuffer samp;
+        PlayMode mode;
+        int active;
+        
+        tExpSmooth gain;
+        
+        float    out;
+        float    last_delta;
+        float    amp;
+        float    last_amp;
+        float    syncin;
+        float   _p, _w, _z;
+        float   _last_w;
+        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
+        int     _j;
+        
+        int     start, end;
+    } _tMBSampler;
+    
+    typedef _tMBSampler* tMBSampler;
+    
+    void    tMBSampler_init               (tMBSampler* const, tBuffer* const);
+    void    tMBSampler_initToPool         (tMBSampler* const, tBuffer* const, tMempool* const);
+    void    tMBSampler_free               (tMBSampler* const);
+    
+    float   tMBSampler_tick               (tMBSampler* const);
+    void    tMBSampler_setSample          (tMBSampler* const, tBuffer* const);
+    void    tMBSampler_setMode            (tMBSampler* const, PlayMode mode);
+    void    tMBSampler_play               (tMBSampler* const);
+    void    tMBSampler_stop               (tMBSampler* const);
+    void    tMBSampler_setStart           (tMBSampler* const, int32_t start);
+    void    tMBSampler_setEnd             (tMBSampler* const, int32_t end);
+    void    tMBSampler_setLength          (tMBSampler* const, int32_t length);
+    void    tMBSampler_setRate            (tMBSampler* const, float rate);
     
 #ifdef __cplusplus
 }
