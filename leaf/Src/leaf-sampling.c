@@ -956,6 +956,7 @@ float tMBSampler_tick        (tMBSampler* const sp)
     j = c->_j;  /* index into buffer _f */
     
     length = end - start;
+    w = fminf((float)length * 0.5f, w);
 
     //a = 0.2 + 0.8 * vco->_port [FILT];
     a = 0.5f; // when a = 1, LPfilter is disabled
