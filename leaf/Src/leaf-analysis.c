@@ -1021,19 +1021,6 @@ int     tZeroCrossingInfo_getWidth(tZeroCrossingInfo* const zc)
     return z->_width;
 }
 
-int     tZeroCrossingInfo_isSimilar(tZeroCrossingInfo* const zc, tZeroCrossingInfo* const next)
-{
-    _tZeroCrossingInfo* z = *zc;
-    _tZeroCrossingInfo* n = *next;
-    
-    int similarPeak = fabs(z->_peak - n->_peak) <= ((1.0f - PULSE_HEIGHT_DIFF) * fmax(fabs(z->_peak), fabs(n->_peak)));
-    
-    int similarWidth = fabs(z->_width - n->_width) <= ((1.0f - PULSE_WIDTH_DIFF) * fmax(fabs(z->_width), fabs(n->_width)));
-    
-    return similarPeak && similarWidth;
-}
-
-
 static inline void update_state(tZeroCrossingCollector* const zc, float s);
 static inline void shift(tZeroCrossingCollector* const zc, int n);
 static inline void reset(tZeroCrossingCollector* const zc);
@@ -1049,7 +1036,7 @@ void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const zc, 
     _tZeroCrossingCollector* z = *zc = (_tZeroCrossingCollector*) mpool_alloc(sizeof(_tZeroCrossingCollector), m);
     z->mempool = m;
     
-    z->_hysteresis = -hysteresis;
+    z->_hysteresis = -dbtoa(hysteresis);
     int bits = CHAR_BIT * sizeof(unsigned int);
     z->_window_size = fmax(2, (windowSize + bits - 1) / bits) * bits;
     
@@ -1177,6 +1164,13 @@ int     tZeroCrossingCollector_isReset(tZeroCrossingCollector* const zc)
     return z->_frame == 0;
 }
 
+void    tZeroCrossingCollector_setHysteresis(tZeroCrossingCollector* const zc, float hysteresis)
+{
+    _tZeroCrossingCollector* z = *zc;
+    
+    z->_hysteresis = -dbtoa(hysteresis);
+}
+
 static inline void update_state(tZeroCrossingCollector* const zc, float s)
 {
     _tZeroCrossingCollector* z = *zc;
@@ -1224,6 +1218,9 @@ static inline void update_state(tZeroCrossingCollector* const zc, float s)
         if (z->_peak == 0.0f)
             z->_peak = z->_peak_update;
     }
+    
+    if (z->_frame > z->_window_size * 2)
+        reset(zc);
     
     z->_prev = s;
 }
@@ -1494,10 +1491,10 @@ static inline void autocorrelate(tPeriodDetector* const detector);
 static inline void sub_collector_init(_sub_collector* collector, tZeroCrossingCollector* const crossings, float pdt, int range);
 static inline float sub_collector_period_of(_sub_collector* collector, _auto_correlation_info info);
 static inline void sub_collector_save(_sub_collector* collector, _auto_correlation_info info);
-static inline int sub_collector_try_sub_harmonic(_sub_collector* collector, int harmonic, _auto_correlation_info info);
+static inline int sub_collector_try_sub_harmonic(_sub_collector* collector, int harmonic, _auto_correlation_info info, float incoming_period);
 static inline int sub_collector_process_harmonics(_sub_collector* collector, _auto_correlation_info info);
 static inline void sub_collector_process(_sub_collector* collector, _auto_correlation_info info);
-static inline void sub_collector_get(_sub_collector* collector, _auto_correlation_info info, float* result);
+static inline void sub_collector_get(_sub_collector* collector, _auto_correlation_info info, _period_info* result);
 
 void    tPeriodDetector_init    (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis)
 {
@@ -1523,6 +1520,8 @@ void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowe
     p->_predicted_period = -1.0f;
     p->_edge_mark = 0;
     p->_predict_edge = 0;
+    p->_num_pulses = 0;
+    p->_half_empty = 0;
     
     tBACF_initToPool(&p->_bacf, &p->_bits, mempool);
 }
@@ -1554,8 +1553,8 @@ int   tPeriodDetector_tick    (tPeriodDetector* const detector, float s)
     
     if (tZeroCrossingCollector_isReset(&p->_zc))
     {
-        p->_period_info[0] = -1.0f;
-        p->_period_info[1] = 0.0f;
+        p->_fundamental.period = -1.0f;
+        p->_fundamental.periodicity = 0.0f;
     }
     
     if (tZeroCrossingCollector_isReady(&p->_zc))
@@ -1571,14 +1570,14 @@ float   tPeriodDetector_getPeriod   (tPeriodDetector* const detector)
 {
     _tPeriodDetector* p = *detector;
     
-    return p->_period_info[0];
+    return p->_fundamental.period;
 }
 
 float   tPeriodDetector_getPeriodicity  (tPeriodDetector* const detector)
 {
     _tPeriodDetector* p = *detector;
     
-    return p->_period_info[1];
+    return p->_fundamental.periodicity;
 }
 
 float   tPeriodDetector_harmonic    (tPeriodDetector* const detector, int harmonicIndex)
@@ -1588,9 +1587,9 @@ float   tPeriodDetector_harmonic    (tPeriodDetector* const detector, int harmon
     if (harmonicIndex > 0)
     {
         if (harmonicIndex == 1)
-            return p->_period_info[1];
+            return p->_fundamental.periodicity;
         
-        float target_period = p->_period_info[0] / (float) harmonicIndex;
+        float target_period = p->_fundamental.period / (float) harmonicIndex;
         if (target_period >= p->_min_period && target_period < p->_mid_point)
         {
             int count = tBACF_getCorrelation(&p->_bacf, roundf(target_period));
@@ -1620,12 +1619,14 @@ float   tPeriodDetector_predictPeriod   (tPeriodDetector* const detector)
                     for (int j = i-1; j >= 0; --j)
                     {
                         tZeroCrossingInfo edge1 = tZeroCrossingCollector_getCrossing(&p->_zc, j);
-                        if (tZeroCrossingInfo_isSimilar(&edge1, &edge2))
+                        if (edge1->_peak >= threshold)
                         {
-                            p->_predicted_period = tZeroCrossingInfo_fractionalPeriod(&edge1, &edge2);
-                            return p->_predicted_period;
+                            float period = tZeroCrossingInfo_fractionalPeriod(&edge1, &edge2);
+                            if (period > p->_min_period)
+                                return (p->_predicted_period = period);
                         }
                     }
+                    return p->_predicted_period = -1.0f;
                 }
             }
         }
@@ -1640,24 +1641,47 @@ int     tPeriodDetector_isReady (tPeriodDetector* const detector)
     return tZeroCrossingCollector_isReady(&p->_zc);
 }
 
+int     tPeriodDetector_isReset (tPeriodDetector* const detector)
+{
+    _tPeriodDetector* p = *detector;
+    
+    return tZeroCrossingCollector_isReset(&p->_zc);
+}
+
+void    tPeriodDetector_setHysteresis   (tPeriodDetector* const detector, float hysteresis)
+{
+    _tPeriodDetector* p = *detector;
+    
+    return tZeroCrossingCollector_setHysteresis(&p->_zc, hysteresis);
+}
+
 static inline void set_bitstream(tPeriodDetector* const detector)
 {
     _tPeriodDetector* p = *detector;
     
     float threshold = tZeroCrossingCollector_getPeak(&p->_zc) * PULSE_THRESHOLD;
+    unsigned int leading_edge = tZeroCrossingCollector_getWindowSize(&p->_zc);
+    unsigned int trailing_edge = 0;
     
+    p->_num_pulses = 0;
     tBitset_clear(&p->_bits);
-
+    
     for (int i = 0; i != tZeroCrossingCollector_getNumEdges(&p->_zc); ++i)
     {
         tZeroCrossingInfo info = tZeroCrossingCollector_getCrossing(&p->_zc, i);
         if (info->_peak >= threshold)
         {
+            ++p->_num_pulses;
+            if (info->_leading_edge < leading_edge)
+                leading_edge = info->_leading_edge;
+            if (info->_trailing_edge > trailing_edge)
+                trailing_edge = info->_trailing_edge;
             int pos = fmax(info->_leading_edge, 0);
             int n = info->_trailing_edge - pos;
             tBitset_setMultiple(&p->_bits, pos, n, 1);
         }
     }
+    p->_half_empty = (leading_edge > p->_mid_point) || (trailing_edge < p->_mid_point);
 }
 
 static inline void autocorrelate(tPeriodDetector* const detector)
@@ -1669,69 +1693,87 @@ static inline void autocorrelate(tPeriodDetector* const detector)
     _sub_collector collect;
     sub_collector_init(&collect, &p->_zc, p->_periodicity_diff_threshold, p->_range);
     
-    int shouldBreak = 0;
-    int n = tZeroCrossingCollector_getNumEdges(&p->_zc);
-    for (int i = 0; i != n - 1; ++i)
+    if (p->_half_empty || p->_num_pulses < 2)
     {
-        tZeroCrossingInfo first = tZeroCrossingCollector_getCrossing(&p->_zc, i);
-        if (first->_peak >= threshold)
+        p->_fundamental.periodicity = -1.0f;
+        return;
+    }
+    else
+    {
+        int shouldBreak = 0;
+        int n = tZeroCrossingCollector_getNumEdges(&p->_zc);
+        for (int i = 0; i != n - 1; ++i)
         {
-            for (int j = i + 1; j != n; ++j)
+            tZeroCrossingInfo curr = tZeroCrossingCollector_getCrossing(&p->_zc, i);
+            if (curr->_peak >= threshold)
             {
-                tZeroCrossingInfo next = tZeroCrossingCollector_getCrossing(&p->_zc, j);
-                if (next->_peak >= threshold)
+                for (int j = i + 1; j != n; ++j)
                 {
-                    int period = tZeroCrossingInfo_period(&first, &next);
-                    if (period > p->_mid_point)
-                        break;
-                    if (period >= p->_min_period)
+                    tZeroCrossingInfo next = tZeroCrossingCollector_getCrossing(&p->_zc, j);
+                    if (next->_peak >= threshold)
                     {
-                        
-                        int count = tBACF_getCorrelation(&p->_bacf, period);
-                        
-                        int mid = p->_bacf->_mid_array * CHAR_BIT * sizeof(unsigned int);
-                        
-                        int start = period;
-                        
-                        if (period < 32) // Search minimum if the resolution is low
+                        int period = tZeroCrossingInfo_period(&curr, &next);
+                        if (period > p->_mid_point)
+                            break;
+                        if (period >= p->_min_period)
                         {
-                            // Search upwards for the minimum autocorrelation count
-                            for (int d = start + 1; d < mid; ++d)
+                            
+                            int count = tBACF_getCorrelation(&p->_bacf, period);
+                            
+                            int mid = p->_bacf->_mid_array * CHAR_BIT * sizeof(unsigned int);
+                            
+                            int start = period;
+                            
+                            if ((collect._fundamental._period == -1.0f) && count == 0)
                             {
-                                int c = tBACF_getCorrelation(&p->_bacf, d);
-                                if (c > count)
-                                    break;
-                                count = c;
-                                period = d;
+                                if (tBACF_getCorrelation(&p->_bacf, period / 2.0f) == 0)
+                                    count = -1;
                             }
-                            // Search downwards for the minimum autocorrelation count
-                            for (int d = start - 1; d > p->_min_period; --d)
+                            else if (period < 32) // Search minimum if the resolution is low
                             {
-                                int c = tBACF_getCorrelation(&p->_bacf, d);
-                                if (c > count)
-                                    break;
-                                count = c;
-                                period = d;
+                                // Search upwards for the minimum autocorrelation count
+                                for (int d = start + 1; d < mid; ++d)
+                                {
+                                    int c = tBACF_getCorrelation(&p->_bacf, d);
+                                    if (c > count)
+                                        break;
+                                    count = c;
+                                    period = d;
+                                }
+                                // Search downwards for the minimum autocorrelation count
+                                for (int d = start - 1; d > p->_min_period; --d)
+                                {
+                                    int c = tBACF_getCorrelation(&p->_bacf, d);
+                                    if (c > count)
+                                        break;
+                                    count = c;
+                                    period = d;
+                                }
                             }
-                        }
-                        
-                        float periodicity = 1.0f - (count * p->_weight);
-                        _auto_correlation_info info = { i, j, (int) period, periodicity };
-                        sub_collector_process(&collect, info);
-                        if (count == 0)
-                        {
-                            shouldBreak = 1;
-                            break; // Return early if we have perfect correlation
+                            
+                            if (count == -1)
+                            {
+                                shouldBreak = 1;
+                                break; // Return early if we have false correlation
+                            }
+                            float periodicity = 1.0f - (count * p->_weight);
+                            _auto_correlation_info info = { i, j, (int) period, periodicity };
+                            sub_collector_process(&collect, info);
+                            if (count == 0)
+                            {
+                                shouldBreak = 1;
+                                break; // Return early if we have perfect correlation
+                            }
                         }
                     }
                 }
             }
+            if (shouldBreak > 0) break;
         }
-        if (shouldBreak > 0) break;
     }
     
     // Get the final resuts
-    sub_collector_get(&collect, collect._fundamental, p->_period_info);
+    sub_collector_get(&collect, collect._fundamental, &p->_fundamental);
 }
 
 static inline void sub_collector_init(_sub_collector* collector, tZeroCrossingCollector* const crossings, float pdt, int range)
@@ -1761,11 +1803,9 @@ static inline void sub_collector_save(_sub_collector* collector, _auto_correlati
     collector->_first_period = sub_collector_period_of(collector, collector->_fundamental);
 }
 
-static inline int sub_collector_try_sub_harmonic(_sub_collector* collector, int harmonic, _auto_correlation_info info)
+static inline int sub_collector_try_sub_harmonic(_sub_collector* collector, int harmonic, _auto_correlation_info info, float incoming_period)
 {
-    int incoming_period = info._period / harmonic;
-    int current_period = collector->_fundamental._period;
-    if (abs(incoming_period - current_period) < collector->_periodicity_diff_threshold)
+    if (fabsf(incoming_period - collector->_first_period) < collector->_periodicity_diff_threshold)
     {
         // If incoming is a different harmonic and has better
         // periodicity ...
@@ -1792,18 +1832,19 @@ static inline int sub_collector_try_sub_harmonic(_sub_collector* collector, int 
                 sub_collector_save(collector, info);
             }
         }
-        return true;
+        return 1;
     }
-    return false;
+    return 0;
 }
 
 static inline int sub_collector_process_harmonics(_sub_collector* collector, _auto_correlation_info info)
 {
     if (info._period < collector->_first_period)
-        return false;
-    
-    int multiple = fmaxf(1.0f, roundf(sub_collector_period_of(collector, info) / collector->_first_period));
-    return sub_collector_try_sub_harmonic(collector, fmin(collector->_range, multiple), info);
+        return 0;
+     
+    float incoming_period = sub_collector_period_of(collector, info);
+    int multiple = fmaxf(1.0f, roundf( incoming_period / collector->_first_period));
+    return sub_collector_try_sub_harmonic(collector, fmin(collector->_range, multiple), info, incoming_period/multiple);
 }
 
 static inline void sub_collector_process(_sub_collector* collector, _auto_correlation_info info)
@@ -1818,36 +1859,37 @@ static inline void sub_collector_process(_sub_collector* collector, _auto_correl
         sub_collector_save(collector, info);
 }
 
-static inline void sub_collector_get(_sub_collector* collector, _auto_correlation_info info, float* result)
+static inline void sub_collector_get(_sub_collector* collector, _auto_correlation_info info, _period_info* result)
 {
     if (info._period != -1.0f)
     {
-        result[0] = sub_collector_period_of(collector, info) / info._harmonic;
-        result[1] = info._periodicity;
+        result->period = sub_collector_period_of(collector, info) / info._harmonic;
+        result->periodicity = info._periodicity;
     }
     else
     {
-        result[0] = -1.0f;
-        result[1] = 0.0f;
+        result->period = -1.0f;
+        result->period = 0.0f;
     }
 }
 
 static inline float calculate_frequency(tPitchDetector* const detector);
-static inline void bias(tPitchDetector* const detector, float incoming);
+static inline void bias(tPitchDetector* const detector, _pitch_info incoming);
 
-void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis)
+void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq)
 {
-    tPitchDetector_initToPool(detector, lowestFreq, highestFreq, hysteresis, &leaf.mempool);
+    tPitchDetector_initToPool(detector, lowestFreq, highestFreq, &leaf.mempool);
 }
 
-void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool)
+void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool)
 {
     _tMempool* m = *mempool;
     _tPitchDetector* p = *detector = (_tPitchDetector*) mpool_alloc(sizeof(_tPitchDetector), m);
     p->mempool = m;
     
-    tPeriodDetector_initToPool(&p->_pd, lowestFreq, highestFreq, hysteresis, mempool);
-    p->_frequency = 0.0f;
+    tPeriodDetector_initToPool(&p->_pd, lowestFreq, highestFreq, DEFAULT_HYSTERESIS, mempool);
+    p->_current.frequency = 0.0f;
+    p->_current.periodicity = 0.0f;
     p->_frames_after_shift = 0;
 }
 
@@ -1864,33 +1906,47 @@ int     tPitchDetector_tick    (tPitchDetector* const detector, float s)
     _tPitchDetector* p = *detector;
     tPeriodDetector_tick(&p->_pd, s);
     
-    int ready = tPeriodDetector_isReady(&p->_pd);
-    if (ready > 0)
+    if (tPeriodDetector_isReset(&p->_pd))
     {
-        if (p->_frequency == 0.0f)
+        p->_current.frequency = 0.0f;
+        p->_current.periodicity = 0.0f;
+    }
+    
+    int ready = tPeriodDetector_isReady(&p->_pd);
+    if (ready)
+    {
+        float periodicity = p->_pd->_fundamental.periodicity;
+        
+        if (periodicity == -1.0f)
         {
-            // Disregard if we are not periodic enough
-            if (p->_pd->_period_info[1] >= MAX_DEVIATION)
+            p->_current.frequency = 0.0f;
+            p->_current.periodicity = 0.0f;
+            return 0;
+        }
+        
+        if (p->_current.frequency == 0.0f)
+        {
+            if (periodicity >= ONSET_PERIODICITY)
             {
                 float f = calculate_frequency(detector);
                 if (f > 0.0f)
                 {
-                    // Apply the median for the future
-                    p->_median = median3f(f, p->_median_b, p->_median_c);
-                    p->_median_c = p->_median_b;
-                    p->_median_b = f;
-                    p->_frequency = f;   // But assign outright now
+                    p->_current.frequency = f;
+                    p->_current.periodicity = periodicity;
                     p->_frames_after_shift = 0;
                 }
             }
         }
         else
         {
-            if (p->_pd->_period_info[1] < MIN_PERIODICITY)
+            if (periodicity < MIN_PERIODICITY)
                 p->_frames_after_shift = 0;
             float f = calculate_frequency(detector);
             if (f > 0.0f)
-                bias(detector, f);
+            {
+                _pitch_info info = { f, periodicity };
+                bias(detector, info);
+            }
         }
     }
     return ready;
@@ -1900,14 +1956,14 @@ float   tPitchDetector_getFrequency    (tPitchDetector* const detector)
 {
     _tPitchDetector* p = *detector;
     
-    return p->_frequency;
+    return p->_current.frequency;
 }
 
 float   tPitchDetector_getPeriodicity  (tPitchDetector* const detector)
 {
     _tPitchDetector* p = *detector;
     
-    return p->_pd->_period_info[1];
+    return p->_current.periodicity;
 }
 
 float   tPitchDetector_harmonic (tPitchDetector* const detector, int harmonicIndex)
@@ -1917,95 +1973,89 @@ float   tPitchDetector_harmonic (tPitchDetector* const detector, int harmonicInd
     return tPeriodDetector_harmonic(&p->_pd, harmonicIndex);
 }
 
-float   tPitchDetector_predictFrequency (tPitchDetector* const detector, int init)
+float   tPitchDetector_predictFrequency (tPitchDetector* const detector)
 {
     _tPitchDetector* p = *detector;
     
     float period = tPeriodDetector_predictPeriod(&p->_pd);
-    if (period < p->_pd->_min_period)
-        return 0.0f;
-    float f = leaf.sampleRate / period;
-    if (p->_frequency != f)
-    {
-        p->_predict_median = median3f(f, p->_predict_median_b, p->_predict_median_c);
-        p->_predict_median_c = p->_predict_median_b;
-        p->_predict_median_b = f;
-        f = p->_predict_median;
-        if (init > 0)
-        {
-            p->_median = median3f(f, p->_median_b, p->_median_c);
-            p->_median_c = p->_median_b;
-            p->_median_b = f;
-            p->_frequency = p->_median;
-        }
-    }
-    return f;
+    if (period > 0.0f)
+       return leaf.sampleRate / period;
+   return 0.0f;
 }
 
-void    tPitchDetector_reset    (tPitchDetector* const detector)
+int     tPitchDetector_indeterminate    (tPitchDetector* const detector)
 {
     _tPitchDetector* p = *detector;
     
-    p->_frequency = 0.0f;
+    return p->_current.frequency == 0.0f;
+}
+
+void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, float hysteresis)
+{
+    _tPitchDetector* p = *detector;
+    
+    tPeriodDetector_setHysteresis(&p->_pd, hysteresis);
 }
 
 static inline float calculate_frequency(tPitchDetector* const detector)
 {
     _tPitchDetector* p = *detector;
     
-    if (p->_pd->_period_info[0] != -1)
-        return leaf.sampleRate / p->_pd->_period_info[0];
+    float period = p->_pd->_fundamental.period;
+    if (period > 0.0f)
+        return leaf.sampleRate / period;
     return 0.0f;
 }
 
-static inline void bias(tPitchDetector* const detector, float incoming)
+static inline void bias(tPitchDetector* const detector, _pitch_info incoming)
 {
     _tPitchDetector* p = *detector;
     
-    float current = p->_frequency;
     ++p->_frames_after_shift;
     int shifted = 0;
     
-    float f;
+    _pitch_info result;
     
     //=============================================================================
-    //float f = bias(current, incoming, shift);
+    //_pitch_info result = bias(current, incoming, shift);
     {
-        float error = current / 32.0f; // approx 1/2 semitone
-        float diff = fabsf(current - incoming);
+        float error = p->_current.frequency / 32.0f; // approx 1/2 semitone
+        float diff = fabsf(p->_current.frequency - incoming.frequency);
         int done = 0;
         
         // Try fundamental
         if (diff < error)
         {
-            f = incoming;
+            result = incoming;
             done = 1;
         }
         // Try harmonics and sub-harmonics
-        else if (p->_frames_after_shift > 2)
+        else if (p->_frames_after_shift > 1)
         {
-            if (current > incoming)
+            if (p->_current.frequency > incoming.frequency)
             {
-                float multiple = roundf(current / incoming);
-                if (multiple > 1.0f)
+                int multiple = roundf(p->_current.frequency / incoming.frequency);
+                if (multiple > 1)
                 {
-                    float h = incoming * multiple;
-                    if (fabsf(current - h) < error)
+                    float f = incoming.frequency * multiple;
+                    if (fabsf(p->_current.frequency - f) < error)
                     {
-                        f = h;
+                        result.frequency = f;
+                        result.periodicity = incoming.periodicity;
                         done = 1;
                     }
                 }
             }
             else
             {
-                float multiple = roundf(incoming / current);
-                if (multiple > 1.0f)
+                int multiple = roundf(incoming.frequency / p->_current.frequency);
+                if (multiple > 1)
                 {
-                    float h = incoming / multiple;
-                    if (fabsf(current - h) < error)
+                    float f = incoming.frequency / multiple;
+                    if (fabsf(p->_current.frequency - f) < error)
                     {
-                        f = h;
+                        result.frequency = f;
+                        result.periodicity = incoming.periodicity;
                         done = 1;
                     }
                 }
@@ -2018,13 +2068,13 @@ static inline void bias(tPitchDetector* const detector, float incoming)
         // harmonic matches).
         if (!done)
         {
-            if (p->_pd->_period_info[1] > MIN_PERIODICITY)
+            if (p->_pd->_fundamental.periodicity > MIN_PERIODICITY)
             {
                 // Now we have a frequency shift
                 shifted = 1;
-                f = incoming;
+                result = incoming;
             }
-            else f = current;
+            else result = p->_current;
         }
     }
     
@@ -2034,128 +2084,161 @@ static inline void bias(tPitchDetector* const detector, float incoming)
     // Note that we only do this check on frequency shifts
     if (shifted)
     {
-        if (p->_pd->_period_info[1] < MAX_DEVIATION)
+        float periodicity = p->_pd->_fundamental.periodicity;
+        if (periodicity >= ONSET_PERIODICITY)
         {
-            // If we don't have enough confidence in the autocorrelation
-            // result, we'll try the zero-crossing edges to extract the
-            // frequency and the one closest to the current frequency wins.
-            int shifted2 = 0;
-            float predicted = tPitchDetector_predictFrequency(detector, 0);
-            if (predicted > 0.0f)
-            {
-                float f2;
-                
-                //=============================================================================
-//              float f2 = bias(current, predicted, shifted2);
-                {
-                    float error = current / 32.0f; // approx 1/2 semitone
-                    float diff = fabsf(current - predicted);
-                    int done = 0;
-                    
-                    // Try fundamental
-                    if (diff < error)
-                    {
-                        f2 = predicted;
-                        done = 1;
-                    }
-                    // Try harmonics and sub-harmonics
-                    else if (p->_frames_after_shift > 2)
-                    {
-                        if (current > predicted)
-                        {
-                            float multiple = roundf(current / predicted);
-                            if (multiple > 1.0f)
-                            {
-                                float h = predicted * multiple;
-                                if (fabsf(current - h) < error)
-                                {
-                                    f2 = h;
-                                    done = 1;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            float multiple = roundf(predicted / current);
-                            if (multiple > 1.0f)
-                            {
-                                float h = predicted / multiple;
-                                if (fabsf(current - h) < error)
-                                {
-                                    f2 = h;
-                                    done = 1;
-                                }
-                            }
-                        }
-                    }
-                    // Don't do anything if the latest autocorrelation is not periodic
-                    // enough. Note that we only do this check on frequency shifts (i.e. at
-                    // this point, we are looking at a potential frequency shift, after
-                    // passing through the code above, checking for fundamental and
-                    // harmonic matches).
-                    if (!done)
-                    {
-                        if (p->_pd->_period_info[1] > MIN_PERIODICITY)
-                        {
-                            // Now we have a frequency shift
-                            shifted2 = 1;
-                            f2 = predicted;
-                        }
-                        else f2 = current;
-                    }
-                }
-                
-                //=============================================================================
-                
-                // If there's no shift, the edges wins
-                if (!shifted2)
-                {
-                    p->_median = median3f(f2, p->_median_b, p->_median_c);
-                    p->_median_c = p->_median_b;
-                    p->_median_b = f2;
-                    p->_frequency = p->_median;
-                }
-                else // else, whichever is closest to the current frequency wins.
-                {
-                    int predicted = fabsf(current - f) >= fabsf(current - f2);
-                    float pf = !predicted ? f : f2;
-                    p->_median = median3f(pf, p->_median_b, p->_median_c);
-                    p->_median_c = p->_median_b;
-                    p->_median_b = pf;
-                    p->_frequency = p->_median;
-                }
-            }
-            else
-            {
-                p->_median = median3f(f, p->_median_b, p->_median_c);
-                p->_median_c = p->_median_b;
-                p->_median_b = f;
-                p->_frequency = p->_median;
-            }
-            
+            p->_frames_after_shift = 0;
+            p->_current = result;
         }
-        else
+        else if (periodicity < MIN_PERIODICITY)
         {
-            // Now we have a frequency shift. Get the median of 3 (incoming
-            // frequency and last two frequency shifts) to eliminate abrupt
-            // changes. This will minimize potentially unwanted shifts.
-            // See https://en.wikipedia.org/wiki/Median_filter
-
-            p->_median = median3f(incoming, p->_median_b, p->_median_c);
-            p->_median_c = p->_median_b;
-            p->_median_b = incoming;
-            
-            if (p->_median == incoming)
-                p->_frames_after_shift = 0;
-            
-            p->_frequency = f;
+            p->_current.frequency = 0.0f;
+            p->_current.periodicity = 0.0f;
         }
     }
     else
     {
-        p->_median = median3f(f, p->_median_b, p->_median_c);
-        p->_median_c = p->_median_b;
-        p->_median_b = f;
-        p->_frequency = p->_median;
+        p->_current = result;
     }
+}
+
+static inline int within_octave(tDualPitchDetector* const detector, float f);
+static inline void compute_predicted_frequency(tDualPitchDetector* const detector);
+
+void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq)
+{
+    tDualPitchDetector_initToPool(detector, lowestFreq, highestFreq, &leaf.mempool);
+}
+
+void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool)
+{
+    _tMempool* m = *mempool;
+    _tDualPitchDetector* p = *detector = (_tDualPitchDetector*) mpool_alloc(sizeof(_tDualPitchDetector), m);
+    p->mempool = m;
+    
+    tPitchDetector_initToPool(&p->_pd1, lowestFreq, highestFreq, mempool);
+    tPitchDetector_initToPool(&p->_pd2, lowestFreq, highestFreq, mempool);
+    p->_current.frequency = 0.0f;
+    p->_current.periodicity = 0.0f;
+    p->_mean = lowestFreq + ((highestFreq - lowestFreq) / 2.0f);
+    p->_predicted_frequency = 0.0f;
+    p->_first = 1;
+}
+
+void    tDualPitchDetector_free (tDualPitchDetector* const detector)
+{
+    _tDualPitchDetector* p = *detector;
+    
+    tPitchDetector_free(&p->_pd1);
+    tPitchDetector_free(&p->_pd2);
+    
+    mpool_free((char*) p, p->mempool);
+}
+
+int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sample)
+{
+    _tDualPitchDetector* p = *detector;
+    
+    int pd1_ready = tPitchDetector_tick(&p->_pd1, sample);
+    int pd2_ready = tPitchDetector_tick(&p->_pd2, -sample);
+    
+    if (pd1_ready || pd2_ready)
+    {
+        int pd1_indeterminate = tPitchDetector_indeterminate(&p->_pd1);
+        int pd2_indeterminate = tPitchDetector_indeterminate(&p->_pd2);
+        if (!pd1_indeterminate && !pd2_indeterminate)
+        {
+            _pitch_info _i1 = p->_pd1->_current;
+            _pitch_info _i2 = p->_pd2->_current;
+            
+            float pd1_diff = fabsf(_i1.frequency - p->_mean);
+            float pd2_diff = fabsf(_i2.frequency - p->_mean);
+            _pitch_info i = (pd1_diff < pd2_diff) ? _i1 : _i2;
+            
+            if (p->_first)
+            {
+                p->_current = i;
+                p->_mean = p->_current.frequency;
+                p->_first = 0;
+                p->_predicted_frequency = 0.0f;
+            }
+            else if (within_octave(detector, i.frequency))
+            {
+                p->_current = i;
+                p->_mean = p->_current.frequency;//(0.222222f * p->_current.frequency) + (0.888888f * p->_mean);
+                p->_predicted_frequency = 0.0f;
+            }
+        }
+        
+        if (pd1_indeterminate && pd2_indeterminate)
+        {
+            compute_predicted_frequency(detector);
+            p->_current.frequency = 0.0f;
+            p->_current.periodicity = 0.0f;
+        }
+    }
+    
+    return pd1_ready || pd2_ready;
+}
+
+float   tDualPitchDetector_getFrequency    (tDualPitchDetector* const detector)
+{
+    _tDualPitchDetector* p = *detector;
+    
+    return p->_current.frequency;
+}
+
+float   tDualPitchDetector_getPeriodicity  (tDualPitchDetector* const detector)
+{
+    _tDualPitchDetector* p = *detector;
+    
+    return p->_current.periodicity;
+}
+
+float   tDualPitchDetector_predictFrequency (tDualPitchDetector* const detector)
+{
+    _tDualPitchDetector* p = *detector;
+    
+    if (p->_predicted_frequency == 0.0f)
+        compute_predicted_frequency(detector);
+    return p->_predicted_frequency;
+}
+
+void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector, float hysteresis)
+{
+    _tDualPitchDetector* p = *detector;
+    
+    tPitchDetector_setHysteresis(&p->_pd1, hysteresis);
+    tPitchDetector_setHysteresis(&p->_pd2, hysteresis);
+}
+
+static inline int within_octave(tDualPitchDetector* const detector, float f)
+{
+    _tDualPitchDetector* p = *detector;
+    
+    return (f > p->_mean) ? (f < (p->_mean * 2.0f)) : (f > (p->_mean * 0.5f));
+}
+
+static inline void compute_predicted_frequency(tDualPitchDetector* const detector)
+{
+    _tDualPitchDetector* p = *detector;
+    
+    float f1 = tPitchDetector_predictFrequency(&p->_pd1);
+    if (f1 > 0.0f)
+    {
+        float f2 = tPitchDetector_predictFrequency(&p->_pd2);
+        if (f2 > 0.0f)
+        {
+            float error = f1 * 0.1f;
+            if (fabsf(f1 - f2) < error)
+            {
+                if (p->_first || within_octave(detector, f1))
+                {
+                    p->_predicted_frequency = f1;
+                    return;
+                }
+            }
+        }
+    }
+    p->_predicted_frequency = 0.0f;
 }

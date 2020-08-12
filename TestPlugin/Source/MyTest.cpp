@@ -18,14 +18,18 @@ tMBSaw bsaw;
 tMBTriangle btri;
 tMBPulse bpulse;
 
-tPitchDetector detector;
+tDualPitchDetector detector;
+
+tCompressor compressor;
+
+tSVF lp, hp;
 
 tPeriodDetection pd;
 
 tZeroCrossingCounter zc;
 tEnvelopeFollower ef;
 
-tCycle sine;
+tTriangle tri;
 
 tBuffer samp;
 tMBSampler sampler;
@@ -54,16 +58,21 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     bufIn = (float*) leaf_alloc(sizeof(float) * 4096);
     bufOut = (float*) leaf_alloc(sizeof(float) * 4096);
-    // lowestFreq, highestFreq, hysteresis (width of hysteresis region around 0.0 for zero crossing detection)
-    tPitchDetector_init(&detector, mtof(48), mtof(84), 0.01f);
+    
+    tDualPitchDetector_init(&detector, mtof(53), mtof(77));
+    
+    tCompressor_init(&compressor);
+    
+    tSVF_init(&lp, SVFTypeLowpass, mtof(77) * 2.0f, 1.0f);
+    tSVF_init(&hp, SVFTypeHighpass, mtof(48) * 0.5f, 1.0f);
     
     tPeriodDetection_init(&pd, bufIn, bufOut, 4096, 1024);
     
     tZeroCrossingCounter_init(&zc, 128);
     tEnvelopeFollower_init(&ef, 0.02f, 0.9999f);
     
-    tCycle_init(&sine);
-    tCycle_setFreq(&sine, 100);
+    tTriangle_init(&tri);
+    tTriangle_setFreq(&tri, 100);
     
     tBuffer_init(&samp, 5.0f * leaf.sampleRate);
     tMBSampler_init(&sampler, &samp);
@@ -81,12 +90,11 @@ inline double getSawFall(double angle) {
     
 }
 
-float lastFreq;
 float   LEAFTest_tick            (float input)
 {
-    tBuffer_tick(&samp, input);
-    
-    return tMBSampler_tick(&sampler);
+//    tBuffer_tick(&samp, input);
+//
+//    return tMBSampler_tick(&sampler);
     
     
 //    tMBSaw_setFreq(&bsaw, x);
@@ -99,34 +107,34 @@ float   LEAFTest_tick            (float input)
 ////    return tMBSaw_tick(&bsaw);
 ////    return tMBTriangle_tick(&btri);
 //    return tMBPulse_tick(&bpulse);
-
+    
+    input = tSVF_tick(&hp, tSVF_tick(&lp, tCompressor_tick(&compressor, input)));
     
 //    float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
-//    tPitchDetector_tick(&detector, input);
-//    float altFreq = tPitchDetector_getFrequency(&detector);
-//
+    tDualPitchDetector_tick(&detector, input);
+    float altFreq = tDualPitchDetector_getFrequency(&detector);
+
 //    if (fabsf(1.0f - (freq / altFreq)) < 0.05f)
-////    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
-//    {
-//        tCycle_setFreq(&sine, altFreq);
-//    }
-//
-//    float g = tEnvelopeFollower_tick(&ef, input);
-//
-//    lastFreq = freq;
-//
-//    return tCycle_tick(&sine) * g * 2.0f + input;
+//    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
+    if (altFreq > 0.0f)
+    {
+        tTriangle_setFreq(&tri, altFreq);
+    }
+
+    float g = tEnvelopeFollower_tick(&ef, input);
+
+    return tTriangle_tick(&tri) * g;
 }
 
 int firstFrame = 1;
 bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
-    float periodicity = tPitchDetector_getPeriodicity(&detector);
+    float periodicity = tDualPitchDetector_getPeriodicity(&detector);
     if (periodicity > 0.99f)
     {
-        DBG(tPitchDetector_getFrequency(&detector));
-        DBG(tPitchDetector_getPeriodicity(&detector));
+        DBG(tDualPitchDetector_getFrequency(&detector));
+        DBG(tDualPitchDetector_getPeriodicity(&detector));
     }
     
     float val = getSliderValue("on/off");

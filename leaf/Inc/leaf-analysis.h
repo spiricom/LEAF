@@ -572,12 +572,8 @@ extern "C" {
     int     tZeroCrossingInfo_period(tZeroCrossingInfo* const, tZeroCrossingInfo* const next);
     float   tZeroCrossingInfo_fractionalPeriod(tZeroCrossingInfo* const, tZeroCrossingInfo* const next);
     int     tZeroCrossingInfo_getWidth(tZeroCrossingInfo* const);
-    int     tZeroCrossingInfo_isSimilar(tZeroCrossingInfo* const, tZeroCrossingInfo* const next);
     
     //==============================================================================
-    
-#define PULSE_HEIGHT_DIFF 0.8
-#define PULSE_WIDTH_DIFF 0.85
     
     typedef struct _tZeroCrossingCollector
     {
@@ -618,6 +614,8 @@ extern "C" {
     int     tZeroCrossingCollector_isReset(tZeroCrossingCollector* const zc);
     
     tZeroCrossingInfo const tZeroCrossingCollector_getCrossing(tZeroCrossingCollector* const zc, int index);
+
+    void    tZeroCrossingCollector_setHysteresis(tZeroCrossingCollector* const zc, float hysteresis);
     
     //==============================================================================
     
@@ -709,7 +707,16 @@ extern "C" {
      @fn int     tPeriodDetector_isReady (tPeriodDetector* const detector)
      @brief
      @param
+     
+     @fn int     tPeriodDetector_isReset (tPeriodDetector* const detector)
+     @brief
+     @param
      ￼￼￼
+     @fn void    tPeriodDetector_setHysteresis    (tPeriodDetector* const detector, float hysteresis)
+     @brief Set the hysteresis used in zero crossing detection.
+     @param detector A pointer to the relevant tPeriodDetector.
+     @param hysteresis The hysteresis in decibels. Defaults to -40db.
+     
      @} */
     
 #define PULSE_THRESHOLD 0.6f
@@ -741,12 +748,18 @@ extern "C" {
         int               _range;
     } _sub_collector;
 
+    typedef struct _period_info
+    {
+        float period; // -1.0f
+        float periodicity;
+    } _period_info;
+
     typedef struct _tPeriodDetector
     {
         tMempool mempool;
         
         tZeroCrossingCollector          _zc;
-        float                   _period_info[2]; // i0 is period, i1 is periodicity
+        _period_info            _fundamental;
         unsigned int            _min_period;
         int                     _range;
         tBitset                 _bits;
@@ -756,6 +769,8 @@ extern "C" {
         float                   _predicted_period;// = -1.0f;
         unsigned int            _edge_mark;// = 0;
         unsigned int            _predict_edge;// = 0;
+        unsigned int            _num_pulses; // = 0;
+        int                     _half_empty; // 0;
         
         tBACF                   _bacf;
         
@@ -775,6 +790,9 @@ extern "C" {
     float   tPeriodDetector_harmonic    (tPeriodDetector* const detector, int harmonicIndex);
     float   tPeriodDetector_predictPeriod   (tPeriodDetector* const detector);
     int     tPeriodDetector_isReady (tPeriodDetector* const detector);
+    int     tPeriodDetector_isReset (tPeriodDetector* const detector);
+
+    void    tPeriodDetector_setHysteresis   (tPeriodDetector* const detector, float hysteresis);
     
     //==============================================================================
     
@@ -784,75 +802,114 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis)
+     @fn void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq)
      @brief Initialize a tPitchDetector to the default LEAF mempool.
-     @param
+     @param detector A pointer to the relevant tPitchDetector.
+     @param lowestFreq
+     @param highestFreq
      
-     @fn void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool)
+     
+     @fn void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool)
      @brief Initialize a tPitchDetector to a specified mempool.
-     @param
+     @param detector A pointer to the relevant tPitchDetector.
+     @param lowestFreq
+     @param highestFreq
+     @param mempool
      
      @fn void    tPitchDetector_free (tPitchDetector* const detector)
      @brief
-     @param
+     @param detector A pointer to the relevant tPitchDetector.
      
      @fn int     tPitchDetector_tick    (tPitchDetector* const detector, float sample)
      @brief
-     @param
+     @param detector A pointer to the relevant tPitchDetector.
      
      @fn float   tPitchDetector_getFrequency    (tPitchDetector* const detector)
      @brief
-     @param
+     @param detector A pointer to the relevant tPitchDetector.
      
      @fn float   tPitchDetector_getPeriodicity  (tPitchDetector* const detector)
      @brief
-     @param
+     @param detector A pointer to the relevant tPitchDetector.
      
      @fn float   tPitchDetector_harmonic    (tPitchDetector* const detector, int harmonicIndex)
      @brief
-     @param
+     @param detector A pointer to the relevant tPitchDetector.
      
-     @fn float   tPitchDetector_predictFrequency (tPitchDetector* const detector, int init)
+     @fn float   tPitchDetector_predictFrequency (tPitchDetector* const detector)
      @brief
-     @param
+     @param detector A pointer to the relevant tPitchDetector.
      
-     @fn void    tPitchDetector_reset    (tPitchDetector* const detector)
-     @brief
-     @param
+     @fn void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, float hysteresis)
+     @brief Set the hysteresis used in zero crossing detection.
+     @param detector A pointer to the relevant tPitchDetector.
+     @param hysteresis The hysteresis in decibels. Defaults to -40db.
      ￼￼￼
      @} */
     
-#define MAX_DEVIATION 0.9f
-#define MIN_PERIODICITY 0.8f
+#define ONSET_PERIODICITY 0.95f
+#define MIN_PERIODICITY 0.9f
+#define DEFAULT_HYSTERESIS -40.0f
+
+    typedef struct _pitch_info
+    {
+        float frequency;
+        float periodicity;
+    } _pitch_info;
     
     typedef struct _tPitchDetector
     {
         tMempool mempool;
         
         tPeriodDetector _pd;
-        float _frequency;
-        float _median, _median_b, _median_c;
-        float _predict_median, _predict_median_b, _predict_median_c;
+        _pitch_info _current;
         int _frames_after_shift;// = 0;
         
     } _tPitchDetector;
     
     typedef _tPitchDetector* tPitchDetector;
     
-    void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis);
-    void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool);
+    void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq);
+    void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool);
     void    tPitchDetector_free (tPitchDetector* const detector);
     
     int     tPitchDetector_tick    (tPitchDetector* const detector, float sample);
     float   tPitchDetector_getFrequency    (tPitchDetector* const detector);
     float   tPitchDetector_getPeriodicity  (tPitchDetector* const detector);
     float   tPitchDetector_harmonic    (tPitchDetector* const detector, int harmonicIndex);
-    float   tPitchDetector_predictFrequency (tPitchDetector* const detector, int init);
-    void    tPitchDetector_reset    (tPitchDetector* const detector);
+    float   tPitchDetector_predictFrequency (tPitchDetector* const detector);
+    int     tPitchDetector_indeterminate    (tPitchDetector* const detector);
+    
+    void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, float hysteresis);
     
     
+
+    typedef struct _tDualPitchDetector
+    {
+        tMempool mempool;
+        
+        tPitchDetector _pd1;
+        tPitchDetector _pd2;
+        _pitch_info _current;
+        float _mean;
+        float _predicted_frequency;
+        int _first;
+        
+    } _tDualPitchDetector;
     
+    typedef _tDualPitchDetector* tDualPitchDetector;
     
+    void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq);
+    void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool);
+    void    tDualPitchDetector_free (tDualPitchDetector* const detector);
+    
+    int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sample);
+    float   tDualPitchDetector_getFrequency    (tDualPitchDetector* const detector);
+    float   tDualPitchDetector_getPeriodicity  (tDualPitchDetector* const detector);
+    float   tDualPitchDetector_harmonic    (tDualPitchDetector* const detector, int harmonicIndex);
+    float   tDualPitchDetector_predictFrequency (tDualPitchDetector* const detector);
+    
+    void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector, float hysteresis);
     
     
     
@@ -864,6 +921,7 @@ extern "C" {
 #endif  // LEAF_ANALYSIS_H_INCLUDED
 
 //==============================================================================
+
 
 
 
