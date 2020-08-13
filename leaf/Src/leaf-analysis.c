@@ -2165,7 +2165,7 @@ int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sa
             else if (within_octave(detector, i.frequency))
             {
                 p->_current = i;
-                p->_mean = p->_current.frequency;//(0.222222f * p->_current.frequency) + (0.888888f * p->_mean);
+                p->_mean = (0.222222f * p->_current.frequency) + (0.777778f * p->_mean);
                 p->_predicted_frequency = 0.0f;
             }
         }
