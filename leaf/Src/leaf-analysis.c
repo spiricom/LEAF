@@ -2102,7 +2102,6 @@ static inline void bias(tPitchDetector* const detector, _pitch_info incoming)
     }
 }
 
-static inline int within_octave(tDualPitchDetector* const detector, float f);
 static inline void compute_predicted_frequency(tDualPitchDetector* const detector);
 
 void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq)
@@ -2162,7 +2161,7 @@ int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sa
                 p->_first = 0;
                 p->_predicted_frequency = 0.0f;
             }
-            else if (within_octave(detector, i.frequency))
+            else
             {
                 p->_current = i;
                 p->_mean = (0.222222f * p->_current.frequency) + (0.777778f * p->_mean);
@@ -2212,13 +2211,6 @@ void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector,
     tPitchDetector_setHysteresis(&p->_pd2, hysteresis);
 }
 
-static inline int within_octave(tDualPitchDetector* const detector, float f)
-{
-    _tDualPitchDetector* p = *detector;
-    
-    return (f > p->_mean) ? (f < (p->_mean * 2.0f)) : (f > (p->_mean * 0.5f));
-}
-
 static inline void compute_predicted_frequency(tDualPitchDetector* const detector)
 {
     _tDualPitchDetector* p = *detector;
@@ -2232,11 +2224,8 @@ static inline void compute_predicted_frequency(tDualPitchDetector* const detecto
             float error = f1 * 0.1f;
             if (fabsf(f1 - f2) < error)
             {
-                if (p->_first || within_octave(detector, f1))
-                {
-                    p->_predicted_frequency = f1;
-                    return;
-                }
+                p->_predicted_frequency = f1;
+                return;
             }
         }
     }

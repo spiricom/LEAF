@@ -427,7 +427,7 @@ extern "C" {
         tExpSmooth gain;
         
         float    out;
-        float    last_delta;
+        float    last, beforeLast;
         float    amp;
         float    last_amp;
         float    syncin;
@@ -437,6 +437,7 @@ extern "C" {
         int     _j;
         
         int     start, end;
+        int     currentLoopLength;
     } _tMBSampler;
     
     typedef _tMBSampler* tMBSampler;

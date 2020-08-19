@@ -896,6 +896,7 @@ void tMBSampler_initToPool(tMBSampler* const sp, tBuffer* const b, tMempool* con
         
     tExpSmooth_initToPool(&c->gain, 0.0f, 0.01f, mp);
     
+    c->last = 0.0f;
     c->amp = 1.0f;
     c->_p = 0.0f;
     c->_w = 1.0f;
@@ -905,6 +906,8 @@ void tMBSampler_initToPool(tMBSampler* const sp, tBuffer* const b, tMempool* con
     memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
 
     c->start = 0;
+    c->end = 1;
+    c->currentLoopLength = 1;
     tMBSampler_setEnd(sp, c->samp->bufferLength);
 }
 
@@ -936,8 +939,13 @@ float tMBSampler_tick        (tMBSampler* const sp)
     _tMBSampler* c = *sp;
     
     if (c->gain->curr == 0.0f && !c->active) return 0.0f;
-    if (c->_w == 0.0f) return c->out;
+    if (c->_w == 0.0f)
+    {
+        c->_last_w = 0.0f;
+        return c->out;
+    }
     
+    float last, beforeLast;
     int start, end, length;
     float* buff;
     int    j;
@@ -950,21 +958,21 @@ float tMBSampler_tick        (tMBSampler* const sp)
 
     buff = c->samp->buff;
     
+    last = c->last;
+    beforeLast = c->beforeLast;
     p = c->_p;  /* position */
-    w = c->_w;  /* rate */
+    w = fminf((float)c->currentLoopLength * 0.5f, c->_w);  /* rate */
     z = c->_z;  /* low pass filter state */
     j = c->_j;  /* index into buffer _f */
     
     length = end - start;
-    w = fminf((float)length * 0.5f, w);
 
     //a = 0.2 + 0.8 * vco->_port [FILT];
     a = 0.5f; // when a = 1, LPfilter is disabled
     
     p += w;
     
-    float next;
-    
+    float next, afterNext;
 //    if (syncin >= 1e-20f) {  /* sync to master */
 //
 //        float eof_offset = (syncin - 1e-20f) * w;
@@ -995,32 +1003,51 @@ float tMBSampler_tick        (tMBSampler* const sp)
 //        place_slope_dd(c->_f, j, p, w, (next - c->out) - c->last_delta);
 //
 //    } else
+    
     if (w > 0.0f) {
     
         if (p >= (float) end) {  /* normal phase reset */
         
             // start and end are never negative and end must also be greater than start
             // so this loop is fine
-            while (p >= (float) end) p -= (float) length;
+            while (p >= (float) end)
+            {
+                p -= (float) length;
+                c->currentLoopLength = length;
+            }
             
             float f = p;
             int i = (int) f;
             f -= i;
             next = buff[i] * (1.0f - f) + buff[i+1] * f;
             
-            place_step_dd(c->_f, j, p - start, w, next - c->out);
-            place_slope_dd(c->_f, j, p - start, w, (next - c->out) - c->last_delta);
+            f = p + w;
+            i = (int) f;
+            f -= i;
+            afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
+ 
+            place_step_dd(c->_f, j, p - start, w, next - last);
+            float nextSlope = (afterNext - next) / w;
+            float lastSlope = (last - beforeLast) / w;
+            place_slope_dd(c->_f, j, p - start, w, nextSlope - lastSlope);
             
             if (c->mode == PlayNormal) c->active = 0;
             else if (c->mode == PlayBackAndForth) w = -w;
         }
 //        else if (p < (float) start) { /* start has been set ahead of the current phase */
-//
+//            
 //            p = (float) start;
 //            next = buff[start];
+//           
+//            float f = p + w;
+//            int i = (int) f;
+//            f -= i;
+//            afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
 //
-//            place_step_dd(c->_f, j, p, w, next - c->last);
-//            place_slope_dd(c->_f, j, p, w, (next - c->last) - c->last_delta);
+//            place_step_dd(c->_f, j, 0, w, next - last);
+//            float nextSlope = (afterNext - next) / w;
+//            float lastSlope = (last - beforeLast) / w;
+//            place_slope_dd(c->_f, j, 0, w, nextSlope - lastSlope);
 //        }
         else {
             
@@ -1032,32 +1059,58 @@ float tMBSampler_tick        (tMBSampler* const sp)
 
         if (c->_last_w < 0.0f)
         {
-            place_slope_dd(c->_f, j, p - start, w, (next - c->out) - c->last_delta);
+            float f = p + w;
+            int i = (int) f;
+            f -= i;
+            afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
+            
+            float nextSlope = (afterNext - next) / w;
+            float lastSlope = (last - beforeLast) / w;
+            place_slope_dd(c->_f, j, p - start, w, nextSlope - lastSlope);
         }
         
     } else { // if (w < 0.0f) {
         
         if (p < (float) start) {
         
-            while (p < (float) start) p += (float) length;
+            while (p < (float) start)
+            {
+                p += (float) length;
+                c->currentLoopLength = length;
+            }
             
             float f = p;
             int i = (int) f;
             f -= i;
             next = buff[i] * (1.0f - f) + buff[i+1] * f;
-            
-            place_step_dd(c->_f, j, end - p, w, next - c->out);
-            place_slope_dd(c->_f, j, end - p, w, (next - c->out) - c->last_delta);
+
+            f = p + w;
+            i = (int) f;
+            f -= i;
+            afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
+
+            place_step_dd(c->_f, j, end - p, w, next - last);
+            float nextSlope = (afterNext - next) / w;
+            float lastSlope = (last - beforeLast) / w;
+            place_slope_dd(c->_f, j, end - p, w, nextSlope - lastSlope);
             
             if (c->mode == PlayNormal) c->active = 0;
             else if (c->mode == PlayBackAndForth) w = -w;
         }
-//        else if (p >= (float) end) {
+//        else if (p > (float) end) {
 //
-//            p = (float) end - 1;
-//            next = buff[end - 1];
-//            place_step_dd(c->_f, j, p, w, next - c->last);
-//            place_slope_dd(c->_f, j, p, w, (next - c->last) - c->last_delta);
+//            p = (float) end;
+//            next = buff[end];
+//
+//            float f = p + w;
+//            int i = (int) f;
+//            f -= i;
+//            afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
+//
+//            place_step_dd(c->_f, j, 0, w, next - last);
+//            float nextSlope = (afterNext - next) / w;
+//            float lastSlope = (last - beforeLast) / w;
+//            place_slope_dd(c->_f, j, 0, w, nextSlope - lastSlope);
 //        }
         else {
             
@@ -1069,16 +1122,24 @@ float tMBSampler_tick        (tMBSampler* const sp)
         
         if (c->_last_w > 0.0f)
         {
-            place_slope_dd(c->_f, j, end - p, w, (next - c->out) - c->last_delta);
+            float f = p + w;
+            int i = (int) f;
+            f -= i;
+            afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
+            
+            float nextSlope = (afterNext - next) / w;
+            float lastSlope = (last - beforeLast) / w;
+            place_slope_dd(c->_f, j, end - p, w, nextSlope - lastSlope);
         }
     }
+    
+    c->beforeLast = last;
+    c->last = next;
     
     c->_f[j + DD_SAMPLE_DELAY] += next;
     
     z += a * (c->_f[j] - z); // LP filtering
     next = c->amp * z;
-    
-    c->last_delta = next - c->out;
     
     c->out = next;
     

@@ -59,11 +59,11 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     bufIn = (float*) leaf_alloc(sizeof(float) * 4096);
     bufOut = (float*) leaf_alloc(sizeof(float) * 4096);
     
-    tDualPitchDetector_init(&detector, mtof(53), mtof(77));
+    tDualPitchDetector_init(&detector, mtof(48), mtof(84));
     
     tCompressor_init(&compressor);
     
-    tSVF_init(&lp, SVFTypeLowpass, mtof(77) * 2.0f, 1.0f);
+    tSVF_init(&lp, SVFTypeLowpass, mtof(84) * 2.0f, 1.0f);
     tSVF_init(&hp, SVFTypeHighpass, mtof(48) * 0.5f, 1.0f);
     
     tPeriodDetection_init(&pd, bufIn, bufOut, 4096, 1024);
@@ -92,9 +92,9 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
-//    tBuffer_tick(&samp, input);
-//
-//    return tMBSampler_tick(&sampler);
+    tBuffer_tick(&samp, input);
+
+    return tMBSampler_tick(&sampler);
     
     
 //    tMBSaw_setFreq(&bsaw, x);
@@ -108,22 +108,22 @@ float   LEAFTest_tick            (float input)
 ////    return tMBTriangle_tick(&btri);
 //    return tMBPulse_tick(&bpulse);
     
-    input = tSVF_tick(&hp, tSVF_tick(&lp, tCompressor_tick(&compressor, input)));
-    
-//    float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
-    tDualPitchDetector_tick(&detector, input);
-    float altFreq = tDualPitchDetector_getFrequency(&detector);
-
-//    if (fabsf(1.0f - (freq / altFreq)) < 0.05f)
-//    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
-    if (altFreq > 0.0f)
-    {
-        tTriangle_setFreq(&tri, altFreq);
-    }
-
-    float g = tEnvelopeFollower_tick(&ef, input);
-
-    return tTriangle_tick(&tri) * g;
+//    input = tSVF_tick(&hp, tSVF_tick(&lp, tCompressor_tick(&compressor, input)));
+//    
+////    float freq = 1.0f/tPeriodDetection_tick(&pd, input) * leaf.sampleRate;
+//    tDualPitchDetector_tick(&detector, input);
+//    float altFreq = tDualPitchDetector_getFrequency(&detector);
+//
+////    if (fabsf(1.0f - (freq / altFreq)) < 0.05f)
+////    if (tZeroCrossingCounter_tick(&zc, input) < 0.05 && freq > 0.0f)
+//    if (altFreq > 0.0f)
+//    {
+//        tTriangle_setFreq(&tri, altFreq);
+//    }
+//
+//    float g = tEnvelopeFollower_tick(&ef, input);
+//
+//    return tTriangle_tick(&tri) * g;
 }
 
 int firstFrame = 1;
