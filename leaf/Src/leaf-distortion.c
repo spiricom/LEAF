@@ -23,9 +23,9 @@
 //============================================================================================================
 
 
-void tSampleReducer_init (tSampleReducer* const sr)
+void tSampleReducer_init (tSampleReducer* const sr, LEAF* const leaf)
 {
-    tSampleReducer_initToPool(sr, &leaf.mempool);
+    tSampleReducer_initToPool(sr, &leaf->mempool);
 }
 
 void tSampleReducer_initToPool (tSampleReducer* const sr, tMempool* const mp)
@@ -72,9 +72,9 @@ void tSampleReducer_setRatio(tSampleReducer* const sr, float ratio)
 // Oversampler
 //============================================================================================================
 // Latency is equal to the phase length (numTaps / ratio)
-void tOversampler_init (tOversampler* const osr, int ratio, int extraQuality)
+void tOversampler_init (tOversampler* const osr, int ratio, int extraQuality, LEAF* const leaf)
 {
-    tOversampler_initToPool(osr, ratio, extraQuality, &leaf.mempool);
+    tOversampler_initToPool(osr, ratio, extraQuality, &leaf->mempool);
 }
 
 void tOversampler_initToPool (tOversampler* const osr, int ratio, int extraQuality, tMempool* const mp)
@@ -312,9 +312,9 @@ int tOversampler_getLatency(tOversampler* const osr)
 //from the paper: Virtual Analog Model of the Lockhart Wavefolder
 //by Fabián Esqueda, Henri Pöntynen, Julian D. Parker and Stefan Bilbao
 
-void tLockhartWavefolder_init (tLockhartWavefolder* const wf)
+void tLockhartWavefolder_init (tLockhartWavefolder* const wf, LEAF* const leaf)
 {
-	tLockhartWavefolder_initToPool   (wf,  &leaf.mempool);
+	tLockhartWavefolder_initToPool   (wf, &leaf->mempool);
 }
 
 void tLockhartWavefolder_initToPool (tLockhartWavefolder* const wf, tMempool* const mp)
@@ -554,9 +554,9 @@ float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float in)
 //============================================================================================================
 #define SCALAR 5000.f
 
-void tCrusher_init (tCrusher* const cr)
+void tCrusher_init (tCrusher* const cr, LEAF* const leaf)
 {
-    tCrusher_initToPool(cr, &leaf.mempool);
+    tCrusher_initToPool(cr, &leaf->mempool);
 }
 
 void tCrusher_initToPool (tCrusher* const cr, tMempool* const mp)

@@ -39,7 +39,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void  tBuffer_init                  (tBuffer* const, uint32_t length)
+     @fn void  tBuffer_init                  (tBuffer* const, uint32_t length, LEAF* const leaf)
      @brief
      @param
      
@@ -114,6 +114,7 @@ extern "C" {
     
     typedef struct _tBuffer
     {
+        
         tMempool mempool;
         
         float* buff;
@@ -128,7 +129,7 @@ extern "C" {
     
     typedef _tBuffer* tBuffer;
     
-    void  tBuffer_init                  (tBuffer* const, uint32_t length);
+    void  tBuffer_init                  (tBuffer* const, uint32_t length, LEAF* const leaf);
     void  tBuffer_initToPool            (tBuffer* const, uint32_t length, tMempool* const);
     void  tBuffer_free                  (tBuffer* const);
     
@@ -154,7 +155,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tSampler_init               (tSampler* const, tBuffer* const)
+     @fn void    tSampler_init               (tSampler* const, tBuffer* const, LEAF* const leaf)
      @brief
      @param
      
@@ -218,6 +219,7 @@ extern "C" {
     
     typedef struct _tSampler
     {
+        
         tMempool mempool;
         
         tBuffer samp;
@@ -251,7 +253,7 @@ extern "C" {
     
     typedef _tSampler* tSampler;
     
-    void    tSampler_init               (tSampler* const, tBuffer* const);
+    void    tSampler_init               (tSampler* const, tBuffer* const, LEAF* const leaf);
     void    tSampler_initToPool         (tSampler* const, tBuffer* const, tMempool* const);
     void    tSampler_free               (tSampler* const);
     
@@ -274,7 +276,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const)
+     @fn void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const, LEAF* const leaf)
      @brief
      @param
      
@@ -326,6 +328,7 @@ extern "C" {
     
     typedef struct _tAutoSampler
     {
+        
         tMempool mempool;
         tSampler sampler;
         tEnvelopeFollower ef;
@@ -339,7 +342,7 @@ extern "C" {
     
     typedef _tAutoSampler* tAutoSampler;
     
-    void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const);
+    void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const, LEAF* const leaf);
     void    tAutoSampler_initToPool         (tAutoSampler* const, tBuffer* const, tMempool* const);
     void    tAutoSampler_free               (tAutoSampler* const);
     
@@ -360,7 +363,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tMBSampler_init               (tMBSampler* const, tBuffer* const)
+     @fn void    tMBSampler_init               (tMBSampler* const, tBuffer* const, LEAF* const leaf)
      @brief
      @param
      
@@ -418,6 +421,7 @@ extern "C" {
 
     typedef struct _tMBSampler
     {
+        
         tMempool mempool;
         
         tBuffer samp;
@@ -442,7 +446,7 @@ extern "C" {
     
     typedef _tMBSampler* tMBSampler;
     
-    void    tMBSampler_init               (tMBSampler* const, tBuffer* const);
+    void    tMBSampler_init               (tMBSampler* const, tBuffer* const, LEAF* const leaf);
     void    tMBSampler_initToPool         (tMBSampler* const, tBuffer* const, tMempool* const);
     void    tMBSampler_free               (tMBSampler* const);
     

@@ -24,9 +24,9 @@
 
 //==============================================================================
 
-void  tBuffer_init (tBuffer* const sb, uint32_t length)
+void  tBuffer_init (tBuffer* const sb, uint32_t length, LEAF* const leaf)
 {
-    tBuffer_initToPool(sb, length, &leaf.mempool);
+    tBuffer_initToPool(sb, length, &leaf->mempool);
 }
 
 void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp)
@@ -166,9 +166,9 @@ static void handleStartEndChange(tSampler* const sp);
 
 static void attemptStartEndChange(tSampler* const sp);
 
-void tSampler_init(tSampler* const sp, tBuffer* const b)
+void tSampler_init(tSampler* const sp, tBuffer* const b, LEAF* const leaf)
 {
-    tSampler_initToPool(sp, b, &leaf.mempool);
+    tSampler_initToPool(sp, b, &leaf->mempool);
 }
 
 void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const mp)
@@ -239,6 +239,7 @@ void tSampler_setSample (tSampler* const sp, tBuffer* const b)
 float tSampler_tick        (tSampler* const sp)
 {
     _tSampler* p = *sp;
+    LEAF* leaf = p->mempool->leaf;
     
     attemptStartEndChange(sp);
     
@@ -451,7 +452,7 @@ float tSampler_tick        (tSampler* const sp)
             p->idx = myEnd;
         }
         float ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
-        if (ticksToEnd < (0.007f * leaf.sampleRate))
+        if (ticksToEnd < (0.007f * leaf->sampleRate))
         {
             tRamp_setDest(&p->gain, 0.f);
             p->active = -1;
@@ -755,9 +756,9 @@ void tSampler_setRate      (tSampler* const sp, float rate)
 
 //==============================================================================
 
-void    tAutoSampler_init   (tAutoSampler* const as, tBuffer* const b)
+void    tAutoSampler_init   (tAutoSampler* const as, tBuffer* const b, LEAF* const leaf)
 {
-    tAutoSampler_initToPool(as, b, &leaf.mempool);
+    tAutoSampler_initToPool(as, b, &leaf->mempool);
 }
 
 void    tAutoSampler_initToPool (tAutoSampler* const as, tBuffer* const b, tMempool* const mp)
@@ -878,9 +879,9 @@ void    tAutoSampler_setRate    (tAutoSampler* const as, float rate)
 
 
 
-void tMBSampler_init(tMBSampler* const sp, tBuffer* const b)
+void tMBSampler_init(tMBSampler* const sp, tBuffer* const b, LEAF* const leaf)
 {
-    tMBSampler_initToPool(sp, b, &leaf.mempool);
+    tMBSampler_initToPool(sp, b, &leaf->mempool);
 }
 
 void tMBSampler_initToPool(tMBSampler* const sp, tBuffer* const b, tMempool* const mp)

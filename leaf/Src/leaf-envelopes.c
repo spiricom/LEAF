@@ -24,9 +24,9 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Envelope ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tEnvelope_init(tEnvelope* const envlp, float attack, float decay, int loop)
+void    tEnvelope_init(tEnvelope* const envlp, float attack, float decay, int loop, LEAF* const leaf)
 {
-    tEnvelope_initToPool(envlp, attack, decay, loop, &leaf.mempool);
+    tEnvelope_initToPool(envlp, attack, decay, loop, &leaf->mempool);
 }
 
 void    tEnvelope_initToPool    (tEnvelope* const envlp, float attack, float decay, int loop, tMempool* const mp)
@@ -215,9 +215,9 @@ float   tEnvelope_tick(tEnvelope* const envlp)
 
 
 /* ADSR */
-void    tADSR_init(tADSR* const adsrenv, float attack, float decay, float sustain, float release)
+void    tADSR_init(tADSR* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
 {
-    tADSR_initToPool(adsrenv, attack, decay, sustain, release, &leaf.mempool);
+    tADSR_initToPool(adsrenv, attack, decay, sustain, release, &leaf->mempool);
 }
 
 void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp)
@@ -498,9 +498,9 @@ const float ADSR2_MAX_TIME = 10.f;
 const float ADSR2_LAMBDA_BASE = 10000.0f;
 
 
-void    tADSR2_init(tADSR2* const adsrenv, float attack, float decay, float sustain, float release)
+void    tADSR2_init(tADSR2* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
 {
-    tADSR2_initToPool(adsrenv, attack, decay, sustain, release, &leaf.mempool);
+    tADSR2_initToPool(adsrenv, attack, decay, sustain, release, &leaf->mempool);
 }
 
 void    tADSR2_initToPool    (tADSR2* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp)
@@ -509,7 +509,9 @@ void    tADSR2_initToPool    (tADSR2* const adsrenv, float attack, float decay, 
     _tADSR2* adsr = *adsrenv = (_tADSR2*) mpool_alloc(sizeof(_tADSR2), m);
     adsr->mempool = m;
     
-    adsr->sampleRateInMs =  leaf.sampleRate * 0.001f;
+    LEAF* leaf = adsr->mempool->leaf;
+    
+    adsr->sampleRateInMs = leaf->sampleRate * 0.001f;
     adsr->attack = LEAF_clip(0.0f, attack * 0.001f, 1.0f);
     adsr->attackLambda = powf(ADSR2_LAMBDA_BASE, -adsr->attack) * ADSR2_INV_MIN_TIME;
 
@@ -605,6 +607,8 @@ void tADSR2_off(tADSR2* const adsrenv)
 float   tADSR2_tick(tADSR2* const adsrenv)
 {
     _tADSR2* adsr = *adsrenv;
+    LEAF* leaf = adsr->mempool->leaf;
+    
     float lambda;
 
     if (adsr->gate)
@@ -625,7 +629,7 @@ float   tADSR2_tick(tADSR2* const adsrenv)
 
 
     // Adjust env
-    adsr->env += (adsr->envTarget - adsr->env) * lambda * leaf.invSampleRate;
+    adsr->env += (adsr->envTarget - adsr->env) * lambda * leaf->invSampleRate;
 
     // Turn off attacking state if envelope is HIGH
     if (adsr->env >= 1.0f)
@@ -650,9 +654,9 @@ float calcADSR3Coef(float rate, float targetRatio)
 }
 
 
-void    tADSR3_init(tADSR3* const adsrenv, float attack, float decay, float sustain, float release)
+void    tADSR3_init(tADSR3* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
 {
-    tADSR3_initToPool(adsrenv, attack, decay, sustain, release, &leaf.mempool);
+    tADSR3_initToPool(adsrenv, attack, decay, sustain, release, &leaf->mempool);
 }
 
 void    tADSR3_initToPool    (tADSR3* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp)
@@ -661,7 +665,9 @@ void    tADSR3_initToPool    (tADSR3* const adsrenv, float attack, float decay, 
     _tADSR3* adsr = *adsrenv = (_tADSR3*) mpool_alloc(sizeof(_tADSR3), m);
     adsr->mempool = m;
     
-    adsr->sampleRateInMs =  leaf.sampleRate * 0.001f;
+    LEAF* leaf = adsr->mempool->leaf;
+    
+    adsr->sampleRateInMs =  leaf->sampleRate * 0.001f;
     adsr->targetRatioA = 0.3f;
     adsr->targetRatioDR = 0.0001f;
     adsr->attackRate = attack * adsr->sampleRateInMs;
@@ -796,9 +802,9 @@ float   tADSR3_tick(tADSR3* const adsrenv)
 
 /* ADSR 4 */ // new version of our original table-based ADSR but with the table passed in by the user
 // use this if the size of the big ADSR tables is too much.
-void    tADSR4_init    (tADSR4* const adsrenv, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize)
+void    tADSR4_init    (tADSR4* const adsrenv, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf)
 {
-    tADSR4_initToPool    (adsrenv, attack, decay, sustain, release, expBuffer, bufferSize, &leaf.mempool);
+    tADSR4_initToPool    (adsrenv, attack, decay, sustain, release, expBuffer, bufferSize, &leaf->mempool);
 }
 
 //initialize with an exponential function that decays -- i.e. a call to LEAF_generate_exp(expBuffer, 0.001f, 0.0f, 1.0f, -0.0008f, EXP_BUFFER_SIZE);
@@ -808,12 +814,14 @@ void    tADSR4_initToPool    (tADSR4* const adsrenv, float attack, float decay, 
     _tMempool* m = *mp;
     _tADSR4* adsr = *adsrenv = (_tADSR4*) mpool_alloc(sizeof(_tADSR4), m);
     adsr->mempool = m;
+    
+    LEAF* leaf = adsr->mempool->leaf;
 
     adsr->exp_buff = expBuffer;
     adsr->buff_size = bufferSize;
     adsr->buff_sizeMinusOne = bufferSize - 1;
 
-    adsr->bufferSizeDividedBySampleRateInMs = bufferSize / (leaf.sampleRate * 0.001f);
+    adsr->bufferSizeDividedBySampleRateInMs = bufferSize / (leaf->sampleRate * 0.001f);
 
     if (attack < 0.0f)
         attack = 0.0f;
@@ -1144,9 +1152,9 @@ float   tADSR4_tickNoInterp(tADSR4* const adsrenv)
 
 /////-----------------
 /* Ramp */
-void    tRamp_init(tRamp* const r, float time, int samples_per_tick)
+void    tRamp_init(tRamp* const r, float time, int samples_per_tick, LEAF* const leaf)
 {
-    tRamp_initToPool(r, time, samples_per_tick, &leaf.mempool);
+    tRamp_initToPool(r, time, samples_per_tick, &leaf->mempool);
 }
 
 void    tRamp_initToPool    (tRamp* const r, float time, int samples_per_tick, tMempool* const mp)
@@ -1155,7 +1163,9 @@ void    tRamp_initToPool    (tRamp* const r, float time, int samples_per_tick, t
     _tRamp* ramp = *r = (_tRamp*) mpool_alloc(sizeof(_tRamp), m);
     ramp->mempool = m;
     
-    ramp->inv_sr_ms = 1.0f/(leaf.sampleRate*0.001f);
+    LEAF* leaf = ramp->mempool->leaf;
+    
+    ramp->inv_sr_ms = 1.0f/(leaf->sampleRate*0.001f);
     ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
     ramp->curr = 0.0f;
     ramp->dest = 0.0f;
@@ -1235,7 +1245,9 @@ float   tRamp_sample(tRamp* const ramp)
 void    tRampSampleRateChanged(tRamp* const ramp)
 {
     _tRamp* r = *ramp;
-    r->inv_sr_ms = 1.0f / (leaf.sampleRate * 0.001f);
+    LEAF* leaf = r->mempool->leaf;
+    
+    r->inv_sr_ms = 1.0f / (leaf->sampleRate * 0.001f);
     r->factor = (1.0f / r->time) * r->inv_sr_ms * (float)r->samples_per_tick;
     r->inc = (r->dest - r->curr) * r->factor;
 }
@@ -1243,9 +1255,9 @@ void    tRampSampleRateChanged(tRamp* const ramp)
 
 
 /* RampUpDown */
-void    tRampUpDown_init(tRampUpDown* const r, float upTime, float downTime, int samples_per_tick)
+void    tRampUpDown_init(tRampUpDown* const r, float upTime, float downTime, int samples_per_tick, LEAF* const leaf)
 {
-    tRampUpDown_initToPool(r, upTime, downTime, samples_per_tick, &leaf.mempool);
+    tRampUpDown_initToPool(r, upTime, downTime, samples_per_tick, &leaf->mempool);
 }
 
 void    tRampUpDown_initToPool(tRampUpDown* const r, float upTime, float downTime, int samples_per_tick, tMempool* const mp)
@@ -1253,8 +1265,10 @@ void    tRampUpDown_initToPool(tRampUpDown* const r, float upTime, float downTim
     _tMempool* m = *mp;
     _tRampUpDown* ramp = *r = (_tRampUpDown*) mpool_alloc(sizeof(_tRampUpDown), m);
     ramp->mempool = m;
+    
+    LEAF* leaf = ramp->mempool->leaf;
 
-    ramp->inv_sr_ms = 1.0f/(leaf.sampleRate*0.001f);
+    ramp->inv_sr_ms = 1.0f/(leaf->sampleRate*0.001f);
     ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
     ramp->curr = 0.0f;
     ramp->dest = 0.0f;
@@ -1382,9 +1396,9 @@ float   tRampUpDown_sample(tRampUpDown* const ramp)
 
 
 /* Exponential Smoother */
-void    tExpSmooth_init(tExpSmooth* const expsmooth, float val, float factor)
+void    tExpSmooth_init(tExpSmooth* const expsmooth, float val, float factor, LEAF* const leaf)
 {   // factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
-    tExpSmooth_initToPool(expsmooth, val, factor, &leaf.mempool);
+    tExpSmooth_initToPool(expsmooth, val, factor, &leaf->mempool);
 }
 
 void    tExpSmooth_initToPool   (tExpSmooth* const expsmooth, float val, float factor, tMempool* const mp)
@@ -1455,9 +1469,9 @@ float   tExpSmooth_sample(tExpSmooth* const expsmooth)
 //tSlide is based on the max/msp slide~ object
 ////
 
-void    tSlide_init          (tSlide* const sl, float upSlide, float downSlide)
+void    tSlide_init          (tSlide* const sl, float upSlide, float downSlide, LEAF* const leaf)
 {
-    tSlide_initToPool    (sl, upSlide, downSlide, &leaf.mempool);
+    tSlide_initToPool    (sl, upSlide, downSlide, &leaf->mempool);
 }
 
 void    tSlide_initToPool    (tSlide* const sl, float upSlide, float downSlide, tMempool* const mp)

@@ -38,7 +38,7 @@ extern "C" {
      @brief A basic stack of integers with a fixed capacity of 128, used by tPoly to keep track of MIDI notes.
      @{
      
-     @fn void    tStack_init                 (tStack* const stack)
+     @fn void    tStack_init                 (tStack* const stack, LEAF* const leaf)
      @brief Initialize a tStack to the default LEAF mempool.
      @param stack A pointer to the tStack to be initialized.
      
@@ -107,6 +107,7 @@ extern "C" {
 #define STACK_SIZE 128
     typedef struct _tStack
     {
+        
         tMempool mempool;
         int data[STACK_SIZE];
         uint16_t pos;
@@ -117,7 +118,7 @@ extern "C" {
     
     typedef _tStack* tStack;
     
-    void    tStack_init                 (tStack* const stack);
+    void    tStack_init                 (tStack* const stack, LEAF* const leaf);
     void    tStack_initToPool           (tStack* const stack, tMempool* const pool);
     void    tStack_free                 (tStack* const stack);
     
@@ -138,7 +139,7 @@ extern "C" {
      @brief An object for polyphonic handling.
      @{
      
-     @fn void    tPoly_init                  (tPoly* const poly, int maxNumVoices)
+     @fn void    tPoly_init                  (tPoly* const poly, int maxNumVoices, LEAF* const leaf)
      @brief Initialize a tPoly to the default LEAF mempool.
      @param poly A pointer to the tPoly to be initialized.
      @param maxNumVoices The maximum number of voices this tPoly can handle at once.
@@ -247,6 +248,7 @@ extern "C" {
 
     typedef struct _tPoly
     {
+        
         tMempool mempool;
         
         tStack stack;
@@ -283,7 +285,7 @@ extern "C" {
     
     typedef _tPoly* tPoly;
     
-    void    tPoly_init                  (tPoly* const poly, int maxNumVoices);
+    void    tPoly_init                  (tPoly* const poly, int maxNumVoices, LEAF* const leaf);
     void    tPoly_initToPool            (tPoly* const poly, int maxNumVoices, tMempool* const pool);
     void    tPoly_free                  (tPoly* const poly);
     
@@ -314,7 +316,7 @@ extern "C" {
      @brief An object for polyphonic handling.
      @{
      
-     @fn void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices)
+     @fn void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices, LEAF* const leaf)
      @brief Initialize a tSimplePoly to the default LEAF mempool.
      @param poly A pointer to the tSimplePoly to be initialized.
      @param maxNumVoices The maximum number of voices this tSimplePoly can handle at once.
@@ -392,6 +394,7 @@ extern "C" {
      @} */
     typedef struct _tSimplePoly
     {
+        
         tMempool mempool;
         
         tStack stack;
@@ -407,7 +410,7 @@ extern "C" {
 
     typedef _tSimplePoly* tSimplePoly;
 
-    void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices);
+    void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices, LEAF* const leaf);
     void    tSimplePoly_initToPool            (tSimplePoly* const poly, int maxNumVoices, tMempool* const pool);
     void    tSimplePoly_free                  (tSimplePoly* const poly);
     

@@ -19,9 +19,9 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Delay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tDelay_init (tDelay* const dl, uint32_t delay, uint32_t maxDelay)
+void    tDelay_init (tDelay* const dl, uint32_t delay, uint32_t maxDelay, LEAF* const leaf)
 {
-    tDelay_initToPool(dl, delay, maxDelay, &leaf.mempool);
+    tDelay_initToPool(dl, delay, maxDelay, &leaf->mempool);
 }
 
 void    tDelay_initToPool   (tDelay* const dl, uint32_t delay, uint32_t maxDelay, tMempool* const mp)
@@ -162,9 +162,9 @@ float tDelay_getGain (tDelay* const dl)
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ LinearDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void   tLinearDelay_init (tLinearDelay* const dl, float delay, uint32_t maxDelay)
+void   tLinearDelay_init (tLinearDelay* const dl, float delay, uint32_t maxDelay, LEAF* const leaf)
 {
-    tLinearDelay_initToPool(dl, delay, maxDelay, &leaf.mempool);
+    tLinearDelay_initToPool(dl, delay, maxDelay, &leaf->mempool);
 }
 
 void tLinearDelay_initToPool  (tLinearDelay* const dl, float delay, uint32_t maxDelay, tMempool* const mp)
@@ -355,9 +355,9 @@ float tLinearDelay_getGain (tLinearDelay* const dl)
 
 /// Hermite Interpolated Delay
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ LinearDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void tHermiteDelay_init (tHermiteDelay* const dl, float delay, uint32_t maxDelay)
+void tHermiteDelay_init (tHermiteDelay* const dl, float delay, uint32_t maxDelay, LEAF* const leaf)
 {
-    tHermiteDelay_initToPool(dl, delay, maxDelay, &leaf.mempool);
+    tHermiteDelay_initToPool(dl, delay, maxDelay, &leaf->mempool);
 }
 
 void tHermiteDelay_initToPool  (tHermiteDelay* const dl, float delay, uint32_t maxDelay, tMempool* const mp)
@@ -550,9 +550,9 @@ float tHermiteDelay_getGain (tHermiteDelay* const dl)
 
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ AllpassDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void tAllpassDelay_init (tAllpassDelay* const dl, float delay, uint32_t maxDelay)
+void tAllpassDelay_init (tAllpassDelay* const dl, float delay, uint32_t maxDelay, LEAF* const leaf)
 {
-    tAllpassDelay_initToPool(dl, delay, maxDelay, &leaf.mempool);
+    tAllpassDelay_initToPool(dl, delay, maxDelay, &leaf->mempool);
 }
 
 void tAllpassDelay_initToPool  (tAllpassDelay* const dl, float delay, uint32_t maxDelay, tMempool* const mp)
@@ -725,9 +725,9 @@ float tAllpassDelay_getGain (tAllpassDelay* const dl)
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ TapeDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void tTapeDelay_init (tTapeDelay* const dl, float delay, uint32_t maxDelay)
+void tTapeDelay_init (tTapeDelay* const dl, float delay, uint32_t maxDelay, LEAF* const leaf)
 {
-    tTapeDelay_initToPool(dl, delay, maxDelay, &leaf.mempool);
+    tTapeDelay_initToPool(dl, delay, maxDelay, &leaf->mempool);
 }
 
 void tTapeDelay_initToPool (tTapeDelay* const dl, float delay, uint32_t maxDelay, tMempool* const mp)
@@ -903,9 +903,9 @@ float tTapeDelay_getGain (tTapeDelay* const dl)
 
 
 
-void    tRingBuffer_init     (tRingBuffer* const ring, int size)
+void    tRingBuffer_init     (tRingBuffer* const ring, int size, LEAF* const leaf)
 {
-    tRingBuffer_initToPool(ring, size, &leaf.mempool);
+    tRingBuffer_initToPool(ring, size, &leaf->mempool);
 }
 
 void    tRingBuffer_initToPool   (tRingBuffer* const ring, int size, tMempool* const mempool)

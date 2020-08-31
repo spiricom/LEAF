@@ -38,7 +38,7 @@ extern "C" {
      @brief Reverb, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tPRCReverb_init         (tPRCReverb* const, float t60)
+     @fn void    tPRCReverb_init         (tPRCReverb* const, float t60, LEAF* const leaf)
      @brief
      @param
      
@@ -70,6 +70,7 @@ extern "C" {
     
     typedef struct _tPRCReverb
     {
+        
         tMempool mempool;
         
         float mix, t60;
@@ -86,7 +87,7 @@ extern "C" {
     
     typedef _tPRCReverb* tPRCReverb;
     
-    void    tPRCReverb_init         (tPRCReverb* const, float t60);
+    void    tPRCReverb_init         (tPRCReverb* const, float t60, LEAF* const leaf);
     void    tPRCReverb_initToPool   (tPRCReverb* const, float t60, tMempool* const);
     void    tPRCReverb_free         (tPRCReverb* const);
     
@@ -103,7 +104,7 @@ extern "C" {
      @brief Reverb, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tNReverb_init           (tNReverb* const, float t60)
+     @fn void    tNReverb_init           (tNReverb* const, float t60, LEAF* const leaf)
      @brief
      @param
      
@@ -139,6 +140,7 @@ extern "C" {
     
     typedef struct _tNReverb
     {
+        
         tMempool mempool;
         
         float mix, t60;
@@ -156,7 +158,7 @@ extern "C" {
     
     typedef _tNReverb* tNReverb;
     
-    void    tNReverb_init           (tNReverb* const, float t60);
+    void    tNReverb_init           (tNReverb* const, float t60, LEAF* const leaf);
     void    tNReverb_initToPool     (tNReverb* const, float t60, tMempool* const);
     void    tNReverb_free           (tNReverb* const);
     
@@ -174,7 +176,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tDattorroReverb_init              (tDattorroReverb* const)
+     @fn void    tDattorroReverb_init              (tDattorroReverb* const, LEAF* const leaf)
      @brief
      @param
      
@@ -234,6 +236,7 @@ extern "C" {
     
     typedef struct _tDattorroReverb
     {
+        
         tMempool mempool;
         
         float   predelay;
@@ -279,7 +282,7 @@ extern "C" {
     
     typedef _tDattorroReverb* tDattorroReverb;
     
-    void    tDattorroReverb_init              (tDattorroReverb* const);
+    void    tDattorroReverb_init              (tDattorroReverb* const, LEAF* const leaf);
     void    tDattorroReverb_initToPool        (tDattorroReverb* const, tMempool* const);
     void    tDattorroReverb_free              (tDattorroReverb* const);
     

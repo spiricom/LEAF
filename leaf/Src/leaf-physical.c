@@ -17,9 +17,9 @@
 #endif
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ tPluck ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
-void    tPluck_init         (tPluck* const pl, float lowestFrequency)
+void    tPluck_init         (tPluck* const pl, float lowestFrequency, LEAF* const leaf)
 {
-    tPluck_initToPool(pl, lowestFrequency, &leaf.mempool);
+    tPluck_initToPool(pl, lowestFrequency, &leaf->mempool);
 }
 
 void    tPluck_initToPool    (tPluck* const pl, float lowestFrequency, tMempool* const mp)
@@ -27,6 +27,7 @@ void    tPluck_initToPool    (tPluck* const pl, float lowestFrequency, tMempool*
     _tMempool* m = *mp;
     _tPluck* p = *pl = (_tPluck*) mpool_alloc(sizeof(_tPluck), m);
     p->mempool = m;
+    LEAF* leaf = p->mempool->leaf;
     
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 10.0f;
     
@@ -36,7 +37,7 @@ void    tPluck_initToPool    (tPluck* const pl, float lowestFrequency, tMempool*
     
     tOneZero_initToPool(&p->loopFilter, 0.0f, mp);
     
-    tAllpassDelay_initToPool(&p->delayLine, 0.0f, leaf.sampleRate * 2, mp);
+    tAllpassDelay_initToPool(&p->delayLine, 0.0f, leaf->sampleRate * 2, mp);
     tAllpassDelay_clear(&p->delayLine);
     
     tPluck_setFrequency(pl, 220.0f);
@@ -105,11 +106,12 @@ void    tPluck_noteOff       (tPluck* const pl, float amplitude )
 void    tPluck_setFrequency  (tPluck* const pl, float frequency )
 {
     _tPluck* p = *pl;
+    LEAF* leaf = p->mempool->leaf;
     
     if ( frequency <= 0.0f )   frequency = 0.001f;
     
     // Delay = length - filter delay.
-    float delay = ( leaf.sampleRate / frequency ) - tOneZero_getPhaseDelay(&p->loopFilter, frequency );
+    float delay = ( leaf->sampleRate / frequency ) - tOneZero_getPhaseDelay(&p->loopFilter, frequency );
     
     tAllpassDelay_setDelay(&p->delayLine, delay );
     
@@ -132,9 +134,9 @@ void tPluckSampleRateChanged(tPluck* const pl)
 }
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ tKarplusStrong ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
-void    tKarplusStrong_init (tKarplusStrong* const pl, float lowestFrequency)
+void    tKarplusStrong_init (tKarplusStrong* const pl, float lowestFrequency, LEAF* const leaf)
 {
-    tKarplusStrong_initToPool(pl, lowestFrequency, &leaf.mempool);
+    tKarplusStrong_initToPool(pl, lowestFrequency, &leaf->mempool);
 }
 
 void    tKarplusStrong_initToPool   (tKarplusStrong* const pl, float lowestFrequency, tMempool* const mp)
@@ -142,13 +144,14 @@ void    tKarplusStrong_initToPool   (tKarplusStrong* const pl, float lowestFrequ
     _tMempool* m = *mp;
     _tKarplusStrong* p = *pl = (_tKarplusStrong*) mpool_alloc(sizeof(_tKarplusStrong), m);
     p->mempool = m;
+    LEAF* leaf = p->mempool->leaf;
     
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 8.0f;
     
-    tAllpassDelay_initToPool(&p->delayLine, 0.0f, leaf.sampleRate * 2, mp);
+    tAllpassDelay_initToPool(&p->delayLine, 0.0f, leaf->sampleRate * 2, mp);
     tAllpassDelay_clear(&p->delayLine);
     
-    tLinearDelay_initToPool(&p->combDelay, 0.0f, leaf.sampleRate * 2, mp);
+    tLinearDelay_initToPool(&p->combDelay, 0.0f, leaf->sampleRate * 2, mp);
     tLinearDelay_clear(&p->combDelay);
     
     tOneZero_initToPool(&p->filter, 0.0f, mp);
@@ -251,11 +254,12 @@ void    tKarplusStrong_noteOff       (tKarplusStrong* const pl, float amplitude 
 void    tKarplusStrong_setFrequency  (tKarplusStrong* const pl, float frequency )
 {
     _tKarplusStrong* p = *pl;
+    LEAF* leaf = p->mempool->leaf;
     
     if ( frequency <= 0.0f )   frequency = 0.001f;
     
     p->lastFrequency = frequency;
-    p->lastLength = leaf.sampleRate / p->lastFrequency;
+    p->lastLength = leaf->sampleRate / p->lastFrequency;
     float delay = p->lastLength - 0.5f;
     tAllpassDelay_setDelay(&p->delayLine, delay);
     
@@ -270,14 +274,15 @@ void    tKarplusStrong_setFrequency  (tKarplusStrong* const pl, float frequency 
 }
 
 // Set the stretch "factor" of the string (0.0 - 1.0).
-void    tKarplusStrong_setStretch         (tKarplusStrong* const pl, float stretch )
+void    tKarplusStrong_setStretch         (tKarplusStrong* const pl, float stretch)
 {
     _tKarplusStrong* p = *pl;
+    LEAF* leaf = p->mempool->leaf;
     
     p->stretching = stretch;
     float coefficient;
     float freq = p->lastFrequency * 2.0f;
-    float dFreq = ( (0.5f * leaf.sampleRate) - freq ) * 0.25f;
+    float dFreq = ( (0.5f * leaf->sampleRate) - freq ) * 0.25f;
     float temp = 0.5f + (stretch * 0.5f);
     if ( temp > 0.9999f ) temp = 0.9999f;
     
@@ -288,7 +293,7 @@ void    tKarplusStrong_setStretch         (tKarplusStrong* const pl, float stret
         tBiQuad_setB0(&p->biquad[i], coefficient);
         tBiQuad_setB2(&p->biquad[i], 1.0f);
         
-        coefficient = -2.0f * temp * cosf(TWO_PI * freq / leaf.sampleRate);
+        coefficient = -2.0f * temp * cosf(TWO_PI * freq / leaf->sampleRate);
         tBiQuad_setA1(&p->biquad[i], coefficient);
         tBiQuad_setB1(&p->biquad[i], coefficient);
         
@@ -346,9 +351,9 @@ void    tKarplusStrongSampleRateChanged (tKarplusStrong* const pl)
 
 void    tSimpleLivingString_init(tSimpleLivingString* const pl, float freq, float dampFreq,
                                  float decay, float targetLev, float levSmoothFactor,
-                                 float levStrength, int levMode)
+                                 float levStrength, int levMode, LEAF* const leaf)
 {
-    tSimpleLivingString_initToPool(pl, freq, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf.mempool);
+    tSimpleLivingString_initToPool(pl, freq, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf->mempool);
 }
 
 void    tSimpleLivingString_initToPool  (tSimpleLivingString* const pl, float freq, float dampFreq,
@@ -358,9 +363,10 @@ void    tSimpleLivingString_initToPool  (tSimpleLivingString* const pl, float fr
     _tMempool* m = *mp;
     _tSimpleLivingString* p = *pl = (_tSimpleLivingString*) mpool_alloc(sizeof(_tSimpleLivingString), m);
     p->mempool = m;
+    LEAF* leaf = p->mempool->leaf;
     
     p->curr=0.0f;
-    tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tExpSmooth_initToPool(&p->wlSmooth, leaf->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tSimpleLivingString_setFreq(pl, freq);
     tLinearDelay_initToPool(&p->delayLine,p->waveLengthInSamples, 2400, mp);
     tLinearDelay_clear(&p->delayLine);
@@ -387,10 +393,11 @@ void    tSimpleLivingString_free (tSimpleLivingString* const pl)
 void     tSimpleLivingString_setFreq(tSimpleLivingString* const pl, float freq)
 {
     _tSimpleLivingString* p = *pl;
+    LEAF* leaf = p->mempool->leaf;
     
     if (freq<20) freq=20;
     else if (freq>10000) freq=10000;
-    p->waveLengthInSamples = leaf.sampleRate/freq;
+    p->waveLengthInSamples = leaf->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
@@ -463,9 +470,9 @@ float   tSimpleLivingString_sample(tSimpleLivingString* const pl)
 
 void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, float prepIndex,
                            float dampFreq, float decay, float targetLev, float levSmoothFactor,
-                           float levStrength, int levMode)
+                           float levStrength, int levMode, LEAF* const leaf)
 {
-    tLivingString_initToPool(pl, freq, pickPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf.mempool);
+    tLivingString_initToPool(pl, freq, pickPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf->mempool);
 }
 
 void    tLivingString_initToPool    (tLivingString* const pl, float freq, float pickPos, float prepIndex,
@@ -475,9 +482,10 @@ void    tLivingString_initToPool    (tLivingString* const pl, float freq, float 
     _tMempool* m = *mp;
     _tLivingString* p = *pl = (_tLivingString*) mpool_alloc(sizeof(_tLivingString), m);
     p->mempool = m;
+    LEAF* leaf = p->mempool->leaf;
     
     p->curr=0.0f;
-    tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tExpSmooth_initToPool(&p->wlSmooth, leaf->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tLivingString_setFreq(pl, freq);
     p->freq = freq;
     tExpSmooth_initToPool(&p->ppSmooth, pickPos, 0.01f, mp); // smoother for pick position
@@ -530,9 +538,11 @@ void    tLivingString_free (tLivingString* const pl)
 void     tLivingString_setFreq(tLivingString* const pl, float freq)
 {    // NOTE: It is faster to set wavelength in samples directly
     _tLivingString* p = *pl;
+    LEAF* leaf = p->mempool->leaf;
+    
     if (freq<20.f) freq=20.f;
     else if (freq>10000.f) freq=10000.f;
-    p->waveLengthInSamples = leaf.sampleRate/freq;
+    p->waveLengthInSamples = leaf->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
@@ -655,9 +665,9 @@ float   tLivingString_sample(tLivingString* const pl)
 
 void    tComplexLivingString_init(tComplexLivingString* const pl, float freq, float pickPos, float prepPos, float prepIndex,
                            float dampFreq, float decay, float targetLev, float levSmoothFactor,
-                           float levStrength, int levMode)
+                           float levStrength, int levMode, LEAF* const leaf)
 {
-    tComplexLivingString_initToPool(pl, freq, pickPos, prepPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf.mempool);
+    tComplexLivingString_initToPool(pl, freq, pickPos, prepPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf->mempool);
 }
 
 void    tComplexLivingString_initToPool    (tComplexLivingString* const pl, float freq, float pickPos, float prepPos, float prepIndex,
@@ -667,9 +677,10 @@ void    tComplexLivingString_initToPool    (tComplexLivingString* const pl, floa
     _tMempool* m = *mp;
     _tComplexLivingString* p = *pl = (_tComplexLivingString*) mpool_alloc(sizeof(_tComplexLivingString), m);
     p->mempool = m;
+    LEAF* leaf = p->mempool->leaf;
 
     p->curr=0.0f;
-    tExpSmooth_initToPool(&p->wlSmooth, leaf.sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tExpSmooth_initToPool(&p->wlSmooth, leaf->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tComplexLivingString_setFreq(pl, freq);
     p->freq = freq;
     tExpSmooth_initToPool(&p->pickPosSmooth, pickPos, 0.01f, mp); // smoother for pick position
@@ -697,8 +708,8 @@ void    tComplexLivingString_initToPool    (tComplexLivingString* const pl, floa
     tOnePole_initToPool(&p->nutFilter, dampFreq, mp);
     tOnePole_initToPool(&p->prepFilterU, dampFreq, mp);
     tOnePole_initToPool(&p->prepFilterL, dampFreq, mp);
-    tHighpass_initToPool(&p->DCblockerU,13, mp);
-    tHighpass_initToPool(&p->DCblockerL,13, mp);
+    tHighpass_initToPool(&p->DCblockerU, 13, mp);
+    tHighpass_initToPool(&p->DCblockerL, 13, mp);
     p->decay=decay;
     p->prepIndex = prepIndex;
     tFeedbackLeveler_initToPool(&p->fbLevU, targetLev, levSmoothFactor, levStrength, levMode, mp);
@@ -734,9 +745,11 @@ void    tComplexLivingString_free (tComplexLivingString* const pl)
 void     tComplexLivingString_setFreq(tComplexLivingString* const pl, float freq)
 {    // NOTE: It is faster to set wavelength in samples directly
     _tComplexLivingString* p = *pl;
+    LEAF* leaf = p->mempool->leaf;
+    
     if (freq<20.0f) freq=20.0f;
     else if (freq>10000.0f) freq=10000.0f;
-    p->waveLengthInSamples = leaf.sampleRate/freq;
+    p->waveLengthInSamples = leaf->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
@@ -892,9 +905,9 @@ float   tComplexLivingString_sample(tComplexLivingString* const pl)
 ///Reed Table model
 //default values from STK are 0.6 offset and -0.8 slope
 
-void    tReedTable_init      (tReedTable* const pm, float offset, float slope)
+void    tReedTable_init      (tReedTable* const pm, float offset, float slope, LEAF* const leaf)
 {
-    tReedTable_initToPool(pm, offset, slope, &leaf.mempool);
+    tReedTable_initToPool(pm, offset, slope, &leaf->mempool);
 }
 
 void    tReedTable_initToPool   (tReedTable* const pm, float offset, float slope, tMempool* const mp)

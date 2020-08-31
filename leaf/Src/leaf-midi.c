@@ -20,9 +20,9 @@
 /* Stack */
 //====================================================================================
 
-void tStack_init(tStack* const stack)
+void tStack_init(tStack* const stack, LEAF* const leaf)
 {
-    tStack_initToPool(stack, &leaf.mempool);
+    tStack_initToPool(stack, &leaf->mempool);
 }
 
 void    tStack_initToPool           (tStack* const stack, tMempool* const mp)
@@ -256,9 +256,9 @@ int tStack_first(tStack* const stack)
 
 
 // POLY
-void tPoly_init(tPoly* const polyh, int maxNumVoices)
+void tPoly_init(tPoly* const polyh, int maxNumVoices, LEAF* const leaf)
 {
-    tPoly_initToPool(polyh, maxNumVoices, &leaf.mempool);
+    tPoly_initToPool(polyh, maxNumVoices, &leaf->mempool);
 }
 
 void    tPoly_initToPool            (tPoly* const polyh, int maxNumVoices, tMempool* const mp)
@@ -612,9 +612,9 @@ int tPoly_isOn(tPoly* const polyh, uint8_t voice)
 
 
 // SIMPLE POLY
-void tSimplePoly_init(tSimplePoly* const polyh, int maxNumVoices)
+void tSimplePoly_init(tSimplePoly* const polyh, int maxNumVoices, LEAF* const leaf)
 {
-    tSimplePoly_initToPool(polyh, maxNumVoices, &leaf.mempool);
+    tSimplePoly_initToPool(polyh, maxNumVoices, &leaf->mempool);
 }
 
 void    tSimplePoly_initToPool            (tSimplePoly* const polyh, int maxNumVoices, tMempool* const mp)

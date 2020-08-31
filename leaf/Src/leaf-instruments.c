@@ -18,9 +18,9 @@
 
 // ----------------- COWBELL ----------------------------//
 
-void t808Cowbell_init(t808Cowbell* const cowbellInst, int useStick)
+void t808Cowbell_init(t808Cowbell* const cowbellInst, int useStick, LEAF* const leaf)
 {
-    t808Cowbell_initToPool(cowbellInst, useStick, &leaf.mempool);
+    t808Cowbell_initToPool(cowbellInst, useStick, &leaf->mempool);
 }
 
 void        t808Cowbell_initToPool      (t808Cowbell* const cowbellInst, int useStick, tMempool* const mp)
@@ -143,9 +143,9 @@ void t808Cowbell_setStick(t808Cowbell* const cowbellInst, int useStick)
 
 // ----------------- HIHAT ----------------------------//
 
-void t808Hihat_init(t808Hihat* const hihatInst)
+void t808Hihat_init(t808Hihat* const hihatInst, LEAF* const leaf)
 {
-    t808Hihat_initToPool(hihatInst, &leaf.mempool);
+    t808Hihat_initToPool(hihatInst, &leaf->mempool);
 }
 
 void    t808Hihat_initToPool  (t808Hihat* const hihatInst, tMempool* const mp)
@@ -311,9 +311,9 @@ void t808Hihat_setOscFreq(t808Hihat* const hihatInst, float freq)
 
 // ----------------- SNARE ----------------------------//
 
-void t808Snare_init (t808Snare* const snareInst)
+void t808Snare_init (t808Snare* const snareInst, LEAF* const leaf)
 {
-    t808Snare_initToPool(snareInst, &leaf.mempool);
+    t808Snare_initToPool(snareInst, &leaf->mempool);
 }
 
 void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
@@ -458,9 +458,9 @@ float t808Snare_tick(t808Snare* const snareInst)
 
 // ----------------- KICK ----------------------------//
 
-void t808Kick_init (t808Kick* const kickInst)
+void t808Kick_init (t808Kick* const kickInst, LEAF* const leaf)
 {
-    t808Kick_initToPool(kickInst, &leaf.mempool);
+    t808Kick_initToPool(kickInst, &leaf->mempool);
 }
 
 void t808Kick_initToPool (t808Kick* const kickInst, tMempool* const mp)

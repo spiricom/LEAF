@@ -34,7 +34,7 @@ extern "C" {
      @brief A general wavetable oscillator.
      @{
 
-     @fn void    tTable_init         (tTable* const osc, float* table, int size)
+     @fn void    tTable_init         (tTable* const osc, float* table, int size, LEAF* const leaf)
      @brief Initialize a tTable to the default LEAF mempool.
      @param osc A pointer to the tTable to be initialized.
      @param table A pointer to the wave table data.
@@ -65,6 +65,7 @@ extern "C" {
     
     typedef struct _tTable
     {
+        
         tMempool mempool;
         
         float* waveTable;
@@ -75,7 +76,7 @@ extern "C" {
     
     typedef _tTable* tTable;
 
-     void    tTable_init(tTable* const osc, float* table, int size);
+     void    tTable_init(tTable* const osc, float* table, int size, LEAF* const leaf);
      void    tTable_initToPool(tTable* const osc, float* table, int size, tMempool* const mempool);
      void    tTable_free(tTable* const osc);
     
@@ -90,7 +91,7 @@ extern "C" {
      @brief A cycle/sine waveform oscillator. Uses wavetable synthesis.
      @{
 
-     @fn void    tCycle_init         (tCycle* const osc)
+     @fn void    tCycle_init         (tCycle* const osc, LEAF* const leaf)
      @brief Initialize a tCycle to the default LEAF mempool.
      @param osc A pointer to the tCycle to be initialized.
      
@@ -118,6 +119,7 @@ extern "C" {
     
     typedef struct _tCycle
     {
+        
         tMempool mempool;
         // Underlying phasor
         float phase;
@@ -126,7 +128,7 @@ extern "C" {
     
     typedef _tCycle* tCycle;
     
-    void    tCycle_init         (tCycle* const osc);
+    void    tCycle_init         (tCycle* const osc, LEAF* const leaf);
     void    tCycle_initToPool   (tCycle* const osc, tMempool* const mempool);
     void    tCycle_free         (tCycle* const osc);
     
@@ -141,7 +143,7 @@ extern "C" {
      @brief Anti-aliased Triangle waveform using wavetable interpolation. Wavetables constructed from sine components.
      @{
      
-     @fn void    tTriangle_init         (tTriangle* const osc)
+     @fn void    tTriangle_init         (tTriangle* const osc, LEAF* const leaf)
      @brief Initialize a tTriangle to the default LEAF mempool.
      @param osc A pointer to the tTriangle to be initialized.
      
@@ -168,6 +170,7 @@ extern "C" {
 
     typedef struct _tTriangle
     {
+        
         tMempool mempool;
         // Underlying phasor
         float phase;
@@ -178,7 +181,7 @@ extern "C" {
     
     typedef _tTriangle* tTriangle;
 
-    void    tTriangle_init          (tTriangle* const osc);
+    void    tTriangle_init          (tTriangle* const osc, LEAF* const leaf);
     void    tTriangle_initToPool    (tTriangle* const osc, tMempool* const mempool);
     void    tTriangle_free          (tTriangle* const osc);
     
@@ -194,7 +197,7 @@ extern "C" {
      @brief Anti-aliased Square waveform using wavetable interpolation. Wavetables constructed from sine components.
      @{
      
-     @fn void    tSquare_init         (tSquare* const osc)
+     @fn void    tSquare_init         (tSquare* const osc, LEAF* const leaf)
      @brief Initialize a tSquare to the default LEAF mempool.
      @param osc A pointer to the tSquare to be initialized.
      
@@ -221,6 +224,7 @@ extern "C" {
     
     typedef struct _tSquare
     {
+        
         tMempool mempool;
         // Underlying phasor
         float phase;
@@ -231,7 +235,7 @@ extern "C" {
     
     typedef _tSquare* tSquare;
 
-    void    tSquare_init        (tSquare* const osc);
+    void    tSquare_init        (tSquare* const osc, LEAF* const leaf);
     void    tSquare_initToPool  (tSquare* const osc, tMempool* const);
     void    tSquare_free        (tSquare* const osc);
 
@@ -249,7 +253,7 @@ extern "C" {
      @brief Anti-aliased Square waveform using wavetable interpolation. Wavetables constructed from sine components.
      @{
      
-     @fn void    tSawtooth_init         (tSawtooth* const osc)
+     @fn void    tSawtooth_init         (tSawtooth* const osc, LEAF* const leaf)
      @brief Initialize a tSawtooth to the default LEAF mempool.
      @param osc A pointer to the tSawtooth to be initialized.
      
@@ -276,6 +280,7 @@ extern "C" {
     
     typedef struct _tSawtooth
     {
+        
         tMempool mempool;
         // Underlying phasor
         float phase;
@@ -286,7 +291,7 @@ extern "C" {
     
     typedef _tSawtooth* tSawtooth;
 
-    void    tSawtooth_init          (tSawtooth* const osc);
+    void    tSawtooth_init          (tSawtooth* const osc, LEAF* const leaf);
     void    tSawtooth_initToPool    (tSawtooth* const osc, tMempool* const mempool);
     void    tSawtooth_free          (tSawtooth* const osc);
 
@@ -301,7 +306,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tTri_init          (tTri* const osc)
+     @fn void    tTri_init          (tTri* const osc, LEAF* const leaf)
      @brief
      @param
      
@@ -329,6 +334,7 @@ extern "C" {
 
     typedef struct _tTri
     {
+        
         tMempool mempool;
         float phase;
         float inc,freq;
@@ -338,7 +344,7 @@ extern "C" {
     
     typedef _tTri* tTri;
     
-    void    tTri_init          (tTri* const osc);
+    void    tTri_init          (tTri* const osc, LEAF* const leaf);
     void    tTri_initToPool    (tTri* const osc, tMempool* const mempool);
     void    tTri_free          (tTri* const osc);
     
@@ -354,7 +360,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tPulse_init        (tPulse* const osc)
+     @fn void    tPulse_init        (tPulse* const osc, LEAF* const leaf)
      @brief
      @param
      
@@ -382,6 +388,7 @@ extern "C" {
     
     typedef struct _tPulse
     {
+        
         tMempool mempool;
         float phase;
         float inc,freq;
@@ -390,7 +397,7 @@ extern "C" {
     
     typedef _tPulse* tPulse;
     
-    void    tPulse_init        (tPulse* const osc);
+    void    tPulse_init        (tPulse* const osc, LEAF* const leaf);
     void    tPulse_initToPool  (tPulse* const osc, tMempool* const);
     void    tPulse_free        (tPulse* const osc);
     
@@ -406,7 +413,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tSaw_init          (tSaw* const osc)
+     @fn void    tSaw_init          (tSaw* const osc, LEAF* const leaf)
      @brief
      @param
      
@@ -430,6 +437,7 @@ extern "C" {
     
     typedef struct _tSaw
     {
+        
         tMempool mempool;
         float phase;
         float inc,freq;
@@ -437,7 +445,7 @@ extern "C" {
     
     typedef _tSaw* tSaw;
     
-    void    tSaw_init          (tSaw* const osc);
+    void    tSaw_init          (tSaw* const osc, LEAF* const leaf);
     void    tSaw_initToPool    (tSaw* const osc, tMempool* const mempool);
     void    tSaw_free          (tSaw* const osc);
     
@@ -452,7 +460,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tPhasor_init        (tPhasor* const osc)
+     @fn void    tPhasor_init        (tPhasor* const osc, LEAF* const leaf)
      @brief
      @param
      
@@ -476,6 +484,7 @@ extern "C" {
     
     typedef struct _tPhasor
     {
+        
         tMempool mempool;
         float phase;
         float inc,freq;
@@ -484,7 +493,7 @@ extern "C" {
     
     typedef _tPhasor* tPhasor;
     
-    void    tPhasor_init        (tPhasor* const osc);
+    void    tPhasor_init        (tPhasor* const osc, LEAF* const leaf);
     void    tPhasor_initToPool  (tPhasor* const osc, tMempool* const);
     void    tPhasor_free        (tPhasor* const osc);
     
@@ -499,7 +508,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tNoise_init         (tNoise* const noise, NoiseType type)
+     @fn void    tNoise_init         (tNoise* const noise, NoiseType type, LEAF* const leaf)
      @brief
      @param
      
@@ -533,6 +542,7 @@ extern "C" {
     
     typedef struct _tNoise
     {
+        
         tMempool mempool;
         NoiseType type;
         float pinkb0, pinkb1, pinkb2;
@@ -541,7 +551,7 @@ extern "C" {
     
     typedef _tNoise* tNoise;
 
-    void    tNoise_init         (tNoise* const noise, NoiseType type);
+    void    tNoise_init         (tNoise* const noise, NoiseType type, LEAF* const leaf);
     void    tNoise_initToPool   (tNoise* const noise, NoiseType type, tMempool* const);
     void    tNoise_free         (tNoise* const noise);
     
@@ -555,7 +565,7 @@ extern "C" {
      @brief A model of a neuron, adapted to act as an oscillator.
      @{
      
-     @fn void    tNeuron_init        (tNeuron* const neuron)
+     @fn void    tNeuron_init        (tNeuron* const neuron, LEAF* const leaf)
      @brief Initialize a tNeuron to the default LEAF mempool.
      @param neuron A pointer to the tNeuron to be initialized.
      
@@ -643,6 +653,7 @@ extern "C" {
     
     typedef struct _tNeuron
     {
+        
         tMempool mempool;
         
         tPoleZero f;
@@ -662,7 +673,7 @@ extern "C" {
     
     typedef _tNeuron* tNeuron;
     
-    void    tNeuron_init        (tNeuron* const neuron);
+    void    tNeuron_init        (tNeuron* const neuron, LEAF* const leaf);
     void    tNeuron_initToPool  (tNeuron* const neuron, tMempool* const mempool);
     void    tNeuron_free        (tNeuron* const neuron);
     
@@ -692,7 +703,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void tMBPulse_init(tMBPulse* const osc)
+     @fn void tMBPulse_init(tMBPulse* const osc, LEAF* const leaf)
      @brief
      @param
      
@@ -728,6 +739,7 @@ extern "C" {
     
     typedef struct _tMBPulse
     {
+        
         tMempool mempool;
         float    out;
         float    amp;
@@ -744,7 +756,7 @@ extern "C" {
     
     typedef _tMBPulse* tMBPulse;
     
-    void tMBPulse_init(tMBPulse* const osc);
+    void tMBPulse_init(tMBPulse* const osc, LEAF* const leaf);
     void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const mempool);
     void tMBPulse_free(tMBPulse* const osc);
     
@@ -760,7 +772,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void tMBTriangle_init(tMBTriangle* const osc)
+     @fn void tMBTriangle_init(tMBTriangle* const osc, LEAF* const leaf)
      @brief
      @param
      
@@ -796,6 +808,7 @@ extern "C" {
     
     typedef struct _tMBTriangle
     {
+        
         tMempool mempool;
         float    out;
         float    amp;
@@ -812,7 +825,7 @@ extern "C" {
     
     typedef _tMBTriangle* tMBTriangle;
     
-    void tMBTriangle_init(tMBTriangle* const osc);
+    void tMBTriangle_init(tMBTriangle* const osc, LEAF* const leaf);
     void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const mempool);
     void tMBTriangle_free(tMBTriangle* const osc);
     
@@ -829,7 +842,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void tMBSaw_init(tMBSaw* const osc)
+     @fn void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf)
      @brief
      @param
      
@@ -861,6 +874,7 @@ extern "C" {
     
     typedef struct _tMBSaw
     {
+        
         tMempool mempool;
         float    out;
         float    amp;
@@ -876,7 +890,7 @@ extern "C" {
     
     typedef _tMBSaw* tMBSaw;
     
-    void tMBSaw_init(tMBSaw* const osc);
+    void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf);
     void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const mempool);
     void tMBSaw_free(tMBSaw* const osc);
     

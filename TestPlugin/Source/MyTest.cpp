@@ -45,37 +45,39 @@ float a, b, c, d;
 float* bufIn;
 float* bufOut;
 
+LEAF leaf;
+
 #define MSIZE 2048000
 char memory[MSIZE];
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
-    LEAF_init(sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
+    LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
-    tMBSaw_init(&bsaw);
-    tMBTriangle_init(&btri);
-    tMBPulse_init(&bpulse);
+    tMBSaw_init(&bsaw, &leaf);
+    tMBTriangle_init(&btri, &leaf);
+    tMBPulse_init(&bpulse, &leaf);
     
-    bufIn = (float*) leaf_alloc(sizeof(float) * 4096);
-    bufOut = (float*) leaf_alloc(sizeof(float) * 4096);
+    bufIn = (float*) leaf_alloc(&leaf, sizeof(float) * 4096);
+    bufOut = (float*) leaf_alloc(&leaf, sizeof(float) * 4096);
     
-    tDualPitchDetector_init(&detector, mtof(48), mtof(84));
+    tDualPitchDetector_init(&detector, mtof(48), mtof(84), &leaf);
     
-    tCompressor_init(&compressor);
+    tCompressor_init(&compressor, &leaf);
     
-    tSVF_init(&lp, SVFTypeLowpass, mtof(84) * 2.0f, 1.0f);
-    tSVF_init(&hp, SVFTypeHighpass, mtof(48) * 0.5f, 1.0f);
+    tSVF_init(&lp, SVFTypeLowpass, mtof(84) * 2.0f, 1.0f, &leaf);
+    tSVF_init(&hp, SVFTypeHighpass, mtof(48) * 0.5f, 1.0f, &leaf);
     
-    tPeriodDetection_init(&pd, bufIn, bufOut, 4096, 1024);
+    tPeriodDetection_init(&pd, bufIn, bufOut, 4096, 1024, &leaf);
     
-    tZeroCrossingCounter_init(&zc, 128);
-    tEnvelopeFollower_init(&ef, 0.02f, 0.9999f);
+    tZeroCrossingCounter_init(&zc, 128, &leaf);
+    tEnvelopeFollower_init(&ef, 0.02f, 0.9999f, &leaf);
     
-    tTriangle_init(&tri);
+    tTriangle_init(&tri, &leaf);
     tTriangle_setFreq(&tri, 100);
     
-    tBuffer_init(&samp, 5.0f * leaf.sampleRate);
-    tMBSampler_init(&sampler, &samp);
+    tBuffer_init(&samp, 5.0f * leaf.sampleRate, &leaf);
+    tMBSampler_init(&sampler, &samp, &leaf);
     
     tMBSampler_setMode(&sampler, PlayLoop);
     tMBSampler_setEnd(&sampler, samp->bufferLength);
@@ -191,13 +193,13 @@ void    LEAFTest_end             (void)
 
 void leaf_pool_report(void)
 {
-    DBG(String(leaf_pool_get_used()) + " of  " + String(leaf_pool_get_size()));
+    DBG(String(leaf_pool_get_used(&leaf)) + " of  " + String(leaf_pool_get_size(&leaf)));
 }
 
 void leaf_pool_dump(void)
 {
-    float* buff = (float*)leaf_pool_get_pool();
-    unsigned long siz = leaf_pool_get_size();
+    float* buff = (float*)leaf_pool_get_pool(&leaf);
+    unsigned long siz = leaf_pool_get_size(&leaf);
     siz /= sizeof(float);
     for (int i = 0; i < siz; i++)
     {
@@ -212,7 +214,7 @@ static void run_pool_test(void)
     DBG("ALLOC BUFFER 1");
     int size = 50;
     float* buffer;
-    buffer = (float*) leaf_alloc(sizeof(float) * size);
+    buffer = (float*) leaf_alloc(&leaf, sizeof(float) * size);
     
     for (int i = 0; i < size; i++)
     {
@@ -225,7 +227,7 @@ static void run_pool_test(void)
     DBG("ALLOC BUFFER 2");
     size = 25;
     
-    buffer = (float*) leaf_alloc(sizeof(float) * size);
+    buffer = (float*) leaf_alloc(&leaf, sizeof(float) * size);
     
     leaf_pool_report();
     
@@ -233,14 +235,14 @@ static void run_pool_test(void)
     {
         buffer[i] = (float)(i*2);
     }
-    leaf_free((char*)buffer);
+    leaf_free(&leaf, (char*)buffer);
     
     leaf_pool_report();
     
     DBG("ALLOC BUFFER 3");
     size = 15;
     
-    buffer = (float*) leaf_alloc(sizeof(float) * size);
+    buffer = (float*) leaf_alloc(&leaf, sizeof(float) * size);
     
     for (int i = 0; i < size; i++)
     {

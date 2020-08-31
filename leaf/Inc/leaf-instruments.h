@@ -37,7 +37,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    t808Cowbell_init            (t808Cowbell* const, int useStick)
+     @fn void    t808Cowbell_init            (t808Cowbell* const, int useStick, LEAF* const leaf)
      @brief
      @param
      
@@ -101,7 +101,7 @@ extern "C" {
     
     typedef _t808Cowbell* t808Cowbell;
     
-    void    t808Cowbell_init            (t808Cowbell* const, int useStick);
+    void    t808Cowbell_init            (t808Cowbell* const, int useStick, LEAF* const leaf);
     void    t808Cowbell_initToPool      (t808Cowbell* const, int useStick, tMempool* const);
     void    t808Cowbell_free            (t808Cowbell* const);
     
@@ -122,7 +122,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    t808Hihat_init                  (t808Hihat* const)
+     @fn void    t808Hihat_init                  (t808Hihat* const, LEAF* const leaf)
      @brief
      @param
      
@@ -186,6 +186,7 @@ extern "C" {
     
     typedef struct _t808Hihat
     {
+        
         tMempool mempool;
         // 6 Square waves
         tSquare p[6];
@@ -206,7 +207,7 @@ extern "C" {
     
     typedef _t808Hihat* t808Hihat;
     
-    void    t808Hihat_init                  (t808Hihat* const);
+    void    t808Hihat_init                  (t808Hihat* const, LEAF* const leaf);
     void    t808Hihat_initToPool            (t808Hihat* const, tMempool* const);
     void    t808Hihat_free                  (t808Hihat* const);
     
@@ -231,7 +232,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    t808Snare_init                  (t808Snare* const)
+     @fn void    t808Snare_init                  (t808Snare* const, LEAF* const leaf)
      @brief
      @param
      
@@ -287,6 +288,7 @@ extern "C" {
     
     typedef struct _t808Snare
     {
+        
         tMempool mempool;
         // Tone 1, Tone 2, Noise
         tTriangle tone[2]; // Tri (not yet antialiased or wavetabled)
@@ -311,7 +313,7 @@ extern "C" {
     
     typedef _t808Snare* t808Snare;
     
-    void    t808Snare_init                  (t808Snare* const);
+    void    t808Snare_init                  (t808Snare* const, LEAF* const leaf);
     void    t808Snare_initToPool            (t808Snare* const, tMempool* const);
     void    t808Snare_free                  (t808Snare* const);
     
@@ -334,7 +336,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    t808Kick_init               (t808Kick* const)
+     @fn void    t808Kick_init               (t808Kick* const, LEAF* const leaf)
      @brief
      @param
      
@@ -390,6 +392,7 @@ extern "C" {
     
     typedef struct _t808Kick
     {
+        
         tMempool mempool;
         
         tCycle tone; // Tri
@@ -412,7 +415,7 @@ extern "C" {
     
     typedef _t808Kick* t808Kick;
     
-    void    t808Kick_init               (t808Kick* const);
+    void    t808Kick_init               (t808Kick* const, LEAF* const leaf);
     void    t808Kick_initToPool         (t808Kick* const, tMempool* const);
     void    t808Kick_free               (t808Kick* const);
     

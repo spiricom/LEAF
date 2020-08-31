@@ -19,9 +19,9 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ PRCReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tPRCReverb_init(tPRCReverb* const rev, float t60)
+void    tPRCReverb_init(tPRCReverb* const rev, float t60, LEAF* const leaf)
 {
-    tPRCReverb_initToPool(rev, t60, &leaf.mempool);
+    tPRCReverb_initToPool(rev, t60, &leaf->mempool);
 }
 
 void    tPRCReverb_initToPool   (tPRCReverb* const rev, float t60, tMempool* const mp)
@@ -29,13 +29,14 @@ void    tPRCReverb_initToPool   (tPRCReverb* const rev, float t60, tMempool* con
     _tMempool* m = *mp;
     _tPRCReverb* r = *rev = (_tPRCReverb*) mpool_alloc(sizeof(_tPRCReverb), m);
     r->mempool = m;
+    LEAF* leaf = r->mempool->leaf;
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
     r->inv_441 = 1.0f/44100.0f;
     
     int lengths[4] = { 341, 613, 1557, 2137 }; // Delay lengths for 44100 Hz sample rate.
-    double scaler = leaf.sampleRate * r->inv_441;
+    double scaler = leaf->sampleRate * r->inv_441;
     
     int delay, i;
     if (scaler != 1.0f)
@@ -84,12 +85,13 @@ void    tPRCRevert_clear(tPRCReverb* const rev)
 void    tPRCReverb_setT60(tPRCReverb* const rev, float t60)
 {
     _tPRCReverb* r = *rev;
+    LEAF* leaf = r->mempool->leaf;
     
     if ( t60 <= 0.0f ) t60 = 0.001f;
     
     r->t60 = t60;
     
-    r->combCoeff = powf(10.0f, (-3.0f * tDelay_getDelay(&r->combDelay) * leaf.invSampleRate / t60 ));
+    r->combCoeff = powf(10.0f, (-3.0f * tDelay_getDelay(&r->combDelay) * leaf->invSampleRate / t60 ));
     
 }
 
@@ -136,13 +138,15 @@ float   tPRCReverb_tick(tPRCReverb* const rev, float input)
 void     tPRCReverbSampleRateChanged (tPRCReverb* const rev)
 {
     _tPRCReverb* r = *rev;
-    r->combCoeff = powf(10.0f, (-3.0f * tDelay_getDelay(&r->combDelay) * leaf.invSampleRate / r->t60 ));
+    LEAF* leaf = r->mempool->leaf;
+    
+    r->combCoeff = powf(10.0f, (-3.0f * tDelay_getDelay(&r->combDelay) * leaf->invSampleRate / r->t60 ));
 }
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ NReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
-void    tNReverb_init(tNReverb* const rev, float t60)
+void    tNReverb_init(tNReverb* const rev, float t60, LEAF* const leaf)
 {
-    tNReverb_initToPool(rev, t60, &leaf.mempool);
+    tNReverb_initToPool(rev, t60, &leaf->mempool);
 }
 
 void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const mp)
@@ -150,13 +154,14 @@ void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const
     _tMempool* m = *mp;
     _tNReverb* r = *rev = (_tNReverb*) mpool_alloc(sizeof(_tNReverb), m);
     r->mempool = m;
+    LEAF* leaf = r->mempool->leaf;
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
     r->inv_441 = 1.0f/44100.0f;
     
     int lengths[15] = {1433, 1601, 1867, 2053, 2251, 2399, 347, 113, 37, 59, 53, 43, 37, 29, 19}; // Delay lengths for 44100 Hz sample rate.
-    double scaler = leaf.sampleRate / 25641.0f;
+    double scaler = leaf->sampleRate / 25641.0f;
     
     int delay, i;
     
@@ -174,7 +179,7 @@ void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const
     {
         tLinearDelay_initToPool(&r->combDelays[i], lengths[i], lengths[i] * 2, mp);
         tLinearDelay_clear(&r->combDelays[i]);
-        r->combCoeffs[i] = powf(10.0f, (-3.0f * (float)lengths[i] * leaf.invSampleRate / t60));
+        r->combCoeffs[i] = powf(10.0f, (-3.0f * (float)lengths[i] * leaf->invSampleRate / t60));
     }
     
     for ( i=0; i<8; i++ )
@@ -209,12 +214,13 @@ void    tNReverb_free (tNReverb* const rev)
 void    tNReverb_setT60(tNReverb* const rev, float t60)
 {
     _tNReverb* r = *rev;
+    LEAF* leaf = r->mempool->leaf;
     
     if (t60 <= 0.0f)           t60 = 0.001f;
     
     r->t60 = t60;
     
-    for (int i=0; i<6; i++)   r->combCoeffs[i] = powf(10.0f, (-3.0f * tLinearDelay_getDelay(&r->combDelays[i]) * leaf.invSampleRate / t60 ));
+    for (int i=0; i<6; i++)   r->combCoeffs[i] = powf(10.0f, (-3.0f * tLinearDelay_getDelay(&r->combDelays[i]) * leaf->invSampleRate / t60 ));
     
 }
 
@@ -351,7 +357,9 @@ void   tNReverb_tickStereo(tNReverb* const rev, float input, float* output)
 void     tNReverbSampleRateChanged (tNReverb* const rev)
 {
     _tNReverb* r = *rev;
-    for (int i=0; i<6; i++)   r->combCoeffs[i] = powf(10.0f, (-3.0f * tLinearDelay_getDelay(&r->combDelays[i]) * leaf.invSampleRate / r->t60 ));
+    LEAF* leaf = r->mempool->leaf;
+    
+    for (int i=0; i<6; i++)   r->combCoeffs[i] = powf(10.0f, (-3.0f * tLinearDelay_getDelay(&r->combDelays[i]) * leaf->invSampleRate / r->t60 ));
 }
 
 // ======================================DATTORRO=========================================
@@ -362,9 +370,9 @@ float       in_allpass_delays[4] = { 4.771f, 3.595f, 12.73f, 9.307f };
 float       in_allpass_gains[4] = { 0.75f, 0.75f, 0.625f, 0.625f };
 
 
-void    tDattorroReverb_init              (tDattorroReverb* const rev)
+void    tDattorroReverb_init              (tDattorroReverb* const rev, LEAF* const leaf)
 {
-    tDattorroReverb_initToPool(rev, &leaf.mempool);
+    tDattorroReverb_initToPool(rev, &leaf->mempool);
 }
 
 void    tDattorroReverb_initToPool        (tDattorroReverb* const rev, tMempool* const mp)
@@ -372,10 +380,11 @@ void    tDattorroReverb_initToPool        (tDattorroReverb* const rev, tMempool*
     _tMempool* m = *mp;
     _tDattorroReverb* r = *rev = (_tDattorroReverb*) mpool_alloc(sizeof(_tDattorroReverb), m);
     r->mempool = m;
+    LEAF* leaf = r->mempool->leaf;
     
     r->size_max = 2.0f;
     r->size = 1.f;
-    r->t = r->size * leaf.sampleRate * 0.001f;
+    r->t = r->size * leaf->sampleRate * 0.001f;
     r->frozen = 0;
     // INPUT
     tTapeDelay_initToPool(&r->in_delay, 0.f, SAMP(200.f), mp);
@@ -763,9 +772,10 @@ void    tDattorroReverb_setHP           (tDattorroReverb* const rev, float freq)
 void    tDattorroReverb_setSize           (tDattorroReverb* const rev, float size)
 {
     _tDattorroReverb* r = *rev;
+    LEAF* leaf = r->mempool->leaf;
     
     r->size = LEAF_clip(0.01f, size*r->size_max, r->size_max);
-    r->t = r->size * leaf.sampleRate * 0.001f;
+    r->t = r->size * leaf->sampleRate * 0.001f;
     
     /*
      for (int i = 0; i < 4; i++)

@@ -34,7 +34,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
+     @fn void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, LEAF* const leaf)
      @brief
      @param
      
@@ -108,6 +108,7 @@ extern "C" {
     typedef _tWDF* tWDF;
     struct _tWDF
     {
+        
         tMempool mempool;
         WDFComponentType type;
         float port_resistance_up;
@@ -134,7 +135,7 @@ extern "C" {
     };
     
     //WDF Linear Components
-    void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR);
+    void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, LEAF* const leaf);
     void    tWDF_initToPool             (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const);
     void    tWDF_free                   (tWDF* const);
     

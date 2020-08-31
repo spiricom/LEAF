@@ -18,58 +18,56 @@
 
 #endif
 
-LEAF leaf;
-
-void LEAF_init(float sr, int blocksize, char* memory, size_t memorysize, float(*random)(void))
-
+void LEAF_init(LEAF* const leaf, float sr, int blocksize, char* memory, size_t memorysize, float(*random)(void))
 {
-    leaf_pool_init(memory, memorysize);
+    leaf->_internal_mempool.leaf = leaf;
+    leaf_pool_init(leaf, memory, memorysize);
     
-    leaf.sampleRate = sr;
+    leaf->sampleRate = sr;
 
-    leaf.blockSize = blocksize;
+    leaf->blockSize = blocksize;
     
-    leaf.invSampleRate = 1.0f/sr;
+    leaf->invSampleRate = 1.0f/sr;
     
-    leaf.twoPiTimesInvSampleRate = leaf.invSampleRate * TWO_PI;
+    leaf->twoPiTimesInvSampleRate = leaf->invSampleRate * TWO_PI;
 
-    leaf.random = random;
+    leaf->random = random;
     
-    leaf.clearOnAllocation = 0;
+    leaf->clearOnAllocation = 0;
     
-    leaf.errorCallback = &LEAF_defaultErrorCallback;
+    leaf->errorCallback = &LEAF_defaultErrorCallback;
     
     for (int i = 0; i < LEAFErrorNil; ++i)
-        leaf.errorState[i] = 0;
+        leaf->errorState[i] = 0;
 }
 
 
 #define LEAFSampleRateChanged(THIS) leaf.THIS.sampleRateChanged(&leaf.THIS)
 
-void LEAF_setSampleRate(float sampleRate)
+void LEAF_setSampleRate(LEAF* const leaf, float sampleRate)
 {
-    leaf.sampleRate = sampleRate;
-    leaf.invSampleRate = 1.0f/sampleRate;
+    leaf->sampleRate = sampleRate;
+    leaf->invSampleRate = 1.0f/sampleRate;
 }
 
-float LEAF_getSampleRate()
+float LEAF_getSampleRate(LEAF* const leaf)
 {
-    return leaf.sampleRate;
+    return leaf->sampleRate;
 }
 
-void LEAF_defaultErrorCallback(LEAFErrorType whichone)
+void LEAF_defaultErrorCallback(LEAF* const leaf, LEAFErrorType whichone)
 {
     // Not sure what this should do if anything
     // Maybe fine as a placeholder
 }
 
-void LEAF_internalErrorCallback(LEAFErrorType whichone)
+void LEAF_internalErrorCallback(LEAF* const leaf, LEAFErrorType whichone)
 {
-    leaf.errorState[whichone] = 1;
-    leaf.errorCallback(whichone);
+    leaf->errorState[whichone] = 1;
+    leaf->errorCallback(leaf, whichone);
 }
 
-void LEAF_setErrorCallback(void (*callback)(LEAFErrorType))
+void LEAF_setErrorCallback(LEAF* const leaf, void (*callback)(LEAF* const, LEAFErrorType))
 {
-    leaf.errorCallback = callback;
+    leaf->errorCallback = callback;
 }

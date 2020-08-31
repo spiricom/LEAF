@@ -35,7 +35,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tSampleReducer_init    (tSampleReducer* const)
+     @fn void    tSampleReducer_init    (tSampleReducer* const, LEAF* const leaf)
      @brief
      @param
      
@@ -59,6 +59,7 @@ extern "C" {
     
     typedef struct _tSampleReducer
     {
+        
         tMempool mempool;
         float invRatio;
         float hold;
@@ -67,7 +68,7 @@ extern "C" {
     
     typedef _tSampleReducer* tSampleReducer;
     
-    void    tSampleReducer_init    (tSampleReducer* const);
+    void    tSampleReducer_init    (tSampleReducer* const, LEAF* const leaf);
     void    tSampleReducer_initToPool   (tSampleReducer* const, tMempool* const);
     void    tSampleReducer_free    (tSampleReducer* const);
     
@@ -82,7 +83,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tOversampler_init           (tOversampler* const, int order, int extraQuality)
+     @fn void    tOversampler_init           (tOversampler* const, int order, int extraQuality, LEAF* const leaf)
      @brief
      @param
      
@@ -114,6 +115,7 @@ extern "C" {
     
     typedef struct _tOversampler
     {
+        
         tMempool mempool;
         int ratio;
         float* pCoeffs;
@@ -125,7 +127,7 @@ extern "C" {
     
     typedef _tOversampler* tOversampler;
     
-    void    tOversampler_init           (tOversampler* const, int order, int extraQuality);
+    void    tOversampler_init           (tOversampler* const, int order, int extraQuality, LEAF* const leaf);
     void    tOversampler_initToPool     (tOversampler* const, int order, int extraQuality, tMempool* const);
     void    tOversampler_free           (tOversampler* const);
     
@@ -142,7 +144,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tLockhartWavefolder_init    (tLockhartWavefolder* const)
+     @fn void    tLockhartWavefolder_init    (tLockhartWavefolder* const, LEAF* const leaf)
      @brief
      @param
      
@@ -162,6 +164,7 @@ extern "C" {
     
     typedef struct _tLockhartWavefolder
     {
+        
         tMempool mempool;
         
         double Ln1;
@@ -193,7 +196,7 @@ extern "C" {
     
     typedef _tLockhartWavefolder* tLockhartWavefolder;
     
-    void    tLockhartWavefolder_init    (tLockhartWavefolder* const);
+    void    tLockhartWavefolder_init    (tLockhartWavefolder* const, LEAF* const leaf);
     void    tLockhartWavefolder_initToPool   (tLockhartWavefolder* const, tMempool* const);
     void    tLockhartWavefolder_free    (tLockhartWavefolder* const);
     
@@ -207,7 +210,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tCrusher_init    (tCrusher* const)
+     @fn void    tCrusher_init    (tCrusher* const, LEAF* const leaf)
      @brief
      @param
      
@@ -243,6 +246,7 @@ extern "C" {
     
     typedef struct _tCrusher
     {
+        
         tMempool mempool;
         
         float srr;
@@ -258,7 +262,7 @@ extern "C" {
     
     typedef _tCrusher* tCrusher;
     
-    void    tCrusher_init    (tCrusher* const);
+    void    tCrusher_init    (tCrusher* const, LEAF* const leaf);
     void    tCrusher_initToPool   (tCrusher* const, tMempool* const);
     void    tCrusher_free    (tCrusher* const);
     

@@ -36,7 +36,7 @@ extern "C" {
      @brief Schroeder allpass. Comb-filter with feedforward and feedback.
      @{
      
-     @fn void    tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay)
+     @fn void    tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay, LEAF* const leaf)
      @brief
      @param
      
@@ -64,6 +64,7 @@ extern "C" {
     
     typedef struct _tAllpass
     {
+        
         tMempool mempool;
         
         float gain;
@@ -75,7 +76,7 @@ extern "C" {
     
     typedef _tAllpass* tAllpass;
     
-    void    tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay);
+    void    tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay, LEAF* const leaf);
     void    tAllpass_initToPool     (tAllpass* const, float initDelay, uint32_t maxDelay, tMempool* const);
     void    tAllpass_free           (tAllpass* const);
     
@@ -92,7 +93,7 @@ extern "C" {
      @brief OnePole filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tOnePole_init           (tOnePole* const, float thePole)
+     @fn void    tOnePole_init           (tOnePole* const, float thePole, LEAF* const leaf)
      @brief
      @param
      
@@ -136,6 +137,7 @@ extern "C" {
     
     typedef struct _tOnePole
     {
+        
         tMempool mempool;
         float gain;
         float a0,a1;
@@ -145,7 +147,7 @@ extern "C" {
     
     typedef _tOnePole* tOnePole;
     
-    void    tOnePole_init           (tOnePole* const, float thePole);
+    void    tOnePole_init           (tOnePole* const, float thePole, LEAF* const leaf);
     void    tOnePole_initToPool     (tOnePole* const, float thePole, tMempool* const);
     void    tOnePole_free           (tOnePole* const);
     
@@ -165,7 +167,7 @@ extern "C" {
      @brief TwoPole filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tTwoPole_init           (tTwoPole* const)
+     @fn void    tTwoPole_init           (tTwoPole* const, LEAF* const leaf)
      @brief
      @param
      
@@ -209,6 +211,7 @@ extern "C" {
 
     typedef struct _tTwoPole
     {
+        
         tMempool mempool;
         
         float gain;
@@ -223,7 +226,7 @@ extern "C" {
     
     typedef _tTwoPole* tTwoPole;
     
-    void    tTwoPole_init           (tTwoPole* const);
+    void    tTwoPole_init           (tTwoPole* const, LEAF* const leaf);
     void    tTwoPole_initToPool     (tTwoPole* const, tMempool* const);
     void    tTwoPole_free           (tTwoPole* const);
     
@@ -243,7 +246,7 @@ extern "C" {
      @brief OneZero filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tOneZero_init           (tOneZero* const, float theZero)
+     @fn void    tOneZero_init           (tOneZero* const, float theZero, LEAF* const leaf)
      @brief
      @param
      
@@ -287,6 +290,7 @@ extern "C" {
     
     typedef struct _tOneZero
     {
+        
         tMempool mempool;
         float gain;
         float b0,b1;
@@ -295,7 +299,7 @@ extern "C" {
     
     typedef _tOneZero* tOneZero;
     
-    void    tOneZero_init           (tOneZero* const, float theZero);
+    void    tOneZero_init           (tOneZero* const, float theZero, LEAF* const leaf);
     void    tOneZero_initToPool     (tOneZero* const, float theZero, tMempool* const);
     void    tOneZero_free           (tOneZero* const);
     
@@ -315,7 +319,7 @@ extern "C" {
      @brief TwoZero filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tTwoZero_init           (tTwoZero* const)
+     @fn void    tTwoZero_init           (tTwoZero* const, LEAF* const leaf)
      @brief
      @param
      
@@ -360,6 +364,7 @@ extern "C" {
 
     typedef struct _tTwoZero
     {
+        
         tMempool mempool;
         
         float gain;
@@ -372,7 +377,7 @@ extern "C" {
     
     typedef _tTwoZero* tTwoZero;
     
-    void    tTwoZero_init           (tTwoZero* const);
+    void    tTwoZero_init           (tTwoZero* const, LEAF* const leaf);
     void    tTwoZero_initToPool     (tTwoZero* const, tMempool* const);
     void    tTwoZero_free           (tTwoZero* const);
     
@@ -392,7 +397,7 @@ extern "C" {
      @brief PoleZero filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tPoleZero_init              (tPoleZero* const)
+     @fn void    tPoleZero_init              (tPoleZero* const, LEAF* const leaf)
      @brief
      @param
      
@@ -442,6 +447,7 @@ extern "C" {
     
     typedef struct _tPoleZero
     {
+        
         tMempool mempool;
         
         float gain;
@@ -453,7 +459,7 @@ extern "C" {
     
     typedef _tPoleZero* tPoleZero;
     
-    void    tPoleZero_init              (tPoleZero* const);
+    void    tPoleZero_init              (tPoleZero* const, LEAF* const leaf);
     void    tPoleZero_initToPool        (tPoleZero* const, tMempool* const);
     void    tPoleZero_free              (tPoleZero* const);
     
@@ -474,7 +480,7 @@ extern "C" {
      @brief BiQuad filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tBiQuad_init           (tBiQuad* const)
+     @fn void    tBiQuad_init           (tBiQuad* const, LEAF* const leaf)
      @brief
      @param
      
@@ -532,6 +538,7 @@ extern "C" {
     
     typedef struct _tBiQuad
     {
+        
         tMempool mempool;
         
         float gain;
@@ -547,7 +554,7 @@ extern "C" {
     
     typedef _tBiQuad* tBiQuad;
     
-    void    tBiQuad_init           (tBiQuad* const);
+    void    tBiQuad_init           (tBiQuad* const, LEAF* const leaf);
     void    tBiQuad_initToPool     (tBiQuad* const, tMempool* const);
     void    tBiQuad_free           (tBiQuad* const);
     
@@ -570,7 +577,7 @@ extern "C" {
      @brief State Variable Filter, algorithm from Andy Simper.
      @{
      
-     @fn void    tSVF_init           (tSVF* const, SVFType type, float freq, float Q)
+     @fn void    tSVF_init           (tSVF* const, SVFType type, float freq, float Q, LEAF* const leaf)
      @brief
      @param
      
@@ -613,6 +620,7 @@ extern "C" {
     
     typedef struct _tSVF
     {
+        
         tMempool mempool;
         SVFType type;
         float cutoff, Q;
@@ -622,7 +630,7 @@ extern "C" {
     
     typedef _tSVF* tSVF;
     
-    void    tSVF_init           (tSVF* const, SVFType type, float freq, float Q);
+    void    tSVF_init           (tSVF* const, SVFType type, float freq, float Q, LEAF* const leaf);
     void    tSVF_initToPool     (tSVF* const, SVFType type, float freq, float Q, tMempool* const);
     void    tSVF_free           (tSVF* const);
     
@@ -639,7 +647,7 @@ extern "C" {
      @brief Efficient State Variable Filter for 14-bit control input, [0, 4096).
      @{
      
-     @fn void    tEfficientSVF_init          (tEfficientSVF* const, SVFType type, uint16_t input, float Q)
+     @fn void    tEfficientSVF_init          (tEfficientSVF* const, SVFType type, uint16_t input, float Q, LEAF* const leaf)
      @brief
      @param
      
@@ -667,6 +675,7 @@ extern "C" {
     
     typedef struct _tEfficientSVF
     {
+        
         tMempool mempool;
         SVFType type;
         float cutoff, Q;
@@ -676,7 +685,7 @@ extern "C" {
     
     typedef _tEfficientSVF* tEfficientSVF;
     
-    void    tEfficientSVF_init          (tEfficientSVF* const, SVFType type, uint16_t input, float Q);
+    void    tEfficientSVF_init          (tEfficientSVF* const, SVFType type, uint16_t input, float Q, LEAF* const leaf);
     void    tEfficientSVF_initToPool    (tEfficientSVF* const, SVFType type, uint16_t input, float Q, tMempool* const);
     void    tEfficientSVF_free          (tEfficientSVF* const);
     
@@ -692,7 +701,7 @@ extern "C" {
      @brief Simple Highpass filter.
      @{
      
-     @fn void    tHighpass_init          (tHighpass* const, float freq)
+     @fn void    tHighpass_init          (tHighpass* const, float freq, LEAF* const leaf)
      @brief
      @param
      
@@ -720,6 +729,7 @@ extern "C" {
     
     typedef struct _tHighpass
     {
+        
         tMempool mempool;
         float xs, ys, R;
         float frequency;
@@ -727,7 +737,7 @@ extern "C" {
     
     typedef _tHighpass* tHighpass;
     
-    void    tHighpass_init          (tHighpass* const, float freq);
+    void    tHighpass_init          (tHighpass* const, float freq, LEAF* const leaf);
     void    tHighpass_initToPool    (tHighpass* const, float freq, tMempool* const);
     void    tHighpass_free          (tHighpass* const);
     
@@ -743,7 +753,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tButterworth_init           (tButterworth* const, int N, float f1, float f2)
+     @fn void    tButterworth_init           (tButterworth* const, int N, float f1, float f2, LEAF* const leaf, LEAF* const leaf)
      @brief
      @param
      
@@ -776,6 +786,7 @@ extern "C" {
 #define NUM_SVF_BW 16
     typedef struct _tButterworth
     {
+        
         tMempool mempool;
         
         float gain;
@@ -790,7 +801,7 @@ extern "C" {
     
     typedef _tButterworth* tButterworth;
     
-    void    tButterworth_init           (tButterworth* const, int N, float f1, float f2);
+    void    tButterworth_init           (tButterworth* const, int N, float f1, float f2, LEAF* const leaf);
     void    tButterworth_initToPool     (tButterworth* const, int N, float f1, float f2, tMempool* const);
     void    tButterworth_free           (tButterworth* const);
     
@@ -807,7 +818,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tFIR_init           (tFIR* const, float* coeffs, int numTaps)
+     @fn void    tFIR_init           (tFIR* const, float* coeffs, int numTaps, LEAF* const leaf)
      @brief
      @param
      
@@ -827,6 +838,7 @@ extern "C" {
     
     typedef struct _tFIR
     {
+        
         tMempool mempool;
         float* past;
         float* coeff;
@@ -835,7 +847,7 @@ extern "C" {
     
     typedef _tFIR* tFIR;
     
-    void    tFIR_init           (tFIR* const, float* coeffs, int numTaps);
+    void    tFIR_init           (tFIR* const, float* coeffs, int numTaps, LEAF* const leaf);
     void    tFIR_initToPool     (tFIR* const, float* coeffs, int numTaps, tMempool* const);
     void    tFIR_free           (tFIR* const);
     
@@ -850,7 +862,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tMedianFilter_init           (tMedianFilter* const, int size)
+     @fn void    tMedianFilter_init           (tMedianFilter* const, int size, LEAF* const leaf)
      @brief
      @param
      
@@ -870,6 +882,7 @@ extern "C" {
     
     typedef struct _tMedianFilter
     {
+        
         tMempool mempool;
         float* val;
         int* age;
@@ -882,7 +895,7 @@ extern "C" {
     
     typedef _tMedianFilter* tMedianFilter;
     
-    void    tMedianFilter_init           (tMedianFilter* const, int size);
+    void    tMedianFilter_init           (tMedianFilter* const, int size, LEAF* const leaf);
     void    tMedianFilter_initToPool     (tMedianFilter* const, int size, tMempool* const);
     void    tMedianFilter_free           (tMedianFilter* const);
     
@@ -895,7 +908,7 @@ extern "C" {
      @brief Vadim Zavalishin style from VA book (from implementation in RSlib posted to kvr forum)
      @{
      
-     @fn void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q)
+     @fn void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q, LEAF* const leaf)
      @brief
      @param
      
@@ -965,6 +978,7 @@ extern "C" {
     
     typedef struct _tVZFilter
     {
+        
         tMempool mempool;
         
         VZFilterType type;
@@ -990,7 +1004,7 @@ extern "C" {
     
     typedef _tVZFilter* tVZFilter;
     
-    void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q);
+    void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q, LEAF* const leaf);
     void    tVZFilter_initToPool     (tVZFilter* const, VZFilterType type, float freq, float Q, tMempool* const);
     void    tVZFilter_free           (tVZFilter* const);
     
@@ -1012,7 +1026,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q)
+     @fn void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q, LEAF* const leaf)
      @brief
      @param
      
@@ -1041,6 +1055,7 @@ extern "C" {
     //diode ladder filter
     typedef struct _tDiodeFilter
     {
+        
         tMempool mempool;
         float f;
         float r;
@@ -1056,7 +1071,7 @@ extern "C" {
     
     typedef _tDiodeFilter* tDiodeFilter;
     
-    void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q);
+    void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q, LEAF* const leaf);
     void    tDiodeFilter_initToPool     (tDiodeFilter* const, float freq, float Q, tMempool* const);
     void    tDiodeFilter_free           (tDiodeFilter* const);
     

@@ -42,7 +42,7 @@ extern "C" {
      @brief Karplus-Strong model
      @{
      
-     @fn void    tPluck_init          (tPluck* const, float lowestFrequency)
+     @fn void    tPluck_init          (tPluck* const, float lowestFrequency, LEAF* const leaf)
      @brief
      @param
      
@@ -86,6 +86,7 @@ extern "C" {
     
     typedef struct _tPluck
     {
+        
         tMempool mempool;
         
         tAllpassDelay     delayLine; // Allpass or Linear??  big difference...
@@ -102,7 +103,7 @@ extern "C" {
     
     typedef _tPluck* tPluck;
     
-    void    tPluck_init          (tPluck* const, float lowestFrequency); //float delayBuff[DELAY_LENGTH]);
+    void    tPluck_init          (tPluck* const, float lowestFrequency, LEAF* const leaf); //float delayBuff[DELAY_LENGTH]);
     void    tPluck_initToPool    (tPluck* const, float lowestFrequency, tMempool* const);
     void    tPluck_free          (tPluck* const);
     
@@ -122,7 +123,7 @@ extern "C" {
      @brief Stiff Karplus-Strong model
      @{
      
-     @fn void    tKarplusStrong_init               (tKarplusStrong* const, float lowestFrequency)
+     @fn void    tKarplusStrong_init               (tKarplusStrong* const, float lowestFrequency, LEAF* const leaf)
      @brief
      @param
      
@@ -186,6 +187,7 @@ extern "C" {
     
     typedef struct _tKarplusStrong
     {
+        
         tMempool mempool;
         
         tAllpassDelay  delayLine;
@@ -208,7 +210,7 @@ extern "C" {
     
     typedef _tKarplusStrong* tKarplusStrong;
     
-    void    tKarplusStrong_init               (tKarplusStrong* const, float lowestFrequency); // float delayBuff[2][DELAY_LENGTH]);
+    void    tKarplusStrong_init               (tKarplusStrong* const, float lowestFrequency, LEAF* const leaf); // float delayBuff[2][DELAY_LENGTH]);
     void    tKarplusStrong_initToPool         (tKarplusStrong* const, float lowestFrequency, tMempool* const);
     void    tKarplusStrong_free               (tKarplusStrong* const);
     
@@ -231,7 +233,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tSimpleLivingString_init   (tSimpleLivingString* const, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode)
+     @fn void    tSimpleLivingString_init   (tSimpleLivingString* const, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)
      @brief
      @param
      
@@ -287,6 +289,7 @@ extern "C" {
     
     typedef struct _tSimpleLivingString
     {
+        
         tMempool mempool;
         float freq, waveLengthInSamples;        // the frequency of the string, determining delay length
         float dampFreq;    // frequency for the bridge LP filter, in Hz
@@ -304,7 +307,7 @@ extern "C" {
     
     void    tSimpleLivingString_init                (tSimpleLivingString* const, float freq, float dampFreq,
                                                      float decay, float targetLev, float levSmoothFactor,
-                                                     float levStrength, int levMode);
+                                                     float levStrength, int levMode, LEAF* const leaf);
     void    tSimpleLivingString_initToPool          (tSimpleLivingString* const, float freq, float dampFreq,
                                                      float decay, float targetLev, float levSmoothFactor,
                                                      float levStrength, int levMode, tMempool* const);
@@ -329,7 +332,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tLivingString_init                  (tLivingString* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode)
+     @fn void    tLivingString_init                  (tLivingString* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)
      @brief
      @param
      
@@ -393,6 +396,7 @@ extern "C" {
     
     typedef struct _tLivingString
     {
+        
         tMempool mempool;
         float freq, waveLengthInSamples;        // the frequency of the whole string, determining delay length
         float pickPos;    // the pick position, dividing the string in two, in ratio
@@ -412,7 +416,7 @@ extern "C" {
     
     void    tLivingString_init                  (tLivingString* const, float freq, float pickPos, float prepIndex,
                                                  float dampFreq, float decay, float targetLev, float levSmoothFactor,
-                                                 float levStrength, int levMode);
+                                                 float levStrength, int levMode, LEAF* const leaf);
     void    tLivingString_initToPool            (tLivingString* const, float freq, float pickPos, float prepIndex,
                                                  float dampFreq, float decay, float targetLev, float levSmoothFactor,
                                                  float levStrength, int levMode, tMempool* const);
@@ -441,7 +445,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tComplexLivingString_init  (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode)
+     @fn void    tComplexLivingString_init  (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)
      @brief
      @param
      
@@ -509,6 +513,7 @@ extern "C" {
     
     typedef struct _tComplexLivingString
     {
+        
         tMempool mempool;
         float freq, waveLengthInSamples;        // the frequency of the whole string, determining delay length
         float pickPos;    // the pick position, dividing the string, in ratio
@@ -528,12 +533,14 @@ extern "C" {
 
     typedef _tComplexLivingString* tComplexLivingString;
 
-    void    tComplexLivingString_init                  (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex,
-                                                 float dampFreq, float decay, float targetLev, float levSmoothFactor,
-                                                 float levStrength, int levMode);
-    void    tComplexLivingString_initToPool            (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex,
-                                                 float dampFreq, float decay, float targetLev, float levSmoothFactor,
-                                                 float levStrength, int levMode, tMempool* const);
+    void    tComplexLivingString_init                  (tComplexLivingString* const, float freq, float pickPos,
+                                                        float prepPos, float prepIndex, float dampFreq,
+                                                        float decay, float targetLev, float levSmoothFactor,
+                                                        float levStrength, int levMode, LEAF* const leaf);
+    void    tComplexLivingString_initToPool            (tComplexLivingString* const, float freq, float pickPos,
+                                                        float prepPos, float prepIndex, float dampFreq,
+                                                        float decay, float targetLev, float levSmoothFactor,
+                                                        float levStrength, int levMode, tMempool* const);
     void    tComplexLivingString_free                  (tComplexLivingString* const);
 
     float   tComplexLivingString_tick                  (tComplexLivingString* const, float input);
@@ -559,7 +566,7 @@ extern "C" {
      @brief Reed Table - borrowed from STK
      @{
      
-     @fn void    tReedTable_init         (tReedTable* const, float offset, float slope)
+     @fn void    tReedTable_init         (tReedTable* const, float offset, float slope, LEAF* const leaf)
      @brief
      @param
      
@@ -591,13 +598,14 @@ extern "C" {
 
     typedef struct _tReedTable
     {
+        
         tMempool mempool;
         float offset, slope;
     } _tReedTable;
     
     typedef _tReedTable* tReedTable;
     
-    void    tReedTable_init         (tReedTable* const, float offset, float slope);
+    void    tReedTable_init         (tReedTable* const, float offset, float slope, LEAF* const leaf);
     void    tReedTable_initToPool   (tReedTable* const, float offset, float slope, tMempool* const);
     void    tReedTable_free         (tReedTable* const);
     

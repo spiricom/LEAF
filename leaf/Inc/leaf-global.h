@@ -21,6 +21,7 @@ extern "C" {
      * @ingroup leaf
      * @brief The struct of the global LEAF instance `leaf`. Contains global variables and settings.
      */
+    
     struct LEAF
     {
         ///@{ 
@@ -33,14 +34,11 @@ extern "C" {
         tMempool mempool; //!< The default LEAF mempool object.
         _tMempool _internal_mempool;
         size_t header_size; //!< The size in bytes of memory region headers within mempools.
-        void (*errorCallback)(LEAFErrorType); //!< A pointer to the callback function for LEAF errors. Can be set by the user.
+        void (*errorCallback)(LEAF* const, LEAFErrorType); //!< A pointer to the callback function for LEAF errors. Can be set by the user.
         int     errorState[LEAFErrorNil]; //!< An array of flags that indicate which errors have occurred.
         
         ///@}
     };
-    typedef struct LEAF LEAF;
-    
-    extern LEAF leaf;
     
     //==============================================================================
     

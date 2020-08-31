@@ -32,9 +32,9 @@
 // -JS
 
 
-void tTalkbox_init (tTalkbox* const voc, int bufsize)
+void tTalkbox_init (tTalkbox* const voc, int bufsize, LEAF* const leaf)
 {
-    tTalkbox_initToPool(voc, bufsize, &leaf.mempool);
+    tTalkbox_initToPool(voc, bufsize, &leaf->mempool);
 }
 
 void tTalkbox_initToPool (tTalkbox* const voc, int bufsize, tMempool* const mp)
@@ -86,8 +86,9 @@ void tTalkbox_free (tTalkbox* const voc)
 void tTalkbox_update(tTalkbox* const voc) ///update internal parameters...
 {
     _tTalkbox* v = *voc;
+    LEAF* leaf = v->mempool->leaf;
     
-    float fs = leaf.sampleRate;
+    float fs = leaf->sampleRate;
     if(fs <  8000.0f) fs =  8000.0f;
     if(fs > 96000.0f) fs = 96000.0f;
     
@@ -316,8 +317,10 @@ void tTalkbox_lpc(float *buf, float *car, double* dl, double* Rt, int32_t n, int
 void tTalkbox_setQuality(tTalkbox* const voc, float quality)
 {
     _tTalkbox* v = *voc;
+    LEAF* leaf = v->mempool->leaf;
+    
     v->param[3] = quality;
-    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf.sampleRate);
+    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf->sampleRate);
     if (v->O >= ORD_MAX)
     {
         v->O = ORD_MAX-1;
@@ -358,9 +361,9 @@ void tTalkbox_setFreeze(tTalkbox* const voc, float freeze)
 // -JS
 
 
-void tTalkboxFloat_init (tTalkboxFloat* const voc, int bufsize)
+void tTalkboxFloat_init (tTalkboxFloat* const voc, int bufsize, LEAF* const leaf)
 {
-    tTalkboxFloat_initToPool(voc, bufsize, &leaf.mempool);
+    tTalkboxFloat_initToPool(voc, bufsize, &leaf->mempool);
 }
 
 void tTalkboxFloat_initToPool (tTalkboxFloat* const voc, int bufsize, tMempool* const mp)
@@ -412,8 +415,9 @@ void tTalkboxFloat_free (tTalkboxFloat* const voc)
 void tTalkboxFloat_update(tTalkboxFloat* const voc) ///update internal parameters...
 {
     _tTalkboxFloat* v = *voc;
-
-    float fs = leaf.sampleRate;
+    LEAF* leaf = v->mempool->leaf;
+    
+    float fs = leaf->sampleRate;
     if(fs <  8000.0f) fs =  8000.0f;
     if(fs > 96000.0f) fs = 96000.0f;
 
@@ -643,8 +647,10 @@ void tTalkboxFloat_lpc(float *buf, float *car, float* dl, float* Rt, int32_t n, 
 void tTalkboxFloat_setQuality(tTalkboxFloat* const voc, float quality)
 {
     _tTalkboxFloat* v = *voc;
+    LEAF* leaf = v->mempool->leaf;
+    
     v->param[3] = quality;
-    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf.sampleRate);
+    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf->sampleRate);
     if (v->O >= ORD_MAX)
     {
         v->O = ORD_MAX-1;
@@ -677,9 +683,9 @@ void tTalkboxFloat_setFreeze(tTalkboxFloat* const voc, int freeze)
 // VOCODER
 //============================================================================================================
 
-void tVocoder_init (tVocoder* const voc)
+void tVocoder_init (tVocoder* const voc, LEAF* const leaf)
 {
-    tVocoder_initToPool(voc, &leaf.mempool);
+    tVocoder_initToPool(voc, &leaf->mempool);
 }
 
 void tVocoder_initToPool (tVocoder* const voc, tMempool* const mp)
@@ -710,8 +716,9 @@ void tVocoder_free (tVocoder* const voc)
 void        tVocoder_update      (tVocoder* const voc)
 {
     _tVocoder* v = *voc;
+    LEAF* leaf = v->mempool->leaf;
     
-    float tpofs = 6.2831853f * leaf.invSampleRate;
+    float tpofs = 6.2831853f * leaf->invSampleRate;
     
     float rr, th;
     
@@ -872,9 +879,9 @@ void        tVocoder_suspend     (tVocoder* const voc)
 
 /// Glottal Pulse (Rosenberg model)
 
-void tRosenbergGlottalPulse_init (tRosenbergGlottalPulse* const gp)
+void tRosenbergGlottalPulse_init (tRosenbergGlottalPulse* const gp, LEAF* const leaf)
 {
-    tRosenbergGlottalPulse_initToPool(gp, &leaf.mempool);
+    tRosenbergGlottalPulse_initToPool(gp, &leaf->mempool);
 }
 
 void tRosenbergGlottalPulse_initToPool (tRosenbergGlottalPulse* const gp, tMempool* const mp)
@@ -957,8 +964,10 @@ float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const g
 void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const gp, float freq)
 {
     _tRosenbergGlottalPulse* g = *gp;
+    LEAF* leaf = g->mempool->leaf;
+    
     g->freq = freq;
-    g->inc = freq * leaf.invSampleRate;
+    g->inc = freq * leaf->invSampleRate;
 }
 
 void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const gp, float openLength)
@@ -1002,9 +1011,9 @@ static void pitchup(_tSOLAD *w, float *out);
 /******************************************************************************/
 
 // init
-void tSOLAD_init (tSOLAD* const wp)
+void tSOLAD_init (tSOLAD* const wp, LEAF* const leaf)
 {
-    tSOLAD_initToPool(wp, &leaf.mempool);
+    tSOLAD_initToPool(wp, &leaf->mempool);
 }
 
 void tSOLAD_initToPool (tSOLAD* const wp, tMempool* const mp)
@@ -1357,9 +1366,9 @@ static int pitchshift_attackdetect(_tPitchShift* ps)
     return (p->fba == 0 && (p->max > 60 && p->deltamax > 6)) ? 1 : 0;
 }
 
-void tPitchShift_init (tPitchShift* const psr, tPeriodDetection* pd, float* out, int bufSize)
+void tPitchShift_init (tPitchShift* const psr, tPeriodDetection* pd, float* out, int bufSize, LEAF* const leaf)
 {
-    tPitchShift_initToPool(psr, pd, out, bufSize, &leaf.mempool);
+    tPitchShift_initToPool(psr, pd, out, bufSize, &leaf->mempool);
 }
 
 void tPitchShift_initToPool (tPitchShift* const psr, tPeriodDetection* const pd, float* out, int bufSize, tMempool* const mp)
@@ -1440,6 +1449,7 @@ float tPitchShift_shiftToFreq (tPitchShift* psr, float freq)
 {
     _tPitchShift* ps = *psr;
     _tPeriodDetection* p = *ps->p;
+    LEAF* leaf = ps->mempool->leaf;
     
     float period, out;
     int i, iLast;
@@ -1461,7 +1471,7 @@ float tPitchShift_shiftToFreq (tPitchShift* psr, float freq)
         
         tSOLAD_setPeriod(&ps->sola, period);
         
-        if (period != 0) ps->pitchFactor = period*freq*leaf.invSampleRate;
+        if (period != 0) ps->pitchFactor = period * freq * leaf->invSampleRate;
         else ps->pitchFactor = 1.0f;
         
         tSOLAD_setPitchFactor(&ps->sola, ps->pitchFactor);
@@ -1514,9 +1524,9 @@ float tPitchShift_shiftToFunc (tPitchShift* psr, float (*fun)(float))
 // RETUNE
 //============================================================================================================
 
-void tRetune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize)
+void tRetune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
 {
-    tRetune_initToPool(rt, numVoices, bufSize, frameSize, &leaf.mempool);
+    tRetune_initToPool(rt, numVoices, bufSize, frameSize, &leaf->mempool);
 }
 
 void tRetune_initToPool (tRetune* const rt, int numVoices, int bufSize, int frameSize, tMempool* const mp)
@@ -1621,9 +1631,10 @@ void tRetune_setPitchFactor(tRetune* const rt, float pf, int voice)
 void tRetune_setTimeConstant(tRetune* const rt, float tc)
 {
     _tRetune* r = *rt;
+    LEAF* leaf = r->mempool->leaf;
     
     r->timeConstant = tc;
-    r->radius = expf(-1000.0f * r->hopSize * leaf.invSampleRate / r->timeConstant);
+    r->radius = expf(-1000.0f * r->hopSize * leaf->invSampleRate / r->timeConstant);
 }
 
 void tRetune_setHopSize(tRetune* const rt, int hs)
@@ -1652,24 +1663,26 @@ void tRetune_setFidelityThreshold(tRetune* const rt, float threshold)
 float tRetune_getInputPeriod(tRetune* const rt)
 {
     _tRetune* r = *rt;
-    
-    return (r->inputPeriod * leaf.invSampleRate);
+    LEAF* leaf = r->mempool->leaf;
+
+    return (r->inputPeriod * leaf->invSampleRate);
 }
 
 float tRetune_getInputFreq(tRetune* const rt)
 {
     _tRetune* r = *rt;
+    LEAF* leaf = r->mempool->leaf;
     
-    return 1.0f/(r->inputPeriod * leaf.invSampleRate);
+    return 1.0f/(r->inputPeriod * leaf->invSampleRate);
 }
 
 //============================================================================================================
 // AUTOTUNE
 //============================================================================================================
 
-void tAutotune_init (tAutotune* const rt, int numVoices, int bufSize, int frameSize)
+void tAutotune_init (tAutotune* const rt, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
 {
-    tAutotune_initToPool(rt, numVoices, bufSize, frameSize, &leaf.mempool);
+    tAutotune_initToPool(rt, numVoices, bufSize, frameSize, &leaf->mempool);
 }
 
 void tAutotune_initToPool (tAutotune* const rt, int numVoices, int bufSize, int frameSize, tMempool* const mp)
@@ -1777,9 +1790,10 @@ void tAutotune_setFreq(tAutotune* const rt, float f, int voice)
 void tAutotune_setTimeConstant(tAutotune* const rt, float tc)
 {
     _tAutotune* r = *rt;
+    LEAF* leaf = r->mempool->leaf;
     
     r->timeConstant = tc;
-    r->radius = expf(-1000.0f * r->hopSize * leaf.invSampleRate / r->timeConstant);
+    r->radius = expf(-1000.0f * r->hopSize * leaf->invSampleRate / r->timeConstant);
 }
 
 void tAutotune_setHopSize(tAutotune* const rt, int hs)
@@ -1836,9 +1850,9 @@ float tAutotune_getInputFreq(tAutotune* const rt)
 //============================================================================================================
 // algorithm from Tom Baran's autotalent code.
 
-void tFormantShifter_init (tFormantShifter* const fsr, int order)
+void tFormantShifter_init (tFormantShifter* const fsr, int order, LEAF* const leaf)
 {
-    tFormantShifter_initToPool(fsr, order, &leaf.mempool);
+    tFormantShifter_initToPool(fsr, order, &leaf->mempool);
 }
 
 void tFormantShifter_initToPool (tFormantShifter* const fsr, int order, tMempool* const mp)
@@ -1846,6 +1860,8 @@ void tFormantShifter_initToPool (tFormantShifter* const fsr, int order, tMempool
     _tMempool* m = *mp;
     _tFormantShifter* fs = *fsr = (_tFormantShifter*) mpool_alloc(sizeof(_tFormantShifter), m);
     fs->mempool = m;
+    
+    LEAF* leaf = fs->mempool->leaf;
     
     fs->ford = order;
     fs->fk = (float*) mpool_calloc(sizeof(float) * fs->ford, m);
@@ -1860,13 +1876,13 @@ void tFormantShifter_initToPool (tFormantShifter* const fsr, int order, tMempool
     fs->fbuff = (float*) mpool_calloc(sizeof(float*) * fs->ford, m);
 
     
-    fs->falph = powf(0.001f, 10.0f * leaf.invSampleRate);
-    fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f*leaf.sampleRate))-0.1916f);
+    fs->falph = powf(0.001f, 10.0f * leaf->invSampleRate);
+    fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f * leaf->sampleRate)) - 0.1916f);
     fs->fhp = 0.0f;
     fs->flp = 0.0f;
-    fs->flpa = powf(0.001f, 10.0f * leaf.invSampleRate);
+    fs->flpa = powf(0.001f, 10.0f * leaf->invSampleRate);
     fs->fmute = 1.0f;
-    fs->fmutealph = powf(0.001f, 1.0f * leaf.invSampleRate);
+    fs->fmutealph = powf(0.001f, 1.0f * leaf->invSampleRate);
     fs->cbi = 0;
     fs->intensity = 1.0f;
     fs->invIntensity = 1.0f;

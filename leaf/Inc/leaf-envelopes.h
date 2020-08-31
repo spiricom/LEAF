@@ -40,7 +40,7 @@ extern "C" {
      @brief Basic attack-decay envelope.
      @{
      
-     @fn void    tEnvelope_init          (tEnvelope* const, float attack, float decay, int loop)
+     @fn void    tEnvelope_init          (tEnvelope* const, float attack, float decay, int loop, LEAF* const leaf)
      @brief
      @param
      
@@ -76,6 +76,7 @@ extern "C" {
     
     typedef struct _tEnvelope
     {
+        
         tMempool mempool;
         
         const float *exp_buff;
@@ -98,7 +99,7 @@ extern "C" {
     
     typedef _tEnvelope* tEnvelope;
     
-    void    tEnvelope_init          (tEnvelope* const, float attack, float decay, int loop);
+    void    tEnvelope_init          (tEnvelope* const, float attack, float decay, int loop, LEAF* const leaf);
     void    tEnvelope_initToPool    (tEnvelope* const, float attack, float decay, int loop, tMempool* const);
     void    tEnvelope_free          (tEnvelope* const);
     
@@ -117,7 +118,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tExpSmooth_init         (tExpSmooth* const, float val, float factor)
+     @fn void    tExpSmooth_init         (tExpSmooth* const, float val, float factor, LEAF* const leaf)
      @brief
      @param
      
@@ -157,6 +158,7 @@ extern "C" {
     
     typedef struct _tExpSmooth
     {
+        
         tMempool mempool;
         float factor, oneminusfactor;
         float curr,dest;
@@ -164,7 +166,7 @@ extern "C" {
     
     typedef _tExpSmooth* tExpSmooth;
     
-    void    tExpSmooth_init         (tExpSmooth* const, float val, float factor);
+    void    tExpSmooth_init         (tExpSmooth* const, float val, float factor, LEAF* const leaf);
     void    tExpSmooth_initToPool   (tExpSmooth* const, float val, float factor, tMempool* const);
     void    tExpSmooth_free         (tExpSmooth* const);
     
@@ -186,7 +188,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tADSR_init    (tADSR* const adsrenv, float attack, float decay, float sustain, float release)
+     @fn void    tADSR_init    (tADSR* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
      @brief
      @param
      
@@ -235,6 +237,7 @@ extern "C" {
     /* ADSR */
     typedef struct _tADSR
     {
+        
         tMempool mempool;
         
         const float *exp_buff;
@@ -256,7 +259,7 @@ extern "C" {
     
     typedef _tADSR* tADSR;
     
-    void    tADSR_init    (tADSR* const adsrenv, float attack, float decay, float sustain, float release);
+    void    tADSR_init    (tADSR* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf);
     void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp);
     void    tADSR_free          (tADSR* const);
     
@@ -277,7 +280,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tADSR2_init          (tADSR2* const, float attack, float decay, float sustain, float release)
+     @fn void    tADSR2_init          (tADSR2* const, float attack, float decay, float sustain, float release, LEAF* const leaf)
      @brief
      @param
      
@@ -325,6 +328,7 @@ extern "C" {
     
     typedef struct _tADSR2
     {
+        
         tMempool mempool;
         float sampleRateInMs;
         float attack;
@@ -348,7 +352,7 @@ extern "C" {
     
     typedef _tADSR2* tADSR2;
     
-    void    tADSR2_init          (tADSR2* const, float attack, float decay, float sustain, float release);
+    void    tADSR2_init          (tADSR2* const, float attack, float decay, float sustain, float release, LEAF* const leaf);
     void    tADSR2_initToPool    (tADSR2* const, float attack, float decay, float sustain, float release, tMempool* const);
     void    tADSR2_free          (tADSR2* const);
     
@@ -370,7 +374,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tADSR3_init          (tADSR3* const, float attack, float decay, float sustain, float release)
+     @fn void    tADSR3_init          (tADSR3* const, float attack, float decay, float sustain, float release, LEAF* const leaf)
      @brief
      @param
      
@@ -427,6 +431,7 @@ extern "C" {
     
     typedef struct _tADSR3
     {
+        
         tMempool mempool;
         float sampleRateInMs;
         int state;
@@ -453,7 +458,7 @@ extern "C" {
     
     typedef _tADSR3* tADSR3;
     
-    void    tADSR3_init          (tADSR3* const, float attack, float decay, float sustain, float release);
+    void    tADSR3_init          (tADSR3* const, float attack, float decay, float sustain, float release, LEAF* const leaf);
     void    tADSR3_initToPool    (tADSR3* const, float attack, float decay, float sustain, float release, tMempool* const);
     void    tADSR3_free          (tADSR3* const);
     
@@ -474,7 +479,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tADSR4_init          (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize)
+     @fn void    tADSR4_init          (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf)
      @brief
      @param
      
@@ -526,6 +531,7 @@ extern "C" {
     
     typedef struct _tADSR4
     {
+        
         tMempool mempool;
         const float *exp_buff;
         uint32_t buff_size;
@@ -546,7 +552,7 @@ extern "C" {
     
     typedef _tADSR4* tADSR4;
     
-    void    tADSR4_init          (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize);
+    void    tADSR4_init          (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf);
     void    tADSR4_initToPool    (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const);
     void    tADSR4_free          (tADSR4* const);
     
@@ -568,7 +574,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tRamp_init          (tRamp* const, float time, int samplesPerTick)
+     @fn void    tRamp_init          (tRamp* const, float time, int samplesPerTick, LEAF* const leaf)
      @brief
      @param
      
@@ -604,6 +610,7 @@ extern "C" {
     
     typedef struct _tRamp
     {
+        
         tMempool mempool;
         float inc;
         float inv_sr_ms;
@@ -616,7 +623,7 @@ extern "C" {
     
     typedef _tRamp* tRamp;
     
-    void    tRamp_init          (tRamp* const, float time, int samplesPerTick);
+    void    tRamp_init          (tRamp* const, float time, int samplesPerTick, LEAF* const leaf);
     void    tRamp_initToPool    (tRamp* const, float time, int samplesPerTick, tMempool* const);
     void    tRamp_free          (tRamp* const);
     
@@ -632,7 +639,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tRampUpDown_init          (tRampUpDown* const, float upTime, float downTime, int samplesPerTick)
+     @fn void    tRampUpDown_init          (tRampUpDown* const, float upTime, float downTime, int samplesPerTick, LEAF* const leaf)
      @brief
      @param
      
@@ -672,6 +679,7 @@ extern "C" {
     
     typedef struct _tRampUpDown
     {
+        
         tMempool mempool;
         float upInc;
         float downInc;
@@ -685,7 +693,7 @@ extern "C" {
     
     typedef _tRampUpDown* tRampUpDown;
     
-    void    tRampUpDown_init          (tRampUpDown* const, float upTime, float downTime, int samplesPerTick);
+    void    tRampUpDown_init          (tRampUpDown* const, float upTime, float downTime, int samplesPerTick, LEAF* const leaf);
     void    tRampUpDown_initToPool    (tRampUpDown* const, float upTime, float downTime, int samplesPerTick, tMempool* const);
     void    tRampUpDown_free          (tRampUpDown* const);
     
@@ -704,7 +712,7 @@ extern "C" {
      @brief based on Max/MSP's slide~
      @{
      
-     @fn void    tSlide_init          (tSlide* const, float upSlide, float downSlide)
+     @fn void    tSlide_init          (tSlide* const, float upSlide, float downSlide, LEAF* const leaf)
      @brief
      @param
      
@@ -740,6 +748,7 @@ extern "C" {
     
     typedef struct _tSlide
     {
+        
         tMempool mempool;
         float prevOut;
         float currentOut;
@@ -751,7 +760,7 @@ extern "C" {
     
     typedef _tSlide* tSlide;
     
-    void    tSlide_init          (tSlide* const, float upSlide, float downSlide);
+    void    tSlide_init          (tSlide* const, float upSlide, float downSlide, LEAF* const leaf);
     void    tSlide_initToPool    (tSlide* const, float upSlide, float downSlide, tMempool* const);
     void    tSlide_free          (tSlide* const);
     

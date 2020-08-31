@@ -34,7 +34,7 @@ extern "C" {
      @brief Non-interpolating delay, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void        tDelay_init         (tDelay* const, uint32_t delay, uint32_t maxDelay)
+     @fn void        tDelay_init         (tDelay* const, uint32_t delay, uint32_t maxDelay, LEAF* const leaf)
      @brief
      @param
      
@@ -86,6 +86,7 @@ extern "C" {
     
     typedef struct _tDelay
     {
+        
         tMempool mempool;
         
         float gain;
@@ -101,7 +102,7 @@ extern "C" {
     
     typedef _tDelay* tDelay;
     
-    void        tDelay_init         (tDelay* const, uint32_t delay, uint32_t maxDelay);
+    void        tDelay_init         (tDelay* const, uint32_t delay, uint32_t maxDelay, LEAF* const leaf);
     void        tDelay_initToPool   (tDelay* const, uint32_t delay, uint32_t maxDelay, tMempool* const);
     void        tDelay_free         (tDelay* const);
     
@@ -123,7 +124,7 @@ extern "C" {
      @brief Linearly-interpolating delay, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tLinearDelay_init        (tLinearDelay* const, float delay, uint32_t maxDelay)
+     @fn void    tLinearDelay_init        (tLinearDelay* const, float delay, uint32_t maxDelay, LEAF* const leaf)
      @brief
      @param
      
@@ -183,6 +184,7 @@ extern "C" {
     
     typedef struct _tLinearDelay
     {
+        
         tMempool mempool;
         
         float gain;
@@ -202,7 +204,7 @@ extern "C" {
     
     typedef _tLinearDelay* tLinearDelay;
     
-    void    tLinearDelay_init        (tLinearDelay* const, float delay, uint32_t maxDelay);
+    void    tLinearDelay_init        (tLinearDelay* const, float delay, uint32_t maxDelay, LEAF* const leaf);
     void    tLinearDelay_initToPool  (tLinearDelay* const, float delay, uint32_t maxDelay, tMempool* const);
     void    tLinearDelay_free        (tLinearDelay* const);
     
@@ -228,7 +230,7 @@ extern "C" {
      @brief Hermite-interpolating delay, created by adapting STK linear delay with Hermite interpolation.
      @{
      
-     @fn void       tHermiteDelay_init             (tHermiteDelay* const dl, float delay, uint32_t maxDelay)
+     @fn void       tHermiteDelay_init             (tHermiteDelay* const dl, float delay, uint32_t maxDelay, LEAF* const leaf)
      @brief
      @param
      
@@ -296,6 +298,7 @@ extern "C" {
     
     typedef struct _tHermiteDelay
     {
+        
         tMempool mempool;
         
         float gain;
@@ -314,7 +317,7 @@ extern "C" {
     
     typedef _tHermiteDelay* tHermiteDelay;
     
-    void       tHermiteDelay_init             (tHermiteDelay* const dl, float delay, uint32_t maxDelay);
+    void       tHermiteDelay_init             (tHermiteDelay* const dl, float delay, uint32_t maxDelay, LEAF* const leaf);
     void    tHermiteDelay_initToPool      (tHermiteDelay* const dl, float delay, uint32_t maxDelay, tMempool* const mp);
     void     tHermiteDelay_free            (tHermiteDelay* const dl);
     
@@ -341,7 +344,7 @@ extern "C" {
      @brief Allpass-interpolating delay, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tAllpassDelay_init        (tAllpassDelay* const, float delay, uint32_t maxDelay)
+     @fn void    tAllpassDelay_init        (tAllpassDelay* const, float delay, uint32_t maxDelay, LEAF* const leaf)
      @brief
      @param
      
@@ -393,6 +396,7 @@ extern "C" {
     
     typedef struct _tAllpassDelay
     {
+        
         tMempool mempool;
         
         float gain;
@@ -414,7 +418,7 @@ extern "C" {
     
     typedef _tAllpassDelay* tAllpassDelay;
     
-    void    tAllpassDelay_init        (tAllpassDelay* const, float delay, uint32_t maxDelay);
+    void    tAllpassDelay_init        (tAllpassDelay* const, float delay, uint32_t maxDelay, LEAF* const leaf);
     void    tAllpassDelay_initToPool  (tAllpassDelay* const, float delay, uint32_t maxDelay, tMempool* const);
     void    tAllpassDelay_free        (tAllpassDelay* const);
     
@@ -436,7 +440,7 @@ extern "C" {
      @brief Linear interpolating delay with fixed read and write pointers, variable rate.
      @{
      
-     @fn void    tTapeDelay_init        (tTapeDelay* const, float delay, uint32_t maxDelay)
+     @fn void    tTapeDelay_init        (tTapeDelay* const, float delay, uint32_t maxDelay, LEAF* const leaf)
      @brief
      @param
      
@@ -492,6 +496,7 @@ extern "C" {
     
     typedef struct _tTapeDelay
     {
+        
         tMempool mempool;
         
         float gain;
@@ -511,7 +516,7 @@ extern "C" {
     
     typedef _tTapeDelay* tTapeDelay;
     
-    void    tTapeDelay_init        (tTapeDelay* const, float delay, uint32_t maxDelay);
+    void    tTapeDelay_init        (tTapeDelay* const, float delay, uint32_t maxDelay, LEAF* const leaf);
     void    tTapeDelay_initToPool  (tTapeDelay* const, float delay, uint32_t maxDelay, tMempool* const);
     void    tTapeDelay_free        (tTapeDelay* const);
     
@@ -534,7 +539,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tRingBuffer_init     (tRingBuffer* const ring, int size)
+     @fn void    tRingBuffer_init     (tRingBuffer* const ring, int size, LEAF* const leaf)
      @brief
      @param
      
@@ -573,6 +578,7 @@ extern "C" {
      @} */
     typedef struct _tRingBuffer
     {
+        
         tMempool mempool;
         
         float* buffer;
@@ -583,7 +589,7 @@ extern "C" {
     
     typedef _tRingBuffer* tRingBuffer;
     
-    void    tRingBuffer_init     (tRingBuffer* const ring, int size);
+    void    tRingBuffer_init     (tRingBuffer* const ring, int size, LEAF* const leaf);
     void    tRingBuffer_initToPool   (tRingBuffer* const ring, int size, tMempool* const mempool);
     void    tRingBuffer_free     (tRingBuffer* const ring);
     

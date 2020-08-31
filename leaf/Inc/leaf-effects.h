@@ -30,7 +30,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tTalkbox_init           (tTalkbox* const, int bufsize)
+     @fn void    tTalkbox_init           (tTalkbox* const, int bufsize, LEAF* const leaf)
      @brief
      @param
      
@@ -92,6 +92,7 @@ extern "C" {
     
     typedef struct _tTalkbox
     {
+        
         tMempool mempool;
         
         float param[NUM_TALKBOX_PARAM];
@@ -120,7 +121,7 @@ extern "C" {
     
     typedef _tTalkbox* tTalkbox;
     
-    void    tTalkbox_init           (tTalkbox* const, int bufsize);
+    void    tTalkbox_init           (tTalkbox* const, int bufsize, LEAF* const leaf);
     void    tTalkbox_initToPool     (tTalkbox* const, int bufsize, tMempool* const);
     void    tTalkbox_free           (tTalkbox* const);
     
@@ -146,7 +147,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize)
+     @fn void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize, LEAF* const leaf)
      @brief
      @param
      
@@ -206,6 +207,7 @@ extern "C" {
 
     typedef struct _tTalkboxFloat
       {
+            
           tMempool mempool;
           
           float param[NUM_TALKBOX_PARAM];
@@ -233,7 +235,7 @@ extern "C" {
 
       typedef _tTalkboxFloat* tTalkboxFloat;
 
-      void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize);
+      void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize, LEAF* const leaf);
       void    tTalkboxFloat_initToPool     (tTalkboxFloat* const, int bufsize, tMempool* const);
       void    tTalkboxFloat_free           (tTalkboxFloat* const);
 
@@ -257,7 +259,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tVocoder_init           (tVocoder* const)
+     @fn void    tVocoder_init           (tVocoder* const, LEAF* const leaf)
      @brief
      @param
      
@@ -288,6 +290,7 @@ extern "C" {
     
     typedef struct _tVocoder
     {
+        
         tMempool mempool;
         
         float param[NUM_VOCODER_PARAM];
@@ -305,7 +308,7 @@ extern "C" {
     
     typedef _tVocoder* tVocoder;
     
-    void    tVocoder_init           (tVocoder* const);
+    void    tVocoder_init           (tVocoder* const, LEAF* const leaf);
     void    tVocoder_initToPool     (tVocoder* const, tMempool* const);
     void    tVocoder_free           (tVocoder* const);
     
@@ -321,7 +324,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const)
+     @fn void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const, LEAF* const leaf)
      @brief
      @param
      
@@ -361,6 +364,7 @@ extern "C" {
 
     typedef struct _tRosenbergGlottalPulse
     {
+        
         tMempool mempool;
         float phase;
         float openLength;
@@ -372,7 +376,7 @@ extern "C" {
 
     typedef _tRosenbergGlottalPulse* tRosenbergGlottalPulse;
 
-    void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const);
+    void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const, LEAF* const leaf);
     void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const, tMempool* const);
     void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const);
 
@@ -392,7 +396,7 @@ extern "C" {
      @brief pitch shifting algorithm that underlies tRetune etc from Katja Vetters http://www.katjaas.nl/pitchshiftlowlatency/pitchshiftlowlatency.html
      @{
      
-     @fn void    tSOLAD_init             (tSOLAD* const)
+     @fn void    tSOLAD_init             (tSOLAD* const, LEAF* const leaf)
      @brief
      @param
      
@@ -435,6 +439,7 @@ extern "C" {
     
     typedef struct _tSOLAD
     {
+        
         tMempool mempool;
         
         uint16_t timeindex;              // current reference time, write index
@@ -452,7 +457,7 @@ extern "C" {
     
     typedef _tSOLAD* tSOLAD;
     
-    void    tSOLAD_init             (tSOLAD* const);
+    void    tSOLAD_init             (tSOLAD* const, LEAF* const leaf);
     void    tSOLAD_initToPool       (tSOLAD* const, tMempool* const);
     void    tSOLAD_free             (tSOLAD* const);
     
@@ -473,7 +478,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize)
+     @fn void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, LEAF* const leaf)
      @brief
      @param
      
@@ -505,6 +510,7 @@ extern "C" {
     
     typedef struct _tPitchShift
     {
+        
         tMempool mempool;
         
         tSOLAD sola;
@@ -527,7 +533,7 @@ extern "C" {
     
     typedef _tPitchShift* tPitchShift;
     
-    void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize);
+    void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, LEAF* const leaf);
     void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, tMempool* const);
     void    tPitchShift_free            (tPitchShift* const);
     
@@ -542,7 +548,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize)
+     @fn void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
      @brief
      @param
      
@@ -598,6 +604,7 @@ extern "C" {
     
     typedef struct _tRetune
     {
+        
         tMempool mempool;
         
         tPeriodDetection pd;
@@ -624,7 +631,7 @@ extern "C" {
     
     typedef _tRetune* tRetune;
     
-    void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize);
+    void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf);
     void    tRetune_initToPool          (tRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
     void    tRetune_free                (tRetune* const);
     
@@ -645,7 +652,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize)
+     @fn void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
      @brief
      @param
      
@@ -709,6 +716,7 @@ extern "C" {
     
     typedef struct _tAutotune
     {
+        
         tMempool mempool;
         
         tPeriodDetection pd;
@@ -735,7 +743,7 @@ extern "C" {
     
     typedef _tAutotune* tAutotune;
     
-    void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize);
+    void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf);
     void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
     void    tAutotune_free                  (tAutotune* const);
     
@@ -760,7 +768,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tFormantShifter_init            (tFormantShifter* const, int order)
+     @fn void    tFormantShifter_init            (tFormantShifter* const, int order, LEAF* const leaf)
      @brief
      @param
      
@@ -800,6 +808,7 @@ extern "C" {
     
     typedef struct _tFormantShifter
     {
+        
         tMempool mempool;
         int ford;
         float falph;
@@ -829,7 +838,7 @@ extern "C" {
     
     typedef _tFormantShifter* tFormantShifter;
     
-    void    tFormantShifter_init            (tFormantShifter* const, int order);
+    void    tFormantShifter_init            (tFormantShifter* const, int order, LEAF* const leaf);
     void    tFormantShifter_initToPool      (tFormantShifter* const, int order, tMempool* const);
     void    tFormantShifter_free            (tFormantShifter* const);
     

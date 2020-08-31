@@ -126,33 +126,33 @@ extern "C" {
      @param memorySize The size of the memory that will make up the default LEAF mempool.
      @param random A pointer to a random number function. Should return a float >= 0 and < 1.
      */
-    void        LEAF_init            (float sampleRate, int blockSize, char* memory, size_t memorySize, float(*random)(void));
+    void        LEAF_init            (LEAF* const leaf, float sampleRate, int blockSize, char* memory, size_t memorySize, float(*random)(void));
     
     //! Set the sample rate of LEAF.
     /*!
      @param sampleRate The new audio sample rate.
      */
-    void        LEAF_setSampleRate   (float sampleRate);
+    void        LEAF_setSampleRate   (LEAF* const leaf, float sampleRate);
     
     //! Get the sample rate of LEAF.
     /*!
      @return The current sample rate as a float.
      */
-    float       LEAF_getSampleRate   (void);
+    float       LEAF_getSampleRate   (LEAF* const leaf);
     
     //! The default callback function for LEAF errors.
     /*!
      @param errorType The type of the error that has occurred.
      */
-    void        LEAF_defaultErrorCallback(LEAFErrorType errorType);
+    void        LEAF_defaultErrorCallback(LEAF* const leaf, LEAFErrorType errorType);
     
-    void        LEAF_internalErrorCallback(LEAFErrorType whichone);
+    void        LEAF_internalErrorCallback(LEAF* const leaf, LEAFErrorType whichone);
     
     //! Set the callback function for LEAF errors.
     /*!
      @param callback A pointer to the callback function.
      */
-    void LEAF_setErrorCallback(void (*callback)(LEAFErrorType));
+    void LEAF_setErrorCallback(LEAF* const leaf, void (*callback)(LEAF* const, LEAFErrorType));
     
     /*! @} */
     

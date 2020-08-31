@@ -37,7 +37,7 @@ extern "C" {
      @brief
      @{
      
-     @fn void    tCompressor_init        (tCompressor* const)
+     @fn void    tCompressor_init        (tCompressor* const, LEAF* const leaf)
      @brief
      @param
      
@@ -57,6 +57,7 @@ extern "C" {
    
     typedef struct _tCompressor
     {
+        
         tMempool mempool;
         
         float tauAttack, tauRelease;
@@ -70,7 +71,7 @@ extern "C" {
     
     typedef _tCompressor* tCompressor;
     
-    void    tCompressor_init        (tCompressor* const);
+    void    tCompressor_init        (tCompressor* const, LEAF* const leaf);
     void    tCompressor_initToPool  (tCompressor* const, tMempool* const);
     void    tCompressor_free        (tCompressor* const);
     
@@ -84,7 +85,7 @@ extern "C" {
      @detail An auto VCA that you put into a feedback circuit to make it stay at the same level. It can enforce level bidirectionally (amplifying and attenuating as needed) or just attenutating. The former option allows for infinite sustain strings, for example, while The latter option allows for decaying strings, which can never exceed a specific level.
      @{
      
-     @fn void tFeedbackLeveler_init (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode)
+     @fn void tFeedbackLeveler_init (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, LEAF* const leaf)
      @brief
      @param
      
@@ -124,6 +125,7 @@ extern "C" {
     
     typedef struct _tFeedbackLeveler
     {
+        
         tMempool mempool;
         float targetLevel;    // target power level
         float strength;        // how strongly level difference affects the VCA
@@ -135,7 +137,7 @@ extern "C" {
     
     typedef _tFeedbackLeveler* tFeedbackLeveler;
     
-    void    tFeedbackLeveler_init           (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode);
+    void    tFeedbackLeveler_init           (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, LEAF* const leaf);
     void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, tMempool* const);
     void    tFeedbackLeveler_free           (tFeedbackLeveler* const);
     
@@ -156,7 +158,7 @@ extern "C" {
      @brief Threshold with hysteresis (like Max/MSP thresh~ object)
      @{
      
-     @fn void    tThreshold_init        (tThreshold* const, float low, float high)
+     @fn void    tThreshold_init        (tThreshold* const, float low, float high, LEAF* const leaf)
      @brief
      @param
      
@@ -184,6 +186,7 @@ extern "C" {
 
     typedef struct _tThreshold
     {
+        
         tMempool mempool;
         float highThresh, lowThresh;
 		int currentValue;
@@ -191,7 +194,7 @@ extern "C" {
 
     typedef _tThreshold* tThreshold;
 
-    void    tThreshold_init        (tThreshold* const, float low, float high);
+    void    tThreshold_init        (tThreshold* const, float low, float high, LEAF* const leaf);
     void    tThreshold_initToPool  (tThreshold* const, float low, float high, tMempool* const);
     void    tThreshold_free        (tThreshold* const);
 

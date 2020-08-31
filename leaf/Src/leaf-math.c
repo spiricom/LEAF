@@ -439,14 +439,14 @@ void LEAF_generate_sine(float* buffer, int size)
     }
 }
 
-void LEAF_generate_sawtooth(float* buffer, float basefreq, int size)
+void LEAF_generate_sawtooth(float* buffer, float basefreq, int size, LEAF* const leaf)
 {
     int harmonic = 1;
     float phase = 0.0f;
     float freq = harmonic * basefreq;
     float amp;
     
-    while (freq < (leaf.sampleRate * 0.5))
+    while (freq < (leaf->sampleRate * 0.5))
     {
         amp = 1.0f / harmonic;
         for (int i = 0; i < size; i++)
@@ -461,7 +461,7 @@ void LEAF_generate_sawtooth(float* buffer, float basefreq, int size)
 }
 
 
-void LEAF_generate_triangle(float* buffer, float basefreq, int size)
+void LEAF_generate_triangle(float* buffer, float basefreq, int size, LEAF* const leaf)
 {
     int harmonic = 1;
     float phase = 0.0f;
@@ -471,7 +471,7 @@ void LEAF_generate_triangle(float* buffer, float basefreq, int size)
     int count = 0;
     float mult = 1.0f;
     
-    while (freq < (leaf.sampleRate * 0.5))
+    while (freq < (leaf->sampleRate * 0.5))
     {
         amp = 1.0f / (float)(harmonic * harmonic);
         
@@ -490,14 +490,14 @@ void LEAF_generate_triangle(float* buffer, float basefreq, int size)
     }
 }
 
-void LEAF_generate_square(float* buffer, float basefreq, int size)
+void LEAF_generate_square(float* buffer, float basefreq, int size, LEAF* const leaf)
 {
     int harmonic = 1;
     float phase = 0.0f;
     float freq = harmonic * basefreq;
     float amp = 1.0f;
     
-    while (freq < (leaf.sampleRate * 0.5))
+    while (freq < (leaf->sampleRate * 0.5))
     {
         amp = 1.0f / (float)(harmonic);
         

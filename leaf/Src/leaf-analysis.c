@@ -22,9 +22,9 @@
 /* Envelope Follower */
 //===========================================================================
 
-void    tEnvelopeFollower_init(tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff)
+void    tEnvelopeFollower_init(tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff, LEAF* const leaf)
 {
-    tEnvelopeFollower_initToPool(ef, attackThreshold, decayCoeff, &leaf.mempool);
+    tEnvelopeFollower_initToPool(ef, attackThreshold, decayCoeff, &leaf->mempool);
 }
 
 void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff, tMempool* const mp)
@@ -82,9 +82,9 @@ void    tEnvelopeFollower_setAttackThreshold(tEnvelopeFollower* const ef, float 
 
 // zero crossing detector
 
-void    tZeroCrossingCounter_init         (tZeroCrossingCounter* const zc, int maxWindowSize)
+void    tZeroCrossingCounter_init         (tZeroCrossingCounter* const zc, int maxWindowSize, LEAF* const leaf)
 {
-    tZeroCrossingCounter_initToPool   (zc, maxWindowSize, &leaf.mempool);
+    tZeroCrossingCounter_initToPool   (zc, maxWindowSize, &leaf->mempool);
 }
 
 void    tZeroCrossingCounter_initToPool   (tZeroCrossingCounter* const zc, int maxWindowSize, tMempool* const mp)
@@ -173,9 +173,9 @@ void    tZeroCrossingCounter_setWindowSize        (tZeroCrossingCounter* const z
 //===========================================================================
 /* Power Follower */
 //===========================================================================
-void    tPowerFollower_init(tPowerFollower* const pf, float factor)
+void    tPowerFollower_init(tPowerFollower* const pf, float factor, LEAF* const leaf)
 {
-    tPowerFollower_initToPool(pf, factor, &leaf.mempool);
+    tPowerFollower_initToPool(pf, factor, &leaf->mempool);
 }
 
 void    tPowerFollower_initToPool   (tPowerFollower* const pf, float factor, tMempool* const mp)
@@ -227,9 +227,9 @@ float   tPowerFollower_sample(tPowerFollower* const pf)
 /* ---------------- env~ - simple envelope follower. ----------------- */
 //===========================================================================
 
-void tEnvPD_init(tEnvPD* const xpd, int ws, int hs, int bs)
+void tEnvPD_init(tEnvPD* const xpd, int ws, int hs, int bs, LEAF* const leaf)
 {
-    tEnvPD_initToPool(xpd, ws, hs, bs, &leaf.mempool);
+    tEnvPD_initToPool(xpd, ws, hs, bs, &leaf->mempool);
 }
 
 void    tEnvPD_initToPool       (tEnvPD* const xpd, int ws, int hs, int bs, tMempool* const mp)
@@ -335,9 +335,9 @@ static void atkdtk_envelope(tAttackDetection* const a, float *in);
 
 /********Constructor/Destructor***************/
 
-void tAttackDetection_init(tAttackDetection* const ad, int blocksize, int atk, int rel)
+void tAttackDetection_init(tAttackDetection* const ad, int blocksize, int atk, int rel, LEAF* const leaf)
 {
-    tAttackDetection_initToPool(ad, blocksize, atk, rel, &leaf.mempool);
+    tAttackDetection_initToPool(ad, blocksize, atk, rel, &leaf->mempool);
 }
 
 void tAttackDetection_initToPool     (tAttackDetection* const ad, int blocksize, int atk, int rel, tMempool* const mp)
@@ -426,11 +426,12 @@ int tAttackDetection_detect(tAttackDetection* const ad, float *in)
 static void atkdtk_init(tAttackDetection* const ad, int blocksize, int atk, int rel)
 {
     _tAttackDetection* a = *ad;
+    LEAF* leaf = a->mempool->leaf;
     
     a->env = 0;
     a->blocksize = blocksize;
     a->threshold = DEFTHRESHOLD;
-    a->samplerate = leaf.sampleRate;
+    a->samplerate = leaf->sampleRate;
     a->prevAmp = 0;
     
     a->env = 0;
@@ -480,9 +481,9 @@ static float snac_spectralpeak(tSNAC* const s, float periodlength);
 /******************************************************************************/
 
 
-void tSNAC_init(tSNAC* const snac, int overlaparg)
+void tSNAC_init(tSNAC* const snac, int overlaparg, LEAF* const leaf)
 {
-    tSNAC_initToPool(snac, overlaparg, &leaf.mempool);
+    tSNAC_initToPool(snac, overlaparg, &leaf->mempool);
 }
 
 void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const mp)
@@ -831,9 +832,9 @@ static void snac_biasbuf(tSNAC* const snac)
 //===========================================================================
 // PERIODDETECTION
 //===========================================================================
-void tPeriodDetection_init (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize)
+void tPeriodDetection_init (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize, LEAF* const leaf)
 {
-    tPeriodDetection_initToPool(pd, in, out, bufSize, frameSize, &leaf.mempool);
+    tPeriodDetection_initToPool(pd, in, out, bufSize, frameSize, &leaf->mempool);
 }
 
 void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize, tMempool* const mp)
@@ -841,6 +842,7 @@ void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, float* 
     _tMempool* m = *mp;
     _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_calloc(sizeof(_tPeriodDetection), m);
     p->mempool = m;
+    LEAF* leaf = p->mempool->leaf;
     
     p->inBuffer = in;
     p->outBuffer = out;
@@ -863,7 +865,7 @@ void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, float* 
     p->alpha = 1.0f;
     p->tolerance = 1.0f;
     p->timeConstant = DEFTIMECONSTANT;
-    p->radius = expf(-1000.0f * p->hopSize * leaf.invSampleRate / p->timeConstant);
+    p->radius = expf(-1000.0f * p->hopSize * leaf->invSampleRate / p->timeConstant);
     p->fidelityThreshold = 0.95f;
 }
 
@@ -952,9 +954,9 @@ void tPeriodDetection_setTolerance        (tPeriodDetection* pd, float tolerance
 }
 
 
-void    tZeroCrossingInfo_init  (tZeroCrossingInfo* const zc)
+void    tZeroCrossingInfo_init  (tZeroCrossingInfo* const zc, LEAF* const leaf)
 {
-    tZeroCrossingInfo_initToPool(zc, &leaf.mempool);
+    tZeroCrossingInfo_initToPool(zc, &leaf->mempool);
 }
 
 void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo* const zc, tMempool* const mp)
@@ -1025,9 +1027,9 @@ static inline void update_state(tZeroCrossingCollector* const zc, float s);
 static inline void shift(tZeroCrossingCollector* const zc, int n);
 static inline void reset(tZeroCrossingCollector* const zc);
 
-void    tZeroCrossingCollector_init  (tZeroCrossingCollector* const zc, int windowSize, float hysteresis)
+void    tZeroCrossingCollector_init  (tZeroCrossingCollector* const zc, int windowSize, float hysteresis, LEAF* const leaf)
 {
-    tZeroCrossingCollector_initToPool(zc, windowSize, hysteresis, &leaf.mempool);
+    tZeroCrossingCollector_initToPool(zc, windowSize, hysteresis, &leaf->mempool);
 }
 
 void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const zc, int windowSize, float hysteresis, tMempool* const mp)
@@ -1257,9 +1259,9 @@ static inline void reset(tZeroCrossingCollector* const zc)
 
 
 
-void    tBitset_init    (tBitset* const bitset, int numBits)
+void    tBitset_init    (tBitset* const bitset, int numBits, LEAF* const leaf)
 {
-    tBitset_initToPool(bitset, numBits, &leaf.mempool);
+    tBitset_initToPool(bitset, numBits, &leaf->mempool);
 }
 
 void    tBitset_initToPool  (tBitset* const bitset, int numBits, tMempool* const mempool)
@@ -1407,9 +1409,9 @@ void    tBitset_clear   (tBitset* const bitset)
     }
 }
 
-void    tBACF_init  (tBACF* const bacf, tBitset* const bitset)
+void    tBACF_init  (tBACF* const bacf, tBitset* const bitset, LEAF* const leaf)
 {
-    tBACF_initToPool(bacf, bitset, &leaf.mempool);
+    tBACF_initToPool(bacf, bitset, &leaf->mempool);
 }
 
 void    tBACF_initToPool    (tBACF* const bacf, tBitset* const bitset, tMempool* const mempool)
@@ -1496,9 +1498,9 @@ static inline int sub_collector_process_harmonics(_sub_collector* collector, _au
 static inline void sub_collector_process(_sub_collector* collector, _auto_correlation_info info);
 static inline void sub_collector_get(_sub_collector* collector, _auto_correlation_info info, _period_info* result);
 
-void    tPeriodDetector_init    (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis)
+void    tPeriodDetector_init    (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, LEAF* const leaf)
 {
-    tPeriodDetector_initToPool(detector, lowestFreq, highestFreq, hysteresis, &leaf.mempool);
+    tPeriodDetector_initToPool(detector, lowestFreq, highestFreq, hysteresis, &leaf->mempool);
 }
 
 void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool)
@@ -1507,8 +1509,10 @@ void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowe
     _tPeriodDetector* p = *detector = (_tPeriodDetector*) mpool_alloc(sizeof(_tPeriodDetector), m);
     p->mempool = m;
     
-    tZeroCrossingCollector_initToPool(&p->_zc, (1.0f / lowestFreq) * leaf.sampleRate * 2.0f, hysteresis, mempool);
-    p->_min_period = (1.0f / highestFreq) * leaf.sampleRate;
+    LEAF* leaf = p->mempool->leaf;
+    
+    tZeroCrossingCollector_initToPool(&p->_zc, (1.0f / lowestFreq) * leaf->sampleRate * 2.0f, hysteresis, mempool);
+    p->_min_period = (1.0f / highestFreq) * leaf->sampleRate;
     p->_range = highestFreq / lowestFreq;
     
     int windowSize = tZeroCrossingCollector_getWindowSize(&p->_zc);
@@ -1876,9 +1880,9 @@ static inline void sub_collector_get(_sub_collector* collector, _auto_correlatio
 static inline float calculate_frequency(tPitchDetector* const detector);
 static inline void bias(tPitchDetector* const detector, _pitch_info incoming);
 
-void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq)
+void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq, LEAF* const leaf)
 {
-    tPitchDetector_initToPool(detector, lowestFreq, highestFreq, &leaf.mempool);
+    tPitchDetector_initToPool(detector, lowestFreq, highestFreq, &leaf->mempool);
 }
 
 void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool)
@@ -1976,10 +1980,11 @@ float   tPitchDetector_harmonic (tPitchDetector* const detector, int harmonicInd
 float   tPitchDetector_predictFrequency (tPitchDetector* const detector)
 {
     _tPitchDetector* p = *detector;
+    LEAF* leaf = p->mempool->leaf;
     
     float period = tPeriodDetector_predictPeriod(&p->_pd);
     if (period > 0.0f)
-       return leaf.sampleRate / period;
+       return leaf->sampleRate / period;
    return 0.0f;
 }
 
@@ -2000,10 +2005,11 @@ void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, float h
 static inline float calculate_frequency(tPitchDetector* const detector)
 {
     _tPitchDetector* p = *detector;
+    LEAF* leaf = p->mempool->leaf;
     
     float period = p->_pd->_fundamental.period;
     if (period > 0.0f)
-        return leaf.sampleRate / period;
+        return leaf->sampleRate / period;
     return 0.0f;
 }
 
@@ -2104,9 +2110,9 @@ static inline void bias(tPitchDetector* const detector, _pitch_info incoming)
 
 static inline void compute_predicted_frequency(tDualPitchDetector* const detector);
 
-void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq)
+void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, LEAF* const leaf)
 {
-    tDualPitchDetector_initToPool(detector, lowestFreq, highestFreq, &leaf.mempool);
+    tDualPitchDetector_initToPool(detector, lowestFreq, highestFreq, &leaf->mempool);
 }
 
 void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool)

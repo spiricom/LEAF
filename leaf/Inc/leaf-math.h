@@ -118,9 +118,9 @@ extern "C" {
     float       LEAF_frequencyToMidi(float f);
     
     void        LEAF_generate_sine     (float* buffer, int size);
-    void        LEAF_generate_sawtooth (float* buffer, float basefreq, int size);
-    void        LEAF_generate_triangle (float* buffer, float basefreq, int size);
-    void        LEAF_generate_square   (float* buffer, float basefreq, int size);
+    void        LEAF_generate_sawtooth (float* buffer, float basefreq, int size, LEAF* const leaf);
+    void        LEAF_generate_triangle (float* buffer, float basefreq, int size, LEAF* const leaf);
+    void        LEAF_generate_square   (float* buffer, float basefreq, int size, LEAF* const leaf);
     
     // dope af
     float       LEAF_chebyshevT(float in, int n);
@@ -160,11 +160,6 @@ extern "C" {
     float fast_tanh2(float x);
     float fast_tanh3(float x);
     float fast_tanh4(float x);
-    
-    void LEAF_generate_sine(float* buffer, int size);
-    void LEAF_generate_sawtooth(float* buffer, float basefreq, int size);
-    void LEAF_generate_triangle(float* buffer, float basefreq, int size);
-    void LEAF_generate_square(float* buffer, float basefreq, int size);
 
     //0.001 base gives a good curve that goes from 1 to near zero
     //1000 gives a good curve from -1.0 to 0.0
