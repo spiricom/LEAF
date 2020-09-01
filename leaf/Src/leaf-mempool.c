@@ -425,5 +425,7 @@ void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, 
     _tMempool* mm = *mem;
     _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), mm);
     
+    m->leaf = mm->leaf;
+    
     mpool_create (memory, size, m);
 }
