@@ -288,7 +288,7 @@ void tTalkbox_lpc(float *buf, float *car, double* dl, double* Rt, int32_t n, int
         {
 //            for(i=0; i<n; i++)
 //            {
-                buf[i] = 0.0f;
+                buf[0] = 0.0f;
                 return;
 //            }
         }
@@ -618,7 +618,7 @@ void tTalkboxFloat_lpc(float *buf, float *car, float* dl, float* Rt, int32_t n, 
         {
 //            for(i=0; i<n; i++)
 //            {
-                buf[i] = 0.0f;
+                buf[0] = 0.0f;
                 return;
 //            }
         }
