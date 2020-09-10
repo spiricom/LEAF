@@ -122,6 +122,8 @@ extern "C" {
         uint32_t idx;
         uint32_t bufferLength;
         uint32_t recordedLength;
+        uint32_t channels;
+        uint32_t sampleRate;
         RecordMode mode;
         
         int active;
@@ -130,7 +132,7 @@ extern "C" {
     typedef _tBuffer* tBuffer;
     
     void  tBuffer_init                  (tBuffer* const, uint32_t length, LEAF* const leaf);
-    void  tBuffer_initToPool            (tBuffer* const, uint32_t length, tMempool* const);
+    void  tBuffer_initToPool 			(tBuffer* const sb, uint32_t length, tMempool* const mp, LEAF* const leaf);
     void  tBuffer_free                  (tBuffer* const);
     
     void  tBuffer_tick                  (tBuffer* const, float sample);
@@ -138,6 +140,7 @@ extern "C" {
     float tBuffer_get                   (tBuffer* const, int idx);
     void  tBuffer_record                (tBuffer* const);
     void  tBuffer_stop                  (tBuffer* const);
+    void tBuffer_setBuffer				(tBuffer* const sb, float* externalBuffer, int length, int channels, int sampleRate);
     int   tBuffer_getRecordPosition     (tBuffer* const);
     void   tBuffer_setRecordPosition    (tBuffer* const, int pos);
     void  tBuffer_setRecordMode         (tBuffer* const, RecordMode mode);
@@ -224,6 +227,12 @@ extern "C" {
         
         tBuffer samp;
         
+        float leafInvSampleRate;
+        float leafSampleRate;
+        float ticksPerSevenMs;
+        float rateFactor;
+        uint32_t channels;
+
         tRamp gain;
         
         float idx;
@@ -254,10 +263,11 @@ extern "C" {
     typedef _tSampler* tSampler;
     
     void    tSampler_init               (tSampler* const, tBuffer* const, LEAF* const leaf);
-    void    tSampler_initToPool         (tSampler* const, tBuffer* const, tMempool* const);
+    void 	tSampler_initToPool			(tSampler* const sp, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
     void    tSampler_free               (tSampler* const);
     
     float   tSampler_tick               (tSampler* const);
+    float	tSampler_tickStereo        	(tSampler* const sp, float* outputArray);
     void    tSampler_setSample          (tSampler* const, tBuffer* const);
     void    tSampler_setMode            (tSampler* const, PlayMode mode);
     void    tSampler_play               (tSampler* const);
@@ -343,7 +353,7 @@ extern "C" {
     typedef _tAutoSampler* tAutoSampler;
     
     void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const, LEAF* const leaf);
-    void    tAutoSampler_initToPool         (tAutoSampler* const, tBuffer* const, tMempool* const);
+    void    tAutoSampler_initToPool 		(tAutoSampler* const as, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
     void    tAutoSampler_free               (tAutoSampler* const);
     
     float   tAutoSampler_tick               (tAutoSampler* const, float input);

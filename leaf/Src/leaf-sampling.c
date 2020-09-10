@@ -26,17 +26,18 @@
 
 void  tBuffer_init (tBuffer* const sb, uint32_t length, LEAF* const leaf)
 {
-    tBuffer_initToPool(sb, length, &leaf->mempool);
+    tBuffer_initToPool(sb, length, &leaf->mempool, leaf);
 }
 
-void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp)
+void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp, LEAF* const leaf)
 {
     _tMempool* m = *mp;
     _tBuffer* s = *sb = (_tBuffer*) mpool_alloc(sizeof(_tBuffer), m);
     s->mempool = m;
     
     s->buff = (float*) mpool_alloc( sizeof(float) * length, m);
-    
+    s->sampleRate = leaf->sampleRate;
+    s->channels = 1;
     s->bufferLength = length;
     s->recordedLength = 0;
     s->active = 0;
@@ -136,6 +137,17 @@ void  tBuffer_clear (tBuffer* const sb)
 
 }
 
+void tBuffer_setBuffer(tBuffer* const sb, float* externalBuffer, int length, int channels, int sampleRate)
+{
+    _tBuffer* s = *sb;
+
+    s->buff = externalBuffer;
+    s->channels = channels;
+    s->sampleRate = sampleRate;
+    s->recordedLength = length/channels;
+    s->bufferLength = s->recordedLength;
+}
+
 uint32_t tBuffer_getBufferLength(tBuffer* const sb)
 {
     _tBuffer* s = *sb;
@@ -168,10 +180,10 @@ static void attemptStartEndChange(tSampler* const sp);
 
 void tSampler_init(tSampler* const sp, tBuffer* const b, LEAF* const leaf)
 {
-    tSampler_initToPool(sp, b, &leaf->mempool);
+    tSampler_initToPool(sp, b, &leaf->mempool, leaf);
 }
 
-void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const mp)
+void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const mp, LEAF* const leaf)
 {
     _tMempool* m = *mp;
     _tSampler* p = *sp = (_tSampler*) mpool_alloc(sizeof(_tSampler), m);
@@ -179,18 +191,36 @@ void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const m
     
     _tBuffer* s = *b;
     
+    p->leafInvSampleRate = leaf->invSampleRate;
+    p->leafSampleRate = leaf->sampleRate;
+    p->ticksPerSevenMs = 0.007f * p->leafSampleRate;
+    p->rateFactor = s->sampleRate * p->leafInvSampleRate;
+    p->channels = s->channels;
+
+
     p->samp = s;
     
     p->active = 0;
     
     p->start = 0;
-    p->end = 0;
+    p->end = p->samp->bufferLength - 1;
     
     p->len = p->end - p->start;
     
     p->idx = 0.f;
-    p->inc = 1.f;
-    p->iinc = 1.f;
+    float rate = p->rateFactor; //adjust for sampling rate of buffer (may be different from leaf.sampleRate if audio file was loaded form SD card)
+    if (rate < 0.f)
+    {
+        rate = -rate;
+        p->dir = -1;
+    }
+    else
+    {
+        p->dir = 1;
+    }
+
+    p->inc = rate;
+    p->iinc = 1.f / p->inc;
     
     p->dir = 1;
     p->flip = 1;
@@ -200,7 +230,7 @@ void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const m
     
     p->cfxlen = 500; // default 300 sample crossfade
     
-    tRamp_initToPool(&p->gain, 7.0f, 1, mp);
+    tRamp_initToPool(&p->gain, 5.0f, 1, mp);
     tRamp_setVal(&p->gain, 0.f);
     
     p->targetstart = -1;
@@ -226,6 +256,10 @@ void tSampler_setSample (tSampler* const sp, tBuffer* const b)
     
     p->samp = s;
     
+
+    p->rateFactor = s->sampleRate * p->leafInvSampleRate;
+    p->channels = s->channels;
+
     p->start = 0;
     p->end = p->samp->bufferLength - 1;
     
@@ -452,7 +486,7 @@ float tSampler_tick        (tSampler* const sp)
             p->idx = myEnd;
         }
         float ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
-        if (ticksToEnd < (0.007f * leaf->sampleRate))
+        if ((ticksToEnd < p->ticksPerSevenMs) && (p->active == 1))
         {
             tRamp_setDest(&p->gain, 0.f);
             p->active = -1;
@@ -500,6 +534,299 @@ float tSampler_tick        (tSampler* const sp)
     return p->last;
 }
 
+
+float tSampler_tickStereo        (tSampler* const sp, float* outputArray)
+{
+    _tSampler* p = *sp;
+    LEAF* leaf = p->mempool->leaf;
+
+    attemptStartEndChange(sp);
+
+    if (p->active == 0)         return 0.f;
+
+    if ((p->inc == 0.0f) || (p->len < 2))
+    {
+        //        p->inCrossfade = 1;
+        return p->last;
+    }
+
+    float cfxsample[2] = {0.0f, 0.0f};
+    float crossfadeMix = 0.0f;
+    float flipsample[2] = {0.0f, 0.0f};
+    float flipMix = 0.0f;
+
+    float* buff = p->samp->buff;
+
+    // Variables so start is also before end
+    int myStart = p->start;
+    int myEnd = p->end;
+    if (p->flip < 0)
+    {
+        myStart = p->end;
+        myEnd = p->start;
+    }
+
+    // Get the direction and a reverse flag for some calcs
+    int dir = p->bnf * p->dir * p->flip;
+    int rev = 0;
+    if (dir < 0) rev = 1;
+
+    // Get the current integer index and alpha for interpolation
+    int idx = (int) p->idx;
+    float alpha = rev + (p->idx - idx) * dir;
+    idx += rev;
+
+    // Get the indexes for interpolation
+    int i1 = idx-(1*dir);
+    int i2 = idx;
+    int i3 = idx+(1*dir);
+    int i4 = idx+(2*dir);
+
+    int length = p->samp->recordedLength;
+
+    // Wrap as needed
+    i1 = (i1 < length*rev) ? i1 + (length * (1-rev)) : i1 - (length * rev);
+    i2 = (i2 < length*rev) ? i2 + (length * (1-rev)) : i2 - (length * rev);
+    i3 = (i3 < length*(1-rev)) ? i3 + (length * rev) : i3 - (length * (1-rev));
+    i4 = (i4 < length*(1-rev)) ? i4 + (length * rev) : i4 - (length * (1-rev));
+
+    outputArray[0] = LEAF_interpolate_hermite_x (buff[i1 * p->channels],
+                                         buff[i2 * p->channels],
+                                         buff[i3 * p->channels],
+                                         buff[i4 * p->channels],
+                                         alpha);
+
+    outputArray[1] = LEAF_interpolate_hermite_x (buff[(i1 * p->channels) + 1],
+                                         buff[(i2 * p->channels) + 1],
+                                         buff[(i3 * p->channels) + 1],
+                                         buff[(i4 * p->channels) + 1],
+                                         alpha);
+
+    int32_t cfxlen = p->cfxlen;
+    if (p->len * 0.25f < cfxlen) cfxlen = p->len * 0.25f;
+
+    // Determine crossfade points
+    int32_t fadeLeftStart = 0;
+    if (myStart >= cfxlen) fadeLeftStart = myStart - cfxlen;
+    int32_t fadeLeftEnd = fadeLeftStart + cfxlen;
+
+    int32_t fadeRightEnd = myEnd;// + (fadeLeftEnd - start);
+    //    if (fadeRightEnd >= length) fadeRightEnd = length - 1;
+    int32_t fadeRightStart = fadeRightEnd - cfxlen;
+
+
+
+
+    if (p->mode == PlayLoop)
+    {
+
+        int offset = 0;
+        int cdx = 0;
+        if ((fadeLeftStart <= idx) && (idx <= fadeLeftEnd))
+        {
+            offset = fadeLeftEnd - idx;
+            cdx = fadeRightEnd - offset;
+            p->inCrossfade = 1;
+        }
+        else if ((fadeRightStart <= idx) && (idx <= fadeRightEnd))
+        {
+            offset = idx - fadeRightStart;
+            cdx = fadeLeftStart + offset;
+            p->inCrossfade = 1;
+        }
+        else p->inCrossfade = 0;
+
+        if (p->inCrossfade)
+        {
+            int c1 = cdx-(1*dir);
+            int c2 = cdx;
+            int c3 = cdx+(1*dir);
+            int c4 = cdx+(2*dir);
+
+            // Wrap as needed
+            c1 = (c1 < length * rev) ? c1 + (length * (1-rev)) : c1 - (length * rev);
+            c2 = (c2 < length * rev) ? c2 + (length * (1-rev)) : c2 - (length * rev);
+            c3 = (c3 < length * (1-rev)) ? c3 + (length * rev) : c3 - (length * (1-rev));
+            c4 = (c4 < length * (1-rev)) ? c4 + (length * rev) : c4 - (length * (1-rev));
+
+            cfxsample[0] = LEAF_interpolate_hermite_x (buff[c1 * p->channels],
+                                                    buff[c2 * p->channels],
+                                                    buff[c3 * p->channels],
+                                                    buff[c4 * p->channels],
+                                                    alpha);
+
+            cfxsample[1] = LEAF_interpolate_hermite_x (buff[(c1 * p->channels) + 1],
+                                                                buff[(c2 * p->channels) + 1],
+                                                                buff[(c3 * p->channels) + 1],
+                                                                buff[(c4 * p->channels) + 1],
+                                                                alpha);
+
+            crossfadeMix = (float) offset / (float) cfxlen;
+        }
+
+        float flipLength = fabsf(p->flipIdx - p->flipStart);
+        if (flipLength > cfxlen)
+        {
+            p->flipStart = -1;
+            p->flipIdx = -1;
+        }
+        if (p->flipIdx >= 0)
+        {
+            if (p->flipStart == -1)
+            {
+                p->flipStart = p->idx;
+                p->flipIdx = p->idx;
+            }
+            flipLength = fabsf(p->flipIdx - p->flipStart);
+
+            int fdx = (int) p->flipIdx;
+            float falpha = (1-rev) - (p->flipIdx - fdx) * dir;
+            idx += (1-rev);
+
+            // Get the indexes for interpolation
+            int f1 = fdx+(1*dir);
+            int f2 = fdx;
+            int f3 = fdx-(1*dir);
+            int f4 = fdx-(2*dir);
+
+            // Wrap as needed
+            f1 = (f1 < length*(1-rev)) ? f1 + (length * rev) : f1 - (length * (1-rev));
+            f2 = (f2 < length*(1-rev)) ? f2 + (length * rev) : f2 - (length * (1-rev));
+            f3 = (f3 < length*rev) ? f3 + (length * (1-rev)) : f3 - (length * rev);
+            f4 = (f4 < length*rev) ? f4 + (length * (1-rev)) : f4 - (length * rev);
+
+            flipsample[0] = LEAF_interpolate_hermite_x (buff[f1 * p->channels],
+                                                     buff[f2 * p->channels],
+                                                     buff[f3 * p->channels],
+                                                     buff[f4 * p->channels],
+                                                     falpha);
+
+            flipsample[1] = LEAF_interpolate_hermite_x (buff[(f1 * p->channels) + 1],
+                                                     buff[(f2 * p->channels) + 1],
+                                                     buff[(f3 * p->channels) + 1],
+                                                     buff[(f4 * p->channels) + 1],
+                                                     falpha);
+
+            flipMix = (float) (cfxlen - flipLength) / (float) cfxlen;
+        }
+    }
+
+    float inc = fmodf(p->inc, (float)p->len);
+    p->idx += (dir * inc);
+    if (p->flipStart >= 0)
+    {
+        p->flipIdx += (-dir * inc);
+        if((int)p->flipIdx < 0)
+        {
+            p->idx += (float)length;
+        }
+        if((int)p->idx >= length)
+        {
+
+            p->idx -= (float)length;
+        }
+    }
+
+
+
+    attemptStartEndChange(sp);
+
+
+    if (p->mode == PlayLoop)
+    {
+        if((int)p->idx < myStart)
+        {
+            p->idx += (float)(fadeRightEnd - fadeLeftEnd);
+        }
+        if((int)p->idx > myEnd)
+        {
+
+            p->idx -= (float)(fadeRightEnd - fadeLeftEnd);
+        }
+    }
+    else if (p->mode == PlayBackAndForth)
+    {
+        if (p->idx < myStart)
+        {
+            p->bnf = -p->bnf;
+            p->idx = myStart + 1;
+        }
+        else if (p->idx > myEnd)
+        {
+            p->bnf = -p->bnf;
+            p->idx = myEnd - 1;
+        }
+    }
+
+
+    if (p->mode == PlayNormal)
+    {
+        if (p->idx < myStart)
+        {
+            p->idx = myStart;
+        }
+        else if (p->idx > myEnd)
+        {
+            p->idx = myEnd;
+        }
+        float ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
+        if ((ticksToEnd < p->ticksPerSevenMs) && (p->active == 1))
+        {
+            tRamp_setDest(&p->gain, 0.f);
+            p->active = -1;
+        }
+    }
+
+    float sampleGain = tRamp_tick(&p->gain);
+    for (int i = 0; i < p->channels; i++)
+    {
+        outputArray[i] = ((outputArray[i] * (1.0f - crossfadeMix)) + (cfxsample[i] * crossfadeMix)) * (1.0f - flipMix) + (flipsample[i] * flipMix);
+        outputArray[i]  = outputArray[i] * sampleGain;
+    }
+
+
+
+
+    if (p->active < 0)
+    {
+        //if was fading out and reached silence
+    	if (tRamp_sample(&p->gain) <= 0.0001f)
+        {
+            if (p->retrigger == 1)
+            {
+                p->active = 1;
+                p->retrigger = 0;
+                tRamp_setDest(&p->gain, 1.f);
+
+                if (p->dir > 0)
+                {
+                    if (p->flip > 0)    p->idx = p->start;
+                    else                p->idx = p->end;
+                }
+                else
+                {
+                    if (p->flip > 0)    p->idx = p->end;
+                    else                p->idx = p->start;
+                }
+                handleStartEndChange(&p);
+            }
+            else
+            {
+                p->active = 0;
+            }
+
+        }
+    }
+
+
+
+    p->last =  outputArray[0];
+
+
+    return p->last;
+}
+
+
 void tSampler_setMode      (tSampler* const sp, PlayMode mode)
 {
     _tSampler* p = *sp;
@@ -518,14 +845,23 @@ void tSampler_setCrossfadeLength  (tSampler* const sp, uint32_t length)
 void tSampler_play         (tSampler* const sp)
 {
     _tSampler* p = *sp;
-    
-    if (p->active != 0)
+
+    if (p->active > 0)
     {
         p->active = -1;
         p->retrigger = 1;
         
         tRamp_setDest(&p->gain, 0.f);
     }
+
+    else if (p->active < 0)
+    {
+        p->active = -1;
+        p->retrigger = 1;
+
+        //tRamp_setDest(&p->gain, 0.f);
+    }
+
     else
     {
         p->active = 1;
@@ -740,6 +1076,7 @@ void tSampler_setRate      (tSampler* const sp, float rate)
 {
     _tSampler* p = *sp;
     
+    rate = rate * p->rateFactor; //adjust for sampling rate of buffer (may be different from leaf.sampleRate if audio file was loaded form SD card)
     if (rate < 0.f)
     {
         rate = -rate;
@@ -758,17 +1095,17 @@ void tSampler_setRate      (tSampler* const sp, float rate)
 
 void    tAutoSampler_init   (tAutoSampler* const as, tBuffer* const b, LEAF* const leaf)
 {
-    tAutoSampler_initToPool(as, b, &leaf->mempool);
+    tAutoSampler_initToPool(as, b, &leaf->mempool, leaf);
 }
 
-void    tAutoSampler_initToPool (tAutoSampler* const as, tBuffer* const b, tMempool* const mp)
+void    tAutoSampler_initToPool (tAutoSampler* const as, tBuffer* const b, tMempool* const mp, LEAF* const leaf)
 {
     _tMempool* m = *mp;
     _tAutoSampler* a = *as = (_tAutoSampler*) mpool_alloc(sizeof(_tAutoSampler), m);
     a->mempool = m;
     
     tBuffer_setRecordMode(b, RecordOneShot);
-    tSampler_initToPool(&a->sampler, b, mp);
+    tSampler_initToPool(&a->sampler, b, mp, leaf);
     tSampler_setMode(&a->sampler, PlayLoop);
     tEnvelopeFollower_initToPool(&a->ef, 0.05f, 0.9999f, mp);
 }
@@ -939,7 +1276,7 @@ float tMBSampler_tick        (tMBSampler* const sp)
 {
     _tMBSampler* c = *sp;
     
-    if (c->gain->curr == 0.0f && !c->active) return 0.0f;
+    if ((c->gain->curr == 0.0f) && (!c->active)) return 0.0f;
     if (c->_w == 0.0f)
     {
         c->_last_w = 0.0f;
@@ -1031,8 +1368,10 @@ float tMBSampler_tick        (tMBSampler* const sp)
             float nextSlope = (afterNext - next) / w;
             float lastSlope = (last - beforeLast) / w;
             place_slope_dd(c->_f, j, p - start, w, nextSlope - lastSlope);
-            
-            if (c->mode == PlayNormal) c->active = 0;
+            if (c->mode == PlayNormal)
+            {
+            	c->active = 0;
+            }
             else if (c->mode == PlayBackAndForth) w = -w;
         }
 //        else if (p < (float) start) { /* start has been set ahead of the current phase */
@@ -1056,6 +1395,13 @@ float tMBSampler_tick        (tMBSampler* const sp)
             int i = (int) f;
             f -= i;
             next = buff[i] * (1.0f - f) + buff[i+1] * f;
+
+
+            if ((end - p) < 480) // 480 samples should be enough to let the tExpSmooth go from 1 to 0 (10ms at 48k, 5ms at 192k)
+            if (c->mode == PlayNormal)
+            {
+            	tExpSmooth_setDest(&c->gain, 0.0f);
+            }
         }
 
         if (c->_last_w < 0.0f)
@@ -1095,7 +1441,10 @@ float tMBSampler_tick        (tMBSampler* const sp)
             float lastSlope = (last - beforeLast) / w;
             place_slope_dd(c->_f, j, end - p, w, nextSlope - lastSlope);
             
-            if (c->mode == PlayNormal) c->active = 0;
+            if (c->mode == PlayNormal)
+            {
+            	c->active = 0;
+            }
             else if (c->mode == PlayBackAndForth) w = -w;
         }
 //        else if (p > (float) end) {
@@ -1115,6 +1464,11 @@ float tMBSampler_tick        (tMBSampler* const sp)
 //        }
         else {
             
+            if ((p - start) < 480) // 480 samples should be enough to let the tExpSmooth go from 1 to 0 (10ms at 48k, 5ms at 192k)
+            if (c->mode == PlayNormal)
+            {
+            	tExpSmooth_setDest(&c->gain, 0.0f);
+            }
             float f = p;
             int i = (int) f;
             f -= i;

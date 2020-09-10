@@ -1321,37 +1321,6 @@ float   tVZFilter_tickEfficient             (tVZFilter* const vf, float in)
 
 }
 
-float   tVZFilter_tickEfficientBP               (tVZFilter* const vf, float in)
-{
-    _tVZFilter* f = *vf;
-
-    float yL, yB, yH;
-
-    // compute highpass output via Eq. 5.1:
-    yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
-
-    // compute bandpass output by applying 1st integrator to highpass output:
-    yB = (f->g*yH) + f->s1;
-    f->s1 = f->g*yH + yB; // state update in 1st integrator
-
-    // compute lowpass output by applying 2nd integrator to bandpass output:
-    yL = (f->g*yB) + f->s2;
-    f->s2 = f->g*yB + yL; // state update in 2nd integrator
-
-    //according to the Vadim paper, we could add saturation to this model by adding a tanh in the integration stage.
-    //
-    //seems like that might look like this:
-    // y = tanh(g*x) + s; // output computation
-    // s = g*x + y; // state update
-
-    //instead of this:
-    // y = g*x + s; // output computation
-    // s = g*x + y; // state update
-
-    return f->cL*yL + f->cB*yB + f->cH*yH;
-
-}
-
 
 void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
 {
@@ -1458,6 +1427,18 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
       f->h = 1.0f / (1.0f + f->R2*f->g + f->g*f->g);  // factor for feedback precomputation
 }
 
+void   tVZFilter_calcCoeffsEfficientBP           (tVZFilter* const vf)
+{
+
+    _tVZFilter* f = *vf;
+    f->g = fastertanf(PI * f->fc * f->inv_sr);  // embedded integrator gain (Fig 3.11)
+    f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
+    f->cB = f->R2;
+    f->h = 1.0f / (1.0f + f->R2*f->g + f->g*f->g);  // factor for feedback precomputation
+}
+
+
+
 
 void   tVZFilter_setBandwidth               (tVZFilter* const vf, float B)
 {
@@ -1483,13 +1464,27 @@ void   tVZFilter_setFreqAndBandwidth           (tVZFilter* const vf, float freq,
     tVZFilter_calcCoeffs(vf);
 }
 
+void   tVZFilter_setFreqAndBandwidthEfficientBP           (tVZFilter* const vf, float freq, float bw)
+{
+    _tVZFilter* f = *vf;
+    LEAF* leaf = f->mempool->leaf;
+
+    f->B = LEAF_clip(0.0f,bw, 100.0f);
+    f->fc = LEAF_clip(0.0f, freq, 0.5f * leaf->sampleRate);
+    tVZFilter_calcCoeffsEfficientBP(vf);
+}
+
+
+
 void   tVZFilter_setGain                (tVZFilter* const vf, float gain)
 {
     _tVZFilter* f = *vf;
-    f->G = LEAF_clip(0.000001f, gain, 100.0f);
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
     f->invG = 1.0f/f->G;
     tVZFilter_calcCoeffs(vf);
 }
+
+
 
 void   tVZFilter_setMorph               (tVZFilter* const vf, float morph)
 {
@@ -1515,6 +1510,18 @@ float tVZFilter_BandwidthToR(tVZFilter* const vf, float B)
                                // center-frequencies
   return sqrtf((1.0f-r*r)*(1.0f-r*r)/(4.0f*r*r));
 }
+
+float tVZFilter_BandwidthToREfficientBP(tVZFilter* const vf, float B)
+{
+    _tVZFilter* f = *vf;
+  float fl = f->fc*fastPowf(2.0f, -B * 0.5f); // lower bandedge frequency (in Hz)
+  float gl = fastertanf(PI*fl*f->inv_sr);   // warped radian lower bandedge frequency /(2*fs)
+  float r  = gl/f->g;            // ratio between warped lower bandedge- and center-frequencies
+                               // unwarped: r = pow(2, -B/2) -> approximation for low
+                               // center-frequencies
+  return fastsqrtf((1.0f-r*r)*(1.0f-r*r)/(4.0f*r*r));
+}
+
 
 
 
@@ -1557,13 +1564,22 @@ float tanhXdX(float x)
 {
     float a = x*x;
     // IIRC I got this as Pade-approx for tanh(sqrt(x))/sqrt(x)
-    return ((a + 105.0f)*a + 945.0f) / ((15.0f*a + 420.0f)*a + 945.0f);
+    float testVal = ((15.0f*a + 420.0f)*a + 945.0f);
+    float output = 1.0f;
+
+    if (testVal!= 0.0f)
+    {
+    	output = testVal;
+
+    }
+    return ((a + 105.0f)*a + 945.0f) / output;
 }
 
 float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
 {
     _tDiodeFilter* f = *vf;
 
+    int errorCheck = 0;
     // the input x[n+1] is given by 'in', and x[n] by zi
     // input with half delay
     float ih = 0.5f * (in + f->zi);
@@ -1579,24 +1595,24 @@ float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
 
     // This formula gives the result for y3 thanks to MATLAB
     float y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
-//    if (isnan(y3))
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-//    }
+    if (isnan(y3))
+    {
+    	errorCheck = 1;
+    }
     float tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
-//    if (isnan(tempy3denom))
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-//    }
+    if (isnan(tempy3denom))
+    {
+    	errorCheck = 2;
+    }
     if (tempy3denom == 0.0f)
     {
         tempy3denom = 0.000001f;
     }
     y3 = y3 / tempy3denom;
-//    if (isnan(y3))
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-//    }
+    if (isnan(y3))
+    {
+    	errorCheck = 3;
+    }
     if (t1 == 0.0f)
     {
         t1 = 0.000001f;
@@ -1617,15 +1633,15 @@ float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
 
     // update state
     f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
-//    if (isnan(f->s0))
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-//    }
+    if (isnan(f->s0))
+    {
+    	errorCheck = 4;
+    }
 
-//    if (isinf(f->s0))
-//    {
-//        __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 400);
-//    }
+    if (isinf(f->s0))
+    {
+    	errorCheck = 5;
+    }
     f->s1 += 2.0f * (t2*(y2-y1) - t1*(y1-y0));
     f->s2 += 2.0f * (t3*(y3-y2) - t2*(y2-y1));
     f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));

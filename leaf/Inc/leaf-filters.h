@@ -1012,13 +1012,16 @@ extern "C" {
     float   tVZFilter_tick               (tVZFilter* const, float input);
     float   tVZFilter_tickEfficient               (tVZFilter* const vf, float in);
     void    tVZFilter_calcCoeffs           (tVZFilter* const);
+    void    tVZFilter_calcCoeffsEfficientBP           (tVZFilter* const);
     void    tVZFilter_setBandwidth            (tVZFilter* const, float bandWidth);
     void    tVZFilter_setFreq           (tVZFilter* const, float freq);
     void    tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, float freq, float bw);
+    void    tVZFilter_setFreqAndBandwidthEfficientBP    (tVZFilter* const vf, float freq, float bw);
     void    tVZFilter_setGain                  (tVZFilter* const, float gain);
+
     void    tVZFilter_setType                  (tVZFilter* const, VZFilterType type);
     float   tVZFilter_BandwidthToR        (tVZFilter* const vf, float B);
-    
+    float   tVZFilter_BandwidthToREfficientBP(tVZFilter* const vf, float B);
     
     /*!
      @defgroup tdiodefilter tDiodeFilter

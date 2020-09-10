@@ -410,7 +410,7 @@ static inline void delink_node(mpool_node_t* node)
 
 void tMempool_init(tMempool* const mp, char* memory, size_t size, LEAF* const leaf)
 {
-    tMempool_initToPool(mp, memory, size, &leaf->mempool);
+    tMempool_initToPool(mp, memory, size, &leaf->mempool, leaf);
 }
 
 void tMempool_free(tMempool* const mp)
@@ -420,10 +420,11 @@ void tMempool_free(tMempool* const mp)
     mpool_free((char*)m, m->mempool);
 }
 
-void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem)
+void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem, LEAF* const leaf)
 {
     _tMempool* mm = *mem;
     _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), mm);
-    
+    m->leaf = leaf;
     mpool_create (memory, size, m);
 }
+

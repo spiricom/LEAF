@@ -99,7 +99,47 @@ float fastercosf(float fAngle)
     return fResult;
 }
 
+float fasttanf (float fAngle)
+{
+    float fASqr = fAngle*fAngle;
+    float fResult = 9.5168091e-03f;
+    fResult *= fASqr;
+    fResult += 2.900525e-03f;
+    fResult *= fASqr;
+    fResult += 2.45650893e-02f;
+    fResult *= fASqr;
+    fResult += 5.33740603e-02f;
+    fResult *= fASqr;
+    fResult += 1.333923995e-01f;
+    fResult *= fASqr;
+    fResult += 3.333314036e-01f;
+    fResult *= fASqr;
+    fResult += 1.0f;
+    fResult *= fAngle;
+    return fResult;
+}
 
+float fastertanf(float fAngle)
+{
+    float fASqr = fAngle*fAngle;
+    float fResult = 2.033e-01f;
+    fResult *= fASqr;
+    fResult += 3.1755e-01f;
+    fResult *= fASqr;
+    fResult += 1.0f;
+    fResult *= fAngle;
+    return fResult;
+}
+
+// from Heng Li, a combination of inverse square root (see wiki) and inversion: https://bits.stephan-brumme.com/inverse.html
+float fastsqrtf(float x)
+{
+	union { float f; uint32_t i; } z = { x };
+	z.i  = 0x5f3759df - (z.i >> 1);
+	z.f *= (1.5f - (x * 0.5f * z.f * z.f));
+	z.i = 0x7EEEEEEE - z.i;
+	return z.f;
+}
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit integers
@@ -114,7 +154,7 @@ int fastabs_int(int in){
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit floats
-inline float fastabsf(float f)
+float fastabsf(float f)
 {
     union
     {

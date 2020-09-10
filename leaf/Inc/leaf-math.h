@@ -138,6 +138,13 @@ extern "C" {
     float fastcosf(float fAngle);
 
     float fastercosf(float fAngle);
+
+    float fasttanf (float fAngle);
+
+
+    float fastertanf(float fAngle);
+
+
     // alternative implementation for abs()
     // REQUIRES: 32 bit integers
     int fastabs_int(int in);

@@ -112,7 +112,7 @@ extern "C" {
      @param size The size of the chuck of memory to be used as a mempool.
      @param poolTo A pointer to the tMempool to which a tMempool should be initialized.
      */
-    void    tMempool_initToPool     (tMempool* const pool, char* memory, size_t size, tMempool* const poolTo);
+    void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem, LEAF* const leaf);
 
     /*!￼￼￼
      @} */

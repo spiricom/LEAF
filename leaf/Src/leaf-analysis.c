@@ -10,7 +10,7 @@
 
 #include "..\Inc\leaf-analysis.h"
 #include "..\Externals\d_fft_mayer.h"
-
+#include <intrin.h>
 #else
 
 #include "../Inc/leaf-analysis.h"
