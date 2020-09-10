@@ -89,14 +89,18 @@ void tTalkbox_update(tTalkbox* const voc) ///update internal parameters...
     LEAF* leaf = v->mempool->leaf;
     
     float fs = leaf->sampleRate;
-    if(fs <  8000.0f) fs =  8000.0f;
-    if(fs > 96000.0f) fs = 96000.0f;
+//    if(fs <  8000.0f) fs =  8000.0f;
+//    if(fs > 96000.0f) fs = 96000.0f;
     
     int32_t n = (int32_t)(0.01633f * fs); //this sets the window time to 16ms if the buffer is large enough. Buffer needs to be at least 784 samples at 48000
     if(n > v->bufsize) n = v->bufsize;
     
     //O = (VstInt32)(0.0005f * fs);
     v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * fs);
+    if (v->O >= ORD_MAX)
+    {
+        v->O = ORD_MAX-1;
+    }
     
     if(n != v->N) //recalc hanning window
     {
@@ -261,7 +265,6 @@ void tTalkbox_lpc(float *buf, float *car, double* dl, double* Rt, int32_t n, int
     float z[ORD_MAX], r[ORD_MAX], x;
     int32_t i, j, nn=n;
 
-
     if (warpOn == 0)
     {
         for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
@@ -286,11 +289,11 @@ void tTalkbox_lpc(float *buf, float *car, double* dl, double* Rt, int32_t n, int
     {
         if(r[0] < min)
         {
-//            for(i=0; i<n; i++)
-//            {
-                buf[0] = 0.0f;
-                return;
-//            }
+            for(i=0; i<n; i++)
+            {
+                buf[i] = 0.0f;
+            }
+            return;
         }
 
         tTalkbox_lpcDurbin(r, o, k, G);  //calc reflection coeffs
@@ -418,14 +421,18 @@ void tTalkboxFloat_update(tTalkboxFloat* const voc) ///update internal parameter
     LEAF* leaf = v->mempool->leaf;
     
     float fs = leaf->sampleRate;
-    if(fs <  8000.0f) fs =  8000.0f;
-    if(fs > 96000.0f) fs = 96000.0f;
+//    if(fs <  8000.0f) fs =  8000.0f;
+//    if(fs > 96000.0f) fs = 96000.0f;
 
     int32_t n = (int32_t)(0.01633f * fs); //this sets the window time to 16ms if the buffer is large enough. Buffer needs to be at least 784 samples at 48000
     if(n > v->bufsize) n = v->bufsize;
 
     //O = (VstInt32)(0.0005f * fs);
     v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * fs);
+    if (v->O >= ORD_MAX)
+    {
+        v->O = ORD_MAX-1;
+    }
 
     if(n != v->N) //recalc hanning window
     {
@@ -589,20 +596,20 @@ float tTalkboxFloat_tick(tTalkboxFloat* const voc, float synth, float voice)
 void tTalkboxFloat_lpc(float *buf, float *car, float* dl, float* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G)
 {
     float z[ORD_MAX], r[ORD_MAX], x;
-    int32_t i, j, nn=n;
-
-
+    
     if (warpOn == 0)
     {
-        for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
+        int nn = n;
+        for(int j = 0; j <= o; j++, nn--)  //buf[] is already emphasized and windowed
         {
             z[j] = r[j] = 0.0f;
-            for(i=0; i<nn; i++) r[j] += buf[i] * buf[i+j]; //autocorrelation
+            for(int i = 0; i < nn; i++) r[j] += buf[i] * buf[i+j]; //autocorrelation
         }
     }
     else
     {
-        for(j=0; j<=o; j++, nn--)  //buf[] is already emphasized and windowed
+        int nn = n;
+        for(int j = 0; j <= o; j++, nn--)  //buf[] is already emphasized and windowed
         {
             z[j] = r[j] = 0.0f;
         }
@@ -616,26 +623,28 @@ void tTalkboxFloat_lpc(float *buf, float *car, float* dl, float* Rt, int32_t n, 
     {
         if(r[0] < min)
         {
-//            for(i=0; i<n; i++)
-//            {
-                buf[0] = 0.0f;
-                return;
-//            }
+
+            for(int i = 0; i < n; i++)
+            {
+                buf[i] = 0.0f;
+            }
+            return;
+
         }
 
         tTalkbox_lpcDurbin(r, o, k, G);  //calc reflection coeffs
 
         //this is for stability to keep reflection coefficients inside the unit circle
         //but in Harma's papers I've seen 0.998.  just needs to be less than 1 it seems but maybe some wiggle room to avoid instability from floating point precision -JS
-        for(i=0; i<=o; i++)
+        for(int i = 0; i <= o; i++)
         {
             if(k[i] > 0.998f) k[i] = 0.998f; else if(k[i] < -0.998f) k[i] = -.998f;
         }
     }
-    for(i=0; i<n; i++)
+    for(int i = 0; i < n; i++)
     {
         x = G[0] * car[i];
-        for(j=o; j>0; j--)  //lattice filter
+        for(int j = o; j > 0; j--)  //lattice filter
         {
             x -= k[j] * z[j-1];
             z[j] = z[j-1] + k[j] * x;
