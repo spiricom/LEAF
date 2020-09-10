@@ -54,8 +54,10 @@ LEAF objects assume that they will be "ticked" once per sample, and generally ta
 
 
 ```
-//in your user code, create an instance of a leaf object
+//in your user code, create an instance of a master leaf object. This exists so that in the case of a plugin environment or other situation with shared resources, you can still have separate instances of the LEAF library that won't conflict.
+LEAF leaf
 
+//then create instances of whatever LEAF objects you want
 tCycle mySine;
 
 
@@ -72,14 +74,14 @@ float audioBuffer[AUDIO_BUFFER_SIZE];
 
 
 //then initialize the whole LEAF library (this only needs to be done once, it sets global parameters like the default mempool and the sample rate)
-//the parameters are: sample rate, audio buffer size in samples, name of mempool array, size of mempool array, and address of a function to generate a random number. In this case, there is a function called randomNumber that exists elsewhere in the user code that generates a random floating point number from 0.0 to 1.0. We ask the user to pass in a random number function because LEAF has no dependencies, and users developing on embedded systems may want to use a hardware RNG, for instance.
+//the parameters are: master leaf instance, sample rate, audio buffer size in samples, name of mempool array, size of mempool array, and address of a function to generate a random number. In this case, there is a function called randomNumber that exists elsewhere in the user code that generates a random floating point number from 0.0 to 1.0. We ask the user to pass in a random number function because LEAF has no dependencies, and users developing on embedded systems may want to use a hardware RNG, for instance.
 
-LEAF_init(48000, AUDIO_BUFFER_SIZE, myMemory, MEM_SIZE, &randomNumber);
+LEAF_init(&leaf, 48000, AUDIO_BUFFER_SIZE, myMemory, MEM_SIZE, &randomNumber);
 
 
-//now initialize the object you want to use, in this case the sine wave oscillator you created above.
+//now initialize the object you want to use, in this case the sine wave oscillator you created above. You need to also pass in the instance of the master leaf object (only needed for initializing objects).
 
-tCycle_init(&mySine);
+tCycle_init(&mySine, &leaf);
 
 
 //set the frequency of the oscillator (defaults to zero). In a real use case, you'd probably want to be updating this to new values in the audio frame based on knob positions or midi data or other inputs, but here we'll assume it stays fixed.
