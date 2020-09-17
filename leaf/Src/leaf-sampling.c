@@ -26,17 +26,17 @@
 
 void  tBuffer_init (tBuffer* const sb, uint32_t length, LEAF* const leaf)
 {
-    tBuffer_initToPool(sb, length, &leaf->mempool, leaf);
+    tBuffer_initToPool(sb, length, &leaf->mempool);
 }
 
-void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp, LEAF* const leaf)
+void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tBuffer* s = *sb = (_tBuffer*) mpool_alloc(sizeof(_tBuffer), m);
     s->mempool = m;
     
     s->buff = (float*) mpool_alloc( sizeof(float) * length, m);
-    s->sampleRate = leaf->sampleRate;
+    s->sampleRate = s->mempool->leaf->sampleRate;
     s->channels = 1;
     s->bufferLength = length;
     s->recordedLength = 0;
@@ -273,7 +273,6 @@ void tSampler_setSample (tSampler* const sp, tBuffer* const b)
 float tSampler_tick        (tSampler* const sp)
 {
     _tSampler* p = *sp;
-    LEAF* leaf = p->mempool->leaf;
     
     attemptStartEndChange(sp);
     
@@ -538,7 +537,6 @@ float tSampler_tick        (tSampler* const sp)
 float tSampler_tickStereo        (tSampler* const sp, float* outputArray)
 {
     _tSampler* p = *sp;
-    LEAF* leaf = p->mempool->leaf;
 
     attemptStartEndChange(sp);
 

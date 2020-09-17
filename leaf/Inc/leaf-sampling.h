@@ -132,7 +132,7 @@ extern "C" {
     typedef _tBuffer* tBuffer;
     
     void  tBuffer_init                  (tBuffer* const, uint32_t length, LEAF* const leaf);
-    void  tBuffer_initToPool 			(tBuffer* const sb, uint32_t length, tMempool* const mp, LEAF* const leaf);
+    void  tBuffer_initToPool 			(tBuffer* const sb, uint32_t length, tMempool* const mp);
     void  tBuffer_free                  (tBuffer* const);
     
     void  tBuffer_tick                  (tBuffer* const, float sample);
