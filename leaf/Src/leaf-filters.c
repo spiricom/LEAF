@@ -791,8 +791,10 @@ void    tSVF_initToPool     (tSVF* const svff, SVFType type, float freq, float Q
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g*svf->a1;
     svf->a3 = svf->g*svf->a2;
+    
     svf->cH = 0.0f;
     svf->cB = 0.0f;
+    svf->cBK = 0.0f;
     svf->cL = 1.0f;
 
     if (type == SVFTypeLowpass)
@@ -854,6 +856,11 @@ float   tSVF_tick(tSVF* const svff, float v0)
     svf->ic1eq = (2.0f * v1) - svf->ic1eq;
     svf->ic2eq = (2.0f * v2) - svf->ic2eq;
     
+    if (isnan(svf->ic1eq))
+    {
+        return 0.0f;
+    }
+    
     return (v0 * svf->cH) + (v1 * svf->cB) + (svf->k * v1 * svf->cBK) + (v2 * svf->cL);
 }
 
@@ -862,8 +869,8 @@ void     tSVF_setFreq(tSVF* const svff, float freq)
     _tSVF* svf = *svff;
     LEAF* leaf = svf->mempool->leaf;
     
-    svf->cutoff = freq;
-    svf->g = tanf(PI * freq * leaf->invSampleRate);
+    svf->cutoff = LEAF_clip(0.0f, freq, leaf->sampleRate * 0.5f);
+    svf->g = tanf(PI * svf->cutoff * leaf->invSampleRate);
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;
@@ -885,8 +892,9 @@ void    tSVF_setFreqAndQ(tSVF* const svff, float freq, float Q)
     _tSVF* svf = *svff;
     LEAF* leaf = svf->mempool->leaf;
     
+    svf->cutoff = LEAF_clip(0.0f, freq, leaf->sampleRate * 0.5f);
     svf->k = 1.0f/Q;
-    svf->g = tanf(PI * freq * leaf->invSampleRate);
+    svf->g = tanf(PI * svf->cutoff * leaf->invSampleRate);
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;
