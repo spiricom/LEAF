@@ -796,9 +796,7 @@ float   tTapeDelay_tick (tTapeDelay* const dl, float input)
 
     d->idx += d->inc;
 
-    int i = (int)d->idx;
-    float f = d->idx - (float)i;
-    if (d->idx >= d->maxDelay) d->idx = f;
+    while (d->idx >= d->maxDelay) d->idx -= d->maxDelay;
 
     if (d->lastOut)
         return d->lastOut;
