@@ -516,6 +516,7 @@ extern "C" {
         tSOLAD sola;
         tHighpass hp;
         tPeriodDetection* p;
+        tDualPitchDetector dp;
         
         float* outBuffer;
         int frameSize;
@@ -533,8 +534,8 @@ extern "C" {
     
     typedef _tPitchShift* tPitchShift;
     
-    void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, LEAF* const leaf);
-    void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, tMempool* const);
+    void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, tDualPitchDetector* const, float* out, int bufSize, LEAF* const leaf);
+    void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, tDualPitchDetector* const, float* out, int bufSize, tMempool* const);
     void    tPitchShift_free            (tPitchShift* const);
     
     float   tPitchShift_shift           (tPitchShift* const);
@@ -607,6 +608,7 @@ extern "C" {
         
         tMempool mempool;
         
+        tDualPitchDetector dp;
         tPeriodDetection pd;
         tPitchShift* ps;
         
@@ -719,6 +721,7 @@ extern "C" {
         
         tMempool mempool;
         
+        tDualPitchDetector dp;
         tPeriodDetection pd;
         tPitchShift* ps;
         

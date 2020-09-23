@@ -1375,12 +1375,12 @@ static int pitchshift_attackdetect(_tPitchShift* ps)
     return (p->fba == 0 && (p->max > 60 && p->deltamax > 6)) ? 1 : 0;
 }
 
-void tPitchShift_init (tPitchShift* const psr, tPeriodDetection* pd, float* out, int bufSize, LEAF* const leaf)
+void tPitchShift_init (tPitchShift* const psr, tPeriodDetection* const pd, tDualPitchDetector* const dp, float* out, int bufSize, LEAF* const leaf)
 {
-    tPitchShift_initToPool(psr, pd, out, bufSize, &leaf->mempool);
+    tPitchShift_initToPool(psr, pd, dp, out, bufSize, &leaf->mempool);
 }
 
-void tPitchShift_initToPool (tPitchShift* const psr, tPeriodDetection* const pd, float* out, int bufSize, tMempool* const mp)
+void tPitchShift_initToPool (tPitchShift* const psr, tPeriodDetection* const pd, tDualPitchDetector* const dp, float* out, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPitchShift* ps = *psr = (_tPitchShift*) mpool_calloc(sizeof(_tPitchShift), m);
@@ -1398,6 +1398,7 @@ void tPitchShift_initToPool (tPitchShift* const psr, tPeriodDetection* const pd,
     ps->lastBlock = 0;
     ps->index = 0;
     ps->pitchFactor = 1.0f;
+    ps->dp = *dp;
     
     tSOLAD_initToPool(&ps->sola, mp);
     
@@ -1434,10 +1435,11 @@ float tPitchShift_shift (tPitchShift* psr)
     iLast = p->iLast;
     
     out = tHighpass_tick(&ps->hp, ps->outBuffer[iLast]);
-    
+
     if (p->indexstore >= ps->frameSize)
     {
-        period = tPeriodDetection_getPeriod(&p);
+//        period = tPeriodDetection_getPeriod(&p);
+        period = 1.0f / tDualPitchDetector_getFrequency(&ps->dp);
         
         if(pitchshift_attackdetect(ps) == 1)
         {
@@ -1460,7 +1462,8 @@ float tPitchShift_shiftToFreq (tPitchShift* psr, float freq)
     _tPeriodDetection* p = *ps->p;
     LEAF* leaf = ps->mempool->leaf;
     
-    float period, out;
+    float period = 0;
+    float out;
     int i, iLast;
     
     i = p->i;
@@ -1470,7 +1473,9 @@ float tPitchShift_shiftToFreq (tPitchShift* psr, float freq)
     
     if (p->indexstore >= ps->frameSize)
     {
-        period = tPeriodDetection_getPeriod(&p);
+//        period = tPeriodDetection_getPeriod(&p);
+        float f = tDualPitchDetector_getFrequency(&ps->dp);
+        if (f > 0) period = 1.0f / f;
         
         if(pitchshift_attackdetect(ps) == 1)
         {
@@ -1478,9 +1483,9 @@ float tPitchShift_shiftToFreq (tPitchShift* psr, float freq)
             tSOLAD_setReadLag(&ps->sola, p->windowSize);
         }
         
-        tSOLAD_setPeriod(&ps->sola, period);
+        tSOLAD_setPeriod(&ps->sola, period * leaf->sampleRate);
         
-        if (period != 0) ps->pitchFactor = period * freq * leaf->invSampleRate;
+        if (period != 0) ps->pitchFactor = freq * period;
         else ps->pitchFactor = 1.0f;
         
         tSOLAD_setPitchFactor(&ps->sola, ps->pitchFactor);
@@ -1505,7 +1510,8 @@ float tPitchShift_shiftToFunc (tPitchShift* psr, float (*fun)(float))
     
     if (p->indexstore >= ps->frameSize)
     {
-        period = tPeriodDetection_getPeriod(&p);
+//        period = tPeriodDetection_getPeriod(&p);
+        period = 1.0f / tDualPitchDetector_getFrequency(&ps->dp);
         
         if(pitchshift_attackdetect(ps) == 1)
         {
@@ -1566,11 +1572,12 @@ void tRetune_initToPool (tRetune* const rt, int numVoices, int bufSize, int fram
         r->outBuffers[i] = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
     }
     
+    tDualPitchDetector_initToPool(&r->dp, mtof(48), mtof(72), mp);
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
 
     for (int i = 0; i < r->numVoices; ++i)
     {
-        tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, mp);
+        tPitchShift_initToPool(&r->ps[i], &r->pd, &r->dp, r->outBuffers[i], r->bufSize, mp);
     }
 }
 
@@ -1578,6 +1585,7 @@ void tRetune_free (tRetune* const rt)
 {
     _tRetune* r = *rt;
     
+    tDualPitchDetector_free(&r->dp);
     tPeriodDetection_free(&r->pd);
     for (int i = 0; i < r->numVoices; ++i)
     {
@@ -1596,7 +1604,9 @@ float* tRetune_tick(tRetune* const rt, float sample)
 {
     _tRetune* r = *rt;
     
-    r->inputPeriod = tPeriodDetection_tick(&r->pd, sample);
+    tPeriodDetection_tick(&r->pd, sample);
+    tDualPitchDetector_tick(&r->dp, sample);
+    r->inputPeriod = 1.0f / tDualPitchDetector_getFrequency(&r->dp);
     
     for (int v = 0; v < r->numVoices; ++v)
     {
@@ -1720,11 +1730,12 @@ void tAutotune_initToPool (tAutotune* const rt, int numVoices, int bufSize, int 
         r->outBuffers[i] = (float*) mpool_alloc(sizeof(float) * r->bufSize, m);
     }
     
+    tDualPitchDetector_initToPool(&r->dp, mtof(48), mtof(72), mp);
     tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
 
     for (int i = 0; i < r->numVoices; ++i)
     {
-        tPitchShift_initToPool(&r->ps[i], &r->pd, r->outBuffers[i], r->bufSize, mp);
+        tPitchShift_initToPool(&r->ps[i], &r->pd, &r->dp, r->outBuffers[i], r->bufSize, mp);
     }
     
     r->inputPeriod = 0.0f;
@@ -1753,11 +1764,14 @@ float* tAutotune_tick(tAutotune* const rt, float sample)
 {
     _tAutotune* r = *rt;
     
-    float tempPeriod = tPeriodDetection_tick(&r->pd, sample);
-    if (tempPeriod < 1000.0f) //to avoid trying to follow consonants JS
-    {
-        r->inputPeriod = tempPeriod;
-    }
+    tPeriodDetection_tick(&r->pd, sample);
+    tDualPitchDetector_tick(&r->dp, sample);
+    r->inputPeriod = 1.0f / tDualPitchDetector_getFrequency(&r->dp);
+    
+//    if (tempPeriod < 1000.0f) //to avoid trying to follow consonants JS
+//    {
+//        r->inputPeriod = tempPeriod;
+//    }
 
     for (int v = 0; v < r->numVoices; ++v)
     {
