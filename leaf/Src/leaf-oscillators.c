@@ -1166,13 +1166,23 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     a = 0.5f; // when a = 1, LPfilter is disabled
     
     t = freq / leaf->sampleRate;
-    if (t < 1e-5f) t = 1e-5f;
-    if (t > 0.5f) t = 0.5f;
-    dw = (t - w) ;
+    
+    if (t >= 0)
+    {
+        if (t < 1e-5f) t = 1e-5f;
+        if (t > 0.5f) t = 0.5f;
+    }
+    else
+    {
+        if (t > -1e-5f) t = -1e-5f;
+        if (t < -0.5f) t = -0.5f;
+    }
+    
+    dw = (t - w);
     t = 0.5f * (1.0f + c->waveform );
     if (t < w) t = w;
     if (t > 1.0f - w) t = 1.0f - w;
-    db = (t - b) ;
+    db = (t - b);
     
     w += dw;
     b += db;
@@ -1357,8 +1367,18 @@ float tMBSaw_tick(tMBSaw* const osc)
     if (c->_init) {
         p = 0.5f;
         w = freq / leaf->sampleRate;
-        if (w < 1e-5f) w = 1e-5f;
-        if (w > 0.5f) w = 0.5f;
+        
+        if (w >= 0)
+        {
+            if (w < 1e-5f) w = 1e-5f;
+            if (w > 0.5f) w = 0.5f;
+        }
+        else
+        {
+            if (w > -1e-5f) w = -1e-5f;
+            if (w < -0.5f) w = -0.5f;
+        }
+        
         /* if we valued alias-free startup over low startup time, we could do:
          *   p -= w;
          *   place_slope_dd(_f, j, 0.0f, w, -1.0f); */
@@ -1369,8 +1389,18 @@ float tMBSaw_tick(tMBSaw* const osc)
     a = 0.5f; // when a = 1, LPfilter is disabled
     
     t = freq / leaf->sampleRate;
-    if (t < 1e-5f) t = 1e-5f;
-    if (t > 0.5f) t = 0.5f;
+
+    if (t >= 0)
+    {
+        if (t < 1e-5f) t = 1e-5f;
+        if (t > 0.5f) t = 0.5f;
+    }
+    else
+    {
+        if (t > -1e-5f) t = -1e-5f;
+        if (t < -0.5f) t = -0.5f;
+    }
+    
     dw = (t - w); // n= 1
     w += dw;
     p += w;
@@ -1398,8 +1428,12 @@ float tMBSaw_tick(tMBSaw* const osc)
         c->syncout = p / w + 1e-20f;
         place_step_dd(c->_f, j, p, w, 1.0f);
         
-    } else {
-        
+    } else if (p < 0.0f) {
+        p += 1.0f;
+        c->syncout = p / w + 1e-20f;
+        place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
+    }
+    else {
         c->syncout = 0.0f;
     }
     c->_f[j + DD_SAMPLE_DELAY] += 0.5f - p;

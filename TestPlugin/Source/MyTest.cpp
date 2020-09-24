@@ -55,6 +55,7 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
     tMBSaw_init(&bsaw, &leaf);
+    tMBSaw_setFreq(&bsaw, -500);
     tMBTriangle_init(&btri, &leaf);
     tMBPulse_init(&bpulse, &leaf);
     
@@ -94,9 +95,11 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
-    tBuffer_tick(&samp, input);
-
-    return tMBSampler_tick(&sampler);
+//    tBuffer_tick(&samp, input);
+//
+//    return tMBSampler_tick(&sampler);
+    
+    return tMBSaw_tick(&bsaw);
     
     
 //    tMBSaw_setFreq(&bsaw, x);

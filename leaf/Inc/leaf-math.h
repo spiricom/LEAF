@@ -190,6 +190,8 @@ extern "C" {
     double fasterexp(double x);
 
     float fasterexpf(float x);
+    
+    float fastsqrtf(float x);
 
     float mtof(float f);
     
