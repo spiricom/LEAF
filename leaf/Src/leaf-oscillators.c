@@ -1120,7 +1120,7 @@ float tMBPulse_tick(tMBPulse* const osc)
         {
             if (p < 0.0f) {
                 p += 1.0f;
-                c->syncout = p / -w + 1e-20f;
+                c->syncout = (1.0f - p) / -w + 1e-20f;
                 place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
                 k = 1;
                 x = -0.5f;
@@ -1162,7 +1162,7 @@ float tMBPulse_tick(tMBPulse* const osc)
             }
             if (p < 0.0f) {
                 p += 1.0f;
-                c->syncout = p / -w + 1e-20f;
+                c->syncout = (1.0f - p) / -w + 1e-20f;
                 place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
                 k = 1;
                 x = -0.5f;
@@ -1455,7 +1455,7 @@ float tMBTriangle_tick(tMBTriangle* const osc)
         {
             if (p < 0.0f) {
                 p += 1.0f;
-                c->syncout = p / -w + 1e-20f;
+                c->syncout = (1.0f - p) / -w + 1e-20f;
                 x = 0.5f - (p - b) / b1;
                 place_slope_dd(c->_f, j, 1.0f - p, -w, 1.0f / b + 1.0f / b1);
                 k = 1;
@@ -1498,7 +1498,7 @@ float tMBTriangle_tick(tMBTriangle* const osc)
             }
             if (p < 0.0f) {
                 p += 1.0f;
-                c->syncout = p / -w + 1e-20f;
+                c->syncout = (1.0f - p) / -w + 1e-20f;
                 x = 0.5f - (p - b) / b1;
                 place_slope_dd(c->_f, j, 1.0f - p, -w, 1.0f / b + 1.0f / b1);
                 k = 1;
@@ -1673,7 +1673,7 @@ float tMBSaw_tick(tMBSaw* const osc)
         
     } else if (p < 0.0f) {
         p += 1.0f;
-        c->syncout = p / -w + 1e-20f;
+        c->syncout = (1.0f - p) / -w + 1e-20f;
         place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
     }
     else {

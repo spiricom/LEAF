@@ -55,9 +55,9 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
     tMBSaw_init(&bsaw, &leaf);
-    tMBSaw_setFreq(&bsaw, 100);
+    tMBSaw_setFreq(&bsaw, -100);
     tMBTriangle_init(&btri, &leaf);
-    tMBTriangle_setFreq(&btri, 200);
+    tMBTriangle_setFreq(&btri, -200);
     tMBPulse_init(&bpulse, &leaf);
     tMBPulse_setFreq(&bpulse, -500);
     
