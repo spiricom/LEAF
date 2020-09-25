@@ -921,7 +921,7 @@ float tMBPulse_tick(tMBPulse* const osc)
     
     int    j, k;
     float  freq, syncin;
-    float  a, b, db, p, t, w, dw, x, z;
+    float  a, b, db, p, tw, tb, w, dw, x, z;
     
     syncin  = c->syncin;
     freq = c->freq;
@@ -937,11 +937,21 @@ float tMBPulse_tick(tMBPulse* const osc)
         p = 0.0f;
         
         w = freq / leaf->sampleRate;
-        if (w < 1e-5f) w = 1e-5f;
-        if (w > 0.5f) w = 0.5f;
         b = 0.5f * (1.0f + c->waveform );
-        if (b < w) b = w;
-        if (b > 1.0f - w) b = 1.0f - w;
+        if (w >= 0)
+        {
+            if (w < 1e-5f) w = 1e-5f;
+            if (w > 0.5f) w = 0.5f;
+            if (b < w) b = w;
+            if (b > 1.0f - w) b = 1.0f - w;
+        }
+        else
+        {
+            if (w > -1e-5f) w = -1e-5f;
+            if (w < -0.5f) w = -0.5f;
+            if (b < -w) b = -w;
+            if (b > 1.0f + w) b = 1.0f + w;
+        }
         /* for variable-width rectangular wave, we could do DC compensation with:
          *     x = 1.0f - b;
          * but that doesn't work well with highly modulated hard sync.  Instead,
@@ -957,14 +967,32 @@ float tMBPulse_tick(tMBPulse* const osc)
     //    a = 0.2 + 0.8 * vco->_port [FILT];
     a = 0.5f; // when a = 1, LPfilter is disabled
     
-    t = freq / leaf->sampleRate;
-    if (t < 1e-5f) t = 1e-5f;
-    if (t > 0.5f) t = 0.5f;
-    dw = (t - w) ;
-    t = 0.5f * (1.0f + c->waveform );
-    if (t < w) t = w;
-    if (t > 1.0f - w) t = 1.0f - w;
-    db = (t - b) ;
+    tw = freq / leaf->sampleRate;
+    if (tw >= 0)
+    {
+        if (tw < 1e-5f) tw = 1e-5f;
+        if (tw > 0.5f) tw = 0.5f;
+    }
+    else
+    {
+        if (tw > -1e-5f) tw = -1e-5f;
+        if (tw < -0.5f) tw = -0.5f;
+    }
+    
+    tb = 0.5f * (1.0f + c->waveform);
+    if (w >= 0)
+    {
+        if (tb < w) tb = w;
+        if (tb > 1.0f - w) tb = 1.0f - w;
+    }
+    else
+    {
+        if (tb < -w) tb = -w;
+        if (tb > 1.0f + w) tb = 1.0f + w;
+    }
+    
+    dw = (tw - w);
+    db = (tb - b);
     
     w += dw;
     b += db;
@@ -974,81 +1002,174 @@ float tMBPulse_tick(tMBPulse* const osc)
         //
         float eof_offset = (syncin - 1e-20f) * w;
         float p_at_reset = p - eof_offset;
-        p = eof_offset;
+    
+        if (w > 0) p = eof_offset;
+        else p = 1.0f - eof_offset;
         
         /* place any DDs that may have occurred in subsample before reset */
         if (!k) {
-            if (p_at_reset >= b) {
-                place_step_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f);
-                k = 1;
-                x = -0.5f;
+            if (w > 0)
+            {
+                if (p_at_reset >= b) {
+                    place_step_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f);
+                    k = 1;
+                    x = -0.5f;
+                }
+                if (p_at_reset >= 1.0f) {
+                    p_at_reset -= 1.0f;
+                    place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
+                    k = 0;
+                    x = 0.5f;
+                }
             }
-            if (p_at_reset >= 1.0f) {
-                p_at_reset -= 1.0f;
-                place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
-                k = 0;
-                x = 0.5f;
+            else
+            {
+                if (p_at_reset < 0.0f) {
+                    p_at_reset += 1.0f;
+                    place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, -1.0f);
+                    k = 1;
+                    x = -0.5f;
+                }
+                if (k && p_at_reset < b) {
+                    place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -w, 1.0f);
+                    k = 0;
+                    x = 0.5f;
+                }
             }
         } else {
-            if (p_at_reset >= 1.0f) {
-                p_at_reset -= 1.0f;
-                place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
-                k = 0;
-                x = 0.5f;
+            if (w > 0)
+            {
+                if (p_at_reset >= 1.0f) {
+                    p_at_reset -= 1.0f;
+                    place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
+                    k = 0;
+                    x = 0.5f;
+                }
+                if (!k && p_at_reset >= b) {
+                    place_step_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f);
+                    k = 1;
+                    x = -0.5f;
+                }
             }
-            if (!k && p_at_reset >= b) {
-                place_step_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f);
-                k = 1;
-                x = -0.5f;
+            else
+            {
+                if (p_at_reset < b) {
+                    place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -w, 1.0f);
+                    k = 0;
+                    x = 0.5f;
+                }
+                if (p_at_reset < 0.0f) {
+                    p_at_reset += 1.0f;
+                    place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, -1.0f);
+                    k = 1;
+                    x = -0.5f;
+                }
             }
         }
         
         /* now place reset DD */
-        if (k) {
-            place_step_dd(c->_f, j, p, w, 1.0f);
-            k = 0;
-            x = 0.5f;
+        if (w > 0)
+        {
+            if (k) {
+                place_step_dd(c->_f, j, p, w, 1.0f);
+                k = 0;
+                x = 0.5f;
+            }
+            if (p >= b) {
+                place_step_dd(c->_f, j, p - b, w, -1.0f);
+                k = 1;
+                x = -0.5f;
+            }
         }
-        if (p >= b) {
-            place_step_dd(c->_f, j, p - b, w, -1.0f);
-            k = 1;
-            x = -0.5f;
+        else
+        {
+            if (!k) {
+                place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
+                k = 1;
+                x = -0.5f;
+            }
+            if (p < b) {
+                place_step_dd(c->_f, j, b - p, -w, 1.0f);
+                k = 0;
+                x = 0.5f;
+            }
         }
         
         c->syncout = syncin;  /* best we can do is pass on upstream sync */
         
     } else if (!k) {  /* normal operation, signal currently high */
         
-        if (p >= b) {
-            place_step_dd(c->_f, j, p - b, w, -1.0f);
-            k = 1;
-            x = -0.5f;
+        if (w > 0)
+        {
+            if (p >= b) {
+                place_step_dd(c->_f, j, p - b, w, -1.0f);
+                k = 1;
+                x = -0.5f;
+            }
+            if (p >= 1.0f) {
+                p -= 1.0f;
+                c->syncout = p / w + 1e-20f;
+                place_step_dd(c->_f, j, p, w, 1.0f);
+                k = 0;
+                x = 0.5f;
+            } else {
+                c->syncout = 0.0f;
+            }
         }
-        if (p >= 1.0f) {
-            p -= 1.0f;
-            c->syncout = p / w + 1e-20f;
-            place_step_dd(c->_f, j, p, w, 1.0f);
-            k = 0;
-            x = 0.5f;
-        } else {
-            c->syncout = 0.0f;
+        else
+        {
+            if (p < 0.0f) {
+                p += 1.0f;
+                c->syncout = p / -w + 1e-20f;
+                place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
+                k = 1;
+                x = -0.5f;
+            } else {
+                c->syncout = 0.0f;
+            }
+            if (k && p < b) {
+                place_step_dd(c->_f, j, b - p, -w, 1.0f);
+                k = 0;
+                x = 0.5f;
+            }
         }
         
     } else {  /* normal operation, signal currently low */
         
-        if (p >= 1.0f) {
-            p -= 1.0f;
-            c->syncout = p / w + 1e-20f;
-            place_step_dd(c->_f, j, p, w, 1.0f);
-            k = 0;
-            x = 0.5f;
-        } else {
-            c->syncout = 0.0f;
+        if (w > 0)
+        {
+            if (p >= 1.0f) {
+                p -= 1.0f;
+                c->syncout = p / w + 1e-20f;
+                place_step_dd(c->_f, j, p, w, 1.0f);
+                k = 0;
+                x = 0.5f;
+            } else {
+                c->syncout = 0.0f;
+            }
+            if (!k && p >= b) {
+                place_step_dd(c->_f, j, p - b, w, -1.0f);
+                k = 1;
+                x = -0.5f;
+            }
         }
-        if (!k && p >= b) {
-            place_step_dd(c->_f, j, p - b, w, -1.0f);
-            k = 1;
-            x = -0.5f;
+        else
+        {
+            if (p < b) {
+                place_step_dd(c->_f, j, b - p, -w, 1.0f);
+                k = 0;
+                x = 0.5f;
+            }
+            if (p < 0.0f) {
+                p += 1.0f;
+                c->syncout = p / -w + 1e-20f;
+                place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
+                k = 1;
+                x = -0.5f;
+            } else {
+                c->syncout = 0.0f;
+            }
+            
         }
     }
     c->_f[j + DD_SAMPLE_DELAY] += x;
@@ -1134,7 +1255,7 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     
     int    j, k;
     float  freq, syncin;
-    float  a, b, b1, db, p, t, w, dw, x, z;
+    float  a, b, b1, db, p, tw, tb, w, dw, x, z;
     
     syncin  = c->syncin;
     freq = c->freq;
@@ -1149,11 +1270,22 @@ float tMBTriangle_tick(tMBTriangle* const osc)
         //        w = (exp2ap (freq[1] + vco->_port[OCTN] + vco->_port[TUNE] + expm[1] * vco->_port[EXPG] + 8.03136)
         //                + 1e3 * linm[1] * vco->_port[LING]) / SAMPLERATE;
         w = freq / leaf->sampleRate;
-        if (w < 1e-5f) w = 1e-5f;
-        if (w > 0.5f) w = 0.5f;
         b = 0.5f * (1.0f + c->waveform);
-        if (b < w) b = w;
-        if (b > 1.0f - w) b = 1.0f - w;
+        if (w >= 0)
+        {
+            if (w < 1e-5f) w = 1e-5f;
+            if (w > 0.5f) w = 0.5f;
+            if (b < w) b = w;
+            if (b > 1.0f - w) b = 1.0f - w;
+        }
+        else
+        {
+            if (w > -1e-5f) w = -1e-5f;
+            if (w < -0.5f) w = -0.5f;
+            if (b < -w) b = -w;
+            if (b > 1.0f + w) b = 1.0f + w;
+        }
+        
         p = 0.5f * b;
         /* if we valued alias-free startup over low startup time, we could do:
          *   p -= w;
@@ -1165,24 +1297,32 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     //    a = 0.2 + 0.8 * vco->_port [FILT];
     a = 0.5f; // when a = 1, LPfilter is disabled
     
-    t = freq / leaf->sampleRate;
-    
-    if (t >= 0)
+    tw = freq / leaf->sampleRate;
+    if (tw >= 0)
     {
-        if (t < 1e-5f) t = 1e-5f;
-        if (t > 0.5f) t = 0.5f;
+        if (tw < 1e-5f) tw = 1e-5f;
+        if (tw > 0.5f) tw = 0.5f;
     }
     else
     {
-        if (t > -1e-5f) t = -1e-5f;
-        if (t < -0.5f) t = -0.5f;
+        if (tw > -1e-5f) tw = -1e-5f;
+        if (tw < -0.5f) tw = -0.5f;
     }
     
-    dw = (t - w);
-    t = 0.5f * (1.0f + c->waveform );
-    if (t < w) t = w;
-    if (t > 1.0f - w) t = 1.0f - w;
-    db = (t - b);
+    tb = 0.5f * (1.0f + c->waveform);
+    if (w >= 0)
+    {
+        if (tb < w) tb = w;
+        if (tb > 1.0f - w) tb = 1.0f - w;
+    }
+    else
+    {
+        if (tb < -w) tb = -w;
+        if (tb > 1.0f + w) tb = 1.0f + w;
+    }
+    
+    dw = (tw - w);
+    db = (tb - b);
     
     w += dw;
     b += db;
@@ -1193,84 +1333,178 @@ float tMBTriangle_tick(tMBTriangle* const osc)
         
         float eof_offset = (syncin - 1e-20f) * w;
         float p_at_reset = p - eof_offset;
-        p = eof_offset;
+        
+        if (w > 0) p = eof_offset;
+        else p = 1.0f - eof_offset;
         //
         /* place any DDs that may have occurred in subsample before reset */
+            
         if (!k) {
             x = -0.5f + p_at_reset / b;
-            if (p_at_reset >= b) {
-                x = 0.5f - (p_at_reset - b) / b1;
-                place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f / b1 - 1.0f / b);
-                k = 1;
+            if (w > 0)
+            {
+                if (p_at_reset >= b) {
+                    x = 0.5f - (p_at_reset - b) / b1;
+                    place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f / b1 - 1.0f / b);
+                    k = 1;
+                }
+                if (p_at_reset >= 1.0f) {
+                    p_at_reset -= 1.0f;
+                    x = -0.5f + p_at_reset / b;
+                    place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f / b + 1.0f / b1);
+                    k = 0;
+                }
             }
-            if (p_at_reset >= 1.0f) {
-                p_at_reset -= 1.0f;
-                x = -0.5f + p_at_reset / b;
-                place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f / b + 1.0f / b1);
-                k = 0;
+            else
+            {
+                if (p_at_reset < 0.0f) {
+                    p_at_reset += 1.0f;
+                    x = 0.5f - (p_at_reset - b) / b1;
+                    place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, 1.0f / b + 1.0f / b1);
+                    k = 1;
+                }
+                if (k && p_at_reset < b) {
+                    x = -0.5f + p_at_reset / b;
+                    place_slope_dd(c->_f, j, b - p_at_reset - eof_offset, -w, -1.0f / b1 - 1.0f / b);
+                    k = 0;
+                }
             }
         } else {
             x = 0.5f - (p_at_reset - b) / b1;
-            if (p_at_reset >= 1.0f) {
-                p_at_reset -= 1.0f;
-                x = -0.5f + p_at_reset / b;
-                place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f / b + 1.0f / b1);
-                k = 0;
+            if (w > 0)
+            {
+                if (p_at_reset >= 1.0f) {
+                    p_at_reset -= 1.0f;
+                    x = -0.5f + p_at_reset / b;
+                    place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f / b + 1.0f / b1);
+                    k = 0;
+                }
+                if (!k && p_at_reset >= b) {
+                    x = 0.5f - (p_at_reset - b) / b1;
+                    place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f / b1 - 1.0f / b);
+                    k = 1;
+                }
             }
-            if (!k && p_at_reset >= b) {
-                x = 0.5f - (p_at_reset - b) / b1;
-                place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f / b1 - 1.0f / b);
-                k = 1;
+            else
+            {
+                if (p_at_reset < b) {
+                    x = -0.5f + p_at_reset / b;
+                    place_slope_dd(c->_f, j, b - p_at_reset - eof_offset, -w, -1.0f / b1 - 1.0f / b);
+                    k = 0;
+                }
+                if (p_at_reset < 0.0f) {
+                    p_at_reset += 1.0f;
+                    x = 0.5f - (p_at_reset - b) / b1;
+                    place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, 1.0f / b + 1.0f / b1);
+                    k = 1;
+                }
             }
         }
         
         /* now place reset DDs */
-        if (k)
-            place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
-        place_step_dd(c->_f, j, p, w, -0.5f - x);
-        x = -0.5f + p / b;
-        k = 0;
-        if (p >= b) {
-            x = 0.5f - (p - b) / b1;
-            place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
-            k = 1;
+        if (w > 0)
+        {
+            if (k)
+                place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
+            place_step_dd(c->_f, j, p, w, -0.5f - x);
+            x = -0.5f + p / b;
+            k = 0;
+            if (p >= b) {
+                x = 0.5f - (p - b) / b1;
+                place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
+                k = 1;
+            }
         }
+        else
+        {
+            if (!k)
+                place_slope_dd(c->_f, j, 1.0f - p, -w, 1.0f / b + 1.0f / b1);
+            place_step_dd(c->_f, j, 1.0f - p, -w, -0.5f - x);
+            x = 0.5f - (p - b) / b1;
+            k = 1;
+            if (p < b) {
+                x = -0.5f + p / b;
+                place_slope_dd(c->_f, j, b - p, -w, -1.0f / b1 - 1.0f / b);
+                k = 0;
+            }
+        }
+        
         c->syncout = syncin;  /* best we can do is pass on upstream sync */
         
     } else if (!k) {  /* normal operation, slope currently up */
         
         x = -0.5f + p / b;
-        if (p >= b) {
-            x = 0.5f - (p - b) / b1;
-            place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
-            k = 1;
+        if (w > 0)
+        {
+            if (p >= b) {
+                x = 0.5f - (p - b) / b1;
+                place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
+                k = 1;
+            }
+            if (p >= 1.0f) {
+                p -= 1.0f;
+                c->syncout = p / w + 1e-20f;
+                x = -0.5f + p / b;
+                place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
+                k = 0;
+            } else {
+                c->syncout = 0.0f;
+            }
         }
-        if (p >= 1.0f) {
-            p -= 1.0f;
-            c->syncout = p / w + 1e-20f;
-            x = -0.5f + p / b;
-            place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
-            k = 0;
-        } else {
-            c->syncout = 0.0f;
+        else
+        {
+            if (p < 0.0f) {
+                p += 1.0f;
+                c->syncout = p / -w + 1e-20f;
+                x = 0.5f - (p - b) / b1;
+                place_slope_dd(c->_f, j, 1.0f - p, -w, 1.0f / b + 1.0f / b1);
+                k = 1;
+            } else {
+                c->syncout = 0.0f;
+            }
+            if (k && p < b) {
+                x = -0.5f + p / b;
+                place_slope_dd(c->_f, j, b - p, -w, -1.0f / b1 - 1.0f / b);
+                k = 0;
+            }
         }
         
     } else {  /* normal operation, slope currently down */
         
         x = 0.5f - (p - b) / b1;
-        if (p >= 1.0f) {
-            p -= 1.0f;
-            c->syncout = p / w + 1e-20f;
-            x = -0.5f + p / b;
-            place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
-            k = 0;
-        } else {
-            c->syncout = 0.0f;
+        if (w > 0)
+        {
+            if (p >= 1.0f) {
+                p -= 1.0f;
+                c->syncout = p / w + 1e-20f;
+                x = -0.5f + p / b;
+                place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
+                k = 0;
+            } else {
+                c->syncout = 0.0f;
+            }
+            if (!k && p >= b) {
+                x = 0.5f - (p - b) / b1;
+                place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
+                k = 1;
+            }
         }
-        if (!k && p >= b) {
-            x = 0.5f - (p - b) / b1;
-            place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
-            k = 1;
+        else
+        {
+            if (p < b) {
+                x = -0.5f + p / b;
+                place_slope_dd(c->_f, j, b - p, -w, -1.0f / b1 - 1.0f / b);
+                k = 0;
+            }
+            if (p < 0.0f) {
+                p += 1.0f;
+                c->syncout = p / -w + 1e-20f;
+                x = 0.5f - (p - b) / b1;
+                place_slope_dd(c->_f, j, 1.0f - p, -w, 1.0f / b + 1.0f / b1);
+                k = 1;
+            } else {
+                c->syncout = 0.0f;
+            }
         }
     }
     c->_f[j + DD_SAMPLE_DELAY] += x;
@@ -1409,16 +1643,25 @@ float tMBSaw_tick(tMBSaw* const osc)
         
         float eof_offset = (syncin - 1e-20f) * w;
         float p_at_reset = p - eof_offset;
-        p = eof_offset;
+        
+        if (w > 0) p = eof_offset;
+        else p = 1.0f - eof_offset;
         
         /* place any DD that may have occurred in subsample before reset */
         if (p_at_reset >= 1.0f) {
             p_at_reset -= 1.0f;
             place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
         }
+        if (p_at_reset < 0.0f) {
+            p_at_reset += 1.0f;
+            place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, -1.0f);
+        }
         
         /* now place reset DD */
-        place_step_dd(c->_f, j, p, w, p_at_reset);
+        if (w > 0)
+            place_step_dd(c->_f, j, p, w, p_at_reset);
+        else
+            place_step_dd(c->_f, j, 1.0f - p, -w, -p_at_reset);
         
         c->syncout = syncin;  /* best we can do is pass on upstream sync */
         
@@ -1430,7 +1673,7 @@ float tMBSaw_tick(tMBSaw* const osc)
         
     } else if (p < 0.0f) {
         p += 1.0f;
-        c->syncout = p / w + 1e-20f;
+        c->syncout = p / -w + 1e-20f;
         place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
     }
     else {
