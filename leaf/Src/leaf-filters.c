@@ -1241,7 +1241,7 @@ void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, float 
     
     LEAF* leaf = f->mempool->leaf;
     
-    f->fc   = freq;
+    f->fc   = LEAF_clip(0.0f, freq, 0.5f * leaf->sampleRate);
     f->type = type;
     f->G    = ONE_OVER_SQRT2;
     f->invG    = 1.0f/ONE_OVER_SQRT2;

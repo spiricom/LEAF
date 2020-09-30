@@ -383,7 +383,8 @@ float tSampler_tick        (tSampler* const sp)
                                                     buff[c3],
                                                     buff[c4],
                                                     alpha);
-            crossfadeMix = (float) offset / (float) cfxlen;
+            if (cfxlen > 0.0f) crossfadeMix = (float) offset / (float) cfxlen;
+            else crossfadeMix = 0.0f;
         }
         
         float flipLength = fabsf(p->flipIdx - p->flipStart);
@@ -524,8 +525,6 @@ float tSampler_tick        (tSampler* const sp)
             
         }
     }
-    
-
     
     p->last = sample;
     
@@ -705,7 +704,8 @@ float tSampler_tickStereo        (tSampler* const sp, float* outputArray)
                                                      buff[(f4 * p->channels) + 1],
                                                      falpha);
 
-            flipMix = (float) (cfxlen - flipLength) / (float) cfxlen;
+            if (cfxlen > 0) flipMix = (float) (cfxlen - flipLength) / (float) cfxlen;
+            else flipMix = 1.0f;
         }
     }
 
