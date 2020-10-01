@@ -51,6 +51,7 @@ float   tEnvelopeFollower_tick(tEnvelopeFollower* const ef, float x)
     
     if (x < 0.0f ) x = -x;  /* Absolute value. */
     
+    if (isnan(x)) return 0.0f;
     if ((x >= e->y) && (x > e->a_thresh)) e->y = x;                      /* If we hit a peak, ride the peak to the top. */
     else                                    e->y = e->y * e->d_coeff;    /* Else, exponential decay of output. */
     
