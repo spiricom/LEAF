@@ -510,38 +510,27 @@ extern "C" {
     
     typedef struct _tPitchShift
     {
-        
         tMempool mempool;
+        
+        _tDualPitchDetector* pd;
         
         tSOLAD sola;
         tHighpass hp;
-        tPeriodDetection* p;
-        tDualPitchDetector dp;
         
         float* outBuffer;
-        int frameSize;
+        float* inBuffer;
         int bufSize;
-        
-        int framesPerBuffer;
-        int curBlock;
-        int lastBlock;
         int index;
-        
-        float pitchFactor;
-        float timeConstant;
-        float radius;
     } _tPitchShift;
     
     typedef _tPitchShift* tPitchShift;
     
-    void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, tDualPitchDetector* const, float* out, int bufSize, LEAF* const leaf);
-    void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, tDualPitchDetector* const, float* out, int bufSize, tMempool* const);
-    void    tPitchShift_free            (tPitchShift* const);
+    void    tPitchShift_init (tPitchShift* const, tDualPitchDetector* const, LEAF* const leaf);
+    void    tPitchShift_initToPool (tPitchShift* const, tDualPitchDetector* const, tMempool* const);
+    void    tPitchShift_free (tPitchShift* const);
     
-    float   tPitchShift_shift           (tPitchShift* const);
-    float   tPitchShift_shiftToFunc     (tPitchShift* const, float (*fun)(float));
-    float   tPitchShift_shiftToFreq     (tPitchShift* const, float freq);
-    void    tPitchShift_setPitchFactor  (tPitchShift* const, float pf);
+    void    tPitchShift_shiftBy (tPitchShift* const, float factor, float* in, float* out, int bufSize);
+    void    tPitchShift_shiftTo (tPitchShift* const, float freq, float* in, float* out, int bufSize);
     
     /*!
      @defgroup tretune tRetune
@@ -577,35 +566,10 @@ extern "C" {
      @brief
      @param
      
-     @fn void    tRetune_setTimeConstant     (tRetune* const, float tc)
-     @brief
-     @param
-     
-     @fn void    tRetune_setHopSize          (tRetune* const, int hs)
-     @brief
-     @param
-     
-     @fn void    tRetune_setWindowSize       (tRetune* const, int ws)
-     @brief
-     @param
-     
-     @fn void    tRetune_setFidelityThreshold(tRetune* const, float threshold)
-     @brief
-     @param
-     
-     @fn float   tRetune_getInputPeriod      (tRetune* const)
-     @brief
-     @param
-     
-     @fn float   tRetune_getInputFreq        (tRetune* const)
-     @brief
-     @param
-     
      @} */
     
     typedef struct _tRetune
     {
-        
         tMempool mempool;
         
         tDualPitchDetector dp;
@@ -613,40 +577,25 @@ extern "C" {
         tPitchShift* ps;
         
         float* inBuffer;
-        float** outBuffers;
-        float* tickOutput;
-        int frameSize;
+        float* outBuffer;
+        float* lastOutBuffer;
         int bufSize;
+        int index;
         
-        uint16_t hopSize;
-        uint16_t windowSize;
-        uint8_t fba;
-        
-        float* pitchFactor;
-        float timeConstant;
-        float radius;
-        
-        float inputPeriod;
-        
+        float* pitchFactors;
         int numVoices;
     } _tRetune;
     
     typedef _tRetune* tRetune;
     
-    void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf);
-    void    tRetune_initToPool          (tRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
+    void    tRetune_init                (tRetune* const, int numVoices, int bufSize, LEAF* const leaf);
+    void    tRetune_initToPool          (tRetune* const, int numVoices, int bufSize, tMempool* const);
     void    tRetune_free                (tRetune* const);
     
-    float*  tRetune_tick                (tRetune* const, float sample);
+    float   tRetune_tick                (tRetune* const, float sample);
     void    tRetune_setNumVoices        (tRetune* const, int numVoices);
     void    tRetune_setPitchFactors     (tRetune* const, float pf);
     void    tRetune_setPitchFactor      (tRetune* const, float pf, int voice);
-    void    tRetune_setTimeConstant     (tRetune* const, float tc);
-    void    tRetune_setHopSize          (tRetune* const, int hs);
-    void    tRetune_setWindowSize       (tRetune* const, int ws);
-    void    tRetune_setFidelityThreshold(tRetune* const, float threshold);
-    float   tRetune_getInputPeriod      (tRetune* const);
-    float   tRetune_getInputFreq        (tRetune* const);
     
     /*!
      @defgroup tautotune tAutotune
@@ -718,7 +667,6 @@ extern "C" {
     
     typedef struct _tAutotune
     {
-        
         tMempool mempool;
         
         tDualPitchDetector dp;
@@ -726,42 +674,25 @@ extern "C" {
         tPitchShift* ps;
         
         float* inBuffer;
-        float** outBuffers;
-        float* tickOutput;
-        int frameSize;
+        float* outBuffer;
+        float* lastOutBuffer;
         int bufSize;
+        int index;
         
-        uint16_t hopSize;
-        uint16_t windowSize;
-        uint8_t fba;
-        
-        float* freq;
-        float timeConstant;
-        float radius;
-        
-        float inputPeriod;
-        int shiftOn;
+        float* freqs;
         int numVoices;
     } _tAutotune;
     
     typedef _tAutotune* tAutotune;
     
-    void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf);
-    void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
+    void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, LEAF* const leaf);
+    void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, tMempool* const);
     void    tAutotune_free                  (tAutotune* const);
     
-    float*  tAutotune_tick                  (tAutotune* const, float sample);
+    float   tAutotune_tick                  (tAutotune* const, float sample);
     void    tAutotune_setNumVoices          (tAutotune* const, int numVoices);
     void    tAutotune_setFreqs              (tAutotune* const, float f);
     void    tAutotune_setFreq               (tAutotune* const, float f, int voice);
-    void    tAutotune_setTimeConstant       (tAutotune* const, float tc);
-    void    tAutotune_setHopSize            (tAutotune* const, int hs);
-    void    tAutotune_setWindowSize         (tAutotune* const, int ws);
-    void    tAutotune_setFidelityThreshold  (tAutotune* const, float threshold);
-    void    tAutotune_setAlpha              (tAutotune* const, float alpha);
-    void    tAutotune_setTolerance          (tAutotune* const, float tolerance);
-    float   tAutotune_getInputPeriod        (tAutotune* const);
-    float   tAutotune_getInputFreq          (tAutotune* const);
     
     //==============================================================================
     

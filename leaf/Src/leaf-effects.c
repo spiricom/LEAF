@@ -1010,7 +1010,6 @@ void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergG
 /***************** static function declarations *******************************/
 /******************************************************************************/
 
-static void solad_init(_tSOLAD *w);
 static inline float read_sample(_tSOLAD *w, float floatindex);
 static void pitchdown(_tSOLAD *w, float *out);
 static void pitchup(_tSOLAD *w, float *out);
@@ -1032,9 +1031,13 @@ void tSOLAD_initToPool (tSOLAD* const wp, tMempool* const mp)
     w->mempool = m;
     
     w->pitchfactor = 1.;
-    w->delaybuf = (float*) mpool_calloc(sizeof(float) * (LOOPSIZE+16), m);
+    w->delaybuf = (float*) mpool_calloc(sizeof(float) * LOOPSIZE, m);
 
-    solad_init(w);
+    w->timeindex = 0;
+    w->xfadevalue = -1;
+    w->period = INITPERIOD;
+    w->readlag = INITPERIOD;
+    w->blocksize = INITPERIOD;
 }
 
 void tSOLAD_free (tSOLAD* const wp)
@@ -1077,7 +1080,10 @@ void tSOLAD_setPitchFactor(tSOLAD* const wp, float pitchfactor)
 {
     _tSOLAD* w = *wp;
     
-    if (pitchfactor <= 0.0f) return;
+    if (pitchfactor <= 0.0f || pitchfactor > 1000.0f)
+    {
+        return;
+    }
     w->pitchfactor = pitchfactor;
 }
 
@@ -1101,11 +1107,16 @@ void tSOLAD_resetState(tSOLAD* const wp)
 {
     _tSOLAD* w = *wp;
     
-    int n = LOOPSIZE + 1;
+    int n = LOOPSIZE;
     float *buf = w->delaybuf;
     
     while(n--) *buf++ = 0;
-    solad_init(w);
+    
+    w->timeindex = 0;
+    w->xfadevalue = -1;
+    w->period = INITPERIOD;
+    w->readlag = INITPERIOD;
+    w->blocksize = INITPERIOD;
 }
 
 /******************************************************************************/
@@ -1182,7 +1193,7 @@ static void pitchdown(_tSOLAD* const w, float *out)
             xfadevalue -= xfadestep;
         }
         
-        *out++ = outputsample;
+        *out++ += outputsample;
         refindex += 1;
         readlag += readlagstep;
     }
@@ -1312,7 +1323,7 @@ static void pitchup(_tSOLAD* const w, float *out)
             xfadevalue -= xfadestep;
         }
         
-        *out++ = outputsample;
+        *out++ += outputsample;
         refindex += 1;
         readlag -= readlagstep;
     }
@@ -1334,77 +1345,55 @@ static inline float read_sample(_tSOLAD* const w, float floatindex)
     return (buf[index] + (fraction * (buf[index+1] - buf[index])));
 }
 
-static void solad_init(_tSOLAD* const w)
-{
-    w->timeindex = 0;
-    w->xfadevalue = -1;
-    w->period = INITPERIOD;
-    w->readlag = INITPERIOD;
-    w->blocksize = INITPERIOD;
-}
-
 //============================================================================================================
 // PITCHSHIFT
 //============================================================================================================
 
 static int pitchshift_attackdetect(_tPitchShift* ps)
 {
-    float envout;
-    
-    _tPeriodDetection* p = *ps->p;
-    
-    envout = tEnvPD_tick(&p->env);
-    
-    if (envout >= 1.0f)
-    {
-        p->lastmax = p->max;
-        if (envout > p->max)
-        {
-            p->max = envout;
-        }
-        else
-        {
-            p->deltamax = envout - p->max;
-            p->max = p->max * ps->radius;
-        }
-        p->deltamax = p->max - p->lastmax;
-    }
-    
-    p->fba = p->fba ? (p->fba - 1) : 0;
-    
-    return (p->fba == 0 && (p->max > 60 && p->deltamax > 6)) ? 1 : 0;
+//    float envout;
+//
+//    _tPeriodDetection* p = *ps->p;
+//
+//    envout = tEnvPD_tick(&p->env);
+//
+//    if (envout >= 1.0f)
+//    {
+//        p->lastmax = p->max;
+//        if (envout > p->max)
+//        {
+//            p->max = envout;
+//        }
+//        else
+//        {
+//            p->deltamax = envout - p->max;
+//            p->max = p->max * ps->radius;
+//        }
+//        p->deltamax = p->max - p->lastmax;
+//    }
+//
+//    p->fba = p->fba ? (p->fba - 1) : 0;
+//
+//    return (p->fba == 0 && (p->max > 60 && p->deltamax > 6)) ? 1 : 0;
 }
 
-void tPitchShift_init (tPitchShift* const psr, tPeriodDetection* const pd, tDualPitchDetector* const dp, float* out, int bufSize, LEAF* const leaf)
+void tPitchShift_init (tPitchShift* const psr, tDualPitchDetector* const dpd, LEAF* const leaf)
 {
-    tPitchShift_initToPool(psr, pd, dp, out, bufSize, &leaf->mempool);
+    tPitchShift_initToPool(psr, dpd, &leaf->mempool);
 }
 
-void tPitchShift_initToPool (tPitchShift* const psr, tPeriodDetection* const pd, tDualPitchDetector* const dp, float* out, int bufSize, tMempool* const mp)
+void tPitchShift_initToPool (tPitchShift* const psr, tDualPitchDetector* const dpd, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPitchShift* ps = *psr = (_tPitchShift*) mpool_calloc(sizeof(_tPitchShift), m);
     ps->mempool = m;
     
-    _tPeriodDetection* p = *pd;
-    
-    ps->p = pd;
-    
-    ps->outBuffer = out;
-    ps->bufSize = bufSize;
-    ps->frameSize = p->frameSize;
-    ps->framesPerBuffer = ps->bufSize / ps->frameSize;
-    ps->curBlock = 1;
-    ps->lastBlock = 0;
-    ps->index = 0;
-    ps->pitchFactor = 1.0f;
-    ps->dp = *dp;
+    ps->pd = *dpd;
     
     tSOLAD_initToPool(&ps->sola, mp);
+    tSOLAD_setPitchFactor(&ps->sola, DEFPITCHRATIO);
     
     tHighpass_initToPool(&ps->hp, HPFREQ, mp);
-    
-    tSOLAD_setPitchFactor(&ps->sola, DEFPITCHRATIO);
 }
 
 void tPitchShift_free (tPitchShift* const psr)
@@ -1416,168 +1405,63 @@ void tPitchShift_free (tPitchShift* const psr)
     mpool_free((char*)ps, ps->mempool);
 }
 
-void tPitchShift_setPitchFactor(tPitchShift* psr, float pf)
+void tPitchShift_shiftBy (tPitchShift* const psr, float factor, float* in, float* out, int bufSize)
 {
     _tPitchShift* ps = *psr;
-    
-    ps->pitchFactor = pf;
-}
-
-float tPitchShift_shift (tPitchShift* psr)
-{
-    _tPitchShift* ps = *psr;
-    _tPeriodDetection* p = *ps->p;
-    
-    float period, out;
-    int i, iLast;
-    
-    i = p->i;
-    iLast = p->iLast;
-    
-    out = tHighpass_tick(&ps->hp, ps->outBuffer[iLast]);
-
-    if (p->indexstore >= ps->frameSize)
-    {
-//        period = tPeriodDetection_getPeriod(&p);
-        period = 1.0f / tDualPitchDetector_getFrequency(&ps->dp);
-        
-        if(pitchshift_attackdetect(ps) == 1)
-        {
-            p->fba = 5;
-            tSOLAD_setReadLag(&ps->sola, p->windowSize);
-        }
-        
-        tSOLAD_setPeriod(&ps->sola, period);
-        tSOLAD_setPitchFactor(&ps->sola, ps->pitchFactor);
-        
-        tSOLAD_ioSamples(&ps->sola, &(p->inBuffer[i]), &(ps->outBuffer[i]), ps->frameSize);
-    }
-    
-    return out;
-}
-
-float tPitchShift_shiftToFreq (tPitchShift* psr, float freq)
-{
-    _tPitchShift* ps = *psr;
-    _tPeriodDetection* p = *ps->p;
     LEAF* leaf = ps->mempool->leaf;
     
-    float period = 0;
-    float out;
-    int i, iLast;
+    float period = leaf->sampleRate / tDualPitchDetector_getFrequency(&ps->pd);
+    tSOLAD_setPeriod(&ps->sola, period);
+    tSOLAD_setPitchFactor(&ps->sola, factor);
     
-    i = p->i;
-    iLast = p->iLast;
-    
-    out = tHighpass_tick(&ps->hp, ps->outBuffer[iLast]);
-    
-    if (p->indexstore >= ps->frameSize)
-    {
-//        period = tPeriodDetection_getPeriod(&p);
-        float f = tDualPitchDetector_getFrequency(&ps->dp);
-        if (f > 0) period = 1.0f / f;
-        
-        if(pitchshift_attackdetect(ps) == 1)
-        {
-            p->fba = 5;
-            tSOLAD_setReadLag(&ps->sola, p->windowSize);
-        }
-        
-        tSOLAD_setPeriod(&ps->sola, period * leaf->sampleRate);
-        
-        if (period != 0) ps->pitchFactor = freq * period;
-        else ps->pitchFactor = 1.0f;
-        
-        tSOLAD_setPitchFactor(&ps->sola, ps->pitchFactor);
-        
-        tSOLAD_ioSamples(&ps->sola, &(p->inBuffer[i]), &(ps->outBuffer[i]), ps->frameSize);
-    }
-    return out;
+    tSOLAD_ioSamples(&ps->sola, in, out, bufSize);
 }
 
-float tPitchShift_shiftToFunc (tPitchShift* psr, float (*fun)(float))
+void    tPitchShift_shiftTo (tPitchShift* const psr, float freq, float* in, float* out, int bufSize)
 {
     _tPitchShift* ps = *psr;
-    _tPeriodDetection* p = *ps->p;
+    LEAF* leaf = ps->mempool->leaf;
     
-    float period, out;
-    int i, iLast;
+    float period = 1.0f / tDualPitchDetector_getFrequency(&ps->pd);
+    float factor = freq * period;
+    tSOLAD_setPeriod(&ps->sola, leaf->sampleRate * period);
+    tSOLAD_setPitchFactor(&ps->sola, factor);
     
-    i = p->i;
-    iLast = p->iLast;
-    
-    out = tHighpass_tick(&ps->hp, ps->outBuffer[iLast]);
-    
-    if (p->indexstore >= ps->frameSize)
-    {
-//        period = tPeriodDetection_getPeriod(&p);
-        period = 1.0f / tDualPitchDetector_getFrequency(&ps->dp);
-        
-        if(pitchshift_attackdetect(ps) == 1)
-        {
-            p->fba = 5;
-            tSOLAD_setReadLag(&ps->sola, p->windowSize);
-        }
-        
-        tSOLAD_setPeriod(&ps->sola, period);
-        
-        ps->pitchFactor = period/fun(period);
-        tSOLAD_setPitchFactor(&ps->sola, ps->pitchFactor);
-        
-        tSOLAD_ioSamples(&ps->sola, &(p->inBuffer[i]), &(ps->outBuffer[i]), ps->frameSize);
-        
-        ps->curBlock++;
-        if (ps->curBlock >= p->framesPerBuffer) ps->curBlock = 0;
-        ps->lastBlock++;
-        if (ps->lastBlock >= ps->framesPerBuffer) ps->lastBlock = 0;
-    }
-    
-    return out;
+    tSOLAD_ioSamples(&ps->sola, in, out, bufSize);
 }
 
 //============================================================================================================
 // RETUNE
 //============================================================================================================
 
-void tRetune_init(tRetune* const rt, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
+void tRetune_init(tRetune* const rt, int numVoices, int bufSize, LEAF* const leaf)
 {
-    tRetune_initToPool(rt, numVoices, bufSize, frameSize, &leaf->mempool);
+    tRetune_initToPool(rt, numVoices, bufSize, &leaf->mempool);
 }
 
-void tRetune_initToPool (tRetune* const rt, int numVoices, int bufSize, int frameSize, tMempool* const mp)
+void tRetune_initToPool (tRetune* const rt, int numVoices, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tRetune* r = *rt = (_tRetune*) mpool_alloc(sizeof(_tRetune), m);
     r->mempool = *mp;
     
     r->bufSize = bufSize;
-    r->frameSize = frameSize;
     r->numVoices = numVoices;
     
     r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
-    r->outBuffers = (float**) mpool_calloc(sizeof(float*) * r->numVoices, m);
+    r->outBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
+    r->lastOutBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
     
-    r->hopSize = DEFHOPSIZE;
-    r->windowSize = DEFWINDOWSIZE;
-    r->fba = FBA;
-    tRetune_setTimeConstant(rt, DEFTIMECONSTANT);
-    
-    r->inputPeriod = 0.0f;
+    r->index = 0;
 
     r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
-    r->pitchFactor = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
-    r->tickOutput = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        r->outBuffers[i] = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
-    }
+    r->pitchFactors = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
     
     tDualPitchDetector_initToPool(&r->dp, mtof(48), mtof(72), mp);
-    tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
 
     for (int i = 0; i < r->numVoices; ++i)
     {
-        tPitchShift_initToPool(&r->ps[i], &r->pd, &r->dp, r->outBuffers[i], r->bufSize, mp);
+        tPitchShift_initToPool(&r->ps[i], &r->dp, mp);
     }
 }
 
@@ -1590,30 +1474,34 @@ void tRetune_free (tRetune* const rt)
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_free(&r->ps[i]);
-        mpool_free((char*)r->outBuffers[i], r->mempool);
     }
-    mpool_free((char*)r->tickOutput, r->mempool);
-    mpool_free((char*)r->pitchFactor, r->mempool);
+    mpool_free((char*)r->pitchFactors, r->mempool);
     mpool_free((char*)r->ps, r->mempool);
     mpool_free((char*)r->inBuffer, r->mempool);
-    mpool_free((char*)r->outBuffers, r->mempool);
+    mpool_free((char*)r->outBuffer, r->mempool);
     mpool_free((char*)r, r->mempool);
 }
 
-float* tRetune_tick(tRetune* const rt, float sample)
+float tRetune_tick(tRetune* const rt, float sample)
 {
     _tRetune* r = *rt;
     
-    tPeriodDetection_tick(&r->pd, sample);
     tDualPitchDetector_tick(&r->dp, sample);
-    r->inputPeriod = 1.0f / tDualPitchDetector_getFrequency(&r->dp);
     
-    for (int v = 0; v < r->numVoices; ++v)
+    r->inBuffer[r->index] = sample;
+    float out = r->outBuffer[r->index];
+    r->outBuffer[r->index++] = 0.0f;
+    
+    if (r->index >= r->bufSize)
     {
-        r->tickOutput[v] = tPitchShift_shift(&r->ps[v]);
+        for (int i = 0; i < r->numVoices; ++i)
+        {
+            tPitchShift_shiftBy(&r->ps[i], r->pitchFactors[i], r->inBuffer, r->outBuffer, r->bufSize);
+        }
+        r->index = 0;
     }
     
-    return r->tickOutput;
+    return out;
 }
 
 void tRetune_setNumVoices(tRetune* const rt, int numVoices)
@@ -1621,11 +1509,10 @@ void tRetune_setNumVoices(tRetune* const rt, int numVoices)
     _tRetune* r = *rt;
     
     int bufSize = r->bufSize;
-    int frameSize = r->frameSize;
     tMempool mempool = r->mempool;
     
     tRetune_free(rt);
-    tRetune_initToPool(rt, numVoices, bufSize, frameSize, &mempool);
+    tRetune_initToPool(rt, numVoices, bufSize, &mempool);
 }
 
 void tRetune_setPitchFactors(tRetune* const rt, float pf)
@@ -1634,8 +1521,7 @@ void tRetune_setPitchFactors(tRetune* const rt, float pf)
     
     for (int i = 0; i < r->numVoices; ++i)
     {
-        r->pitchFactor[i] = pf;
-        tPitchShift_setPitchFactor(&r->ps[i], r->pitchFactor[i]);
+        r->pitchFactors[i] = pf;
     }
 }
 
@@ -1643,142 +1529,81 @@ void tRetune_setPitchFactor(tRetune* const rt, float pf, int voice)
 {
     _tRetune* r = *rt;
     
-    r->pitchFactor[voice] = pf;
-    tPitchShift_setPitchFactor(&r->ps[voice], r->pitchFactor[voice]);
-}
-
-void tRetune_setTimeConstant(tRetune* const rt, float tc)
-{
-    _tRetune* r = *rt;
-    LEAF* leaf = r->mempool->leaf;
-    
-    r->timeConstant = tc;
-    r->radius = expf(-1000.0f * r->hopSize * leaf->invSampleRate / r->timeConstant);
-}
-
-void tRetune_setHopSize(tRetune* const rt, int hs)
-{
-    _tRetune* r = *rt;
-    
-    r->hopSize = hs;
-    tPeriodDetection_setHopSize(&r->pd, r->hopSize);
-}
-
-void tRetune_setWindowSize(tRetune* const rt, int ws)
-{
-    _tRetune* r = *rt;
-    
-    r->windowSize = ws;
-    tPeriodDetection_setWindowSize(&r->pd, r->windowSize);
-}
-
-void tRetune_setFidelityThreshold(tRetune* const rt, float threshold)
-{
-    _tRetune* r = *rt;
-    
-    tPeriodDetection_setFidelityThreshold(&r->pd, threshold);
-}
-
-float tRetune_getInputPeriod(tRetune* const rt)
-{
-    _tRetune* r = *rt;
-    LEAF* leaf = r->mempool->leaf;
-
-    return (r->inputPeriod * leaf->invSampleRate);
-}
-
-float tRetune_getInputFreq(tRetune* const rt)
-{
-    _tRetune* r = *rt;
-    LEAF* leaf = r->mempool->leaf;
-    
-    return 1.0f/(r->inputPeriod * leaf->invSampleRate);
+    r->pitchFactors[voice] = pf;
 }
 
 //============================================================================================================
 // AUTOTUNE
 //============================================================================================================
 
-void tAutotune_init (tAutotune* const rt, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
+void tAutotune_init (tAutotune* const rt, int numVoices, int bufSize, LEAF* const leaf)
 {
-    tAutotune_initToPool(rt, numVoices, bufSize, frameSize, &leaf->mempool);
+    tAutotune_initToPool(rt, numVoices, bufSize, &leaf->mempool);
 }
 
-void tAutotune_initToPool (tAutotune* const rt, int numVoices, int bufSize, int frameSize, tMempool* const mp)
+void tAutotune_initToPool (tAutotune* const rt, int numVoices, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tAutotune* r = *rt = (_tAutotune*) mpool_alloc(sizeof(_tAutotune), m);
     r->mempool = *mp;
     
     r->bufSize = bufSize;
-    r->frameSize = frameSize;
     r->numVoices = numVoices;
     
-    r->inBuffer = (float*) mpool_alloc(sizeof(float) * r->bufSize, m);
-    r->outBuffers = (float**) mpool_alloc(sizeof(float*) * r->numVoices, m);
+    r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
+    r->outBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
+    r->lastOutBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
     
-    r->hopSize = DEFHOPSIZE;
-    r->windowSize = DEFWINDOWSIZE;
-    r->fba = FBA;
-    tAutotune_setTimeConstant(rt, DEFTIMECONSTANT);
+    r->index = 0;
     
-    r->ps = (tPitchShift*) mpool_alloc(sizeof(tPitchShift) * r->numVoices, m);
-    r->freq = (float*) mpool_alloc(sizeof(float) * r->numVoices, m);
-    r->tickOutput = (float*) mpool_alloc(sizeof(float) * r->numVoices, m);
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        r->outBuffers[i] = (float*) mpool_alloc(sizeof(float) * r->bufSize, m);
-    }
+    r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
+    r->freqs = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
     
     tDualPitchDetector_initToPool(&r->dp, mtof(48), mtof(72), mp);
-    tPeriodDetection_initToPool(&r->pd, r->inBuffer, r->outBuffers[0], r->bufSize, r->frameSize, mp);
-
+    
     for (int i = 0; i < r->numVoices; ++i)
     {
-        tPitchShift_initToPool(&r->ps[i], &r->pd, &r->dp, r->outBuffers[i], r->bufSize, mp);
+        tPitchShift_initToPool(&r->ps[i], &r->dp, mp);
     }
-    
-    r->inputPeriod = 0.0f;
-    r->shiftOn = 0;
 }
 
 void tAutotune_free (tAutotune* const rt)
 {
     _tAutotune* r = *rt;
     
+    tDualPitchDetector_free(&r->dp);
     tPeriodDetection_free(&r->pd);
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_free(&r->ps[i]);
-        mpool_free((char*)r->outBuffers[i], r->mempool);
     }
-    mpool_free((char*)r->tickOutput, r->mempool);
-    mpool_free((char*)r->freq, r->mempool);
+    mpool_free((char*)r->freqs, r->mempool);
     mpool_free((char*)r->ps, r->mempool);
     mpool_free((char*)r->inBuffer, r->mempool);
-    mpool_free((char*)r->outBuffers, r->mempool);
+    mpool_free((char*)r->outBuffer, r->mempool);
     mpool_free((char*)r, r->mempool);
 }
 
-float* tAutotune_tick(tAutotune* const rt, float sample)
+float tAutotune_tick(tAutotune* const rt, float sample)
 {
     _tAutotune* r = *rt;
     
-    tPeriodDetection_tick(&r->pd, sample);
     tDualPitchDetector_tick(&r->dp, sample);
-    r->inputPeriod = 1.0f / tDualPitchDetector_getFrequency(&r->dp);
     
-//    if (tempPeriod < 1000.0f) //to avoid trying to follow consonants JS
-//    {
-//        r->inputPeriod = tempPeriod;
-//    }
-
-    for (int v = 0; v < r->numVoices; ++v)
+    r->inBuffer[r->index] = sample;
+    float out = r->outBuffer[r->index];
+    r->outBuffer[r->index++] = 0.0f;
+    
+    if (r->index >= r->bufSize)
     {
-        r->tickOutput[v] = tPitchShift_shiftToFreq(&r->ps[v], r->freq[v]);
+        for (int i = 0; i < r->numVoices; ++i)
+        {
+            tPitchShift_shiftTo(&r->ps[i], r->freqs[i], r->inBuffer, r->outBuffer, r->bufSize);
+        }
+        r->index = 0;
     }
-
-    return r->tickOutput;
+    
+    return out;
 }
 
 void tAutotune_setNumVoices(tAutotune* const rt, int numVoices)
@@ -1786,11 +1611,10 @@ void tAutotune_setNumVoices(tAutotune* const rt, int numVoices)
     _tAutotune* r = *rt;
     
     int bufSize = r->bufSize;
-    int frameSize = r->frameSize;
     tMempool mempool = r->mempool;
     
     tAutotune_free(rt);
-    tAutotune_initToPool(rt, numVoices, bufSize, frameSize, &mempool);
+    tAutotune_initToPool(rt, numVoices, bufSize, &mempool);
 }
 
 void tAutotune_setFreqs(tAutotune* const rt, float f)
@@ -1799,7 +1623,7 @@ void tAutotune_setFreqs(tAutotune* const rt, float f)
     
     for (int i = 0; i < r->numVoices; ++i)
     {
-        r->freq[i] = f;
+        r->freqs[i] = f;
     }
 }
 
@@ -1807,65 +1631,7 @@ void tAutotune_setFreq(tAutotune* const rt, float f, int voice)
 {
     _tAutotune* r = *rt;
     
-    r->freq[voice] = f;
-}
-
-void tAutotune_setTimeConstant(tAutotune* const rt, float tc)
-{
-    _tAutotune* r = *rt;
-    LEAF* leaf = r->mempool->leaf;
-    
-    r->timeConstant = tc;
-    r->radius = expf(-1000.0f * r->hopSize * leaf->invSampleRate / r->timeConstant);
-}
-
-void tAutotune_setHopSize(tAutotune* const rt, int hs)
-{
-    _tAutotune* r = *rt;
-    
-    r->hopSize = hs;
-    tPeriodDetection_setHopSize(&r->pd, r->hopSize);
-}
-
-void tAutotune_setWindowSize(tAutotune* const rt, int ws)
-{
-    _tAutotune* r = *rt;
-    
-    r->windowSize = ws;
-    tPeriodDetection_setWindowSize(&r->pd, r->windowSize);
-}
-
-void tAutotune_setFidelityThreshold(tAutotune* const rt, float threshold)
-{
-    _tAutotune* r = *rt;
-
-    tPeriodDetection_setFidelityThreshold(&r->pd, threshold);
-}
-
-void     tAutotune_setAlpha                (tAutotune* rt, float alpha)
-{
-    _tAutotune* r = *rt;
-    tPeriodDetection_setAlpha(&r->pd, alpha);
-}
-
-void     tAutotune_setTolerance            (tAutotune* rt, float tolerance)
-{
-    _tAutotune* r = *rt;
-    tPeriodDetection_setTolerance(&r->pd, tolerance);
-}
-
-float tAutotune_getInputPeriod(tAutotune* const rt)
-{
-    _tAutotune* r = *rt;
-    
-    return r->inputPeriod;
-}
-
-float tAutotune_getInputFreq(tAutotune* const rt)
-{
-    _tAutotune* r = *rt;
-    
-    return 1.0f/r->inputPeriod;
+    r->freqs[voice] = f;
 }
 
 //============================================================================================================

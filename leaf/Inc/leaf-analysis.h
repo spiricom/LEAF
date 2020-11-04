@@ -497,7 +497,7 @@ extern "C" {
 #define DEFHOPSIZE 64
 #define DEFWINDOWSIZE 64
 #define FBA 20
-#define HPFREQ 40.0f
+#define HPFREQ 20.0f
     
     typedef struct _tPeriodDetection
     {
@@ -769,7 +769,6 @@ extern "C" {
 
     typedef struct _tPeriodDetector
     {
-        
         tMempool mempool;
         
         tZeroCrossingCollector          _zc;
