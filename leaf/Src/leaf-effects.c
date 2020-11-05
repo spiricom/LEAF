@@ -1038,6 +1038,9 @@ void tSOLAD_initToPool (tSOLAD* const wp, tMempool* const mp)
     w->period = INITPERIOD;
     w->readlag = INITPERIOD;
     w->blocksize = INITPERIOD;
+    
+    tAttackDetection_initToPool(&w->ad, INITPERIOD, 2, 2, mp);
+    tHighpass_initToPool(&w->hp, 20.0f, mp);
 }
 
 void tSOLAD_free (tSOLAD* const wp)
@@ -1056,8 +1059,22 @@ void tSOLAD_ioSamples(tSOLAD* const wp, float* in, float* out, int blocksize)
     int i = w->timeindex;
     int n = w->blocksize = blocksize;
     
-    if(!i) w->delaybuf[LOOPSIZE] = in[0];   // copy one sample for interpolation
-    while(n--) w->delaybuf[i++] = *in++;    // copy one input block to delay buffer
+    if(!i)
+    {
+        float sample = tHighpass_tick(&w->hp, in[0]);
+        w->delaybuf[0] = sample;
+        w->delaybuf[LOOPSIZE] = sample;   // copy one sample for interpolation
+        n--;
+        i++;
+        in++;
+    }
+    while(n--) w->delaybuf[i++] = tHighpass_tick(&w->hp, *in++);    // copy one input block to delay buffer
+    
+    tAttackDetection_setBlocksize(&w->ad, n);
+    if (tAttackDetection_detect(&w->ad, in))
+    {
+        tSOLAD_setReadLag(wp, w->blocksize);
+    }
     
     if(w->pitchfactor > 1) pitchup(w, out);
     else pitchdown(w, out);
@@ -1349,34 +1366,6 @@ static inline float read_sample(_tSOLAD* const w, float floatindex)
 // PITCHSHIFT
 //============================================================================================================
 
-static int pitchshift_attackdetect(_tPitchShift* ps)
-{
-//    float envout;
-//
-//    _tPeriodDetection* p = *ps->p;
-//
-//    envout = tEnvPD_tick(&p->env);
-//
-//    if (envout >= 1.0f)
-//    {
-//        p->lastmax = p->max;
-//        if (envout > p->max)
-//        {
-//            p->max = envout;
-//        }
-//        else
-//        {
-//            p->deltamax = envout - p->max;
-//            p->max = p->max * ps->radius;
-//        }
-//        p->deltamax = p->max - p->lastmax;
-//    }
-//
-//    p->fba = p->fba ? (p->fba - 1) : 0;
-//
-//    return (p->fba == 0 && (p->max > 60 && p->deltamax > 6)) ? 1 : 0;
-}
-
 void tPitchShift_init (tPitchShift* const psr, tDualPitchDetector* const dpd, LEAF* const leaf)
 {
     tPitchShift_initToPool(psr, dpd, &leaf->mempool);
@@ -1392,8 +1381,6 @@ void tPitchShift_initToPool (tPitchShift* const psr, tDualPitchDetector* const d
     
     tSOLAD_initToPool(&ps->sola, mp);
     tSOLAD_setPitchFactor(&ps->sola, DEFPITCHRATIO);
-    
-    tHighpass_initToPool(&ps->hp, HPFREQ, mp);
 }
 
 void tPitchShift_free (tPitchShift* const psr)
@@ -1401,7 +1388,6 @@ void tPitchShift_free (tPitchShift* const psr)
     _tPitchShift* ps = *psr;
     
     tSOLAD_free(&ps->sola);
-    tHighpass_free(&ps->hp);
     mpool_free((char*)ps, ps->mempool);
 }
 
@@ -1410,10 +1396,14 @@ void tPitchShift_shiftBy (tPitchShift* const psr, float factor, float* in, float
     _tPitchShift* ps = *psr;
     LEAF* leaf = ps->mempool->leaf;
     
-    float period = leaf->sampleRate / tDualPitchDetector_getFrequency(&ps->pd);
-    tSOLAD_setPeriod(&ps->sola, period);
-    tSOLAD_setPitchFactor(&ps->sola, factor);
-    
+    float detected = tDualPitchDetector_getFrequency(&ps->pd);
+    if (detected > 0.0f)
+    {
+        float period = leaf->sampleRate / detected;
+        tSOLAD_setPeriod(&ps->sola, period);
+        tSOLAD_setPitchFactor(&ps->sola, factor);
+    }
+        
     tSOLAD_ioSamples(&ps->sola, in, out, bufSize);
 }
 
@@ -1422,10 +1412,14 @@ void    tPitchShift_shiftTo (tPitchShift* const psr, float freq, float* in, floa
     _tPitchShift* ps = *psr;
     LEAF* leaf = ps->mempool->leaf;
     
-    float period = 1.0f / tDualPitchDetector_getFrequency(&ps->pd);
-    float factor = freq * period;
-    tSOLAD_setPeriod(&ps->sola, leaf->sampleRate * period);
-    tSOLAD_setPitchFactor(&ps->sola, factor);
+    float detected = tDualPitchDetector_getFrequency(&ps->pd);
+    if (detected > 0.0f)
+    {
+        float period = 1.0f / detected;
+        float factor = freq * period;
+        tSOLAD_setPeriod(&ps->sola, leaf->sampleRate * period);
+        tSOLAD_setPitchFactor(&ps->sola, factor);
+    }
     
     tSOLAD_ioSamples(&ps->sola, in, out, bufSize);
 }
@@ -1434,12 +1428,12 @@ void    tPitchShift_shiftTo (tPitchShift* const psr, float freq, float* in, floa
 // RETUNE
 //============================================================================================================
 
-void tRetune_init(tRetune* const rt, int numVoices, int bufSize, LEAF* const leaf)
+void tRetune_init(tRetune* const rt, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, LEAF* const leaf)
 {
-    tRetune_initToPool(rt, numVoices, bufSize, &leaf->mempool);
+    tRetune_initToPool(rt, numVoices, minInputFreq, maxInputFreq, bufSize, &leaf->mempool);
 }
 
-void tRetune_initToPool (tRetune* const rt, int numVoices, int bufSize, tMempool* const mp)
+void tRetune_initToPool (tRetune* const rt, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tRetune* r = *rt = (_tRetune*) mpool_alloc(sizeof(_tRetune), m);
@@ -1457,7 +1451,9 @@ void tRetune_initToPool (tRetune* const rt, int numVoices, int bufSize, tMempool
     r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
     r->pitchFactors = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
     
-    tDualPitchDetector_initToPool(&r->dp, mtof(48), mtof(72), mp);
+    r->minInputFreq = minInputFreq;
+    r->maxInputFreq = maxInputFreq;
+    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, mp);
 
     for (int i = 0; i < r->numVoices; ++i)
     {
@@ -1470,7 +1466,6 @@ void tRetune_free (tRetune* const rt)
     _tRetune* r = *rt;
     
     tDualPitchDetector_free(&r->dp);
-    tPeriodDetection_free(&r->pd);
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_free(&r->ps[i]);
@@ -1509,10 +1504,12 @@ void tRetune_setNumVoices(tRetune* const rt, int numVoices)
     _tRetune* r = *rt;
     
     int bufSize = r->bufSize;
+    float minInputFreq = r->minInputFreq;
+    float maxInputFreq = r->maxInputFreq;
     tMempool mempool = r->mempool;
     
     tRetune_free(rt);
-    tRetune_initToPool(rt, numVoices, bufSize, &mempool);
+    tRetune_initToPool(rt, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
 }
 
 void tRetune_setPitchFactors(tRetune* const rt, float pf)
@@ -1536,12 +1533,12 @@ void tRetune_setPitchFactor(tRetune* const rt, float pf, int voice)
 // AUTOTUNE
 //============================================================================================================
 
-void tAutotune_init (tAutotune* const rt, int numVoices, int bufSize, LEAF* const leaf)
+void tAutotune_init (tAutotune* const rt, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, LEAF* const leaf)
 {
-    tAutotune_initToPool(rt, numVoices, bufSize, &leaf->mempool);
+    tAutotune_initToPool(rt, numVoices, minInputFreq, maxInputFreq, bufSize, &leaf->mempool);
 }
 
-void tAutotune_initToPool (tAutotune* const rt, int numVoices, int bufSize, tMempool* const mp)
+void tAutotune_initToPool (tAutotune* const rt, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tAutotune* r = *rt = (_tAutotune*) mpool_alloc(sizeof(_tAutotune), m);
@@ -1559,7 +1556,9 @@ void tAutotune_initToPool (tAutotune* const rt, int numVoices, int bufSize, tMem
     r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
     r->freqs = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
     
-    tDualPitchDetector_initToPool(&r->dp, mtof(48), mtof(72), mp);
+    r->minInputFreq = minInputFreq;
+    r->maxInputFreq = maxInputFreq;
+    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, mp);
     
     for (int i = 0; i < r->numVoices; ++i)
     {
@@ -1572,7 +1571,6 @@ void tAutotune_free (tAutotune* const rt)
     _tAutotune* r = *rt;
     
     tDualPitchDetector_free(&r->dp);
-    tPeriodDetection_free(&r->pd);
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_free(&r->ps[i]);
@@ -1611,10 +1609,12 @@ void tAutotune_setNumVoices(tAutotune* const rt, int numVoices)
     _tAutotune* r = *rt;
     
     int bufSize = r->bufSize;
+    float minInputFreq = r->minInputFreq;
+    float maxInputFreq = r->maxInputFreq;
     tMempool mempool = r->mempool;
     
     tAutotune_free(rt);
-    tAutotune_initToPool(rt, numVoices, bufSize, &mempool);
+    tAutotune_initToPool(rt, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
 }
 
 void tAutotune_setFreqs(tAutotune* const rt, float f)

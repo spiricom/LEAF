@@ -363,12 +363,7 @@ void tAttackDetection_setBlocksize(tAttackDetection* const ad, int size)
 {
     _tAttackDetection* a = *ad;
     
-    if(!((size==64)|(size==128)|(size==256)|(size==512)|(size==1024)|(size==2048)))
-        size = DEFBLOCKSIZE;
     a->blocksize = size;
-    
-    return;
-    
 }
 
 void tAttackDetection_setSamplerate(tAttackDetection* const ad, int inRate)

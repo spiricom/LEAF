@@ -439,8 +439,10 @@ extern "C" {
     
     typedef struct _tSOLAD
     {
-        
         tMempool mempool;
+        
+        tAttackDetection ad;
+        tHighpass hp;
         
         uint16_t timeindex;              // current reference time, write index
         uint16_t blocksize;              // signal input / output block size
@@ -513,9 +515,7 @@ extern "C" {
         tMempool mempool;
         
         _tDualPitchDetector* pd;
-        
         tSOLAD sola;
-        tHighpass hp;
         
         float* outBuffer;
         float* inBuffer;
@@ -573,7 +573,8 @@ extern "C" {
         tMempool mempool;
         
         tDualPitchDetector dp;
-        tPeriodDetection pd;
+        float minInputFreq, maxInputFreq;
+        
         tPitchShift* ps;
         
         float* inBuffer;
@@ -588,8 +589,8 @@ extern "C" {
     
     typedef _tRetune* tRetune;
     
-    void    tRetune_init                (tRetune* const, int numVoices, int bufSize, LEAF* const leaf);
-    void    tRetune_initToPool          (tRetune* const, int numVoices, int bufSize, tMempool* const);
+    void    tRetune_init                (tRetune* const, int numVoices, float minInputFreq, float maxInputFreq,  int bufSize, LEAF* const leaf);
+    void    tRetune_initToPool          (tRetune* const,  int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const);
     void    tRetune_free                (tRetune* const);
     
     float   tRetune_tick                (tRetune* const, float sample);
@@ -631,38 +632,6 @@ extern "C" {
      @brief
      @param
      
-     @fn void    tAutotune_setTimeConstant       (tAutotune* const, float tc)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setHopSize            (tAutotune* const, int hs)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setWindowSize         (tAutotune* const, int ws)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setFidelityThreshold  (tAutotune* const, float threshold)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setAlpha              (tAutotune* const, float alpha)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setTolerance          (tAutotune* const, float tolerance)
-     @brief
-     @param
-     
-     @fn float   tAutotune_getInputPeriod        (tAutotune* const)
-     @brief
-     @param
-     
-     @fn float   tAutotune_getInputFreq          (tAutotune* const)
-     @brief
-     @param
-     
      @} */
     
     typedef struct _tAutotune
@@ -670,7 +639,8 @@ extern "C" {
         tMempool mempool;
         
         tDualPitchDetector dp;
-        tPeriodDetection pd;
+        float minInputFreq, maxInputFreq;
+        
         tPitchShift* ps;
         
         float* inBuffer;
@@ -685,8 +655,8 @@ extern "C" {
     
     typedef _tAutotune* tAutotune;
     
-    void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, LEAF* const leaf);
-    void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, tMempool* const);
+    void    tAutotune_init                  (tAutotune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, LEAF* const leaf);
+    void    tAutotune_initToPool            (tAutotune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const);
     void    tAutotune_free                  (tAutotune* const);
     
     float   tAutotune_tick                  (tAutotune* const, float sample);

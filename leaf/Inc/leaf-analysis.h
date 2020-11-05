@@ -492,7 +492,7 @@ extern "C" {
      ￼￼￼
      @} */
     
-#define DEFPITCHRATIO 2.0f
+#define DEFPITCHRATIO 1.0f
 #define DEFTIMECONSTANT 100.0f
 #define DEFHOPSIZE 64
 #define DEFWINDOWSIZE 64

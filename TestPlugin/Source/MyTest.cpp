@@ -55,8 +55,8 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
-    tRetune_init(&retune, 1, 1024, &leaf);
-    tAutotune_init(&autotune, 1, 1024, &leaf);
+    tRetune_init(&retune, 1, mtof(48), mtof(72), 2048, &leaf);
+    tAutotune_init(&autotune, 1, mtof(48), mtof(72), 2048, &leaf);
 }
 
 inline double getSawFall(double angle) {
