@@ -1047,6 +1047,8 @@ void tSOLAD_free (tSOLAD* const wp)
 {
     _tSOLAD* w = *wp;
     
+    tAttackDetection_free(&w->ad);
+    tHighpass_free(&w->hp);
     mpool_free((char*)w->delaybuf, w->mempool);
     mpool_free((char*)w, w->mempool);
 }
@@ -1374,7 +1376,7 @@ void tPitchShift_init (tPitchShift* const psr, tDualPitchDetector* const dpd, LE
 void tPitchShift_initToPool (tPitchShift* const psr, tDualPitchDetector* const dpd, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPitchShift* ps = *psr = (_tPitchShift*) mpool_calloc(sizeof(_tPitchShift), m);
+    _tPitchShift* ps = *psr = (_tPitchShift*) mpool_alloc(sizeof(_tPitchShift), m);
     ps->mempool = m;
     
     ps->pd = *dpd;
@@ -1424,6 +1426,128 @@ void    tPitchShift_shiftTo (tPitchShift* const psr, float freq, float* in, floa
     tSOLAD_ioSamples(&ps->sola, in, out, bufSize);
 }
 
+
+//============================================================================================================
+// SIMPLERETUNE
+//============================================================================================================
+
+void tSimpleRetune_init (tSimpleRetune* const rt, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, LEAF* const leaf)
+{
+    tSimpleRetune_initToPool(rt, numVoices, minInputFreq, maxInputFreq, bufSize, &leaf->mempool);
+}
+
+void tSimpleRetune_initToPool (tSimpleRetune* const rt, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSimpleRetune* r = *rt = (_tSimpleRetune*) mpool_calloc(sizeof(_tSimpleRetune), m);
+    r->mempool = *mp;
+    
+    r->bufSize = bufSize;
+    r->numVoices = numVoices;
+    
+    r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
+    r->outBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
+    
+    r->index = 0;
+    
+    r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
+    r->shiftValues = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
+    
+    r->minInputFreq = minInputFreq;
+    r->maxInputFreq = maxInputFreq;
+    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, mp);
+    
+    for (int i = 0; i < r->numVoices; ++i)
+    {
+        tPitchShift_initToPool(&r->ps[i], &r->dp, mp);
+    }
+    
+    r->shiftFunction = &tPitchShift_shiftBy;
+}
+
+void tSimpleRetune_free (tSimpleRetune* const rt)
+{
+    _tSimpleRetune* r = *rt;
+    
+    tDualPitchDetector_free(&r->dp);
+    for (int i = 0; i < r->numVoices; ++i)
+    {
+        tPitchShift_free(&r->ps[i]);
+    }
+    mpool_free((char*)r->shiftValues, r->mempool);
+    mpool_free((char*)r->ps, r->mempool);
+    mpool_free((char*)r->inBuffer, r->mempool);
+    mpool_free((char*)r->outBuffer, r->mempool);
+    mpool_free((char*)r, r->mempool);
+}
+
+float tSimpleRetune_tick(tSimpleRetune* const rt, float sample)
+{
+    _tSimpleRetune* r = *rt;
+    
+    tDualPitchDetector_tick(&r->dp, sample);
+    
+    r->inBuffer[r->index] = sample;
+    float out = r->outBuffer[r->index];
+    r->outBuffer[r->index] = 0.0f;
+    
+    if (++r->index >= r->bufSize)
+    {
+        for (int i = 0; i < r->numVoices; ++i)
+        {
+            r->shiftFunction(&r->ps[i], r->shiftValues[i], r->inBuffer, r->outBuffer, r->bufSize);
+        }
+        r->index = 0;
+    }
+    
+    return out;
+}
+
+void tSimpleRetune_setMode (tSimpleRetune* const rt, int mode)
+{
+    _tSimpleRetune* r = *rt;
+    
+    if (mode > 0) r->shiftFunction = &tPitchShift_shiftTo;
+    else r->shiftFunction = &tPitchShift_shiftBy;
+}
+
+void tSimpleRetune_setNumVoices(tSimpleRetune* const rt, int numVoices)
+{
+    _tSimpleRetune* r = *rt;
+    
+    int bufSize = r->bufSize;
+    float minInputFreq = r->minInputFreq;
+    float maxInputFreq = r->maxInputFreq;
+    tMempool mempool = r->mempool;
+    
+    tSimpleRetune_free(rt);
+    tSimpleRetune_initToPool(rt, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
+}
+
+void tSimpleRetune_tuneVoices(tSimpleRetune* const rt, float* t)
+{
+    _tSimpleRetune* r = *rt;
+    
+    for (int i = 0; i < r->numVoices; ++i)
+    {
+        r->shiftValues[i] = t[i];
+    }
+}
+
+void tSimpleRetune_tuneVoice(tSimpleRetune* const rt,  int voice, float t)
+{
+    _tSimpleRetune* r = *rt;
+    
+    r->shiftValues[voice] = t;
+}
+
+float tSimpleRetune_getInputFrequency (tSimpleRetune* const rt)
+{
+    _tSimpleRetune* r = *rt;
+    
+    return tDualPitchDetector_getFrequency(&r->dp);
+}
+
 //============================================================================================================
 // RETUNE
 //============================================================================================================
@@ -1436,20 +1560,20 @@ void tRetune_init(tRetune* const rt, int numVoices, float minInputFreq, float ma
 void tRetune_initToPool (tRetune* const rt, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tRetune* r = *rt = (_tRetune*) mpool_alloc(sizeof(_tRetune), m);
+    _tRetune* r = *rt = (_tRetune*) mpool_calloc(sizeof(_tRetune), m);
     r->mempool = *mp;
     
     r->bufSize = bufSize;
     r->numVoices = numVoices;
     
     r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
-    r->outBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
-    r->lastOutBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
-    
+
     r->index = 0;
 
     r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
-    r->pitchFactors = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
+    r->shiftValues = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
+    r->outBuffers = (float**) mpool_calloc(sizeof(float*) * r->numVoices, m);
+    r->output = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
     
     r->minInputFreq = minInputFreq;
     r->maxInputFreq = maxInputFreq;
@@ -1458,7 +1582,10 @@ void tRetune_initToPool (tRetune* const rt, int numVoices, float minInputFreq, f
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_initToPool(&r->ps[i], &r->dp, mp);
+        r->outBuffers[i] = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
     }
+    
+    r->shiftFunction = &tPitchShift_shiftBy;
 }
 
 void tRetune_free (tRetune* const rt)
@@ -1469,34 +1596,47 @@ void tRetune_free (tRetune* const rt)
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_free(&r->ps[i]);
+        mpool_free((char*)r->outBuffers[i], r->mempool);
     }
-    mpool_free((char*)r->pitchFactors, r->mempool);
+    mpool_free((char*)r->shiftValues, r->mempool);
     mpool_free((char*)r->ps, r->mempool);
     mpool_free((char*)r->inBuffer, r->mempool);
-    mpool_free((char*)r->outBuffer, r->mempool);
+    mpool_free((char*)r->outBuffers, r->mempool);
+    mpool_free((char*)r->output, r->mempool);
     mpool_free((char*)r, r->mempool);
 }
 
-float tRetune_tick(tRetune* const rt, float sample)
+float* tRetune_tick(tRetune* const rt, float sample)
 {
     _tRetune* r = *rt;
     
     tDualPitchDetector_tick(&r->dp, sample);
     
     r->inBuffer[r->index] = sample;
-    float out = r->outBuffer[r->index];
-    r->outBuffer[r->index++] = 0.0f;
-    
-    if (r->index >= r->bufSize)
+    for (int i = 0; i < r->numVoices; ++i)
+    {
+        r->output[i] = r->outBuffers[i][r->index];
+        r->outBuffers[i][r->index] = 0.0f;
+    }
+
+    if (++r->index >= r->bufSize)
     {
         for (int i = 0; i < r->numVoices; ++i)
         {
-            tPitchShift_shiftBy(&r->ps[i], r->pitchFactors[i], r->inBuffer, r->outBuffer, r->bufSize);
+            r->shiftFunction(&r->ps[i], r->shiftValues[i], r->inBuffer, r->outBuffers[i], r->bufSize);
         }
         r->index = 0;
     }
+     
+    return r->output;
+}
+
+void tRetune_setMode (tRetune* const rt, int mode)
+{
+    _tRetune* r = *rt;
     
-    return out;
+    if (mode > 0) r->shiftFunction = &tPitchShift_shiftTo;
+    else r->shiftFunction = &tPitchShift_shiftBy;
 }
 
 void tRetune_setNumVoices(tRetune* const rt, int numVoices)
@@ -1512,126 +1652,28 @@ void tRetune_setNumVoices(tRetune* const rt, int numVoices)
     tRetune_initToPool(rt, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
 }
 
-void tRetune_setPitchFactors(tRetune* const rt, float pf)
+void tRetune_tuneVoices(tRetune* const rt, float* t)
 {
     _tRetune* r = *rt;
     
     for (int i = 0; i < r->numVoices; ++i)
     {
-        r->pitchFactors[i] = pf;
+        r->shiftValues[i] = t[i];
     }
 }
 
-void tRetune_setPitchFactor(tRetune* const rt, float pf, int voice)
+void tRetune_tuneVoice(tRetune* const rt, int voice, float t)
 {
     _tRetune* r = *rt;
     
-    r->pitchFactors[voice] = pf;
+    r->shiftValues[voice] = t;
 }
 
-//============================================================================================================
-// AUTOTUNE
-//============================================================================================================
-
-void tAutotune_init (tAutotune* const rt, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, LEAF* const leaf)
+float tRetune_getInputFrequency (tRetune* const rt)
 {
-    tAutotune_initToPool(rt, numVoices, minInputFreq, maxInputFreq, bufSize, &leaf->mempool);
-}
-
-void tAutotune_initToPool (tAutotune* const rt, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const mp)
-{
-    _tMempool* m = *mp;
-    _tAutotune* r = *rt = (_tAutotune*) mpool_alloc(sizeof(_tAutotune), m);
-    r->mempool = *mp;
+    _tRetune* r = *rt;
     
-    r->bufSize = bufSize;
-    r->numVoices = numVoices;
-    
-    r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
-    r->outBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
-    r->lastOutBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
-    
-    r->index = 0;
-    
-    r->ps = (tPitchShift*) mpool_calloc(sizeof(tPitchShift) * r->numVoices, m);
-    r->freqs = (float*) mpool_calloc(sizeof(float) * r->numVoices, m);
-    
-    r->minInputFreq = minInputFreq;
-    r->maxInputFreq = maxInputFreq;
-    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, mp);
-    
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        tPitchShift_initToPool(&r->ps[i], &r->dp, mp);
-    }
-}
-
-void tAutotune_free (tAutotune* const rt)
-{
-    _tAutotune* r = *rt;
-    
-    tDualPitchDetector_free(&r->dp);
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        tPitchShift_free(&r->ps[i]);
-    }
-    mpool_free((char*)r->freqs, r->mempool);
-    mpool_free((char*)r->ps, r->mempool);
-    mpool_free((char*)r->inBuffer, r->mempool);
-    mpool_free((char*)r->outBuffer, r->mempool);
-    mpool_free((char*)r, r->mempool);
-}
-
-float tAutotune_tick(tAutotune* const rt, float sample)
-{
-    _tAutotune* r = *rt;
-    
-    tDualPitchDetector_tick(&r->dp, sample);
-    
-    r->inBuffer[r->index] = sample;
-    float out = r->outBuffer[r->index];
-    r->outBuffer[r->index++] = 0.0f;
-    
-    if (r->index >= r->bufSize)
-    {
-        for (int i = 0; i < r->numVoices; ++i)
-        {
-            tPitchShift_shiftTo(&r->ps[i], r->freqs[i], r->inBuffer, r->outBuffer, r->bufSize);
-        }
-        r->index = 0;
-    }
-    
-    return out;
-}
-
-void tAutotune_setNumVoices(tAutotune* const rt, int numVoices)
-{
-    _tAutotune* r = *rt;
-    
-    int bufSize = r->bufSize;
-    float minInputFreq = r->minInputFreq;
-    float maxInputFreq = r->maxInputFreq;
-    tMempool mempool = r->mempool;
-    
-    tAutotune_free(rt);
-    tAutotune_initToPool(rt, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
-}
-
-void tAutotune_setFreqs(tAutotune* const rt, float f)
-{
-    _tAutotune* r = *rt;
-    
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        r->freqs[i] = f;
-    }
-}
-
-void tAutotune_setFreq(tAutotune* const rt, float f, int voice)
-{
-    _tAutotune* r = *rt;
-    
-    r->freqs[voice] = f;
+    return tDualPitchDetector_getFrequency(&r->dp);
 }
 
 //============================================================================================================

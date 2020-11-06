@@ -249,8 +249,7 @@ char* mpool_calloc(size_t asize, _tMempool* pool)
     
     pool->usize += pool->leaf->header_size + node_to_alloc->size;
     // Format the new pool
-    char* new_pool = (char*)node_to_alloc->pool;
-    for (int i = 0; i < node_to_alloc->size; i++) new_pool[i] = 0;
+    for (int i = 0; i < node_to_alloc->size; i++) node_to_alloc->pool[i] = 0;
     // Return the pool of the allocated node;
     return node_to_alloc->pool;
 }

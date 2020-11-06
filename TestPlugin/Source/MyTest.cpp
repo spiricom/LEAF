@@ -19,7 +19,7 @@ tMBTriangle btri;
 tMBPulse bpulse;
 
 tRetune retune;
-tAutotune autotune;
+tSimpleRetune sretune;
 
 tCompressor compressor;
 
@@ -56,7 +56,8 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
     tRetune_init(&retune, 1, mtof(48), mtof(72), 2048, &leaf);
-    tAutotune_init(&autotune, 1, mtof(48), mtof(72), 2048, &leaf);
+    tSimpleRetune_init(&sretune, 1, mtof(48), mtof(72), 2048, &leaf);
+    tSimpleRetune_setMode(&sretune, 1);
 }
 
 inline double getSawFall(double angle) {
@@ -70,8 +71,8 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
-//    return tRetune_tick(&retune, input);
-    return tAutotune_tick(&autotune, input);
+//    return tRetune_tick(&retune, input)[0];
+    return tSimpleRetune_tick(&sretune, input);
 }
 
 int firstFrame = 1;
@@ -79,8 +80,8 @@ bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
     float val = getSliderValue("slider1");
-//    tRetune_setPitchFactor(&retune, val * 3.0f + 0.5f, 0);
-    tAutotune_setFreq(&autotune, 300, 0);
+    tRetune_tuneVoice(&retune, 0, val * 3.0f + 0.5f);
+    tSimpleRetune_tuneVoice(&sretune, 0, 300);
 
     val = getSliderValue("slider2");
 //    tRetune_setPitchFactor(&retune, val * 3.0f + 0.5f, 1);

@@ -1044,7 +1044,7 @@ void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const zc, 
     z->_mask = z->_size - 1;
 
 
-    z->_info = (tZeroCrossingInfo*) mpool_alloc(sizeof(tZeroCrossingInfo) * z->_size, m);
+    z->_info = (tZeroCrossingInfo*) mpool_calloc(sizeof(tZeroCrossingInfo) * z->_size, m);
     for (unsigned i = 0; i < z->_size; i++)
         tZeroCrossingInfo_initToPool(&z->_info[i], mp);
 
@@ -1063,6 +1063,9 @@ void    tZeroCrossingCollector_free  (tZeroCrossingCollector* const zc)
 {
     _tZeroCrossingCollector* z = *zc;
     
+    for (unsigned i = 0; i < z->_size; i++)
+        tZeroCrossingInfo_free(&z->_info[i]);
+    mpool_free((char*)z->_info, z->mempool);
     mpool_free((char*)z, z->mempool);
 }
 

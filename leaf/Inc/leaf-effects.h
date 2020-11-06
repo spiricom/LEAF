@@ -533,6 +533,75 @@ extern "C" {
     void    tPitchShift_shiftTo (tPitchShift* const, float freq, float* in, float* out, int bufSize);
     
     /*!
+     @defgroup tsimpleretune tSimpleRetune
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tSimpleRetune_init                  (tSimpleRetune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
+     @brief
+     @param
+     
+     @fn void    tSimpleRetune_initToPool            (tSimpleRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const)
+     @brief
+     @param
+     
+     @fn void    tSimpleRetune_free                  (tSimpleRetune* const)
+     @brief
+     @param
+     
+     @fn float*  tSimpleRetune_tick                  (tSimpleRetune* const, float sample)
+     @brief
+     @param
+     
+     @fn void    tSimpleRetune_setNumVoices          (tSimpleRetune* const, int numVoices)
+     @brief
+     @param
+     
+     @fn void    tSimpleRetune_tuneVoices              (tSimpleRetune* const, float f)
+     @brief
+     @param
+     
+     @fn void    tSimpleRetune_tuneVoice              (tSimpleRetune* const, float f, int voice)
+     @brief
+     @param
+     
+     @} */
+    
+    typedef struct _tSimpleRetune
+    {
+        tMempool mempool;
+        
+        tDualPitchDetector dp;
+        float minInputFreq, maxInputFreq;
+        
+        tPitchShift* ps;
+        
+        float* inBuffer;
+        float* outBuffer;
+        int bufSize;
+        int index;
+        
+        void (*shiftFunction)(tPitchShift* const, float, float*, float*, int);
+        
+        float* shiftValues;
+        int numVoices;
+    } _tSimpleRetune;
+    
+    typedef _tSimpleRetune* tSimpleRetune;
+    
+    void    tSimpleRetune_init                  (tSimpleRetune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, LEAF* const leaf);
+    void    tSimpleRetune_initToPool            (tSimpleRetune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const);
+    void    tSimpleRetune_free                  (tSimpleRetune* const);
+    
+    float   tSimpleRetune_tick                  (tSimpleRetune* const, float sample);
+    void    tSimpleRetune_setMode               (tSimpleRetune* const, int mode);
+    void    tSimpleRetune_setNumVoices          (tSimpleRetune* const, int numVoices);
+    void    tSimpleRetune_tuneVoices            (tSimpleRetune* const, float* t);
+    void    tSimpleRetune_tuneVoice             (tSimpleRetune* const, int voice, float t);
+    float   tSimpleRetune_getInputFrequency     (tSimpleRetune* const);
+    
+    /*!
      @defgroup tretune tRetune
      @ingroup effects
      @brief
@@ -578,12 +647,15 @@ extern "C" {
         tPitchShift* ps;
         
         float* inBuffer;
-        float* outBuffer;
-        float* lastOutBuffer;
+        float** outBuffers;
         int bufSize;
         int index;
         
-        float* pitchFactors;
+        float* output;
+        
+        void (*shiftFunction)(tPitchShift* const, float, float*, float*, int);
+        
+        float* shiftValues;
         int numVoices;
     } _tRetune;
     
@@ -593,76 +665,12 @@ extern "C" {
     void    tRetune_initToPool          (tRetune* const,  int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const);
     void    tRetune_free                (tRetune* const);
     
-    float   tRetune_tick                (tRetune* const, float sample);
+    float*  tRetune_tick                (tRetune* const, float sample);
+    void    tRetune_setMode             (tRetune* const, int mode);
     void    tRetune_setNumVoices        (tRetune* const, int numVoices);
-    void    tRetune_setPitchFactors     (tRetune* const, float pf);
-    void    tRetune_setPitchFactor      (tRetune* const, float pf, int voice);
-    
-    /*!
-     @defgroup tautotune tAutotune
-     @ingroup effects
-     @brief
-     @{
-     
-     @fn void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
-     @brief
-     @param
-     
-     @fn void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const)
-     @brief
-     @param
-     
-     @fn void    tAutotune_free                  (tAutotune* const)
-     @brief
-     @param
-     
-     @fn float*  tAutotune_tick                  (tAutotune* const, float sample)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setNumVoices          (tAutotune* const, int numVoices)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setFreqs              (tAutotune* const, float f)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setFreq               (tAutotune* const, float f, int voice)
-     @brief
-     @param
-     
-     @} */
-    
-    typedef struct _tAutotune
-    {
-        tMempool mempool;
-        
-        tDualPitchDetector dp;
-        float minInputFreq, maxInputFreq;
-        
-        tPitchShift* ps;
-        
-        float* inBuffer;
-        float* outBuffer;
-        float* lastOutBuffer;
-        int bufSize;
-        int index;
-        
-        float* freqs;
-        int numVoices;
-    } _tAutotune;
-    
-    typedef _tAutotune* tAutotune;
-    
-    void    tAutotune_init                  (tAutotune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, LEAF* const leaf);
-    void    tAutotune_initToPool            (tAutotune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const);
-    void    tAutotune_free                  (tAutotune* const);
-    
-    float   tAutotune_tick                  (tAutotune* const, float sample);
-    void    tAutotune_setNumVoices          (tAutotune* const, int numVoices);
-    void    tAutotune_setFreqs              (tAutotune* const, float f);
-    void    tAutotune_setFreq               (tAutotune* const, float f, int voice);
+    void    tRetune_tuneVoices          (tRetune* const, float* t);
+    void    tRetune_tuneVoice           (tRetune* const, int voice, float t);
+    float   tRetune_getInputFrequency   (tRetune* const);
     
     //==============================================================================
     
