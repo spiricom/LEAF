@@ -909,6 +909,7 @@ extern "C" {
         float _mean;
         float _predicted_frequency;
         int _first;
+        int sub;
         
     } _tDualPitchDetector;
     

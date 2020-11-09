@@ -1889,7 +1889,7 @@ void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowes
     _tPitchDetector* p = *detector = (_tPitchDetector*) mpool_alloc(sizeof(_tPitchDetector), m);
     p->mempool = m;
     
-    tPeriodDetector_initToPool(&p->_pd, lowestFreq, highestFreq, DEFAULT_HYSTERESIS, mempool);
+    tPeriodDetector_initToPool(&p->_pd, lowestFreq, highestFreq, -120.0f, mempool);
     p->_current.frequency = 0.0f;
     p->_current.periodicity = 0.0f;
     p->_frames_after_shift = 0;
@@ -2119,13 +2119,14 @@ void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, flo
     _tDualPitchDetector* p = *detector = (_tDualPitchDetector*) mpool_alloc(sizeof(_tDualPitchDetector), m);
     p->mempool = m;
     
-    tPitchDetector_initToPool(&p->_pd1, lowestFreq, highestFreq, mempool);
-    tPitchDetector_initToPool(&p->_pd2, lowestFreq, highestFreq, mempool);
+    tPitchDetector_initToPool(&p->_pd1, lowestFreq*2.0f, highestFreq*2.0f, mempool);
+    tPitchDetector_initToPool(&p->_pd2, lowestFreq*2.0f, highestFreq*2.0f, mempool);
     p->_current.frequency = 0.0f;
     p->_current.periodicity = 0.0f;
     p->_mean = lowestFreq + ((highestFreq - lowestFreq) / 2.0f);
     p->_predicted_frequency = 0.0f;
     p->_first = 1;
+    p->sub = 0;
 }
 
 void    tDualPitchDetector_free (tDualPitchDetector* const detector)
@@ -2142,34 +2143,52 @@ int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sa
 {
     _tDualPitchDetector* p = *detector;
     
-    int pd1_ready = tPitchDetector_tick(&p->_pd1, sample);
-    int pd2_ready = tPitchDetector_tick(&p->_pd2, -sample);
+    int pd1_ready;
+    if (!(p->sub % 2))
+    {
+        pd1_ready = tPitchDetector_tick(&p->_pd2, sample);
+        p->sub = 0;
+    }
+    else
+    {
+        pd1_ready = tPitchDetector_tick(&p->_pd1, sample);
+    }
+    p->sub++;
     
-    if (pd1_ready || pd2_ready)
+    if (pd1_ready)
     {
         int pd1_indeterminate = tPitchDetector_indeterminate(&p->_pd1);
         int pd2_indeterminate = tPitchDetector_indeterminate(&p->_pd2);
+        int disagreement = 0;
         if (!pd1_indeterminate && !pd2_indeterminate)
         {
             _pitch_info _i1 = p->_pd1->_current;
             _pitch_info _i2 = p->_pd2->_current;
             
-            float pd1_diff = fabsf(_i1.frequency - p->_mean);
-            float pd2_diff = fabsf(_i2.frequency - p->_mean);
-            _pitch_info i = (pd1_diff < pd2_diff) ? _i1 : _i2;
+            float pd1_diff = fabsf(_i1.frequency*0.5f - p->_mean);
+            float pd2_diff = fabsf(_i2.frequency*0.5f - p->_mean);
+            _pitch_info i1 = _i1;
+            i1.frequency = i1.frequency*0.5f;
+            _pitch_info i2 = _i2;
+            i2.frequency = i2.frequency*0.5f;
+    
+            _pitch_info i = (pd1_diff < pd2_diff) ? i1 : i2;
+            disagreement = fabsf(pd1_diff - pd2_diff) > 2.0f;
             
-            if (p->_first)
-            {
-                p->_current = i;
-                p->_mean = p->_current.frequency;
-                p->_first = 0;
-                p->_predicted_frequency = 0.0f;
-            }
-            else
-            {
-                p->_current = i;
-                p->_mean = (0.222222f * p->_current.frequency) + (0.777778f * p->_mean);
-                p->_predicted_frequency = 0.0f;
+            if (!disagreement) {
+                if (p->_first)
+                {
+                    p->_current = i;
+                    p->_mean = p->_current.frequency;
+                    p->_first = 0;
+                    p->_predicted_frequency = 0.0f;
+                }
+                else
+                {
+                    p->_current = i;
+                    p->_mean = (0.2222222 * p->_current.frequency) + (0.7777778 * p->_mean);
+                    p->_predicted_frequency = 0.0f;
+                }
             }
         }
         
@@ -2181,7 +2200,7 @@ int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sa
         }
     }
     
-    return pd1_ready || pd2_ready;
+    return pd1_ready;
 }
 
 float   tDualPitchDetector_getFrequency    (tDualPitchDetector* const detector)

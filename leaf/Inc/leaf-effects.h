@@ -430,11 +430,11 @@ extern "C" {
      
      @} */
     
-#define LOOPSIZE (2048*2)      // (4096*2) // loop size must be power of two
-#define LOOPMASK (LOOPSIZE - 1)
+//#define LOOPSIZE (2048*2)      // (4096*2) // loop size must be power of two
+//#define LOOPMASK (LOOPSIZE - 1)
 #define PITCHFACTORDEFAULT 1.0f
 #define INITPERIOD 64.0f
-#define MAXPERIOD (float)((LOOPSIZE - w->blocksize) * 0.8f)
+//#define MAXPERIOD (float)((LOOPSIZE - w->blocksize) * 0.8f)
 #define MINPERIOD 8.0f
     
     typedef struct _tSOLAD
@@ -444,6 +444,7 @@ extern "C" {
         tAttackDetection ad;
         tHighpass hp;
         
+        int loopSize;
         uint16_t timeindex;              // current reference time, write index
         uint16_t blocksize;              // signal input / output block size
         float pitchfactor;        // pitch factor between 0.25 and 4
@@ -459,8 +460,8 @@ extern "C" {
     
     typedef _tSOLAD* tSOLAD;
     
-    void    tSOLAD_init             (tSOLAD* const, LEAF* const leaf);
-    void    tSOLAD_initToPool       (tSOLAD* const, tMempool* const);
+    void    tSOLAD_init             (tSOLAD* const, int loopSize, LEAF* const leaf);
+    void    tSOLAD_initToPool       (tSOLAD* const, int loopSize, tMempool* const);
     void    tSOLAD_free             (tSOLAD* const);
     
     // send one block of input samples, receive one block of output samples
@@ -521,16 +522,20 @@ extern "C" {
         float* inBuffer;
         int bufSize;
         int index;
+        
+        float pickiness;
     } _tPitchShift;
     
     typedef _tPitchShift* tPitchShift;
     
-    void    tPitchShift_init (tPitchShift* const, tDualPitchDetector* const, LEAF* const leaf);
-    void    tPitchShift_initToPool (tPitchShift* const, tDualPitchDetector* const, tMempool* const);
+    void    tPitchShift_init (tPitchShift* const, tDualPitchDetector* const, int bufSize, LEAF* const leaf);
+    void    tPitchShift_initToPool (tPitchShift* const, tDualPitchDetector* const, int bufSize, tMempool* const);
     void    tPitchShift_free (tPitchShift* const);
     
-    void    tPitchShift_shiftBy (tPitchShift* const, float factor, float* in, float* out, int bufSize);
-    void    tPitchShift_shiftTo (tPitchShift* const, float freq, float* in, float* out, int bufSize);
+    void    tPitchShift_shiftBy (tPitchShift* const, float factor, float* in, float* out);
+    void    tPitchShift_shiftTo (tPitchShift* const, float freq, float* in, float* out);
+    
+    void    tPitchShift_setPickiness (tPitchShift* const, float p);
     
     /*!
      @defgroup tsimpleretune tSimpleRetune
@@ -582,7 +587,7 @@ extern "C" {
         int bufSize;
         int index;
         
-        void (*shiftFunction)(tPitchShift* const, float, float*, float*, int);
+        void (*shiftFunction)(tPitchShift* const, float, float*, float*);
         
         float* shiftValues;
         int numVoices;
@@ -597,6 +602,7 @@ extern "C" {
     float   tSimpleRetune_tick                  (tSimpleRetune* const, float sample);
     void    tSimpleRetune_setMode               (tSimpleRetune* const, int mode);
     void    tSimpleRetune_setNumVoices          (tSimpleRetune* const, int numVoices);
+    void    tSimpleRetune_setPickiness          (tSimpleRetune* const, float p);
     void    tSimpleRetune_tuneVoices            (tSimpleRetune* const, float* t);
     void    tSimpleRetune_tuneVoice             (tSimpleRetune* const, int voice, float t);
     float   tSimpleRetune_getInputFrequency     (tSimpleRetune* const);
@@ -653,7 +659,7 @@ extern "C" {
         
         float* output;
         
-        void (*shiftFunction)(tPitchShift* const, float, float*, float*, int);
+        void (*shiftFunction)(tPitchShift* const, float, float*, float*);
         
         float* shiftValues;
         int numVoices;
@@ -668,6 +674,7 @@ extern "C" {
     float*  tRetune_tick                (tRetune* const, float sample);
     void    tRetune_setMode             (tRetune* const, int mode);
     void    tRetune_setNumVoices        (tRetune* const, int numVoices);
+    void    tRetune_setPickiness        (tRetune* const, float p);
     void    tRetune_tuneVoices          (tRetune* const, float* t);
     void    tRetune_tuneVoice           (tRetune* const, int voice, float t);
     float   tRetune_getInputFrequency   (tRetune* const);
