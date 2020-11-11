@@ -17,6 +17,7 @@ extern "C" {
     
 #include "leaf-global.h"
 #include "leaf-mempool.h"
+#include "leaf-distortion.h"
 #include "leaf-math.h"
 #include "leaf-filters.h"
 #include "leaf-envelopes.h"
@@ -431,7 +432,7 @@ extern "C" {
     void    tSNAC_initToPool    (tSNAC* const, int overlaparg, tMempool* const);
     void    tSNAC_free          (tSNAC* const);
     
-    void    tSNAC_ioSamples     (tSNAC *s, float *in, float *out, int size);
+    void    tSNAC_ioSamples     (tSNAC *s, float *in, int size);
     void    tSNAC_setOverlap    (tSNAC *s, int lap);
     void    tSNAC_setBias       (tSNAC *s, float bias);
     void    tSNAC_setMinRMS     (tSNAC *s, float rms);
@@ -539,12 +540,13 @@ extern "C" {
     
     typedef _tPeriodDetection* tPeriodDetection;
     
-    void    tPeriodDetection_init               (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, LEAF* const leaf);
-    void    tPeriodDetection_initToPool         (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, tMempool* const);
+    void    tPeriodDetection_init               (tPeriodDetection* const, float* in, int bufSize, int frameSize, LEAF* const leaf);
+    void    tPeriodDetection_initToPool         (tPeriodDetection* const, float* in, int bufSize, int frameSize, tMempool* const);
     void    tPeriodDetection_free               (tPeriodDetection* const);
     
     float   tPeriodDetection_tick               (tPeriodDetection* const, float sample);
     float   tPeriodDetection_getPeriod          (tPeriodDetection* const);
+    float   tPeriodDetection_getFidelity        (tPeriodDetection* pd);
     void    tPeriodDetection_setHopSize         (tPeriodDetection* const, int hs);
     void    tPeriodDetection_setWindowSize      (tPeriodDetection* const, int ws);
     void    tPeriodDetection_setFidelityThreshold(tPeriodDetection* const, float threshold);
@@ -862,7 +864,7 @@ extern "C" {
     
 #define ONSET_PERIODICITY 0.95f
 #define MIN_PERIODICITY 0.9f
-#define DEFAULT_HYSTERESIS -40.0f
+#define DEFAULT_HYSTERESIS -200.0f
 
     typedef struct _pitch_info
     {
@@ -903,20 +905,22 @@ extern "C" {
         
         tMempool mempool;
         
-        tPitchDetector _pd1;
+        tPeriodDetection _pd1;
         tPitchDetector _pd2;
         _pitch_info _current;
         float _mean;
         float _predicted_frequency;
         int _first;
-        int sub;
         
+        float highest, lowest;
+        float thresh;
+
     } _tDualPitchDetector;
     
     typedef _tDualPitchDetector* tDualPitchDetector;
     
-    void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, LEAF* const leaf);
-    void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool);
+    void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, LEAF* const leaf);
+    void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, tMempool* const mempool);
     void    tDualPitchDetector_free (tDualPitchDetector* const detector);
     
     int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sample);
@@ -926,6 +930,7 @@ extern "C" {
     float   tDualPitchDetector_predictFrequency (tDualPitchDetector* const detector);
     
     void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector, float hysteresis);
+    void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector* const detector, float thresh);
     
     
     

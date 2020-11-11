@@ -1039,8 +1039,8 @@ void tSOLAD_initToPool (tSOLAD* const wp, int loopSize, tMempool* const mp)
     w->period = INITPERIOD;
     w->readlag = INITPERIOD;
     w->blocksize = INITPERIOD;
-    
-    tAttackDetection_initToPool(&w->ad, INITPERIOD, 2, 2, mp);
+
+    tAttackDetection_initToPool(&w->ad, INITPERIOD, 5, 5, mp);
     tHighpass_initToPool(&w->hp, 20.0f, mp);
 }
 
@@ -1383,7 +1383,7 @@ void tPitchShift_initToPool (tPitchShift* const psr, tDualPitchDetector* const d
     
     ps->pd = *dpd;
     ps->bufSize = bufSize;
-    ps->pickiness = 0.95f;
+    ps->pickiness = 0.0f;
     
     tSOLAD_initToPool(&ps->sola, pow(2.0, ceil(log2(ps->bufSize * 2.0))), mp);
     tSOLAD_setPitchFactor(&ps->sola, DEFPITCHRATIO);
@@ -1468,7 +1468,7 @@ void tSimpleRetune_initToPool (tSimpleRetune* const rt, int numVoices, float min
     
     r->minInputFreq = minInputFreq;
     r->maxInputFreq = maxInputFreq;
-    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, mp);
+    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, r->inBuffer, r->bufSize, mp);
     
     for (int i = 0; i < r->numVoices; ++i)
     {
@@ -1589,6 +1589,7 @@ void tRetune_initToPool (tRetune* const rt, int numVoices, float minInputFreq, f
     r->bufSize = bufSize;
     r->numVoices = numVoices;
     
+    r->pdBuffer = (float*) mpool_alloc(sizeof(float) * 2048, m);
     r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
 
     r->index = 0;
@@ -1600,7 +1601,7 @@ void tRetune_initToPool (tRetune* const rt, int numVoices, float minInputFreq, f
     
     r->minInputFreq = minInputFreq;
     r->maxInputFreq = maxInputFreq;
-    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, mp);
+    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, r->pdBuffer, 2048, mp);
 
     for (int i = 0; i < r->numVoices; ++i)
     {
@@ -1623,6 +1624,7 @@ void tRetune_free (tRetune* const rt)
     }
     mpool_free((char*)r->shiftValues, r->mempool);
     mpool_free((char*)r->ps, r->mempool);
+    mpool_free((char*)r->pdBuffer, r->mempool);
     mpool_free((char*)r->inBuffer, r->mempool);
     mpool_free((char*)r->outBuffers, r->mempool);
     mpool_free((char*)r->output, r->mempool);
@@ -1666,10 +1668,7 @@ void tRetune_setPickiness (tRetune* const rt, float p)
 {
     _tRetune* r = *rt;
     
-    for (int i = 0; i < r->numVoices; ++i)
-    {
-        tPitchShift_setPickiness(&r->ps[i], p);
-    }
+    tDualPitchDetector_setPeriodicityThreshold(&r->dp, p);
 }
 
 void tRetune_setNumVoices(tRetune* const rt, int numVoices)
