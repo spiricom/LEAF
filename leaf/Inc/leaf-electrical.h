@@ -37,13 +37,15 @@ extern "C" {
      @fn void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tWDF_initToPool             (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tWDF_free                   (tWDF* const)
-     @brief
+     @brief Free a tWDF from its mempool.
      @param
      
      @fn float   tWDF_tick                   (tWDF* const, float sample, tWDF* const outputPoint, uint8_t paramsChanged)

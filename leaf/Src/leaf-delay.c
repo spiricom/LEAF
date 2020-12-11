@@ -262,7 +262,7 @@ float   tLinearDelay_tickOut (tLinearDelay* const dl)
     return d->lastOut;
 }
 
-int     tLinearDelay_setDelay (tLinearDelay* const dl, float delay)
+void     tLinearDelay_setDelay (tLinearDelay* const dl, float delay)
 {
     _tLinearDelay* d = *dl;
 
@@ -279,8 +279,6 @@ int     tLinearDelay_setDelay (tLinearDelay* const dl, float delay)
     d->omAlpha = 1.0f - d->alpha;
 
     if ( d->outPoint == d->maxDelay ) d->outPoint = 0;
-
-    return 0;
 }
 
 float tLinearDelay_tapOut (tLinearDelay* const dl, uint32_t tapDelay)

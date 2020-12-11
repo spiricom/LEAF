@@ -39,13 +39,15 @@ extern "C" {
      @fn void    tAllpass_init           (tAllpass* const, float initDelay, uint32_t maxDelay, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tAllpass_initToPool     (tAllpass* const, float initDelay, uint32_t maxDelay, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tAllpass_free           (tAllpass* const)
-     @brief
+     @brief Free a tAllpass from its mempool.
      @param
      
      @fn float   tAllpass_tick           (tAllpass* const, float input)
@@ -96,13 +98,15 @@ extern "C" {
      @fn void    tOnePole_init           (tOnePole* const, float thePole, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tOnePole_initToPool     (tOnePole* const, float thePole, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tOnePole_free           (tOnePole* const)
-     @brief
+     @brief Free a tOnePole from its mempool.
      @param
      
      @fn float   tOnePole_tick           (tOnePole* const, float input)
@@ -170,13 +174,15 @@ extern "C" {
      @fn void    tTwoPole_init           (tTwoPole* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tTwoPole_initToPool     (tTwoPole* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tTwoPole_free           (tTwoPole* const)
-     @brief
+     @brief Free a tTwoPole from its mempool.
      @param
      
      @fn float   tTwoPole_tick           (tTwoPole* const, float input)
@@ -249,13 +255,15 @@ extern "C" {
      @fn void    tOneZero_init           (tOneZero* const, float theZero, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tOneZero_initToPool     (tOneZero* const, float theZero, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tOneZero_free           (tOneZero* const)
-     @brief
+     @brief Free a tOneZero from its mempool.
      @param
      
      @fn float   tOneZero_tick           (tOneZero* const, float input)
@@ -322,13 +330,15 @@ extern "C" {
      @fn void    tTwoZero_init           (tTwoZero* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tTwoZero_initToPool     (tTwoZero* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tTwoZero_free           (tTwoZero* const)
-     @brief
+     @brief Free a tTwoZero from its mempool.
      @param
      
      @fn float   tTwoZero_tick           (tTwoZero* const, float input)
@@ -400,13 +410,15 @@ extern "C" {
      @fn void    tPoleZero_init              (tPoleZero* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tPoleZero_initToPool        (tPoleZero* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tPoleZero_free              (tPoleZero* const)
-     @brief
+     @brief Free a tPoleZero from its mempool.
      @param
      
      
@@ -483,13 +495,15 @@ extern "C" {
      @fn void    tBiQuad_init           (tBiQuad* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tBiQuad_initToPool     (tBiQuad* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tBiQuad_free           (tBiQuad* const)
-     @brief
+     @brief Free a tBiQuad from its mempool.
      @param
      
      
@@ -580,13 +594,15 @@ extern "C" {
      @fn void    tSVF_init           (tSVF* const, SVFType type, float freq, float Q, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tSVF_initToPool     (tSVF* const, SVFType type, float freq, float Q, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tSVF_free           (tSVF* const)
-     @brief
+     @brief Free a tSVF from its mempool.
      @param
      
      @fn float   tSVF_tick           (tSVF* const, float v0)
@@ -650,13 +666,15 @@ extern "C" {
      @fn void    tEfficientSVF_init          (tEfficientSVF* const, SVFType type, uint16_t input, float Q, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tEfficientSVF_initToPool    (tEfficientSVF* const, SVFType type, uint16_t input, float Q, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tEfficientSVF_free          (tEfficientSVF* const)
-     @brief
+     @brief Free a tEfficientSVF from its mempool.
      @param
      
      @fn float   tEfficientSVF_tick          (tEfficientSVF* const, float v0)
@@ -704,13 +722,15 @@ extern "C" {
      @fn void    tHighpass_init          (tHighpass* const, float freq, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tHighpass_initToPool    (tHighpass* const, float freq, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tHighpass_free          (tHighpass* const)
-     @brief
+     @brief Free a tHighpass from its mempool.
      @param
      
      @fn float   tHighpass_tick          (tHighpass* const, float x)
@@ -756,13 +776,15 @@ extern "C" {
      @fn void    tButterworth_init           (tButterworth* const, int N, float f1, float f2, LEAF* const leaf, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tButterworth_initToPool     (tButterworth* const, int N, float f1, float f2, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tButterworth_free           (tButterworth* const)
-     @brief
+     @brief Free a tButterworth from its mempool.
      @param
      
      @fn float   tButterworth_tick           (tButterworth* const, float input)
@@ -821,13 +843,15 @@ extern "C" {
      @fn void    tFIR_init           (tFIR* const, float* coeffs, int numTaps, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tFIR_initToPool     (tFIR* const, float* coeffs, int numTaps, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tFIR_free           (tFIR* const)
-     @brief
+     @brief Free a tFIR from its mempool.
      @param
      
      @fn float   tFIR_tick           (tFIR* const, float input)
@@ -865,13 +889,15 @@ extern "C" {
      @fn void    tMedianFilter_init           (tMedianFilter* const, int size, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.f
      
      @fn void    tMedianFilter_initToPool     (tMedianFilter* const, int size, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tMedianFilter_free           (tMedianFilter* const)
-     @brief
+     @brief Free a tMedianFilter from its mempool.
      @param
      
      @fn float   tMedianFilter_tick           (tMedianFilter* const, float input)
@@ -911,13 +937,15 @@ extern "C" {
      @fn void    tVZFilter_init           (tVZFilter* const, VZFilterType type, float freq, float Q, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tVZFilter_initToPool     (tVZFilter* const, VZFilterType type, float freq, float Q, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tVZFilter_free           (tVZFilter* const)
-     @brief
+     @brief Free a tVZFilter from its mempool.
      @param
      
      @fn void    tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate)
@@ -1032,13 +1060,15 @@ extern "C" {
      @fn void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tDiodeFilter_initToPool     (tDiodeFilter* const, float freq, float Q, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tDiodeFilter_free           (tDiodeFilter* const)
-     @brief
+     @brief Free a tDiodeFilter from its mempool.
      @param
      
      @fn float   tDiodeFilter_tick               (tDiodeFilter* const, float input)

@@ -42,13 +42,15 @@ extern "C" {
      @fn void  tBuffer_init                  (tBuffer* const, uint32_t length, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void  tBuffer_initToPool            (tBuffer* const, uint32_t length, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void  tBuffer_free                  (tBuffer* const)
-     @brief
+     @brief Free a tBuffer from its mempool.
      @param
      
      @fn void  tBuffer_tick                  (tBuffer* const, float sample)
@@ -132,7 +134,7 @@ extern "C" {
     typedef _tBuffer* tBuffer;
     
     void  tBuffer_init                  (tBuffer* const, uint32_t length, LEAF* const leaf);
-    void  tBuffer_initToPool 			(tBuffer* const sb, uint32_t length, tMempool* const mp);
+    void  tBuffer_initToPool             (tBuffer* const sb, uint32_t length, tMempool* const mp);
     void  tBuffer_free                  (tBuffer* const);
     
     void  tBuffer_tick                  (tBuffer* const, float sample);
@@ -140,15 +142,15 @@ extern "C" {
     float tBuffer_get                   (tBuffer* const, int idx);
     void  tBuffer_record                (tBuffer* const);
     void  tBuffer_stop                  (tBuffer* const);
-    void tBuffer_setBuffer				(tBuffer* const sb, float* externalBuffer, int length, int channels, int sampleRate);
+    void tBuffer_setBuffer                (tBuffer* const sb, float* externalBuffer, int length, int channels, int sampleRate);
     int   tBuffer_getRecordPosition     (tBuffer* const);
     void   tBuffer_setRecordPosition    (tBuffer* const, int pos);
     void  tBuffer_setRecordMode         (tBuffer* const, RecordMode mode);
     void  tBuffer_clear                 (tBuffer* const);
     uint32_t tBuffer_getBufferLength    (tBuffer* const);
     uint32_t tBuffer_getRecordedLength  (tBuffer* const sb);
-    void 	tBuffer_setRecordedLength	(tBuffer* const sb, int length);
-    int 	tBuffer_isActive			(tBuffer* const sb);
+    void     tBuffer_setRecordedLength    (tBuffer* const sb, int length);
+    int     tBuffer_isActive            (tBuffer* const sb);
     
     //==============================================================================
     
@@ -161,13 +163,15 @@ extern "C" {
      @fn void    tSampler_init               (tSampler* const, tBuffer* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tSampler_initToPool         (tSampler* const, tBuffer* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tSampler_free               (tSampler* const)
-     @brief
+     @brief Free a tSampler from its mempool.
      @param
      
      @fn float   tSampler_tick               (tSampler* const)
@@ -232,7 +236,7 @@ extern "C" {
         float ticksPerSevenMs;
         float rateFactor;
         uint32_t channels;
-
+        
         tRamp gain;
         
         float idx;
@@ -263,11 +267,11 @@ extern "C" {
     typedef _tSampler* tSampler;
     
     void    tSampler_init               (tSampler* const, tBuffer* const, LEAF* const leaf);
-    void 	tSampler_initToPool			(tSampler* const sp, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
+    void     tSampler_initToPool            (tSampler* const sp, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
     void    tSampler_free               (tSampler* const);
     
     float   tSampler_tick               (tSampler* const);
-    float	tSampler_tickStereo        	(tSampler* const sp, float* outputArray);
+    float    tSampler_tickStereo            (tSampler* const sp, float* outputArray);
     void    tSampler_setSample          (tSampler* const, tBuffer* const);
     void    tSampler_setMode            (tSampler* const, PlayMode mode);
     void    tSampler_play               (tSampler* const);
@@ -289,13 +293,15 @@ extern "C" {
      @fn void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tAutoSampler_initToPool         (tAutoSampler* const, tBuffer* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tAutoSampler_free               (tAutoSampler* const)
-     @brief
+     @brief Free a tAutoSampler from its mempool.
      @param
      
      @fn float   tAutoSampler_tick               (tAutoSampler* const, float input)
@@ -353,7 +359,7 @@ extern "C" {
     typedef _tAutoSampler* tAutoSampler;
     
     void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const, LEAF* const leaf);
-    void    tAutoSampler_initToPool 		(tAutoSampler* const as, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
+    void    tAutoSampler_initToPool         (tAutoSampler* const as, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
     void    tAutoSampler_free               (tAutoSampler* const);
     
     float   tAutoSampler_tick               (tAutoSampler* const, float input);
@@ -365,9 +371,9 @@ extern "C" {
     void    tAutoSampler_setWindowSize      (tAutoSampler* const, uint32_t size);
     void    tAutoSampler_setCrossfadeLength (tAutoSampler* const, uint32_t length);
     void    tAutoSampler_setRate            (tAutoSampler* const, float rate);
-
-
-/*!
+    
+    
+    /*!
      @defgroup tMBSampler tMBSampler
      @ingroup sampling
      @brief
@@ -376,13 +382,15 @@ extern "C" {
      @fn void    tMBSampler_init               (tMBSampler* const, tBuffer* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tMBSampler_initToPool         (tMBSampler* const, tBuffer* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tMBSampler_free               (tMBSampler* const)
-     @brief
+     @brief Free a tMBSampler from its mempool.
      @param
      
      @fn float   tMBSampler_tick               (tMBSampler* const)
@@ -428,7 +436,7 @@ extern "C" {
      @} */
     
 #define FILLEN 256
-
+    
     typedef struct _tMBSampler
     {
         
@@ -477,3 +485,4 @@ extern "C" {
 #endif // LEAF_SAMPLING_H_INCLUDED
 
 //==============================================================================
+

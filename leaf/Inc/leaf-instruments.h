@@ -40,13 +40,15 @@ extern "C" {
      @fn void    t808Cowbell_init            (t808Cowbell* const, int useStick, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    t808Cowbell_initToPool      (t808Cowbell* const, int useStick, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    t808Cowbell_free            (t808Cowbell* const)
-     @brief
+     @brief Free a t808Cowbell from its mempool.
      @param
      
      @fn float   t808Cowbell_tick            (t808Cowbell* const)
@@ -125,13 +127,15 @@ extern "C" {
      @fn void    t808Hihat_init                  (t808Hihat* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    t808Hihat_initToPool            (t808Hihat* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    t808Hihat_free                  (t808Hihat* const)
-     @brief
+     @brief Free a t808Hihat from its mempool.
      @param
      
      @fn float   t808Hihat_tick                  (t808Hihat* const)
@@ -235,13 +239,15 @@ extern "C" {
      @fn void    t808Snare_init                  (t808Snare* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    t808Snare_initToPool            (t808Snare* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    t808Snare_free                  (t808Snare* const)
-     @brief
+     @brief Free a t808Snare from its mempool.
      @param
      
      @fn float   t808Snare_tick                  (t808Snare* const)
@@ -339,13 +345,15 @@ extern "C" {
      @fn void    t808Kick_init               (t808Kick* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    t808Kick_initToPool         (t808Kick* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    t808Kick_free               (t808Kick* const)
-     @brief
+     @brief Free a t808Kick from its mempool.
      @param
      
      @fn float   t808Kick_tick               (t808Kick* const)

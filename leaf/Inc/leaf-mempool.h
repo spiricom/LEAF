@@ -89,9 +89,9 @@ extern "C" {
         mpool_node_t* head;        // first node of memory pool free list
     };
     
-    //! Initialize a tMempool for a given memory location and size to the default LEAF mempool.
+    //! Initialize a tMempool for a given memory location and size to the default mempool of a LEAF instance.
     /*!
-     @param pool A pointer to the tMempool to be initialized.
+     @param pool A pointer to the tMempool to initialize.
      @param memory A pointer to the chunk of memory to be used as a mempool.
      @param size The size of the chunk of memory to be used as a mempool.
      */
@@ -100,17 +100,17 @@ extern "C" {
     
     //! Free a tMempool from its mempool.
     /*!
-     @param pool A pointer to the tMempool to be freed.
+     @param pool A pointer to the tMempool to free.
      */
     void    tMempool_free           (tMempool* const pool);
     
     
     //! Initialize a tMempool for a given memory location and size to a specified mempool.
     /*!
-     @param pool A pointer to the tMempool to be initialized.
+     @param pool A pointer to the tMempool to initialize.
      @param memory A pointer to the chunk of memory to be used as a mempool.
      @param size The size of the chuck of memory to be used as a mempool.
-     @param poolTo A pointer to the tMempool to which a tMempool should be initialized.
+     @param poolTo A pointer to the tMempool to which this tMempool should be initialized.
      */
     void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem, LEAF* const leaf);
 

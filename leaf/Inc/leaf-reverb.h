@@ -41,13 +41,15 @@ extern "C" {
      @fn void    tPRCReverb_init         (tPRCReverb* const, float t60, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tPRCReverb_initToPool   (tPRCReverb* const, float t60, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tPRCReverb_free         (tPRCReverb* const)
-     @brief
+     @brief Free a tPRCReverb from its mempool.
      @param
      
      @fn void    tPRCReverb_clear        (tPRCReverb* const)
@@ -107,13 +109,15 @@ extern "C" {
      @fn void    tNReverb_init           (tNReverb* const, float t60, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tNReverb_initToPool     (tNReverb* const, float t60, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tNReverb_free           (tNReverb* const)
-     @brief
+     @brief Free a tNReverb from its mempool.
      @param
      
      @fn void    tNReverb_clear          (tNReverb* const)
@@ -179,13 +183,15 @@ extern "C" {
      @fn void    tDattorroReverb_init              (tDattorroReverb* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tDattorroReverb_initToPool        (tDattorroReverb* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tDattorroReverb_free              (tDattorroReverb* const)
-     @brief
+     @brief Free a tDattorroReverb from its mempool.
      @param
      
      @fn void    tDattorroReverb_clear             (tDattorroReverb* const)

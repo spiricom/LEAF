@@ -38,13 +38,15 @@ extern "C" {
      @fn void    tSampleReducer_init    (tSampleReducer* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tSampleReducer_initToPool   (tSampleReducer* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tSampleReducer_free    (tSampleReducer* const)
-     @brief
+     @brief Free a tSampleReducer from its mempool.
      @param
      
      @fn float   tSampleReducer_tick    (tSampleReducer* const, float input)
@@ -86,13 +88,15 @@ extern "C" {
      @fn void    tOversampler_init           (tOversampler* const, int order, int extraQuality, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tOversampler_initToPool     (tOversampler* const, int order, int extraQuality, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tOversampler_free           (tOversampler* const)
-     @brief
+     @brief Free a tOversampler from its mempool.
      @param
      
      @fn void    tOversampler_upsample       (tOversampler* const, float input, float* output)
@@ -147,13 +151,15 @@ extern "C" {
      @fn void    tLockhartWavefolder_init    (tLockhartWavefolder* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tLockhartWavefolder_initToPool   (tLockhartWavefolder* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tLockhartWavefolder_free    (tLockhartWavefolder* const)
-     @brief
+     @brief Free a tLockhartWavefolder from its mempool.
      @param
      
      @fn float   tLockhartWavefolder_tick    (tLockhartWavefolder* const, float samp)
@@ -213,13 +219,15 @@ extern "C" {
      @fn void    tCrusher_init    (tCrusher* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.f
      
      @fn void    tCrusher_initToPool   (tCrusher* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tCrusher_free    (tCrusher* const)
-     @brief
+     @brief Free a tCrusher from its mempool.
      @param
      
      @fn float   tCrusher_tick    (tCrusher* const, float input)

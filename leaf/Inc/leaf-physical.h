@@ -45,13 +45,15 @@ extern "C" {
      @fn void    tPluck_init          (tPluck* const, float lowestFrequency, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tPluck_initToPool    (tPluck* const, float lowestFrequency, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tPluck_free          (tPluck* const)
-     @brief
+     @brief Free a tPluck from its mempool.
      @param
      
      @fn float   tPluck_tick          (tPluck* const)
@@ -126,13 +128,15 @@ extern "C" {
      @fn void    tKarplusStrong_init               (tKarplusStrong* const, float lowestFrequency, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tKarplusStrong_initToPool         (tKarplusStrong* const, float lowestFrequency, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tKarplusStrong_free               (tKarplusStrong* const)
-     @brief
+     @brief Free a tKarplusStrong from its mempool.
      @param
      
      @fn float   tKarplusStrong_tick               (tKarplusStrong* const)
@@ -236,13 +240,15 @@ extern "C" {
      @fn void    tSimpleLivingString_init   (tSimpleLivingString* const, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tSimpleLivingString_initToPool     (tSimpleLivingString* const, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tSimpleLivingString_free                (tSimpleLivingString* const)
-     @brief
+     @brief Free a tSimpleLivingString from its mempool.
      @param
      
      @fn float   tSimpleLivingString_tick                (tSimpleLivingString* const, float input)
@@ -335,13 +341,15 @@ extern "C" {
      @fn void    tLivingString_init                  (tLivingString* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tLivingString_initToPool            (tLivingString* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tLivingString_free                  (tLivingString* const)
-     @brief
+     @brief Free a tLivingString from its mempool.
      @param
      
      @fn float   tLivingString_tick                  (tLivingString* const, float input)
@@ -448,13 +456,15 @@ extern "C" {
      @fn void    tComplexLivingString_init  (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tComplexLivingString_initToPool    (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tComplexLivingString_free                  (tComplexLivingString* const)
-     @brief
+     @brief Free a tComplexLivingString from its mempool.
      @param
      
      @fn float   tComplexLivingString_tick                  (tComplexLivingString* const, float input)
@@ -569,13 +579,15 @@ extern "C" {
      @fn void    tReedTable_init         (tReedTable* const, float offset, float slope, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tReedTable_initToPool   (tReedTable* const, float offset, float slope, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tReedTable_free         (tReedTable* const)
-     @brief
+     @brief Free a tReedTable from its mempool.
      @param
      
      @fn float   tReedTable_tick         (tReedTable* const, float input)

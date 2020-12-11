@@ -43,13 +43,15 @@ extern "C" {
      @fn void    tEnvelope_init          (tEnvelope* const, float attack, float decay, int loop, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tEnvelope_initToPool    (tEnvelope* const, float attack, float decay, int loop, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tEnvelope_free          (tEnvelope* const)
-     @brief
+     @brief Free a tEnvelope from its mempool.
      @param
      
      @fn float   tEnvelope_tick          (tEnvelope* const)
@@ -121,13 +123,15 @@ extern "C" {
      @fn void    tExpSmooth_init         (tExpSmooth* const, float val, float factor, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tExpSmooth_initToPool   (tExpSmooth* const, float val, float factor, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tExpSmooth_free         (tExpSmooth* const)
-     @brief
+     @brief Free a tExpSmooth from its mempool.
      @param
      
      @fn float   tExpSmooth_tick         (tExpSmooth* const)
@@ -191,13 +195,15 @@ extern "C" {
      @fn void    tADSR_init    (tADSR* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tADSR_free          (tADSR* const)
-     @brief
+     @brief Free a tADSR from its mempool.
      @param
      
      @fn float   tADSR_tick          (tADSR* const)
@@ -283,13 +289,15 @@ extern "C" {
      @fn void    tADSR2_init          (tADSR2* const, float attack, float decay, float sustain, float release, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tADSR2_initToPool    (tADSR2* const, float attack, float decay, float sustain, float release, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tADSR2_free          (tADSR2* const)
-     @brief
+     @brief Free a tADSR2 from its mempool.
      @param
      
      @fn float   tADSR2_tick          (tADSR2* const)
@@ -377,13 +385,15 @@ extern "C" {
      @fn void    tADSR3_init          (tADSR3* const, float attack, float decay, float sustain, float release, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tADSR3_initToPool    (tADSR3* const, float attack, float decay, float sustain, float release, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tADSR3_free          (tADSR3* const)
-     @brief
+     @brief Free a tADSR3 from its mempool.
      @param
      
      @fn float   tADSR3_tick          (tADSR3* const)
@@ -482,13 +492,15 @@ extern "C" {
      @fn void    tADSR4_init          (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tADSR4_initToPool    (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tADSR4_free          (tADSR4* const)
-     @brief
+     @brief Free a tADSR4 from its mempool.
      @param
      
      @fn float   tADSR4_tick          (tADSR4* const)
@@ -577,13 +589,15 @@ extern "C" {
      @fn void    tRamp_init          (tRamp* const, float time, int samplesPerTick, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tRamp_initToPool    (tRamp* const, float time, int samplesPerTick, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tRamp_free          (tRamp* const)
-     @brief
+     @brief Free a tRamp from its mempool.
      @param
      
      @fn float   tRamp_tick          (tRamp* const)
@@ -642,13 +656,15 @@ extern "C" {
      @fn void    tRampUpDown_init          (tRampUpDown* const, float upTime, float downTime, int samplesPerTick, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tRampUpDown_initToPool    (tRampUpDown* const, float upTime, float downTime, int samplesPerTick, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tRampUpDown_free          (tRampUpDown* const)
-     @brief
+     @brief Free a tRampUpDown from its mempool.
      @param
      
      @fn float   tRampUpDown_tick          (tRampUpDown* const)
@@ -715,13 +731,15 @@ extern "C" {
      @fn void    tSlide_init          (tSlide* const, float upSlide, float downSlide, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tSlide_initToPool    (tSlide* const, float upSlide, float downSlide, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tSlide_free          (tSlide* const)
-     @brief
+     @brief Free a tSlide from its mempool.
      @param
      
      @fn float   tSlide_tick         (tSlide* const, float in)

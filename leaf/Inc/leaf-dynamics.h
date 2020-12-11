@@ -40,13 +40,15 @@ extern "C" {
      @fn void    tCompressor_init        (tCompressor* const, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tCompressor_initToPool  (tCompressor* const, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tCompressor_free        (tCompressor* const)
-     @brief
+     @brief Free a tCompressor from its mempool.
      @param
      
      @fn float   tCompressor_tick        (tCompressor* const, float input)
@@ -88,13 +90,15 @@ extern "C" {
      @fn void tFeedbackLeveler_init (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void tFeedbackLeveler_initToPool (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tFeedbackLeveler_free           (tFeedbackLeveler* const)
-     @brief
+     @brief Free a tFeedbackLeveler from its mempool.
      @param
      
      @fn float   tFeedbackLeveler_tick           (tFeedbackLeveler* const, float input)
@@ -161,13 +165,15 @@ extern "C" {
      @fn void    tThreshold_init        (tThreshold* const, float low, float high, LEAF* const leaf)
      @brief
      @param
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tThreshold_initToPool  (tThreshold* const, float low, float high, tMempool* const)
      @brief
      @param
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tThreshold_free        (tThreshold* const)
-     @brief
+     @brief Free a tThreshold from its mempool.
      @param
      
      @fn int   tThreshold_tick        (tThreshold* const, float input)
