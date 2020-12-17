@@ -35,14 +35,14 @@ extern "C" {
      @{
      
      @fn void        tDelay_init         (tDelay* const, uint32_t delay, uint32_t maxDelay, LEAF* const leaf)
-     @brief
+     @brief Initialize a tDelay to the default mempool of a LEAF instance.
      @param delay A pointer to the tDelay to initialize.
      @param initalLength
      @param maxLength
      @param leaf A pointer to the leaf instance.
      
      @fn void        tDelay_initToPool   (tDelay* const, uint32_t delay, uint32_t maxDelay, tMempool* const)
-     @brief
+     @brief Initialize a tDelay to a specified mempool.
      @param delay A pointer to the tDelay to initialize.
      @param initalLength
      @param maxLength
@@ -143,14 +143,14 @@ extern "C" {
      @{
      
      @fn void    tLinearDelay_init        (tLinearDelay* const, float delay, uint32_t maxDelay, LEAF* const leaf)
-     @brief
+     @brief Initialize a tLinearDelay to the default mempool of a LEAF instance.
      @param delay A pointer to the tLinearDelay to initialize.
      @param initialLength
      @param maxLength
      @param leaf A pointer to the leaf instance.
      
      @fn void    tLinearDelay_initToPool  (tLinearDelay* const, float delay, uint32_t maxDelay, tMempool* const)
-     @brief
+     @brief Initialize a tLinearDelay to a specified mempool.
      @param delay A pointer to the tLinearDelay to initialize.
      @param initialLength
      @param maxLength
@@ -210,7 +210,6 @@ extern "C" {
     
     typedef struct _tLinearDelay
     {
-        
         tMempool mempool;
         
         float gain;
@@ -257,14 +256,14 @@ extern "C" {
      @{
      
      @fn void       tHermiteDelay_init             (tHermiteDelay* const dl, float delay, uint32_t maxDelay, LEAF* const leaf)
-     @brief
+     @brief Initialize a tHermiteDelay to the default mempool of a LEAF instance.
      @param delay A pointer to the tHermiteDelay to initialize.
      @param initialLength
      @param maxLength
      @param leaf A pointer to the leaf instance.
      
      @fn void    tHermiteDelay_initToPool      (tHermiteDelay* const dl, float delay, uint32_t maxDelay, tMempool* const mp)
-     @brief
+     @brief Initialize a tHermiteDelay to a specified mempool.
      @param delay A pointer to the tHermiteDelay to initialize.
      @param initialLength
      @param maxLength
@@ -394,54 +393,54 @@ extern "C" {
      @{
      
      @fn void    tAllpassDelay_init        (tAllpassDelay* const, float delay, uint32_t maxDelay, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tAllpassDelay to the default mempool of a LEAF instance.
+     @param delay A pointer to the tAllpassDelay to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tAllpassDelay_initToPool  (tAllpassDelay* const, float delay, uint32_t maxDelay, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tAllpassDelay to a specified mempool.
+     @param delay A pointer to the tAllpassDelay to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tAllpassDelay_free        (tAllpassDelay* const)
      @brief Free a tAllpassDelay from its mempool.
-     @param
+     @param delay A pointer to the tAllpassDelay to free.
      
      @fn void    tAllpassDelay_clear       (tAllpassDelay* const)
      @brief
-     @param
+     @param delay A pointer to the relevant tAllpassDelay.
      
      @fn int     tAllpassDelay_setDelay    (tAllpassDelay* const, float delay)
      @brief
-     @param
+     @param delay A pointer to the relevant tAllpassDelay.
      
      @fn float   tAllpassDelay_getDelay    (tAllpassDelay* const)
      @brief
-     @param
+     @param delay A pointer to the relevant tAllpassDelay.
      
      @fn void    tAllpassDelay_tapIn       (tAllpassDelay* const, float in, uint32_t tapDelay)
      @brief
-     @param
+     @param delay A pointer to the relevant tAllpassDelay.
      
      @fn float   tAllpassDelay_tapOut      (tAllpassDelay* const, uint32_t tapDelay)
      @brief
-     @param
+     @param delay A pointer to the relevant tAllpassDelay.
      
      @fn float   tAllpassDelay_addTo       (tAllpassDelay* const, float value, uint32_t tapDelay)
      @brief
-     @param
+     @param delay A pointer to the relevant tAllpassDelay.
      
      @fn float   tAllpassDelay_tick        (tAllpassDelay* const, float sample)
      @brief
-     @param
+     @param delay A pointer to the relevant tAllpassDelay.
      
      @fn float   tAllpassDelay_getLastOut  (tAllpassDelay* const)
      @brief
-     @param
+     @param delay A pointer to the relevant tAllpassDelay.
      
      @fn float   tAllpassDelay_getLastIn   (tAllpassDelay* const)
      @brief
-     @param
+     @param delay A pointer to the relevant tAllpassDelay.
      ￼￼￼
      @} */
     
@@ -492,64 +491,63 @@ extern "C" {
      @{
      
      @fn void    tTapeDelay_init        (tTapeDelay* const, float delay, uint32_t maxDelay, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tTapeDelay to the default mempool of a LEAF instance.
+     @param delay A pointer to the tTapeDelay to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tTapeDelay_initToPool  (tTapeDelay* const, float delay, uint32_t maxDelay, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tTapeDelay to a specified mempool.
+     @param delay A pointer to the tTapeDelay to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tTapeDelay_free        (tTapeDelay* const)
      @brief Free a tTapeDelay from its mempool.
-     @param
+     @param delay A pointer to the tTapeDelay to free.
      
      @fn void    tTapeDelay_clear       (tTapeDelay* const)
-     @brief
-     @param
+     @brief 
+     @param delay A pointer to the relevant tTapeDelay.
      
      @fn void    tTapeDelay_setDelay    (tTapeDelay* const, float delay)
      @brief
-     @param
+     @param delay A pointer to the relevant tTapeDelay.
      
      @fn float   tTapeDelay_getDelay    (tTapeDelay* const)
      @brief
-     @param
+     @param delay A pointer to the relevant tTapeDelay.
      
      @fn void    tTapeDelay_tapIn       (tTapeDelay* const, float in, uint32_t tapDelay)
      @brief
-     @param
+     @param delay A pointer to the relevant tTapeDelay.
      
      @fn float   tTapeDelay_tapOut      (tTapeDelay* const d, float tapDelay)
      @brief
-     @param
+     @param delay A pointer to the relevant tTapeDelay.
      
      @fn float   tTapeDelay_addTo       (tTapeDelay* const, float value, uint32_t tapDelay)
      @brief
-     @param
+     @param delay A pointer to the relevant tTapeDelay.
      
      @fn float   tTapeDelay_tick        (tTapeDelay* const, float sample)
      @brief
-     @param
+     @param delay A pointer to the relevant tTapeDelay.
      
      @fn void    tTapeDelay_incrementInPoint(tTapeDelay* const dl)
      @brief
-     @param
+     @param delay A pointer to the relevant tTapeDelay.
      
      @fn float   tTapeDelay_getLastOut  (tTapeDelay* const)
      @brief
-     @param
+     @param delay A pointer to the relevant tTapeDelay.
      
      @fn float   tTapeDelay_getLastIn   (tTapeDelay* const)
      @brief
-     @param
+     @param delay A pointer to the relevant tTapeDelay.
      ￼￼￼
      @} */
     
     typedef struct _tTapeDelay
     {
-        
         tMempool mempool;
         
         float gain;
@@ -593,42 +591,42 @@ extern "C" {
      @{
      
      @fn void    tRingBuffer_init     (tRingBuffer* const ring, int size, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tRingBuffer to the default mempool of a LEAF instance.
+     @param delay A pointer to the tRingbuffer to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tRingBuffer_initToPool   (tRingBuffer* const ring, int size, tMempool* const mempool)
-     @brief
-     @param
+     @brief Initialize a tRingBuffer to a specified mempool.
+     @param delay A pointer to the tRingbuffer to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tRingBuffer_free     (tRingBuffer* const ring)
      @brief Free a tRingBuffer from its mempool.
-     @param
+     @param delay A pointer to the tRingBuffer to free.
      
      @fn void    tRingBuffer_push     (tRingBuffer* const ring, float val)
      @brief
-     @param
+     @param delay A pointer to the relevant tRingBuffer.
      
      @fn float   tRingBuffer_getNewest    (tRingBuffer* const ring)
      @brief
-     @param
+     @param delay A pointer to the relevant tRingBuffer.
      
      @fn float   tRingBuffer_getOldest    (tRingBuffer* const ring)
      @brief
-     @param
+     @param delay A pointer to the relevant tRingBuffer.
      
      @fn float   tRingBuffer_get      (tRingBuffer* const ring, int index)
      @brief
-     @param
+     @param delay A pointer to the relevant tRingBuffer.
      
      @fn float   tRingBuffer_clear    (tRingBuffer* const ring)
      @brief
-     @param
+     @param delay A pointer to the relevant tRingBuffer.
      
      @fn int     tRingBuffer_getSize  (tRingBuffer* const ring)
      @brief
-     @param
+     @param delay A pointer to the relevant tRingBuffer.
      ￼￼￼
      @} */
     typedef struct _tRingBuffer

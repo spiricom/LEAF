@@ -19,7 +19,7 @@ extern "C" {
     
     /*!
      * @ingroup leaf
-     * @brief The struct of the global LEAF instance `leaf`. Contains global variables and settings.
+     * @brief Struct for an instance of LEAF.
      */
     
     struct LEAF

@@ -35,59 +35,59 @@ extern "C" {
      @{
      
      @fn void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tWDF to the default mempool of a LEAF instance.
+     @param wdf A pointer to the tWDF to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tWDF_initToPool             (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tWDF to a specified mempool.
+     @param wdf A pointer to the tWDF to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tWDF_free                   (tWDF* const)
      @brief Free a tWDF from its mempool.
-     @param
+     @param wdf A pointer to the tWDF to free.
      
      @fn float   tWDF_tick                   (tWDF* const, float sample, tWDF* const outputPoint, uint8_t paramsChanged)
      @brief
-     @param
+     @param wdf A pointer to the relevant tWDF.
      
      @fn void    tWDF_setValue               (tWDF* const, float value)
      @brief
-     @param
+     @param wdf A pointer to the relevant tWDF.
      
      @fn void    tWDF_setSampleRate          (tWDF* const, float sample_rate)
      @brief
-     @param
+     @param wdf A pointer to the relevant tWDF.
      
      @fn uint8_t tWDF_isLeaf                 (tWDF* const)
      @brief
-     @param
+     @param wdf A pointer to the relevant tWDF.
      
      @fn float   tWDF_getPortResistance      (tWDF* const)
      @brief
-     @param
+     @param wdf A pointer to the relevant tWDF.
      
      @fn float   tWDF_getReflectedWaveUp     (tWDF* const, float input)
      @brief
-     @param
+     @param wdf A pointer to the relevant tWDF.
      
      @fn float   tWDF_getReflectedWaveDown   (tWDF* const, float input, float incident_wave)
      @brief
-     @param
+     @param wdf A pointer to the relevant tWDF.
      
      @fn void    tWDF_setIncidentWave        (tWDF* const, float incident_wave, float input)
      @brief
-     @param
+     @param wdf A pointer to the relevant tWDF.
      
      @fn float   tWDF_getVoltage             (tWDF* const)
      @brief
-     @param
+     @param wdf A pointer to the relevant tWDF.
      
      @fn float   tWDF_getCurrent             (tWDF* const)
      @brief
-     @param
-     
+     @param wdf A pointer to the relevant tWDF.
+      
      @} */
     
     typedef enum WDFComponentType

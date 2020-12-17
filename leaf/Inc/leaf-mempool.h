@@ -94,6 +94,7 @@ extern "C" {
      @param pool A pointer to the tMempool to initialize.
      @param memory A pointer to the chunk of memory to be used as a mempool.
      @param size The size of the chunk of memory to be used as a mempool.
+     @param leaf A pointer to the leaf instance.
      */
     void    tMempool_init           (tMempool* const pool, char* memory, size_t size, LEAF* const leaf);
     
@@ -112,7 +113,7 @@ extern "C" {
      @param size The size of the chuck of memory to be used as a mempool.
      @param poolTo A pointer to the tMempool to which this tMempool should be initialized.
      */
-    void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem, LEAF* const leaf);
+    void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem);
 
     /*!￼￼￼
      @} */

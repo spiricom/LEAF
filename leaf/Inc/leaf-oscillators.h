@@ -34,7 +34,7 @@ extern "C" {
      @brief A general wavetable oscillator.
      @{
 
-     @fn void    tTable_init         (tTable* const osc, float* table, int size, LEAF* const leaf)
+     @fn void    tTable_init  (tTable* const osc, float* table, int size, LEAF* const leaf)
      @brief Initialize a tTable to the default mempool of a LEAF instance.
      @param osc A pointer to the tTable to initialize.
      @param table A pointer to the wave table data.
@@ -312,30 +312,30 @@ extern "C" {
      @{
      
      @fn void    tTri_init          (tTri* const osc, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tTri to the default mempool of a LEAF instance.
+     @param osc A pointer to the tTri to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tTri_initToPool    (tTri* const osc, tMempool* const mempool)
-     @brief
-     @param
+     @brief Initialize a tTri to a specified mempool.
+     @param osc A pointer to the tTri to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tTri_free          (tTri* const osc)
      @brief Free a tTri from its mempool.
-     @param
+     @param osc A pointer to the tTri to free.
      
      @fn float   tTri_tick          (tTri* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tTri.
      
      @fn void    tTri_setFreq       (tTri* const osc, float freq)
      @brief
-     @param
+     @param osc A pointer to the relevant tTri.
      
      @fn void    tTri_setSkew       (tTri* const osc, float skew)
      @brief
-     @param
+     @param osc A pointer to the relevant tTri.
      ￼￼￼
      @} */
 
@@ -368,30 +368,30 @@ extern "C" {
      @{
      
      @fn void    tPulse_init        (tPulse* const osc, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tPulse to the default mempool of a LEAF instance.
+     @param osc A pointer to the tPulse to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tPulse_initToPool  (tPulse* const osc, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tPulse to a specified mempool.
+     @param osc A pointer to the tPulse to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tPulse_free        (tPulse* const osc)
      @brief Free a tPulse from its mempool.
-     @param
+     @param osc A pointer to the tPulse to free.
      
      @fn float   tPulse_tick        (tPulse* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tPulse.
      
      @fn void    tPulse_setFreq     (tPulse* const osc, float freq)
      @brief
-     @param
+     @param osc A pointer to the relevant tPulse.
      
      @fn void    tPulse_setWidth    (tPulse* const osc, float width)
      @brief
-     @param
+     @param osc A pointer to the relevant tPulse.
      ￼￼￼
      @} */
     
@@ -423,26 +423,26 @@ extern "C" {
      @{
      
      @fn void    tSaw_init          (tSaw* const osc, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tSaw to the default mempool of a LEAF instance.
+     @param osc A pointer to the tSaw to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tSaw_initToPool    (tSaw* const osc, tMempool* const mempool)
-     @brief
-     @param
+     @brief Initialize a tSaw to a specified mempool.
+     @param osc A pointer to the tSaw to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tSaw_free          (tSaw* const osc)
      @brief Free a tSaw from its mempool.
-     @param
+     @param osc A pointer to the tSaw to free.
      
      @fn float   tSaw_tick          (tSaw* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tSaw.
      
      @fn void    tSaw_setFreq       (tSaw* const osc, float freq)
      @brief
-     @param
+     @param osc A pointer to the relevant tSaw.
      ￼￼￼
      @} */
     
@@ -472,26 +472,26 @@ extern "C" {
      @{
      
      @fn void    tPhasor_init        (tPhasor* const osc, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tPhasor to the default mempool of a LEAF instance.
+     @param osc A pointer to the tPhasor to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tPhasor_initToPool  (tPhasor* const osc, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tPhasor to a specified mempool.
+     @param osc A pointer to the tPhasor to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tPhasor_free        (tPhasor* const osc)
      @brief Free a tPhasor from its mempool.
-     @param
+     @param osc A pointer to the tPhasor to free.
      
      @fn float   tPhasor_tick        (tPhasor* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tPhasor.
      
      @fn void    tPhasor_setFreq     (tPhasor* const osc, float freq)
      @brief
-     @param
+     @param osc A pointer to the relevant tPhasor.
      ￼￼￼
      @} */
     
@@ -522,22 +522,22 @@ extern "C" {
      @{
      
      @fn void    tNoise_init         (tNoise* const noise, NoiseType type, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tNoise to the default mempool of a LEAF instance.
+     @param noise A pointer to the tNoise to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tNoise_initToPool   (tNoise* const noise, NoiseType type, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tNoise to a specified mempool.
+     @param noise A pointer to the tNoise to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tNoise_free         (tNoise* const noise)
      @brief Free a tNoise from its mempool.
-     @param
+     @param noise A pointer to the tNoise to free.
      
      @fn float   tNoise_tick         (tNoise* const noise)
      @brief
-     @param
+     @param noise A pointer to the relevant tNoise.
      */
     
     /* tNoise. WhiteNoise, PinkNoise. */
@@ -720,36 +720,36 @@ extern "C" {
      @{
      
      @fn void tMBPulse_init(tMBPulse* const osc, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tMBPulse to the default mempool of a LEAF instance.
+     @param osc A pointer to the tMBPulse to initialize.
      
      @fn void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const mempool)
-     @brief
-     @param
+     @brief Initialize a tMBPulse to a specified mempool.
+     @param osc A pointer to the tMBPulse to initialize.
      
      @fn void tMBPulse_free(tMBPulse* const osc)
-     @brief
-     @param
+     @brief Free a tMBPulse from its mempool.
+     @param osc A pointer to the tMBPulse to free.
      
      @fn float tMBPulse_tick(tMBPulse* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBPulse.
      
      @fn void tMBPulse_setFreq(tMBPulse* const osc, float f)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBPulse.
      
      @fn void tMBPulse_setWidth(tMBPulse* const osc, float w)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBPulse.
      
      @fn void tMBPulse_syncIn(tMBPulse* const osc, float sync)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBPulse.
      
      @fn float tMBPulse_syncOut(tMBPulse* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBPulse.
      ￼￼￼
      @} */
     
@@ -789,36 +789,36 @@ extern "C" {
      @{
      
      @fn void tMBTriangle_init(tMBTriangle* const osc, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tMBTriangle to the default mempool of a LEAF instance.
+     @param osc A pointer to the tMBTriangle to initialize.
      
      @fn void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const mempool)
-     @brief
-     @param
+     @brief Initialize a tMBTriangle to a specified mempool.
+     @param osc A pointer to the tMBTriangle to initialize.
      
      @fn void tMBTriangle_free(tMBTriangle* const osc)
-     @brief
-     @param
+     @brief Free a tMBTriangle from its mempool.
+     @param osc A pointer to the tMBTriangle to free.
      
      @fn float tMBTriangle_tick(tMBTriangle* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBTriangle.
      
      @fn void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBTriangle.
      
      @fn void tMBTriangle_setWidth(tMBTriangle* const osc, float w)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBTriangle.
      
      @fn void tMBTriangle_syncIn(tMBTriangle* const osc, float sync)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBTriangle.
      
      @fn float tMBTriangle_syncOut(tMBTriangle* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBTriangle.
      ￼￼￼
      @} */
     
@@ -859,32 +859,32 @@ extern "C" {
      @{
      
      @fn void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tMBSaw to the default mempool of a LEAF instance.
+     @param osc A pointer to the tMBSaw to initialize.
      
      @fn void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const mempool)
-     @brief
-     @param
+     @brief Initialize a tMBSaw to a specified mempool.
+     @param osc A pointer to the tMBSaw to initialize.
      
      @fn void tMBSaw_free(tMBSaw* const osc)
-     @brief
-     @param
+     @brief Free a tMBSaw from its mempool.
+     @param osc A pointer to the tMBSaw to free.
      
      @fn float tMBSaw_tick(tMBSaw* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBSaw.
      
      @fn void tMBSaw_setFreq(tMBSaw* const osc, float f)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBSaw.
      
      @fn void tMBSaw_syncIn(tMBSaw* const osc, float sync)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBSaw.
      
      @fn float tMBSaw_syncOut(tMBSaw* const osc)
      @brief
-     @param
+     @param osc A pointer to the relevant tMBSaw.
      ￼￼￼
      @} */
     

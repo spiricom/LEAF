@@ -40,70 +40,70 @@ extern "C" {
      @{
      
      @fn void  tBuffer_init                  (tBuffer* const, uint32_t length, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tBuffer to the default mempool of a LEAF instance.
+     @param sampler A pointer to the tBuffer to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void  tBuffer_initToPool            (tBuffer* const, uint32_t length, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tBuffer to a specified mempool.
+     @param sampler A pointer to the tBuffer to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void  tBuffer_free                  (tBuffer* const)
      @brief Free a tBuffer from its mempool.
-     @param
+     @param sampler A pointer to the tBuffer to free.
      
      @fn void  tBuffer_tick                  (tBuffer* const, float sample)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn void  tBuffer_read                  (tBuffer* const, float* buff, uint32_t len)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn float tBuffer_get                   (tBuffer* const, int idx)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn void  tBuffer_record                (tBuffer* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn void  tBuffer_stop                  (tBuffer* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn int   tBuffer_getRecordPosition     (tBuffer* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn void   tBuffer_setRecordPosition    (tBuffer* const, int pos)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn void  tBuffer_setRecordMode         (tBuffer* const, RecordMode mode)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn void  tBuffer_clear                 (tBuffer* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn uint32_t tBuffer_getBufferLength    (tBuffer* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn uint32_t tBuffer_getRecordedLength  (tBuffer* const sb)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn void     tBuffer_setRecordedLength    (tBuffer* const sb, int length)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @fn int     tBuffer_isActive            (tBuffer* const sb)
      @brief
-     @param
+     @param sampler A pointer to the relevant tBuffer.
      
      @} */
     
@@ -161,58 +161,58 @@ extern "C" {
      @{
      
      @fn void    tSampler_init               (tSampler* const, tBuffer* const, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tSampler to the default mempool of a LEAF instance.
+     @param sampler A pointer to the tSampler to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tSampler_initToPool         (tSampler* const, tBuffer* const, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tSampler to a specified mempool.
+     @param sampler A pointer to the tSampler to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tSampler_free               (tSampler* const)
      @brief Free a tSampler from its mempool.
-     @param
+     @param sampler A pointer to the tSampler to free.
      
      @fn float   tSampler_tick               (tSampler* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @fn void    tSampler_setSample          (tSampler* const, tBuffer* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @fn void    tSampler_setMode            (tSampler* const, PlayMode mode)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @fn void    tSampler_play               (tSampler* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @fn void    tSampler_stop               (tSampler* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @fn void    tSampler_setStart           (tSampler* const, int32_t start)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @fn void    tSampler_setEnd             (tSampler* const, int32_t end)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @fn void    tSampler_setLength             (tSampler* const, int32_t length)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @fn void    tSampler_setCrossfadeLength (tSampler* const sp, uint32_t length)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @fn void    tSampler_setRate            (tSampler* const, float rate)
      @brief
-     @param
+     @param sampler A pointer to the relevant tSampler.
      
      @} */
     
@@ -291,54 +291,54 @@ extern "C" {
      @{
      
      @fn void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tAutoSampler to the default mempool of a LEAF instance.
+     @param sampler A pointer to the tAutoSampler to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tAutoSampler_initToPool         (tAutoSampler* const, tBuffer* const, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tAutoSampler to a specified mempool.
+     @param sampler A pointer to the tAutoSampler to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tAutoSampler_free               (tAutoSampler* const)
      @brief Free a tAutoSampler from its mempool.
-     @param
+     @param sampler A pointer to the tAutoSampler to free.
      
      @fn float   tAutoSampler_tick               (tAutoSampler* const, float input)
      @brief
-     @param
+     @param sampler A pointer to the relevant tAutoSampler.
      
      @fn void    tAutoSampler_setBuffer          (tAutoSampler* const, tBuffer* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tAutoSampler.
      
      @fn void    tAutoSampler_setMode            (tAutoSampler* const, PlayMode mode)
      @brief
-     @param
+     @param sampler A pointer to the relevant tAutoSampler.
      
      @fn void    tAutoSampler_play               (tAutoSampler* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tAutoSampler.
      
      @fn void    tAutoSampler_stop               (tAutoSampler* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tAutoSampler.
      
      @fn void    tAutoSampler_setThreshold       (tAutoSampler* const, float thresh)
      @brief
-     @param
+     @param sampler A pointer to the relevant tAutoSampler.
      
      @fn void    tAutoSampler_setWindowSize      (tAutoSampler* const, uint32_t size)
      @brief
-     @param
+     @param sampler A pointer to the relevant tAutoSampler.
      
      @fn void    tAutoSampler_setCrossfadeLength (tAutoSampler* const, uint32_t length)
      @brief
-     @param
+     @param sampler A pointer to the relevant tAutoSampler.
      
      @fn void    tAutoSampler_setRate            (tAutoSampler* const, float rate)
      @brief
-     @param
+     @param sampler A pointer to the relevant tAutoSampler.
      
      @} */
     
@@ -380,58 +380,58 @@ extern "C" {
      @{
      
      @fn void    tMBSampler_init               (tMBSampler* const, tBuffer* const, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tMBSampler to the default mempool of a LEAF instance.
+     @param sampler A pointer to the tMBSampler to initialize.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tMBSampler_initToPool         (tMBSampler* const, tBuffer* const, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tMBSampler to a specified mempool.
+     @param sampler A pointer to the tMBSampler to initialize.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tMBSampler_free               (tMBSampler* const)
      @brief Free a tMBSampler from its mempool.
-     @param
+     @param sampler A pointer to the tMBSampler to free.
      
      @fn float   tMBSampler_tick               (tMBSampler* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @fn void    tMBSampler_setSample          (tMBSampler* const, tBuffer* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @fn void    tMBSampler_setMode            (tMBSampler* const, PlayMode mode)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @fn void    tMBSampler_play               (tMBSampler* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @fn void    tMBSampler_stop               (tMBSampler* const)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @fn void    tMBSampler_setStart           (tMBSampler* const, int32_t start)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @fn void    tMBSampler_setEnd             (tMBSampler* const, int32_t end)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @fn void    tMBSampler_setLength             (tMBSampler* const, int32_t length)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @fn void    tMBSampler_setCrossfadeLength (tMBSampler* const sp, uint32_t length)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @fn void    tMBSampler_setRate            (tMBSampler* const, float rate)
      @brief
-     @param
+     @param sampler A pointer to the relevant tMBSampler.
      
      @} */
     

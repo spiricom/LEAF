@@ -76,7 +76,6 @@ float   tTable_tick(tTable* const cy)
     samp1 = c->waveTable[intPart];
     
     return (samp0 + (samp1 - samp0) * fracPart);
-    
 }
 
 void     tTableSampleRateChanged(tTable* const cy)
