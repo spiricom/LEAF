@@ -86,6 +86,7 @@ void     tTableSampleRateChanged(tTable* const cy)
     c->inc = c->freq * leaf->invSampleRate;
 }
 
+#if LEAF_INCLUDE_TABLES
 // Cycle
 void    tCycle_init(tCycle* const cy, LEAF* const leaf)
 {
@@ -155,7 +156,9 @@ void     tCycleSampleRateChanged (tCycle* const cy)
     
     c->inc = c->freq * leaf->invSampleRate;
 }
+#endif
 
+#if LEAF_INCLUDE_TABLES
 //========================================================================
 /* Triangle */
 void   tTriangle_init(tTriangle* const cy, LEAF* const leaf)
@@ -226,7 +229,9 @@ void     tTriangleSampleRateChanged (tTriangle* const cy)
     
     c->inc = c->freq * leaf->invSampleRate;
 }
+#endif
 
+#if LEAF_INCLUDE_TABLES
 //========================================================================
 /* Square */
 void   tSquare_init(tSquare* const cy, LEAF* const leaf)
@@ -296,7 +301,9 @@ void     tSquareSampleRateChanged (tSquare* const cy)
     
     c->inc = c->freq * leaf->invSampleRate;
 }
+#endif
 
+#if LEAF_INCLUDE_TABLES
 //=====================================================================
 // Sawtooth
 void    tSawtooth_init(tSawtooth* const cy, LEAF* const leaf)
@@ -366,6 +373,7 @@ void     tSawtoothSampleRateChanged (tSawtooth* const cy)
     
     c->inc = c->freq * leaf->invSampleRate;
 }
+#endif
 
 //==============================================================================
 

@@ -196,7 +196,7 @@ void    tPowerFollower_free (tPowerFollower* const pf)
     mpool_free((char*)p, p->mempool);
 }
 
-int     tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
+void tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
 {
     _tPowerFollower* p = *pf;
     
@@ -207,14 +207,14 @@ int     tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
     return 0;
 }
 
-float   tPowerFollower_tick(tPowerFollower* const pf, float input)
+float tPowerFollower_tick(tPowerFollower* const pf, float input)
 {
     _tPowerFollower* p = *pf;
     p->curr = p->factor*input*input+p->oneminusfactor*p->curr;
     return p->curr;
 }
 
-float   tPowerFollower_sample(tPowerFollower* const pf)
+float tPowerFollower_getPower(tPowerFollower* const pf)
 {
     _tPowerFollower* p = *pf;
     return p->curr;

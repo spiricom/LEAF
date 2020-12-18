@@ -900,6 +900,7 @@ void    tSVF_setFreqAndQ(tSVF* const svff, float freq, float Q)
     svf->a3 = svf->g * svf->a2;
 }
 
+#if LEAF_INCLUDE_TABLES
 // Efficient version of tSVF where frequency is set based on 12-bit integer input for lookup in tanh wavetable.
 void   tEfficientSVF_init(tEfficientSVF* const svff, SVFType type, uint16_t input, float Q, LEAF* const leaf)
 {
@@ -970,6 +971,7 @@ void     tEfficientSVF_setQ(tEfficientSVF* const svff, float Q)
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;
 }
+#endif
 
 /* Highpass */
 void    tHighpass_init(tHighpass* const ft, float freq, LEAF* const leaf)

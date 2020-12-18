@@ -827,11 +827,9 @@ float median3f(float a, float b, float c)
     return fmax(fmin(a, b), fmin(fmax(a, b), c));
 }
 
+#if LEAF_INCLUDE_MINBLEP
 /// MINBLEPS
-
 // https://github.com/MrBlueXav/Dekrispator_v2 blepvco.c
-
-
 void place_step_dd(float *buffer, int index, float phase, float w, float scale)
 {
     float r;
@@ -874,3 +872,4 @@ void place_slope_dd(float *buffer, int index, float phase, float w, float slope_
         index++;
     }
 }
+#endif

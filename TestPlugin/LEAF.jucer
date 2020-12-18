@@ -76,6 +76,7 @@
         <FILE id="VTmuyj" name="leaf-tables.c" compile="1" resource="0" file="../leaf/Src/leaf-tables.c"/>
         <FILE id="HKEtqp" name="leaf.c" compile="1" resource="0" file="../leaf/Src/leaf.c"/>
       </GROUP>
+      <FILE id="a85MuA" name="leaf-config.h" compile="0" resource="0" file="../leaf/leaf-config.h"/>
       <FILE id="a1IWV9" name="leaf.cpp" compile="1" resource="0" file="../leaf/leaf.cpp"/>
       <FILE id="TzDyuj" name="leaf.h" compile="0" resource="0" file="../leaf/leaf.h"/>
     </GROUP>

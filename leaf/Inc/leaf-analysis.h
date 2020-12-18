@@ -159,19 +159,19 @@ extern "C" {
     /*!
      @defgroup tpowerfollower tPowerFollower
      @ingroup analysis
-     @brief Measure and output the power of an input signal.
+     @brief Measure and follow the power of an input signal using an exponential moving average of power.
      @{
      
      @fn void    tPowerFollower_init         (tPowerFollower* const, float factor, LEAF* const leaf)
      @brief Initialize a tPowerFollower to the default mempool of a LEAF instance.
      @param follower A pointer to the tPowerFollower to initialize.
-     @param factor
+     @param factor Smoothing factor of the moving average. 0.0-1.0, with a higher value discounting older inputs more quickly.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tPowerFollower_initToPool   (tPowerFollower* const, float factor, tMempool* const)
      @brief Initialize a tPowerFollower to a specified mempool.
      @param follower A pointer to the tPowerFollower to initialize.
-     @param factor
+     @param factor Smoothing factor of the moving average. 0.0-1.0, with a higher value discounting older inputs more quickly.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tPowerFollower_free         (tPowerFollower* const)
@@ -179,17 +179,20 @@ extern "C" {
      @param follower A pointer to the tPowerFollower to free.
      
      @fn float   tPowerFollower_tick         (tPowerFollower* const, float input)
-     @brief
+     @brief Pass a sample into the power follower and return the current power.
      @param follower A pointer to the relevant tPowerFollower.
      @param input The input sample
+     @return The current power.
      
-     @fn float   tPowerFollower_sample       (tPowerFollower* const)
-     @brief
+     @fn float   tPowerFollower_getPower       (tPowerFollower* const)
+     @brief Get the current power.
      @param follower A pointer to the relevant tPowerFollower.
+     @return The current power.
      
      @fn int     tPowerFollower_setFactor    (tPowerFollower* const, float factor)
-     @brief
+     @brief Set the smoothing factor for the moving average.
      @param follower A pointer to the relevant tPowerFollower.
+     @param factor Smoothing factor of the moving average. 0.0-1.0, with a higher value discounting older inputs more quickly.
      ￼￼￼
      @} */
     
@@ -210,8 +213,8 @@ extern "C" {
     void    tPowerFollower_free         (tPowerFollower* const);
     
     float   tPowerFollower_tick         (tPowerFollower* const, float input);
-    float   tPowerFollower_sample       (tPowerFollower* const);
-    int     tPowerFollower_setFactor    (tPowerFollower* const, float factor);
+    float   tPowerFollower_getPower     (tPowerFollower* const);
+    void    tPowerFollower_setFactor    (tPowerFollower* const, float factor);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -248,7 +251,7 @@ extern "C" {
      @fn void    tEnvPD_processBlock     (tEnvPD* const, float* in)
      @brief
      @param env
-     @param input
+     @param inputBlock
      ￼￼￼
      @} */
     
@@ -338,7 +341,8 @@ extern "C" {
      @fn int     tAttackDetection_detect         (tAttackDetection* const, float *in)
      @brief Find the largest transient in input block, return index of attack
      @param detection A pointer to the relevant tAttackDetection.
-     @param input
+     @param inputBlock
+     @return Index of the largest transient in the input.
      ￼￼￼
      @} */
     
@@ -508,7 +512,6 @@ extern "C" {
      @fn void    tPeriodDetection_free               (tPeriodDetection* const)
      @brief Free a tPeriodDetection from its mempool.
      @param detection A pointer to the tPeriodDetection to free.
-     @param
      
      @fn float   tPeriodDetection_tick               (tPeriodDetection* const, float sample)
      @brief
