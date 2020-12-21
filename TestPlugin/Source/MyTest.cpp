@@ -139,46 +139,46 @@ void leaf_pool_dump(void)
 static void run_pool_test(void)
 {
     leaf_pool_report();
-    
+
     DBG("ALLOC BUFFER 1");
     int size = 50;
     float* buffer;
     buffer = (float*) leaf_alloc(&leaf, sizeof(float) * size);
-    
+
     for (int i = 0; i < size; i++)
     {
         buffer[i] = (float)i;
-        
+
     }
-    
+
     leaf_pool_report();
-    
+
     DBG("ALLOC BUFFER 2");
     size = 25;
-    
+
     buffer = (float*) leaf_alloc(&leaf, sizeof(float) * size);
-    
+
     leaf_pool_report();
-    
+
     for (int i = 0; i < size; i++)
     {
         buffer[i] = (float)(i*2);
     }
     leaf_free(&leaf, (char*)buffer);
-    
+
     leaf_pool_report();
-    
+
     DBG("ALLOC BUFFER 3");
     size = 15;
-    
+
     buffer = (float*) leaf_alloc(&leaf, sizeof(float) * size);
-    
+
     for (int i = 0; i < size; i++)
     {
         buffer[i] = (float)(i*3);
     }
-    
+
     leaf_pool_report();
-    
+
     leaf_pool_dump();
 }

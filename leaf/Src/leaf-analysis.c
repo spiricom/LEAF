@@ -204,7 +204,6 @@ void tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
     if (factor>1) factor=1;
     p->factor=factor;
     p->oneminusfactor=1.0f-factor;
-    return 0;
 }
 
 float tPowerFollower_tick(tPowerFollower* const pf, float input)
@@ -527,9 +526,9 @@ void tSNAC_ioSamples(tSNAC* const snac, float *in, int size)
     
     int timeindex = s->timeindex;
     int mask = s->framesize - 1;
-    int outindex = 0;
+//    int outindex = 0;
     float *inputbuf = s->inputbuf;
-    float *processbuf = s->processbuf;
+//    float *processbuf = s->processbuf;
     
     // call analysis function when it is time
     if(!(timeindex & (s->framesize / s->overlap - 1))) snac_analyzeframe(snac);

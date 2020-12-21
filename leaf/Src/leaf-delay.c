@@ -89,8 +89,6 @@ void     tDelay_setDelay (tDelay* const dl, uint32_t delay)
     // read chases write
     if ( d->inPoint >= delay )  d->outPoint = d->inPoint - d->delay;
     else                        d->outPoint = d->maxDelay + d->inPoint - d->delay;
-
-    return 0;
 }
 
 float tDelay_tapOut (tDelay* const dl, uint32_t tapDelay)
@@ -648,8 +646,6 @@ void     tAllpassDelay_setDelay (tAllpassDelay* const dl, float delay)
     }
 
     d->coeff = (1.0f - d->alpha) / (1.0f + d->alpha);  // coefficient for allpass
-
-    return 0;
 }
 
 float tAllpassDelay_tapOut (tAllpassDelay* const dl, uint32_t tapDelay)

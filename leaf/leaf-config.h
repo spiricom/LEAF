@@ -8,7 +8,52 @@
   ==============================================================================
 */
 
-#pragma once
+#ifndef LEAF_CONFIG_H_INCLUDED
+#define LEAF_CONFIG_H_INCLUDED
 
-#define LEAF_INCLUDE_TABLES 0
-#define LEAF_INCLUDE_MINBLEP 0
+/*!
+ @file leaf-config.h
+ @brief LEAF configuration file. Contains defines for controlling inclusion of various tables.
+ */
+
+//==============================================================================
+
+//! Include FIR tables required to use tOversampler.
+#define LEAF_INCLUDE_OVERSAMPLER_TABLES 1
+
+// Unused
+#define LEAF_INCLUDE_SHAPER_TABLE 0
+
+// Unused
+#define LEAF_INCLUDE_MTOF_TABLE 0
+
+//! Include table required to use tEfficientSVF.
+#define LEAF_INCLUDE_FILTERTAN_TABLE 1
+
+// Unused
+#define LEAF_INCLUDE_TANH_TABLE 0
+
+// Unused
+#define LEAF_INCLUDE_ADC_TABLE 0
+
+//! Include tables required to use tEnvelope and tADSR (but not tADSR2, tADSR3, and tADSR4).
+#define LEAF_INCLUDE_ADSR_TABLES 1
+
+//! Include wave table required to use tCycle.
+#define LEAF_INCLUDE_SINE_TABLE 1
+
+//! Include wave table required to use tTriangle.
+#define LEAF_INCLUDE_TRIANGLE_TABLE 1
+
+//! Include wave table required to use tSquare.
+#define LEAF_INCLUDE_SQUARE_TABLE 1
+
+//! Include wave table required to use tSawtooth.
+#define LEAF_INCLUDE_SAWTOOTH_TABLE 1
+
+//! Include tables for minblep insertion, required for all tMB objects.
+#define LEAF_INCLUDE_MINBLEP_TABLES 1
+
+//==============================================================================
+
+#endif // LEAF_CONFIG_H_INCLUDED

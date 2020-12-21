@@ -159,7 +159,7 @@ extern "C" {
     /*!
      @defgroup tpowerfollower tPowerFollower
      @ingroup analysis
-     @brief Measure and follow the power of an input signal using an exponential moving average of power.
+     @brief Measure and follow the power of an input signal using an exponential moving average for smoothing.
      @{
      
      @fn void    tPowerFollower_init         (tPowerFollower* const, float factor, LEAF* const leaf)
@@ -391,7 +391,7 @@ extern "C" {
     /*!
      @defgroup tsnac tSNAC
      @ingroup analysis
-     @brief Period detection algorithm from Katja Vetters http://www.katjaas.nl/helmholtz/helmholtz.html
+     @brief Component of period detection algorithm from Katja Vetters http://www.katjaas.nl/helmholtz/helmholtz.html
      @{
      
      @fn void    tSNAC_init          (tSNAC* const, int overlaparg, LEAF* const leaf)
@@ -488,7 +488,7 @@ extern "C" {
     /*!
      @defgroup tperioddetection tPeriodDetection
      @ingroup analysis
-     @brief
+     @brief Period detection algorithm from Katja Vetters http://www.katjaas.nl/helmholtz/helmholtz.html
      @{
 
      @fn void    tPeriodDetection_init               (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, LEAF* const leaf)
@@ -612,8 +612,7 @@ extern "C" {
     
     //==============================================================================
     
-    // Maybe keep these up to PeriodDetector internal?
-    
+    // Maybe keep from here to tPeriodDetector internal?
     typedef struct _tZeroCrossingInfo
     {
         

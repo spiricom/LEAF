@@ -19,30 +19,10 @@ extern "C" {
     
     //==============================================================================
     
-#define USE_SAWTOOTH_TABLE 1
-#define USE_SQUARE_TABLE 1
-#define USE_TRIANGLE_TABLE 1
-#define USE_SHAPER_TABLE 1
-#define DECAY_TABLES_USED 1
-    
     /*!
      @ingroup tables
      @{
      */
-    
-#define SINE_TABLE_SIZE 2048
-#define SAW_TABLE_SIZE 2048
-#define SQR_TABLE_SIZE 2048
-#define TRI_TABLE_SIZE 2048
-#define EXP_DECAY_TABLE_SIZE 65536
-#define ATTACK_DECAY_INC_TABLE_SIZE 65536
-#define TANH1_TABLE_SIZE 65536
-#define DECAY_COEFF_TABLE_SIZE 4096
-#define MTOF1_TABLE_SIZE 4096
-#define FILTERTAN_TABLE_SIZE 4096
-    
-#define SHAPER1_TABLE_SIZE 65536
-    extern const float __leaf_table_shaper1[SHAPER1_TABLE_SIZE];
     
 #define COEFFS_SIZE 32
     extern const float* __leaf_tableref_firCoeffs[COEFFS_SIZE];
@@ -60,44 +40,56 @@ extern "C" {
     extern const float __leaf_table_fir32XHigh[512];
     extern const float __leaf_table_fir64XHigh[1024];
     
-    typedef enum TableName
-    {
-        T20 = 0,
-        T40,
-        T80,
-        T160,
-        T320,
-        T640,
-        T1280,
-        T2560,
-        T5120,
-        T10240,
-        T20480,
-        TableNameNil
-    } TableName;
+//    typedef enum TableName
+//    {
+//        T20 = 0,
+//        T40,
+//        T80,
+//        T160,
+//        T320,
+//        T640,
+//        T1280,
+//        T2560,
+//        T5120,
+//        T10240,
+//        T20480,
+//        TableNameNil
+//    } TableName;
     
+    
+#define SHAPER1_TABLE_SIZE 65536
+    extern const float __leaf_table_shaper1[SHAPER1_TABLE_SIZE];
+   
     // mtof lookup table based on input range [0.0,1.0) in 4096 increments - midi frequency values scaled between m25 and m134 (from the Snyderphonics DrumBox code)
-    
+#define MTOF1_TABLE_SIZE 4096
+    extern const float __leaf_table_mtof1[MTOF1_TABLE_SIZE];
+
+#define EXP_DECAY_TABLE_SIZE 65536
     extern const float __leaf_table_exp_decay[EXP_DECAY_TABLE_SIZE];
+    
+#define ATTACK_DECAY_INC_TABLE_SIZE 65536
     extern const float __leaf_table_attack_decay_inc[ATTACK_DECAY_INC_TABLE_SIZE];
     
+#define FILTERTAN_TABLE_SIZE 4096
     extern const float __leaf_table_filtertan[FILTERTAN_TABLE_SIZE];
     
-    extern const float __leaf_table_mtof1[MTOF1_TABLE_SIZE];
-    extern const float __leaf_table_decayCoeffTable[DECAY_COEFF_TABLE_SIZE];
-    
+#define TANH1_TABLE_SIZE 65536
     extern const float __leaf_table_tanh1[TANH1_TABLE_SIZE];
     
     //==============================================================================
     
     /* Sine wave table ripped from http://aquaticus.info/pwm-sine-wave. */
+#define SINE_TABLE_SIZE 2048
     extern const float __leaf_table_sinewave[SINE_TABLE_SIZE];
     
-    extern const float __leaf_table_sawtooth[11][SAW_TABLE_SIZE];
-    
+#define TRI_TABLE_SIZE 2048
     extern const float __leaf_table_triangle[11][TRI_TABLE_SIZE];
     
+#define SQR_TABLE_SIZE 2048
     extern const float __leaf_table_squarewave[11][SQR_TABLE_SIZE];
+    
+#define SAW_TABLE_SIZE 2048
+    extern const float __leaf_table_sawtooth[11][SAW_TABLE_SIZE];
     
     //==============================================================================
     

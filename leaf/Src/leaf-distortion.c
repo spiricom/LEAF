@@ -67,7 +67,7 @@ void tSampleReducer_setRatio(tSampleReducer* const sr, float ratio)
     
 }
 
-#if LEAF_INCLUDE_TABLES
+#if LEAF_INCLUDE_OVERSAMPLER_TABLES
 //============================================================================================================
 // Oversampler
 //============================================================================================================
@@ -303,7 +303,7 @@ int tOversampler_getLatency(tOversampler* const osr)
     _tOversampler* os = *osr;
     return os->phaseLength;
 }
-#endif
+#endif // LEAF_INCLUDE_OVERSAMPLER_TABLES
 
 //============================================================================================================
 // WAVEFOLDER
