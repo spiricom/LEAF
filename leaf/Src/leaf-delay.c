@@ -80,7 +80,7 @@ float   tDelay_tick (tDelay* const dl, float input)
     return d->lastOut;
 }
 
-int     tDelay_setDelay (tDelay* const dl, uint32_t delay)
+void     tDelay_setDelay (tDelay* const dl, uint32_t delay)
 {
     _tDelay* d = *dl;
 
@@ -89,8 +89,6 @@ int     tDelay_setDelay (tDelay* const dl, uint32_t delay)
     // read chases write
     if ( d->inPoint >= delay )  d->outPoint = d->inPoint - d->delay;
     else                        d->outPoint = d->maxDelay + d->inPoint - d->delay;
-
-    return 0;
 }
 
 float tDelay_tapOut (tDelay* const dl, uint32_t tapDelay)
@@ -262,7 +260,7 @@ float   tLinearDelay_tickOut (tLinearDelay* const dl)
     return d->lastOut;
 }
 
-int     tLinearDelay_setDelay (tLinearDelay* const dl, float delay)
+void     tLinearDelay_setDelay (tLinearDelay* const dl, float delay)
 {
     _tLinearDelay* d = *dl;
 
@@ -279,8 +277,6 @@ int     tLinearDelay_setDelay (tLinearDelay* const dl, float delay)
     d->omAlpha = 1.0f - d->alpha;
 
     if ( d->outPoint == d->maxDelay ) d->outPoint = 0;
-
-    return 0;
 }
 
 float tLinearDelay_tapOut (tLinearDelay* const dl, uint32_t tapDelay)
@@ -456,7 +452,7 @@ float   tHermiteDelay_tickOut (tHermiteDelay* const dl)
     return d->lastOut;
 }
 
-int     tHermiteDelay_setDelay (tHermiteDelay* const dl, float delay)
+void tHermiteDelay_setDelay (tHermiteDelay* const dl, float delay)
 {
     _tHermiteDelay* d = *dl;
 
@@ -473,8 +469,6 @@ int     tHermiteDelay_setDelay (tHermiteDelay* const dl, float delay)
     d->omAlpha = 1.0f - d->alpha;
 
     if ( d->outPoint == d->maxDelay ) d->outPoint = 0;
-
-    return 0;
 }
 
 float tHermiteDelay_tapOut (tHermiteDelay* const dl, uint32_t tapDelay)
@@ -622,7 +616,7 @@ float tAllpassDelay_tick (tAllpassDelay* const dl, float input)
     return d->lastOut;
 }
 
-int     tAllpassDelay_setDelay (tAllpassDelay* const dl, float delay)
+void     tAllpassDelay_setDelay (tAllpassDelay* const dl, float delay)
 {
     _tAllpassDelay* d = *dl;
 
@@ -652,8 +646,6 @@ int     tAllpassDelay_setDelay (tAllpassDelay* const dl, float delay)
     }
 
     d->coeff = (1.0f - d->alpha) / (1.0f + d->alpha);  // coefficient for allpass
-
-    return 0;
 }
 
 float tAllpassDelay_tapOut (tAllpassDelay* const dl, uint32_t tapDelay)

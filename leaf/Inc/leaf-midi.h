@@ -39,17 +39,18 @@ extern "C" {
      @{
      
      @fn void    tStack_init                 (tStack* const stack, LEAF* const leaf)
-     @brief Initialize a tStack to the default LEAF mempool.
-     @param stack A pointer to the tStack to be initialized.
+     @brief Initialize a tStack to the default mempool of a LEAF instance.
+     @param stack A pointer to the tStack to initialize.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tStack_initToPool           (tStack* const stack, tMempool* const mempool)
      @brief Initialize a tStack to a specified mempool.
-     @param stack A pointer to the tStack to be initialized.
-     @param mempool A pointer to the tMempool to which the tStack should be initialized.
+     @param stack A pointer to the tStack to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tStack_free                 (tStack* const stack)
      @brief Free a tStack from its mempool.
-     @param stack A pointer to the tStack to be freed.
+     @param stack A pointer to the tStack to free.
      
      @fn void    tStack_setCapacity          (tStack* const stack, uint16_t cap)
      @brief Set the capacity of the stack.
@@ -140,18 +141,19 @@ extern "C" {
      @{
      
      @fn void    tPoly_init                  (tPoly* const poly, int maxNumVoices, LEAF* const leaf)
-     @brief Initialize a tPoly to the default LEAF mempool.
-     @param poly A pointer to the tPoly to be initialized.
+     @brief Initialize a tPoly to the default mempool of a LEAF instance.
+     @param poly A pointer to the tPoly to initialize.
      @param maxNumVoices The maximum number of voices this tPoly can handle at once.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tPoly_initToPool            (tPoly* const poly, int maxNumVoices, tMempool* const pool)
      @brief Initialize a tPoly to a specified mempool.
-     @param poly A pointer to the tPoly to be initialized.
-     @param pool A pointer to the tMempool to which the tPoly should be initialized.
+     @param poly A pointer to the tPoly to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tPoly_free                  (tPoly* const poly)
      @brief Free a tPoly from its mempool.
-     @param poly A pointer to the tPoly to be freed.
+     @param poly A pointer to the tPoly to free.
      
      @fn int     tPoly_noteOn                (tPoly* const poly, int note, uint8_t vel)
      @brief Add a note with a given velocity to the poly handler.
@@ -317,18 +319,19 @@ extern "C" {
      @{
      
      @fn void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices, LEAF* const leaf)
-     @brief Initialize a tSimplePoly to the default LEAF mempool.
-     @param poly A pointer to the tSimplePoly to be initialized.
+     @brief Initialize a tSimplePoly to the default mempool of a LEAF instance.
+     @param poly A pointer to the tSimplePoly to initialize.
      @param maxNumVoices The maximum number of voices this tSimplePoly can handle at once.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tSimplePoly_initToPool            (tSimplePoly* const poly, int maxNumVoices, tMempool* const pool)
      @brief Initialize a tSimplePoly to a specified mempool.
-     @param poly A pointer to the tSimplePoly to be initialized.
-     @param pool A pointer to the tMempool to which the tSimplePoly should be initialized.
+     @param poly A pointer to the tSimplePoly to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tSimplePoly_free                  (tSimplePoly* const poly)
      @brief Free a tSimplePoly from its mempool.
-     @param poly A pointer to the tSimplePoly to be freed.
+     @param poly A pointer to the tSimplePoly to free.
      
      @fn int     tSimplePoly_noteOn                (tSimplePoly* const poly, int note, uint8_t vel)
      @brief Add a note with a given velocity to the poly handler.

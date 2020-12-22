@@ -22,7 +22,6 @@
 // Sample-Rate reducer
 //============================================================================================================
 
-
 void tSampleReducer_init (tSampleReducer* const sr, LEAF* const leaf)
 {
     tSampleReducer_initToPool(sr, &leaf->mempool);
@@ -68,6 +67,7 @@ void tSampleReducer_setRatio(tSampleReducer* const sr, float ratio)
     
 }
 
+#if LEAF_INCLUDE_OVERSAMPLER_TABLES
 //============================================================================================================
 // Oversampler
 //============================================================================================================
@@ -303,6 +303,7 @@ int tOversampler_getLatency(tOversampler* const osr)
     _tOversampler* os = *osr;
     return os->phaseLength;
 }
+#endif // LEAF_INCLUDE_OVERSAMPLER_TABLES
 
 //============================================================================================================
 // WAVEFOLDER

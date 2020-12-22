@@ -31,60 +31,62 @@ extern "C" {
      @{
      
      @fn void    tTalkbox_init           (tTalkbox* const, int bufsize, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tTalkbox to the default mempool of a LEAF instance.
+     @param talkbox A pointer to the tTalkbox to initialize.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tTalkbox_initToPool     (tTalkbox* const, int bufsize, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tTalkbox to a specified mempool.
+     @param talkbox A pointer to the tTalkbox to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tTalkbox_free           (tTalkbox* const)
-     @brief
-     @param
+     @brief Free a tTalkbox from its mempool.
+     @param talkbox A pointer to the tTalkbox to free.
      
      @fn float   tTalkbox_tick           (tTalkbox* const, float synth, float voice)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn float     tTalkbox_tickFrozen        (tTalkbox* const voc, float synth, float voice)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn void    tTalkbox_update         (tTalkbox* const)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn void    tTalkbox_suspend        (tTalkbox* const)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn void    tTalkbox_lpcDurbin      (float *r, int p, float *k, float *g)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn void     tTalkbox_lpc            (float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn void    tTalkbox_setQuality     (tTalkbox* const, float quality)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn void     tTalkbox_setWarpFactor    (tTalkbox* const voc, float warp)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn void     tTalkbox_setWarpOn        (tTalkbox* const voc, float warpOn)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn void     tTalkbox_setFreeze        (tTalkbox* const voc, float freeze)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @fn void     tTalkbox_warpedAutocorrelate    (float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkbox.
      
      @} */
      
@@ -148,60 +150,62 @@ extern "C" {
      @{
      
      @fn void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tTalkboxFloat to the default mempool of a LEAF instance.
+     @param talkbox A pointer to the tTalkboxFloat to initialize.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tTalkboxFloat_initToPool     (tTalkboxFloat* const, int bufsize, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tTalkboxFloat to a specified mempool.
+     @param talkbox A pointer to the tTalkboxFloat to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tTalkboxFloat_free           (tTalkboxFloat* const)
-     @brief
-     @param
+     @brief Free a tTalkboxFloat from its mempool.
+     @param talkbox A pointer to the tTalkboxFloat to free.
      
      @fn float   tTalkboxFloat_tick           (tTalkboxFloat* const, float synth, float voice)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn float     tTalkboxFloat_tickFrozen        (tTalkboxFloat* const voc, float synth, float voice)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn void    tTalkboxFloat_update         (tTalkboxFloat* const)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn void    tTalkboxFloat_suspend        (tTalkboxFloat* const)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn void    tTalkboxFloat_lpcDurbin      (float *r, int p, float *k, float *g)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn void     tTalkboxFloat_lpc            (float *buf, float *car, float* dl, float* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn void    tTalkboxFloat_setQuality     (tTalkboxFloat* const, float quality)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn void     tTalkboxFloat_setWarpFactor    (tTalkboxFloat* const voc, float warp)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn void     tTalkboxFloat_setWarpOn        (tTalkboxFloat* const voc, float warpOn)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn void     tTalkboxFloat_setFreeze        (tTalkboxFloat* const voc, float freeze)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @fn void     tTalkboxFloat_warpedAutocorrelate    (float * x, float* dl, float* Rt, unsigned int L, float * R, unsigned int P, float lambda)
      @brief
-     @param
+     @param talkbox A pointer to the relevant tTalkboxFloat.
      
      @} */
 
@@ -260,28 +264,30 @@ extern "C" {
      @{
      
      @fn void    tVocoder_init           (tVocoder* const, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tVocoder to the default mempool of a LEAF instance.
+     @param vocoder A pointer to the tVocoder to initialize.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tVocoder_initToPool     (tVocoder* const, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tVocoder to a specified mempool.
+     @param vocoder A pointer to the tVocoder to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tVocoder_free           (tVocoder* const)
-     @brief
-     @param
+     @brief Free a tVocoder from its mempool.
+     @param vocoder A pointer to the tVocoder to free.
      
      @fn float   tVocoder_tick           (tVocoder* const, float synth, float voice)
      @brief
-     @param
+     @param vocoder A pointer to the relevant tVocoder.
      
      @fn void    tVocoder_update         (tVocoder* const)
      @brief
-     @param
+     @param vocoder A pointer to the relevant tVocoder.
      
      @fn void    tVocoder_suspend        (tVocoder* const)
      @brief
-     @param
+     @param vocoder A pointer to the relevant tVocoder.
      
      @} */
     
@@ -325,40 +331,42 @@ extern "C" {
      @{
      
      @fn void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tRosenbergGlottalPulse to the default mempool of a LEAF instance.
+     @param pulse A pointer to the tRosenbergGlottalPulse to initialize.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tRosenbergGlottalPulse to a specified mempool.
+     @param pulse A pointer to the tRosenbergGlottalPulse to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const)
-     @brief
-     @param
+     @brief Free a tRosenbergGlottalPulse from its mempool.
+     @param pulse A pointer to the tRosenbergGlottalPulse to free.
      
      @fn float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const)
      @brief
-     @param
+     @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
      @fn float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp)
      @brief
-     @param
+     @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
      @fn void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq)
      @brief
-     @param
+     @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
      @fn void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, float openLength)
      @brief
-     @param
+     @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
      @fn void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const, float pulseLength)
      @brief
-     @param
+     @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
      @fn void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergGlottalPulse* const gp, float openLength, float pulseLength)
      @brief
-     @param
+     @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
      @} */
 
@@ -397,51 +405,56 @@ extern "C" {
      @{
      
      @fn void    tSOLAD_init             (tSOLAD* const, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tSOLAD to the default mempool of a LEAF instance.
+     @param solad A pointer to the tSOLAD to initialize.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tSOLAD_initToPool       (tSOLAD* const, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tSOLAD to a specified mempool.
+     @param solad A pointer to the tSOLAD to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tSOLAD_free             (tSOLAD* const)
-     @brief
-     @param
+     @brief Free a tSOLAD from its mempool.
+     @param solad A pointer to the tSOLAD to free.
      
      @fn void    tSOLAD_ioSamples        (tSOLAD *w, float* in, float* out, int blocksize)
-     @brief send one block of input samples, receive one block of output samples
-     @param
+     @brief Send one block of input samples, receive one block of output samples
+     @param solad A pointer to the relevant tSOLAD.
 
      @fn void    tSOLAD_setPeriod        (tSOLAD *w, float period)
-     @brief set periodicity analysis data
-     @param
+     @brief Set periodicity analysis data
+     @param solad A pointer to the relevant tSOLAD.
      
      @fn void    tSOLAD_setPitchFactor   (tSOLAD *w, float pitchfactor)
-     @brief set pitch factor between 0.25 and 4
-     @param
+     @brief Set pitch factor between 0.25 and 4
+     @param solad A pointer to the relevant tSOLAD.
      
      @fn void    tSOLAD_setReadLag       (tSOLAD *w, float readlag)
-     @brief force readpointer lag
-     @param
+     @brief Force readpointer lag
+     @param solad A pointer to the relevant tSOLAD.
      
      @fn void    tSOLAD_resetState       (tSOLAD *w)
-     @brief reset state variables
-     @param
+     @brief Reset state variables
+     @param solad A pointer to the relevant tSOLAD.
      
      @} */
     
-#define LOOPSIZE (2048*2)      // (4096*2) // loop size must be power of two
-#define LOOPMASK (LOOPSIZE - 1)
+//#define LOOPSIZE (2048*2)      // (4096*2) // loop size must be power of two
+//#define LOOPMASK (LOOPSIZE - 1)
 #define PITCHFACTORDEFAULT 1.0f
 #define INITPERIOD 64.0f
-#define MAXPERIOD (float)((LOOPSIZE - w->blocksize) * 0.8f)
+//#define MAXPERIOD (float)((LOOPSIZE - w->blocksize) * 0.8f)
 #define MINPERIOD 8.0f
     
     typedef struct _tSOLAD
     {
-        
         tMempool mempool;
         
+        tAttackDetection ad;
+        tHighpass hp;
+        
+        int loopSize;
         uint16_t timeindex;              // current reference time, write index
         uint16_t blocksize;              // signal input / output block size
         float pitchfactor;        // pitch factor between 0.25 and 4
@@ -457,8 +470,8 @@ extern "C" {
     
     typedef _tSOLAD* tSOLAD;
     
-    void    tSOLAD_init             (tSOLAD* const, LEAF* const leaf);
-    void    tSOLAD_initToPool       (tSOLAD* const, tMempool* const);
+    void    tSOLAD_init             (tSOLAD* const, int loopSize, LEAF* const leaf);
+    void    tSOLAD_initToPool       (tSOLAD* const, int loopSize, tMempool* const);
     void    tSOLAD_free             (tSOLAD* const);
     
     // send one block of input samples, receive one block of output samples
@@ -479,68 +492,134 @@ extern "C" {
      @{
      
      @fn void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tPitchShift to the default mempool of a LEAF instance.
+     @param pitchshift A pointer to the tPitchShift to initialize.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tPitchShift to a specified mempool.
+     @param pitchshift A pointer to the tPitchShift to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tPitchShift_free            (tPitchShift* const)
-     @brief
-     @param
+     @brief Free a tPitchShift from its mempool.
+     @param pitchshift A pointer to the tPitchShift to free.
      
      @fn float   tPitchShift_shift           (tPitchShift* const)
      @brief
-     @param
+     @param pitchshift A pointer to the relevant tPitchShift.
      
      @fn float   tPitchShift_shiftToFunc     (tPitchShift* const, float (*fun)(float))
      @brief
-     @param
+     @param pitchshift A pointer to the relevant tPitchShift.
      
      @fn float   tPitchShift_shiftToFreq     (tPitchShift* const, float freq)
      @brief
-     @param
+     @param pitchshift A pointer to the relevant tPitchShift.
      
      @fn void    tPitchShift_setPitchFactor  (tPitchShift* const, float pf)
      @brief
-     @param
+     @param pitchshift A pointer to the relevant tPitchShift.
      
      @} */
     
     typedef struct _tPitchShift
     {
-        
         tMempool mempool;
         
+        _tDualPitchDetector* pd;
         tSOLAD sola;
-        tHighpass hp;
-        tPeriodDetection* p;
         
         float* outBuffer;
-        int frameSize;
+        float* inBuffer;
         int bufSize;
-        
-        int framesPerBuffer;
-        int curBlock;
-        int lastBlock;
         int index;
         
-        float pitchFactor;
-        float timeConstant;
-        float radius;
+        float pickiness;
     } _tPitchShift;
     
     typedef _tPitchShift* tPitchShift;
     
-    void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, LEAF* const leaf);
-    void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, tMempool* const);
-    void    tPitchShift_free            (tPitchShift* const);
+    void    tPitchShift_init (tPitchShift* const, tDualPitchDetector* const, int bufSize, LEAF* const leaf);
+    void    tPitchShift_initToPool (tPitchShift* const, tDualPitchDetector* const, int bufSize, tMempool* const);
+    void    tPitchShift_free (tPitchShift* const);
     
-    float   tPitchShift_shift           (tPitchShift* const);
-    float   tPitchShift_shiftToFunc     (tPitchShift* const, float (*fun)(float));
-    float   tPitchShift_shiftToFreq     (tPitchShift* const, float freq);
-    void    tPitchShift_setPitchFactor  (tPitchShift* const, float pf);
+    void    tPitchShift_shiftBy (tPitchShift* const, float factor, float* in, float* out);
+    void    tPitchShift_shiftTo (tPitchShift* const, float freq, float* in, float* out);
+    
+    void    tPitchShift_setPickiness (tPitchShift* const, float p);
+    
+    /*!
+     @defgroup tsimpleretune tSimpleRetune
+     @ingroup effects
+     @brief
+     @{
+     
+     @fn void    tSimpleRetune_init                  (tSimpleRetune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
+     @brief Initialize a tSimpleRetune to the default mempool of a LEAF instance.
+     @param retune A pointer to the tSimpleRetune to initialize.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void    tSimpleRetune_initToPool            (tSimpleRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const)
+     @brief Initialize a tSimpleRetune to a specified mempool.
+     @param retune A pointer to the tSimpleRetune to initialize.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tSimpleRetune_free                  (tSimpleRetune* const)
+     @brief Free a tSimpleRetune from its mempool.
+     @param retune A pointer to the tSimpleRetune to free.
+     
+     @fn float*  tSimpleRetune_tick                  (tSimpleRetune* const, float sample)
+     @brief
+     @param retune A pointer to the relevant tSimpleRetune.
+     
+     @fn void    tSimpleRetune_setNumVoices          (tSimpleRetune* const, int numVoices)
+     @brief
+     @param retune A pointer to the relevant tSimpleRetune.
+     
+     @fn void    tSimpleRetune_tuneVoices              (tSimpleRetune* const, float f)
+     @brief
+     @param retune A pointer to the relevant tSimpleRetune.
+     
+     @fn void    tSimpleRetune_tuneVoice              (tSimpleRetune* const, float f, int voice)
+     @brief
+     @param retune A pointer to the relevant tSimpleRetune.
+     
+     @} */
+    
+    typedef struct _tSimpleRetune
+    {
+        tMempool mempool;
+        
+        tDualPitchDetector dp;
+        float minInputFreq, maxInputFreq;
+        
+        tPitchShift* ps;
+        
+        float* inBuffer;
+        float* outBuffer;
+        int bufSize;
+        int index;
+        
+        void (*shiftFunction)(tPitchShift* const, float, float*, float*);
+        
+        float* shiftValues;
+        int numVoices;
+    } _tSimpleRetune;
+    
+    typedef _tSimpleRetune* tSimpleRetune;
+    
+    void    tSimpleRetune_init                  (tSimpleRetune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, LEAF* const leaf);
+    void    tSimpleRetune_initToPool            (tSimpleRetune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const);
+    void    tSimpleRetune_free                  (tSimpleRetune* const);
+    
+    float   tSimpleRetune_tick                  (tSimpleRetune* const, float sample);
+    void    tSimpleRetune_setMode               (tSimpleRetune* const, int mode);
+    void    tSimpleRetune_setNumVoices          (tSimpleRetune* const, int numVoices);
+    void    tSimpleRetune_setPickiness          (tSimpleRetune* const, float p);
+    void    tSimpleRetune_tuneVoices            (tSimpleRetune* const, float* t);
+    void    tSimpleRetune_tuneVoice             (tSimpleRetune* const, int voice, float t);
+    float   tSimpleRetune_getInputFrequency     (tSimpleRetune* const);
     
     /*!
      @defgroup tretune tRetune
@@ -549,216 +628,73 @@ extern "C" {
      @{
      
      @fn void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tRetune to the default mempool of a LEAF instance.
+     @param retune A pointer to the tRetune to initialize.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tRetune_initToPool          (tRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tRetune to a specified mempool.
+     @param retune A pointer to the tRetune to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tRetune_free                (tRetune* const)
-     @brief
-     @param
+     @brief Free a tRetune from its mempool.
+     @param retune A pointer to the tRetune to free.
      
      @fn float*  tRetune_tick                (tRetune* const, float sample)
      @brief
-     @param
+     @param retune A pointer to the relevant tRetune.
      
      @fn void    tRetune_setNumVoices        (tRetune* const, int numVoices)
      @brief
-     @param
+     @param retune A pointer to the relevant tRetune.
      
      @fn void    tRetune_setPitchFactors     (tRetune* const, float pf)
      @brief
-     @param
+     @param retune A pointer to the relevant tRetune.
      
      @fn void    tRetune_setPitchFactor      (tRetune* const, float pf, int voice)
      @brief
-     @param
-     
-     @fn void    tRetune_setTimeConstant     (tRetune* const, float tc)
-     @brief
-     @param
-     
-     @fn void    tRetune_setHopSize          (tRetune* const, int hs)
-     @brief
-     @param
-     
-     @fn void    tRetune_setWindowSize       (tRetune* const, int ws)
-     @brief
-     @param
-     
-     @fn void    tRetune_setFidelityThreshold(tRetune* const, float threshold)
-     @brief
-     @param
-     
-     @fn float   tRetune_getInputPeriod      (tRetune* const)
-     @brief
-     @param
-     
-     @fn float   tRetune_getInputFreq        (tRetune* const)
-     @brief
-     @param
+     @param retune A pointer to the relevant tRetune.
      
      @} */
     
     typedef struct _tRetune
     {
-        
         tMempool mempool;
         
-        tPeriodDetection pd;
+        tDualPitchDetector dp;
+        float minInputFreq, maxInputFreq;
+        
         tPitchShift* ps;
         
+        float* pdBuffer;
         float* inBuffer;
         float** outBuffers;
-        float* tickOutput;
-        int frameSize;
         int bufSize;
+        int index;
         
-        uint16_t hopSize;
-        uint16_t windowSize;
-        uint8_t fba;
+        float* output;
         
-        float* pitchFactor;
-        float timeConstant;
-        float radius;
+        void (*shiftFunction)(tPitchShift* const, float, float*, float*);
         
-        float inputPeriod;
-        
+        float* shiftValues;
         int numVoices;
     } _tRetune;
     
     typedef _tRetune* tRetune;
     
-    void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf);
-    void    tRetune_initToPool          (tRetune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
+    void    tRetune_init                (tRetune* const, int numVoices, float minInputFreq, float maxInputFreq,  int bufSize, LEAF* const leaf);
+    void    tRetune_initToPool          (tRetune* const,  int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const);
     void    tRetune_free                (tRetune* const);
     
     float*  tRetune_tick                (tRetune* const, float sample);
+    void    tRetune_setMode             (tRetune* const, int mode);
     void    tRetune_setNumVoices        (tRetune* const, int numVoices);
-    void    tRetune_setPitchFactors     (tRetune* const, float pf);
-    void    tRetune_setPitchFactor      (tRetune* const, float pf, int voice);
-    void    tRetune_setTimeConstant     (tRetune* const, float tc);
-    void    tRetune_setHopSize          (tRetune* const, int hs);
-    void    tRetune_setWindowSize       (tRetune* const, int ws);
-    void    tRetune_setFidelityThreshold(tRetune* const, float threshold);
-    float   tRetune_getInputPeriod      (tRetune* const);
-    float   tRetune_getInputFreq        (tRetune* const);
-    
-    /*!
-     @defgroup tautotune tAutotune
-     @ingroup effects
-     @brief
-     @{
-     
-     @fn void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
-     @brief
-     @param
-     
-     @fn void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const)
-     @brief
-     @param
-     
-     @fn void    tAutotune_free                  (tAutotune* const)
-     @brief
-     @param
-     
-     @fn float*  tAutotune_tick                  (tAutotune* const, float sample)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setNumVoices          (tAutotune* const, int numVoices)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setFreqs              (tAutotune* const, float f)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setFreq               (tAutotune* const, float f, int voice)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setTimeConstant       (tAutotune* const, float tc)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setHopSize            (tAutotune* const, int hs)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setWindowSize         (tAutotune* const, int ws)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setFidelityThreshold  (tAutotune* const, float threshold)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setAlpha              (tAutotune* const, float alpha)
-     @brief
-     @param
-     
-     @fn void    tAutotune_setTolerance          (tAutotune* const, float tolerance)
-     @brief
-     @param
-     
-     @fn float   tAutotune_getInputPeriod        (tAutotune* const)
-     @brief
-     @param
-     
-     @fn float   tAutotune_getInputFreq          (tAutotune* const)
-     @brief
-     @param
-     
-     @} */
-    
-    typedef struct _tAutotune
-    {
-        
-        tMempool mempool;
-        
-        tPeriodDetection pd;
-        tPitchShift* ps;
-        
-        float* inBuffer;
-        float** outBuffers;
-        float* tickOutput;
-        int frameSize;
-        int bufSize;
-        
-        uint16_t hopSize;
-        uint16_t windowSize;
-        uint8_t fba;
-        
-        float* freq;
-        float timeConstant;
-        float radius;
-        
-        float inputPeriod;
-        int shiftOn;
-        int numVoices;
-    } _tAutotune;
-    
-    typedef _tAutotune* tAutotune;
-    
-    void    tAutotune_init                  (tAutotune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf);
-    void    tAutotune_initToPool            (tAutotune* const, int numVoices, int bufSize, int frameSize, tMempool* const);
-    void    tAutotune_free                  (tAutotune* const);
-    
-    float*  tAutotune_tick                  (tAutotune* const, float sample);
-    void    tAutotune_setNumVoices          (tAutotune* const, int numVoices);
-    void    tAutotune_setFreqs              (tAutotune* const, float f);
-    void    tAutotune_setFreq               (tAutotune* const, float f, int voice);
-    void    tAutotune_setTimeConstant       (tAutotune* const, float tc);
-    void    tAutotune_setHopSize            (tAutotune* const, int hs);
-    void    tAutotune_setWindowSize         (tAutotune* const, int ws);
-    void    tAutotune_setFidelityThreshold  (tAutotune* const, float threshold);
-    void    tAutotune_setAlpha              (tAutotune* const, float alpha);
-    void    tAutotune_setTolerance          (tAutotune* const, float tolerance);
-    float   tAutotune_getInputPeriod        (tAutotune* const);
-    float   tAutotune_getInputFreq          (tAutotune* const);
+    void    tRetune_setPickiness        (tRetune* const, float p);
+    void    tRetune_tuneVoices          (tRetune* const, float* t);
+    void    tRetune_tuneVoice           (tRetune* const, int voice, float t);
+    float   tRetune_getInputFrequency   (tRetune* const);
     
     //==============================================================================
     
@@ -769,40 +705,42 @@ extern "C" {
      @{
      
      @fn void    tFormantShifter_init            (tFormantShifter* const, int order, LEAF* const leaf)
-     @brief
-     @param
+     @brief Initialize a tFormantShifter to the default mempool of a LEAF instance.
+     @param formant A pointer to the tFormantShifter to initialize.
+     @param leaf A pointer to the leaf instance.
      
      @fn void    tFormantShifter_initToPool      (tFormantShifter* const, int order, tMempool* const)
-     @brief
-     @param
+     @brief Initialize a tFormantShifter to a specified mempool.
+     @param formant A pointer to the tFormantShifter to initialize.
+     @param mempool A pointer to the tMempool to use.
      
      @fn void    tFormantShifter_free            (tFormantShifter* const)
-     @brief
-     @param
+     @brief Free a tFormantShifter from its mempool.
+     @param formant A pointer to the tFormantShifter to free.
      
      @fn float   tFormantShifter_tick            (tFormantShifter* const, float input)
      @brief
-     @param
+     @param formant A pointer to the relevant tFormantShifter.
      
      @fn float   tFormantShifter_remove          (tFormantShifter* const, float input)
      @brief
-     @param
+     @param formant A pointer to the relevant tFormantShifter.
      
      @fn float   tFormantShifter_add             (tFormantShifter* const, float input)
      @brief
-     @param
+     @param formant A pointer to the relevant tFormantShifter.
      
      @fn void    tFormantShifter_ioSamples       (tFormantShifter* const, float* in, float* out, int size, float fwarp)
      @brief
-     @param
+     @param formant A pointer to the relevant tFormantShifter.
      
      @fn void    tFormantShifter_setShiftFactor  (tFormantShifter* const, float shiftFactor)
      @brief
-     @param
+     @param formant A pointer to the relevant tFormantShifter.
      
      @fn void    tFormantShifter_setIntensity    (tFormantShifter* const, float intensity)
      @brief
-     @param
+     @param formant A pointer to the relevant tFormantShifter.
      
      @} */
     

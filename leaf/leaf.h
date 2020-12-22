@@ -122,8 +122,8 @@ extern "C" {
     /*!
      @param sampleRate The audio sample rate.
      @param blockSize The audio block size.
-     @param memory A pointer to the memory that will make up the default LEAF mempool.
-     @param memorySize The size of the memory that will make up the default LEAF mempool.
+     @param memory A pointer to the memory that will make up the default mempool of a LEAF instance.
+     @param memorySize The size of the memory that will make up the default mempool of a LEAF instance.
      @param random A pointer to a random number function. Should return a float >= 0 and < 1.
      */
     void        LEAF_init            (LEAF* const leaf, float sampleRate, int blockSize, char* memory, size_t memorySize, float(*random)(void));

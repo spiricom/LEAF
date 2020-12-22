@@ -1,10 +1,10 @@
 /*==============================================================================
-
-    leaf-analysis.c
-    Created: 30 Nov 2018 11:56:49am
-    Author:  airship
-
-==============================================================================*/
+ 
+ leaf-analysis.c
+ Created: 30 Nov 2018 11:56:49am
+ Author:  airship
+ 
+ ==============================================================================*/
 
 #if _WIN32 || _WIN64
 
@@ -93,7 +93,7 @@ void    tZeroCrossingCounter_initToPool   (tZeroCrossingCounter* const zc, int m
     _tMempool* m = *mp;
     _tZeroCrossingCounter* z = *zc = (_tZeroCrossingCounter*) mpool_alloc(sizeof(_tZeroCrossingCounter), m);
     z->mempool = m;
-
+    
     z->count = 0;
     z->maxWindowSize = maxWindowSize;
     z->currentWindowSize = maxWindowSize;
@@ -117,11 +117,11 @@ void    tZeroCrossingCounter_free (tZeroCrossingCounter* const zc)
 float   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const zc, float input)
 {
     _tZeroCrossingCounter* z = *zc;
-
+    
     z->inBuffer[z->position] = input;
     int futurePosition = ((z->position + 1) % z->currentWindowSize);
     float output = 0.0f;
-
+    
     //add new value to count
     if ((z->inBuffer[z->position] * z->inBuffer[z->prevPosition]) < 0.0f)
     {
@@ -133,7 +133,7 @@ float   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const zc, float
     {
         z->countBuffer[z->position] = 0;
     }
-
+    
     //remove oldest value from count
     if (z->countBuffer[futurePosition] > 0)
     {
@@ -143,12 +143,12 @@ float   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const zc, float
             z->count = 0;
         }
     }
-
+    
     z->prevPosition = z->position;
     z->position = futurePosition;
-
+    
     output = z->count * z->invCurrentWindowSize;
-
+    
     return output;
 }
 
@@ -157,9 +157,9 @@ void    tZeroCrossingCounter_setWindowSize        (tZeroCrossingCounter* const z
 {
     _tZeroCrossingCounter* z = *zc;
     if (windowSize <= z->maxWindowSize)
-        {
-            z->currentWindowSize = windowSize;
-        }
+    {
+        z->currentWindowSize = windowSize;
+    }
     else
     {
         z->currentWindowSize = z->maxWindowSize;
@@ -197,7 +197,7 @@ void    tPowerFollower_free (tPowerFollower* const pf)
     mpool_free((char*)p, p->mempool);
 }
 
-int     tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
+void tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
 {
     _tPowerFollower* p = *pf;
     
@@ -205,17 +205,16 @@ int     tPowerFollower_setFactor(tPowerFollower* const pf, float factor)
     if (factor>1) factor=1;
     p->factor=factor;
     p->oneminusfactor=1.0f-factor;
-    return 0;
 }
 
-float   tPowerFollower_tick(tPowerFollower* const pf, float input)
+float tPowerFollower_tick(tPowerFollower* const pf, float input)
 {
     _tPowerFollower* p = *pf;
     p->curr = p->factor*input*input+p->oneminusfactor*p->curr;
     return p->curr;
 }
 
-float   tPowerFollower_sample(tPowerFollower* const pf)
+float tPowerFollower_getPower(tPowerFollower* const pf)
 {
     _tPowerFollower* p = *pf;
     return p->curr;
@@ -258,7 +257,7 @@ void    tEnvPD_initToPool       (tEnvPD* const xpd, int ws, int hs, int bs, tMem
     
     for (i = 0; i < MAXOVERLAP; i++) x->x_sumbuf[i] = 0;
     for (i = 0; i < npoints; i++)
-        x->buf[i] = (1.0f - cosf((2 * PI * i) / npoints))/npoints;
+    x->buf[i] = (1.0f - cosf((2 * PI * i) / npoints))/npoints;
     for (; i < npoints+INITVSTAKEN; i++) x->buf[i] = 0;
     
     x->x_f = 0;
@@ -321,7 +320,7 @@ void tEnvPD_processBlock(tEnvPD* const xpd, float* in)
         x->x_result = x->x_sumbuf[0];
         for (count = x->x_realperiod, sump = x->x_sumbuf;
              count < x->x_npoints; count += x->x_realperiod, sump++)
-            sump[0] = sump[1];
+        sump[0] = sump[1];
         sump[0] = 0;
         x->x_phase = x->x_realperiod - n;
     }
@@ -364,12 +363,7 @@ void tAttackDetection_setBlocksize(tAttackDetection* const ad, int size)
 {
     _tAttackDetection* a = *ad;
     
-    if(!((size==64)|(size==128)|(size==256)|(size==512)|(size==1024)|(size==2048)))
-        size = DEFBLOCKSIZE;
     a->blocksize = size;
-    
-    return;
-    
 }
 
 void tAttackDetection_setSamplerate(tAttackDetection* const ad, int inRate)
@@ -500,7 +494,7 @@ void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const 
     s->fidelity = 0.;
     s->minrms = DEFMINRMS;
     s->framesize = SNAC_FRAME_SIZE;
-
+    
     s->inputbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, m);
     s->processbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE * 2), m);
     s->spectrumbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE / 2), m);
@@ -526,15 +520,16 @@ void tSNAC_free (tSNAC* const snac)
 /******************************************************************************/
 
 
-void tSNAC_ioSamples(tSNAC* const snac, float *in, float *out, int size)
+//void tSNAC_ioSamples(tSNAC* const snac, float *in, float *out, int size)
+void tSNAC_ioSamples(tSNAC* const snac, float *in, int size)
 {
     _tSNAC* s = *snac;
     
     int timeindex = s->timeindex;
     int mask = s->framesize - 1;
-    int outindex = 0;
+//    int outindex = 0;
     float *inputbuf = s->inputbuf;
-    float *processbuf = s->processbuf;
+//    float *processbuf = s->processbuf;
     
     // call analysis function when it is time
     if(!(timeindex & (s->framesize / s->overlap - 1))) snac_analyzeframe(snac);
@@ -542,7 +537,8 @@ void tSNAC_ioSamples(tSNAC* const snac, float *in, float *out, int size)
     while(size--)
     {
         inputbuf[timeindex] = *in++;
-        out[outindex++] = processbuf[timeindex++];
+//        out[outindex++] = processbuf[timeindex++];
+        timeindex++;
         timeindex &= mask;
     }
     s->timeindex = timeindex;
@@ -833,12 +829,12 @@ static void snac_biasbuf(tSNAC* const snac)
 //===========================================================================
 // PERIODDETECTION
 //===========================================================================
-void tPeriodDetection_init (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize, LEAF* const leaf)
+void tPeriodDetection_init (tPeriodDetection* const pd, float* in, int bufSize, int frameSize, LEAF* const leaf)
 {
-    tPeriodDetection_initToPool(pd, in, out, bufSize, frameSize, &leaf->mempool);
+    tPeriodDetection_initToPool(pd, in, bufSize, frameSize, &leaf->mempool);
 }
 
-void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, float* out, int bufSize, int frameSize, tMempool* const mp)
+void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, int bufSize, int frameSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_calloc(sizeof(_tPeriodDetection), m);
@@ -846,7 +842,6 @@ void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, float* 
     LEAF* leaf = p->mempool->leaf;
     
     p->inBuffer = in;
-    p->outBuffer = out;
     p->bufSize = bufSize;
     p->frameSize = frameSize;
     p->framesPerBuffer = p->bufSize / p->frameSize;
@@ -861,7 +856,7 @@ void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, float* 
     tEnvPD_initToPool(&p->env, p->windowSize, p->hopSize, p->frameSize, mp);
     
     tSNAC_initToPool(&p->snac, DEFOVERLAP, mp);
-
+    
     p->history = 0.0f;
     p->alpha = 1.0f;
     p->tolerance = 1.0f;
@@ -901,13 +896,10 @@ float tPeriodDetection_tick (tPeriodDetection* pd, float sample)
         
         tEnvPD_processBlock(&p->env, &(p->inBuffer[i]));
         
-        tSNAC_ioSamples(&p->snac, &(p->inBuffer[i]), &(p->outBuffer[i]), p->frameSize);
-        float fidelity = tSNAC_getFidelity(&p->snac);
+        tSNAC_ioSamples(&p->snac, &(p->inBuffer[i]), p->frameSize);
+        
         // Fidelity threshold recommended by Katja Vetters is 0.95 for most instruments/voices http://www.katjaas.nl/helmholtz/helmholtz.html
-        if (fidelity > p->fidelityThreshold)
-        {
-            p->period = tSNAC_getPeriod(&p->snac);
-        }
+        p->period = tSNAC_getPeriod(&p->snac);
         
         p->curBlock++;
         if (p->curBlock >= p->framesPerBuffer) p->curBlock = 0;
@@ -921,6 +913,12 @@ float tPeriodDetection_getPeriod(tPeriodDetection* pd)
 {
     _tPeriodDetection* p = *pd;
     return p->period;
+}
+
+float tPeriodDetection_getFidelity(tPeriodDetection* pd)
+{
+    _tPeriodDetection* p = *pd;
+    return tSNAC_getFidelity(&p->snac);
 }
 
 void tPeriodDetection_setHopSize(tPeriodDetection* pd, int hs)
@@ -965,7 +963,7 @@ void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo* const zc, tMempool* 
     _tMempool* m = *mp;
     _tZeroCrossingInfo* z = *zc = (_tZeroCrossingInfo*) mpool_alloc(sizeof(_tZeroCrossingInfo), m);
     z->mempool = m;
-
+    
     z->_leading_edge = INT_MIN;
     z->_trailing_edge = INT_MIN;
     z->_width = 0.0f;
@@ -1049,11 +1047,11 @@ void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const zc, 
     z->_size = pow(2.0, ceil(log2((double)size)));
     z->_mask = z->_size - 1;
 
+    z->_info = (tZeroCrossingInfo*) mpool_calloc(sizeof(tZeroCrossingInfo) * z->_size, m);
 
-    z->_info = (tZeroCrossingInfo*) mpool_alloc(sizeof(tZeroCrossingInfo) * z->_size, m);
     for (unsigned i = 0; i < z->_size; i++)
-        tZeroCrossingInfo_initToPool(&z->_info[i], mp);
-
+    tZeroCrossingInfo_initToPool(&z->_info[i], mp);
+    
     z->_pos = 0;
     
     z->_prev = 0.0f;
@@ -1069,6 +1067,11 @@ void    tZeroCrossingCollector_free  (tZeroCrossingCollector* const zc)
 {
     _tZeroCrossingCollector* z = *zc;
     
+    for (unsigned i = 0; i < z->_size; i++)
+
+    tZeroCrossingInfo_free(&z->_info[i]);
+    
+    mpool_free((char*)z->_info, z->mempool);
     mpool_free((char*)z, z->mempool);
 }
 
@@ -1846,7 +1849,7 @@ static inline int sub_collector_process_harmonics(_sub_collector* collector, _au
 {
     if (info._period < collector->_first_period)
         return 0;
-     
+    
     float incoming_period = sub_collector_period_of(collector, info);
     int multiple = fmaxf(1.0f, roundf( incoming_period / collector->_first_period));
     return sub_collector_try_sub_harmonic(collector, fmin(collector->_range, multiple), info, incoming_period/multiple);
@@ -1892,7 +1895,7 @@ void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowes
     _tPitchDetector* p = *detector = (_tPitchDetector*) mpool_alloc(sizeof(_tPitchDetector), m);
     p->mempool = m;
     
-    tPeriodDetector_initToPool(&p->_pd, lowestFreq, highestFreq, DEFAULT_HYSTERESIS, mempool);
+    tPeriodDetector_initToPool(&p->_pd, lowestFreq, highestFreq, -120.0f, mempool);
     p->_current.frequency = 0.0f;
     p->_current.periodicity = 0.0f;
     p->_frames_after_shift = 0;
@@ -1985,8 +1988,8 @@ float   tPitchDetector_predictFrequency (tPitchDetector* const detector)
     
     float period = tPeriodDetector_predictPeriod(&p->_pd);
     if (period > 0.0f)
-       return leaf->sampleRate / period;
-   return 0.0f;
+        return leaf->sampleRate / period;
+    return 0.0f;
 }
 
 int     tPitchDetector_indeterminate    (tPitchDetector* const detector)
@@ -2026,7 +2029,7 @@ static inline void bias(tPitchDetector* const detector, _pitch_info incoming)
     //=============================================================================
     //_pitch_info result = bias(current, incoming, shift);
     {
-        float error = p->_current.frequency / 32.0f; // approx 1/2 semitone
+        float error = p->_current.frequency * 0.015625; // approx 1/4 semitone
         float diff = fabsf(p->_current.frequency - incoming.frequency);
         int done = 0;
         
@@ -2111,31 +2114,36 @@ static inline void bias(tPitchDetector* const detector, _pitch_info incoming)
 
 static inline void compute_predicted_frequency(tDualPitchDetector* const detector);
 
-void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, LEAF* const leaf)
+void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, LEAF* const leaf)
 {
-    tDualPitchDetector_initToPool(detector, lowestFreq, highestFreq, &leaf->mempool);
+    tDualPitchDetector_initToPool(detector, lowestFreq, highestFreq, inBuffer, bufSize, &leaf->mempool);
 }
 
-void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool)
+void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, tMempool* const mempool)
 {
     _tMempool* m = *mempool;
     _tDualPitchDetector* p = *detector = (_tDualPitchDetector*) mpool_alloc(sizeof(_tDualPitchDetector), m);
     p->mempool = m;
     
-    tPitchDetector_initToPool(&p->_pd1, lowestFreq, highestFreq, mempool);
+    tPeriodDetection_initToPool(&p->_pd1, inBuffer, bufSize, bufSize / 2, mempool);
     tPitchDetector_initToPool(&p->_pd2, lowestFreq, highestFreq, mempool);
+
     p->_current.frequency = 0.0f;
     p->_current.periodicity = 0.0f;
     p->_mean = lowestFreq + ((highestFreq - lowestFreq) / 2.0f);
     p->_predicted_frequency = 0.0f;
     p->_first = 1;
+    p->thresh = 0.98f;
+    
+    p->lowest = lowestFreq;
+    p->highest = highestFreq;
 }
 
 void    tDualPitchDetector_free (tDualPitchDetector* const detector)
 {
     _tDualPitchDetector* p = *detector;
     
-    tPitchDetector_free(&p->_pd1);
+    tPeriodDetection_free(&p->_pd1);
     tPitchDetector_free(&p->_pd2);
     
     mpool_free((char*) p, p->mempool);
@@ -2144,22 +2152,65 @@ void    tDualPitchDetector_free (tDualPitchDetector* const detector)
 int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sample)
 {
     _tDualPitchDetector* p = *detector;
+    LEAF* leaf = p->mempool->leaf;
     
-    int pd1_ready = tPitchDetector_tick(&p->_pd1, sample);
-    int pd2_ready = tPitchDetector_tick(&p->_pd2, -sample);
-    
-    if (pd1_ready || pd2_ready)
+    tPeriodDetection_tick(&p->_pd1, sample);
+    int ready = tPitchDetector_tick(&p->_pd2, sample);
+
+    if (ready)
     {
-        int pd1_indeterminate = tPitchDetector_indeterminate(&p->_pd1);
         int pd2_indeterminate = tPitchDetector_indeterminate(&p->_pd2);
-        if (!pd1_indeterminate && !pd2_indeterminate)
+        int disagreement = 0;
+        float period = tPeriodDetection_getPeriod(&p->_pd1);
+        if (!pd2_indeterminate && period != 0.0f)
         {
-            _pitch_info _i1 = p->_pd1->_current;
+            _pitch_info _i1;
+            _i1.frequency = leaf->sampleRate / tPeriodDetection_getPeriod(&p->_pd1);
+            _i1.periodicity = tPeriodDetection_getFidelity(&p->_pd1);
             _pitch_info _i2 = p->_pd2->_current;
             
             float pd1_diff = fabsf(_i1.frequency - p->_mean);
             float pd2_diff = fabsf(_i2.frequency - p->_mean);
-            _pitch_info i = (pd1_diff < pd2_diff) ? _i1 : _i2;
+
+            _pitch_info i;
+            disagreement = fabsf(_i1.frequency - _i2.frequency) > (p->_mean * 0.03125f);
+            // If they agree, we'll use bacf
+            if (!disagreement) i = _i2;
+            // A disagreement implies a change
+            // Start with smaller changes
+            else if (pd2_diff < p->_mean * 0.03125f) i = _i2;
+            else if (pd1_diff < p->_mean * 0.03125f) i = _i1;
+            // Now filter out lower fidelity stuff
+            else if (_i1.periodicity < p->thresh) return ready;
+            // Changing up (bacf tends to lead changes)
+            else if ((_i1.frequency > p->_mean && _i2.frequency > p->_mean) &&
+                     (_i1.frequency < _i2.frequency) &&
+                     (_i2.periodicity > p->thresh))
+            {
+                if (roundf(_i2.frequency / _i1.frequency) > 1) i = _i1;
+                else i = _i2;
+            }
+            // Changing down
+            else if ((_i1.frequency < p->_mean && _i2.frequency < p->_mean) &&
+                     (_i1.frequency > _i2.frequency) &&
+                     (_i2.periodicity > p->thresh))
+            {
+                if (roundf(_i1.frequency / _i2.frequency) > 1) i = _i1;
+                else i = _i2;
+            }
+            // A bit of handling for stuff out of bacf range, won't be as solid but better than nothing
+            else if (_i1.frequency > p->highest)
+            {
+                if (roundf(_i1.frequency / _i2.frequency) > 1) i = _i2;
+                else i = _i1;
+            }
+            else if (_i1.frequency < p->lowest)
+            {
+                if (roundf(_i2.frequency / _i1.frequency) > 1) i = _i2;
+                else i = _i1;
+            }
+            // Don't change if we met non of these, probably a bad read
+            else return ready;
             
             if (p->_first)
             {
@@ -2171,20 +2222,14 @@ int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sa
             else
             {
                 p->_current = i;
-                p->_mean = (0.222222f * p->_current.frequency) + (0.777778f * p->_mean);
+                p->_mean = (0.2222222 * p->_current.frequency) + (0.7777778 * p->_mean);
                 p->_predicted_frequency = 0.0f;
             }
-        }
-        
-        if (pd1_indeterminate && pd2_indeterminate)
-        {
-            compute_predicted_frequency(detector);
-            p->_current.frequency = 0.0f;
-            p->_current.periodicity = 0.0f;
+            return ready;
         }
     }
-    
-    return pd1_ready || pd2_ready;
+
+    return ready;
 }
 
 float   tDualPitchDetector_getFrequency    (tDualPitchDetector* const detector)
@@ -2210,31 +2255,36 @@ float   tDualPitchDetector_predictFrequency (tDualPitchDetector* const detector)
     return p->_predicted_frequency;
 }
 
-void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector, float hysteresis)
+void    tDualPitchDetector_setHysteresis (tDualPitchDetector* const detector, float hysteresis)
 {
     _tDualPitchDetector* p = *detector;
     
-    tPitchDetector_setHysteresis(&p->_pd1, hysteresis);
     tPitchDetector_setHysteresis(&p->_pd2, hysteresis);
+}
+
+void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector* const detector, float thresh)
+{
+    _tDualPitchDetector* p = *detector;
+    
+    p->thresh = thresh;
 }
 
 static inline void compute_predicted_frequency(tDualPitchDetector* const detector)
 {
     _tDualPitchDetector* p = *detector;
     
-    float f1 = tPitchDetector_predictFrequency(&p->_pd1);
-    if (f1 > 0.0f)
+    float f1 = 1.0f / tPeriodDetection_getPeriod(&p->_pd1);
+    float f2 = tPitchDetector_predictFrequency(&p->_pd2);
+    if (f2 > 0.0f)
     {
-        float f2 = tPitchDetector_predictFrequency(&p->_pd2);
-        if (f2 > 0.0f)
+        float error = f1 * 0.1f;
+        if (fabsf(f1 - f2) < error)
         {
-            float error = f1 * 0.1f;
-            if (fabsf(f1 - f2) < error)
-            {
-                p->_predicted_frequency = f1;
-                return;
-            }
+            p->_predicted_frequency = f1;
+            return;
         }
     }
+    
     p->_predicted_frequency = 0.0f;
 }
+

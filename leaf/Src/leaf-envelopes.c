@@ -23,6 +23,7 @@
 
 #endif
 
+#if LEAF_INCLUDE_ADSR_TABLES
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Envelope ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 void    tEnvelope_init(tEnvelope* const envlp, float attack, float decay, int loop, LEAF* const leaf)
 {
@@ -211,9 +212,9 @@ float   tEnvelope_tick(tEnvelope* const envlp)
     
     return env->next;
 }
+#endif // LEAF_INCLUDE_ADSR_TABLES
 
-
-
+#if LEAF_INCLUDE_ADSR_TABLES
 /* ADSR */
 void    tADSR_init(tADSR* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
 {
@@ -482,7 +483,7 @@ float   tADSR_tick(tADSR* const adsrenv)
 
     return adsr->next;
 }
-
+#endif // LEAF_INCLUDE_ADSR_TABLES
 
 
 
