@@ -632,7 +632,7 @@ extern "C" {
     /*!
      @defgroup tringbuffer tRingBuffer
      @ingroup delay
-     @brief
+     @brief Ring buffer.
      @{
      
      @fn void    tRingBuffer_init     (tRingBuffer* const ring, int size, LEAF* const leaf)

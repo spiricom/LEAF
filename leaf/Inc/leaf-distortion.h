@@ -32,7 +32,7 @@ extern "C" {
     /*!
      @defgroup tsamplereducer tSampleReducer
      @ingroup distortion
-     @brief
+     @brief Sample rate reducer.
      @{
      
      @fn void    tSampleReducer_init    (tSampleReducer* const, LEAF* const leaf)
@@ -82,7 +82,7 @@ extern "C" {
     /*!
      @defgroup toversampler tOversampler
      @ingroup distortion
-     @brief
+     @brief Oversampler.
      @{
      
      @fn void    tOversampler_init           (tOversampler* const, int order, int extraQuality, LEAF* const leaf)
@@ -145,7 +145,7 @@ extern "C" {
     /*!
      @defgroup tlockhartwavefolder tLockhartWavefolder
      @ingroup distortion
-     @brief
+     @brief Analog model wavefolder.
      @{
      
      @fn void    tLockhartWavefolder_init    (tLockhartWavefolder* const, LEAF* const leaf)
@@ -213,7 +213,7 @@ extern "C" {
     /*!
      @defgroup tcrusher tCrusher
      @ingroup distortion
-     @brief
+     @brief Bit depth and sampler rate degrader.
      @{
      
      @fn void    tCrusher_init    (tCrusher* const, LEAF* const leaf)

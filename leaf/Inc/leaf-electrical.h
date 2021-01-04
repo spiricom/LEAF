@@ -31,7 +31,7 @@ extern "C" {
     /*!
      @defgroup twdf tWDF
      @ingroup electrical
-     @brief
+     @brief Wave digital filter component.
      @{
      
      @fn void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, LEAF* const leaf)

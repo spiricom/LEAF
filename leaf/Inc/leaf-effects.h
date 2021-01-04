@@ -27,7 +27,7 @@ extern "C" {
     /*!
      @defgroup ttalkbox tTalkbox
      @ingroup effects
-     @brief
+     @brief High resolution vocoder from mda using Levinson-Durbin LPC algorithm.
      @{
      
      @fn void    tTalkbox_init           (tTalkbox* const, int bufsize, LEAF* const leaf)
@@ -146,7 +146,7 @@ extern "C" {
     /*!
      @defgroup ttalkboxfloat tTalkboxFloat
      @ingroup effects
-     @brief
+     @brief High resolution vocoder from mda using Levinson-Durbin LPC algorithm.
      @{
      
      @fn void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize, LEAF* const leaf)
@@ -260,7 +260,7 @@ extern "C" {
     /*!
      @defgroup tvocoder tVocoder
      @ingroup effects
-     @brief
+     @brief Channel vocoder from mda.
      @{
      
      @fn void    tVocoder_init           (tVocoder* const, LEAF* const leaf)
@@ -327,7 +327,7 @@ extern "C" {
     /*!
      @defgroup trosenbergglottalpulse tRosenbergGlottalPulse
      @ingroup effects
-     @brief
+     @brief Rosenberg glottal pulse approximator.
      @{
      
      @fn void    tRosenbergGlottalPulse_init           (tRosenbergGlottalPulse* const, LEAF* const leaf)
@@ -488,7 +488,7 @@ extern "C" {
     /*!
      @defgroup tpitchshift tPitchShift
      @ingroup effects
-     @brief
+     @brief SOLAD-based pitch shifter.
      @{
      
      @fn void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, LEAF* const leaf)
@@ -552,7 +552,7 @@ extern "C" {
     /*!
      @defgroup tsimpleretune tSimpleRetune
      @ingroup effects
-     @brief
+     @brief Wrapper for multiple pitch shifters with single-channel output.
      @{
      
      @fn void    tSimpleRetune_init                  (tSimpleRetune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
@@ -624,7 +624,7 @@ extern "C" {
     /*!
      @defgroup tretune tRetune
      @ingroup effects
-     @brief
+     @brief Wrapper for multiple pitch shifters with multi-channel output.
      @{
      
      @fn void    tRetune_init                (tRetune* const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
@@ -701,7 +701,7 @@ extern "C" {
     /*!
      @defgroup tformantshifter tFormantShifter
      @ingroup effects
-     @brief
+     @brief Formant remover and adder, allowing for formant shifting.
      @{
      
      @fn void    tFormantShifter_init            (tFormantShifter* const, int order, LEAF* const leaf)

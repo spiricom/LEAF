@@ -34,7 +34,7 @@ extern "C" {
     /*!
      @defgroup tcompressor tCompressor
      @ingroup dynamics
-     @brief
+     @brief Standard compressor.
      @{
      
      @fn void    tCompressor_init        (tCompressor* const, LEAF* const leaf)
@@ -84,7 +84,7 @@ extern "C" {
      @defgroup tfeedbackleveler tFeedbackLeveler
      @ingroup dynamics
      @brief An auto VCA that you put into a feedback circuit to make it stay at the same level.
-     @detail An auto VCA that you put into a feedback circuit to make it stay at the same level. It can enforce level bidirectionally (amplifying and attenuating as needed) or just attenutating. The former option allows for infinite sustain strings, for example, while the latter option allows for decaying strings, which can never exceed a specific level.
+     @details An auto VCA that you put into a feedback circuit to make it stay at the same level. It can enforce level bidirectionally (amplifying and attenuating as needed) or just attenutating. The former option allows for infinite sustain strings, for example, while the latter option allows for decaying strings, which can never exceed a specific level.
      @{
      
      @fn void tFeedbackLeveler_init (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, LEAF* const leaf)

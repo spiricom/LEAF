@@ -36,17 +36,20 @@ extern "C" {
     /*!
      @defgroup tbuffer tBuffer
      @ingroup sampling
-     @brief
+     @brief Buffer for use in Sampler objects.
+     @details Buffer for use in Sampler objects. Can selectively record audio and keeps track of the length of recorded audio.
      @{
      
      @fn void  tBuffer_init                  (tBuffer* const, uint32_t length, LEAF* const leaf)
      @brief Initialize a tBuffer to the default mempool of a LEAF instance.
      @param sampler A pointer to the tBuffer to initialize.
+     @param length The length of the buffer in samples.
      @param leaf A pointer to the leaf instance.
      
      @fn void  tBuffer_initToPool            (tBuffer* const, uint32_t length, tMempool* const)
      @brief Initialize a tBuffer to a specified mempool.
      @param sampler A pointer to the tBuffer to initialize.
+     @param length The length of the buffer in samples.
      @param mempool A pointer to the tMempool to use.
      
      @fn void  tBuffer_free                  (tBuffer* const)
@@ -54,56 +57,68 @@ extern "C" {
      @param sampler A pointer to the tBuffer to free.
      
      @fn void  tBuffer_tick                  (tBuffer* const, float sample)
-     @brief
+     @brief If recording, add a sample to the buffer. Otherwise do nothing.
      @param sampler A pointer to the relevant tBuffer.
+     @param input The input sample.
      
      @fn void  tBuffer_read                  (tBuffer* const, float* buff, uint32_t len)
-     @brief
+     @brief Read an input buffer into the buffer.
      @param sampler A pointer to the relevant tBuffer.
+     @param inputBuffer The input buffer.
+     @param length The length of the input buffer.
      
      @fn float tBuffer_get                   (tBuffer* const, int idx)
-     @brief
+     @brief Get the sample recorded at a given position in the buffer.
      @param sampler A pointer to the relevant tBuffer.
+     @param position The position to get a sample from.
+     @return The recorded sample.
      
      @fn void  tBuffer_record                (tBuffer* const)
-     @brief
+     @brief Start recording samples into the buffer.
      @param sampler A pointer to the relevant tBuffer.
      
      @fn void  tBuffer_stop                  (tBuffer* const)
-     @brief
+     @brief Stop recordings samples into the buffer.
      @param sampler A pointer to the relevant tBuffer.
      
      @fn int   tBuffer_getRecordPosition     (tBuffer* const)
-     @brief
+     @brief Get the recording position, from where the buffer will next add samples.
      @param sampler A pointer to the relevant tBuffer.
+     @return The recording position.
      
      @fn void   tBuffer_setRecordPosition    (tBuffer* const, int pos)
-     @brief
+     @brief Set the recording position, from where the buffer will next add samples.
      @param sampler A pointer to the relevant tBuffer.
+     @param index The new recording position.
      
      @fn void  tBuffer_setRecordMode         (tBuffer* const, RecordMode mode)
-     @brief
+     @brief Set the recording mode.
      @param sampler A pointer to the relevant tBuffer.
+     @param mode The new mode, either RecordOneShot to record one buffer length or RecordLoop to record on loop, overwriting old samples.
      
      @fn void  tBuffer_clear                 (tBuffer* const)
-     @brief
+     @brief Clear the buffer.
      @param sampler A pointer to the relevant tBuffer.
      
      @fn uint32_t tBuffer_getBufferLength    (tBuffer* const)
-     @brief
+     @brief Get the length of the buffer.
      @param sampler A pointer to the relevant tBuffer.
+     @return The length of the buffer.
      
      @fn uint32_t tBuffer_getRecordedLength  (tBuffer* const sb)
-     @brief
+     @brief Get the length of recorded audio in the buffer.
      @param sampler A pointer to the relevant tBuffer.
+     @return The length in samples of recorded audio.
      
      @fn void     tBuffer_setRecordedLength    (tBuffer* const sb, int length)
-     @brief
+     @brief Set the length of what is considered recorded audio in the buffer.
      @param sampler A pointer to the relevant tBuffer.
+     @param length The new recorded length.
      
      @fn int     tBuffer_isActive            (tBuffer* const sb)
-     @brief
+     @brief Check if the buffer is recording
      @param sampler A pointer to the relevant tBuffer.
+     @return 1 if recording, 0 if not.
      
      @} */
     
@@ -157,17 +172,19 @@ extern "C" {
     /*!
      @defgroup tsampler tSampler
      @ingroup sampling
-     @brief
+     @brief Loopable input sampler with crossfading.
      @{
      
      @fn void    tSampler_init               (tSampler* const, tBuffer* const, LEAF* const leaf)
      @brief Initialize a tSampler to the default mempool of a LEAF instance.
      @param sampler A pointer to the tSampler to initialize.
+     @param buffer A pointer to a tBuffer to playback audio from. Multiple tSamplers can share one tBuffer.
      @param leaf A pointer to the leaf instance.
      
      @fn void    tSampler_initToPool         (tSampler* const, tBuffer* const, tMempool* const)
      @brief Initialize a tSampler to a specified mempool.
      @param sampler A pointer to the tSampler to initialize.
+     @param buffer A pointer to a tBuffer to playback audio from. Multiple tSamplers can share one tBuffer.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tSampler_free               (tSampler* const)
@@ -287,7 +304,7 @@ extern "C" {
     /*!
      @defgroup tautosampler tAutoSampler
      @ingroup sampling
-     @brief
+     @brief Automatic sampler based on power of input.
      @{
      
      @fn void    tAutoSampler_init               (tAutoSampler* const, tBuffer* const, LEAF* const leaf)
@@ -376,7 +393,7 @@ extern "C" {
     /*!
      @defgroup tMBSampler tMBSampler
      @ingroup sampling
-     @brief
+     @brief Loopable input sampler using minBLEP to remove discontinuities.
      @{
      
      @fn void    tMBSampler_init               (tMBSampler* const, tBuffer* const, LEAF* const leaf)

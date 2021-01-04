@@ -65,7 +65,7 @@ extern "C" {
     /*!
      * @defgroup tmempool tMempool
      * @ingroup mempool
-     * An object that can contain an additional mempool for the allocation of LEAF objects.
+     * @brief Memory pool for the allocation of LEAF objects.
      * @{
      */
     

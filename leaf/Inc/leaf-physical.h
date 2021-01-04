@@ -234,7 +234,7 @@ extern "C" {
     /*!
      @defgroup tsimplelivingstring tSimpleLivingString
      @ingroup physical
-     @brief
+     @brief Simplified string model.
      @{
      
      @fn void    tSimpleLivingString_init   (tSimpleLivingString* const, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)
@@ -335,7 +335,7 @@ extern "C" {
     /*!
      @defgroup tlivingstring tLivingString
      @ingroup physical
-     @brief
+     @brief String model.
      @{
      
      @fn void    tLivingString_init                  (tLivingString* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)
@@ -450,7 +450,7 @@ extern "C" {
     /*!
      @defgroup tcomplexlivingstring tComplexLivingString
      @ingroup physical
-     @brief
+     @brief Complex string model.
      @{
      
      @fn void    tComplexLivingString_init  (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)

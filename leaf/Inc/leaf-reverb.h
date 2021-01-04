@@ -177,7 +177,7 @@ extern "C" {
     /*!
      @defgroup tdattorroreverb tDattorroReverb
      @ingroup reverb
-     @brief
+     @brief Dattorro plate reverb.
      @{
      
      @fn void    tDattorroReverb_init              (tDattorroReverb* const, LEAF* const leaf)

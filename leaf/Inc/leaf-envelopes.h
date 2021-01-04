@@ -117,7 +117,7 @@ extern "C" {
     /*!
      @defgroup texpsmooth tExpSmooth
      @ingroup envelopes
-     @brief
+     @brief Exponential curve smoother.
      @{
      
      @fn void    tExpSmooth_init         (tExpSmooth* const, float val, float factor, LEAF* const leaf)
@@ -583,7 +583,7 @@ extern "C" {
     /*!
      @defgroup tramp tRamp
      @ingroup envelopes
-     @brief
+     @brief Value ramp.
      @{
      
      @fn void    tRamp_init          (tRamp* const, float time, int samplesPerTick, LEAF* const leaf)
@@ -650,7 +650,7 @@ extern "C" {
     /*!
      @defgroup trampupdown tRampUpDown
      @ingroup envelopes
-     @brief
+     @brief Value ramp with variable rate depending on direction.
      @{
      
      @fn void    tRampUpDown_init          (tRampUpDown* const, float upTime, float downTime, int samplesPerTick, LEAF* const leaf)
@@ -725,7 +725,7 @@ extern "C" {
     /*!
      @defgroup tslide tSlide
      @ingroup envelopes
-     @brief based on Max/MSP's slide~
+     @brief Based on Max/MSP's slide~
      @{
      
      @fn void    tSlide_init          (tSlide* const, float upSlide, float downSlide, LEAF* const leaf)

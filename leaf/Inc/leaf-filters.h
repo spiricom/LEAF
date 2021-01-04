@@ -770,7 +770,7 @@ extern "C" {
     /*!
      @defgroup tbutterworth tButterworth
      @ingroup filters
-     @brief
+     @brief Butterworth filter.
      @{
      
      @fn void    tButterworth_init           (tButterworth* const, int N, float f1, float f2, LEAF* const leaf, LEAF* const leaf)
@@ -837,7 +837,7 @@ extern "C" {
     /*!
      @defgroup tfir tFIR
      @ingroup filters
-     @brief
+     @brief Finite impulse response filter.
      @{
      
      @fn void    tFIR_init           (tFIR* const, float* coeffs, int numTaps, LEAF* const leaf)
@@ -883,7 +883,7 @@ extern "C" {
     /*!
      @defgroup tmedianfilter tMedianFilter
      @ingroup filters
-     @brief
+     @brief Median filter.
      @{
      
      @fn void    tMedianFilter_init           (tMedianFilter* const, int size, LEAF* const leaf)
@@ -1056,7 +1056,7 @@ extern "C" {
     /*!
      @defgroup tdiodefilter tDiodeFilter
      @ingroup filters
-     @brief
+     @brief Diode filter.
      @{
      
      @fn void    tDiodeFilter_init           (tDiodeFilter* const, float freq, float Q, LEAF* const leaf)

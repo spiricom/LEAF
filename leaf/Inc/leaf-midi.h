@@ -137,7 +137,7 @@ extern "C" {
     /*! @} 
      @defgroup tpoly tPoly
      @ingroup midi
-     @brief An object for polyphonic handling.
+     @brief Polyphony handler with glide and pitch bend options.
      @{
      
      @fn void    tPoly_init                  (tPoly* const poly, int maxNumVoices, LEAF* const leaf)
@@ -315,7 +315,7 @@ extern "C" {
     /*! @}
      @defgroup tsimplepoly tSimplePoly
      @ingroup midi
-     @brief An object for polyphonic handling.
+     @brief Polyphony handler.
      @{
      
      @fn void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices, LEAF* const leaf)
@@ -397,7 +397,6 @@ extern "C" {
      @} */
     typedef struct _tSimplePoly
     {
-        
         tMempool mempool;
         
         tStack stack;

@@ -34,7 +34,7 @@ extern "C" {
     /*!
      @defgroup t808cowbell t808Cowbell
      @ingroup instruments
-     @brief
+     @brief 808 drum machine cowbell.
      @{
      
      @fn void    t808Cowbell_init            (t808Cowbell* const, int useStick, LEAF* const leaf)
@@ -121,7 +121,7 @@ extern "C" {
     /*!
      @defgroup t808hihat t808Hihat
      @ingroup instruments
-     @brief
+     @brief 808 drum machine hihat.
      @{
      
      @fn void    t808Hihat_init                  (t808Hihat* const, LEAF* const leaf)
@@ -233,7 +233,7 @@ extern "C" {
     /*!
      @defgroup t808snare t808Snare
      @ingroup instruments
-     @brief
+     @brief 808 drum machine snare.
      @{
      
      @fn void    t808Snare_init                  (t808Snare* const, LEAF* const leaf)
@@ -339,7 +339,7 @@ extern "C" {
     /*!
      @defgroup t808kick t808Kick
      @ingroup instruments
-     @brief
+     @brief 808 drum machine kick.
      @{
      
      @fn void    t808Kick_init               (t808Kick* const, LEAF* const leaf)

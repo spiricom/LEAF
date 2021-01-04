@@ -31,7 +31,7 @@ extern "C" {
     /*!
      @defgroup ttable tTable
      @ingroup oscillators
-     @brief A general wavetable oscillator.
+     @brief General wavetable oscillator.
      @{
 
      @fn void    tTable_init  (tTable* const osc, float* table, int size, LEAF* const leaf)
@@ -89,7 +89,7 @@ extern "C" {
     /*!
      @defgroup tcycle tCycle
      @ingroup oscillators
-     @brief A cycle/sine waveform oscillator. Uses wavetable synthesis.
+     @brief Wavetable cycle/sine wave oscillator
      @{
 
      @fn void    tCycle_init         (tCycle* const osc, LEAF* const leaf)
@@ -142,7 +142,7 @@ extern "C" {
     /*!
      @defgroup ttriangle tTriangle
      @ingroup oscillators
-     @brief Anti-aliased Triangle waveform using wavetable interpolation. Wavetables constructed from sine components.
+     @brief Anti-aliased wavetable triangle wave oscillator.
      @{
      
      @fn void    tTriangle_init         (tTriangle* const osc, LEAF* const leaf)
@@ -197,7 +197,7 @@ extern "C" {
     /*!
      @defgroup tsquare tSquare
      @ingroup oscillators
-     @brief Anti-aliased Square waveform using wavetable interpolation. Wavetables constructed from sine components.
+     @brief Anti-aliased wavetable square wave oscillator.
      @{
      
      @fn void    tSquare_init         (tSquare* const osc, LEAF* const leaf)
@@ -254,7 +254,7 @@ extern "C" {
     /*!
      @defgroup tsawtooth tSawtooth
      @ingroup oscillators
-     @brief Anti-aliased Square waveform using wavetable interpolation. Wavetables constructed from sine components.
+     @brief Anti-aliased wavetable saw wave oscillator.
      @{
      
      @fn void    tSawtooth_init         (tSawtooth* const osc, LEAF* const leaf)
@@ -308,7 +308,7 @@ extern "C" {
     /*!
      @defgroup ttri tTri
      @ingroup oscillators
-     @brief
+     @brief Triangle wave oscillator with polyBLEP anti-aliasing.
      @{
      
      @fn void    tTri_init          (tTri* const osc, LEAF* const leaf)
@@ -364,7 +364,7 @@ extern "C" {
     /*!
      @defgroup tpulse tPulse
      @ingroup oscillators
-     @brief
+     @brief Pulse wave oscillator with polyBLEP anti-aliasing.
      @{
      
      @fn void    tPulse_init        (tPulse* const osc, LEAF* const leaf)
@@ -419,7 +419,7 @@ extern "C" {
     /*!
      @defgroup tsaw tSaw
      @ingroup oscillators
-     @brief
+     @brief Saw wave oscillator with polyBLEP anti-aliasing.
      @{
      
      @fn void    tSaw_init          (tSaw* const osc, LEAF* const leaf)
@@ -468,7 +468,7 @@ extern "C" {
     /*!
      @defgroup tphasor tPhasor
      @ingroup oscillators
-     @brief
+     @brief Aliasing phasor.
      @{
      
      @fn void    tPhasor_init        (tPhasor* const osc, LEAF* const leaf)
@@ -518,7 +518,7 @@ extern "C" {
     /*!
      @defgroup tnoise tNoise
      @ingroup oscillators
-     @brief
+     @brief Noise generator, capable of producing white or pink noise.
      @{
      
      @fn void    tNoise_init         (tNoise* const noise, NoiseType type, LEAF* const leaf)
@@ -577,7 +577,7 @@ extern "C" {
     /*!
      @defgroup tneuron tNeuron
      @ingroup oscillators
-     @brief A model of a neuron, adapted to act as an oscillator.
+     @brief Model of a neuron, adapted to act as an oscillator.
      @{
      
      @fn void    tNeuron_init        (tNeuron* const neuron, LEAF* const leaf)
@@ -669,7 +669,6 @@ extern "C" {
     
     typedef struct _tNeuron
     {
-        
         tMempool mempool;
         
         tPoleZero f;
@@ -716,7 +715,7 @@ extern "C" {
     /*!
      @defgroup tmbpulse tMBPulse
      @ingroup oscillators
-     @brief
+     @brief Pulse wave oscillator with minBLEP anti-aliasing.
      @{
      
      @fn void tMBPulse_init(tMBPulse* const osc, LEAF* const leaf)
@@ -785,7 +784,7 @@ extern "C" {
     /*!
      @defgroup tmbtriangle tMBTriangle
      @ingroup oscillators
-     @brief
+     @brief Triangle wave oscillator with minBLEP anti-aliasing.
      @{
      
      @fn void tMBTriangle_init(tMBTriangle* const osc, LEAF* const leaf)
@@ -855,7 +854,7 @@ extern "C" {
     /*!
      @defgroup tmbsaw tMBSaw
      @ingroup oscillators
-     @brief
+     @brief Saw wave oscillator with minBLEP anti-aliasing.
      @{
      
      @fn void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf)

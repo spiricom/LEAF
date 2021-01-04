@@ -79,8 +79,12 @@
  *
  * @section intro_sec Introduction
  *
- * This is the work in progress documentation of LEAF.
+ * LEAF (Lightweight Embedded Audio Framework) is a no-dependency C audio library intended for embedded systems.
  *
+ * This documentation is a work in progress and will eventually include usage instructions, examples, and descriptions of LEAF objects and functions.
+ */
+/*!
+ * @internal
  * @section install_sec Installation
  *
  * @subsection step1 Step 1: Opening the box
@@ -89,24 +93,42 @@
  */
 
 /*!
- * @defgroup leaf LEAF
- * @defgroup oscillators Oscillators
- * @defgroup filters Filters
- * @defgroup delay Delay
- * @defgroup reverb Reverb
- * @defgroup distortion Distortion
- * @defgroup effects Effects
- * @defgroup envelopes Envelopes
- * @defgroup dynamics Dynamics
- * @defgroup analysis Analysis
- * @defgroup instruments Instruments
- * @defgroup midi MIDI
- * @defgroup sampling Sampling
- * @defgroup physical Physical Models
- * @defgroup electrical Electrical Models
- * @defgroup mempool Mempool
- * @defgroup math Math
- * @defgroup tables Tables
+ @defgroup leaf LEAF
+ @brief The structure of an instance of LEAF.
+ @defgroup oscillators Oscillators
+ @brief Oscillators and generators.
+ @defgroup filters Filters
+ @brief Filters.
+ @defgroup delay Delay
+ @brief Delays.
+ @defgroup reverb Reverb
+ @brief Reverbs.
+ @defgroup distortion Distortion
+ @brief Degradation and oversampling.
+ @defgroup effects Effects
+ @brief Vocoders, pitch shifters, and more.
+ @defgroup envelopes Envelopes
+ @brief Envelopes and smoothers.
+ @defgroup dynamics Dynamics
+ @brief Compression and levelling.
+ @defgroup analysis Analysis
+ @brief Signal analysis.
+ @defgroup instruments Instruments
+ @brief Instruments.
+ @defgroup midi MIDI
+ @brief MIDI handling.
+ @defgroup sampling Sampling
+ @brief Samplers.
+ @defgroup physical Physical Models
+ @brief String models and more.
+ @defgroup electrical Electrical Models
+ @brief Circuit models.
+ @defgroup mempool Mempool
+ @brief Memory allocation.
+ @defgroup math Math
+ @brief Math functions.
+ @defgroup tables Tables
+ @brief Wavetables, filter tables, minBLEP tables, and more.
  */
 
 #ifdef __cplusplus
