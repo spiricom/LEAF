@@ -15,7 +15,7 @@
               jucerFormatVersion="1">
   <MAINGROUP id="F7Bywq" name="LEAF">
     <GROUP id="{F7096CF4-1A84-4CC8-A236-06FAE894451E}" name="Examples">
-      <FILE id="hMMOsl" name="basic-oscillators.c" compile="0" resource="0"
+      <FILE id="hMMOsl" name="basic-oscillators.c" compile="1" resource="0"
             file="../Examples/basic-oscillators.c"/>
       <FILE id="mVSe2h" name="basic-oscillators.h" compile="0" resource="0"
             file="../Examples/basic-oscillators.h"/>

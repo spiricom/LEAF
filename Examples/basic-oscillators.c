@@ -12,9 +12,11 @@
 
 void exampleInit()
 {
-    LEAF_init(44100, 64, mempool, 1000, &exampleRandom);
+    LEAF leaf;
     
-    tCycle_init(&cycle);
+    LEAF_init(&leaf, 44100, 128, mempool, 1000, &exampleRandom);
+    
+    tCycle_init(&cycle, &leaf);
     tCycle_setFreq(&cycle, 220);
 }
 

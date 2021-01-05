@@ -963,9 +963,9 @@ extern "C" {
     //==============================================================================
     
     /*!
-     @defgroup tdualpitchdetector tPitchDetector
+     @defgroup tdualpitchdetector tDualPitchDetector
      @ingroup analysis
-     @brief Combined pitch detection algorithm using boht Joel de Guzman's Q Audio DSP Library and Katya Vetters algorithms
+     @brief Combined pitch detection algorithm using both Joel de Guzman's Q Audio DSP Library and Katya Vetters algorithms
      @{
      
      @fn void tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, LEAF* const leaf)

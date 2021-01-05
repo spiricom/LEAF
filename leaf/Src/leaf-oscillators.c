@@ -86,6 +86,123 @@ void     tTableSampleRateChanged(tTable* const cy)
     c->inc = c->freq * leaf->invSampleRate;
 }
 
+void    tWavetable_init(tWavetable* const cy, float* table, int size, LEAF* const leaf)
+{
+    tWavetable_initToPool(cy, table, size, &leaf->mempool);
+}
+
+void    tWavetable_initToPool(tWavetable* const cy, float* table, int size, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tWavetable* c = *cy = (_tWavetable*)mpool_alloc(sizeof(_tTable), m);
+    c->mempool = m;
+    
+    // Determine base frequency
+    c->baseFreq = m->leaf->sampleRate / (float) size;
+    c->invBaseFreq = 1.0f / c->baseFreq;
+    
+    // Determine how many tables we need
+    c->numTables = 1;
+    float f = c->baseFreq;
+    while (f < 20000.f)
+    {
+        c->numTables++;
+        f *= 2.0f; // pass this multiplier in to set spacing of tables?
+    }
+    
+    c->size = size;
+
+    // Allocate memory for the tables
+    c->tables = (float**) mpool_alloc(sizeof(float*) * c->numTables, m);
+    for (int t = 0; t < c->numTables; ++t)
+    {
+        c->tables[t] = (float*) mpool_alloc(sizeof(float) * c->size, m);
+    }
+    
+    // Copy table
+    for (int i = 0; i < c->size; ++i)
+    {
+        c->tables[0][i] = table[i];
+    }
+    
+    // Make bandlimited copies at
+    f = m->leaf->sampleRate * 0.25f; //start at half nyquist
+    for (int t = 1; t < c->numTables; ++t)
+    {
+        tButterworth_initToPool(&c->bl, 4, -1.0f, f, mp);
+        for (int i = 0; i < c->size; ++i)
+        {
+            c->tables[t][i] = tButterworth_tick(&c->bl, table[i]);
+        }
+        tButterworth_free(&c->bl);
+        f *= 0.5f; //half the cutoff for next pass
+    }
+
+    c->inc = 0.0f;
+    c->phase = 0.0f;
+    
+    tWavetable_setFreq(cy, 220);
+}
+
+void    tWavetable_free(tWavetable* const cy)
+{
+    _tWavetable* c = *cy;
+    
+    for (int t = 0; t < c->numTables; ++t)
+    {
+        mpool_free((char*)c->tables[t], c->mempool);
+    }
+    mpool_free((char*)c->tables, c->mempool);
+    
+    mpool_free((char*)c, c->mempool);
+}
+
+float   tWavetable_tick(tWavetable* const cy)
+{
+    _tWavetable* c = *cy;
+    
+    float temp;
+    int idx;
+    float fracPart;
+    float samp0;
+    float samp1;
+    
+    // Phasor increment
+    c->phase += c->inc;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase < 0.0f) c->phase += 1.0f;
+    
+    // Wavetable synthesis
+    temp = c->size * c->phase;
+    idx = (int)temp;
+    fracPart = temp - (float)idx;
+    samp0 = c->tables[c->oct+1][idx] +
+    (c->tables[c->oct][idx] - c->tables[c->oct+1][idx]) * c->w;
+    if (++idx >= c->size) idx = 0;
+    samp1 = c->tables[c->oct+1][idx] +
+    (c->tables[c->oct][idx] - c->tables[c->oct+1][idx]) * c->w;
+    
+    return (samp0 + (samp1 - samp0) * fracPart);
+}
+
+void    tWavetable_setFreq(tWavetable* const cy, float freq)
+{
+    _tWavetable* c = *cy;
+    
+    LEAF* leaf = c->mempool->leaf;
+    
+    c->freq  = freq;
+    
+    c->inc = c->freq * leaf->invSampleRate;
+    
+    c->w = c->freq * c->invBaseFreq;
+    for (c->oct = 0; c->w > 2.0f; c->oct++)
+    {
+        c->w = 0.5f * c->w;
+    }
+    c->w = 2.0f - c->w;
+}
+
 #if LEAF_INCLUDE_SINE_TABLE
 // Cycle
 void    tCycle_init(tCycle* const cy, LEAF* const leaf)
@@ -338,6 +455,7 @@ void    tSawtooth_setFreq(tSawtooth* const cy, float freq)
     
     c->inc = c->freq * leaf->invSampleRate;
     
+    // base freq 20
     c->w = c->freq * INV_20;
     for (c->oct = 0; c->w > 2.0f; c->oct++)
     {
@@ -361,7 +479,7 @@ float   tSawtooth_tick(tSawtooth* const cy)
     
     // Wavetable synthesis
     out = __leaf_table_sawtooth[c->oct+1][idx] +
-         (__leaf_table_sawtooth[c->oct][idx] - __leaf_table_sawtooth[c->oct+1][idx]) * c->w;
+        (__leaf_table_sawtooth[c->oct][idx] - __leaf_table_sawtooth[c->oct+1][idx]) * c->w;
     
     return out;
 }

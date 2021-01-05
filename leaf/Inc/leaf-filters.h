@@ -777,11 +777,17 @@ extern "C" {
      @brief Initialize a tButterworth to the default mempool of a LEAF instance.
      @param filter A pointer to the tButterworth to initialize.
      @param leaf A pointer to the leaf instance.
+     @param order Order of the filter.
+     @param lowCutoff Lower cutoff frequency.
+     @param upperCutoff Upper cutoff frequency.
      
      @fn void    tButterworth_initToPool     (tButterworth* const, int N, float f1, float f2, tMempool* const)
      @brief Initialize a tButterworth to a specified mempool.
      @param filter A pointer to the tButterworth to initialize.
      @param mempool A pointer to the tMempool to use.
+     @param order Order of the filter.
+     @param lowCutoff Lower cutoff frequency.
+     @param upperCutoff Upper cutoff frequency.
      
      @fn void    tButterworth_free           (tButterworth* const)
      @brief Free a tButterworth from its mempool.
@@ -808,15 +814,13 @@ extern "C" {
 #define NUM_SVF_BW 16
     typedef struct _tButterworth
     {
-        
         tMempool mempool;
         
         float gain;
+        int order;
+        int numSVF;
         
-        int N;
-        
-        tSVF low[NUM_SVF_BW];
-        tSVF high[NUM_SVF_BW];
+        tSVF* svf;
         
         float f1,f2;
     } _tButterworth;

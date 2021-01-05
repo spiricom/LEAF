@@ -54,6 +54,10 @@
 //! Include tables for minblep insertion, required for all tMB objects.
 #define LEAF_INCLUDE_MINBLEP_TABLES 1
 
+#define LEAF_NO_DENORMAL_CHECK 0
+
+#define LEAF_USE_CMSIS 0
+
 //==============================================================================
 
 #endif // LEAF_CONFIG_H_INCLUDED

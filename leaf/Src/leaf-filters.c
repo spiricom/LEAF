@@ -828,7 +828,6 @@ void    tSVF_initToPool     (tSVF* const svff, SVFType type, float freq, float Q
         svf->cL = 0.0f;
     }
 
-
     else if (type == SVFTypePeak)
     {
         svf->cH = 1.0f;
@@ -974,12 +973,12 @@ void     tEfficientSVF_setQ(tEfficientSVF* const svff, float Q)
 #endif // LEAF_INCLUDE_FILTERTAN_TABLE
 
 /* Highpass */
-void    tHighpass_init(tHighpass* const ft, float freq, LEAF* const leaf)
+void tHighpass_init(tHighpass* const ft, float freq, LEAF* const leaf)
 {
     tHighpass_initToPool(ft, freq, &leaf->mempool);
 }
 
-void    tHighpass_initToPool    (tHighpass* const ft, float freq, tMempool* const mp)
+void tHighpass_initToPool    (tHighpass* const ft, float freq, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tHighpass* f = *ft = (_tHighpass*) mpool_calloc(sizeof(_tHighpass), m);
@@ -994,14 +993,14 @@ void    tHighpass_initToPool    (tHighpass* const ft, float freq, tMempool* cons
     f->frequency = freq;
 }
 
-void    tHighpass_free  (tHighpass* const ft)
+void tHighpass_free  (tHighpass* const ft)
 {
     _tHighpass* f = *ft;
     
     mpool_free((char*)f, f->mempool);
 }
 
-void     tHighpass_setFreq(tHighpass* const ft, float freq)
+void tHighpass_setFreq(tHighpass* const ft, float freq)
 {
     _tHighpass* f = *ft;
     LEAF* leaf = f->mempool->leaf;
@@ -1011,14 +1010,14 @@ void     tHighpass_setFreq(tHighpass* const ft, float freq)
     
 }
 
-float     tHighpass_getFreq(tHighpass* const ft)
+float tHighpass_getFreq(tHighpass* const ft)
 {
     _tHighpass* f = *ft;
     return f->frequency;
 }
 
 // From JOS DC Blocker
-float   tHighpass_tick(tHighpass* const ft, float x)
+float tHighpass_tick(tHighpass* const ft, float x)
 {
     _tHighpass* f = *ft;
     f->ys = x - f->xs + f->R * f->ys;
@@ -1034,12 +1033,12 @@ void tHighpassSampleRateChanged(tHighpass* const ft)
     f->R = (1.0f-((f->frequency * 2.0f * 3.14f) * leaf->invSampleRate));
 }
 
-void tButterworth_init(tButterworth* const ft, int N, float f1, float f2, LEAF* const leaf)
+void tButterworth_init(tButterworth* const ft, int order, float f1, float f2, LEAF* const leaf)
 {
-    tButterworth_initToPool(ft, N, f1, f2, &leaf->mempool);
+    tButterworth_initToPool(ft, order, f1, f2, &leaf->mempool);
 }
 
-void    tButterworth_initToPool     (tButterworth* const ft, int N, float f1, float f2, tMempool* const mp)
+void    tButterworth_initToPool     (tButterworth* const ft, int order, float f1, float f2, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tButterworth* f = *ft = (_tButterworth*) mpool_alloc(sizeof(_tButterworth), m);
@@ -1049,14 +1048,19 @@ void    tButterworth_initToPool     (tButterworth* const ft, int N, float f1, fl
     f->f2 = f2;
     f->gain = 1.0f;
     
-    f->N = N;
+    f->numSVF = f->order = order;
+    if (f1 >= 0.0f && f2 >= 0.0f) f->numSVF *= 2;
     
-    if (f->N > NUM_SVF_BW) f->N = NUM_SVF_BW;
+    f->svf = (tSVF*) mpool_alloc(sizeof(tSVF) * f->numSVF, m);
     
-    for(int i = 0; i < N/2; ++i)
+    int o = 0;
+    if (f1 >= 0.0f) o = f->order;
+    for(int i = 0; i < f->order; ++i)
     {
-        tSVF_initToPool(&f->low[i], SVFTypeHighpass, f1, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*N)), mp);
-        tSVF_initToPool(&f->high[i], SVFTypeLowpass, f2, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*N)), mp);
+        if (f1 >= 0.0f)
+            tSVF_initToPool(&f->svf[i], SVFTypeHighpass, f1, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*f->order)), mp);
+        if (f2 >= 0.0f)
+            tSVF_initToPool(&f->svf[i+o], SVFTypeLowpass, f2, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*f->order)), mp);
     }
 }
 
@@ -1064,11 +1068,8 @@ void    tButterworth_free   (tButterworth* const ft)
 {
     _tButterworth* f = *ft;
     
-    for(int i = 0; i < f->N/2; ++i)
-    {
-        tSVF_free(&f->low[i]);
-        tSVF_free(&f->high[i]);
-    }
+    for(int i = 0; i < f->numSVF; ++i)
+        tSVF_free(&f->svf[i]);
     
     mpool_free((char*)f, f->mempool);
 }
@@ -1077,11 +1078,9 @@ float tButterworth_tick(tButterworth* const ft, float samp)
 {
     _tButterworth* f = *ft;
     
-    for(int i = 0; i < ((f->N)/2); ++i)
-    {
-        samp = tSVF_tick(&f->low[i],samp);
-        samp = tSVF_tick(&f->high[i],samp);
-    }
+    for(int i = 0; i < f->numSVF; ++i)
+        samp = tSVF_tick(&f->svf[i], samp);
+    
     return samp;
 }
 
@@ -1089,29 +1088,36 @@ void tButterworth_setF1(tButterworth* const ft, float f1)
 {
     _tButterworth* f = *ft;
     
+    if (f->f1 < 0.0f || f1 < 0.0f) return;
+    
     f->f1 = f1;
-    for(int i = 0; i < ((f->N)/2); ++i)        tSVF_setFreq(&f->low[i], f1);
+    for (int i = 0; i < f->order; ++i) tSVF_setFreq(&f->svf[i], f1);
 }
 
 void tButterworth_setF2(tButterworth* const ft, float f2)
 {
     _tButterworth* f = *ft;
     
+    if (f->f2 < 0.0f || f2 < 0.0f) return;
+    
+    int o = 0;
+    if (f->f1 >= 0.0f) o = f->order;
     f->f2 = f2;
-    for(int i = 0; i < ((f->N)/2); ++i)        tSVF_setFreq(&f->high[i], f2);
+    for (int i = 0; i < f->order; ++i) tSVF_setFreq(&f->svf[i+o], f2);
 }
 
 void tButterworth_setFreqs(tButterworth* const ft, float f1, float f2)
 {
-    _tButterworth* f = *ft;
-    
-    f->f1 = f1;
-    f->f2 = f2;
-    for(int i = 0; i < ((f->N)/2); ++i)
-    {
-        tSVF_setFreq(&f->low[i], f1);
-        tSVF_setFreq(&f->high[i], f2);
-    }
+//    _tButterworth* f = *ft;
+    tButterworth_setF1(ft, f1);
+    tButterworth_setF1(ft, f2);
+//    f->f1 = f1;
+//    f->f2 = f2;
+//    for(int i = 0; i < ((f->N)/2); ++i)
+//    {
+//        tSVF_setFreq(&f->low[i], f1);
+//        tSVF_setFreq(&f->high[i], f2);
+//    }
 }
 
 void    tFIR_init(tFIR* const firf, float* coeffs, int numTaps, LEAF* const leaf)

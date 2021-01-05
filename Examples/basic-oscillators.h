@@ -8,7 +8,7 @@
   ==============================================================================
 */
 
-#include "../LEAF/leaf.h"
+#include "../leaf/leaf.h"
 
 char mempool[1000];
 tCycle cycle;
