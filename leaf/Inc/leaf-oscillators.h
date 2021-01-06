@@ -91,18 +91,20 @@ extern "C" {
      @brief Anti-aliased wavetable oscillator.
      @{
      
-     @fn void    tWavetable_init  (tWavetable* const osc, float* table, int size, LEAF* const leaf)
+     @fn void    tWavetable_init  (tWavetable* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
      @brief Initialize a tWavetable to the default mempool of a LEAF instance.
      @param osc A pointer to the tWavetable to initialize.
      @param table A pointer to the wavetable data.
      @param size The number of samples in the wavetable.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tWavetable_initToPool   (tWavetable* const osc, float* table, int size, tMempool* const mempool)
+     @fn void    tWavetable_initToPool   (tWavetable* const osc, float* table, int size, float maxFreq, tMempool* const mempool)
      @brief Initialize a tWavetable to a specified mempool.
      @param osc A pointer to the tWavetable to initialize.
      @param table A pointer to the wavetable data.
      @param size The number of samples in the wave table.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed. 
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tWavetable_free         (tWavetable* const osc)
@@ -157,18 +159,20 @@ extern "C" {
      @brief A more space-efficient anti-aliased wavetable oscillator than tWavetable but with slightly worse fidelity.
      @{
      
-     @fn void    tCompactWavetable_init  (tCompactWavetable* const osc, float* table, int size, LEAF* const leaf)
+     @fn void    tCompactWavetable_init  (tCompactWavetable* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
      @brief Initialize a tCompactWavetable to the default mempool of a LEAF instance.
      @param osc A pointer to the tCompactWavetable to initialize.
      @param table A pointer to the wavetable data.
      @param size The number of samples in the wavetable.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tCompactWavetable_initToPool   (tCompactWavetable* const osc, float* table, int size, tMempool* const mempool)
+     @fn void    tCompactWavetable_initToPool   (tCompactWavetable* const osc, float* table, int size, float maxFreq, tMempool* const mempool)
      @brief Initialize a tCompactWavetable to a specified mempool.
      @param osc A pointer to the tCompactWavetable to initialize.
      @param table A pointer to the wavetable data.
      @param size The number of samples in the wave table.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tCompactWavetable_free         (tCompactWavetable* const osc)
