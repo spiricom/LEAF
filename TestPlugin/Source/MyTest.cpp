@@ -9,7 +9,6 @@
 #include "LEAFTest.h"
 #include "MyTest.h"
 
-
 static void leaf_pool_report(void);
 static void leaf_pool_dump(void);
 static void run_pool_test(void);
@@ -17,11 +16,6 @@ static void run_pool_test(void);
 tMBSaw bsaw;
 tMBTriangle btri;
 tMBPulse bpulse;
-
-tRetune retune;
-tSimpleRetune sretune;
-
-tCompressor compressor;
 
 tSVF lp, hp;
 
@@ -31,6 +25,12 @@ tZeroCrossingCounter zc;
 tEnvelopeFollower ef;
 
 tTriangle tri;
+
+tNoise noise;
+tButterworth bw;
+
+tWavetable wt;
+tCompactWavetable cwt;
 
 tBuffer samp;
 tMBSampler sampler;
@@ -55,9 +55,8 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
-    tRetune_init(&retune, 1, mtof(48), mtof(72), 2048, &leaf);
-    tSimpleRetune_init(&sretune, 1, mtof(48), mtof(72), 2048, &leaf);
-    tSimpleRetune_setMode(&sretune, 1);
+    tWavetable_init(&wt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
+    tCompactWavetable_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
 }
 
 inline double getSawFall(double angle) {
@@ -72,7 +71,9 @@ inline double getSawFall(double angle) {
 float   LEAFTest_tick            (float input)
 {
 //    return tRetune_tick(&retune, input)[0];
-    return tSimpleRetune_tick(&sretune, input);
+//    return tSimpleRetune_tick(&sretune, input);
+    return tWavetable_tick(&wt);
+    return tCompactWavetable_tick(&cwt);
 }
 
 int firstFrame = 1;
@@ -80,8 +81,10 @@ bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
     float val = getSliderValue("slider1");
-    tRetune_tuneVoice(&retune, 0, val * 3.0f + 0.5f);
-    tSimpleRetune_tuneVoice(&sretune, 0, 300);
+    tWavetable_setFreq(&wt, val * 40000.);
+    tCompactWavetable_setFreq(&cwt, val * 10000.);
+//    tRetune_tuneVoice(&retune, 0, val * 3.0f + 0.5f);
+//    tSimpleRetune_tuneVoice(&sretune, 0, 300);
 
     val = getSliderValue("slider2");
 //    tRetune_setPitchFactor(&retune, val * 3.0f + 0.5f, 1);

@@ -35,6 +35,7 @@ extern "C" {
     };
 
 #define SQRT8 2.82842712475f
+#define LEAF_SQRT2 1.41421356237f
 #define WSCALE 1.30612244898f
 #define PI              (3.14159265358979f)
 #define TWO_PI          (6.28318530717958f)

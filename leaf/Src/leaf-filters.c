@@ -1058,9 +1058,9 @@ void    tButterworth_initToPool     (tButterworth* const ft, int order, float f1
     for(int i = 0; i < f->order; ++i)
     {
         if (f1 >= 0.0f)
-            tSVF_initToPool(&f->svf[i], SVFTypeHighpass, f1, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*f->order)), mp);
+            tSVF_initToPool(&f->svf[i], SVFTypeHighpass, f1, 0.5f/cosf((1.0f+2.0f*i)*PI/(4*f->order)), mp);
         if (f2 >= 0.0f)
-            tSVF_initToPool(&f->svf[i+o], SVFTypeLowpass, f2, 0.5f/cosf((1.0f+2.0f*i)*PI/(2*f->order)), mp);
+            tSVF_initToPool(&f->svf[i+o], SVFTypeLowpass, f2, 0.5f/cosf((1.0f+2.0f*i)*PI/(4*f->order)), mp);
     }
 }
 
@@ -1071,6 +1071,7 @@ void    tButterworth_free   (tButterworth* const ft)
     for(int i = 0; i < f->numSVF; ++i)
         tSVF_free(&f->svf[i]);
     
+    mpool_free((char*)f->svf, f->mempool);
     mpool_free((char*)f, f->mempool);
 }
 

@@ -86,15 +86,15 @@ void     tTableSampleRateChanged(tTable* const cy)
     c->inc = c->freq * leaf->invSampleRate;
 }
 
-void    tWavetable_init(tWavetable* const cy, float* table, int size, LEAF* const leaf)
+void tWavetable_init(tWavetable* const cy, const float* table, int size, float maxFreq, LEAF* const leaf)
 {
-    tWavetable_initToPool(cy, table, size, &leaf->mempool);
+    tWavetable_initToPool(cy, table, size, maxFreq, &leaf->mempool);
 }
 
-void    tWavetable_initToPool(tWavetable* const cy, float* table, int size, tMempool* const mp)
+void tWavetable_initToPool(tWavetable* const cy, const float* table, int size, float maxFreq, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tWavetable* c = *cy = (_tWavetable*)mpool_alloc(sizeof(_tTable), m);
+    _tWavetable* c = *cy = (_tWavetable*) mpool_alloc(sizeof(_tWavetable), m);
     c->mempool = m;
     
     // Determine base frequency
@@ -102,12 +102,13 @@ void    tWavetable_initToPool(tWavetable* const cy, float* table, int size, tMem
     c->invBaseFreq = 1.0f / c->baseFreq;
     
     // Determine how many tables we need
-    c->numTables = 1;
+    // Assume we need at least 2, the fundamental + one to account for setting extra anti aliasing
+    c->numTables = 2;
     float f = c->baseFreq;
-    while (f < 20000.f)
+    while (f < maxFreq)
     {
         c->numTables++;
-        f *= 2.0f; // pass this multiplier in to set spacing of tables?
+        f *= 2.0f; // pass this multiplier in to set spacing of tables? would need to change setFreq too
     }
     
     c->size = size;
@@ -125,26 +126,36 @@ void    tWavetable_initToPool(tWavetable* const cy, float* table, int size, tMem
         c->tables[0][i] = table[i];
     }
     
-    // Make bandlimited copies at
-    f = m->leaf->sampleRate * 0.25f; //start at half nyquist
+    // Make bandlimited copies
+    f = m->leaf->sampleRate * 0.25; //start at half nyquist
+    // Not worth going over order 8 I think, and even 8 is only marginally better than 4.
+    tButterworth_initToPool(&c->bl, 8, -1.0f, f, mp);
     for (int t = 1; t < c->numTables; ++t)
     {
-        tButterworth_initToPool(&c->bl, 4, -1.0f, f, mp);
-        for (int i = 0; i < c->size; ++i)
+        tButterworth_setF2(&c->bl, f);
+        // Do several passes here to prevent errors at the beginning of the waveform
+        // Not sure how many passes to do, seem to need more as the filter cutoff goes down
+        // 12 might be excessive but seems to work for now.
+        for (int p = 0; p < 12; ++p)
         {
-            c->tables[t][i] = tButterworth_tick(&c->bl, table[i]);
+            for (int i = 0; i < c->size; ++i)
+            {
+                c->tables[t][i] = tButterworth_tick(&c->bl, c->tables[t-1][i]);
+            }
         }
-        tButterworth_free(&c->bl);
-        f *= 0.5f; //half the cutoff for next pass
+        f *= 0.5f; //halve the cutoff for next pass
     }
+    tButterworth_free(&c->bl);
+
 
     c->inc = 0.0f;
     c->phase = 0.0f;
+    c->aa = 0.5f;
     
     tWavetable_setFreq(cy, 220);
 }
 
-void    tWavetable_free(tWavetable* const cy)
+void tWavetable_free(tWavetable* const cy)
 {
     _tWavetable* c = *cy;
     
@@ -153,17 +164,16 @@ void    tWavetable_free(tWavetable* const cy)
         mpool_free((char*)c->tables[t], c->mempool);
     }
     mpool_free((char*)c->tables, c->mempool);
-    
     mpool_free((char*)c, c->mempool);
 }
 
-float   tWavetable_tick(tWavetable* const cy)
+float tWavetable_tick(tWavetable* const cy)
 {
     _tWavetable* c = *cy;
     
     float temp;
     int idx;
-    float fracPart;
+    float frac;
     float samp0;
     float samp1;
     
@@ -174,18 +184,26 @@ float   tWavetable_tick(tWavetable* const cy)
     
     // Wavetable synthesis
     temp = c->size * c->phase;
-    idx = (int)temp;
-    fracPart = temp - (float)idx;
-    samp0 = c->tables[c->oct+1][idx] +
-    (c->tables[c->oct][idx] - c->tables[c->oct+1][idx]) * c->w;
-    if (++idx >= c->size) idx = 0;
-    samp1 = c->tables[c->oct+1][idx] +
-    (c->tables[c->oct][idx] - c->tables[c->oct+1][idx]) * c->w;
     
-    return (samp0 + (samp1 - samp0) * fracPart);
+    idx = (int)temp;
+    frac = temp - (float)idx;
+    samp0 = c->tables[c->oct][idx];
+    if (++idx >= c->size) idx = 0;
+    samp1 = c->tables[c->oct][idx];
+    
+    float oct0 = (samp0 + (samp1 - samp0) * frac);
+    
+    idx = (int)temp;
+    samp0 = c->tables[c->oct+1][idx];
+    if (++idx >= c->size) idx = 0;
+    samp1 = c->tables[c->oct+1][idx];
+    
+    float oct1 = (samp0 + (samp1 - samp0) * frac);
+    
+    return oct0 + (oct1 - oct0) * c->w;
 }
 
-void    tWavetable_setFreq(tWavetable* const cy, float freq)
+void tWavetable_setFreq(tWavetable* const cy, float freq)
 {
     _tWavetable* c = *cy;
     
@@ -195,12 +213,173 @@ void    tWavetable_setFreq(tWavetable* const cy, float freq)
     
     c->inc = c->freq * leaf->invSampleRate;
     
-    c->w = c->freq * c->invBaseFreq;
-    for (c->oct = 0; c->w > 2.0f; c->oct++)
+    // abs for negative frequencies
+    c->w = fabsf(c->freq * c->invBaseFreq);
+    
+    // Probably ok to use a log2 approx here; won't effect tuning at all, just crossfading between octave tables
+    c->w = log2f_approx(c->w) + c->aa; // adding an offset here will shift our table selection upward, reducing aliasing but lower high freq fidelity. +1.0f should remove all aliasing
+    if (c->w < 0.0f) c->w = 0.0f; // If c->w is < 0.0f, then freq is less than our base freq
+    c->oct = (int)c->w;
+    c->w -= c->oct;
+    
+    // When out of range of our tables, this will prevent a crash.
+    // Also causes a blip but fine since we're above maxFreq at this point.
+    if (c->oct >= c->numTables - 1) c->oct = c->numTables - 2;
+}
+
+void tWavetable_setAntiAliasing(tWavetable* const cy, float aa)
+{
+    _tWavetable* c = *cy;
+    
+    c->aa = aa;
+    tWavetable_setFreq(cy, c->freq);
+}
+
+void tCompactWavetable_init(tCompactWavetable* const cy, const float* table, int size, float maxFreq, LEAF* const leaf)
+{
+    tCompactWavetable_initToPool(cy, table, size, maxFreq, &leaf->mempool);
+}
+
+void tCompactWavetable_initToPool(tCompactWavetable* const cy, const float* table, int size, float maxFreq, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tCompactWavetable* c = *cy = (_tCompactWavetable*) mpool_alloc(sizeof(_tCompactWavetable), m);
+    c->mempool = m;
+    
+    // Determine base frequency
+    c->baseFreq = m->leaf->sampleRate / (float) size;
+    c->invBaseFreq = 1.0f / c->baseFreq;
+    
+    // Determine how many tables we need
+    c->numTables = 2;
+    float f = c->baseFreq;
+    while (f < maxFreq)
     {
-        c->w = 0.5f * c->w;
+        c->numTables++;
+        f *= 2.0f; // pass this multiplier in to set spacing of tables?
     }
-    c->w = 2.0f - c->w;
+        
+    // Allocate memory for the tables
+    c->tables = (float**) mpool_alloc(sizeof(float*) * c->numTables, c->mempool);
+    c->sizes = (int*) mpool_alloc(sizeof(int) * c->numTables, c->mempool);
+    int n = size;
+    for (int t = 0; t < c->numTables; ++t)
+    {
+        c->sizes[t] = n;
+        c->tables[t] = (float*) mpool_alloc(sizeof(float) * c->sizes[t], m);
+        n = c->sizes[t] / 2;
+    }
+    
+    // Copy table
+    for (int i = 0; i < c->sizes[0]; ++i)
+    {
+        c->tables[0][i] = table[i];
+    }
+    
+    // Make bandlimited copies
+    // Not worth going over order 8 I think, and even 8 is only marginally better than 4.
+    tButterworth_initToPool(&c->bl, 8, -1.0f, m->leaf->sampleRate * 0.25f, mp);
+    tOversampler_initToPool(&c->ds, 2, 1, mp);
+    for (int t = 1; t < c->numTables; ++t)
+    {
+        // Similar to tWavetable, doing multiple passes here helps, but not sure what number is optimal
+        for (int p = 0; p < 12; ++p)
+        {
+            for (int i = 0; i < c->sizes[t]; ++i)
+            {
+                c->dsBuffer[0] = tButterworth_tick(&c->bl, c->tables[t-1][i*2]);
+                c->dsBuffer[1] = tButterworth_tick(&c->bl, c->tables[t-1][(i*2)+1]);
+                c->tables[t][i] = tOversampler_downsample(&c->ds, c->dsBuffer);
+            }
+        }
+    }
+    tOversampler_free(&c->ds);
+    tButterworth_free(&c->bl);
+
+    c->inc = 0.0f;
+    c->phase = 0.0f;
+    c->aa = 0.5f;
+    
+    tCompactWavetable_setFreq(cy, 220);
+}
+
+void    tCompactWavetable_free(tCompactWavetable* const cy)
+{
+    _tCompactWavetable* c = *cy;
+    
+    for (int t = 0; t < c->numTables; ++t)
+    {
+        mpool_free((char*)c->tables[t], c->mempool);
+    }
+    mpool_free((char*)c->tables, c->mempool);
+    mpool_free((char*)c->sizes, c->mempool);
+    mpool_free((char*)c, c->mempool);
+}
+
+float   tCompactWavetable_tick(tCompactWavetable* const cy)
+{
+    _tCompactWavetable* c = *cy;
+    
+    float temp;
+    int idx;
+    float frac;
+    float samp0;
+    float samp1;
+    
+    // Phasor increment
+    c->phase += c->inc;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase < 0.0f) c->phase += 1.0f;
+    
+    // Wavetable synthesis
+    temp = c->sizes[c->oct] * c->phase;
+    idx = (int)temp;
+    frac = temp - (float)idx;
+    samp0 = c->tables[c->oct][idx];
+    if (++idx >= c->sizes[c->oct]) idx = 0;
+    samp1 = c->tables[c->oct][idx];
+    
+    float oct0 = (samp0 + (samp1 - samp0) * frac);
+    
+    temp = c->sizes[c->oct+1] * c->phase;
+    idx = (int)temp;
+    frac = temp - (float)idx;
+    samp0 = c->tables[c->oct+1][idx];
+    if (++idx >= c->sizes[c->oct+1]) idx = 0;
+    samp1 = c->tables[c->oct+1][idx];
+    
+    float oct1 = (samp0 + (samp1 - samp0) * frac);
+    
+    return oct0 + (oct1 - oct0) * c->w;
+}
+
+void    tCompactWavetable_setFreq(tCompactWavetable* const cy, float freq)
+{
+    _tCompactWavetable* c = *cy;
+    
+    LEAF* leaf = c->mempool->leaf;
+    
+    c->freq  = freq;
+    
+    c->inc = c->freq * leaf->invSampleRate;
+    
+    // abs for negative frequencies
+    c->w = fabsf(c->freq * c->invBaseFreq);
+    
+    // Probably ok to use a log2 approx here; won't effect tuning at all, just crossfading between octave tables
+    c->w = log2f_approx(c->w) + c->aa;//+ LEAF_SQRT2 - 1.0f; adding an offset here will shift our table selection upward, reducing aliasing but lower high freq fidelity. +1.0f should remove all aliasing
+    if (c->w < 0.0f) c->w = 0.0f; // If c->w is < 0.0f, then freq is less than our base freq
+    c->oct = (int)c->w;
+    c->w -= c->oct;
+    if (c->oct >= c->numTables - 1) c->oct = c->numTables - 2;
+}
+
+void tCompactWavetable_setAntiAliasing(tCompactWavetable* const cy, float aa)
+{
+    _tCompactWavetable* c = *cy;
+    
+    c->aa = aa;
+    tCompactWavetable_setFreq(cy, c->freq);
 }
 
 #if LEAF_INCLUDE_SINE_TABLE
@@ -243,9 +422,9 @@ void     tCycle_setFreq(tCycle* const cy, float freq)
 float   tCycle_tick(tCycle* const cy)
 {
     _tCycle* c = *cy;
-    float temp;;
-    int intPart;;
-    float fracPart;
+    float temp;
+    int idx;
+    float frac;
     float samp0;
     float samp1;
     
@@ -257,13 +436,13 @@ float   tCycle_tick(tCycle* const cy)
     // Wavetable synthesis
 
     temp = SINE_TABLE_SIZE * c->phase;
-    intPart = (int)temp;
-    fracPart = temp - (float)intPart;
-    samp0 = __leaf_table_sinewave[intPart];
-    if (++intPart >= SINE_TABLE_SIZE) intPart = 0;
-    samp1 = __leaf_table_sinewave[intPart];
+    idx = (int)temp;
+    frac = temp - (float)idx;
+    samp0 = __leaf_table_sinewave[idx];
+    if (++idx >= SINE_TABLE_SIZE) idx = 0;
+    samp1 = __leaf_table_sinewave[idx];
 
-    return (samp0 + (samp1 - samp0) * fracPart);
+    return (samp0 + (samp1 - samp0) * frac);
 }
 
 void     tCycleSampleRateChanged (tCycle* const cy)
@@ -310,12 +489,14 @@ void tTriangle_setFreq(tTriangle* const cy, float freq)
     
     c->inc = c->freq * leaf->invSampleRate;
     
-    c->w = c->freq * INV_20;
-    for (c->oct = 0; c->w > 2.0f; c->oct++)
-    {
-        c->w = 0.5f * c->w;
-    }
-    c->w = 2.0f - c->w;
+    // abs for negative frequencies
+    c->w = fabsf(c->freq * (TRI_TABLE_SIZE * leaf->invSampleRate));
+    
+    c->w = log2f_approx(c->w);//+ LEAF_SQRT2 - 1.0f; adding an offset here will shift our table selection upward, reducing aliasing but lower high freq fidelity. +1.0f should remove all aliasing
+    if (c->w < 0.0f) c->w = 0.0f;
+    c->oct = (int)c->w;
+    c->w -= c->oct;
+    if (c->oct >= 10) c->oct = 9;
 }
 
 
@@ -323,20 +504,36 @@ float   tTriangle_tick(tTriangle* const cy)
 {
     _tTriangle* c = *cy;
     
+    float temp;
+    int idx;
+    float frac;
+    float samp0;
+    float samp1;
+    
     // Phasor increment
     c->phase += c->inc;
     while (c->phase >= 1.0f) c->phase -= 1.0f;
     while (c->phase < 0.0f) c->phase += 1.0f;
-    
-    float out = 0.0f;
-    
-    int idx = (int)(c->phase * TRI_TABLE_SIZE);
-    
+
     // Wavetable synthesis
-    out = __leaf_table_triangle[c->oct+1][idx] +
-         (__leaf_table_triangle[c->oct][idx] - __leaf_table_triangle[c->oct+1][idx]) * c->w;
+    temp = TRI_TABLE_SIZE * c->phase;
     
-    return out;
+    idx = (int)temp;
+    frac = temp - (float)idx;
+    samp0 = __leaf_table_triangle[c->oct][idx];
+    if (++idx >= TRI_TABLE_SIZE) idx = 0;
+    samp1 = __leaf_table_triangle[c->oct][idx];
+    
+    float oct0 = (samp0 + (samp1 - samp0) * frac);
+    
+    idx = (int)temp;
+    samp0 = __leaf_table_triangle[c->oct+1][idx];
+    if (++idx >= TRI_TABLE_SIZE) idx = 0;
+    samp1 = __leaf_table_triangle[c->oct+1][idx];
+    
+    float oct1 = (samp0 + (samp1 - samp0) * frac);
+    
+    return oct0 + (oct1 - oct0) * c->w;
 }
 
 void     tTriangleSampleRateChanged (tTriangle* const cy)
@@ -383,32 +580,50 @@ void    tSquare_setFreq(tSquare* const cy, float freq)
     
     c->inc = c->freq * leaf->invSampleRate;
     
-    c->w = c->freq * INV_20;
-    for (c->oct = 0; c->w > 2.0f; c->oct++)
-    {
-        c->w = 0.5f * c->w;
-    }
-    c->w = 2.0f - c->w;
+    // abs for negative frequencies
+    c->w = fabsf(c->freq * (SQR_TABLE_SIZE * leaf->invSampleRate));
+    
+    c->w = log2f_approx(c->w);//+ LEAF_SQRT2 - 1.0f; adding an offset here will shift our table selection upward, reducing aliasing but lower high freq fidelity. +1.0f should remove all aliasing
+    if (c->w < 0.0f) c->w = 0.0f;
+    c->oct = (int)c->w;
+    c->w -= c->oct;
+    if (c->oct >= 10) c->oct = 9;
 }
 
 float   tSquare_tick(tSquare* const cy)
 {
     _tSquare* c = *cy;
     
+    float temp;
+    int idx;
+    float frac;
+    float samp0;
+    float samp1;
+    
     // Phasor increment
     c->phase += c->inc;
     while (c->phase >= 1.0f) c->phase -= 1.0f;
     while (c->phase < 0.0f) c->phase += 1.0f;
-    
-    float out = 0.0f;
-    
-    int idx = (int)(c->phase * SQR_TABLE_SIZE);
-    
+
     // Wavetable synthesis
-    out = __leaf_table_squarewave[c->oct+1][idx] +
-         (__leaf_table_squarewave[c->oct][idx] - __leaf_table_squarewave[c->oct+1][idx]) * c->w;
+    temp = SQR_TABLE_SIZE * c->phase;
     
-    return out;
+    idx = (int)temp;
+    frac = temp - (float)idx;
+    samp0 = __leaf_table_squarewave[c->oct][idx];
+    if (++idx >= SQR_TABLE_SIZE) idx = 0;
+    samp1 = __leaf_table_squarewave[c->oct][idx];
+    
+    float oct0 = (samp0 + (samp1 - samp0) * frac);
+    
+    idx = (int)temp;
+    samp0 = __leaf_table_squarewave[c->oct+1][idx];
+    if (++idx >= SQR_TABLE_SIZE) idx = 0;
+    samp1 = __leaf_table_squarewave[c->oct+1][idx];
+    
+    float oct1 = (samp0 + (samp1 - samp0) * frac);
+    
+    return oct0 + (oct1 - oct0) * c->w;
 }
 
 void     tSquareSampleRateChanged (tSquare* const cy)
@@ -455,33 +670,50 @@ void    tSawtooth_setFreq(tSawtooth* const cy, float freq)
     
     c->inc = c->freq * leaf->invSampleRate;
     
-    // base freq 20
-    c->w = c->freq * INV_20;
-    for (c->oct = 0; c->w > 2.0f; c->oct++)
-    {
-        c->w = 0.5f * c->w;
-    }
-    c->w = 2.0f - c->w;
+    // abs for negative frequencies
+    c->w = fabsf(c->freq * (SAW_TABLE_SIZE * leaf->invSampleRate));
+    
+    c->w = log2f_approx(c->w);//+ LEAF_SQRT2 - 1.0f; adding an offset here will shift our table selection upward, reducing aliasing but lower high freq fidelity. +1.0f should remove all aliasing
+    if (c->w < 0.0f) c->w = 0.0f; // If c->w is < 0.0f, then freq is less than our base freq
+    c->oct = (int)c->w;
+    c->w -= c->oct;
+    if (c->oct >= 10) c->oct = 9;
 }
 
 float   tSawtooth_tick(tSawtooth* const cy)
 {
     _tSawtooth* c = *cy;
     
+    float temp;
+    int idx;
+    float frac;
+    float samp0;
+    float samp1;
+    
     // Phasor increment
     c->phase += c->inc;
     while (c->phase >= 1.0f) c->phase -= 1.0f;
     while (c->phase < 0.0f) c->phase += 1.0f;
     
-    float out = 0.0f;
-    
-    int idx = (int)(c->phase * SAW_TABLE_SIZE);
-    
     // Wavetable synthesis
-    out = __leaf_table_sawtooth[c->oct+1][idx] +
-        (__leaf_table_sawtooth[c->oct][idx] - __leaf_table_sawtooth[c->oct+1][idx]) * c->w;
+    temp = SAW_TABLE_SIZE * c->phase;
     
-    return out;
+    idx = (int)temp;
+    frac = temp - (float)idx;
+    samp0 = __leaf_table_sawtooth[c->oct][idx];
+    if (++idx >= SAW_TABLE_SIZE) idx = 0;
+    samp1 = __leaf_table_sawtooth[c->oct][idx];
+    
+    float oct0 = (samp0 + (samp1 - samp0) * frac);
+    
+    idx = (int)temp;
+    samp0 = __leaf_table_sawtooth[c->oct+1][idx];
+    if (++idx >= SAW_TABLE_SIZE) idx = 0;
+    samp1 = __leaf_table_sawtooth[c->oct+1][idx];
+    
+    float oct1 = (samp0 + (samp1 - samp0) * frac);
+    
+    return oct0 + (oct1 - oct0) * c->w;
 }
 
 void     tSawtoothSampleRateChanged (tSawtooth* const cy)

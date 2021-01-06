@@ -17,6 +17,12 @@ extern "C" {
     
 #include "leaf-mempool.h"
     
+#if _WIN32 || _WIN64
+#include "..\leaf-config.h"
+#else
+#include "../leaf-config.h"
+#endif
+    
     /*!
      * @ingroup leaf
      * @brief Struct for an instance of LEAF.

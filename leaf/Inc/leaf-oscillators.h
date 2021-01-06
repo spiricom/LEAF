@@ -17,7 +17,7 @@ extern "C" {
 #include "leaf-mempool.h"
 #include "leaf-tables.h"
 #include "leaf-filters.h"
-    
+#include "leaf-distortion.h"
     
     /*!
      Header.
@@ -91,30 +91,30 @@ extern "C" {
      @brief Anti-aliased wavetable oscillator.
      @{
      
-     @fn void    tWavetable_init  (tTable* const osc, float* table, int size, LEAF* const leaf)
+     @fn void    tWavetable_init  (tWavetable* const osc, float* table, int size, LEAF* const leaf)
      @brief Initialize a tWavetable to the default mempool of a LEAF instance.
      @param osc A pointer to the tWavetable to initialize.
      @param table A pointer to the wavetable data.
      @param size The number of samples in the wavetable.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tWavetable_initToPool   (tTable* const osc, float* table, int size, tMempool* const mempool)
+     @fn void    tWavetable_initToPool   (tWavetable* const osc, float* table, int size, tMempool* const mempool)
      @brief Initialize a tWavetable to a specified mempool.
      @param osc A pointer to the tWavetable to initialize.
      @param table A pointer to the wavetable data.
      @param size The number of samples in the wave table.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tWavetable_free         (tTable* const osc)
+     @fn void    tWavetable_free         (tWavetable* const osc)
      @brief Free a tWavetable from its mempool.
      @param osc A pointer to the tWavetable to free.
      
-     @fn float   tWavetable_tick         (tTable* const osc)
+     @fn float   tWavetable_tick         (tWavetable* const osc)
      @brief Tick a tWavetable oscillator.
      @param osc A pointer to the relevant tWavetable.
      @return The ticked sample as a float from -1 to 1.
      
-     @fn void    tWavetable_setFreq      (tTable* const osc, float freq)
+     @fn void    tWavetable_setFreq      (tWavetable* const osc, float freq)
      @brief Set the frequency of a tWavetable oscillator.
      @param osc A pointer to the relevant tWavetable.
      @param freq The frequency to set the oscillator to.
@@ -134,18 +134,89 @@ extern "C" {
         
         int oct;
         float w;
+        float aa;
         
         tButterworth bl;
     } _tWavetable;
     
     typedef _tWavetable* tWavetable;
     
-    void    tWavetable_init(tWavetable* const osc, float* table, int size, LEAF* const leaf);
-    void    tWavetable_initToPool(tWavetable* const osc, float* table, int size, tMempool* const mempool);
+    void    tWavetable_init(tWavetable* const osc, const float* table, int size, float maxFreq, LEAF* const leaf);
+    void    tWavetable_initToPool(tWavetable* const osc, const float* table, int size, float maxFreq, tMempool* const mempool);
     void    tWavetable_free(tWavetable* const osc);
     
     float   tWavetable_tick(tWavetable* const osc);
     void    tWavetable_setFreq(tWavetable* const osc, float freq);
+    void    tWavetable_setAntiAliasing(tWavetable* const osc, float aa);
+    
+    //==============================================================================
+    
+    /*!
+     @defgroup tcompactwavetable tCompactWavetable
+     @ingroup oscillators
+     @brief A more space-efficient anti-aliased wavetable oscillator than tWavetable but with slightly worse fidelity.
+     @{
+     
+     @fn void    tCompactWavetable_init  (tCompactWavetable* const osc, float* table, int size, LEAF* const leaf)
+     @brief Initialize a tCompactWavetable to the default mempool of a LEAF instance.
+     @param osc A pointer to the tCompactWavetable to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wavetable.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void    tCompactWavetable_initToPool   (tCompactWavetable* const osc, float* table, int size, tMempool* const mempool)
+     @brief Initialize a tCompactWavetable to a specified mempool.
+     @param osc A pointer to the tCompactWavetable to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wave table.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tCompactWavetable_free         (tCompactWavetable* const osc)
+     @brief Free a tCompactWavetable from its mempool.
+     @param osc A pointer to the tCompactWavetable to free.
+     
+     @fn float   tCompactWavetable_tick         (tCompactWavetable* const osc)
+     @brief Tick a tCompactWavetable oscillator.
+     @param osc A pointer to the relevant tCompactWavetable.
+     @return The ticked sample as a float from -1 to 1.
+     
+     @fn void    tCompactWavetable_setFreq      (tCompactWavetable* const osc, float freq)
+     @brief Set the frequency of a tCompactWavetable oscillator.
+     @param osc A pointer to the relevant tCompactWavetable.
+     @param freq The frequency to set the oscillator to.
+     
+     @} */
+    
+    typedef struct _tCompactWavetable
+    {
+        tMempool mempool;
+        
+        float** tables;
+        int numTables;
+        int* sizes;
+        float baseFreq, invBaseFreq;
+        float inc, freq;
+        float phase;
+        
+        int oct;
+        float w;
+        float aa;
+        
+        tButterworth bl;
+        
+        float dsBuffer[2];
+        tOversampler ds;
+    } _tCompactWavetable;
+    
+    typedef _tCompactWavetable* tCompactWavetable;
+    
+    void    tCompactWavetable_init(tCompactWavetable* const osc, const float* table, int size, float maxFreq, LEAF* const leaf);
+    void    tCompactWavetable_initToPool(tCompactWavetable* const osc, const float* table, int size, float maxFreq, tMempool* const mempool);
+    void    tCompactWavetable_free(tCompactWavetable* const osc);
+    
+    float   tCompactWavetable_tick(tCompactWavetable* const osc);
+    void    tCompactWavetable_setFreq(tCompactWavetable* const osc, float freq);
+    void    tCompactWavetable_setAntiAliasing(tCompactWavetable* const osc, float aa);
     
     //==============================================================================
     
