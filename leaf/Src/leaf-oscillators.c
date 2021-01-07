@@ -50,6 +50,7 @@ void     tTable_setFreq(tTable* const cy, float freq)
     
     c->freq = freq;
     c->inc = freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
 }
 
 float   tTable_tick(tTable* const cy)
@@ -63,8 +64,8 @@ float   tTable_tick(tTable* const cy)
     
     // Phasor increment
     c->phase += c->inc;
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
     
     // Wavetable synthesis
     
@@ -84,6 +85,7 @@ void     tTableSampleRateChanged(tTable* const cy)
     LEAF* leaf = c->mempool->leaf;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
 }
 
 void tWavetable_init(tWavetable* const cy, const float* table, int size, float maxFreq, LEAF* const leaf)
@@ -179,8 +181,8 @@ float tWavetable_tick(tWavetable* const cy)
     
     // Phasor increment
     c->phase += c->inc;
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
     
     // Wavetable synthesis
     temp = c->size * c->phase;
@@ -212,6 +214,7 @@ void tWavetable_setFreq(tWavetable* const cy, float freq)
     c->freq  = freq;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
     
     // abs for negative frequencies
     c->w = fabsf(c->freq * c->invBaseFreq);
@@ -328,8 +331,8 @@ float   tCompactWavetable_tick(tCompactWavetable* const cy)
     
     // Phasor increment
     c->phase += c->inc;
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
     
     // Wavetable synthesis
     temp = c->sizes[c->oct] * c->phase;
@@ -362,6 +365,7 @@ void    tCompactWavetable_setFreq(tCompactWavetable* const cy, float freq)
     c->freq  = freq;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
     
     // abs for negative frequencies
     c->w = fabsf(c->freq * c->invBaseFreq);
@@ -416,6 +420,7 @@ void     tCycle_setFreq(tCycle* const cy, float freq)
     c->freq  = freq;
 
     c->inc = freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
 }
 
 //need to check bounds and wrap table properly to allow through-zero FM
@@ -430,8 +435,8 @@ float   tCycle_tick(tCycle* const cy)
     
     // Phasor increment
     c->phase += c->inc;
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
 
     // Wavetable synthesis
 
@@ -451,6 +456,7 @@ void     tCycleSampleRateChanged (tCycle* const cy)
     LEAF* leaf = c->mempool->leaf;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
 }
 #endif // LEAF_INCLUDE_SINE_TABLE
 
@@ -488,6 +494,7 @@ void tTriangle_setFreq(tTriangle* const cy, float freq)
     c->freq  = freq;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
     
     // abs for negative frequencies
     c->w = fabsf(c->freq * (TRI_TABLE_SIZE * leaf->invSampleRate));
@@ -512,8 +519,8 @@ float   tTriangle_tick(tTriangle* const cy)
     
     // Phasor increment
     c->phase += c->inc;
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
 
     // Wavetable synthesis
     temp = TRI_TABLE_SIZE * c->phase;
@@ -542,6 +549,7 @@ void     tTriangleSampleRateChanged (tTriangle* const cy)
     LEAF* leaf = c->mempool->leaf;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
 }
 #endif // LEAF_INCLUDE_TRIANGLE_TABLE
 
@@ -579,6 +587,7 @@ void    tSquare_setFreq(tSquare* const cy, float freq)
     c->freq  = freq;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
     
     // abs for negative frequencies
     c->w = fabsf(c->freq * (SQR_TABLE_SIZE * leaf->invSampleRate));
@@ -602,8 +611,8 @@ float   tSquare_tick(tSquare* const cy)
     
     // Phasor increment
     c->phase += c->inc;
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
 
     // Wavetable synthesis
     temp = SQR_TABLE_SIZE * c->phase;
@@ -632,6 +641,7 @@ void     tSquareSampleRateChanged (tSquare* const cy)
     LEAF* leaf = c->mempool->leaf;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
 }
 #endif // LEAF_INCLUDE_SQUARE_TABLE
 
@@ -669,6 +679,7 @@ void    tSawtooth_setFreq(tSawtooth* const cy, float freq)
     c->freq  = freq;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
     
     // abs for negative frequencies
     c->w = fabsf(c->freq * (SAW_TABLE_SIZE * leaf->invSampleRate));
@@ -722,21 +733,22 @@ void     tSawtoothSampleRateChanged (tSawtooth* const cy)
     LEAF* leaf = c->mempool->leaf;
     
     c->inc = c->freq * leaf->invSampleRate;
+    c->inc -= (int)c->inc;
 }
 #endif // LEAF_INCLUDE_SAWTOOTH_TABLE
 
 //==============================================================================
 
 /* tTri: Anti-aliased Triangle waveform. */
-void    tTri_init          (tTri* const osc, LEAF* const leaf)
+void    tPBTriangle_init          (tPBTriangle* const osc, LEAF* const leaf)
 {
-    tTri_initToPool(osc, &leaf->mempool);
+    tPBTriangle_initToPool(osc, &leaf->mempool);
 }
 
-void    tTri_initToPool    (tTri* const osc, tMempool* const mp)
+void    tPBTriangle_initToPool    (tPBTriangle* const osc, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tTri* c = *osc = (_tTri*) mpool_alloc(sizeof(_tTri), m);
+    _tPBTriangle* c = *osc = (_tPBTriangle*) mpool_alloc(sizeof(_tPBTriangle), m);
     c->mempool = m;
 
     c->inc      =  0.0f;
@@ -745,16 +757,16 @@ void    tTri_initToPool    (tTri* const osc, tMempool* const mp)
     c->lastOut  =  0.0f;
 }
 
-void    tTri_free (tTri* const cy)
+void    tPBTriangle_free (tPBTriangle* const cy)
 {
-    _tTri* c = *cy;
+    _tPBTriangle* c = *cy;
     
     mpool_free((char*)c, c->mempool);
 }
 
-float   tTri_tick          (tTri* const osc)
+float   tPBTriangle_tick          (tPBTriangle* const osc)
 {
-    _tTri* c = *osc;
+    _tPBTriangle* c = *osc;
     
     float out;
     float skew;
@@ -776,27 +788,25 @@ float   tTri_tick          (tTri* const osc)
     out = (skew * c->inc * out) + ((1 - c->inc) * c->lastOut);
     c->lastOut = out;
     
-    c->phase += c->inc;
-    if (c->phase >= 1.0f)
-    {
-        c->phase -= 1.0f;
-    }
+    c->phase += c->inc - (int)c->inc;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
     
     return out;
 }
 
-void    tTri_setFreq       (tTri* const osc, float freq)
+void    tPBTriangle_setFreq       (tPBTriangle* const osc, float freq)
 {
-    _tTri* c = *osc;
+    _tPBTriangle* c = *osc;
     LEAF* leaf = c->mempool->leaf;
     
     c->freq  = freq;
     c->inc = freq * leaf->invSampleRate;
 }
 
-void    tTri_setSkew       (tTri* const osc, float skew)
+void    tPBTriangle_setSkew       (tPBTriangle* const osc, float skew)
 {
-    _tTri* c = *osc;
+    _tPBTriangle* c = *osc;
     c->skew = (skew + 1.0f) * 0.5f;
 }
 
@@ -804,15 +814,15 @@ void    tTri_setSkew       (tTri* const osc, float skew)
 //==============================================================================
 
 /* tPulse: Anti-aliased pulse waveform. */
-void    tPulse_init        (tPulse* const osc, LEAF* const leaf)
+void    tPBPulse_init        (tPBPulse* const osc, LEAF* const leaf)
 {
-    tPulse_initToPool(osc, &leaf->mempool);
+    tPBPulse_initToPool(osc, &leaf->mempool);
 }
 
-void    tPulse_initToPool  (tPulse* const osc, tMempool* const mp)
+void    tPBPulse_initToPool  (tPBPulse* const osc, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPulse* c = *osc = (_tPulse*) mpool_alloc(sizeof(_tPulse), m);
+    _tPBPulse* c = *osc = (_tPBPulse*) mpool_alloc(sizeof(_tPBPulse), m);
     c->mempool = m;
     
     c->inc      =  0.0f;
@@ -820,16 +830,16 @@ void    tPulse_initToPool  (tPulse* const osc, tMempool* const mp)
     c->width     =  0.5f;
 }
 
-void    tPulse_free (tPulse* const osc)
+void    tPBPulse_free (tPBPulse* const osc)
 {
-    _tPulse* c = *osc;
+    _tPBPulse* c = *osc;
     
     mpool_free((char*)c, c->mempool);
 }
 
-float   tPulse_tick        (tPulse* const osc)
+float   tPBPulse_tick        (tPBPulse* const osc)
 {
-    _tPulse* c = *osc;
+    _tPBPulse* c = *osc;
     
     float out;
     if (c->phase < c->width) out = 1.0f;
@@ -837,27 +847,25 @@ float   tPulse_tick        (tPulse* const osc)
     out += LEAF_poly_blep(c->phase, c->inc);
     out -= LEAF_poly_blep(fmodf(c->phase + (1.0f - c->width), 1.0f), c->inc);
     
-    c->phase += c->inc;
-    if (c->phase >= 1.0f)
-    {
-        c->phase -= 1.0f;
-    }
+    c->phase += c->inc - (int)c->inc;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
     
     return out;
 }
 
-void    tPulse_setFreq     (tPulse* const osc, float freq)
+void    tPBPulse_setFreq     (tPBPulse* const osc, float freq)
 {
-    _tPulse* c = *osc;
+    _tPBPulse* c = *osc;
     LEAF* leaf = c->mempool->leaf;
     
     c->freq  = freq;
     c->inc = freq * leaf->invSampleRate;
 }
 
-void    tPulse_setWidth    (tPulse* const osc, float width)
+void    tPBPulse_setWidth    (tPBPulse* const osc, float width)
 {
-    _tPulse* c = *osc;
+    _tPBPulse* c = *osc;
     c->width = width;
 }
 
@@ -865,47 +873,45 @@ void    tPulse_setWidth    (tPulse* const osc, float width)
 //==============================================================================
 
 /* tSawtooth: Anti-aliased Sawtooth waveform. */
-void    tSaw_init          (tSaw* const osc, LEAF* const leaf)
+void    tPBSaw_init          (tPBSaw* const osc, LEAF* const leaf)
 {
-    tSaw_initToPool(osc, &leaf->mempool);
+    tPBSaw_initToPool(osc, &leaf->mempool);
 }
 
-void    tSaw_initToPool    (tSaw* const osc, tMempool* const mp)
+void    tPBSaw_initToPool    (tPBSaw* const osc, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tSaw* c = *osc = (_tSaw*) mpool_alloc(sizeof(_tSaw), m);
+    _tPBSaw* c = *osc = (_tPBSaw*) mpool_alloc(sizeof(_tPBSaw), m);
     c->mempool = m;
     
     c->inc      =  0.0f;
     c->phase    =  0.0f;
 }
 
-void    tSaw_free  (tSaw* const osc)
+void    tPBSaw_free  (tPBSaw* const osc)
 {
-    _tSaw* c = *osc;
+    _tPBSaw* c = *osc;
     
     mpool_free((char*)c, c->mempool);
 }
 
-float   tSaw_tick          (tSaw* const osc)
+float   tPBSaw_tick          (tPBSaw* const osc)
 {
-    _tSaw* c = *osc;
+    _tPBSaw* c = *osc;
     
     float out = (c->phase * 2.0f) - 1.0f;
     out -= LEAF_poly_blep(c->phase, c->inc);
     
-    c->phase += c->inc;
-    if (c->phase >= 1.0f)
-    {
-        c->phase -= 1.0f;
-    }
+    c->phase += c->inc - (int)c->inc;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
     
     return out;
 }
 
-void    tSaw_setFreq       (tSaw* const osc, float freq)
+void    tPBSaw_setFreq       (tPBSaw* const osc, float freq)
 {
-    _tSaw* c = *osc;
+    _tPBSaw* c = *osc;
     LEAF* leaf = c->mempool->leaf;
     
     c->freq  = freq;
@@ -954,6 +960,7 @@ void    tPhasor_setFreq(tPhasor* const ph, float freq)
     p->freq  = freq;
     
     p->inc = freq * leaf->invSampleRate;
+    p->inc -= (int)p->inc;
 }
 
 float   tPhasor_tick(tPhasor* const ph)
@@ -961,13 +968,17 @@ float   tPhasor_tick(tPhasor* const ph)
     _tPhasor* p = *ph;
     
     p->phase += p->inc;
-    
-    
+
     p->phaseDidReset = 0;
     if (p->phase >= 1.0f)
     {
         p->phaseDidReset = 1;
         p->phase -= 1.0f;
+    }
+    else if (p->phase < 0.0f)
+    {
+        p->phaseDidReset = 1;
+        p->phase += 1.0f;
     }
     
     return p->phase;
@@ -1021,17 +1032,17 @@ float   tNoise_tick(tNoise* const ns)
 //=================================================================================
 /* Neuron */
 
-void     tNeuronSampleRateChanged(tNeuron* nr)
+void tNeuronSampleRateChanged(tNeuron* nr)
 {
     
 }
 
-void    tNeuron_init(tNeuron* const nr, LEAF* const leaf)
+void tNeuron_init(tNeuron* const nr, LEAF* const leaf)
 {
     tNeuron_initToPool(nr, &leaf->mempool);
 }
 
-void    tNeuron_initToPool  (tNeuron* const nr, tMempool* const mp)
+void tNeuron_initToPool  (tNeuron* const nr, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tNeuron* n = *nr = (_tNeuron*) mpool_alloc(sizeof(_tNeuron), m);
@@ -1101,58 +1112,58 @@ void   tNeuron_reset(tNeuron* const nr)
     n->rate[2] = n->gL/n->C;
 }
 
-void        tNeuron_setV1(tNeuron* const nr, float V1)
+void tNeuron_setV1(tNeuron* const nr, float V1)
 {
     _tNeuron* n = *nr;
     n->V[0] = V1;
 }
 
 
-void        tNeuron_setV2(tNeuron* const nr, float V2)
+void tNeuron_setV2(tNeuron* const nr, float V2)
 {
     _tNeuron* n = *nr;
     n->V[1] = V2;
 }
 
-void        tNeuron_setV3(tNeuron* const nr, float V3)
+void tNeuron_setV3(tNeuron* const nr, float V3)
 {
     _tNeuron* n = *nr;
     n->V[2] = V3;
 }
 
-void        tNeuron_setTimeStep(tNeuron* const nr, float timeStep)
+void tNeuron_setTimeStep(tNeuron* const nr, float timeStep)
 {
     _tNeuron* n = *nr;
     n->timeStep = timeStep;
 }
 
-void        tNeuron_setK(tNeuron* const nr, float K)
+void tNeuron_setK(tNeuron* const nr, float K)
 {
     _tNeuron* n = *nr;
     n->gK = K;
 }
 
-void        tNeuron_setL(tNeuron* const nr, float L)
+void tNeuron_setL(tNeuron* const nr, float L)
 {
     _tNeuron* n = *nr;
     n->gL = L;
     n->rate[2] = n->gL/n->C;
 }
 
-void        tNeuron_setN(tNeuron* const nr, float N)
+void tNeuron_setN(tNeuron* const nr, float N)
 {
     _tNeuron* n = *nr;
     n->gN = N;
 }
 
-void        tNeuron_setC(tNeuron* const nr, float C)
+void tNeuron_setC(tNeuron* const nr, float C)
 {
     _tNeuron* n = *nr;
     n->C = C;
     n->rate[2] = n->gL/n->C;
 }
 
-float   tNeuron_tick(tNeuron* const nr)
+float tNeuron_tick(tNeuron* const nr)
 {
     _tNeuron* n = *nr;
     
@@ -1228,13 +1239,13 @@ float   tNeuron_tick(tNeuron* const nr)
     
 }
 
-void        tNeuron_setMode  (tNeuron* const nr, NeuronMode mode)
+void tNeuron_setMode  (tNeuron* const nr, NeuronMode mode)
 {
     _tNeuron* n = *nr;
     n->mode = mode;
 }
 
-void        tNeuron_setCurrent  (tNeuron* const nr, float current)
+void tNeuron_setCurrent  (tNeuron* const nr, float current)
 {
     _tNeuron* n = *nr;
     n->current = current;
@@ -1258,7 +1269,10 @@ void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const pool)
     c->_init = true;
     c->amp = 1.0f;
     c->freq = 440.f;
-    c->syncin = 0.0f;
+    c->lastsyncin = 0.0f;
+    c->sync = 0.0f;
+    c->syncdir = 1.0f;
+    c->softsync = 0;
     c->waveform = 0.0f;
     c->_z = 0.0f;
     c->_j = 0;
@@ -1277,10 +1291,10 @@ float tMBPulse_tick(tMBPulse* const osc)
     LEAF* leaf = c->mempool->leaf;
     
     int    j, k;
-    float  freq, syncin;
-    float  a, b, db, p, tw, tb, w, dw, x, z;
+    float  freq, sync;
+    float  a, b, p, w, x, z, sw;
     
-    syncin  = c->syncin;
+    sync = c->sync;
     freq = c->freq;
     p = c->_p;  /* phase [0, 1) */
     w = c->_w;  /* phase increment */
@@ -1293,22 +1307,9 @@ float tMBPulse_tick(tMBPulse* const osc)
     if (c->_init) {
         p = 0.0f;
         
-        w = freq / leaf->sampleRate;
+        w = freq * leaf->invSampleRate;
         b = 0.5f * (1.0f + c->waveform );
-        if (w >= 0)
-        {
-            if (w < 1e-5f) w = 1e-5f;
-            if (w > 0.5f) w = 0.5f;
-            if (b < w) b = w;
-            if (b > 1.0f - w) b = 1.0f - w;
-        }
-        else
-        {
-            if (w > -1e-5f) w = -1e-5f;
-            if (w < -0.5f) w = -0.5f;
-            if (b < -w) b = -w;
-            if (b > 1.0f + w) b = 1.0f + w;
-        }
+        
         /* for variable-width rectangular wave, we could do DC compensation with:
          *     x = 1.0f - b;
          * but that doesn't work well with highly modulated hard sync.  Instead,
@@ -1324,100 +1325,76 @@ float tMBPulse_tick(tMBPulse* const osc)
     //    a = 0.2 + 0.8 * vco->_port [FILT];
     a = 0.5f; // when a = 1, LPfilter is disabled
     
-    tw = freq / leaf->sampleRate;
-    if (tw >= 0)
-    {
-        if (tw < 1e-5f) tw = 1e-5f;
-        if (tw > 0.5f) tw = 0.5f;
-    }
-    else
-    {
-        if (tw > -1e-5f) tw = -1e-5f;
-        if (tw < -0.5f) tw = -0.5f;
-    }
+    w = freq * leaf->invSampleRate;
+    b = 0.5f * (1.0f + c->waveform);
+
+    if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
     
-    tb = 0.5f * (1.0f + c->waveform);
-    if (w >= 0)
-    {
-        if (tb < w) tb = w;
-        if (tb > 1.0f - w) tb = 1.0f - w;
-    }
-    else
-    {
-        if (tb < -w) tb = -w;
-        if (tb > 1.0f + w) tb = 1.0f + w;
-    }
+    sw = w * c->syncdir;
+    p += sw - (int)sw;
     
-    dw = (tw - w);
-    db = (tb - b);
-    
-    w += dw;
-    b += db;
-    p += w;
-    
-    if (syncin >= 1e-20f) {  /* sync to master */
-        //
-        float eof_offset = (syncin - 1e-20f) * w;
+    if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
+        float eof_offset = sync * sw;
         float p_at_reset = p - eof_offset;
     
-        if (w > 0) p = eof_offset;
-        else p = 1.0f - eof_offset;
+        if (sw > 0) p = eof_offset;
+        else if (sw < 0) p = 1.0f - eof_offset;
         
         /* place any DDs that may have occurred in subsample before reset */
         if (!k) {
-            if (w > 0)
+            if (sw > 0)
             {
                 if (p_at_reset >= b) {
-                    place_step_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f);
+                    place_step_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -1.0f);
                     k = 1;
                     x = -0.5f;
                 }
                 if (p_at_reset >= 1.0f) {
                     p_at_reset -= 1.0f;
-                    place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
+                    place_step_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f);
                     k = 0;
                     x = 0.5f;
                 }
             }
-            else
+            else if (sw < 0)
             {
                 if (p_at_reset < 0.0f) {
                     p_at_reset += 1.0f;
-                    place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, -1.0f);
+                    place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -1.0f);
                     k = 1;
                     x = -0.5f;
                 }
                 if (k && p_at_reset < b) {
-                    place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -w, 1.0f);
+                    place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, 1.0f);
                     k = 0;
                     x = 0.5f;
                 }
             }
         } else {
-            if (w > 0)
+            if (sw > 0)
             {
                 if (p_at_reset >= 1.0f) {
                     p_at_reset -= 1.0f;
-                    place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
+                    place_step_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f);
                     k = 0;
                     x = 0.5f;
                 }
                 if (!k && p_at_reset >= b) {
-                    place_step_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f);
+                    place_step_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -1.0f);
                     k = 1;
                     x = -0.5f;
                 }
             }
-            else
+            else if (sw < 0)
             {
                 if (p_at_reset < b) {
-                    place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -w, 1.0f);
+                    place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, 1.0f);
                     k = 0;
                     x = 0.5f;
                 }
                 if (p_at_reset < 0.0f) {
                     p_at_reset += 1.0f;
-                    place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, -1.0f);
+                    place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -1.0f);
                     k = 1;
                     x = -0.5f;
                 }
@@ -1425,67 +1402,58 @@ float tMBPulse_tick(tMBPulse* const osc)
         }
         
         /* now place reset DD */
-        if (w > 0)
+        if (sw > 0)
         {
             if (k) {
-                place_step_dd(c->_f, j, p, w, 1.0f);
+                place_step_dd(c->_f, j, p, sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
             if (p >= b) {
-                place_step_dd(c->_f, j, p - b, w, -1.0f);
+                place_step_dd(c->_f, j, p - b, sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
         }
-        else
+        else if (sw < 0)
         {
             if (!k) {
-                place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
+                place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
             if (p < b) {
-                place_step_dd(c->_f, j, b - p, -w, 1.0f);
+                place_step_dd(c->_f, j, b - p, -sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
         }
-        
-        c->syncout = syncin;  /* best we can do is pass on upstream sync */
-        
     } else if (!k) {  /* normal operation, signal currently high */
         
-        if (w > 0)
+        if (sw > 0)
         {
             if (p >= b) {
-                place_step_dd(c->_f, j, p - b, w, -1.0f);
+                place_step_dd(c->_f, j, p - b, sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
             if (p >= 1.0f) {
                 p -= 1.0f;
-                c->syncout = p / w + 1e-20f;
-                place_step_dd(c->_f, j, p, w, 1.0f);
+                place_step_dd(c->_f, j, p, sw, 1.0f);
                 k = 0;
                 x = 0.5f;
-            } else {
-                c->syncout = 0.0f;
             }
         }
-        else
+        else if (sw < 0)
         {
             if (p < 0.0f) {
                 p += 1.0f;
-                c->syncout = (1.0f - p) / -w + 1e-20f;
-                place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
+                place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
                 k = 1;
                 x = -0.5f;
-            } else {
-                c->syncout = 0.0f;
             }
             if (k && p < b) {
-                place_step_dd(c->_f, j, b - p, -w, 1.0f);
+                place_step_dd(c->_f, j, b - p, -sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
@@ -1493,40 +1461,33 @@ float tMBPulse_tick(tMBPulse* const osc)
         
     } else {  /* normal operation, signal currently low */
         
-        if (w > 0)
+        if (sw > 0)
         {
             if (p >= 1.0f) {
                 p -= 1.0f;
-                c->syncout = p / w + 1e-20f;
-                place_step_dd(c->_f, j, p, w, 1.0f);
+                place_step_dd(c->_f, j, p, sw, 1.0f);
                 k = 0;
                 x = 0.5f;
-            } else {
-                c->syncout = 0.0f;
             }
             if (!k && p >= b) {
-                place_step_dd(c->_f, j, p - b, w, -1.0f);
+                place_step_dd(c->_f, j, p - b, sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
         }
-        else
+        else if (sw < 0)
         {
             if (p < b) {
-                place_step_dd(c->_f, j, b - p, -w, 1.0f);
+                place_step_dd(c->_f, j, b - p, -sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
             if (p < 0.0f) {
                 p += 1.0f;
-                c->syncout = (1.0f - p) / -w + 1e-20f;
-                place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
+                place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
                 k = 1;
                 x = -0.5f;
-            } else {
-                c->syncout = 0.0f;
             }
-            
         }
     }
     c->_f[j + DD_SAMPLE_DELAY] += x;
@@ -1564,19 +1525,30 @@ void tMBPulse_setWidth(tMBPulse* const osc, float w)
     c->waveform = w;
 }
 
-void tMBPulse_syncIn(tMBPulse* const osc, float sync)
+float tMBPulse_sync(tMBPulse* const osc, float value)
 {
     _tMBPulse* c = *osc;
-    c->syncin = sync;
+    
+    //based on https://github.com/VCVRack/Fundamental/blob/5799ee2a9b21492b42ebcb9b65d5395ef5c1cbe2/src/VCO.cpp#L123
+    float last = c->lastsyncin;
+    float delta = value - last;
+    float crossing = -last / delta;
+    c->lastsyncin = value;
+    if ((0.f < crossing) && (crossing <= 1.f) && (value >= 0.f))
+        c->sync = (1.f - crossing) * delta;
+    else c->sync = 0.f;
+    
+    return value;
 }
 
-float tMBPulse_syncOut(tMBPulse* const osc)
+void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft)
 {
     _tMBPulse* c = *osc;
-    return c->syncout;
+    c->softsync = hardOrSoft > 0 ? 1 : 0;
 }
 
-//----------------------------------------------------------------------------------------------------------
+//==========================================================================================================
+//==========================================================================================================
 
 void tMBTriangle_init(tMBTriangle* const osc, LEAF* const leaf)
 {
@@ -1591,7 +1563,10 @@ void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const pool)
     
     c->amp = 1.0f;
     c->freq = 440.f;
-    c->syncin = 0.0f;
+    c->lastsyncin = 0.0f;
+    c->sync = 0.0f;
+    c->syncdir = 1.0f;
+    c->softsync = 0;
     c->waveform = 0.0f;
     c->_init = true;
     c->_z = 0.0f;
@@ -1610,11 +1585,12 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     _tMBTriangle* c = *osc;
     LEAF* leaf = c->mempool->leaf;
     
-    int    j, k;
-    float  freq, syncin;
-    float  a, b, b1, db, p, tw, tb, w, dw, x, z;
+    int    j, k, dir;
+    float  freq, sync;
+    float  a, b, b1, p, w, sw, x, z;
     
-    syncin  = c->syncin;
+    sync = c->sync;
+    dir = c->syncdir;
     freq = c->freq;
     p = c->_p;  /* phase [0, 1) */
     w = c->_w;  /* phase increment */
@@ -1626,23 +1602,8 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     if (c->_init) {
         //        w = (exp2ap (freq[1] + vco->_port[OCTN] + vco->_port[TUNE] + expm[1] * vco->_port[EXPG] + 8.03136)
         //                + 1e3 * linm[1] * vco->_port[LING]) / SAMPLERATE;
-        w = freq / leaf->sampleRate;
+        w = freq * leaf->invSampleRate;
         b = 0.5f * (1.0f + c->waveform);
-        if (w >= 0)
-        {
-            if (w < 1e-5f) w = 1e-5f;
-            if (w > 0.5f) w = 0.5f;
-            if (b < w) b = w;
-            if (b > 1.0f - w) b = 1.0f - w;
-        }
-        else
-        {
-            if (w > -1e-5f) w = -1e-5f;
-            if (w < -0.5f) w = -0.5f;
-            if (b < -w) b = -w;
-            if (b > 1.0f + w) b = 1.0f + w;
-        }
-        
         p = 0.5f * b;
         /* if we valued alias-free startup over low startup time, we could do:
          *   p -= w;
@@ -1654,174 +1615,141 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     //    a = 0.2 + 0.8 * vco->_port [FILT];
     a = 0.5f; // when a = 1, LPfilter is disabled
     
-    tw = freq / leaf->sampleRate;
-    if (tw >= 0)
-    {
-        if (tw < 1e-5f) tw = 1e-5f;
-        if (tw > 0.5f) tw = 0.5f;
-    }
-    else
-    {
-        if (tw > -1e-5f) tw = -1e-5f;
-        if (tw < -0.5f) tw = -0.5f;
-    }
-    
-    tb = 0.5f * (1.0f + c->waveform);
-    if (w >= 0)
-    {
-        if (tb < w) tb = w;
-        if (tb > 1.0f - w) tb = 1.0f - w;
-    }
-    else
-    {
-        if (tb < -w) tb = -w;
-        if (tb > 1.0f + w) tb = 1.0f + w;
-    }
-    
-    dw = (tw - w);
-    db = (tb - b);
-    
-    w += dw;
-    b += db;
+    w = freq * leaf->invSampleRate;
+    b = 0.5f * (1.0f + c->waveform);
     b1 = 1.0f - b;
-    p += w;
     
-    if (syncin >= 1e-20f) {  /* sync to master */
-        
-        float eof_offset = (syncin - 1e-20f) * w;
+    if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
+    
+    sw = w * c->syncdir;
+    p += sw - (int)sw;
+    
+    if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
+        float eof_offset = sync * sw;
         float p_at_reset = p - eof_offset;
         
-        if (w > 0) p = eof_offset;
-        else p = 1.0f - eof_offset;
+        if (sw > 0) p = eof_offset;
+        else if (sw < 0) p = 1.0f - eof_offset;
         //
         /* place any DDs that may have occurred in subsample before reset */
             
         if (!k) {
             x = -0.5f + p_at_reset / b;
-            if (w > 0)
+            if (sw > 0)
             {
                 if (p_at_reset >= b) {
                     x = 0.5f - (p_at_reset - b) / b1;
-                    place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f / b1 - 1.0f / b);
+                    place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -1.0f / b1 - 1.0f / b);
                     k = 1;
                 }
                 if (p_at_reset >= 1.0f) {
                     p_at_reset -= 1.0f;
                     x = -0.5f + p_at_reset / b;
-                    place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f / b + 1.0f / b1);
+                    place_slope_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f / b + 1.0f / b1);
                     k = 0;
                 }
             }
-            else
+            else if (sw < 0)
             {
                 if (p_at_reset < 0.0f) {
                     p_at_reset += 1.0f;
                     x = 0.5f - (p_at_reset - b) / b1;
-                    place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, 1.0f / b + 1.0f / b1);
+                    place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, 1.0f / b + 1.0f / b1);
                     k = 1;
                 }
                 if (k && p_at_reset < b) {
                     x = -0.5f + p_at_reset / b;
-                    place_slope_dd(c->_f, j, b - p_at_reset - eof_offset, -w, -1.0f / b1 - 1.0f / b);
+                    place_slope_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, -1.0f / b1 - 1.0f / b);
                     k = 0;
                 }
             }
         } else {
             x = 0.5f - (p_at_reset - b) / b1;
-            if (w > 0)
+            if (sw > 0)
             {
                 if (p_at_reset >= 1.0f) {
                     p_at_reset -= 1.0f;
                     x = -0.5f + p_at_reset / b;
-                    place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f / b + 1.0f / b1);
+                    place_slope_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f / b + 1.0f / b1);
                     k = 0;
                 }
                 if (!k && p_at_reset >= b) {
                     x = 0.5f - (p_at_reset - b) / b1;
-                    place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, w, -1.0f / b1 - 1.0f / b);
+                    place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -1.0f / b1 - 1.0f / b);
                     k = 1;
                 }
             }
-            else
+            else if (sw < 0)
             {
                 if (p_at_reset < b) {
                     x = -0.5f + p_at_reset / b;
-                    place_slope_dd(c->_f, j, b - p_at_reset - eof_offset, -w, -1.0f / b1 - 1.0f / b);
+                    place_slope_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, -1.0f / b1 - 1.0f / b);
                     k = 0;
                 }
                 if (p_at_reset < 0.0f) {
                     p_at_reset += 1.0f;
                     x = 0.5f - (p_at_reset - b) / b1;
-                    place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, 1.0f / b + 1.0f / b1);
+                    place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, 1.0f / b + 1.0f / b1);
                     k = 1;
                 }
             }
         }
         
         /* now place reset DDs */
-        if (w > 0)
+        if (sw > 0)
         {
             if (k)
-                place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
-            place_step_dd(c->_f, j, p, w, -0.5f - x);
+                place_slope_dd(c->_f, j, p, sw, 1.0f / b + 1.0f / b1);
+            place_step_dd(c->_f, j, p, sw, -0.5f - x);
             x = -0.5f + p / b;
             k = 0;
             if (p >= b) {
                 x = 0.5f - (p - b) / b1;
-                place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
+                place_slope_dd(c->_f, j, p - b, sw, -1.0f / b1 - 1.0f / b);
                 k = 1;
             }
         }
-        else
+        else if (sw < 0)
         {
             if (!k)
-                place_slope_dd(c->_f, j, 1.0f - p, -w, 1.0f / b + 1.0f / b1);
-            place_step_dd(c->_f, j, 1.0f - p, -w, -0.5f - x);
+                place_slope_dd(c->_f, j, 1.0f - p, -sw, 1.0f / b + 1.0f / b1);
+            place_step_dd(c->_f, j, 1.0f - p, -sw, -0.5f - x);
             x = 0.5f - (p - b) / b1;
             k = 1;
             if (p < b) {
                 x = -0.5f + p / b;
-                place_slope_dd(c->_f, j, b - p, -w, -1.0f / b1 - 1.0f / b);
+                place_slope_dd(c->_f, j, b - p, -sw, -1.0f / b1 - 1.0f / b);
                 k = 0;
             }
         }
-        
-        c->syncout = syncin;  /* best we can do is pass on upstream sync */
-        
     } else if (!k) {  /* normal operation, slope currently up */
         
         x = -0.5f + p / b;
-        if (w > 0)
+        if (sw > 0)
         {
             if (p >= b) {
                 x = 0.5f - (p - b) / b1;
-                place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
+                place_slope_dd(c->_f, j, p - b, sw, -1.0f / b1 - 1.0f / b);
                 k = 1;
             }
             if (p >= 1.0f) {
                 p -= 1.0f;
-                c->syncout = p / w + 1e-20f;
                 x = -0.5f + p / b;
-                place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
+                place_slope_dd(c->_f, j, p, sw, 1.0f / b + 1.0f / b1);
                 k = 0;
-            } else {
-                c->syncout = 0.0f;
             }
         }
-        else
+        else if (sw < 0)
         {
             if (p < 0.0f) {
                 p += 1.0f;
-                c->syncout = (1.0f - p) / -w + 1e-20f;
                 x = 0.5f - (p - b) / b1;
-                place_slope_dd(c->_f, j, 1.0f - p, -w, 1.0f / b + 1.0f / b1);
+                place_slope_dd(c->_f, j, 1.0f - p, -sw, 1.0f / b + 1.0f / b1);
                 k = 1;
-            } else {
-                c->syncout = 0.0f;
             }
             if (k && p < b) {
                 x = -0.5f + p / b;
-                place_slope_dd(c->_f, j, b - p, -w, -1.0f / b1 - 1.0f / b);
+                place_slope_dd(c->_f, j, b - p, -sw, -1.0f / b1 - 1.0f / b);
                 k = 0;
             }
         }
@@ -1829,38 +1757,32 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     } else {  /* normal operation, slope currently down */
         
         x = 0.5f - (p - b) / b1;
-        if (w > 0)
+        if (sw > 0)
         {
             if (p >= 1.0f) {
                 p -= 1.0f;
-                c->syncout = p / w + 1e-20f;
                 x = -0.5f + p / b;
-                place_slope_dd(c->_f, j, p, w, 1.0f / b + 1.0f / b1);
+                place_slope_dd(c->_f, j, p, sw, 1.0f / b + 1.0f / b1);
                 k = 0;
-            } else {
-                c->syncout = 0.0f;
             }
             if (!k && p >= b) {
                 x = 0.5f - (p - b) / b1;
-                place_slope_dd(c->_f, j, p - b, w, -1.0f / b1 - 1.0f / b);
+                place_slope_dd(c->_f, j, p - b, sw, -1.0f / b1 - 1.0f / b);
                 k = 1;
             }
         }
-        else
+        else if (sw < 0)
         {
             if (p < b) {
                 x = -0.5f + p / b;
-                place_slope_dd(c->_f, j, b - p, -w, -1.0f / b1 - 1.0f / b);
+                place_slope_dd(c->_f, j, b - p, -sw, -1.0f / b1 - 1.0f / b);
                 k = 0;
             }
             if (p < 0.0f) {
                 p += 1.0f;
-                c->syncout = (1.0f - p) / -w + 1e-20f;
                 x = 0.5f - (p - b) / b1;
-                place_slope_dd(c->_f, j, 1.0f - p, -w, 1.0f / b + 1.0f / b1);
+                place_slope_dd(c->_f, j, 1.0f - p, -sw, 1.0f / b + 1.0f / b1);
                 k = 1;
-            } else {
-                c->syncout = 0.0f;
             }
         }
     }
@@ -1898,20 +1820,30 @@ void tMBTriangle_setWidth(tMBTriangle* const osc, float w)
     c->waveform = w;
 }
 
-void tMBTriangle_syncIn(tMBTriangle* const osc, float sync)
+float tMBTriangle_sync(tMBTriangle* const osc, float value)
 {
     _tMBTriangle* c = *osc;
-    c->syncin = sync;
+    
+    //based on https://github.com/VCVRack/Fundamental/blob/5799ee2a9b21492b42ebcb9b65d5395ef5c1cbe2/src/VCO.cpp#L123
+    float last = c->lastsyncin;
+    float delta = value - last;
+    float crossing = -last / delta;
+    c->lastsyncin = value;
+    if ((0.f < crossing) && (crossing <= 1.f) && (value >= 0.f))
+        c->sync = (1.f - crossing) * delta;
+    else c->sync = 0.f;
+    
+    return value;
 }
 
-float tMBTriangle_syncOut(tMBTriangle* const osc)
+void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft)
 {
     _tMBTriangle* c = *osc;
-    return c->syncout;
+    c->softsync = hardOrSoft > 0 ? 1 : 0;
 }
 
-
-//----------------------------------------------------------------------------------------------------------
+//==========================================================================================================
+//==========================================================================================================
 
 void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf)
 {
@@ -1927,7 +1859,10 @@ void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const pool)
     c->_init = true;
     c->amp = 1.0f;
     c->freq = 440.f;
-    c->syncin = 0.0f;
+    c->lastsyncin = 0.0f;
+    c->sync = 0.0f;
+    c->syncdir = 1.0f;
+    c->softsync = 0;
     c->_z = 0.0f;
     c->_j = 0;
     memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
@@ -1945,9 +1880,10 @@ float tMBSaw_tick(tMBSaw* const osc)
     LEAF* leaf = c->mempool->leaf;
     
     int    j;
-    float  freq, syncin;
-    float  a, p, t, w, dw, z;
-    syncin  = c->syncin;
+    float  freq, sync;
+    float  a, p, w, sw, z;
+    
+    sync = c->sync;
     freq = c->freq;
     
     p = c->_p;  /* phase [0, 1) */
@@ -1957,18 +1893,7 @@ float tMBSaw_tick(tMBSaw* const osc)
     
     if (c->_init) {
         p = 0.5f;
-        w = freq / leaf->sampleRate;
-        
-        if (w >= 0)
-        {
-            if (w < 1e-5f) w = 1e-5f;
-            if (w > 0.5f) w = 0.5f;
-        }
-        else
-        {
-            if (w > -1e-5f) w = -1e-5f;
-            if (w < -0.5f) w = -0.5f;
-        }
+        w = freq * leaf->invSampleRate;
         
         /* if we valued alias-free startup over low startup time, we could do:
          *   p -= w;
@@ -1979,62 +1904,54 @@ float tMBSaw_tick(tMBSaw* const osc)
     //a = 0.2 + 0.8 * vco->_port [FILT];
     a = 0.5f; // when a = 1, LPfilter is disabled
     
-    t = freq / leaf->sampleRate;
+    w = freq * leaf->invSampleRate;
 
-    if (t >= 0)
-    {
-        if (t < 1e-5f) t = 1e-5f;
-        if (t > 0.5f) t = 0.5f;
-    }
-    else
-    {
-        if (t > -1e-5f) t = -1e-5f;
-        if (t < -0.5f) t = -0.5f;
-    }
+    if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
+    // Should insert minblep for softsync?
+    //            if (p_at_reset >= 1.0f) {
+    //                p_at_reset -= (int)p_at_reset;
+    //                place_slope_dd(c->_f, j, p_at_reset + eof_offset, sw, 2.0f);
+    //            }
+    //            if (p_at_reset < 0.0f) {
+    //                p_at_reset += 1.0f - (int)p_at_reset;
+    //                place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -2.0f);
+    //            }
+    //            if (sw > 0) place_slope_dd(c->_f, j, p, sw, 2.0f);
+    //            else if (sw < 0) place_slope_dd(c->_f, j, 1.0f - p, -sw, -2.0f);
     
-    dw = (t - w); // n= 1
-    w += dw;
-    p += w;
+    sw = w * c->syncdir;
+    p += sw - (int)sw;
     
-    if (syncin >= 1e-20f) {  /* sync to master */
-        
-        float eof_offset = (syncin - 1e-20f) * w;
+    if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
+        float eof_offset = sync * sw;
         float p_at_reset = p - eof_offset;
-        
-        if (w > 0) p = eof_offset;
-        else p = 1.0f - eof_offset;
+
+        if (sw > 0) p = eof_offset;
+        else if (sw < 0) p = 1.0f - eof_offset;
         
         /* place any DD that may have occurred in subsample before reset */
         if (p_at_reset >= 1.0f) {
             p_at_reset -= 1.0f;
-            place_step_dd(c->_f, j, p_at_reset + eof_offset, w, 1.0f);
+            place_step_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f);
         }
         if (p_at_reset < 0.0f) {
             p_at_reset += 1.0f;
-            place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -w, -1.0f);
+            place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -1.0f);
         }
         
         /* now place reset DD */
-        if (w > 0)
-            place_step_dd(c->_f, j, p, w, p_at_reset);
-        else
-            place_step_dd(c->_f, j, 1.0f - p, -w, -p_at_reset);
-        
-        c->syncout = syncin;  /* best we can do is pass on upstream sync */
-        
+        if (sw > 0)
+            place_step_dd(c->_f, j, p, sw, p_at_reset);
+        else if (sw < 0)
+            place_step_dd(c->_f, j, 1.0f - p, -sw, -p_at_reset);
+
     } else if (p >= 1.0f) {  /* normal phase reset */
-        
         p -= 1.0f;
-        c->syncout = p / w + 1e-20f;
-        place_step_dd(c->_f, j, p, w, 1.0f);
+        place_step_dd(c->_f, j, p, sw, 1.0f);
         
     } else if (p < 0.0f) {
         p += 1.0f;
-        c->syncout = (1.0f - p) / -w + 1e-20f;
-        place_step_dd(c->_f, j, 1.0f - p, -w, -1.0f);
-    }
-    else {
-        c->syncout = 0.0f;
+        place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
     }
     c->_f[j + DD_SAMPLE_DELAY] += 0.5f - p;
     
@@ -2062,14 +1979,24 @@ void tMBSaw_setFreq(tMBSaw* const osc, float f)
     c->freq = f;
 }
 
-void tMBSaw_syncIn(tMBSaw* const osc, float sync)
+float tMBSaw_sync(tMBSaw* const osc, float value)
 {
     _tMBSaw* c = *osc;
-    c->syncin = sync;
+    
+    //based on https://github.com/VCVRack/Fundamental/blob/5799ee2a9b21492b42ebcb9b65d5395ef5c1cbe2/src/VCO.cpp#L123
+    float last = c->lastsyncin;
+    float delta = value - last;
+    float crossing = -last / delta;
+    c->lastsyncin = value;
+    if ((0.f < crossing) && (crossing <= 1.f) && (value >= 0.f))
+        c->sync = (1.f - crossing) * delta;
+    else c->sync = 0.f;
+    
+    return value;
 }
 
-float tMBSaw_syncOut(tMBSaw* const osc)
+void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft)
 {
     _tMBSaw* c = *osc;
-    return c->syncout;
+    c->softsync = hardOrSoft > 0 ? 1 : 0;
 }

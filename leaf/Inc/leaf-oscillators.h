@@ -104,7 +104,7 @@ extern "C" {
      @param osc A pointer to the tWavetable to initialize.
      @param table A pointer to the wavetable data.
      @param size The number of samples in the wave table.
-     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed. 
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
      @param mempool A pointer to the tMempool to use.
      
      @fn void    tWavetable_free         (tWavetable* const osc)
@@ -444,162 +444,159 @@ extern "C" {
     //==============================================================================
     
     /*!
-     @defgroup ttri tTri
+     @defgroup tpbtriangle tPBTriangle
      @ingroup oscillators
      @brief Triangle wave oscillator with polyBLEP anti-aliasing.
      @{
      
-     @fn void    tTri_init          (tTri* const osc, LEAF* const leaf)
-     @brief Initialize a tTri to the default mempool of a LEAF instance.
-     @param osc A pointer to the tTri to initialize.
+     @fn void   tPBTriangle_init          (tPBTriangle* const osc, LEAF* const leaf)
+     @brief Initialize a tPBTriangle to the default mempool of a LEAF instance.
+     @param osc A pointer to the tPBTriangle to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tTri_initToPool    (tTri* const osc, tMempool* const mempool)
-     @brief Initialize a tTri to a specified mempool.
-     @param osc A pointer to the tTri to initialize.
+     @fn void    tPBTriangle_initToPool    (tPBTriangle* const osc, tMempool* const mempool)
+     @brief Initialize a tPBTriangle to a specified mempool.
+     @param osc A pointer to the tPBTriangle to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tTri_free          (tTri* const osc)
+     @fn void    tPBTriangle_free          (tPBTriangle* const osc)
      @brief Free a tTri from its mempool.
-     @param osc A pointer to the tTri to free.
+     @param osc A pointer to the tPBTriangle to free.
      
-     @fn float   tTri_tick          (tTri* const osc)
+     @fn float   tPBTriangle_tick          (tPBTriangle* const osc)
      @brief
-     @param osc A pointer to the relevant tTri.
+     @param osc A pointer to the relevant tPBTriangle.
      
-     @fn void    tTri_setFreq       (tTri* const osc, float freq)
+     @fn void    tPBTriangle_setFreq       (tPBTriangle* const osc, float freq)
      @brief
-     @param osc A pointer to the relevant tTri.
+     @param osc A pointer to the relevant tPBTriangle.
      
-     @fn void    tTri_setSkew       (tTri* const osc, float skew)
+     @fn void    tPBTriangle_setSkew       (tPBTriangle* const osc, float skew)
      @brief
-     @param osc A pointer to the relevant tTri.
+     @param osc A pointer to the relevant tPBTriangle.
      ￼￼￼
      @} */
 
-    typedef struct _tTri
+    typedef struct _tPBTriangle
     {
-        
         tMempool mempool;
         float phase;
         float inc,freq;
         float skew;
         float lastOut;
-    } _tTri;
+    } _tPBTriangle;
     
-    typedef _tTri* tTri;
+    typedef _tPBTriangle* tPBTriangle;
     
-    void    tTri_init          (tTri* const osc, LEAF* const leaf);
-    void    tTri_initToPool    (tTri* const osc, tMempool* const mempool);
-    void    tTri_free          (tTri* const osc);
+    void    tPBTriangle_init          (tPBTriangle* const osc, LEAF* const leaf);
+    void    tPBTriangle_initToPool    (tPBTriangle* const osc, tMempool* const mempool);
+    void    tPBTriangle_free          (tPBTriangle* const osc);
     
-    float   tTri_tick          (tTri* const osc);
-    void    tTri_setFreq       (tTri* const osc, float freq);
-    void    tTri_setSkew       (tTri* const osc, float skew);
+    float   tPBTriangle_tick          (tPBTriangle* const osc);
+    void    tPBTriangle_setFreq       (tPBTriangle* const osc, float freq);
+    void    tPBTriangle_setSkew       (tPBTriangle* const osc, float skew);
     
     //==============================================================================
     
     /*!
-     @defgroup tpulse tPulse
+     @defgroup tpbpulse tPBPulse
      @ingroup oscillators
      @brief Pulse wave oscillator with polyBLEP anti-aliasing.
      @{
      
-     @fn void    tPulse_init        (tPulse* const osc, LEAF* const leaf)
-     @brief Initialize a tPulse to the default mempool of a LEAF instance.
-     @param osc A pointer to the tPulse to initialize.
+     @fn void    tPBPulse_init        (tPBPulse* const osc, LEAF* const leaf)
+     @brief Initialize a tPBPulse to the default mempool of a LEAF instance.
+     @param osc A pointer to the tPBPulse to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPulse_initToPool  (tPulse* const osc, tMempool* const)
-     @brief Initialize a tPulse to a specified mempool.
-     @param osc A pointer to the tPulse to initialize.
+     @fn void    tPBPulse_initToPool  (tPBPulse* const osc, tMempool* const)
+     @brief Initialize a tPBPulse to a specified mempool.
+     @param osc A pointer to the tPBPulse to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tPulse_free        (tPulse* const osc)
-     @brief Free a tPulse from its mempool.
-     @param osc A pointer to the tPulse to free.
+     @fn void    tPBPulse_free        (tPBPulse* const osc)
+     @brief Free a tPBPulse from its mempool.
+     @param osc A pointer to the tPBPulse to free.
      
-     @fn float   tPulse_tick        (tPulse* const osc)
+     @fn float   tPBPulse_tick        (tPBPulse* const osc)
      @brief
-     @param osc A pointer to the relevant tPulse.
+     @param osc A pointer to the relevant tPBPulse.
      
-     @fn void    tPulse_setFreq     (tPulse* const osc, float freq)
+     @fn void    tPBPulse_setFreq     (tPBPulse* const osc, float freq)
      @brief
-     @param osc A pointer to the relevant tPulse.
+     @param osc A pointer to the relevant tPBPulse.
      
-     @fn void    tPulse_setWidth    (tPulse* const osc, float width)
+     @fn void    tPBPulse_setWidth    (tPBPulse* const osc, float width)
      @brief
-     @param osc A pointer to the relevant tPulse.
+     @param osc A pointer to the relevant tPBPulse.
      ￼￼￼
      @} */
     
-    typedef struct _tPulse
+    typedef struct _tPBPulse
     {
-        
         tMempool mempool;
         float phase;
         float inc,freq;
         float width;
-    } _tPulse;
+    } _tPBPulse;
     
-    typedef _tPulse* tPulse;
+    typedef _tPBPulse* tPBPulse;
     
-    void    tPulse_init        (tPulse* const osc, LEAF* const leaf);
-    void    tPulse_initToPool  (tPulse* const osc, tMempool* const);
-    void    tPulse_free        (tPulse* const osc);
+    void    tPBPulse_init        (tPBPulse* const osc, LEAF* const leaf);
+    void    tPBPulse_initToPool  (tPBPulse* const osc, tMempool* const);
+    void    tPBPulse_free        (tPBPulse* const osc);
     
-    float   tPulse_tick        (tPulse* const osc);
-    void    tPulse_setFreq     (tPulse* const osc, float freq);
-    void    tPulse_setWidth    (tPulse* const osc, float width);
+    float   tPBPulse_tick        (tPBPulse* const osc);
+    void    tPBPulse_setFreq     (tPBPulse* const osc, float freq);
+    void    tPBPulse_setWidth    (tPBPulse* const osc, float width);
     
     //==============================================================================
     
     /*!
-     @defgroup tsaw tSaw
+     @defgroup tpbsaw tPBSaw
      @ingroup oscillators
      @brief Saw wave oscillator with polyBLEP anti-aliasing.
      @{
      
-     @fn void    tSaw_init          (tSaw* const osc, LEAF* const leaf)
-     @brief Initialize a tSaw to the default mempool of a LEAF instance.
-     @param osc A pointer to the tSaw to initialize.
+     @fn void    tPBSaw_init          (tPBSaw* const osc, LEAF* const leaf)
+     @brief Initialize a tPBSaw to the default mempool of a LEAF instance.
+     @param osc A pointer to the tPBSaw to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSaw_initToPool    (tSaw* const osc, tMempool* const mempool)
-     @brief Initialize a tSaw to a specified mempool.
-     @param osc A pointer to the tSaw to initialize.
+     @fn void    tPBSaw_initToPool    (tPBSaw* const osc, tMempool* const mempool)
+     @brief Initialize a tPBSaw to a specified mempool.
+     @param osc A pointer to the tPBSaw to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tSaw_free          (tSaw* const osc)
-     @brief Free a tSaw from its mempool.
-     @param osc A pointer to the tSaw to free.
+     @fn void    tPBSaw_free          (tPBSaw* const osc)
+     @brief Free a tPBSaw from its mempool.
+     @param osc A pointer to the tPBSaw to free.
      
-     @fn float   tSaw_tick          (tSaw* const osc)
+     @fn float   tPBSaw_tick          (tPBSaw* const osc)
      @brief
-     @param osc A pointer to the relevant tSaw.
+     @param osc A pointer to the relevant tPBSaw.
      
-     @fn void    tSaw_setFreq       (tSaw* const osc, float freq)
+     @fn void    tPBSaw_setFreq       (tPBSaw* const osc, float freq)
      @brief
-     @param osc A pointer to the relevant tSaw.
+     @param osc A pointer to the relevant tPBSaw.
      ￼￼￼
      @} */
     
-    typedef struct _tSaw
+    typedef struct _tPBSaw
     {
-        
         tMempool mempool;
         float phase;
         float inc,freq;
-    } _tSaw;
+    } _tPBSaw;
     
-    typedef _tSaw* tSaw;
+    typedef _tPBSaw* tPBSaw;
     
-    void    tSaw_init          (tSaw* const osc, LEAF* const leaf);
-    void    tSaw_initToPool    (tSaw* const osc, tMempool* const mempool);
-    void    tSaw_free          (tSaw* const osc);
+    void    tPBSaw_init          (tPBSaw* const osc, LEAF* const leaf);
+    void    tPBSaw_initToPool    (tPBSaw* const osc, tMempool* const mempool);
+    void    tPBSaw_free          (tPBSaw* const osc);
     
-    float   tSaw_tick          (tSaw* const osc);
-    void    tSaw_setFreq       (tSaw* const osc, float freq);
+    float   tPBSaw_tick          (tPBSaw* const osc);
+    void    tPBSaw_setFreq       (tPBSaw* const osc, float freq);
     
     //==============================================================================
     
@@ -880,13 +877,13 @@ extern "C" {
      @brief
      @param osc A pointer to the relevant tMBPulse.
      
-     @fn void tMBPulse_syncIn(tMBPulse* const osc, float sync)
+     @fn float tMBPulse_sync(tMBPulse* const osc, float sync)
      @brief
      @param osc A pointer to the relevant tMBPulse.
      
-     @fn float tMBPulse_syncOut(tMBPulse* const osc)
-     @brief
-     @param osc A pointer to the relevant tMBPulse.
+     @fn void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft)
+     @brief Set the sync behavior of the oscillator.
+     @param hardOrSoft 0 for hard sync, 1 for soft sync
      ￼￼￼
      @} */
     
@@ -899,8 +896,10 @@ extern "C" {
         float    last_amp;
         float    freq;
         float    waveform;    // duty cycle, must be in [-1, 1]
-        float    syncin;
-        float    syncout;
+        float    lastsyncin;
+        float    sync;
+        float    syncdir;
+        int      softsync;
         float   _p, _w, _b, _x, _z;
         float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
         int     _j, _k;
@@ -916,8 +915,8 @@ extern "C" {
     float tMBPulse_tick(tMBPulse* const osc);
     void tMBPulse_setFreq(tMBPulse* const osc, float f);
     void tMBPulse_setWidth(tMBPulse* const osc, float w);
-    void tMBPulse_syncIn(tMBPulse* const osc, float sync);
-    float tMBPulse_syncOut(tMBPulse* const osc);
+    float tMBPulse_sync(tMBPulse* const osc, float sync);
+    void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft);
     
     /*!
      @defgroup tmbtriangle tMBTriangle
@@ -949,14 +948,14 @@ extern "C" {
      @brief
      @param osc A pointer to the relevant tMBTriangle.
      
-     @fn void tMBTriangle_syncIn(tMBTriangle* const osc, float sync)
+     @fn float tMBTriangle_sync(tMBTriangle* const osc, float sync)
      @brief
      @param osc A pointer to the relevant tMBTriangle.
      
-     @fn float tMBTriangle_syncOut(tMBTriangle* const osc)
-     @brief
-     @param osc A pointer to the relevant tMBTriangle.
-     ￼￼￼
+     @fn void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft)
+     @brief Set the sync behavior of the oscillator.
+     @param hardOrSoft 0 for hard sync, 1 for soft sync
+
      @} */
     
     typedef struct _tMBTriangle
@@ -968,8 +967,10 @@ extern "C" {
         float    last_amp;
         float    freq;
         float    waveform;    // duty cycle, must be in [-1, 1]
-        float    syncin;
-        float    syncout;
+        float    lastsyncin;
+        float    sync;
+        float    syncdir;
+        int      softsync;
         float   _p, _w, _b, _z;
         float   _f [FILLEN + LONGEST_DD_PULSE_LENGTH];
         int     _j, _k;
@@ -985,8 +986,8 @@ extern "C" {
     float tMBTriangle_tick(tMBTriangle* const osc);
     void tMBTriangle_setFreq(tMBTriangle* const osc, float f);
     void tMBTriangle_setWidth(tMBTriangle* const osc, float w);
-    void tMBTriangle_syncIn(tMBTriangle* const osc, float sync);
-    float tMBTriangle_syncOut(tMBTriangle* const osc);
+    float tMBTriangle_sync(tMBTriangle* const osc, float sync);
+    void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft);
     
     
     /*!
@@ -1008,33 +1009,38 @@ extern "C" {
      @param osc A pointer to the tMBSaw to free.
      
      @fn float tMBSaw_tick(tMBSaw* const osc)
-     @brief
+     @brief Tick the oscillator.
      @param osc A pointer to the relevant tMBSaw.
+     @return The ticked sample.
      
      @fn void tMBSaw_setFreq(tMBSaw* const osc, float f)
-     @brief
+     @brief Set the frequency of the oscillator.
      @param osc A pointer to the relevant tMBSaw.
+     @param freq The new frequency.
      
-     @fn void tMBSaw_syncIn(tMBSaw* const osc, float sync)
-     @brief
+     @fn float tMBSaw_sync(tMBSaw* const osc, float sync)
+     @brief Sync this oscillator to another signal.
      @param osc A pointer to the relevant tMBSaw.
+     @param sync A sample of the signal to sync to.
+     @return The passed in sample.
      
-     @fn float tMBSaw_syncOut(tMBSaw* const osc)
-     @brief
-     @param osc A pointer to the relevant tMBSaw.
+     @fn void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft)
+     @brief Set the sync behavior of the oscillator.
+     @param hardOrSoft 0 for hard sync, 1 for soft sync
      ￼￼￼
      @} */
     
     typedef struct _tMBSaw
     {
-        
         tMempool mempool;
         float    out;
         float    amp;
         float    last_amp;
         float    freq;
-        float    syncin;
-        float    syncout;
+        float    lastsyncin;
+        float    sync;
+        float    syncdir;
+        int      softsync;
         float   _p, _w, _z;
         float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
         int     _j;
@@ -1049,11 +1055,9 @@ extern "C" {
     
     float tMBSaw_tick(tMBSaw* const osc);
     void tMBSaw_setFreq(tMBSaw* const osc, float f);
-    void tMBSaw_syncIn(tMBSaw* const osc, float sync);
-    float tMBSaw_syncOut(tMBSaw* const osc);
-    
-    
-    
+    float tMBSaw_sync(tMBSaw* const osc, float sync);
+    void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft);
+
     
 #ifdef __cplusplus
 }

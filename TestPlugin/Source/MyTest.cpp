@@ -17,6 +17,8 @@ tMBSaw bsaw;
 tMBTriangle btri;
 tMBPulse bpulse;
 
+tPhasor phasor;
+
 tSVF lp, hp;
 
 tPeriodDetection pd;
@@ -57,6 +59,16 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     tWavetable_init(&wt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
     tCompactWavetable_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
+    
+    tMBTriangle_init(&btri, &leaf);
+    tMBPulse_init(&bpulse, &leaf);
+    tMBSaw_init(&bsaw, &leaf);
+    tMBSaw_setSyncMode(&bsaw, 1);
+    tMBTriangle_setSyncMode(&btri, 0);
+    tMBPulse_setSyncMode(&bpulse, 0);
+    
+    tPhasor_init(&phasor, &leaf);
+    tPhasor_setFreq(&phasor, 220.f);
 }
 
 inline double getSawFall(double angle) {
@@ -72,8 +84,9 @@ float   LEAFTest_tick            (float input)
 {
 //    return tRetune_tick(&retune, input)[0];
 //    return tSimpleRetune_tick(&sretune, input);
+//    tMBPulse_sync(&bpulse, tPhasor_tick(&phasor) * 2.f - 1.f);
+//    return tMBPulse_tick(&bpulse);
     return tWavetable_tick(&wt);
-    return tCompactWavetable_tick(&cwt);
 }
 
 int firstFrame = 1;
@@ -81,7 +94,10 @@ bool lastState = false, lastPlayState = false;
 void    LEAFTest_block           (void)
 {
     float val = getSliderValue("slider1");
-    tWavetable_setFreq(&wt, val * 40000.);
+    tMBTriangle_setFreq(&btri, val * 440.f);
+    tMBPulse_setFreq(&bpulse, val * 160000.f - 80000.0f);
+    tMBSaw_setFreq(&bsaw, val * 10000.f);
+    tWavetable_setFreq(&wt, val * 160000.f - 80000.0f);
     tCompactWavetable_setFreq(&cwt, val * 10000.);
 //    tRetune_tuneVoice(&retune, 0, val * 3.0f + 0.5f);
 //    tSimpleRetune_tuneVoice(&sretune, 0, 300);
