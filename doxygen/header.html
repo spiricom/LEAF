@@ -17,6 +17,7 @@
     <link href="$relpath^tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="$relpath^jquery.js"></script>
     <script type="text/javascript" src="$relpath^dynsections.js"></script>
+    <script type="text/javascript" src="$relpath^../js/iframeResizer.contentWindow.min.js"></script>
     <!-- <script src="/js/template.js"></script> -->
     $treeview $search $mathjax
     <link href="$relpath^$stylesheet" rel="stylesheet" type="text/css" />
@@ -25,21 +26,6 @@
 </head>
 
 <body class="bg-washed-green black-70 ph0 sans-serif" onload="iframeResizePipe()">
-    <iframe id="helpframe" src='' height='0' width='0' frameborder='0'></iframe>
-
-    <script type="text/javascript">
-        function iframeResizePipe() {
-            // What's the page height?
-            var height = document.body.scrollHeight;
-
-            // Going to 'pipe' the data to the parent through the helpframe..
-            var pipe = document.getElementById('helpframe');
-
-            // Cachebuster a precaution here to stop browser caching interfering
-            pipe.src = 'https://nirl.princeton.edu/_helper.html?height=' + height + '&cacheb=' + Math.random();
-
-        }
-    </script>
 
     <div>
         <!-- do not remove this div, it is closed by doxygen! -->
