@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
     <meta name="generator" content="Doxygen 1.8.16" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LEAF: tSquare</title>
+    <title>LEAF: tPBSaw</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -99,44 +99,42 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">tSquare<div class="ingroups"><a class="el" href="group__oscillators.html">Oscillators</a></div></div>  </div>
+<div class="title">tPBSaw<div class="ingroups"><a class="el" href="group__oscillators.html">Oscillators</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Anti-aliased wavetable square wave oscillator.  
+<p>Saw wave oscillator with polyBLEP anti-aliasing.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gacaaa2bf1d76371d9b4aeda286a09560f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tsquare.html#gacaaa2bf1d76371d9b4aeda286a09560f">tSquare_init</a> (tSquare *const osc, <a class="el" href="struct_l_e_a_f.html">LEAF</a> *const leaf)</td></tr>
-<tr class="memdesc:gacaaa2bf1d76371d9b4aeda286a09560f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tSquare to the default mempool of a <a class="el" href="struct_l_e_a_f.html" title="Struct for an instance of LEAF.">LEAF</a> instance.  <a href="group__tsquare.html#gacaaa2bf1d76371d9b4aeda286a09560f">More...</a><br /></td></tr>
-<tr class="separator:gacaaa2bf1d76371d9b4aeda286a09560f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad9c41ce10b6b0c821360f43743544c89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tsquare.html#gad9c41ce10b6b0c821360f43743544c89">tSquare_initToPool</a> (tSquare *const osc, tMempool *const)</td></tr>
-<tr class="memdesc:gad9c41ce10b6b0c821360f43743544c89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tSquare to a specified mempool.  <a href="group__tsquare.html#gad9c41ce10b6b0c821360f43743544c89">More...</a><br /></td></tr>
-<tr class="separator:gad9c41ce10b6b0c821360f43743544c89"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1f6fac5cb92fcbca09970b95a2d05d7d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tsquare.html#ga1f6fac5cb92fcbca09970b95a2d05d7d">tSquare_free</a> (tSquare *const osc)</td></tr>
-<tr class="memdesc:ga1f6fac5cb92fcbca09970b95a2d05d7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free a tSquare from its mempool.  <a href="group__tsquare.html#ga1f6fac5cb92fcbca09970b95a2d05d7d">More...</a><br /></td></tr>
-<tr class="separator:ga1f6fac5cb92fcbca09970b95a2d05d7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga00053831170c826962e4f1aa9d6696e2"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tsquare.html#ga00053831170c826962e4f1aa9d6696e2">tSquare_tick</a> (tSquare *const osc)</td></tr>
-<tr class="memdesc:ga00053831170c826962e4f1aa9d6696e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tick a tSquare oscillator.  <a href="group__tsquare.html#ga00053831170c826962e4f1aa9d6696e2">More...</a><br /></td></tr>
-<tr class="separator:ga00053831170c826962e4f1aa9d6696e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga4453bd8e23b1b88ec944c93b8cb575f6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tsquare.html#ga4453bd8e23b1b88ec944c93b8cb575f6">tSquare_setFreq</a> (tSquare *const osc, float freq)</td></tr>
-<tr class="memdesc:ga4453bd8e23b1b88ec944c93b8cb575f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the frequency of a tSquare oscillator.  <a href="group__tsquare.html#ga4453bd8e23b1b88ec944c93b8cb575f6">More...</a><br /></td></tr>
-<tr class="separator:ga4453bd8e23b1b88ec944c93b8cb575f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaefe02484a169c2babc92686caa77b211"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbsaw.html#gaefe02484a169c2babc92686caa77b211">tPBSaw_init</a> (tPBSaw *const osc, <a class="el" href="struct_l_e_a_f.html">LEAF</a> *const leaf)</td></tr>
+<tr class="memdesc:gaefe02484a169c2babc92686caa77b211"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tPBSaw to the default mempool of a <a class="el" href="struct_l_e_a_f.html" title="Struct for an instance of LEAF.">LEAF</a> instance.  <a href="group__tpbsaw.html#gaefe02484a169c2babc92686caa77b211">More...</a><br /></td></tr>
+<tr class="separator:gaefe02484a169c2babc92686caa77b211"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga51843ccbdaef8d5251e11a0812c8e627"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbsaw.html#ga51843ccbdaef8d5251e11a0812c8e627">tPBSaw_initToPool</a> (tPBSaw *const osc, tMempool *const mempool)</td></tr>
+<tr class="memdesc:ga51843ccbdaef8d5251e11a0812c8e627"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tPBSaw to a specified mempool.  <a href="group__tpbsaw.html#ga51843ccbdaef8d5251e11a0812c8e627">More...</a><br /></td></tr>
+<tr class="separator:ga51843ccbdaef8d5251e11a0812c8e627"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3e00510154f54b8f7c8e8611217198ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbsaw.html#ga3e00510154f54b8f7c8e8611217198ae">tPBSaw_free</a> (tPBSaw *const osc)</td></tr>
+<tr class="memdesc:ga3e00510154f54b8f7c8e8611217198ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free a tPBSaw from its mempool.  <a href="group__tpbsaw.html#ga3e00510154f54b8f7c8e8611217198ae">More...</a><br /></td></tr>
+<tr class="separator:ga3e00510154f54b8f7c8e8611217198ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga406a4319bcbae4c0f0dfaba1d5631328"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbsaw.html#ga406a4319bcbae4c0f0dfaba1d5631328">tPBSaw_tick</a> (tPBSaw *const osc)</td></tr>
+<tr class="separator:ga406a4319bcbae4c0f0dfaba1d5631328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7e1f3a7848d2bcdab21f6cfe2e476bdc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbsaw.html#ga7e1f3a7848d2bcdab21f6cfe2e476bdc">tPBSaw_setFreq</a> (tPBSaw *const osc, float freq)</td></tr>
+<tr class="separator:ga7e1f3a7848d2bcdab21f6cfe2e476bdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>Anti-aliased wavetable square wave oscillator. </p>
+<p>Saw wave oscillator with polyBLEP anti-aliasing. </p>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="gacaaa2bf1d76371d9b4aeda286a09560f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gacaaa2bf1d76371d9b4aeda286a09560f">&#9670;&nbsp;</a></span>tSquare_init()</h2>
+<a id="gaefe02484a169c2babc92686caa77b211"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaefe02484a169c2babc92686caa77b211">&#9670;&nbsp;</a></span>tPBSaw_init()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void tSquare_init </td>
+          <td class="memname">void tPBSaw_init </td>
           <td>(</td>
-          <td class="paramtype">tSquare *const&#160;</td>
+          <td class="paramtype">tPBSaw *const&#160;</td>
           <td class="paramname"><em>osc</em>, </td>
         </tr>
         <tr>
@@ -153,10 +151,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initialize a tSquare to the default mempool of a <a class="el" href="struct_l_e_a_f.html" title="Struct for an instance of LEAF.">LEAF</a> instance. </p>
+<p>Initialize a tPBSaw to the default mempool of a <a class="el" href="struct_l_e_a_f.html" title="Struct for an instance of LEAF.">LEAF</a> instance. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">osc</td><td>A pointer to the tSquare to initialize. </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the tPBSaw to initialize. </td></tr>
     <tr><td class="paramname">leaf</td><td>A pointer to the leaf instance. </td></tr>
   </table>
   </dd>
@@ -164,22 +162,22 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gad9c41ce10b6b0c821360f43743544c89"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gad9c41ce10b6b0c821360f43743544c89">&#9670;&nbsp;</a></span>tSquare_initToPool()</h2>
+<a id="ga51843ccbdaef8d5251e11a0812c8e627"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga51843ccbdaef8d5251e11a0812c8e627">&#9670;&nbsp;</a></span>tPBSaw_initToPool()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void tSquare_initToPool </td>
+          <td class="memname">void tPBSaw_initToPool </td>
           <td>(</td>
-          <td class="paramtype">tSquare *const&#160;</td>
+          <td class="paramtype">tPBSaw *const&#160;</td>
           <td class="paramname"><em>osc</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">tMempool * const&#160;</td>
+          <td class="paramtype">tMempool *const&#160;</td>
           <td class="paramname"><em>mempool</em>&#160;</td>
         </tr>
         <tr>
@@ -190,10 +188,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initialize a tSquare to a specified mempool. </p>
+<p>Initialize a tPBSaw to a specified mempool. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">osc</td><td>A pointer to the tSquare to initialize. </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the tPBSaw to initialize. </td></tr>
     <tr><td class="paramname">mempool</td><td>A pointer to the tMempool to use. </td></tr>
   </table>
   </dd>
@@ -201,69 +199,66 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga1f6fac5cb92fcbca09970b95a2d05d7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga1f6fac5cb92fcbca09970b95a2d05d7d">&#9670;&nbsp;</a></span>tSquare_free()</h2>
+<a id="ga3e00510154f54b8f7c8e8611217198ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3e00510154f54b8f7c8e8611217198ae">&#9670;&nbsp;</a></span>tPBSaw_free()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void tSquare_free </td>
+          <td class="memname">void tPBSaw_free </td>
           <td>(</td>
-          <td class="paramtype">tSquare *const&#160;</td>
+          <td class="paramtype">tPBSaw *const&#160;</td>
           <td class="paramname"><em>osc</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Free a tSquare from its mempool. </p>
+<p>Free a tPBSaw from its mempool. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">osc</td><td>A pointer to the tSquare to free. </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the tPBSaw to free. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ga00053831170c826962e4f1aa9d6696e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga00053831170c826962e4f1aa9d6696e2">&#9670;&nbsp;</a></span>tSquare_tick()</h2>
+<a id="ga406a4319bcbae4c0f0dfaba1d5631328"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga406a4319bcbae4c0f0dfaba1d5631328">&#9670;&nbsp;</a></span>tPBSaw_tick()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">float tSquare_tick </td>
+          <td class="memname">float tPBSaw_tick </td>
           <td>(</td>
-          <td class="paramtype">tSquare *const&#160;</td>
+          <td class="paramtype">tPBSaw *const&#160;</td>
           <td class="paramname"><em>osc</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Tick a tSquare oscillator. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">osc</td><td>A pointer to the relevant tSquare. </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the relevant tPBSaw. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The ticked sample as a float from -1 to 1. </dd></dl>
 
 </div>
 </div>
-<a id="ga4453bd8e23b1b88ec944c93b8cb575f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga4453bd8e23b1b88ec944c93b8cb575f6">&#9670;&nbsp;</a></span>tSquare_setFreq()</h2>
+<a id="ga7e1f3a7848d2bcdab21f6cfe2e476bdc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7e1f3a7848d2bcdab21f6cfe2e476bdc">&#9670;&nbsp;</a></span>tPBSaw_setFreq()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void tSquare_setFreq </td>
+          <td class="memname">void tPBSaw_setFreq </td>
           <td>(</td>
-          <td class="paramtype">tSquare *const&#160;</td>
+          <td class="paramtype">tPBSaw *const&#160;</td>
           <td class="paramname"><em>osc</em>, </td>
         </tr>
         <tr>
@@ -279,12 +274,9 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Set the frequency of a tSquare oscillator. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">osc</td><td>A pointer to the relevant tSquare. </td></tr>
-    <tr><td class="paramname">freq</td><td>The frequency to set the oscillator to. ￼￼￼ </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the relevant tPBSaw. ￼￼￼ </td></tr>
   </table>
   </dd>
 </dl>

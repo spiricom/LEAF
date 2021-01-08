@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=9" />
     <meta name="generator" content="Doxygen 1.8.16" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LEAF: tHighpass</title>
+    <title>LEAF: tPBPulse</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -99,51 +99,45 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div class="summary">
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">tHighpass<div class="ingroups"><a class="el" href="group__filters.html">Filters</a></div></div>  </div>
+<div class="title">tPBPulse<div class="ingroups"><a class="el" href="group__oscillators.html">Oscillators</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Simple Highpass filter.  
+<p>Pulse wave oscillator with polyBLEP anti-aliasing.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga02cc06dfedbbde5c3746b5238c6c80e7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__thighpass.html#ga02cc06dfedbbde5c3746b5238c6c80e7">tHighpass_init</a> (tHighpass *const, float freq, <a class="el" href="struct_l_e_a_f.html">LEAF</a> *const leaf)</td></tr>
-<tr class="memdesc:ga02cc06dfedbbde5c3746b5238c6c80e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tHighpass to the default mempool of a <a class="el" href="struct_l_e_a_f.html" title="Struct for an instance of LEAF.">LEAF</a> instance.  <a href="group__thighpass.html#ga02cc06dfedbbde5c3746b5238c6c80e7">More...</a><br /></td></tr>
-<tr class="separator:ga02cc06dfedbbde5c3746b5238c6c80e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaaff0f966ed6e69d21d62bc49d3cd7d0a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__thighpass.html#gaaff0f966ed6e69d21d62bc49d3cd7d0a">tHighpass_initToPool</a> (tHighpass *const, float freq, tMempool *const)</td></tr>
-<tr class="memdesc:gaaff0f966ed6e69d21d62bc49d3cd7d0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tHighpass to a specified mempool.  <a href="group__thighpass.html#gaaff0f966ed6e69d21d62bc49d3cd7d0a">More...</a><br /></td></tr>
-<tr class="separator:gaaff0f966ed6e69d21d62bc49d3cd7d0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaaf2a848e9c9f1aa0130cdc8a4de88c2a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__thighpass.html#gaaf2a848e9c9f1aa0130cdc8a4de88c2a">tHighpass_free</a> (tHighpass *const)</td></tr>
-<tr class="memdesc:gaaf2a848e9c9f1aa0130cdc8a4de88c2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free a tHighpass from its mempool.  <a href="group__thighpass.html#gaaf2a848e9c9f1aa0130cdc8a4de88c2a">More...</a><br /></td></tr>
-<tr class="separator:gaaf2a848e9c9f1aa0130cdc8a4de88c2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaed6612747075529362ee1e5a984819a2"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__thighpass.html#gaed6612747075529362ee1e5a984819a2">tHighpass_tick</a> (tHighpass *const, float x)</td></tr>
-<tr class="separator:gaed6612747075529362ee1e5a984819a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga94dddc9bae136df8933a82214ce2f1e3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__thighpass.html#ga94dddc9bae136df8933a82214ce2f1e3">tHighpass_setFreq</a> (tHighpass *const, float freq)</td></tr>
-<tr class="separator:ga94dddc9bae136df8933a82214ce2f1e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga52802836559273d666031bd33b7ad254"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__thighpass.html#ga52802836559273d666031bd33b7ad254">tHighpass_getFreq</a> (tHighpass *const)</td></tr>
-<tr class="separator:ga52802836559273d666031bd33b7ad254"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4b8b8e7bdc1cd61cf193cdb1c65573eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbpulse.html#ga4b8b8e7bdc1cd61cf193cdb1c65573eb">tPBPulse_init</a> (tPBPulse *const osc, <a class="el" href="struct_l_e_a_f.html">LEAF</a> *const leaf)</td></tr>
+<tr class="memdesc:ga4b8b8e7bdc1cd61cf193cdb1c65573eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tPBPulse to the default mempool of a <a class="el" href="struct_l_e_a_f.html" title="Struct for an instance of LEAF.">LEAF</a> instance.  <a href="group__tpbpulse.html#ga4b8b8e7bdc1cd61cf193cdb1c65573eb">More...</a><br /></td></tr>
+<tr class="separator:ga4b8b8e7bdc1cd61cf193cdb1c65573eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga089e07fce804c1b1e6056db359a18824"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbpulse.html#ga089e07fce804c1b1e6056db359a18824">tPBPulse_initToPool</a> (tPBPulse *const osc, tMempool *const)</td></tr>
+<tr class="memdesc:ga089e07fce804c1b1e6056db359a18824"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a tPBPulse to a specified mempool.  <a href="group__tpbpulse.html#ga089e07fce804c1b1e6056db359a18824">More...</a><br /></td></tr>
+<tr class="separator:ga089e07fce804c1b1e6056db359a18824"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6ac8de9bbd2c97c9528b1063b34c1e18"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbpulse.html#ga6ac8de9bbd2c97c9528b1063b34c1e18">tPBPulse_free</a> (tPBPulse *const osc)</td></tr>
+<tr class="memdesc:ga6ac8de9bbd2c97c9528b1063b34c1e18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free a tPBPulse from its mempool.  <a href="group__tpbpulse.html#ga6ac8de9bbd2c97c9528b1063b34c1e18">More...</a><br /></td></tr>
+<tr class="separator:ga6ac8de9bbd2c97c9528b1063b34c1e18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7aaad9740d3c09fc4824163c6ad0c80d"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbpulse.html#ga7aaad9740d3c09fc4824163c6ad0c80d">tPBPulse_tick</a> (tPBPulse *const osc)</td></tr>
+<tr class="separator:ga7aaad9740d3c09fc4824163c6ad0c80d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab32a37dc71636bc09ee394d645be2c09"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbpulse.html#gab32a37dc71636bc09ee394d645be2c09">tPBPulse_setFreq</a> (tPBPulse *const osc, float freq)</td></tr>
+<tr class="separator:gab32a37dc71636bc09ee394d645be2c09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8e65e57d726e906cc346ab8e27f49623"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__tpbpulse.html#ga8e65e57d726e906cc346ab8e27f49623">tPBPulse_setWidth</a> (tPBPulse *const osc, float width)</td></tr>
+<tr class="separator:ga8e65e57d726e906cc346ab8e27f49623"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>Simple Highpass filter. </p>
+<p>Pulse wave oscillator with polyBLEP anti-aliasing. </p>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ga02cc06dfedbbde5c3746b5238c6c80e7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga02cc06dfedbbde5c3746b5238c6c80e7">&#9670;&nbsp;</a></span>tHighpass_init()</h2>
+<a id="ga4b8b8e7bdc1cd61cf193cdb1c65573eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4b8b8e7bdc1cd61cf193cdb1c65573eb">&#9670;&nbsp;</a></span>tPBPulse_init()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void tHighpass_init </td>
+          <td class="memname">void tPBPulse_init </td>
           <td>(</td>
-          <td class="paramtype">tHighpass * const&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>freq</em>, </td>
+          <td class="paramtype">tPBPulse *const&#160;</td>
+          <td class="paramname"><em>osc</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -159,10 +153,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initialize a tHighpass to the default mempool of a <a class="el" href="struct_l_e_a_f.html" title="Struct for an instance of LEAF.">LEAF</a> instance. </p>
+<p>Initialize a tPBPulse to the default mempool of a <a class="el" href="struct_l_e_a_f.html" title="Struct for an instance of LEAF.">LEAF</a> instance. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">filter</td><td>A pointer to the tHighpass to initialize. </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the tPBPulse to initialize. </td></tr>
     <tr><td class="paramname">leaf</td><td>A pointer to the leaf instance. </td></tr>
   </table>
   </dd>
@@ -170,23 +164,17 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gaaff0f966ed6e69d21d62bc49d3cd7d0a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaaff0f966ed6e69d21d62bc49d3cd7d0a">&#9670;&nbsp;</a></span>tHighpass_initToPool()</h2>
+<a id="ga089e07fce804c1b1e6056db359a18824"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga089e07fce804c1b1e6056db359a18824">&#9670;&nbsp;</a></span>tPBPulse_initToPool()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void tHighpass_initToPool </td>
+          <td class="memname">void tPBPulse_initToPool </td>
           <td>(</td>
-          <td class="paramtype">tHighpass * const&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>freq</em>, </td>
+          <td class="paramtype">tPBPulse *const&#160;</td>
+          <td class="paramname"><em>osc</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -202,10 +190,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Initialize a tHighpass to a specified mempool. </p>
+<p>Initialize a tPBPulse to a specified mempool. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">filter</td><td>A pointer to the tHighpass to initialize. </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the tPBPulse to initialize. </td></tr>
     <tr><td class="paramname">mempool</td><td>A pointer to the tMempool to use. </td></tr>
   </table>
   </dd>
@@ -213,77 +201,67 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gaaf2a848e9c9f1aa0130cdc8a4de88c2a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaaf2a848e9c9f1aa0130cdc8a4de88c2a">&#9670;&nbsp;</a></span>tHighpass_free()</h2>
+<a id="ga6ac8de9bbd2c97c9528b1063b34c1e18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6ac8de9bbd2c97c9528b1063b34c1e18">&#9670;&nbsp;</a></span>tPBPulse_free()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void tHighpass_free </td>
+          <td class="memname">void tPBPulse_free </td>
           <td>(</td>
-          <td class="paramtype">tHighpass * const&#160;</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">tPBPulse *const&#160;</td>
+          <td class="paramname"><em>osc</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Free a tHighpass from its mempool. </p>
+<p>Free a tPBPulse from its mempool. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">filter</td><td>A pointer to the tHighpass to free. </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the tPBPulse to free. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="gaed6612747075529362ee1e5a984819a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaed6612747075529362ee1e5a984819a2">&#9670;&nbsp;</a></span>tHighpass_tick()</h2>
+<a id="ga7aaad9740d3c09fc4824163c6ad0c80d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7aaad9740d3c09fc4824163c6ad0c80d">&#9670;&nbsp;</a></span>tPBPulse_tick()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">float tHighpass_tick </td>
+          <td class="memname">float tPBPulse_tick </td>
           <td>(</td>
-          <td class="paramtype">tHighpass * const&#160;</td>
-          <td class="paramname">, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">tPBPulse *const&#160;</td>
+          <td class="paramname"><em>osc</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>x</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">filter</td><td>A pointer to the relevant tHighpass. </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the relevant tPBPulse. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ga94dddc9bae136df8933a82214ce2f1e3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga94dddc9bae136df8933a82214ce2f1e3">&#9670;&nbsp;</a></span>tHighpass_setFreq()</h2>
+<a id="gab32a37dc71636bc09ee394d645be2c09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab32a37dc71636bc09ee394d645be2c09">&#9670;&nbsp;</a></span>tPBPulse_setFreq()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void tHighpass_setFreq </td>
+          <td class="memname">void tPBPulse_setFreq </td>
           <td>(</td>
-          <td class="paramtype">tHighpass * const&#160;</td>
-          <td class="paramname">, </td>
+          <td class="paramtype">tPBPulse *const&#160;</td>
+          <td class="paramname"><em>osc</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -300,31 +278,41 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">filter</td><td>A pointer to the relevant tHighpass. </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the relevant tPBPulse. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ga52802836559273d666031bd33b7ad254"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga52802836559273d666031bd33b7ad254">&#9670;&nbsp;</a></span>tHighpass_getFreq()</h2>
+<a id="ga8e65e57d726e906cc346ab8e27f49623"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8e65e57d726e906cc346ab8e27f49623">&#9670;&nbsp;</a></span>tPBPulse_setWidth()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">float tHighpass_getFreq </td>
+          <td class="memname">void tPBPulse_setWidth </td>
           <td>(</td>
-          <td class="paramtype">tHighpass * const&#160;</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">tPBPulse *const&#160;</td>
+          <td class="paramname"><em>osc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>width</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">filter</td><td>A pointer to the relevant tHighpass. ￼￼￼ </td></tr>
+    <tr><td class="paramname">osc</td><td>A pointer to the relevant tPBPulse. ￼￼￼ </td></tr>
   </table>
   </dd>
 </dl>
