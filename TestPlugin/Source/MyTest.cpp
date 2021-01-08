@@ -33,6 +33,7 @@ tButterworth bw;
 
 tWavetable wt;
 tCompactWavetable cwt;
+tWaveset ws;
 
 tBuffer samp;
 tMBSampler sampler;
@@ -57,8 +58,8 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
-    tWavetable_init(&wt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
-    tCompactWavetable_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
+//    tWavetable_init(&wt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
+//    tCompactWavetable_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
     
     tMBTriangle_init(&btri, &leaf);
     tMBPulse_init(&bpulse, &leaf);
@@ -69,6 +70,15 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     tPhasor_init(&phasor, &leaf);
     tPhasor_setFreq(&phasor, 220.f);
+    
+    float const* set[4];
+    set[0] = __leaf_table_sinewave;
+    set[1] = __leaf_table_triangle[0];
+    set[2] = __leaf_table_squarewave[0];
+    set[3] = __leaf_table_sawtooth[0];
+    
+    tWaveset_init(&ws, set, 4, 2048, 10000.f, &leaf);
+    tWaveset_setIndexGain(&ws, 0, -1.0f);
 }
 
 inline double getSawFall(double angle) {
@@ -86,7 +96,8 @@ float   LEAFTest_tick            (float input)
 //    return tSimpleRetune_tick(&sretune, input);
 //    tMBPulse_sync(&bpulse, tPhasor_tick(&phasor) * 2.f - 1.f);
 //    return tMBPulse_tick(&bpulse);
-    return tWavetable_tick(&wt);
+//    return tWavetable_tick(&wt);
+    return tWaveset_tick(&ws);
 }
 
 int firstFrame = 1;
@@ -97,12 +108,14 @@ void    LEAFTest_block           (void)
     tMBTriangle_setFreq(&btri, val * 440.f);
     tMBPulse_setFreq(&bpulse, val * 160000.f - 80000.0f);
     tMBSaw_setFreq(&bsaw, val * 10000.f);
-    tWavetable_setFreq(&wt, val * 160000.f - 80000.0f);
-    tCompactWavetable_setFreq(&cwt, val * 10000.);
+//    tWavetable_setFreq(&wt, val * 160000.f - 80000.0f);
+//    tCompactWavetable_setFreq(&cwt, val * 10000.);
+    tWaveset_setFreq(&ws, val * 10000.f);
 //    tRetune_tuneVoice(&retune, 0, val * 3.0f + 0.5f);
 //    tSimpleRetune_tuneVoice(&sretune, 0, 300);
 
     val = getSliderValue("slider2");
+    tWaveset_setIndex(&ws, val);
 //    tRetune_setPitchFactor(&retune, val * 3.0f + 0.5f, 1);
     
     val = getSliderValue("slider3");

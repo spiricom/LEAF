@@ -29,202 +29,6 @@ extern "C" {
     //==============================================================================
     
     /*!
-     @defgroup ttable tTable
-     @ingroup oscillators
-     @brief Simple aliasing wavetable oscillator.
-     @{
-
-     @fn void    tTable_init  (tTable* const osc, float* table, int size, LEAF* const leaf)
-     @brief Initialize a tTable to the default mempool of a LEAF instance.
-     @param osc A pointer to the tTable to initialize.
-     @param table A pointer to the wavetable data.
-     @param size The number of samples in the wavetable.
-     @param leaf A pointer to the leaf instance.
-
-     @fn void    tTable_initToPool   (tTable* const osc, float* table, int size, tMempool* const mempool)
-     @brief Initialize a tTable to a specified mempool.
-     @param osc A pointer to the tTable to initialize.
-     @param table A pointer to the wavetable data.
-     @param size The number of samples in the wave table.
-     @param mempool A pointer to the tMempool to use.
-
-     @fn void    tTable_free         (tTable* const osc)
-     @brief Free a tTable from its mempool.
-     @param osc A pointer to the tTable to free.
- 
-     @fn float   tTable_tick         (tTable* const osc)
-     @brief Tick a tTable oscillator.
-     @param osc A pointer to the relevant tTable.
-     @return The ticked sample as a float from -1 to 1.
-
-     @fn void    tTable_setFreq      (tTable* const osc, float freq)
-     @brief Set the frequency of a tTable oscillator.
-     @param osc A pointer to the relevant tTable.
-     @param freq The frequency to set the oscillator to.
-     
-     @} */
-    
-    typedef struct _tTable
-    {
-        tMempool mempool;
-        
-        float* waveTable;
-        int size;
-        float inc, freq;
-        float phase;
-    } _tTable;
-    
-    typedef _tTable* tTable;
-
-     void    tTable_init(tTable* const osc, float* table, int size, LEAF* const leaf);
-     void    tTable_initToPool(tTable* const osc, float* table, int size, tMempool* const mempool);
-     void    tTable_free(tTable* const osc);
-    
-     float   tTable_tick(tTable* const osc);
-     void    tTable_setFreq(tTable* const osc, float freq);
-    
-    //==============================================================================
-    
-    /*!
-     @defgroup twavetable tWavetable
-     @ingroup oscillators
-     @brief Anti-aliased wavetable oscillator.
-     @{
-     
-     @fn void    tWavetable_init  (tWavetable* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
-     @brief Initialize a tWavetable to the default mempool of a LEAF instance.
-     @param osc A pointer to the tWavetable to initialize.
-     @param table A pointer to the wavetable data.
-     @param size The number of samples in the wavetable.
-     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
-     @param leaf A pointer to the leaf instance.
-     
-     @fn void    tWavetable_initToPool   (tWavetable* const osc, float* table, int size, float maxFreq, tMempool* const mempool)
-     @brief Initialize a tWavetable to a specified mempool.
-     @param osc A pointer to the tWavetable to initialize.
-     @param table A pointer to the wavetable data.
-     @param size The number of samples in the wave table.
-     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
-     @param mempool A pointer to the tMempool to use.
-     
-     @fn void    tWavetable_free         (tWavetable* const osc)
-     @brief Free a tWavetable from its mempool.
-     @param osc A pointer to the tWavetable to free.
-     
-     @fn float   tWavetable_tick         (tWavetable* const osc)
-     @brief Tick a tWavetable oscillator.
-     @param osc A pointer to the relevant tWavetable.
-     @return The ticked sample as a float from -1 to 1.
-     
-     @fn void    tWavetable_setFreq      (tWavetable* const osc, float freq)
-     @brief Set the frequency of a tWavetable oscillator.
-     @param osc A pointer to the relevant tWavetable.
-     @param freq The frequency to set the oscillator to.
-     
-     @} */
-    
-    typedef struct _tWavetable
-    {
-        tMempool mempool;
-        
-        float** tables;
-        int size;
-        int numTables;
-        float baseFreq, invBaseFreq;
-        float inc, freq;
-        float phase;
-        
-        int oct;
-        float w;
-        float aa;
-        
-        tButterworth bl;
-    } _tWavetable;
-    
-    typedef _tWavetable* tWavetable;
-    
-    void    tWavetable_init(tWavetable* const osc, const float* table, int size, float maxFreq, LEAF* const leaf);
-    void    tWavetable_initToPool(tWavetable* const osc, const float* table, int size, float maxFreq, tMempool* const mempool);
-    void    tWavetable_free(tWavetable* const osc);
-    
-    float   tWavetable_tick(tWavetable* const osc);
-    void    tWavetable_setFreq(tWavetable* const osc, float freq);
-    void    tWavetable_setAntiAliasing(tWavetable* const osc, float aa);
-    
-    //==============================================================================
-    
-    /*!
-     @defgroup tcompactwavetable tCompactWavetable
-     @ingroup oscillators
-     @brief A more space-efficient anti-aliased wavetable oscillator than tWavetable but with slightly worse fidelity.
-     @{
-     
-     @fn void    tCompactWavetable_init  (tCompactWavetable* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
-     @brief Initialize a tCompactWavetable to the default mempool of a LEAF instance.
-     @param osc A pointer to the tCompactWavetable to initialize.
-     @param table A pointer to the wavetable data.
-     @param size The number of samples in the wavetable.
-     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
-     @param leaf A pointer to the leaf instance.
-     
-     @fn void    tCompactWavetable_initToPool   (tCompactWavetable* const osc, float* table, int size, float maxFreq, tMempool* const mempool)
-     @brief Initialize a tCompactWavetable to a specified mempool.
-     @param osc A pointer to the tCompactWavetable to initialize.
-     @param table A pointer to the wavetable data.
-     @param size The number of samples in the wave table.
-     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
-     @param mempool A pointer to the tMempool to use.
-     
-     @fn void    tCompactWavetable_free         (tCompactWavetable* const osc)
-     @brief Free a tCompactWavetable from its mempool.
-     @param osc A pointer to the tCompactWavetable to free.
-     
-     @fn float   tCompactWavetable_tick         (tCompactWavetable* const osc)
-     @brief Tick a tCompactWavetable oscillator.
-     @param osc A pointer to the relevant tCompactWavetable.
-     @return The ticked sample as a float from -1 to 1.
-     
-     @fn void    tCompactWavetable_setFreq      (tCompactWavetable* const osc, float freq)
-     @brief Set the frequency of a tCompactWavetable oscillator.
-     @param osc A pointer to the relevant tCompactWavetable.
-     @param freq The frequency to set the oscillator to.
-     
-     @} */
-    
-    typedef struct _tCompactWavetable
-    {
-        tMempool mempool;
-        
-        float** tables;
-        int numTables;
-        int* sizes;
-        float baseFreq, invBaseFreq;
-        float inc, freq;
-        float phase;
-        
-        int oct;
-        float w;
-        float aa;
-        
-        tButterworth bl;
-        
-        float dsBuffer[2];
-        tOversampler ds;
-    } _tCompactWavetable;
-    
-    typedef _tCompactWavetable* tCompactWavetable;
-    
-    void    tCompactWavetable_init(tCompactWavetable* const osc, const float* table, int size, float maxFreq, LEAF* const leaf);
-    void    tCompactWavetable_initToPool(tCompactWavetable* const osc, const float* table, int size, float maxFreq, tMempool* const mempool);
-    void    tCompactWavetable_free(tCompactWavetable* const osc);
-    
-    float   tCompactWavetable_tick(tCompactWavetable* const osc);
-    void    tCompactWavetable_setFreq(tCompactWavetable* const osc, float freq);
-    void    tCompactWavetable_setAntiAliasing(tCompactWavetable* const osc, float aa);
-    
-    //==============================================================================
-    
-    /*!
      @defgroup tcycle tCycle
      @ingroup oscillators
      @brief Wavetable cycle/sine wave oscillator
@@ -1057,6 +861,270 @@ extern "C" {
     void tMBSaw_setFreq(tMBSaw* const osc, float f);
     float tMBSaw_sync(tMBSaw* const osc, float sync);
     void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft);
+    
+    //==============================================================================
+    
+    /*!
+     @defgroup ttable tTable
+     @ingroup oscillators
+     @brief Simple aliasing wavetable oscillator.
+     @{
+     
+     @fn void    tTable_init  (tTable* const osc, float* table, int size, LEAF* const leaf)
+     @brief Initialize a tTable to the default mempool of a LEAF instance.
+     @param osc A pointer to the tTable to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wavetable.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void    tTable_initToPool   (tTable* const osc, float* table, int size, tMempool* const mempool)
+     @brief Initialize a tTable to a specified mempool.
+     @param osc A pointer to the tTable to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wave table.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tTable_free         (tTable* const osc)
+     @brief Free a tTable from its mempool.
+     @param osc A pointer to the tTable to free.
+     
+     @fn float   tTable_tick         (tTable* const osc)
+     @brief Tick a tTable oscillator.
+     @param osc A pointer to the relevant tTable.
+     @return The ticked sample as a float from -1 to 1.
+     
+     @fn void    tTable_setFreq      (tTable* const osc, float freq)
+     @brief Set the frequency of a tTable oscillator.
+     @param osc A pointer to the relevant tTable.
+     @param freq The frequency to set the oscillator to.
+     
+     @} */
+    
+    typedef struct _tTable
+    {
+        tMempool mempool;
+        
+        float* waveTable;
+        int size;
+        float inc, freq;
+        float phase;
+    } _tTable;
+    
+    typedef _tTable* tTable;
+    
+    void    tTable_init(tTable* const osc, float* table, int size, LEAF* const leaf);
+    void    tTable_initToPool(tTable* const osc, float* table, int size, tMempool* const mempool);
+    void    tTable_free(tTable* const osc);
+    
+    float   tTable_tick(tTable* const osc);
+    void    tTable_setFreq(tTable* const osc, float freq);
+    
+    //==============================================================================
+    
+    /*!
+     @defgroup twavetable tWavetable
+     @ingroup oscillators
+     @brief Anti-aliased wavetable oscillator.
+     @{
+     
+     @fn void    tWavetable_init  (tWavetable* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
+     @brief Initialize a tWavetable to the default mempool of a LEAF instance.
+     @param osc A pointer to the tWavetable to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wavetable.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void    tWavetable_initToPool   (tWavetable* const osc, float* table, int size, float maxFreq, tMempool* const mempool)
+     @brief Initialize a tWavetable to a specified mempool.
+     @param osc A pointer to the tWavetable to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wave table.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tWavetable_free         (tWavetable* const osc)
+     @brief Free a tWavetable from its mempool.
+     @param osc A pointer to the tWavetable to free.
+     
+     @fn float   tWavetable_tick         (tWavetable* const osc)
+     @brief Tick a tWavetable oscillator.
+     @param osc A pointer to the relevant tWavetable.
+     @return The ticked sample as a float from -1 to 1.
+     
+     @fn void    tWavetable_setFreq      (tWavetable* const osc, float freq)
+     @brief Set the frequency of a tWavetable oscillator.
+     @param osc A pointer to the relevant tWavetable.
+     @param freq The frequency to set the oscillator to.
+     
+     @} */
+    
+    typedef struct _tWavetable
+    {
+        tMempool mempool;
+        
+        float** tables;
+        int size;
+        int numTables;
+        float baseFreq, invBaseFreq;
+        float inc, freq;
+        float phase;
+        
+        int oct;
+        float w;
+        float aa;
+        
+        tButterworth bl;
+    } _tWavetable;
+    
+    typedef _tWavetable* tWavetable;
+    
+    void    tWavetable_init(tWavetable* const osc, const float* table, int size, float maxFreq, LEAF* const leaf);
+    void    tWavetable_initToPool(tWavetable* const osc, const float* table, int size, float maxFreq, tMempool* const mempool);
+    void    tWavetable_free(tWavetable* const osc);
+    
+    float   tWavetable_tick(tWavetable* const osc);
+    void    tWavetable_setFreq(tWavetable* const osc, float freq);
+    void    tWavetable_setAntiAliasing(tWavetable* const osc, float aa);
+    
+    //==============================================================================
+    
+    /*!
+     @defgroup tcompactwavetable tCompactWavetable
+     @ingroup oscillators
+     @brief A more space-efficient anti-aliased wavetable oscillator than tWavetable but with slightly worse fidelity.
+     @{
+     
+     @fn void    tCompactWavetable_init  (tCompactWavetable* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
+     @brief Initialize a tCompactWavetable to the default mempool of a LEAF instance.
+     @param osc A pointer to the tCompactWavetable to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wavetable.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void    tCompactWavetable_initToPool   (tCompactWavetable* const osc, float* table, int size, float maxFreq, tMempool* const mempool)
+     @brief Initialize a tCompactWavetable to a specified mempool.
+     @param osc A pointer to the tCompactWavetable to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wave table.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tCompactWavetable_free         (tCompactWavetable* const osc)
+     @brief Free a tCompactWavetable from its mempool.
+     @param osc A pointer to the tCompactWavetable to free.
+     
+     @fn float   tCompactWavetable_tick         (tCompactWavetable* const osc)
+     @brief Tick a tCompactWavetable oscillator.
+     @param osc A pointer to the relevant tCompactWavetable.
+     @return The ticked sample as a float from -1 to 1.
+     
+     @fn void    tCompactWavetable_setFreq      (tCompactWavetable* const osc, float freq)
+     @brief Set the frequency of a tCompactWavetable oscillator.
+     @param osc A pointer to the relevant tCompactWavetable.
+     @param freq The frequency to set the oscillator to.
+     
+     @} */
+    
+    typedef struct _tCompactWavetable
+    {
+        tMempool mempool;
+        
+        float** tables;
+        int numTables;
+        int* sizes;
+        float baseFreq, invBaseFreq;
+        float inc, freq;
+        float phase;
+        
+        int oct;
+        float w;
+        float aa;
+        
+        tButterworth bl;
+        
+        float dsBuffer[2];
+        tOversampler ds;
+    } _tCompactWavetable;
+    
+    typedef _tCompactWavetable* tCompactWavetable;
+    
+    void    tCompactWavetable_init(tCompactWavetable* const osc, const float* table, int size, float maxFreq, LEAF* const leaf);
+    void    tCompactWavetable_initToPool(tCompactWavetable* const osc, const float* table, int size, float maxFreq, tMempool* const mempool);
+    void    tCompactWavetable_free(tCompactWavetable* const osc);
+    
+    float   tCompactWavetable_tick(tCompactWavetable* const osc);
+    void    tCompactWavetable_setFreq(tCompactWavetable* const osc, float freq);
+    void    tCompactWavetable_setAntiAliasing(tCompactWavetable* const osc, float aa);
+    
+    //==============================================================================
+    
+    /*!
+     @defgroup twaveset tWaveset
+     @ingroup oscillators
+     @brief Set of anti-aliased wavetable oscillators that can be faded between.
+     @{
+     
+     @fn void    tWaveset_init(tWaveset* const osc, const float** tables, int n, int size, float maxFreq, LEAF* const leaf)
+     @brief Initialize a tWaveset to the default mempool of a LEAF instance.
+     @param osc A pointer to the tWaveset to initialize.
+     @param tables An array of pointers to wavetable data.
+     @param n The number of wavetables.
+     @param size The number of samples in each of the wavetables.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void  tWaveset_initToPool(tWaveset* const osc, const float** tables, int n, int size, float maxFreq, tMempool* const mempool)
+     @brief Initialize a tWaveset to a specified mempool.
+     @param osc A pointer to the tWavetable to initialize.
+     @param tables An array of pointers to wavetable data.
+     @param n The number of wavetables.
+     @param size The number of samples in each of the wavetables.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tWaveset_free         (tWaveset* const osc)
+     @brief Free a tWaveset from its mempool.
+     @param osc A pointer to the tWaveset to free.
+     
+     @fn float   tWaveset_tick         (tWaveset* const osc)
+     @brief Tick a tWaveset oscillator.
+     @param osc A pointer to the relevant tWaveset.
+     @return The ticked sample as a float from -1 to 1.
+     
+     @fn void    tWaveset_setFreq      (tWaveset* const osc, float freq)
+     @brief Set the frequency of a tWaveset oscillator.
+     @param osc A pointer to the relevant tWaveset.
+     @param freq The frequency to set the oscillator to.
+     
+     @fn void    tWaveset_setIndex(tWaveset* const osc, float index)
+     @brief Set the output index of the wavetable set.
+     @param index The new index from 0.0 to 1.0 as a smooth fade from the first wavetable in the set to the last.
+     
+     @} */
+    
+    typedef struct _tWaveset
+    {
+        tMempool mempool;
+        
+        tWavetable* wt;
+        int n;
+        float* g;
+        float index;
+    } _tWaveset;
+    
+    typedef _tWaveset* tWaveset;
+    
+    void    tWaveset_init(tWaveset* const osc, const float** tables, int n, int size, float maxFreq, LEAF* const leaf);
+    void    tWaveset_initToPool(tWaveset* const osc, const float** tables, int n, int size, float maxFreq, tMempool* const mempool);
+    void    tWaveset_free(tWaveset* const osc);
+    
+    float   tWaveset_tick(tWaveset* const osc);
+    void    tWaveset_setFreq(tWaveset* const osc, float freq);
+    void    tWaveset_setAntiAliasing(tWaveset* const osc, float aa);
+    void    tWaveset_setIndex(tWaveset* const osc, float index);
+    void    tWaveset_setIndexGain(tWaveset* const osc, int i, float gain);
 
     
 #ifdef __cplusplus
