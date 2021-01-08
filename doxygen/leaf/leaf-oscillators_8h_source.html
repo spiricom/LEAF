@@ -11,7 +11,7 @@
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
-    <script src="/js/template.js"></script>
+    <!-- <script src="/js/template.js"></script> -->
      <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -22,7 +22,7 @@
 </script> 
     <link href="doxygen.css" rel="stylesheet" type="text/css" />
     <link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="/css/tachyons.css" type="text/css" />
+    <!-- <link rel="stylesheet" href="/css/tachyons.css" type="text/css" /> -->
 </head>
 <body class="bg-washed-green black-70 ph0 sans-serif" onload="iframeResizePipe()">
     <iframe id="helpframe" src='' height='0' width='0' frameborder='0'></iframe>
@@ -33,7 +33,7 @@
             // Going to 'pipe' the data to the parent through the helpframe..
             var pipe = document.getElementById('helpframe');
             // Cachebuster a precaution here to stop browser caching interfering
-            pipe.src = 'http://nirl.princeton.edu/_helper.html?height=' + height + '&cacheb=' + Math.random();
+            pipe.src = 'https://nirl.princeton.edu/_helper.html?height=' + height + '&cacheb=' + Math.random();
         }
     </script>
     <div>
@@ -675,6 +675,5 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="agroup__tpbsaw_html_ga51843ccbdaef8d5251e11a0812c8e627"><div class="ttname"><a href="group__tpbsaw.html#ga51843ccbdaef8d5251e11a0812c8e627">tPBSaw_initToPool</a></div><div class="ttdeci">void tPBSaw_initToPool(tPBSaw *const osc, tMempool *const mempool)</div><div class="ttdoc">Initialize a tPBSaw to a specified mempool.</div><div class="ttdef"><b>Definition:</b> leaf-oscillators.c:881</div></div>
 <!-- HTML footer for doxygen 1.8.18-->
 <!-- start footer part -->
-<footer></footer><script>getFooter()</script>
 </body>
 </html>

@@ -11,7 +11,7 @@
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
-    <script src="/js/template.js"></script>
+    <!-- <script src="/js/template.js"></script> -->
      <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -22,7 +22,7 @@
 </script> 
     <link href="doxygen.css" rel="stylesheet" type="text/css" />
     <link href="customdoxygen.css" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="/css/tachyons.css" type="text/css" />
+    <!-- <link rel="stylesheet" href="/css/tachyons.css" type="text/css" /> -->
 </head>
 <body class="bg-washed-green black-70 ph0 sans-serif" onload="iframeResizePipe()">
     <iframe id="helpframe" src='' height='0' width='0' frameborder='0'></iframe>
@@ -33,7 +33,7 @@
             // Going to 'pipe' the data to the parent through the helpframe..
             var pipe = document.getElementById('helpframe');
             // Cachebuster a precaution here to stop browser caching interfering
-            pipe.src = 'http://nirl.princeton.edu/_helper.html?height=' + height + '&cacheb=' + Math.random();
+            pipe.src = 'https://nirl.princeton.edu/_helper.html?height=' + height + '&cacheb=' + Math.random();
         }
     </script>
     <div>
@@ -210,6 +210,5 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="astruct_l_e_a_f_html"><div class="ttname"><a href="struct_l_e_a_f.html">LEAF</a></div><div class="ttdoc">Struct for an instance of LEAF.</div><div class="ttdef"><b>Definition:</b> leaf-global.h:31</div></div>
 <!-- HTML footer for doxygen 1.8.18-->
 <!-- start footer part -->
-<footer></footer><script>getFooter()</script>
 </body>
 </html>
