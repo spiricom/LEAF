@@ -35,7 +35,7 @@ public:
     
     void sliderValueChanged(Slider* s) override;
     
-    void buttonClicked(Button*b) override {};
+    void buttonClicked(Button*b) override;
     void buttonStateChanged(Button* b) override;
     
     void textEditorTextChanged (TextEditor&) override;
@@ -59,7 +59,7 @@ private:
     static const int cLabelWidth  = cSliderWidth + cXSpacing;
     
     static const int cButtonHeight = 30;
-    static const int cButtonWidth  = 60;
+    static const int cButtonWidth  = 75;
     
     static const int cBoxHeight = 20;
     static const int cBoxWidth  =  100;
@@ -69,6 +69,9 @@ private:
     OwnedArray<TextButton>  buttons;
     OwnedArray<TextEditor>  textFields;
     OwnedArray<ComboBox>    comboBoxes;
+    
+    juce::AudioFormatManager formatManager;
+    std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIComponent)
 };

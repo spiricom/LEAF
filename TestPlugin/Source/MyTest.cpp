@@ -38,6 +38,9 @@ tWaveset ws;
 tBuffer samp;
 tMBSampler sampler;
 
+const int numWavetables = 1;
+tWavetable wavetables[numWavetables];
+
 float gain;
 float dtime;
 bool buttonState;
@@ -53,6 +56,8 @@ LEAF leaf;
 
 #define MSIZE 2048000
 char memory[MSIZE];
+
+int lastLoadedAudioSize = 0;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
@@ -79,6 +84,9 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     
     tWaveset_init(&ws, set, 4, 2048, 10000.f, &leaf);
     tWaveset_setIndexGain(&ws, 0, -1.0f);
+    
+    lastLoadedAudioSize = 0;
+    loadedAudio.clear();
 }
 
 inline double getSawFall(double angle) {
@@ -92,12 +100,12 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
-//    return tRetune_tick(&retune, input)[0];
-//    return tSimpleRetune_tick(&sretune, input);
-//    tMBPulse_sync(&bpulse, tPhasor_tick(&phasor) * 2.f - 1.f);
-//    return tMBPulse_tick(&bpulse);
-//    return tWavetable_tick(&wt);
-    return tWaveset_tick(&ws);
+    float out = 0.0f;
+    for (int i = 0; i < fmin(loadedAudio.size(), numWavetables); ++i)
+    {
+        out += tWavetable_tick(&wavetables[i]);
+    }
+    return out;
 }
 
 int firstFrame = 1;
@@ -121,6 +129,15 @@ void    LEAFTest_block           (void)
     val = getSliderValue("slider3");
 //    tRetune_setPitchFactor(&retune, val * 3.0f + 0.5f, 2);
         
+    
+    if (lastLoadedAudioSize < loadedAudio.size())
+    {
+        int i = (loadedAudio.size() - 1) % numWavetables;
+        if (loadedAudio.size() - 1 >= numWavetables) tWavetable_free(&wavetables[i]);
+        tWavetable_init(&wavetables[i], loadedAudio[loadedAudio.size() - 1].getReadPointer(0), loadedAudio[loadedAudio.size() - 1].getNumSamples(), 20000, &leaf);
+        
+        lastLoadedAudioSize = loadedAudio.size();
+    }
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)

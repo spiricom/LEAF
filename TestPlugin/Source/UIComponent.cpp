@@ -13,8 +13,9 @@
 #include "LEAFLink.h"
 
 UIComponent::UIComponent()
-
 {
+    formatManager.registerBasicFormats();
+    
     for (int i = 0; i < cSliderNames.size(); i++)
     {
         
@@ -123,8 +124,9 @@ void UIComponent::resized()
     
     for (int i = 0; i < cButtonNames.size(); i++)
     {
-        buttons[i]      ->setBounds(cLeftOffset + ((cButtonWidth + cXSpacing) * i),
-                                    500,
+        buttons[i]      ->setBounds(cLeftOffset + ((cButtonWidth + cXSpacing) * i) -
+                                    (cButtonNames[i].length() * 2.0f),
+                                    290,
                                     cButtonWidth,
                                     cButtonHeight);
     }
@@ -144,12 +146,36 @@ void UIComponent::sliderValueChanged(Slider* s)
     setSliderValue(s->getName(), s->getValue());
 }
 
-void UIComponent::buttonStateChanged (Button* b)
+void UIComponent::buttonStateChanged(Button* b)
 {
     setButtonState(b->getName(), b->getState());
 }
 
-void UIComponent::comboBoxChanged (ComboBox* cb)
+void UIComponent::comboBoxChanged(ComboBox* cb)
 {
     setComboBoxState(cb->getName(), cb->getSelectedId() - 1);
+}
+
+
+void UIComponent::buttonClicked(Button *b)
+{
+    if (b->getName() == "load")
+    {
+        juce::FileChooser chooser ("Select a Wave file to play...", {}, "*.wav");
+        
+        if (chooser.browseForFileToOpen())
+        {
+            auto file = chooser.getResult();
+            auto* reader = formatManager.createReaderFor (file);
+            
+            if (reader != nullptr)
+            {
+                AudioBuffer<float> buffer = AudioBuffer<float>(reader->numChannels, int(reader->lengthInSamples));
+                
+                reader->read(&buffer, 0, buffer.getNumSamples(), 0, true, true);
+                
+                loadedAudio.add(buffer);
+            }
+        }
+    }
 }

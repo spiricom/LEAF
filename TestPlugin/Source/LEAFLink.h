@@ -39,6 +39,8 @@ extern std::vector<bool> cButtonStates;
 
 extern std::vector<int> cComboBoxStates;
 
+extern Array<AudioBuffer<float>> loadedAudio;
+
 void printSliderValues(void);
 bool getButtonState(String name);
 void setButtonState(String name, bool on);

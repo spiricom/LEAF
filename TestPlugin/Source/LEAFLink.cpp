@@ -15,7 +15,7 @@
 
 std::vector<juce::String> cButtonNames =  std::vector<juce::String>
 {
-    
+    "load"
 };
 
 std::vector<juce::String> cSliderNames =  std::vector<juce::String>
@@ -39,6 +39,8 @@ std::vector<float> cSliderModelValues(cSliderNames.size());
 std::vector<float> cSliderValues(cSliderNames.size());
 std::vector<bool> cButtonStates(cButtonNames.size());
 std::vector<int> cComboBoxStates(cComboBoxNames.size());
+
+Array<AudioBuffer<float>> loadedAudio;
 
 void setSliderModelValue(String name, float val)
 {
@@ -142,3 +144,4 @@ float getRandomFloat(void)
 {
     return ((float)rand()/RAND_MAX);
 }
+
