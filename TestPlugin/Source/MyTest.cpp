@@ -138,6 +138,7 @@ void    LEAFTest_block           (void)
         
         lastLoadedAudioSize = loadedAudio.size();
     }
+    if (loadedAudio.size() > 0) tWavetable_setFreq(&wavetables[0], 220);//val * 10000.f);
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)
