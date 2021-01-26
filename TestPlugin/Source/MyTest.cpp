@@ -76,13 +76,15 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tPhasor_init(&phasor, &leaf);
     tPhasor_setFreq(&phasor, 220.f);
     
-    float const* set[4];
+    float* set[4];
     set[0] = __leaf_table_sinewave;
     set[1] = __leaf_table_triangle[0];
     set[2] = __leaf_table_squarewave[0];
     set[3] = __leaf_table_sawtooth[0];
+    int sizes[4];
+    for (int i = 0; i < 4; i++) sizes[i] = 2048;
     
-    tWaveset_init(&ws, set, 4, 2048, 10000.f, &leaf);
+    tWaveset_init(&ws, set, 4, sizes, 10000.f, &leaf);
     tWaveset_setIndexGain(&ws, 0, -1.0f);
     
     lastLoadedAudioSize = 0;
@@ -129,7 +131,6 @@ void    LEAFTest_block           (void)
     val = getSliderValue("slider3");
 //    tRetune_setPitchFactor(&retune, val * 3.0f + 0.5f, 2);
         
-    
     if (lastLoadedAudioSize < loadedAudio.size())
     {
         int i = (loadedAudio.size() - 1) % numWavetables;

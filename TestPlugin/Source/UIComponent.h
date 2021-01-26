@@ -71,7 +71,6 @@ private:
     OwnedArray<ComboBox>    comboBoxes;
     
     juce::AudioFormatManager formatManager;
-    std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIComponent)
 };

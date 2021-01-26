@@ -969,6 +969,7 @@ extern "C" {
         float baseFreq, invBaseFreq;
         float inc, freq;
         float phase;
+        float phaseOffset;
         
         int oct;
         float w;
@@ -979,13 +980,14 @@ extern "C" {
     
     typedef _tWavetable* tWavetable;
     
-    void    tWavetable_init(tWavetable* const osc, const float* table, int size, float maxFreq, LEAF* const leaf);
-    void    tWavetable_initToPool(tWavetable* const osc, const float* table, int size, float maxFreq, tMempool* const mempool);
+    void    tWavetable_init(tWavetable* const osc, float* table, int size, float maxFreq, LEAF* const leaf);
+    void    tWavetable_initToPool(tWavetable* const osc, float* table, int size, float maxFreq, tMempool* const mempool);
     void    tWavetable_free(tWavetable* const osc);
     
     float   tWavetable_tick(tWavetable* const osc);
     void    tWavetable_setFreq(tWavetable* const osc, float freq);
     void    tWavetable_setAntiAliasing(tWavetable* const osc, float aa);
+    void    tWavetable_setPhaseOffset(tWavetable* const osc, float phase);
     
     //==============================================================================
     
@@ -1050,8 +1052,8 @@ extern "C" {
     
     typedef _tCompactWavetable* tCompactWavetable;
     
-    void    tCompactWavetable_init(tCompactWavetable* const osc, const float* table, int size, float maxFreq, LEAF* const leaf);
-    void    tCompactWavetable_initToPool(tCompactWavetable* const osc, const float* table, int size, float maxFreq, tMempool* const mempool);
+    void    tCompactWavetable_init(tCompactWavetable* const osc, float* table, int size, float maxFreq, LEAF* const leaf);
+    void    tCompactWavetable_initToPool(tCompactWavetable* const osc, float* table, int size, float maxFreq, tMempool* const mempool);
     void    tCompactWavetable_free(tCompactWavetable* const osc);
     
     float   tCompactWavetable_tick(tCompactWavetable* const osc);
@@ -1111,13 +1113,14 @@ extern "C" {
         tWavetable* wt;
         int n;
         float* g;
+        float* p;
         float index;
     } _tWaveset;
     
     typedef _tWaveset* tWaveset;
     
-    void    tWaveset_init(tWaveset* const osc, const float** tables, int n, int size, float maxFreq, LEAF* const leaf);
-    void    tWaveset_initToPool(tWaveset* const osc, const float** tables, int n, int size, float maxFreq, tMempool* const mempool);
+    void    tWaveset_init(tWaveset* const osc, float** tables, int n, int* sizes, float maxFreq, LEAF* const leaf);
+    void    tWaveset_initToPool(tWaveset* const osc, float** tables, int n, int* sizes, float maxFreq, tMempool* const mempool);
     void    tWaveset_free(tWaveset* const osc);
     
     float   tWaveset_tick(tWaveset* const osc);
@@ -1125,6 +1128,7 @@ extern "C" {
     void    tWaveset_setAntiAliasing(tWaveset* const osc, float aa);
     void    tWaveset_setIndex(tWaveset* const osc, float index);
     void    tWaveset_setIndexGain(tWaveset* const osc, int i, float gain);
+    void    tWaveset_setIndexPhase(tWaveset* const osc, int i, float phase);
 
     
 #ifdef __cplusplus

@@ -1704,12 +1704,12 @@ void     tTableSampleRateChanged(tTable* const cy)
     c->inc -= (int)c->inc;
 }
 
-void tWavetable_init(tWavetable* const cy, const float* table, int size, float maxFreq, LEAF* const leaf)
+void tWavetable_init(tWavetable* const cy, float* table, int size, float maxFreq, LEAF* const leaf)
 {
     tWavetable_initToPool(cy, table, size, maxFreq, &leaf->mempool);
 }
 
-void tWavetable_initToPool(tWavetable* const cy, const float* table, int size, float maxFreq, tMempool* const mp)
+void tWavetable_initToPool(tWavetable* const cy, float* table, int size, float maxFreq, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tWavetable* c = *cy = (_tWavetable*) mpool_alloc(sizeof(_tWavetable), m);
@@ -1797,11 +1797,11 @@ float tWavetable_tick(tWavetable* const cy)
     
     // Phasor increment
     c->phase += c->inc;
-    if (c->phase >= 1.0f) c->phase -= 1.0f;
-    if (c->phase < 0.0f) c->phase += 1.0f;
+    if (c->phase + c->phaseOffset >= 1.0f) c->phase -= 1.0f;
+    if (c->phase + c->phaseOffset < 0.0f) c->phase += 1.0f;
     
     // Wavetable synthesis
-    temp = c->size * c->phase;
+    temp = c->size * (c->phase + c->phaseOffset);
     
     idx = (int)temp;
     frac = temp - (float)idx;
@@ -1849,19 +1849,23 @@ void tWavetable_setFreq(tWavetable* const cy, float freq)
 void tWavetable_setAntiAliasing(tWavetable* const cy, float aa)
 {
     _tWavetable* c = *cy;
-    
     c->aa = aa;
     tWavetable_setFreq(cy, c->freq);
 }
 
+void tWavetable_setPhaseOffset(tWavetable* const cy, float phase)
+{
+    _tWavetable* c = *cy;
+    c->phaseOffset = phase - (int)phase;
+}
 
 
-void tCompactWavetable_init(tCompactWavetable* const cy, const float* table, int size, float maxFreq, LEAF* const leaf)
+void tCompactWavetable_init(tCompactWavetable* const cy, float* table, int size, float maxFreq, LEAF* const leaf)
 {
     tCompactWavetable_initToPool(cy, table, size, maxFreq, &leaf->mempool);
 }
 
-void tCompactWavetable_initToPool(tCompactWavetable* const cy, const float* table, int size, float maxFreq, tMempool* const mp)
+void tCompactWavetable_initToPool(tCompactWavetable* const cy, float* table, int size, float maxFreq, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tCompactWavetable* c = *cy = (_tCompactWavetable*) mpool_alloc(sizeof(_tCompactWavetable), m);
@@ -2007,26 +2011,37 @@ void tCompactWavetable_setAntiAliasing(tCompactWavetable* const cy, float aa)
 //================================================================================================
 //================================================================================================
 
-void    tWaveset_init(tWaveset* const cy, const float** tables, int n, int size, float maxFreq, LEAF* const leaf)
+void    tWaveset_init(tWaveset* const cy, float** tables, int n, int* sizes, float maxFreq, LEAF* const leaf)
 {
-    tWaveset_initToPool(cy, tables, n, size, maxFreq, &leaf->mempool);
+    tWaveset_initToPool(cy, tables, n, sizes, maxFreq, &leaf->mempool);
 }
 
-void    tWaveset_initToPool(tWaveset* const cy, const float** tables, int n, int size, float maxFreq, tMempool* const mp)
+void    tWaveset_initToPool(tWaveset* const cy, float** tables, int n, int* sizes, float maxFreq, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tWaveset* c = *cy = (_tWaveset*) mpool_alloc(sizeof(_tWaveset), m);
     c->mempool = m;
     
-    c->n = n;
+    c->n = 0;
+    for (int t = 0; t < n; ++t)
+    {
+        if (sizes[t] > 0) c->n++;
+    }
+    
+    c->wt = (tWavetable*) mpool_alloc(sizeof(tWavetable) * c->n, m);
+    
+    int i = 0;
+    for (int t = 0; t < n; ++t)
+    {
+        if (sizes[t] > 0)
+        {
+            tWavetable_initToPool(&c->wt[i], tables[t], sizes[t], maxFreq, mp);
+            i++;
+        }
+    }
     
     c->g = (float*) mpool_alloc(sizeof(tWavetable) * c->n, m);
-    c->wt = (tWavetable*) mpool_alloc(sizeof(tWavetable) * c->n, m);
-    for (int i = 0; i < c->n; ++i)
-    {
-        c->g[i] = 1.0f;
-        tWavetable_initToPool(&c->wt[i], tables[i], size, maxFreq, mp);
-    }
+    for (int i = 0; i < c->n; ++i)  c->g[i] = 1.0f;
     
     c->index = 0.0f;
 }
@@ -2039,6 +2054,7 @@ void    tWaveset_free(tWaveset* const cy)
     {
         tWavetable_free(&c->wt[i]);
     }
+    mpool_free((char*)c->g, c->mempool);
     mpool_free((char*)c->wt, c->mempool);
     mpool_free((char*)c, c->mempool);
 }
@@ -2047,14 +2063,14 @@ float   tWaveset_tick(tWaveset* const cy)
 {
     _tWaveset* c = *cy;
     
-    float p = c->index * (c->n - 1);
+    float f = c->index * (c->n - 1);
     
-    int o1 = (int)p;
+    int o1 = (int)f;
     int o2 = o1 + 1;
     if (c->index >= 1.0f) o2 = o1;
-    float mix = p - o1;
+    float mix = f - o1;
     
-    float s0, s1, s2;
+    float s0 = 0.f, s1 = 0.f, s2 = 0.f;
     for (int i = 0; i < c->n; ++i)
     {
         s0 = tWavetable_tick(&c->wt[i]) * c->g[i];
@@ -2093,5 +2109,13 @@ void    tWaveset_setIndex(tWaveset* const cy, float index)
 void    tWaveset_setIndexGain(tWaveset* const cy, int i, float gain)
 {
     _tWaveset* c = *cy;
+    if (i >= c->n) return;
     c->g[i] = gain;
+}
+
+void    tWaveset_setIndexPhase(tWaveset* const cy, int i, float phase)
+{
+    _tWaveset* c = *cy;
+    if (i >= c->n) return;
+    tWavetable_setPhaseOffset(&c->wt[i], phase);
 }
