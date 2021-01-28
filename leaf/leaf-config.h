@@ -18,7 +18,7 @@
 
 //==============================================================================
 
-//! Include FIR tables required to use tOversampler and tCompactWavetable which uses tOversampler. 
+//! Include FIR tables required to use tOversampler and tCompactWaveTable which uses tOversampler. 
 #define LEAF_INCLUDE_OVERSAMPLER_TABLES 1
 
 // Unused

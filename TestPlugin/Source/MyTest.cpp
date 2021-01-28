@@ -31,15 +31,15 @@ tTriangle tri;
 tNoise noise;
 tButterworth bw;
 
-tWavetable wt;
-tCompactWavetable cwt;
-tWaveset ws;
+tWaveTable wt;
+tCompactWaveTable cwt;
+tWaveSynth ws;
 
 tBuffer samp;
 tMBSampler sampler;
 
 const int numWavetables = 1;
-tWavetable wavetables[numWavetables];
+tWaveTable wavetables[numWavetables];
 
 float gain;
 float dtime;
@@ -63,8 +63,8 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
 {
     LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
-//    tWavetable_init(&wt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
-//    tCompactWavetable_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
+//    tWaveTable_init(&wt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
+//    tCompactWaveTable_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
     
     tMBTriangle_init(&btri, &leaf);
     tMBPulse_init(&bpulse, &leaf);
@@ -77,15 +77,14 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     tPhasor_setFreq(&phasor, 220.f);
     
     float* set[4];
-    set[0] = __leaf_table_sinewave;
-    set[1] = __leaf_table_triangle[0];
-    set[2] = __leaf_table_squarewave[0];
-    set[3] = __leaf_table_sawtooth[0];
+    set[0] = (float*)__leaf_table_sinewave;
+    set[1] = (float*)__leaf_table_triangle[0];
+    set[2] = (float*)__leaf_table_squarewave[0];
+    set[3] = (float*)__leaf_table_sawtooth[0];
     int sizes[4];
     for (int i = 0; i < 4; i++) sizes[i] = 2048;
     
-    tWaveset_init(&ws, set, 4, sizes, 10000.f, &leaf);
-    tWaveset_setIndexGain(&ws, 0, -1.0f);
+    tWaveSynth_init(&ws, 1, set, sizes, 4, 10000.f, &leaf);
     
     lastLoadedAudioSize = 0;
     loadedAudio.clear();
@@ -105,7 +104,7 @@ float   LEAFTest_tick            (float input)
     float out = 0.0f;
     for (int i = 0; i < fmin(loadedAudio.size(), numWavetables); ++i)
     {
-        out += tWavetable_tick(&wavetables[i]);
+//        out += tWaveTable_tick(&wavetables[i]);
     }
     return out;
 }
@@ -118,14 +117,14 @@ void    LEAFTest_block           (void)
     tMBTriangle_setFreq(&btri, val * 440.f);
     tMBPulse_setFreq(&bpulse, val * 160000.f - 80000.0f);
     tMBSaw_setFreq(&bsaw, val * 10000.f);
-//    tWavetable_setFreq(&wt, val * 160000.f - 80000.0f);
-//    tCompactWavetable_setFreq(&cwt, val * 10000.);
-    tWaveset_setFreq(&ws, val * 10000.f);
+//    tWaveTable_setFreq(&wt, val * 160000.f - 80000.0f);
+//    tCompactWaveTable_setFreq(&cwt, val * 10000.);
+    tWaveSynth_setFreq(&ws, 0, val * 10000.f);
 //    tRetune_tuneVoice(&retune, 0, val * 3.0f + 0.5f);
 //    tSimpleRetune_tuneVoice(&sretune, 0, 300);
 
     val = getSliderValue("slider2");
-    tWaveset_setIndex(&ws, val);
+    tWaveSynth_setIndex(&ws, val);
 //    tRetune_setPitchFactor(&retune, val * 3.0f + 0.5f, 1);
     
     val = getSliderValue("slider3");
@@ -134,12 +133,12 @@ void    LEAFTest_block           (void)
     if (lastLoadedAudioSize < loadedAudio.size())
     {
         int i = (loadedAudio.size() - 1) % numWavetables;
-        if (loadedAudio.size() - 1 >= numWavetables) tWavetable_free(&wavetables[i]);
-        tWavetable_init(&wavetables[i], loadedAudio[loadedAudio.size() - 1].getReadPointer(0), loadedAudio[loadedAudio.size() - 1].getNumSamples(), 20000, &leaf);
+        if (loadedAudio.size() - 1 >= numWavetables) tWaveTable_free(&wavetables[i]);
+        tWaveTable_init(&wavetables[i], (float*)loadedAudio[loadedAudio.size() - 1].getReadPointer(0), loadedAudio[loadedAudio.size() - 1].getNumSamples(), 20000, &leaf);
         
         lastLoadedAudioSize = loadedAudio.size();
     }
-    if (loadedAudio.size() > 0) tWavetable_setFreq(&wavetables[0], 220);//val * 10000.f);
+//    if (loadedAudio.size() > 0) tWaveTable_setFreq(&wavetables[0], 220);//val * 10000.f);
 }
 
 void    LEAFTest_controllerInput (int cnum, float cval)
