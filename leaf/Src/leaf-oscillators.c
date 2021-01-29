@@ -2055,15 +2055,15 @@ void tWaveSynth_setIndexPhase(tWaveSynth* const cy, int i, float phase)
 //=======================================================================================
 //=======================================================================================
 
-void tCompactWaveTable_init(tCompactWaveTable* const cy, float* table, int size, float maxFreq, LEAF* const leaf)
+void tWaveTableS_init(tWaveTableS* const cy, float* table, int size, float maxFreq, LEAF* const leaf)
 {
-    tCompactWaveTable_initToPool(cy, table, size, maxFreq, &leaf->mempool);
+    tWaveTableS_initToPool(cy, table, size, maxFreq, &leaf->mempool);
 }
 
-void tCompactWaveTable_initToPool(tCompactWaveTable* const cy, float* table, int size, float maxFreq, tMempool* const mp)
+void tWaveTableS_initToPool(tWaveTableS* const cy, float* table, int size, float maxFreq, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tCompactWaveTable* c = *cy = (_tCompactWaveTable*) mpool_alloc(sizeof(_tCompactWaveTable), m);
+    _tWaveTableS* c = *cy = (_tWaveTableS*) mpool_alloc(sizeof(_tWaveTableS), m);
     c->mempool = m;
     
     // Determine base frequency
@@ -2117,9 +2117,9 @@ void tCompactWaveTable_initToPool(tCompactWaveTable* const cy, float* table, int
     tButterworth_free(&c->bl);
 }
 
-void    tCompactWaveTable_free(tCompactWaveTable* const cy)
+void    tWaveTableS_free(tWaveTableS* const cy)
 {
-    _tCompactWaveTable* c = *cy;
+    _tWaveTableS* c = *cy;
     
     for (int t = 0; t < c->numTables; ++t)
     {
@@ -2133,15 +2133,15 @@ void    tCompactWaveTable_free(tCompactWaveTable* const cy)
 //================================================================================================
 //================================================================================================
 
-void tCompactWaveOsc_init(tCompactWaveOsc* const cy, tCompactWaveTable* const table, LEAF* const leaf)
+void tWaveOscS_init(tWaveOscS* const cy, tWaveTableS* const table, LEAF* const leaf)
 {
-    tCompactWaveOsc_initToPool(cy, table, &leaf->mempool);
+    tWaveOscS_initToPool(cy, table, &leaf->mempool);
 }
 
-void tCompactWaveOsc_initToPool(tCompactWaveOsc* const cy, tCompactWaveTable* const table, tMempool* const mp)
+void tWaveOscS_initToPool(tWaveOscS* const cy, tWaveTableS* const table, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tCompactWaveOsc* c = *cy = (_tCompactWaveOsc*) mpool_alloc(sizeof(_tCompactWaveOsc), m);
+    _tWaveOscS* c = *cy = (_tWaveOscS*) mpool_alloc(sizeof(_tWaveOscS), m);
     c->mempool = m;
     
     c->inc = 0.0f;
@@ -2149,18 +2149,18 @@ void tCompactWaveOsc_initToPool(tCompactWaveOsc* const cy, tCompactWaveTable* co
     c->phaseOffset = 0.0f;
     c->aa = 0.5f;
     
-    tCompactWaveOsc_setFreq(cy, 220);
+    tWaveOscS_setFreq(cy, 220);
 }
 
-void tCompactWaveOsc_free(tCompactWaveOsc* const cy)
+void tWaveOscS_free(tWaveOscS* const cy)
 {
-    _tCompactWaveOsc* c = *cy;
+    _tWaveOscS* c = *cy;
     mpool_free((char*)c, c->mempool);
 }
 
-float tCompactWaveOsc_tick(tCompactWaveOsc* const cy)
+float tWaveOscS_tick(tWaveOscS* const cy)
 {
-    _tCompactWaveOsc* c = *cy;
+    _tWaveOscS* c = *cy;
     
     float temp;
     int idx;
@@ -2198,9 +2198,9 @@ float tCompactWaveOsc_tick(tCompactWaveOsc* const cy)
     return oct0 + (oct1 - oct0) * c->w;
 }
 
-void tCompactWaveOsc_setFreq(tCompactWaveOsc* const cy, float freq)
+void tWaveOscS_setFreq(tWaveOscS* const cy, float freq)
 {
-    _tCompactWaveOsc* c = *cy;
+    _tWaveOscS* c = *cy;
     
     LEAF* leaf = c->mempool->leaf;
     
@@ -2220,33 +2220,33 @@ void tCompactWaveOsc_setFreq(tCompactWaveOsc* const cy, float freq)
     if (c->oct >= c->table->numTables - 1) c->oct = c->table->numTables - 2;
 }
 
-void tCompactWaveOsc_setAntiAliasing(tCompactWaveOsc* const cy, float aa)
+void tWaveOscS_setAntiAliasing(tWaveOscS* const cy, float aa)
 {
-    _tCompactWaveOsc* c = *cy;
+    _tWaveOscS* c = *cy;
     c->aa = aa;
-    tCompactWaveOsc_setFreq(cy, c->freq);
+    tWaveOscS_setFreq(cy, c->freq);
 }
 
-void tCompactWaveOsc_setPhaseOffset(tCompactWaveOsc* const cy, float phase)
+void tWaveOscS_setPhaseOffset(tWaveOscS* const cy, float phase)
 {
-    _tCompactWaveOsc* c = *cy;
+    _tWaveOscS* c = *cy;
     c->phaseOffset = phase - (int)phase;
 }
 
 //================================================================================================
 //================================================================================================
 
-void tCompactWaveSynth_init(tCompactWaveSynth* const cy, int numVoices, float** tables, int* sizes,
+void tWaveSynthS_init(tWaveSynthS* const cy, int numVoices, float** tables, int* sizes,
                             int numTables, float maxFreq, LEAF* const leaf)
 {
-    tCompactWaveSynth_initToPool(cy, numVoices, tables, sizes, numTables, maxFreq, &leaf->mempool);
+    tWaveSynthS_initToPool(cy, numVoices, tables, sizes, numTables, maxFreq, &leaf->mempool);
 }
 
-void tCompactWaveSynth_initToPool(tCompactWaveSynth* const cy, int numVoices, float** tables, int* sizes,
+void tWaveSynthS_initToPool(tWaveSynthS* const cy, int numVoices, float** tables, int* sizes,
                                   int numTables, float maxFreq, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tCompactWaveSynth* c = *cy = (_tCompactWaveSynth*) mpool_alloc(sizeof(_tCompactWaveSynth), m);
+    _tWaveSynthS* c = *cy = (_tWaveSynthS*) mpool_alloc(sizeof(_tWaveSynthS), m);
     c->mempool = m;
     
     c->numTables = 0;
@@ -2255,8 +2255,8 @@ void tCompactWaveSynth_initToPool(tCompactWaveSynth* const cy, int numVoices, fl
         if (sizes[t] > 0) c->numTables++;
     }
     
-    c->tables = (tCompactWaveTable*) mpool_alloc(sizeof(tCompactWaveTable) * c->numTables, m);
-    c->oscs = (tCompactWaveOsc**) mpool_alloc(sizeof(tCompactWaveOsc*) * c->numTables, m);
+    c->tables = (tWaveTableS*) mpool_alloc(sizeof(tWaveTableS) * c->numTables, m);
+    c->oscs = (tWaveOscS**) mpool_alloc(sizeof(tWaveOscS*) * c->numTables, m);
     
     c->numVoices = numVoices;
     
@@ -2265,9 +2265,9 @@ void tCompactWaveSynth_initToPool(tCompactWaveSynth* const cy, int numVoices, fl
     {
         if (sizes[t] > 0)
         {
-            tCompactWaveTable_initToPool(&c->tables[i], tables[t], sizes[t], maxFreq, mp);
-            c->oscs[i] = (tCompactWaveOsc*) mpool_alloc(sizeof(tCompactWaveOsc) * c->numVoices, m);
-            for (int v = 0; v < c->numVoices; ++v) tCompactWaveOsc_initToPool(&c->oscs[i][v], &c->tables[i], mp);
+            tWaveTableS_initToPool(&c->tables[i], tables[t], sizes[t], maxFreq, mp);
+            c->oscs[i] = (tWaveOscS*) mpool_alloc(sizeof(tWaveOscS) * c->numVoices, m);
+            for (int v = 0; v < c->numVoices; ++v) tWaveOscS_initToPool(&c->oscs[i][v], &c->tables[i], mp);
             i++;
         }
     }
@@ -2279,14 +2279,14 @@ void tCompactWaveSynth_initToPool(tCompactWaveSynth* const cy, int numVoices, fl
     c->maxFreq = maxFreq;
 }
 
-void tCompactWaveSynth_free(tCompactWaveSynth* const cy)
+void tWaveSynthS_free(tWaveSynthS* const cy)
 {
-    _tCompactWaveSynth* c = *cy;
+    _tWaveSynthS* c = *cy;
     
     for (int i = 0; i < c->numTables; ++i)
     {
-        tCompactWaveTable_free(&c->tables[i]);
-        for (int v = 0; v < c->numVoices; ++v) tCompactWaveOsc_free(&c->oscs[i][v]);
+        tWaveTableS_free(&c->tables[i]);
+        for (int v = 0; v < c->numVoices; ++v) tWaveOscS_free(&c->oscs[i][v]);
         mpool_free((char*)c->oscs[i], c->mempool);
     }
     mpool_free((char*)c->g, c->mempool);
@@ -2295,9 +2295,9 @@ void tCompactWaveSynth_free(tCompactWaveSynth* const cy)
     mpool_free((char*)c, c->mempool);
 }
 
-float tCompactWaveSynth_tick(tCompactWaveSynth* const cy)
+float tWaveSynthS_tick(tWaveSynthS* const cy)
 {
-    _tCompactWaveSynth* c = *cy;
+    _tWaveSynthS* c = *cy;
     
     float f = c->index * (c->numTables - 1);
     
@@ -2310,7 +2310,7 @@ float tCompactWaveSynth_tick(tCompactWaveSynth* const cy)
     for (int t = 0; t < c->numTables; ++t)
     {
         float s0 = 0.f;
-        for (int v = 0; v < c->numVoices; ++v) s0 += tCompactWaveOsc_tick(&c->oscs[t][v]);
+        for (int v = 0; v < c->numVoices; ++v) s0 += tWaveOscS_tick(&c->oscs[t][v]);
         if (t == o1) s1 = s0 * c->g[t];
         if (t == o2) s2 = s0 * c->g[t];
     }
@@ -2319,9 +2319,9 @@ float tCompactWaveSynth_tick(tCompactWaveSynth* const cy)
     return s1 + (s2 - s1) * mix;
 }
 
-float tCompactWaveSynth_tickVoice(tCompactWaveSynth* const cy, int voice)
+float tWaveSynthS_tickVoice(tWaveSynthS* const cy, int voice)
 {
-    _tCompactWaveSynth* c = *cy;
+    _tWaveSynthS* c = *cy;
     
     float f = c->index * (c->numTables - 1);
     
@@ -2334,7 +2334,7 @@ float tCompactWaveSynth_tickVoice(tCompactWaveSynth* const cy, int voice)
     for (int t = 0; t < c->numTables; ++t)
     {
         // Should we tick every voice anyway to preserve relative phases?
-        float s0 = tCompactWaveOsc_tick(&c->oscs[t][voice]);
+        float s0 = tWaveOscS_tick(&c->oscs[t][voice]);
         if (t == o1) s1 = s0 * c->g[t];
         if (t == o2) s2 = s0 * c->g[t];
     }
@@ -2343,58 +2343,58 @@ float tCompactWaveSynth_tickVoice(tCompactWaveSynth* const cy, int voice)
     return s1 + (s2 - s1) * mix;
 }
 
-void tCompactWaveSynth_setFreq(tCompactWaveSynth* const cy, int voice, float freq)
+void tWaveSynthS_setFreq(tWaveSynthS* const cy, int voice, float freq)
 {
-    _tCompactWaveSynth* c = *cy;
+    _tWaveSynthS* c = *cy;
     for (int t = 0; t < c->numTables; ++t)
     {
-        tCompactWaveOsc_setFreq(&c->oscs[t][voice], freq);
+        tWaveOscS_setFreq(&c->oscs[t][voice], freq);
     }
 }
 
-void tCompactWaveSynth_setAntiAliasing(tCompactWaveSynth* const cy, float aa)
+void tWaveSynthS_setAntiAliasing(tWaveSynthS* const cy, float aa)
 {
-    _tCompactWaveSynth* c = *cy;
+    _tWaveSynthS* c = *cy;
     for (int t = 0; t < c->numTables; ++t)
     {
         for (int v = 0; v < c->numVoices; ++v)
         {
-            tCompactWaveOsc_setAntiAliasing(&c->oscs[t][v], aa);
+            tWaveOscS_setAntiAliasing(&c->oscs[t][v], aa);
         }
     }
 }
 
-void tCompactWaveSynth_setIndex(tCompactWaveSynth* const cy, float index)
+void tWaveSynthS_setIndex(tWaveSynthS* const cy, float index)
 {
-    _tCompactWaveSynth* c = *cy;
+    _tWaveSynthS* c = *cy;
     c->index = index;
 }
 
-void tCompactWaveSynth_setIndexGain(tCompactWaveSynth* const cy, int i, float gain)
+void tWaveSynthS_setIndexGain(tWaveSynthS* const cy, int i, float gain)
 {
-    _tCompactWaveSynth* c = *cy;
+    _tWaveSynthS* c = *cy;
     if (i >= c->numTables) return;
     c->g[i] = gain;
 }
 
-void tCompactWaveSynth_setIndexPhase(tCompactWaveSynth* const cy, int i, float phase)
+void tWaveSynthS_setIndexPhase(tWaveSynthS* const cy, int i, float phase)
 {
-    _tCompactWaveSynth* c = *cy;
+    _tWaveSynthS* c = *cy;
     if (i >= c->numTables) return;
     for (int v = 0; v < c->numVoices; ++v)
     {
-        tCompactWaveOsc_setPhaseOffset(&c->oscs[i][v], phase);
+        tWaveOscS_setPhaseOffset(&c->oscs[i][v], phase);
     }
 }
 //
-//void tCompactWaveSynth_setIndexTable(tCompactWaveSynth* const cy, int i, float* table, int size)
+//void tWaveSynthS_setIndexTable(tWaveSynthS* const cy, int i, float* table, int size)
 //{
-//    _tCompactWaveSynth* c = *cy;
+//    _tWaveSynthS* c = *cy;
 //    if (i >= c->numTables) return;
-//    tCompactWaveTable_free(&c->tables[i]);
-//    tCompactWaveTable_initToPool(&c->tables[i], table, size, c->maxFreq, &c->mempool);
+//    tWaveTableS_free(&c->tables[i]);
+//    tWaveTableS_initToPool(&c->tables[i], table, size, c->maxFreq, &c->mempool);
 //    for (int v = 0; v < c->numVoices; ++v)
 //    {
-//        tCompactWaveOsc_setFreq(&c->oscs[i][v], c->oscs[i][v]->freq);
+//        tWaveOscS_setFreq(&c->oscs[i][v], c->oscs[i][v]->freq);
 //    }
 //}

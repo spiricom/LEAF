@@ -391,7 +391,7 @@ extern "C" {
     
     
     /*!
-     @defgroup tMBSampler tMBSampler
+     @defgroup tmbsampler tMBSampler
      @ingroup sampling
      @brief Loopable input sampler using minBLEP to remove discontinuities.
      @{

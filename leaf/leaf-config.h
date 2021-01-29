@@ -18,7 +18,7 @@
 
 //==============================================================================
 
-//! Include FIR tables required to use tOversampler and tCompactWaveTable which uses tOversampler. 
+//! Include FIR tables required to use tOversampler and tWaveTableS which uses tOversampler. 
 #define LEAF_INCLUDE_OVERSAMPLER_TABLES 1
 
 // Unused
@@ -36,7 +36,7 @@
 // Unused
 #define LEAF_INCLUDE_ADC_TABLE 0
 
-//! Include tables required to use tEnvelope and tADSR (but not tADSR2, tADSR3, and tADSR4).
+//! Include tables required to use tEnvelope and tADSR (but not tADSRT and tADSRS).
 #define LEAF_INCLUDE_ADSR_TABLES 1
 
 //! Include wave table required to use tCycle.

@@ -281,152 +281,153 @@ extern "C" {
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /*!
-     @defgroup tasdr2 tADSR2
+     @defgroup tadsrt tADSRT
      @ingroup envelopes
      @brief
      @{
      
-     @fn void    tADSR2_init          (tADSR2* const, float attack, float decay, float sustain, float release, LEAF* const leaf)
-     @brief Initialize a tADSR2 to the default mempool of a LEAF instance.
-     @param adsr A pointer to the tADSR2 to initialize.
+     @fn void    tADSRT_init          (tADSRT* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf)
+     @brief Initialize a tADSRT to the default mempool of a LEAF instance.
+     @param adsr A pointer to the tADSRT to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tADSR2_initToPool    (tADSR2* const, float attack, float decay, float sustain, float release, tMempool* const)
-     @brief Initialize a tADSR2 to a specified mempool.
-     @param adsr A pointer to the tADSR2 to initialize.
+     @fn void    tADSRT_initToPool    (tADSRT* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const)
+     @brief Initialize a tADSRT to a specified mempool.
+     @param adsr A pointer to the tADSRT to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tADSR2_free          (tADSR2* const)
-     @brief Free a tADSR2 from its mempool.
-     @param adsr A pointer to the tADSR2 to free.
+     @fn void    tADSRT_free          (tADSRT* const)
+     @brief Free a tADSRT from its mempool.
+     @param adsr A pointer to the tADSRT to free.
      
-     @fn float   tADSR2_tick          (tADSR2* const)
+     @fn float   tADSRT_tick          (tADSRT* const)
      @brief
-     @param adsr A pointer to the relevant tADSR2.
-      
-     @fn void    tADSR2_setAttack     (tADSR2* const, float attack)
-     @brief
-     @param adsr A pointer to the relevant tADSR2.
+     @param adsr A pointer to the relevant tADSRT.
      
-     @fn void    tADSR2_setDecay      (tADSR2* const, float decay)
+     @fn float   tADSRT_tickNoInterp  (tADSRT* const adsrenv)
      @brief
-     @param adsr A pointer to the relevant tADSR2.
+     @param adsr A pointer to the relevant tADSRT.
      
-     @fn void    tADSR2_setSustain    (tADSR2* const, float sustain)
+     @fn void    tADSRT_setAttack     (tADSRT* const, float attack)
      @brief
-     @param adsr A pointer to the relevant tADSR2.
+     @param adsr A pointer to the relevant tADSRT.
      
-     @fn void    tADSR2_setRelease    (tADSR2* const, float release)
+     @fn void    tADSRT_setDecay      (tADSRT* const, float decay)
      @brief
-     @param adsr A pointer to the relevant tADSR2.
+     @param adsr A pointer to the relevant tADSRT.
      
-     @fn void    tADSR2_setLeakFactor (tADSR2* const, float leakFactor)
+     @fn void    tADSRT_setSustain    (tADSRT* const, float sustain)
      @brief
-     @param adsr A pointer to the relevant tADSR2.
+     @param adsr A pointer to the relevant tADSRT.
      
-     @fn void    tADSR2_on            (tADSR2* const, float velocity)
+     @fn void    tADSRT_setRelease    (tADSRT* const, float release)
      @brief
-     @param adsr A pointer to the relevant tADSR2.
+     @param adsr A pointer to the relevant tADSRT.
      
-     @fn void    tADSR2_off           (tADSR2* const)
+     @fn void    tADSRT_setLeakFactor (tADSRT* const, float leakFactor)
      @brief
-     @param adsr A pointer to the relevant tADSR2.
+     @param adsr A pointer to the relevant tADSRT.
+     
+     @fn void    tADSRT_on            (tADSRT* const, float velocity)
+     @brief
+     @param adsr A pointer to the relevant tADSRT.
+     
+     @fn void    tADSRT_off           (tADSRT* const)
+     @brief
+     @param adsr A pointer to the relevant tADSRT.
      
      @} */
     
-    typedef struct _tADSR2
+    typedef struct _tADSRT
     {
         
         tMempool mempool;
-        float sampleRateInMs;
-        float attack;
-        float decay;
-        float release;
-        float attackLambda;
-        float decayLambda;
-        float releaseLambda;
-        float sustain;
-        float leakGain;
+        const float *exp_buff;
+        uint32_t buff_size;
+        uint32_t buff_sizeMinusOne;
+        float bufferSizeDividedBySampleRateInMs;
+        float next;
+        
+        float attackInc, decayInc, releaseInc, rampInc;
+        
+        uint32_t whichStage;
+        
+        float sustain, gain, rampPeak, releasePeak;
+        
+        float attackPhase, decayPhase, releasePhase, rampPhase;
+        
         float leakFactor;
-        float targetGainSquared;
-        float factor;
-        float oneMinusFactor;
-        float gain;
-        uint8_t attacking;
-        uint8_t gate;
-        float env;
-        float envTarget;
-    } _tADSR2;
+    } _tADSRT;
     
-    typedef _tADSR2* tADSR2;
+    typedef _tADSRT* tADSRT;
     
-    void    tADSR2_init          (tADSR2* const, float attack, float decay, float sustain, float release, LEAF* const leaf);
-    void    tADSR2_initToPool    (tADSR2* const, float attack, float decay, float sustain, float release, tMempool* const);
-    void    tADSR2_free          (tADSR2* const);
+    void    tADSRT_init          (tADSRT* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf);
+    void    tADSRT_initToPool    (tADSRT* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const);
+    void    tADSRT_free          (tADSRT* const);
     
-    float   tADSR2_tick          (tADSR2* const);
-    void    tADSR2_setAttack     (tADSR2* const, float attack);
-    void    tADSR2_setDecay      (tADSR2* const, float decay);
-    void    tADSR2_setSustain    (tADSR2* const, float sustain);
-    void    tADSR2_setRelease    (tADSR2* const, float release);
-    void    tADSR2_setLeakFactor (tADSR2* const, float leakFactor);
-    void    tADSR2_on            (tADSR2* const, float velocity);
-    void    tADSR2_off           (tADSR2* const);
-    
+    float   tADSRT_tick          (tADSRT* const);
+    float   tADSRT_tickNoInterp  (tADSRT* const adsrenv);
+    void    tADSRT_setAttack     (tADSRT* const, float attack);
+    void    tADSRT_setDecay      (tADSRT* const, float decay);
+    void    tADSRT_setSustain    (tADSRT* const, float sustain);
+    void    tADSRT_setRelease    (tADSRT* const, float release);
+    void    tADSRT_setLeakFactor (tADSRT* const, float leakFactor);
+    void    tADSRT_on            (tADSRT* const, float velocity);
+    void    tADSRT_off           (tADSRT* const);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
     /*!
-     @defgroup tadsr3 tADSR3
+     @defgroup tadsrs tADSRS
      @ingroup envelopes
      @brief
      @{
      
-     @fn void    tADSR3_init          (tADSR3* const, float attack, float decay, float sustain, float release, LEAF* const leaf)
-     @brief Initialize a tADSR3 to the default mempool of a LEAF instance.
-     @param adsr A pointer to the tADSR3 to initialize.
+     @fn void    tADSRS_init          (tADSRS* const, float attack, float decay, float sustain, float release, LEAF* const leaf)
+     @brief Initialize a tADSRS to the default mempool of a LEAF instance.
+     @param adsr A pointer to the tADSRS to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tADSR3_initToPool    (tADSR3* const, float attack, float decay, float sustain, float release, tMempool* const)
-     @brief Initialize a tADSR3 to a specified mempool.
-     @param adsr A pointer to the tADSR3 to initialize.
+     @fn void    tADSRS_initToPool    (tADSRS* const, float attack, float decay, float sustain, float release, tMempool* const)
+     @brief Initialize a tADSRS to a specified mempool.
+     @param adsr A pointer to the tADSRS to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tADSR3_free          (tADSR3* const)
-     @brief Free a tADSR3 from its mempool.
-     @param adsr A pointer to the tADSR3 to free.
+     @fn void    tADSRS_free          (tADSRS* const)
+     @brief Free a tADSRS from its mempool.
+     @param adsr A pointer to the tADSRS to free.
      
-     @fn float   tADSR3_tick          (tADSR3* const)
+     @fn float   tADSRS_tick          (tADSRS* const)
      @brief
-     @param adsr A pointer to the relevant tADSR3.
+     @param adsr A pointer to the relevant tADSRS.
      
-     @fn void    tADSR3_setAttack     (tADSR3* const, float attack)
+     @fn void    tADSRS_setAttack     (tADSRS* const, float attack)
      @brief
-     @param adsr A pointer to the relevant tADSR3.
+     @param adsr A pointer to the relevant tADSRS.
      
-     @fn void    tADSR3_setDecay      (tADSR3* const, float decay)
+     @fn void    tADSRS_setDecay      (tADSRS* const, float decay)
      @brief
-     @param adsr A pointer to the relevant tADSR3.
+     @param adsr A pointer to the relevant tADSRS.
      
-     @fn void    tADSR3_setSustain    (tADSR3* const, float sustain)
+     @fn void    tADSRS_setSustain    (tADSRS* const, float sustain)
      @brief
-     @param adsr A pointer to the relevant tADSR3.
+     @param adsr A pointer to the relevant tADSRS.
      
-     @fn void    tADSR3_setRelease    (tADSR3* const, float release)
+     @fn void    tADSRS_setRelease    (tADSRS* const, float release)
      @brief
-     @param adsr A pointer to the relevant tADSR3.
+     @param adsr A pointer to the relevant tADSRS.
      
-     @fn void    tADSR3_setLeakFactor (tADSR3* const, float leakFactor)
+     @fn void    tADSRS_setLeakFactor (tADSRS* const, float leakFactor)
      @brief
-     @param adsr A pointer to the relevant tADSR3.
+     @param adsr A pointer to the relevant tADSRS.
      
-     @fn void    tADSR3_on            (tADSR3* const, float velocity)
+     @fn void    tADSRS_on            (tADSRS* const, float velocity)
      @brief
-     @param adsr A pointer to the relevant tADSR3.
+     @param adsr A pointer to the relevant tADSRS.
      
-     @fn void    tADSR3_off           (tADSR3* const)
+     @fn void    tADSRS_off           (tADSRS* const)
      @brief
-     @param adsr A pointer to the relevant tADSR3.
+     @param adsr A pointer to the relevant tADSRS.
      
      @} */
     
@@ -439,7 +440,7 @@ extern "C" {
         env_ramp
     };
     
-    typedef struct _tADSR3
+    typedef struct _tADSRS
     {
         
         tMempool mempool;
@@ -464,119 +465,22 @@ extern "C" {
         float oneMinusFactor;
         float gain;
         
-    } _tADSR3;
+    } _tADSRS;
     
-    typedef _tADSR3* tADSR3;
+    typedef _tADSRS* tADSRS;
     
-    void    tADSR3_init          (tADSR3* const, float attack, float decay, float sustain, float release, LEAF* const leaf);
-    void    tADSR3_initToPool    (tADSR3* const, float attack, float decay, float sustain, float release, tMempool* const);
-    void    tADSR3_free          (tADSR3* const);
+    void    tADSRS_init          (tADSRS* const, float attack, float decay, float sustain, float release, LEAF* const leaf);
+    void    tADSRS_initToPool    (tADSRS* const, float attack, float decay, float sustain, float release, tMempool* const);
+    void    tADSRS_free          (tADSRS* const);
     
-    float   tADSR3_tick          (tADSR3* const);
-    void    tADSR3_setAttack     (tADSR3* const, float attack);
-    void    tADSR3_setDecay      (tADSR3* const, float decay);
-    void    tADSR3_setSustain    (tADSR3* const, float sustain);
-    void    tADSR3_setRelease    (tADSR3* const, float release);
-    void    tADSR3_setLeakFactor (tADSR3* const, float leakFactor);
-    void    tADSR3_on            (tADSR3* const, float velocity);
-    void    tADSR3_off           (tADSR3* const);
-    
-    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-    
-    /*!
-     @defgroup tadsr4 tADSR4
-     @ingroup envelopes
-     @brief
-     @{
-     
-     @fn void    tADSR4_init          (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf)
-     @brief Initialize a tADSR4 to the default mempool of a LEAF instance.
-     @param adsr A pointer to the tADSR4 to initialize.
-     @param leaf A pointer to the leaf instance.
-     
-     @fn void    tADSR4_initToPool    (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const)
-     @brief Initialize a tADSR4 to a specified mempool.
-     @param adsr A pointer to the tADSR4 to initialize.
-     @param mempool A pointer to the tMempool to use.
-     
-     @fn void    tADSR4_free          (tADSR4* const)
-     @brief Free a tADSR4 from its mempool.
-     @param adsr A pointer to the tADSR4 to free.
-     
-     @fn float   tADSR4_tick          (tADSR4* const)
-     @brief
-     @param adsr A pointer to the relevant tADSR4.
-     
-     @fn float   tADSR4_tickNoInterp  (tADSR4* const adsrenv)
-     @brief
-     @param adsr A pointer to the relevant tADSR4.
-     
-     @fn void    tADSR4_setAttack     (tADSR4* const, float attack)
-     @brief
-     @param adsr A pointer to the relevant tADSR4.
-     
-     @fn void    tADSR4_setDecay      (tADSR4* const, float decay)
-     @brief
-     @param adsr A pointer to the relevant tADSR4.
-     
-     @fn void    tADSR4_setSustain    (tADSR4* const, float sustain)
-     @brief
-     @param adsr A pointer to the relevant tADSR4.
-     
-     @fn void    tADSR4_setRelease    (tADSR4* const, float release)
-     @brief
-     @param adsr A pointer to the relevant tADSR4.
-     
-     @fn void    tADSR4_setLeakFactor (tADSR4* const, float leakFactor)
-     @brief
-     @param adsr A pointer to the relevant tADSR4.
-     
-     @fn void    tADSR4_on            (tADSR4* const, float velocity)
-     @brief
-     @param adsr A pointer to the relevant tADSR4.
-     
-     @fn void    tADSR4_off           (tADSR4* const)
-     @brief
-     @param adsr A pointer to the relevant tADSR4.
-     
-     @} */
-    
-    typedef struct _tADSR4
-    {
-        
-        tMempool mempool;
-        const float *exp_buff;
-        uint32_t buff_size;
-        uint32_t buff_sizeMinusOne;
-        float bufferSizeDividedBySampleRateInMs;
-        float next;
-        
-        float attackInc, decayInc, releaseInc, rampInc;
-        
-        uint32_t whichStage;
-        
-        float sustain, gain, rampPeak, releasePeak;
-        
-        float attackPhase, decayPhase, releasePhase, rampPhase;
-        
-        float leakFactor;
-    } _tADSR4;
-    
-    typedef _tADSR4* tADSR4;
-    
-    void    tADSR4_init          (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf);
-    void    tADSR4_initToPool    (tADSR4* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const);
-    void    tADSR4_free          (tADSR4* const);
-    
-    float   tADSR4_tick          (tADSR4* const);
-    float   tADSR4_tickNoInterp  (tADSR4* const adsrenv);
-    void    tADSR4_setAttack     (tADSR4* const, float attack);
-    void    tADSR4_setDecay      (tADSR4* const, float decay);
-    void    tADSR4_setSustain    (tADSR4* const, float sustain);
-    void    tADSR4_setRelease    (tADSR4* const, float release);
-    void    tADSR4_setLeakFactor (tADSR4* const, float leakFactor);
-    void    tADSR4_on            (tADSR4* const, float velocity);
-    void    tADSR4_off           (tADSR4* const);
+    float   tADSRS_tick          (tADSRS* const);
+    void    tADSRS_setAttack     (tADSRS* const, float attack);
+    void    tADSRS_setDecay      (tADSRS* const, float decay);
+    void    tADSRS_setSustain    (tADSRS* const, float sustain);
+    void    tADSRS_setRelease    (tADSRS* const, float release);
+    void    tADSRS_setLeakFactor (tADSRS* const, float leakFactor);
+    void    tADSRS_on            (tADSRS* const, float velocity);
+    void    tADSRS_off           (tADSRS* const);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     

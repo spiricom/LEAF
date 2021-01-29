@@ -486,165 +486,6 @@ float   tADSR_tick(tADSR* const adsrenv)
 #endif // LEAF_INCLUDE_ADSR_TABLES
 
 
-
-/* ADSR 2*/
-//This one is adapted from the VCV Rack code
-//-JS
-
-
-
-const float ADSR2_MIN_TIME = 1e-3f;
-const float ADSR2_INV_MIN_TIME = 1000.0f;
-const float ADSR2_MAX_TIME = 10.f;
-const float ADSR2_LAMBDA_BASE = 10000.0f;
-
-
-void    tADSR2_init(tADSR2* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
-{
-    tADSR2_initToPool(adsrenv, attack, decay, sustain, release, &leaf->mempool);
-}
-
-void    tADSR2_initToPool    (tADSR2* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp)
-{
-    _tMempool* m = *mp;
-    _tADSR2* adsr = *adsrenv = (_tADSR2*) mpool_alloc(sizeof(_tADSR2), m);
-    adsr->mempool = m;
-    
-    LEAF* leaf = adsr->mempool->leaf;
-    
-    adsr->sampleRateInMs = leaf->sampleRate * 0.001f;
-    adsr->attack = LEAF_clip(0.0f, attack * 0.001f, 1.0f);
-    adsr->attackLambda = powf(ADSR2_LAMBDA_BASE, -adsr->attack) * ADSR2_INV_MIN_TIME;
-
-
-    adsr->decay = LEAF_clip(0.0f, decay * 0.001f, 1.0f);
-    adsr->decayLambda = powf(ADSR2_LAMBDA_BASE, -adsr->decay) * ADSR2_INV_MIN_TIME;
-
-
-    adsr->sustain= sustain;
-
-
-    adsr->release = LEAF_clip(0.0f, release * 0.001f, 1.0f);
-    adsr->releaseLambda = powf(ADSR2_LAMBDA_BASE, -adsr->release) * ADSR2_INV_MIN_TIME;
-
-    adsr->attacking = 0;
-    adsr->gate = 0;
-    adsr->gain = 1.0f;
-    adsr->targetGainSquared = 1.0f;
-    adsr->factor = 0.01f;
-    adsr->oneMinusFactor = 0.99f;
-    adsr->env = 0.0f;
-    adsr->leakFactor = 1.0f;
-}
-
-void    tADSR2_free  (tADSR2* const adsrenv)
-{
-    _tADSR2* adsr = *adsrenv;
-    mpool_free((char*)adsr, adsr->mempool);
-}
-
-void     tADSR2_setAttack(tADSR2* const adsrenv, float attack)
-{
-    _tADSR2* adsr = *adsrenv;
-    adsr->attack = LEAF_clip(0.0f, attack * 0.001f, 1.0f);
-    adsr->attackLambda = fastPowf(ADSR2_LAMBDA_BASE, -adsr->attack) * ADSR2_INV_MIN_TIME;
-
-}
-
-void     tADSR2_setDecay(tADSR2* const adsrenv, float decay)
-{
-    _tADSR2* adsr = *adsrenv;
-    adsr->decay = LEAF_clip(0.0f, decay * 0.001f, 1.0f);
-    adsr->decayLambda = fastPowf(ADSR2_LAMBDA_BASE, -adsr->decay) * ADSR2_INV_MIN_TIME;
-
-}
-
-void     tADSR2_setSustain(tADSR2* const adsrenv, float sustain)
-{
-    _tADSR2* adsr = *adsrenv;
-    adsr->sustain = sustain;
-
-    if (adsr->gate)
-    {
-        if (adsr->attacking == 0)
-        {
-            adsr->envTarget = sustain;
-        }
-    }
-}
-
-void     tADSR2_setRelease(tADSR2* const adsrenv, float release)
-{
-    _tADSR2* adsr = *adsrenv;
-    adsr->release = LEAF_clip(0.0f, release * 0.001f, 1.0f);
-    adsr->releaseLambda = fastPowf(ADSR2_LAMBDA_BASE, -adsr->release) * ADSR2_INV_MIN_TIME;
-}
-
-// 0.999999 is slow leak, 0.9 is fast leak
-void     tADSR2_setLeakFactor(tADSR2* const adsrenv, float leakFactor)
-{
-    _tADSR2* adsr = *adsrenv;
-
-    adsr->leakFactor = leakFactor;
-}
-
-void tADSR2_on(tADSR2* const adsrenv, float velocity)
-{
-    _tADSR2* adsr = *adsrenv;
-    adsr->targetGainSquared = velocity * velocity;
-    adsr->envTarget = 1.2f;
-    adsr->leakGain = 1.0f;
-    adsr->gate = 1;
-    adsr->attacking = 1;
-}
-
-void tADSR2_off(tADSR2* const adsrenv)
-{
-    _tADSR2* adsr = *adsrenv;
-    adsr->gate = 0;
-    adsr->envTarget = 0.0f;
-}
-
-float   tADSR2_tick(tADSR2* const adsrenv)
-{
-    _tADSR2* adsr = *adsrenv;
-    LEAF* leaf = adsr->mempool->leaf;
-    
-    float lambda;
-
-    if (adsr->gate)
-    {
-        if (adsr->attacking)
-        {
-            lambda = adsr->attackLambda;
-        }
-        else
-        {
-            lambda = adsr->decayLambda;
-        }
-    }
-    else
-    {
-        lambda = adsr->releaseLambda;
-    }
-
-
-    // Adjust env
-    adsr->env += (adsr->envTarget - adsr->env) * lambda * leaf->invSampleRate;
-
-    // Turn off attacking state if envelope is HIGH
-    if (adsr->env >= 1.0f)
-    {
-        adsr->attacking = 0;
-        adsr->envTarget = adsr->sustain;
-    }
-
-    //smooth the gain value   -- this is not ideal, a retrigger while the envelope is still going with a new gain will cause a jump, although it will be smoothed quickly. Maybe doing the math so the range is computed based on the gain rather than 0.->1. is preferable? But that's harder to get the exponential curve right without a lookup.
-    adsr->gain = ((adsr->factor*adsr->targetGainSquared)+(adsr->oneMinusFactor*adsr->gain));
-    adsr->leakGain *= adsr->leakFactor;
-    return adsr->env * adsr->gain * adsr->leakGain;
-}
-
 /* ADSR 3*/
 //This one doesn't use any lookup table - by Nigel Redmon from his blog. Thanks, Nigel!
 //-JS
@@ -655,15 +496,15 @@ float calcADSR3Coef(float rate, float targetRatio)
 }
 
 
-void    tADSR3_init(tADSR3* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
+void    tADSRS_init(tADSRS* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
 {
-    tADSR3_initToPool(adsrenv, attack, decay, sustain, release, &leaf->mempool);
+    tADSRS_initToPool(adsrenv, attack, decay, sustain, release, &leaf->mempool);
 }
 
-void    tADSR3_initToPool    (tADSR3* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp)
+void    tADSRS_initToPool    (tADSRS* const adsrenv, float attack, float decay, float sustain, float release, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tADSR3* adsr = *adsrenv = (_tADSR3*) mpool_alloc(sizeof(_tADSR3), m);
+    _tADSRS* adsr = *adsrenv = (_tADSRS*) mpool_alloc(sizeof(_tADSRS), m);
     adsr->mempool = m;
     
     LEAF* leaf = adsr->mempool->leaf;
@@ -695,41 +536,41 @@ void    tADSR3_initToPool    (tADSR3* const adsrenv, float attack, float decay, 
     adsr->leakFactor = 1.0f;
 }
 
-void    tADSR3_free  (tADSR3* const adsrenv)
+void    tADSRS_free  (tADSRS* const adsrenv)
 {
-    _tADSR3* adsr = *adsrenv;
+    _tADSRS* adsr = *adsrenv;
     mpool_free((char*)adsr, adsr->mempool);
 }
 
-void     tADSR3_setAttack(tADSR3* const adsrenv, float attack)
+void     tADSRS_setAttack(tADSRS* const adsrenv, float attack)
 {
-    _tADSR3* adsr = *adsrenv;
+    _tADSRS* adsr = *adsrenv;
 
     adsr->attackRate = attack * adsr->sampleRateInMs;
     adsr->attackCoef = calcADSR3Coef(adsr->attackRate, adsr->targetRatioA);
     adsr->attackBase = (1.0f + adsr->targetRatioA) * (1.0f - adsr->attackCoef);
 }
 
-void     tADSR3_setDecay(tADSR3* const adsrenv, float decay)
+void     tADSRS_setDecay(tADSRS* const adsrenv, float decay)
 {
-    _tADSR3* adsr = *adsrenv;
+    _tADSRS* adsr = *adsrenv;
 
     adsr->decayRate = decay * adsr->sampleRateInMs;
     adsr->decayCoef = calcADSR3Coef(adsr->decayRate,adsr-> targetRatioDR);
     adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
 }
 
-void     tADSR3_setSustain(tADSR3* const adsrenv, float sustain)
+void     tADSRS_setSustain(tADSRS* const adsrenv, float sustain)
 {
-    _tADSR3* adsr = *adsrenv;
+    _tADSRS* adsr = *adsrenv;
 
     adsr->sustainLevel = sustain;
     adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
 }
 
-void     tADSR3_setRelease(tADSR3* const adsrenv, float release)
+void     tADSRS_setRelease(tADSRS* const adsrenv, float release)
 {
-    _tADSR3* adsr = *adsrenv;
+    _tADSRS* adsr = *adsrenv;
 
     adsr->releaseRate = release * adsr->sampleRateInMs;
     adsr->releaseCoef = calcADSR3Coef(adsr->releaseRate, (float)adsr->targetRatioDR);
@@ -737,23 +578,23 @@ void     tADSR3_setRelease(tADSR3* const adsrenv, float release)
 }
 
 // 0.999999 is slow leak, 0.9 is fast leak
-void     tADSR3_setLeakFactor(tADSR3* const adsrenv, float leakFactor)
+void     tADSRS_setLeakFactor(tADSRS* const adsrenv, float leakFactor)
 {
-    _tADSR3* adsr = *adsrenv;
+    _tADSRS* adsr = *adsrenv;
 
     adsr->leakFactor = leakFactor;
 }
 
-void tADSR3_on(tADSR3* const adsrenv, float velocity)
+void tADSRS_on(tADSRS* const adsrenv, float velocity)
 {
-    _tADSR3* adsr = *adsrenv;
+    _tADSRS* adsr = *adsrenv;
     adsr->state = env_attack;
     adsr->targetGainSquared = velocity * velocity;
 }
 
-void tADSR3_off(tADSR3* const adsrenv)
+void tADSRS_off(tADSRS* const adsrenv)
 {
-    _tADSR3* adsr = *adsrenv;
+    _tADSRS* adsr = *adsrenv;
 
     if (adsr->state != env_idle)
     {
@@ -761,9 +602,9 @@ void tADSR3_off(tADSR3* const adsrenv)
     }
 }
 
-float   tADSR3_tick(tADSR3* const adsrenv)
+float   tADSRS_tick(tADSRS* const adsrenv)
 {
-    _tADSR3* adsr = *adsrenv;
+    _tADSRS* adsr = *adsrenv;
 
 
     switch (adsr->state) {
@@ -803,17 +644,17 @@ float   tADSR3_tick(tADSR3* const adsrenv)
 
 /* ADSR 4 */ // new version of our original table-based ADSR but with the table passed in by the user
 // use this if the size of the big ADSR tables is too much.
-void    tADSR4_init    (tADSR4* const adsrenv, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf)
+void    tADSRT_init    (tADSRT* const adsrenv, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf)
 {
-    tADSR4_initToPool    (adsrenv, attack, decay, sustain, release, expBuffer, bufferSize, &leaf->mempool);
+    tADSRT_initToPool    (adsrenv, attack, decay, sustain, release, expBuffer, bufferSize, &leaf->mempool);
 }
 
 //initialize with an exponential function that decays -- i.e. a call to LEAF_generate_exp(expBuffer, 0.001f, 0.0f, 1.0f, -0.0008f, EXP_BUFFER_SIZE);
 //times are in ms
-void    tADSR4_initToPool    (tADSR4* const adsrenv, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const mp)
+void    tADSRT_initToPool    (tADSRT* const adsrenv, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tADSR4* adsr = *adsrenv = (_tADSR4*) mpool_alloc(sizeof(_tADSR4), m);
+    _tADSRT* adsr = *adsrenv = (_tADSRT*) mpool_alloc(sizeof(_tADSRT), m);
     adsr->mempool = m;
     
     LEAF* leaf = adsr->mempool->leaf;
@@ -852,15 +693,15 @@ void    tADSR4_initToPool    (tADSR4* const adsrenv, float attack, float decay, 
     adsr->leakFactor = 1.0f;
 }
 
-void    tADSR4_free  (tADSR4* const adsrenv)
+void    tADSRT_free  (tADSRT* const adsrenv)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
     mpool_free((char*)adsr, adsr->mempool);
 }
 
-void     tADSR4_setAttack(tADSR4* const adsrenv, float attack)
+void     tADSRT_setAttack(tADSRT* const adsrenv, float attack)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
 
     if (attack < 0.0f)
     {
@@ -870,9 +711,9 @@ void     tADSR4_setAttack(tADSR4* const adsrenv, float attack)
     adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / attack;
 }
 
-void     tADSR4_setDecay(tADSR4* const adsrenv, float decay)
+void     tADSRT_setDecay(tADSRT* const adsrenv, float decay)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
 
     if (decay < 0.0f)
     {
@@ -881,18 +722,18 @@ void     tADSR4_setDecay(tADSR4* const adsrenv, float decay)
     adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / decay;
 }
 
-void     tADSR4_setSustain(tADSR4* const adsrenv, float sustain)
+void     tADSRT_setSustain(tADSRT* const adsrenv, float sustain)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
 
     if (sustain > 1.0f)      adsr->sustain = 1.0f;
     else if (sustain < 0.0f) adsr->sustain = 0.0f;
     else                     adsr->sustain = sustain;
 }
 
-void     tADSR4_setRelease(tADSR4* const adsrenv, float release)
+void     tADSRT_setRelease(tADSRT* const adsrenv, float release)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
 
     if (release < 0.0f)
     {
@@ -902,17 +743,17 @@ void     tADSR4_setRelease(tADSR4* const adsrenv, float release)
 }
 
 // 0.999999 is slow leak, 0.9 is fast leak
-void     tADSR4_setLeakFactor(tADSR4* const adsrenv, float leakFactor)
+void     tADSRT_setLeakFactor(tADSRT* const adsrenv, float leakFactor)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
 
 
     adsr->leakFactor = leakFactor;
 }
 
-void tADSR4_on(tADSR4* const adsrenv, float velocity)
+void tADSRT_on(tADSRT* const adsrenv, float velocity)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
 
     if (adsr->whichStage != env_idle) // In case ADSR retriggered while it is still happening.
     {
@@ -931,9 +772,9 @@ void tADSR4_on(tADSR4* const adsrenv, float velocity)
     adsr->gain = velocity;
 }
 
-void tADSR4_off(tADSR4* const adsrenv)
+void tADSRT_off(tADSRT* const adsrenv)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
 
     if (adsr->whichStage == env_idle)
     {
@@ -946,9 +787,9 @@ void tADSR4_off(tADSR4* const adsrenv)
     }
 }
 
-float   tADSR4_tick(tADSR4* const adsrenv)
+float   tADSRT_tick(tADSRT* const adsrenv)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
 
     switch (adsr->whichStage)
     {
@@ -1071,9 +912,9 @@ float   tADSR4_tick(tADSR4* const adsrenv)
     return adsr->next;
 }
 
-float   tADSR4_tickNoInterp(tADSR4* const adsrenv)
+float   tADSRT_tickNoInterp(tADSRT* const adsrenv)
 {
-    _tADSR4* adsr = *adsrenv;
+    _tADSRT* adsr = *adsrenv;
 
     switch (adsr->whichStage)
     {

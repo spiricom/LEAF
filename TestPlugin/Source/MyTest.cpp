@@ -32,7 +32,7 @@ tNoise noise;
 tButterworth bw;
 
 tWaveTable wt;
-tCompactWaveTable cwt;
+tWaveTableS cwt;
 tWaveSynth ws;
 
 tBuffer samp;
@@ -64,7 +64,7 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
     
 //    tWaveTable_init(&wt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
-//    tCompactWaveTable_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
+//    tWaveTableS_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
     
     tMBTriangle_init(&btri, &leaf);
     tMBPulse_init(&bpulse, &leaf);
@@ -118,7 +118,7 @@ void    LEAFTest_block           (void)
     tMBPulse_setFreq(&bpulse, val * 160000.f - 80000.0f);
     tMBSaw_setFreq(&bsaw, val * 10000.f);
 //    tWaveTable_setFreq(&wt, val * 160000.f - 80000.0f);
-//    tCompactWaveTable_setFreq(&cwt, val * 10000.);
+//    tWaveTableS_setFreq(&cwt, val * 10000.);
     tWaveSynth_setFreq(&ws, 0, val * 10000.f);
 //    tRetune_tuneVoice(&retune, 0, val * 3.0f + 0.5f);
 //    tSimpleRetune_tuneVoice(&sretune, 0, 300);
