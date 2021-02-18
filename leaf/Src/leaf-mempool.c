@@ -48,6 +48,12 @@
 
 #endif
 
+#include <stdlib.h>
+
+#if LEAF_DEBUG
+#include "../../TestPlugin/JuceLibraryCode/JuceHeader.h"
+#endif
+
 /**
  * private function
  */
@@ -89,6 +95,23 @@ void leaf_pool_init(LEAF* const leaf, char* memory, size_t size)
  */
 char* mpool_alloc(size_t asize, _tMempool* pool)
 {
+#if LEAF_DEBUG
+    DBG("malloc " + String(asize));
+#endif
+#if LEAF_USE_DYNAMIC_ALLOCATION
+    char* temp = (char*) malloc(asize);
+    if (temp == NULL)
+    {
+        // allocation failed, exit from the program
+        fprintf(stderr, "Out of memory.\n");
+        exit(1);
+    }
+    if (pool->leaf->clearOnAllocation > 0)
+    {
+        memset(temp, 0, asize);
+    }
+    return temp;
+#else
     // If the head is NULL, the mempool is full
     if (pool->head == NULL)
     {
@@ -169,6 +192,7 @@ char* mpool_alloc(size_t asize, _tMempool* pool)
     
     // Return the pool of the allocated node;
     return node_to_alloc->pool;
+#endif
 }
 
 
@@ -177,6 +201,20 @@ char* mpool_alloc(size_t asize, _tMempool* pool)
  */
 char* mpool_calloc(size_t asize, _tMempool* pool)
 {
+#if LEAF_DEBUG
+    DBG("calloc " + String(asize));
+#endif
+#if LEAF_USE_DYNAMIC_ALLOCATION
+    char* ret = (char*) malloc(asize);
+    if (ret == NULL)
+    {
+        // allocation failed, exit from the program
+        fprintf(stderr, "Out of memory.\n");
+        exit(1);
+    }
+    memset(ret, 0, asize);
+    return ret;
+#else
     // If the head is NULL, the mempool is full
     if (pool->head == NULL)
     {
@@ -252,26 +290,29 @@ char* mpool_calloc(size_t asize, _tMempool* pool)
     for (int i = 0; i < node_to_alloc->size; i++) node_to_alloc->pool[i] = 0;
     // Return the pool of the allocated node;
     return node_to_alloc->pool;
+#endif
 }
 
 char* leaf_alloc(LEAF* const leaf, size_t size)
 {
     //printf("alloc %i\n", size);
-    char* block = mpool_alloc(size, &leaf->_internal_mempool);
-    
-    return block;
+    return mpool_alloc(size, &leaf->_internal_mempool);
 }
 
 char* leaf_calloc(LEAF* const leaf, size_t size)
 {
     //printf("alloc %i\n", size);
-    char* block = mpool_calloc(size, &leaf->_internal_mempool);
-
-    return block;
+    return mpool_calloc(size, &leaf->_internal_mempool);
 }
 
 void mpool_free(char* ptr, _tMempool* pool)
 {
+#if LEAF_DEBUG
+    DBG("free");
+#endif
+#if LEAF_USE_DYNAMIC_ALLOCATION
+    free(ptr);
+#else
     //if (ptr < pool->mpool || ptr >= pool->mpool + pool->msize)
     // Get the node at the freed space
     mpool_node_t* freed_node = (mpool_node_t*) (ptr - pool->leaf->header_size);
@@ -336,6 +377,7 @@ void mpool_free(char* ptr, _tMempool* pool)
     // Format the freed pool
     //    char* freed_pool = (char*)freed_node->pool;
     //    for (int i = 0; i < freed_node->size; i++) freed_pool[i] = 0;
+#endif
 }
 
 void leaf_free(LEAF* const leaf, char* ptr)

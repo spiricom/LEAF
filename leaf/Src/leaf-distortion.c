@@ -80,14 +80,15 @@ void tOversampler_init (tOversampler* const osr, int ratio, int extraQuality, LE
 void tOversampler_initToPool (tOversampler* const osr, int ratio, int extraQuality, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tOversampler* os = *osr = (_tOversampler*) mpool_alloc(sizeof(_tOversampler), m);
-    os->mempool = m;
-    
     uint8_t offset = 0;
     if (extraQuality) offset = 6;
     if (ratio == 2 || ratio == 4  ||
         ratio == 8 || ratio == 16 ||
         ratio == 32 || ratio == 64) {
+        
+        _tOversampler* os = *osr = (_tOversampler*) mpool_alloc(sizeof(_tOversampler), m);
+        os->mempool = m;
+        
         os->ratio = ratio;
         int idx = (int)(log2f(os->ratio))-1+offset;
         os->numTaps = __leaf_tablesize_firNumTaps[idx];

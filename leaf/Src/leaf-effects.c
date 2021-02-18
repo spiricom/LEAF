@@ -904,9 +904,8 @@ void tRosenbergGlottalPulse_initToPool (tRosenbergGlottalPulse* const gp, tMempo
     g->pulseLength = 0.0f;
     g->freq = 0.0f;
     g->inc = 0.0f;
-
-
 }
+
 void tRosenbergGlottalPulse_free (tRosenbergGlottalPulse* const gp)
 {
     _tRosenbergGlottalPulse* g = *gp;
@@ -977,6 +976,7 @@ void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const g
     
     g->freq = freq;
     g->inc = freq * leaf->invSampleRate;
+    g->inc -= (int) g->inc;
 }
 
 void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const gp, float openLength)
@@ -1066,7 +1066,7 @@ void tSOLAD_ioSamples(tSOLAD* const wp, float* in, float* out, int blocksize)
     {
         float sample = tHighpass_tick(&w->hp, in[0]);
         w->delaybuf[0] = sample;
-        w->delaybuf[w->loopSize] = sample;   // copy one sample for interpolation
+        w->delaybuf[w->loopSize-1] = sample;   // copy one sample for interpolation
         n--;
         i++;
         in++;

@@ -18,6 +18,10 @@
 
 #endif
 
+#if LEAF_DEBUG
+#include "../../TestPlugin/JuceLibraryCode/JuceHeader.h"
+#endif
+
 //===========================================================================
 /* Envelope Follower */
 //===========================================================================
@@ -52,8 +56,8 @@ float   tEnvelopeFollower_tick(tEnvelopeFollower* const ef, float x)
     if (x < 0.0f ) x = -x;  /* Absolute value. */
     
     if (isnan(x)) return 0.0f;
-    if ((x >= e->y) && (x > e->a_thresh)) e->y = x;                      /* If we hit a peak, ride the peak to the top. */
-    else                                    e->y = e->y * e->d_coeff;    /* Else, exponential decay of output. */
+    if ((x >= e->y) && (x > e->a_thresh)) e->y = x; /* If we hit a peak, ride the peak to the top. */
+    else e->y = e->y * e->d_coeff; /* Else, exponential decay of output. */
     
     //ef->y = envelope_pow[(uint16_t)(ef->y * (float)UINT16_MAX)] * ef->d_coeff; //not quite the right behavior - too much loss of precision?
     //ef->y = powf(ef->y, 1.000009f) * ef->d_coeff;  // too expensive
@@ -961,7 +965,7 @@ void    tZeroCrossingInfo_init  (tZeroCrossingInfo* const zc, LEAF* const leaf)
 void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo* const zc, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tZeroCrossingInfo* z = *zc = (_tZeroCrossingInfo*) mpool_alloc(sizeof(_tZeroCrossingInfo), m);
+    _tZeroCrossingInfo* z = *zc = (_tZeroCrossingInfo*) mpool_calloc(sizeof(_tZeroCrossingInfo), m);
     z->mempool = m;
     
     z->_leading_edge = INT_MIN;
@@ -1050,7 +1054,9 @@ void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const zc, 
     z->_info = (tZeroCrossingInfo*) mpool_calloc(sizeof(tZeroCrossingInfo) * z->_size, m);
 
     for (unsigned i = 0; i < z->_size; i++)
-    tZeroCrossingInfo_initToPool(&z->_info[i], mp);
+    {
+        tZeroCrossingInfo_initToPool(&z->_info[i], mp);
+    }
     
     z->_pos = 0;
     
@@ -1068,8 +1074,9 @@ void    tZeroCrossingCollector_free  (tZeroCrossingCollector* const zc)
     _tZeroCrossingCollector* z = *zc;
     
     for (unsigned i = 0; i < z->_size; i++)
-
-    tZeroCrossingInfo_free(&z->_info[i]);
+    {
+        tZeroCrossingInfo_free(&z->_info[i]);
+    }
     
     mpool_free((char*)z->_info, z->mempool);
     mpool_free((char*)z, z->mempool);
@@ -1198,7 +1205,7 @@ static inline void update_state(tZeroCrossingCollector* const zc, float s)
         {
             --z->_pos;
             z->_pos &= z->_mask;
-            tZeroCrossingInfo crossing = z->_info[z->_pos];
+            tZeroCrossingInfo crossing = z->_info[z->_pos & z->_mask];
             crossing->_before_crossing = z->_prev;
             crossing->_after_crossing = s;
             crossing->_peak = s;
@@ -1210,7 +1217,7 @@ static inline void update_state(tZeroCrossingCollector* const zc, float s)
         }
         else
         {
-            tZeroCrossingInfo_updatePeak(&z->_info[z->_pos], s, z->_frame);
+            tZeroCrossingInfo_updatePeak(&z->_info[z->_pos & z->_mask], s, z->_frame);
         }
         if (s > z->_peak_update)
         {
@@ -1220,14 +1227,14 @@ static inline void update_state(tZeroCrossingCollector* const zc, float s)
     else if (z->_state && (s < z->_hysteresis))
     {
         z->_state = 0;
-        z->_info[z->_pos]->_trailing_edge = z->_frame;
+        z->_info[z->_pos & z->_mask]->_trailing_edge = z->_frame;
         if (z->_peak == 0.0f)
             z->_peak = z->_peak_update;
     }
     
     if (z->_frame > z->_window_size * 2)
         reset(zc);
-    
+
     z->_prev = s;
 }
 
@@ -1235,7 +1242,7 @@ static inline void shift(tZeroCrossingCollector* const zc, int n)
 {
     _tZeroCrossingCollector* z = *zc;
     
-    tZeroCrossingInfo crossing = z->_info[z->_pos];
+    tZeroCrossingInfo crossing = z->_info[z->_pos & z->_mask];
     
     crossing->_leading_edge -= n;
     if (!z->_state)

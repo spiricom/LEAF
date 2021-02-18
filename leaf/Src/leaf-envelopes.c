@@ -746,8 +746,6 @@ void     tADSRT_setRelease(tADSRT* const adsrenv, float release)
 void     tADSRT_setLeakFactor(tADSRT* const adsrenv, float leakFactor)
 {
     _tADSRT* adsr = *adsrenv;
-
-
     adsr->leakFactor = leakFactor;
 }
 

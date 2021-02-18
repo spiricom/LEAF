@@ -633,11 +633,11 @@ void    tSimplePoly_initToPool            (tSimplePoly* const polyh, int maxNumV
     }
     poly->stealing_on = 1;
     poly->recover_stolen = 1;
-    poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, m);
+    poly->voices = (int**) mpool_calloc(sizeof(int*) * poly->maxNumVoices, m);
 
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
-        poly->voices[i] = (int*) mpool_alloc(sizeof(int) * 3, m);
+        poly->voices[i] = (int*) mpool_calloc(sizeof(int) * 3, m);
         poly->voices[i][0] = -1;
     }
     tStack_initToPool(&poly->stack, mp);

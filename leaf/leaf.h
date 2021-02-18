@@ -27,9 +27,9 @@
 
 #define LEAF_DEBUG 0
 
-#if LEAF_DEBUG
-#include "../LEAF_JUCEPlugin/JuceLibraryCode/JuceHeader.h"
-#endif
+//#if LEAF_DEBUG
+//#include "../TestPlugin/JuceLibraryCode/JuceHeader.h"
+//#endif
 
 #if _WIN32 || _WIN64
 
