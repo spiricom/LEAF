@@ -77,20 +77,21 @@ void tOversampler_init (tOversampler* const osr, int ratio, int extraQuality, LE
     tOversampler_initToPool(osr, ratio, extraQuality, &leaf->mempool);
 }
 
-void tOversampler_initToPool (tOversampler* const osr, int ratio, int extraQuality, tMempool* const mp)
+void tOversampler_initToPool (tOversampler* const osr, int maxRatio, int extraQuality, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    uint8_t offset = 0;
+    int offset = 0;
     if (extraQuality) offset = 6;
-    if (ratio == 2 || ratio == 4  ||
-        ratio == 8 || ratio == 16 ||
-        ratio == 32 || ratio == 64) {
-        
+    if (maxRatio == 2 || maxRatio == 4  || maxRatio == 8 ||
+        maxRatio == 16 || maxRatio == 32 || maxRatio == 64)
+    {
         _tOversampler* os = *osr = (_tOversampler*) mpool_alloc(sizeof(_tOversampler), m);
         os->mempool = m;
         
-        os->ratio = ratio;
-        int idx = (int)(log2f(os->ratio))-1+offset;
+        os->offset = offset;
+        os->maxRatio = maxRatio;
+        os->ratio = os->maxRatio;
+        int idx = (int)(log2f(os->ratio))-1+os->offset;
         os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
         os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
@@ -125,6 +126,12 @@ float tOversampler_tick(tOversampler* const osr, float input, float* oversample,
 void tOversampler_upsample(tOversampler* const osr, float input, float* output)
 {
     _tOversampler* os = *osr;
+    
+    if (os->ratio == 1)
+    {
+        output[0] = input;
+        return;
+    }
     
     float *pState = os->upState;                 /* State pointer */
     float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
@@ -219,6 +226,8 @@ float tOversampler_downsample(tOversampler *const osr, float* input)
 {
     _tOversampler* os = *osr;
     
+    if (os->ratio == 1) return input[0];
+    
     float *pState = os->downState;                 /* State pointer */
     float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
     float *pStateCur;                          /* Points to the current sample of the state */
@@ -297,6 +306,24 @@ float tOversampler_downsample(tOversampler *const osr, float* input)
     }
     
     return output;
+}
+
+void    tOversampler_setRatio       (tOversampler* const osr, int ratio)
+{
+    _tOversampler* os = *osr;
+    
+    if (ratio > os->maxRatio) ratio = os->maxRatio;
+    
+    if (ratio == 1) os->ratio = ratio;
+    else if (ratio == 2 || ratio == 4  || ratio == 8 ||
+        ratio == 16 || ratio == 32 || ratio == 64)
+    {
+        os->ratio = os->maxRatio;
+        int idx = (int)(log2f(os->ratio))-1+os->offset;
+        os->numTaps = __leaf_tablesize_firNumTaps[idx];
+        os->phaseLength = os->numTaps / os->ratio;
+        os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
+    }
 }
 
 int tOversampler_getLatency(tOversampler* const osr)

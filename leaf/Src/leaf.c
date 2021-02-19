@@ -39,6 +39,10 @@ void LEAF_init(LEAF* const leaf, float sr, int blocksize, char* memory, size_t m
     
     for (int i = 0; i < LEAFErrorNil; ++i)
         leaf->errorState[i] = 0;
+    
+    leaf->allocCount = 0;
+    
+    leaf->freeCount = 0;
 }
 
 

@@ -42,7 +42,8 @@ extern "C" {
         size_t header_size; //!< The size in bytes of memory region headers within mempools.
         void (*errorCallback)(LEAF* const, LEAFErrorType); //!< A pointer to the callback function for LEAF errors. Can be set by the user.
         int     errorState[LEAFErrorNil]; //!< An array of flags that indicate which errors have occurred.
-        
+        unsigned int allocCount; //!< A count of LEAF memory allocations.
+        unsigned int freeCount; //!< A count of LEAF memory frees.
         ///@}
     };
     

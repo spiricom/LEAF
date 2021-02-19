@@ -111,6 +111,11 @@ extern "C" {
      @brief
      @param oversampler A pointer to the relevant tOversampler.
      
+     @fn void    tOversampler_setRatio       (tOversampler* const, int ratio)
+     @brief
+     @param oversampler A pointer to the relevant tOversampler.
+     @param ratio
+     
      @fn int     tOversampler_getLatency     (tOversampler* const os)
      @brief
      @param oversampler A pointer to the relevant tOversampler.
@@ -121,7 +126,9 @@ extern "C" {
     {
         
         tMempool mempool;
+        int maxRatio;
         int ratio;
+        int offset;
         float* pCoeffs;
         float* upState;
         float* downState;
@@ -137,7 +144,9 @@ extern "C" {
     
     void    tOversampler_upsample       (tOversampler* const, float input, float* output);
     float   tOversampler_downsample     (tOversampler* const os, float* input);
-    float   tOversampler_tick           (tOversampler* const, float input, float* oversample, float (*effectTick)(float));
+    float   tOversampler_tick           (tOversampler* const, float input, float* oversample,
+                                         float (*effectTick)(float));
+    void    tOversampler_setRatio       (tOversampler* const, int ratio);
     int     tOversampler_getLatency     (tOversampler* const os);
     
     //==============================================================================

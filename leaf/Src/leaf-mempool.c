@@ -95,8 +95,9 @@ void leaf_pool_init(LEAF* const leaf, char* memory, size_t size)
  */
 char* mpool_alloc(size_t asize, _tMempool* pool)
 {
+    pool->leaf->allocCount++;
 #if LEAF_DEBUG
-    DBG("malloc " + String(asize));
+    DBG("alloc " + String(asize));
 #endif
 #if LEAF_USE_DYNAMIC_ALLOCATION
     char* temp = (char*) malloc(asize);
@@ -201,6 +202,7 @@ char* mpool_alloc(size_t asize, _tMempool* pool)
  */
 char* mpool_calloc(size_t asize, _tMempool* pool)
 {
+    pool->leaf->allocCount++;
 #if LEAF_DEBUG
     DBG("calloc " + String(asize));
 #endif
@@ -307,6 +309,7 @@ char* leaf_calloc(LEAF* const leaf, size_t size)
 
 void mpool_free(char* ptr, _tMempool* pool)
 {
+    pool->leaf->freeCount++;
 #if LEAF_DEBUG
     DBG("free");
 #endif
