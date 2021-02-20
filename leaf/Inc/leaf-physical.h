@@ -444,7 +444,133 @@ extern "C" {
     void    tLivingString_setLevMode            (tLivingString* const, int levMode);
     
 
+  // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+   
+    
+    /*!
+     @defgroup tlivingstring2 tLivingString2
+     @ingroup physical
+     @brief String model with preparation and pick position separated.
+     @{
+     
+     @fn void    tLivingString2_init                  (tLivingString2* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf)
+     @brief Initialize a tLivingString to the default mempool of a LEAF instance.
+     @param string A pointer to the tLivingString2 to initialize.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void    tLivingString2_initToPool            (tLivingString2* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, tMempool* const)
+     @brief Initialize a tLivingString2 to a specified mempool.
+     @param string A pointer to the tLivingString2 to initialize.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tLivingString2_free                  (tLivingString2* const)
+     @brief Free a tLivingString2 from its mempool.
+     @param string A pointer to the tLivingString2 to free.
+     
+     @fn float   tLivingString2_tick                  (tLivingString2* const, float input)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @fn float   tLivingString2_sample                (tLivingString2* const)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @fn void    tLivingString2_setFreq               (tLivingString2* const, float freq)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @fn void    tLivingString2_setWaveLength         (tLivingString2* const, float waveLength)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @fn void    tLivingString2_setPickPos            (tLivingString2* const, float pickPos)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @fn void    tLivingString2_setPrepPosition          (tLivingString2* const, float prepPos)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     
+     @fn void    tLivingString2_setPrepIndex          (tLivingString2* const, float prepIndex)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @fn void    tLivingString2_setBrightness           (tLivingString2* const, float brightness)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     @param float The brightness parameter from 0 to 1.
+     
+     @fn void    tLivingString2_setDecay              (tLivingString2* const, float decay)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     @param float The decay parameter from 0 to 1.
+     
+     @fn void    tLivingString2_setTargetLev          (tLivingString2* const, float targetLev)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @fn void    tLivingString2_setLevSmoothFactor    (tLivingString2* const, float levSmoothFactor)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @fn void    tLivingString2_setLevStrength        (tLivingString2* const, float levStrength)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @fn void    tLivingString2_setLevMode            (tLivingString2* const, int levMode)
+     @brief
+     @param string A pointer to the relevant tLivingString2.
+     
+     @} */
+    typedef struct _tLivingString2
+        {
 
+            tMempool mempool;
+            float freq, waveLengthInSamples;        // the frequency of the whole string, determining delay length
+            float pickPos;    // the pick position, dividing the string in two, in ratio
+            float prepPos;    // the preparation position, dividing the string in two, in ratio
+            float pickupPos;    // the preparation position, dividing the string in two, in ratio
+            float prepIndex;    // the amount of pressure on the preparation position of the string (near 0=soft obj, near 1=hard obj)
+            float decay; // amplitude damping factor for the string (only active in mode 0)
+            int levMode;
+            float brightness;
+            float curr;
+            tHermiteDelay delLF,delUF,delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
+            tTwoZero bridgeFilter, nutFilter, prepFilterU, prepFilterL;
+            tHighpass DCblockerL, DCblockerU;
+            tFeedbackLeveler fbLevU, fbLevL;
+            tExpSmooth wlSmooth, ppSmooth, prpSmooth, puSmooth;
+        } _tLivingString2;
+
+        typedef _tLivingString2* tLivingString2;
+
+        void    tLivingString2_init                  (tLivingString2* const, float freq, float pickPos, float prepPos, float pickupPos, float prepIndex,
+                                                     float brightness, float decay, float targetLev, float levSmoothFactor,
+                                                     float levStrength, int levMode, LEAF* const leaf);
+        void    tLivingString2_initToPool            (tLivingString2* const, float freq, float pickPos, float prepPos, float pickupPos, float prepIndex,
+                                                     float brightness, float decay, float targetLev, float levSmoothFactor,
+                                                     float levStrength, int levMode, tMempool* const);
+        void    tLivingString2_free                  (tLivingString2* const);
+
+        float   tLivingString2_tick                  (tLivingString2* const, float input);
+        float   tLivingString2_sample                (tLivingString2* const);
+        void    tLivingString2_setFreq               (tLivingString2* const, float freq);
+        void    tLivingString2_setWaveLength         (tLivingString2* const, float waveLength); // in samples
+        void    tLivingString2_setPickPos            (tLivingString2* const, float pickPos);
+        void    tLivingString2_setPrepPos            (tLivingString2* const, float prepPos);
+        void    tLivingString2_setPickupPos            (tLivingString2* const, float pickupPos);
+        void    tLivingString2_setPrepIndex          (tLivingString2* const, float prepIndex);
+        void    tLivingString2_setBrightness         (tLivingString2* const, float brightness);
+        void    tLivingString2_setDecay              (tLivingString2* const, float decay); // from 0 to 1, gets converted to real decay factor
+        void    tLivingString2_setTargetLev          (tLivingString2* const, float targetLev);
+        void    tLivingString2_setLevSmoothFactor    (tLivingString2* const, float levSmoothFactor);
+        void    tLivingString2_setLevStrength        (tLivingString2* const, float levStrength);
+        void    tLivingString2_setLevMode            (tLivingString2* const, int levMode);
+
+
+
+            // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
         // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     /*!

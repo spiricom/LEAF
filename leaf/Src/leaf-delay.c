@@ -368,6 +368,25 @@ void tHermiteDelay_initToPool  (tHermiteDelay* const dl, float delay, uint32_t m
     else if (delay < 0.0f)  d->delay = 0.0f;
     else                    d->delay = delay;
 
+    
+    if ((maxDelay != 0) && ((maxDelay & (maxDelay - 1)) == 0))
+    {
+        d->maxDelay = maxDelay;
+        d->bufferMask = maxDelay - 1;
+    }
+    else
+    {
+        //make the delay size into a power of 2
+        maxDelay--;
+        maxDelay |= maxDelay >> 1;
+        maxDelay |= maxDelay >> 2;
+        maxDelay |= maxDelay >> 4;
+        maxDelay |= maxDelay >> 8;
+        maxDelay |= maxDelay >> 16;
+        maxDelay++;
+        d->maxDelay = maxDelay;
+        d->bufferMask = maxDelay - 1;
+    }
     d->buff = (float*) mpool_alloc(sizeof(float) * maxDelay, m);
 
     d->gain = 1.0f;
@@ -405,19 +424,20 @@ float   tHermiteDelay_tick (tHermiteDelay* const dl, float input)
 
     d->buff[d->inPoint] = input * d->gain;
 
+    
     // Increment input pointer modulo length.
-    if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
-
-
+    d->inPoint = (d->inPoint + 1) & d->bufferMask;
+    
+    
     uint32_t idx = (uint32_t) d->outPoint;
-    d->lastOut =    LEAF_interpolate_hermite (d->buff[((idx - 1) + d->maxDelay) % d->maxDelay],
-                                              d->buff[idx],
-                                              d->buff[(idx + 1) % d->maxDelay],
-                                              d->buff[(idx + 2) % d->maxDelay],
-                                              d->alpha);
-
+    d->lastOut =    LEAF_interpolate_hermite_x (d->buff[((idx - 1) + d->maxDelay) & d->bufferMask],
+                                                d->buff[idx],
+                                                d->buff[(idx + 1) & d->bufferMask],
+                                                d->buff[(idx + 2) & d->bufferMask],
+                                                d->alpha);
+    
     // Increment output pointer modulo length
-    if ( (++d->outPoint) >= d->maxDelay )   d->outPoint = 0;
+    d->outPoint = (d->outPoint + 1) & d->bufferMask;
 
     return d->lastOut;
 }
@@ -425,86 +445,88 @@ float   tHermiteDelay_tick (tHermiteDelay* const dl, float input)
 void   tHermiteDelay_tickIn (tHermiteDelay* const dl, float input)
 {
     _tHermiteDelay* d = *dl;
-
-    d->buff[d->inPoint] = input * d->gain;
-
+    
+    d->buff[d->inPoint] = input;
+    
     // Increment input pointer modulo length.
-    if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
+    d->inPoint = (d->inPoint + 1) & d->bufferMask;
 }
 
 float   tHermiteDelay_tickOut (tHermiteDelay* const dl)
 {
     _tHermiteDelay* d = *dl;
-
+    
     uint32_t idx = (uint32_t) d->outPoint;
-
-
-
-    d->lastOut =    LEAF_interpolate_hermite (d->buff[((idx - 1) + d->maxDelay) % d->maxDelay],
-                                              d->buff[idx],
-                                              d->buff[(idx + 1) % d->maxDelay],
-                                              d->buff[(idx + 2) % d->maxDelay],
-                                              d->alpha);
-
+    
+    
+    
+    d->lastOut =    LEAF_interpolate_hermite_x (d->buff[((idx - 1) + d->maxDelay) & d->bufferMask],
+                                                d->buff[idx],
+                                                d->buff[(idx + 1) & d->bufferMask],
+                                                d->buff[(idx + 2) & d->bufferMask],
+                                                d->alpha);
+    
     // Increment output pointer modulo length
-    if ( (++d->outPoint) >= d->maxDelay )   d->outPoint = 0;
-
+    d->outPoint = (d->outPoint + 1) & d->bufferMask;
+    
     return d->lastOut;
 }
 
 void tHermiteDelay_setDelay (tHermiteDelay* const dl, float delay)
 {
     _tHermiteDelay* d = *dl;
-
-    d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
-
+    //d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
+    d->delay = delay; // not safe but faster
     float outPointer = d->inPoint - d->delay;
-
     while ( outPointer < 0 )
         outPointer += d->maxDelay; // modulo maximum length
-
+    
     d->outPoint = (uint32_t) outPointer;   // integer part
-
+    
     d->alpha = outPointer - d->outPoint; // fractional part
     d->omAlpha = 1.0f - d->alpha;
-
-    if ( d->outPoint == d->maxDelay ) d->outPoint = 0;
+    
+    d->outPoint &= d->bufferMask;
 }
 
 float tHermiteDelay_tapOut (tHermiteDelay* const dl, uint32_t tapDelay)
 {
     _tHermiteDelay* d = *dl;
-
-    int32_t tap = d->inPoint - tapDelay - 1;
-
-    // Check for wraparound.
-    while ( tap < 0 )   tap += d->maxDelay;
-
+    
+    int32_t tap = (d->inPoint - tapDelay - 1) & d->bufferMask;
+    
     return d->buff[tap];
 
+}
+
+float   tHermiteDelay_tapOutInterpolated (tHermiteDelay* const dl, uint32_t tapDelay, float alpha)
+{
+    _tHermiteDelay* d = *dl;
+    
+    int32_t idx = (d->inPoint - tapDelay - 1) & d->bufferMask;
+    
+    return    LEAF_interpolate_hermite_x (d->buff[((idx - 1) + d->maxDelay) & d->bufferMask],
+                                          d->buff[idx],
+                                          d->buff[(idx + 1) & d->bufferMask],
+                                          d->buff[(idx + 2) & d->bufferMask],
+                                          alpha);
 }
 
 void tHermiteDelay_tapIn (tHermiteDelay* const dl, float value, uint32_t tapDelay)
 {
     _tHermiteDelay* d = *dl;
-
-    int32_t tap = d->inPoint - tapDelay - 1;
-
-    // Check for wraparound.
-    while ( tap < 0 )   tap += d->maxDelay;
-
+    
+    int32_t tap = (d->inPoint - tapDelay - 1)  & d->bufferMask;
+    
     d->buff[tap] = value;
 }
 
 float tHermiteDelay_addTo (tHermiteDelay* const dl, float value, uint32_t tapDelay)
 {
     _tHermiteDelay* d = *dl;
-
-    int32_t tap = d->inPoint - tapDelay - 1;
-
-    // Check for wraparound.
-    while ( tap < 0 )   tap += d->maxDelay;
-
+    
+    int32_t tap = (d->inPoint - tapDelay - 1)  & d->bufferMask;
+    
     return (d->buff[tap] += value);
 }
 

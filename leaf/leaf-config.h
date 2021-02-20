@@ -58,7 +58,7 @@
 
 #define LEAF_USE_CMSIS 0
 
-//! Use stdlib malloc() and free() internally instead of  LEAF's normal mempool behavior for when you want to avoid being limited to and managing mempool a fixed mempool size. Usage of all object remains essentially the same.
+//! Use stdlib malloc() and free() internally instead of LEAF's normal mempool behavior for when you want to avoid being limited to and managing mempool a fixed mempool size. Usage of all object remains essentially the same.
 #define LEAF_USE_DYNAMIC_ALLOCATION 1
 
 //==============================================================================

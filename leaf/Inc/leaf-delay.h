@@ -317,6 +317,13 @@ extern "C" {
      @param position
      @return
      
+     @fn float   tHermiteDelay_tapOutInterpolated (tHermiteDelay* const dl, uint32_t tapDelay, float alpha);
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @param integer position
+     @param fractional portion of the position
+     @return
+     
      @fn void     tHermiteDelay_tapIn         (tHermiteDelay* const dl, float value, uint32_t tapDelay)
      @brief
      @param delay A pointer to the relevant tHermiteDelay.
@@ -361,15 +368,14 @@ extern "C" {
     {
         tMempool mempool;
         
-        float gain;
         float* buff;
-        
+        uint32_t bufferMask;
         float lastOut, lastIn;
         
         uint32_t inPoint, outPoint;
         
         uint32_t maxDelay;
-        
+        float gain;
         float delay;
         
         float alpha, omAlpha;
@@ -387,6 +393,7 @@ extern "C" {
     float   tHermiteDelay_tickOut       (tHermiteDelay* const dl);
     void    tHermiteDelay_setDelay      (tHermiteDelay* const dl, float delay);
     float   tHermiteDelay_tapOut        (tHermiteDelay* const dl, uint32_t tapDelay);
+    float   tHermiteDelay_tapOutInterpolated (tHermiteDelay* const dl, uint32_t tapDelay, float alpha);
     void    tHermiteDelay_tapIn         (tHermiteDelay* const dl, float value, uint32_t tapDelay);
     float   tHermiteDelay_addTo         (tHermiteDelay* const dl, float value, uint32_t tapDelay);
     float   tHermiteDelay_getDelay      (tHermiteDelay* const dl);
