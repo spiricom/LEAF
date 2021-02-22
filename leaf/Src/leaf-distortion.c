@@ -312,8 +312,8 @@ void    tOversampler_setRatio       (tOversampler* const osr, int ratio)
 {
     _tOversampler* os = *osr;
     
+    if (ratio == os->ratio) return;
     if (ratio > os->maxRatio) ratio = os->maxRatio;
-    
     if (ratio == 1) os->ratio = ratio;
     else if (ratio == 2 || ratio == 4  || ratio == 8 ||
         ratio == 16 || ratio == 32 || ratio == 64)
