@@ -318,7 +318,7 @@ void    tOversampler_setRatio       (tOversampler* const osr, int ratio)
     else if (ratio == 2 || ratio == 4  || ratio == 8 ||
         ratio == 16 || ratio == 32 || ratio == 64)
     {
-        os->ratio = os->maxRatio;
+        os->ratio = os->ratio;
         int idx = (int)(log2f(os->ratio))-1+os->offset;
         os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;

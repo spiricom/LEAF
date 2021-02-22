@@ -682,7 +682,7 @@ void    tLivingString2_initToPool    (tLivingString2* const pl, float freq, floa
     LEAF* leaf = p->mempool->leaf;
 
     p->curr=0.0f;
-    tExpSmooth_initToPool(&p->wlSmooth, leaf->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tExpSmooth_initToPool(&p->wlSmooth, leaf->sampleRate/freq, 0.1f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tLivingString2_setFreq(pl, freq);
     p->freq = freq;
     p->prepPos = prepPos;
@@ -691,7 +691,7 @@ void    tLivingString2_initToPool    (tLivingString2* const pl, float freq, floa
     tExpSmooth_initToPool(&p->puSmooth, pickupPos, 0.01f, mp); // smoother for pickup position
     tLivingString2_setPickPos(pl, pickPos);
     tLivingString2_setPrepPos(pl, prepPos);
-    p->prepIndex=prepIndex;
+    p->prepIndex = prepIndex;
     p->pickupPos = pickupPos;
     tHermiteDelay_initToPool(&p->delLF,p->waveLengthInSamples, 2400, mp);
     tHermiteDelay_initToPool(&p->delUF,p->waveLengthInSamples, 2400, mp);
@@ -745,6 +745,7 @@ void     tLivingString2_setFreq(tLivingString2* const pl, float freq)
     LEAF* leaf = p->mempool->leaf;
     if (freq<20.f) freq=20.f;
     else if (freq>10000.f) freq=10000.f;
+    freq = freq*2;
     p->freq = freq;
     p->waveLengthInSamples = (leaf->sampleRate/freq) - 1;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
@@ -754,6 +755,7 @@ void     tLivingString2_setWaveLength(tLivingString2* const pl, float waveLength
 {
     _tLivingString2* p = *pl;
     LEAF* leaf = p->mempool->leaf;
+    waveLength = waveLength * 0.5f;
     if (waveLength<4.8f) waveLength=4.8f;
     else if (waveLength>2400.f) waveLength=2400.f;
     p->waveLengthInSamples = waveLength - 1;
@@ -926,27 +928,27 @@ float   tLivingString2_tick(tLivingString2* const pl, float input)
     tHermiteDelay_setDelay(&p->delUF, upLen);
     tHermiteDelay_setDelay(&p->delUB, upLen);
 
-    /*
-    uint pickupPosInt;
+    
+    uint32_t pickupPosInt;
     float pickupOut = 0.0f;
-    if (pickupPos < 0.9f)
+    if (p->pickupPos < 0.98f)
     {
-        float fullPickupPos = (pickupPos*upLen);
-        pickupPosInt = (uint) fullPickupPos;
+        float fullPickupPos = (p->pickupPos*upLen);
+        pickupPosInt = (uint32_t) fullPickupPos;
         float pickupPosFloat = fullPickupPos - pickupPosInt;
         if (pickupPosInt == 0)
         {
             pickupPosInt = 1;
         }
         pickupOut = tHermiteDelay_tapOutInterpolated(&p->delUF, pickupPosInt, pickupPosFloat);
-        pickupOut += tHermiteDelay_tapOutInterpolated(&p->delUB, (uint) (upLen - pickupPosInt), pickupPosFloat);
+        pickupOut += tHermiteDelay_tapOutInterpolated(&p->delUB, (uint32_t) (upLen - pickupPosInt), pickupPosFloat);
         p->curr = pickupOut;
     }
     else
-    */
-    //{
+    
+    {
         p->curr = fromBridge;
-    //}
+    }
 
     //p->curr = fromBridge;
     //p->curr += fromNut;
