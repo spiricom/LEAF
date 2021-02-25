@@ -309,7 +309,8 @@ extern "C" {
     int     tPoly_getKey                (tPoly* const poly, uint8_t voice);
     int     tPoly_getVelocity           (tPoly* const poly, uint8_t voice);
     int     tPoly_isOn                  (tPoly* const poly, uint8_t voice);
-
+    void    tPoly_setSampleRate         (tPoly* const poly, float sr);
+    
     //==============================================================================
 
     /*! @}

@@ -51,6 +51,7 @@ void tCompressor_initToPool (tCompressor* const comp, tMempool* const mp)
     _tMempool* m = *mp;
     _tCompressor* c = *comp = (_tCompressor*) mpool_alloc(sizeof(_tCompressor), m);
     c->mempool = m;
+    LEAF* leaf = c->mempool->leaf;
     
     c->tauAttack = 100;
     c->tauRelease = 100;
@@ -61,6 +62,8 @@ void tCompressor_initToPool (tCompressor* const comp, tMempool* const mp)
     c->R = 0.5f; // compression Ratio
     c->M = 3.0f; // decibel Width of knee transition
     c->W = 1.0f; // decibel Make-up gain
+    
+    c->sampleRate = leaf->sampleRate;
 }
 
 void tCompressor_free (tCompressor* const comp)
@@ -73,7 +76,6 @@ void tCompressor_free (tCompressor* const comp)
 float tCompressor_tick(tCompressor* const comp, float in)
 {
     _tCompressor* c = *comp;
-    LEAF* leaf = c->mempool->leaf;
     
     float slope, overshoot;
     float alphaAtt, alphaRel;
@@ -107,8 +109,8 @@ float tCompressor_tick(tCompressor* const comp, float in)
     
     c->x_T[0] = out_db - in_db;
     
-    alphaAtt = expf(-1.0f/(0.001f * c->tauAttack * leaf->sampleRate));
-    alphaRel = expf(-1.0f/(0.001f * c->tauRelease * leaf->sampleRate));
+    alphaAtt = expf(-1.0f/(0.001f * c->tauAttack * c->sampleRate));
+    alphaRel = expf(-1.0f/(0.001f * c->tauRelease * c->sampleRate));
     
     if (c->x_T[0] > c->y_T[1])
         c->y_T[0] = alphaAtt * c->y_T[1] + (1-alphaAtt) * c->x_T[0];

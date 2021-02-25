@@ -118,7 +118,6 @@ void     tEnvelope_loop(tEnvelope* const envlp, int loop)
     env->loop = loop;
 }
 
-
 void     tEnvelope_on(tEnvelope* const envlp, float velocity)
 {
     _tEnvelope* env = *envlp;
@@ -495,7 +494,6 @@ float calcADSR3Coef(float rate, float targetRatio)
     return (rate <= 0.0f) ? 0.0f : expf(-logf((1.0f + targetRatio) / targetRatio) / rate);
 }
 
-
 void    tADSRS_init(tADSRS* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
 {
     tADSRS_initToPool(adsrenv, attack, decay, sustain, release, &leaf->mempool);
@@ -509,13 +507,16 @@ void    tADSRS_initToPool    (tADSRS* const adsrenv, float attack, float decay, 
     
     LEAF* leaf = adsr->mempool->leaf;
     
-    adsr->sampleRateInMs =  leaf->sampleRate * 0.001f;
+    adsr->sampleRate = leaf->sampleRate;
+    adsr->sampleRateInMs =  adsr->sampleRate * 0.001f;
     adsr->targetRatioA = 0.3f;
     adsr->targetRatioDR = 0.0001f;
+    adsr->attack = attack;
     adsr->attackRate = attack * adsr->sampleRateInMs;
     adsr->attackCoef = calcADSR3Coef(attack * adsr->sampleRateInMs, adsr->targetRatioA);
     adsr->attackBase = (1.0f + adsr->targetRatioA) * (1.0f - adsr->attackCoef);
 
+    adsr->decay = decay;
     adsr->decayRate = decay * adsr->sampleRateInMs;
     adsr->decayCoef = calcADSR3Coef(decay * adsr->sampleRateInMs,adsr-> targetRatioDR);
     adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
@@ -523,6 +524,7 @@ void    tADSRS_initToPool    (tADSRS* const adsrenv, float attack, float decay, 
     adsr->sustainLevel = sustain;
     adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
 
+    adsr->release = release;
     adsr->releaseRate = release * adsr->sampleRateInMs;
     adsr->releaseCoef = calcADSR3Coef(release * adsr->sampleRateInMs, adsr->targetRatioDR);
     adsr->releaseBase = -adsr->targetRatioDR * (1.0f - adsr->releaseCoef);
@@ -546,6 +548,7 @@ void     tADSRS_setAttack(tADSRS* const adsrenv, float attack)
 {
     _tADSRS* adsr = *adsrenv;
 
+    adsr->attack = attack;
     adsr->attackRate = attack * adsr->sampleRateInMs;
     adsr->attackCoef = calcADSR3Coef(adsr->attackRate, adsr->targetRatioA);
     adsr->attackBase = (1.0f + adsr->targetRatioA) * (1.0f - adsr->attackCoef);
@@ -555,6 +558,7 @@ void     tADSRS_setDecay(tADSRS* const adsrenv, float decay)
 {
     _tADSRS* adsr = *adsrenv;
 
+    adsr->decay = decay;
     adsr->decayRate = decay * adsr->sampleRateInMs;
     adsr->decayCoef = calcADSR3Coef(adsr->decayRate,adsr-> targetRatioDR);
     adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
@@ -572,6 +576,7 @@ void     tADSRS_setRelease(tADSRS* const adsrenv, float release)
 {
     _tADSRS* adsr = *adsrenv;
 
+    adsr->release = release;
     adsr->releaseRate = release * adsr->sampleRateInMs;
     adsr->releaseCoef = calcADSR3Coef(adsr->releaseRate, (float)adsr->targetRatioDR);
     adsr->releaseBase = -adsr->targetRatioDR * (1.0f - adsr->releaseCoef);
@@ -581,7 +586,6 @@ void     tADSRS_setRelease(tADSRS* const adsrenv, float release)
 void     tADSRS_setLeakFactor(tADSRS* const adsrenv, float leakFactor)
 {
     _tADSRS* adsr = *adsrenv;
-
     adsr->leakFactor = leakFactor;
 }
 
@@ -605,7 +609,6 @@ void tADSRS_off(tADSRS* const adsrenv)
 float   tADSRS_tick(tADSRS* const adsrenv)
 {
     _tADSRS* adsr = *adsrenv;
-
 
     switch (adsr->state) {
         case env_idle:
@@ -641,6 +644,19 @@ float   tADSRS_tick(tADSRS* const adsrenv)
     return adsr->output * adsr->gain;
 }
 
+void tADSRS_setSampleRate(tADSRS* const adsrenv, float sr)
+{
+    _tADSRS* adsr = *adsrenv;
+    
+    adsr->sampleRate = sr;
+    adsr->sampleRateInMs =  adsr->sampleRate * 0.001f;
+    
+    tADSRS_setAttack(adsrenv, adsr->attack);
+    tADSRS_setDecay(adsrenv, adsr->decay);
+    tADSRS_setRelease(adsrenv, adsr->release);
+}
+
+//================================================================================
 
 /* ADSR 4 */ // new version of our original table-based ADSR but with the table passed in by the user
 // use this if the size of the big ADSR tables is too much.
@@ -663,7 +679,8 @@ void    tADSRT_initToPool    (tADSRT* const adsrenv, float attack, float decay, 
     adsr->buff_size = bufferSize;
     adsr->buff_sizeMinusOne = bufferSize - 1;
 
-    adsr->bufferSizeDividedBySampleRateInMs = bufferSize / (leaf->sampleRate * 0.001f);
+    adsr->sampleRate = leaf->sampleRate;
+    adsr->bufferSizeDividedBySampleRateInMs = adsr->buff_size / (adsr->sampleRate * 0.001f);
 
     if (attack < 0.0f)
         attack = 0.0f;
@@ -685,6 +702,9 @@ void    tADSRT_initToPool    (tADSRT* const adsrenv, float attack, float decay, 
 
     adsr->sustain = sustain;
 
+    adsr->attack = attack;
+    adsr->decay = decay;
+    adsr->release = release;
     adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / attack;
     adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / decay;
     adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / release;
@@ -707,7 +727,7 @@ void     tADSRT_setAttack(tADSRT* const adsrenv, float attack)
     {
         attack = 0.0f;
     }
-
+    adsr->attack = attack;
     adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / attack;
 }
 
@@ -719,6 +739,7 @@ void     tADSRT_setDecay(tADSRT* const adsrenv, float decay)
     {
         decay = 0.0f;
     }
+    adsr->decay = decay;
     adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / decay;
 }
 
@@ -739,6 +760,7 @@ void     tADSRT_setRelease(tADSRT* const adsrenv, float release)
     {
         release = 0.0f;
     }
+    adsr->release = release;
     adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / release;
 }
 
@@ -988,7 +1010,17 @@ float   tADSRT_tickNoInterp(tADSRT* const adsrenv)
     return adsr->next;
 }
 
-
+void    tADSRT_setSampleRate (tADSRT* const adsrenv, float sr)
+{
+    _tADSRT* adsr = *adsrenv;
+    
+    adsr->sampleRate = sr;
+    adsr->bufferSizeDividedBySampleRateInMs = adsr->buff_size / (adsr->sampleRate * 0.001f);
+    adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / adsr->attack;
+    adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / adsr->decay;
+    adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / adsr->release;
+    adsr->rampInc = adsr->bufferSizeDividedBySampleRateInMs / 8.0f;
+}
 
 /////-----------------
 /* Ramp */
@@ -1005,7 +1037,8 @@ void    tRamp_initToPool    (tRamp* const r, float time, int samples_per_tick, t
     
     LEAF* leaf = ramp->mempool->leaf;
     
-    ramp->inv_sr_ms = 1.0f/(leaf->sampleRate*0.001f);
+    ramp->sampleRate = leaf->sampleRate;
+    ramp->inv_sr_ms = 1.0f/(ramp->sampleRate*0.001f);
     ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
     ramp->curr = 0.0f;
     ramp->dest = 0.0f;
@@ -1026,7 +1059,6 @@ void    tRamp_initToPool    (tRamp* const r, float time, int samples_per_tick, t
 void    tRamp_free (tRamp* const r)
 {
     _tRamp* ramp = *r;
-    
     mpool_free((char*)ramp, ramp->mempool);
 }
 
@@ -1082,17 +1114,17 @@ float   tRamp_sample(tRamp* const ramp)
     return r->curr;
 }
 
-void    tRampSampleRateChanged(tRamp* const ramp)
+void    tRamp_setSampleRate(tRamp* const ramp, float sr)
 {
     _tRamp* r = *ramp;
-    LEAF* leaf = r->mempool->leaf;
     
-    r->inv_sr_ms = 1.0f / (leaf->sampleRate * 0.001f);
+    r->sampleRate = sr;
+    r->inv_sr_ms = 1.0f / (r->sampleRate * 0.001f);
     r->factor = (1.0f / r->time) * r->inv_sr_ms * (float)r->samples_per_tick;
     r->inc = (r->dest - r->curr) * r->factor;
 }
 
-
+//===========================================================================================
 
 /* RampUpDown */
 void    tRampUpDown_init(tRampUpDown* const r, float upTime, float downTime, int samples_per_tick, LEAF* const leaf)
@@ -1108,7 +1140,8 @@ void    tRampUpDown_initToPool(tRampUpDown* const r, float upTime, float downTim
     
     LEAF* leaf = ramp->mempool->leaf;
 
-    ramp->inv_sr_ms = 1.0f/(leaf->sampleRate*0.001f);
+    ramp->sampleRate = leaf->sampleRate;
+    ramp->inv_sr_ms = 1.0f/(ramp->sampleRate*0.001f);
     ramp->minimum_time = ramp->inv_sr_ms * samples_per_tick;
     ramp->curr = 0.0f;
     ramp->dest = 0.0f;
@@ -1139,7 +1172,6 @@ void    tRampUpDown_initToPool(tRampUpDown* const r, float upTime, float downTim
 void    tRampUpDown_free  (tRampUpDown* const r)
 {
     _tRampUpDown* ramp = *r;
-
     mpool_free((char*)ramp, ramp->mempool);
 }
 
@@ -1258,7 +1290,6 @@ void    tExpSmooth_initToPool   (tExpSmooth* const expsmooth, float val, float f
 void    tExpSmooth_free (tExpSmooth* const expsmooth)
 {
     _tExpSmooth* smooth = *expsmooth;
-    
     mpool_free((char*)smooth, smooth->mempool);
 }
 
@@ -1340,7 +1371,6 @@ void    tSlide_initToPool    (tSlide* const sl, float upSlide, float downSlide, 
 void    tSlide_free  (tSlide* const sl)
 {
     _tSlide* s = *sl;
-
     mpool_free((char*)s, s->mempool);
 }
 

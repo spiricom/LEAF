@@ -18,14 +18,12 @@
 
 #endif
 
-void LEAF_init(LEAF* const leaf, float sr, int blocksize, char* memory, size_t memorysize, float(*random)(void))
+void LEAF_init(LEAF* const leaf, float sr, char* memory, size_t memorysize, float(*random)(void))
 {
     leaf->_internal_mempool.leaf = leaf;
     leaf_pool_init(leaf, memory, memorysize);
     
     leaf->sampleRate = sr;
-
-    leaf->blockSize = blocksize;
     
     leaf->invSampleRate = 1.0f/sr;
     
@@ -45,13 +43,11 @@ void LEAF_init(LEAF* const leaf, float sr, int blocksize, char* memory, size_t m
     leaf->freeCount = 0;
 }
 
-
-#define LEAFSampleRateChanged(THIS) leaf.THIS.sampleRateChanged(&leaf.THIS)
-
 void LEAF_setSampleRate(LEAF* const leaf, float sampleRate)
 {
     leaf->sampleRate = sampleRate;
     leaf->invSampleRate = 1.0f/sampleRate;
+    leaf->twoPiTimesInvSampleRate = leaf->invSampleRate * TWO_PI;
 }
 
 float LEAF_getSampleRate(LEAF* const leaf)

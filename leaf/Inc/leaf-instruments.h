@@ -115,6 +115,7 @@ extern "C" {
     void    t808Cowbell_setFreq         (t808Cowbell* const, float freq);
     void    t808Cowbell_setOscMix       (t808Cowbell* const, float oscMix);
     void    t808Cowbell_setStick        (t808Cowbell* const, int useStick);
+    void    t808Cowbell_setSampleRate   (t808Cowbell* const, float sr);
     
     //==============================================================================
     
@@ -227,6 +228,7 @@ extern "C" {
     void    t808Hihat_setOscFreq            (t808Hihat* const, float freq);
     void    t808Hihat_setStretch            (t808Hihat* const hihat, float stretch);
     void    t808Hihat_setFM                 (t808Hihat* const hihat, float FM_amount);
+    void    t808Hihat_setSampleRate         (t808Hihat* const, float sr);
     
     //==============================================================================
     
@@ -333,6 +335,7 @@ extern "C" {
     void    t808Snare_setToneNoiseMix       (t808Snare* const, float toneNoiseMix);
     void    t808Snare_setNoiseFilterFreq    (t808Snare* const, float noiseFilterFreq);
     void    t808Snare_setNoiseFilterQ       (t808Snare* const, float noiseFilterQ);
+    void    t808Snare_setSampleRate         (t808Snare* const, float sr);
     
     //==============================================================================
     
@@ -437,6 +440,7 @@ extern "C" {
     void    t808Kick_setToneNoiseMix    (t808Kick* const, float toneNoiseMix);
     void    t808Kick_setNoiseFilterFreq (t808Kick* const, float noiseFilterFreq);
     void    t808Kick_setNoiseFilterQ    (t808Kick* const, float noiseFilterQ);
+    void    t808kick_setSampleRate      (t808Kick* const, float sr);
     
     //==============================================================================
     

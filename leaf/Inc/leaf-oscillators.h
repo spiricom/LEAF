@@ -63,11 +63,11 @@ extern "C" {
     
     typedef struct _tCycle
     {
-        
         tMempool mempool;
         // Underlying phasor
         float phase;
         float inc,freq;
+        float invSampleRate;
     } _tCycle;
     
     typedef _tCycle* tCycle;
@@ -78,6 +78,7 @@ extern "C" {
     
     float   tCycle_tick         (tCycle* const osc);
     void    tCycle_setFreq      (tCycle* const osc, float freq);
+    void    tCycle_setSampleRate(tCycle* const osc, float sr);
     
     //==============================================================================
     
@@ -122,6 +123,7 @@ extern "C" {
         float inc,freq;
         int oct;
         float w;
+        float invSampleRate;
     } _tTriangle;
     
     typedef _tTriangle* tTriangle;
@@ -132,7 +134,7 @@ extern "C" {
     
     float   tTriangle_tick          (tTriangle* const osc);
     void    tTriangle_setFreq       (tTriangle* const osc, float freq);
-
+    void    tTriangle_setSampleRate (tTriangle* const osc, float sr);
     
     //==============================================================================
     
@@ -177,6 +179,7 @@ extern "C" {
         float inc,freq;
         int oct;
         float w;
+        float invSampleRate;
     } _tSquare;
     
     typedef _tSquare* tSquare;
@@ -187,6 +190,7 @@ extern "C" {
 
     float   tSquare_tick        (tSquare* const osc);
     void    tSquare_setFreq     (tSquare* const osc, float freq);
+    void    tSquare_setSampleRate (tSquare* const osc, float sr);
     
     /*!￼￼￼
      @} */
@@ -234,6 +238,7 @@ extern "C" {
         float inc,freq;
         int oct;
         float w;
+        float invSampleRate;
     } _tSawtooth;
     
     typedef _tSawtooth* tSawtooth;
@@ -244,6 +249,7 @@ extern "C" {
 
     float   tSawtooth_tick          (tSawtooth* const osc);
     void    tSawtooth_setFreq       (tSawtooth* const osc, float freq);
+    void    tSawtooth_setSampleRate (tSawtooth* const osc, float sr);
     
     //==============================================================================
     
@@ -288,6 +294,7 @@ extern "C" {
         float inc,freq;
         float skew;
         float lastOut;
+        float invSampleRate;
     } _tPBTriangle;
     
     typedef _tPBTriangle* tPBTriangle;
@@ -299,6 +306,7 @@ extern "C" {
     float   tPBTriangle_tick          (tPBTriangle* const osc);
     void    tPBTriangle_setFreq       (tPBTriangle* const osc, float freq);
     void    tPBTriangle_setSkew       (tPBTriangle* const osc, float skew);
+    void    tPBTriangle_setSampleRate (tPBTriangle* const osc, float sr);
     
     //==============================================================================
     
@@ -342,6 +350,7 @@ extern "C" {
         float phase;
         float inc,freq;
         float width;
+        float invSampleRate;
     } _tPBPulse;
     
     typedef _tPBPulse* tPBPulse;
@@ -353,6 +362,7 @@ extern "C" {
     float   tPBPulse_tick        (tPBPulse* const osc);
     void    tPBPulse_setFreq     (tPBPulse* const osc, float freq);
     void    tPBPulse_setWidth    (tPBPulse* const osc, float width);
+    void    tPBPulse_setSampleRate (tPBPulse* const osc, float sr);
     
     //==============================================================================
     
@@ -391,6 +401,7 @@ extern "C" {
         tMempool mempool;
         float phase;
         float inc,freq;
+        float invSampleRate;
     } _tPBSaw;
     
     typedef _tPBSaw* tPBSaw;
@@ -401,6 +412,7 @@ extern "C" {
     
     float   tPBSaw_tick          (tPBSaw* const osc);
     void    tPBSaw_setFreq       (tPBSaw* const osc, float freq);
+    void    tPBSaw_setSampleRate (tPBSaw* const osc, float sr);
     
     //==============================================================================
     
@@ -441,6 +453,7 @@ extern "C" {
         float phase;
         float inc,freq;
         uint8_t phaseDidReset;
+        float invSampleRate;
     } _tPhasor;
     
     typedef _tPhasor* tPhasor;
@@ -451,6 +464,7 @@ extern "C" {
     
     float   tPhasor_tick        (tPhasor* const osc);
     void    tPhasor_setFreq     (tPhasor* const osc, float freq);
+    void    tPhasor_setSampleRate (tPhasor* const osc, float sr);
     
     //==============================================================================
     
@@ -643,9 +657,7 @@ extern "C" {
     void    tNeuron_setV2       (tNeuron* const neuron, float V2);
     void    tNeuron_setV3       (tNeuron* const neuron, float V3);
     void    tNeuron_setTimeStep (tNeuron* const neuron, float timestep);
-    
 
-    
     //==============================================================================
     
     
@@ -708,6 +720,7 @@ extern "C" {
         float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
         int     _j, _k;
         bool    _init;
+        float invSampleRate;
     } _tMBPulse;
     
     typedef _tMBPulse* tMBPulse;
@@ -721,6 +734,7 @@ extern "C" {
     void tMBPulse_setWidth(tMBPulse* const osc, float w);
     float tMBPulse_sync(tMBPulse* const osc, float sync);
     void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft);
+    void    tMBPulse_setSampleRate (tMBPulse* const osc, float sr);
     
     /*!
      @defgroup tmbtriangle tMBTriangle
@@ -779,6 +793,7 @@ extern "C" {
         float   _f [FILLEN + LONGEST_DD_PULSE_LENGTH];
         int     _j, _k;
         bool    _init;
+        float invSampleRate;
     } _tMBTriangle;
     
     typedef _tMBTriangle* tMBTriangle;
@@ -792,6 +807,7 @@ extern "C" {
     void tMBTriangle_setWidth(tMBTriangle* const osc, float w);
     float tMBTriangle_sync(tMBTriangle* const osc, float sync);
     void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft);
+    void   tMBTriangle_setSampleRate (tMBTriangle* const osc, float sr);
     
     
     /*!
@@ -849,6 +865,7 @@ extern "C" {
         float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
         int     _j;
         bool    _init;
+        float invSampleRate;
     } _tMBSaw;
     
     typedef _tMBSaw* tMBSaw;
@@ -861,6 +878,7 @@ extern "C" {
     void tMBSaw_setFreq(tMBSaw* const osc, float f);
     float tMBSaw_sync(tMBSaw* const osc, float sync);
     void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft);
+    void    tMBSaw_setSampleRate (tMBSaw* const osc, float sr);
     
     //==============================================================================
     
@@ -908,6 +926,7 @@ extern "C" {
         int size;
         float inc, freq;
         float phase;
+        float invSampleRate;
     } _tTable;
     
     typedef _tTable* tTable;
@@ -918,6 +937,7 @@ extern "C" {
     
     float   tTable_tick(tTable* const osc);
     void    tTable_setFreq(tTable* const osc, float freq);
+    void    tTable_setSampleRate (tTable* const osc, float sr);
     
     //==============================================================================
     
@@ -953,11 +973,14 @@ extern "C" {
     {
         tMempool mempool;
         
+        float* baseTable;
         float** tables;
         int size;
         int numTables;
+        float maxFreq;
         float baseFreq, invBaseFreq;
         tButterworth bl;
+        float sampleRate;
     } _tWaveTable;
     
     typedef _tWaveTable* tWaveTable;
@@ -967,6 +990,7 @@ extern "C" {
     void    tWaveTable_initToPool(tWaveTable* const osc, float* table, int size,
                                   float maxFreq, tMempool* const mempool);
     void    tWaveTable_free(tWaveTable* const osc);
+    void    tWaveTable_setSampleRate (tWaveTable* const osc, float sr);
    
     //==============================================================================
     
@@ -995,6 +1019,7 @@ extern "C" {
         float inc, freq;
         float phase;
         float phaseOffset;
+        float invSampleRate;
         
         int oct;
         float w;
@@ -1011,6 +1036,7 @@ extern "C" {
     void    tWaveOsc_setFreq(tWaveOsc* const osc, float freq);
     void    tWaveOsc_setAntiAliasing(tWaveOsc* const osc, float aa);
     void    tWaveOsc_setPhaseOffset(tWaveOsc* const osc, float phase);
+    void    tWaveOsc_setSampleRate (tWaveOsc* const osc, float sr);
     
     //==============================================================================
     
@@ -1087,6 +1113,7 @@ extern "C" {
     void    tWaveSynth_setIndexGain(tWaveSynth* const osc, int i, float gain);
     void    tWaveSynth_setIndexPhase(tWaveSynth* const osc, int i, float phase);
 //    void    tWaveSynth_setIndexTable(tWaveSynth* const osc, int i, float* table, int size);
+    void    tWaveSynth_setSampleRate (tWaveSynth* const osc, float sr);
 
     //==============================================================================
     
@@ -1122,13 +1149,16 @@ extern "C" {
     {
         tMempool mempool;
         
+        float* baseTable;
         float** tables;
         int numTables;
         int* sizes;
+        float maxFreq;
         float baseFreq, invBaseFreq;
         tButterworth bl;
         float dsBuffer[2];
         tOversampler ds;
+        float sampleRate;
     } _tWaveTableS;
     
     typedef _tWaveTableS* tWaveTableS;
@@ -1136,6 +1166,7 @@ extern "C" {
     void    tWaveTableS_init(tWaveTableS* const osc, float* table, int size, float maxFreq, LEAF* const leaf);
     void    tWaveTableS_initToPool(tWaveTableS* const osc, float* table, int size, float maxFreq, tMempool* const mempool);
     void    tWaveTableS_free(tWaveTableS* const osc);
+    void    tWaveTableS_setSampleRate (tWaveTableS* const osc, float sr);
     
     /*!
      @defgroup twaveoscs tWaveOscS
@@ -1182,6 +1213,7 @@ extern "C" {
         float inc, freq;
         float phase;
         float phaseOffset;
+        float invSampleRate;
         int oct;
         float w;
         float aa;
@@ -1197,6 +1229,7 @@ extern "C" {
     void    tWaveOscS_setFreq(tWaveOscS* const osc, float freq);
     void    tWaveOscS_setAntiAliasing(tWaveOscS* const osc, float aa);
     void    tWaveOscS_setPhaseOffset(tWaveOscS* const osc, float phase);
+    void    tWaveOscS_setSampleRate (tWaveOscS* const osc, float sr);
     
     //==============================================================================
     
@@ -1273,6 +1306,7 @@ extern "C" {
     void    tWaveSynthS_setIndexGain(tWaveSynthS* const osc, int i, float gain);
     void    tWaveSynthS_setIndexPhase(tWaveSynthS* const osc, int i, float phase);
 //    void    tWaveSynthS_setIndexTable(tWaveSynthS* const osc, int i, float* table, int size);
+    void    tWaveSynthS_setSampleRate (tWaveSynthS* const osc, float sr);
     
 #ifdef __cplusplus
 }

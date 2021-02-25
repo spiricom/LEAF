@@ -69,6 +69,8 @@ extern "C" {
         
         int isActive;
         
+        float sampleRate;
+        
     } _tCompressor;
     
     typedef _tCompressor* tCompressor;

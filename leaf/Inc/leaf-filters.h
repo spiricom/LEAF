@@ -143,10 +143,12 @@ extern "C" {
     {
         
         tMempool mempool;
+        float freq;
         float gain;
         float a0,a1;
         float b0,b1;
         float lastIn, lastOut;
+        float twoPiTimesInvSampleRate;
     } _tOnePole;
     
     typedef _tOnePole* tOnePole;
@@ -162,6 +164,7 @@ extern "C" {
     void    tOnePole_setFreq        (tOnePole* const, float freq);
     void    tOnePole_setCoefficients(tOnePole* const, float b0, float a1);
     void    tOnePole_setGain        (tOnePole* const, float gain);
+    void    tOnePole_setSampleRate  (tOnePole* const, float sr);
     
     //==============================================================================
     
@@ -228,6 +231,9 @@ extern "C" {
         int normalize;
         
         float lastOut[2];
+        
+        float sampleRate;
+        float twoPiTimesInvSampleRate;
     } _tTwoPole;
     
     typedef _tTwoPole* tTwoPole;
@@ -243,6 +249,7 @@ extern "C" {
     void    tTwoPole_setResonance   (tTwoPole* const, float freq, float radius, int normalize);
     void    tTwoPole_setCoefficients(tTwoPole* const, float b0, float a1, float a2);
     void    tTwoPole_setGain        (tTwoPole* const, float gain);
+    void    tTwoPole_setSampleRate  (tTwoPole* const, float sr);
     
     //==============================================================================
     
@@ -298,11 +305,11 @@ extern "C" {
     
     typedef struct _tOneZero
     {
-        
         tMempool mempool;
         float gain;
         float b0,b1;
         float lastIn, lastOut, frequency;
+        float invSampleRate;
     } _tOneZero;
     
     typedef _tOneZero* tOneZero;
@@ -317,7 +324,8 @@ extern "C" {
     void    tOneZero_setZero        (tOneZero* const, float theZero);
     void    tOneZero_setCoefficients(tOneZero* const, float b0, float b1);
     void    tOneZero_setGain        (tOneZero* const, float gain);
-    float   tOneZero_getPhaseDelay  (tOneZero *f, float frequency);
+    float   tOneZero_getPhaseDelay  (tOneZero* const, float frequency);
+    void    tOneZero_setSampleRate  (tOneZero* const, float sr);
     
     //==============================================================================
     
@@ -374,15 +382,13 @@ extern "C" {
 
     typedef struct _tTwoZero
     {
-        
         tMempool mempool;
         
         float gain;
         float b0, b1, b2;
-        
         float frequency, radius;
-        
         float lastIn[2];
+        float twoPiTimesInvSampleRate;
     } _tTwoZero;
     
     typedef _tTwoZero* tTwoZero;
@@ -398,6 +404,7 @@ extern "C" {
     void    tTwoZero_setNotch       (tTwoZero* const, float frequency, float radius);
     void    tTwoZero_setCoefficients(tTwoZero* const, float b0, float b1, float b2);
     void    tTwoZero_setGain        (tTwoZero* const, float gain);
+    void    tTwoZero_setSampleRate  (tTwoZero* const, float sr);
     
     //==============================================================================
     
@@ -552,7 +559,6 @@ extern "C" {
     
     typedef struct _tBiQuad
     {
-        
         tMempool mempool;
         
         float gain;
@@ -564,6 +570,9 @@ extern "C" {
         
         float frequency, radius;
         int normalize;
+        
+        float sampleRate;
+        float twoPiTimesInvSampleRate;
     } _tBiQuad;
     
     typedef _tBiQuad* tBiQuad;
@@ -582,6 +591,7 @@ extern "C" {
     void    tBiQuad_setResonance   (tBiQuad* const, float freq, float radius, int normalize);
     void    tBiQuad_setCoefficients(tBiQuad* const, float b0, float b1, float b2, float a1, float a2);
     void    tBiQuad_setGain        (tBiQuad* const, float gain);
+    void    tBiQuad_setSampleRate  (tBiQuad* const, float sr);
     
     //==============================================================================
     
@@ -636,12 +646,13 @@ extern "C" {
     
     typedef struct _tSVF
     {
-        
         tMempool mempool;
         SVFType type;
         float cutoff, Q;
         float ic1eq,ic2eq;
         float g,k,a1,a2,a3,cH,cB,cL,cBK;
+        float sampleRate;
+        float invSampleRate;
     } _tSVF;
     
     typedef _tSVF* tSVF;
@@ -654,6 +665,7 @@ extern "C" {
     void    tSVF_setFreq        (tSVF* const, float freq);
     void    tSVF_setQ           (tSVF* const, float Q);
     void    tSVF_setFreqAndQ    (tSVF* const svff, float freq, float Q);
+    void    tSVF_setSampleRate  (tSVF* const svff, float sr);
     
     //==============================================================================
     
@@ -749,10 +761,10 @@ extern "C" {
     
     typedef struct _tHighpass
     {
-        
         tMempool mempool;
         float xs, ys, R;
         float frequency;
+        float twoPiTimesInvSampleRate;
     } _tHighpass;
     
     typedef _tHighpass* tHighpass;
@@ -764,6 +776,7 @@ extern "C" {
     float   tHighpass_tick          (tHighpass* const, float x);
     void    tHighpass_setFreq       (tHighpass* const, float freq);
     float   tHighpass_getFreq       (tHighpass* const);
+    void    tHighpass_setSampleRate (tHighpass* const, float sr);
     
     //==============================================================================
     
@@ -835,6 +848,7 @@ extern "C" {
     void    tButterworth_setF1          (tButterworth* const, float in);
     void    tButterworth_setF2          (tButterworth* const, float in);
     void    tButterworth_setFreqs       (tButterworth* const, float f1, float f2);
+    void    tButterworth_setSampleRate  (tButterworth* const, float sr);
     
     //==============================================================================
     
@@ -952,10 +966,6 @@ extern "C" {
      @brief Free a tVZFilter from its mempool.
      @param filter A pointer to the tVZFilter to free.
      
-     @fn void    tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate)
-     @brief
-     @param filter A pointer to the relevant tVZFilter.
-     
      @fn float   tVZFilter_tick               (tVZFilter* const, float input)
      @brief
      @param filter A pointer to the relevant tVZFilter.
@@ -991,6 +1001,10 @@ extern "C" {
      @fn float   tVZFilter_BandwidthToR        (tVZFilter* const vf, float B)
      @brief
      @param filter A pointer to the relevant tVZFilter.
+     
+     @fn void    tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate)
+     @brief
+     @param filter A pointer to the relevant tVZFilter.
      ￼￼￼
      @} */
     
@@ -1012,7 +1026,6 @@ extern "C" {
     
     typedef struct _tVZFilter
     {
-        
         tMempool mempool;
         
         VZFilterType type;
@@ -1032,8 +1045,8 @@ extern "C" {
         float B;     // bandwidth (in octaves)
         float m;     // morph parameter (0...1)
         
-        float sr;    //local sampling rate of filter (may be different from leaf sr if oversampled)
-        float inv_sr;
+        float sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+        float invSampleRate;
     } _tVZFilter;
     
     typedef _tVZFilter* tVZFilter;
@@ -1094,8 +1107,8 @@ extern "C" {
     //diode ladder filter
     typedef struct _tDiodeFilter
     {
-        
         tMempool mempool;
+        float cutoff;
         float f;
         float r;
         float Vt;
@@ -1106,6 +1119,7 @@ extern "C" {
         float g1inv;
         float g2inv;
         float s0, s1, s2, s3;
+        float invSampleRate;
     } _tDiodeFilter;
     
     typedef _tDiodeFilter* tDiodeFilter;
@@ -1117,7 +1131,7 @@ extern "C" {
     float   tDiodeFilter_tick               (tDiodeFilter* const, float input);
     void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff);
     void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance);
-    
+    void    tDiodeFilter_setSampleRate(tDiodeFilter* const vf, float sr);
     
 #ifdef __cplusplus
 }

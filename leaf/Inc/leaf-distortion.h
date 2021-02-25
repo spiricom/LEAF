@@ -61,7 +61,6 @@ extern "C" {
     
     typedef struct _tSampleReducer
     {
-        
         tMempool mempool;
         float invRatio;
         float hold;
@@ -124,9 +123,9 @@ extern "C" {
     
     typedef struct _tOversampler
     {
-        
         tMempool mempool;
         int maxRatio;
+        int allowHighQuality;
         int ratio;
         int offset;
         float* pCoeffs;
@@ -143,11 +142,12 @@ extern "C" {
     void    tOversampler_free           (tOversampler* const);
     
     void    tOversampler_upsample       (tOversampler* const, float input, float* output);
-    float   tOversampler_downsample     (tOversampler* const os, float* input);
+    float   tOversampler_downsample     (tOversampler* const, float* input);
     float   tOversampler_tick           (tOversampler* const, float input, float* oversample,
                                          float (*effectTick)(float));
     void    tOversampler_setRatio       (tOversampler* const, int ratio);
-    int     tOversampler_getLatency     (tOversampler* const os);
+    void    tOversampler_setQuality     (tOversampler* const, int quality);
+    int     tOversampler_getLatency     (tOversampler* const);
     
     //==============================================================================
     

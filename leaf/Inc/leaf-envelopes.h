@@ -345,9 +345,11 @@ extern "C" {
         const float *exp_buff;
         uint32_t buff_size;
         uint32_t buff_sizeMinusOne;
+        float sampleRate;
         float bufferSizeDividedBySampleRateInMs;
         float next;
         
+        float attack, decay, release;
         float attackInc, decayInc, releaseInc, rampInc;
         
         uint32_t whichStage;
@@ -374,6 +376,7 @@ extern "C" {
     void    tADSRT_setLeakFactor (tADSRT* const, float leakFactor);
     void    tADSRT_on            (tADSRT* const, float velocity);
     void    tADSRT_off           (tADSRT* const);
+    void    tADSRT_setSampleRate (tADSRT* const, float sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -444,9 +447,13 @@ extern "C" {
     {
         
         tMempool mempool;
+        float sampleRate;
         float sampleRateInMs;
         int state;
         float output;
+        float attack;
+        float decay;
+        float release;
         float attackRate;
         float decayRate;
         float releaseRate;
@@ -481,6 +488,7 @@ extern "C" {
     void    tADSRS_setLeakFactor (tADSRS* const, float leakFactor);
     void    tADSRS_on            (tADSRS* const, float velocity);
     void    tADSRS_off           (tADSRS* const);
+    void    tADSRS_setSampleRate (tADSRS* const, float sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -528,9 +536,9 @@ extern "C" {
     
     typedef struct _tRamp
     {
-        
         tMempool mempool;
         float inc;
+        float sampleRate;
         float inv_sr_ms;
         float minimum_time;
         float curr,dest;
@@ -550,6 +558,7 @@ extern "C" {
     void    tRamp_setTime       (tRamp* const, float time);
     void    tRamp_setDest       (tRamp* const, float dest);
     void    tRamp_setVal        (tRamp* const, float val);
+    void    tRamp_setSampleRate (tRamp* const, float sr);
     
     /*!
      @defgroup trampupdown tRampUpDown
@@ -599,10 +608,10 @@ extern "C" {
     
     typedef struct _tRampUpDown
     {
-        
         tMempool mempool;
         float upInc;
         float downInc;
+        float sampleRate;
         float inv_sr_ms;
         float minimum_time;
         float curr,dest;
@@ -623,8 +632,7 @@ extern "C" {
     void    tRampUpDown_setDownTime       (tRampUpDown* const, float downTime);
     void    tRampUpDown_setDest       (tRampUpDown* const, float dest);
     void    tRampUpDown_setVal        (tRampUpDown* const, float val);
-    
-    
+    void    tRampUpDown_setSampleRate (tRampUpDown* const, float sr);
     
     /*!
      @defgroup tslide tSlide
@@ -670,7 +678,6 @@ extern "C" {
     
     typedef struct _tSlide
     {
-        
         tMempool mempool;
         float prevOut;
         float currentOut;

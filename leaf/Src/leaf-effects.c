@@ -42,6 +42,7 @@ void tTalkbox_initToPool (tTalkbox* const voc, int bufsize, tMempool* const mp)
     _tMempool* m = *mp;
     _tTalkbox* v = *voc = (_tTalkbox*) mpool_alloc(sizeof(_tTalkbox), m);
     v->mempool = m;
+    LEAF* leaf = v->mempool->leaf;
     
     v->param[0] = 0.5f;  //wet
     v->param[1] = 0.0f;  //dry
@@ -62,6 +63,8 @@ void tTalkbox_initToPool (tTalkbox* const voc, int bufsize, tMempool* const mp)
     v->Rt = (double*) mpool_alloc(sizeof(double) * v->bufsize, m);
 
     v->k = (float*) mpool_alloc(sizeof(float) * ORD_MAX, m);
+    
+    v->sampleRate = leaf->sampleRate;
 
     tTalkbox_update(voc);
     tTalkbox_suspend(voc);
@@ -86,9 +89,8 @@ void tTalkbox_free (tTalkbox* const voc)
 void tTalkbox_update(tTalkbox* const voc) ///update internal parameters...
 {
     _tTalkbox* v = *voc;
-    LEAF* leaf = v->mempool->leaf;
     
-    float fs = leaf->sampleRate;
+    float fs = v->sampleRate;
 //    if(fs <  8000.0f) fs =  8000.0f;
 //    if(fs > 96000.0f) fs = 96000.0f;
     
@@ -320,10 +322,9 @@ void tTalkbox_lpc(float *buf, float *car, double* dl, double* Rt, int32_t n, int
 void tTalkbox_setQuality(tTalkbox* const voc, float quality)
 {
     _tTalkbox* v = *voc;
-    LEAF* leaf = v->mempool->leaf;
     
     v->param[3] = quality;
-    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf->sampleRate);
+    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * v->sampleRate);
     if (v->O >= ORD_MAX)
     {
         v->O = ORD_MAX-1;
@@ -351,7 +352,12 @@ void tTalkbox_setFreeze(tTalkbox* const voc, float freeze)
     v->freeze = freeze;
 }
 
-
+void tTalkbox_setSampleRate(tTalkbox* const voc, float sr)
+{
+    _tTalkbox* v = *voc;
+    v->sampleRate = sr;
+    tTalkbox_update(voc);
+}
 
 ////
 
@@ -374,6 +380,7 @@ void tTalkboxFloat_initToPool (tTalkboxFloat* const voc, int bufsize, tMempool* 
     _tMempool* m = *mp;
     _tTalkboxFloat* v = *voc = (_tTalkboxFloat*) mpool_alloc(sizeof(_tTalkboxFloat), m);
     v->mempool = m;
+    LEAF* leaf = v->mempool->leaf;
 
     v->param[0] = 0.5f;  //wet
     v->param[1] = 0.0f;  //dry
@@ -394,6 +401,8 @@ void tTalkboxFloat_initToPool (tTalkboxFloat* const voc, int bufsize, tMempool* 
     v->Rt = (float*) mpool_alloc(sizeof(float) * v->bufsize, m);
 
     v->k = (float*) mpool_alloc(sizeof(float) * ORD_MAX, m);
+    
+    v->sampleRate = leaf->sampleRate;
 
     tTalkboxFloat_update(voc);
     tTalkboxFloat_suspend(voc);
@@ -418,9 +427,8 @@ void tTalkboxFloat_free (tTalkboxFloat* const voc)
 void tTalkboxFloat_update(tTalkboxFloat* const voc) ///update internal parameters...
 {
     _tTalkboxFloat* v = *voc;
-    LEAF* leaf = v->mempool->leaf;
     
-    float fs = leaf->sampleRate;
+    float fs = v->sampleRate;
 //    if(fs <  8000.0f) fs =  8000.0f;
 //    if(fs > 96000.0f) fs = 96000.0f;
 
@@ -656,10 +664,9 @@ void tTalkboxFloat_lpc(float *buf, float *car, float* dl, float* Rt, int32_t n, 
 void tTalkboxFloat_setQuality(tTalkboxFloat* const voc, float quality)
 {
     _tTalkboxFloat* v = *voc;
-    LEAF* leaf = v->mempool->leaf;
     
     v->param[3] = quality;
-    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * leaf->sampleRate);
+    v->O = (int32_t)((0.0001f + 0.0004f * v->param[3]) * v->sampleRate);
     if (v->O >= ORD_MAX)
     {
         v->O = ORD_MAX-1;
@@ -687,6 +694,12 @@ void tTalkboxFloat_setFreeze(tTalkboxFloat* const voc, int freeze)
     v->freeze = freeze;
 }
 
+void tTalkboxFloat_setSampleRate(tTalkboxFloat* const voc, float sr)
+{
+    _tTalkboxFloat* v = *voc;
+    v->sampleRate = sr;
+    tTalkboxFloat_update(voc);
+}
 
 //============================================================================================================
 // VOCODER
@@ -702,6 +715,9 @@ void tVocoder_initToPool (tVocoder* const voc, tMempool* const mp)
     _tMempool* m = *mp;
     _tVocoder* v = *voc = (_tVocoder*) mpool_alloc(sizeof(_tVocoder), m);
     v->mempool = m;
+    LEAF* leaf = v->mempool->leaf;
+    
+    v->invSampleRate = leaf->invSampleRate;
     
     v->param[0] = 0.33f;  //input select
     v->param[1] = 0.50f;  //output dB
@@ -725,9 +741,8 @@ void tVocoder_free (tVocoder* const voc)
 void        tVocoder_update      (tVocoder* const voc)
 {
     _tVocoder* v = *voc;
-    LEAF* leaf = v->mempool->leaf;
     
-    float tpofs = 6.2831853f * leaf->invSampleRate;
+    float tpofs = 6.2831853f * v->invSampleRate;
     
     float rr, th;
     
@@ -871,7 +886,6 @@ float       tVocoder_tick        (tVocoder* const voc, float synth, float voice)
     if(fabs(o)>10.0f) tVocoder_suspend(voc); //catch instability
     
     return o;
-    
 }
 
 void        tVocoder_suspend     (tVocoder* const voc)
@@ -883,6 +897,13 @@ void        tVocoder_suspend     (tVocoder* const voc)
     for(i=0; i<v->nbnd; i++) for(j=3; j<12; j++) v->f[i][j] = 0.0f; //zero band filters and envelopes
     v->kout = 0.0f;
     v->kval = 0;
+}
+
+void    tVocoder_setSampleRate  (tVocoder* const voc, float sr)
+{
+    _tVocoder* v = *voc;
+    v->invSampleRate = 1.0f/sr;
+    tVocoder_update(voc);
 }
 
 
@@ -898,6 +919,9 @@ void tRosenbergGlottalPulse_initToPool (tRosenbergGlottalPulse* const gp, tMempo
      _tMempool* m = *mp;
     _tRosenbergGlottalPulse* g = *gp = (_tRosenbergGlottalPulse*) mpool_alloc(sizeof(_tRosenbergGlottalPulse), m);
     g->mempool = m;
+    LEAF* leaf = g->mempool->leaf;
+    
+    g->invSampleRate = leaf->invSampleRate;
 
     g->phase  = 0.0f;
     g->openLength = 0.0f;
@@ -972,10 +996,9 @@ float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const g
 void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const gp, float freq)
 {
     _tRosenbergGlottalPulse* g = *gp;
-    LEAF* leaf = g->mempool->leaf;
     
     g->freq = freq;
-    g->inc = freq * leaf->invSampleRate;
+    g->inc = freq * g->invSampleRate;
     g->inc -= (int) g->inc;
 }
 
@@ -1001,6 +1024,12 @@ void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergG
     g->invPulseLengthMinusOpenLength = 1.0f / (g->pulseLength - g->openLength);
 }
 
+void   tRosenbergGlottalPulse_setSampleRate(tRosenbergGlottalPulse* const gp, float sr)
+{
+    _tRosenbergGlottalPulse* g = *gp;
+    g->invSampleRate = 1.0f/sr;
+    tRosenbergGlottalPulse_setFreq(gp, g->freq);
+}
 
 
 //============================================================================================================
@@ -1138,6 +1167,13 @@ void tSOLAD_resetState(tSOLAD* const wp)
     w->period = INITPERIOD;
     w->readlag = INITPERIOD;
     w->blocksize = INITPERIOD;
+}
+
+void tSOLAD_setSampleRate(tSOLAD* const wp, float sr)
+{
+    _tSOLAD* w = *wp;
+    tAttackDetection_setSampleRate(&w->ad, sr);
+    tHighpass_setSampleRate(&w->hp, sr);
 }
 
 /******************************************************************************/
@@ -1380,10 +1416,13 @@ void tPitchShift_initToPool (tPitchShift* const psr, tDualPitchDetector* const d
     _tMempool* m = *mp;
     _tPitchShift* ps = *psr = (_tPitchShift*) mpool_alloc(sizeof(_tPitchShift), m);
     ps->mempool = m;
+    LEAF* leaf = ps->mempool->leaf;
     
     ps->pd = *dpd;
     ps->bufSize = bufSize;
     ps->pickiness = 0.0f;
+    
+    ps->sampleRate = leaf->sampleRate;
     
     tSOLAD_initToPool(&ps->sola, pow(2.0, ceil(log2(ps->bufSize * 2.0))), mp);
     tSOLAD_setPitchFactor(&ps->sola, DEFPITCHRATIO);
@@ -1400,13 +1439,12 @@ void tPitchShift_free (tPitchShift* const psr)
 void tPitchShift_shiftBy (tPitchShift* const psr, float factor, float* in, float* out)
 {
     _tPitchShift* ps = *psr;
-    LEAF* leaf = ps->mempool->leaf;
     
     float detected = tDualPitchDetector_getFrequency(&ps->pd);
     float periodicity = tDualPitchDetector_getPeriodicity(&ps->pd);
     if (detected > 0.0f && periodicity > ps->pickiness)
     {
-        float period = leaf->sampleRate / detected;
+        float period = ps->sampleRate / detected;
         tSOLAD_setPeriod(&ps->sola, period);
         tSOLAD_setPitchFactor(&ps->sola, factor);
     }
@@ -1417,7 +1455,6 @@ void tPitchShift_shiftBy (tPitchShift* const psr, float factor, float* in, float
 void    tPitchShift_shiftTo (tPitchShift* const psr, float freq, float* in, float* out)
 {
     _tPitchShift* ps = *psr;
-    LEAF* leaf = ps->mempool->leaf;
     
     float detected = tDualPitchDetector_getFrequency(&ps->pd);
     float periodicity = tDualPitchDetector_getPeriodicity(&ps->pd);
@@ -1425,7 +1462,7 @@ void    tPitchShift_shiftTo (tPitchShift* const psr, float freq, float* in, floa
     {
         float period = 1.0f / detected;
         float factor = freq * period;
-        tSOLAD_setPeriod(&ps->sola, leaf->sampleRate * period);
+        tSOLAD_setPeriod(&ps->sola, ps->sampleRate * period);
         tSOLAD_setPitchFactor(&ps->sola, factor);
     }
     
@@ -1435,8 +1472,13 @@ void    tPitchShift_shiftTo (tPitchShift* const psr, float freq, float* in, floa
 void    tPitchShift_setPickiness (tPitchShift* const psr, float p)
 {
     _tPitchShift* ps = *psr;
-    
     ps->pickiness = p;
+}
+
+void    tPitchShift_setSampleRate(tPitchShift* const psr, float sr)
+{
+    _tPitchShift* ps = *psr;
+    tSOLAD_setSampleRate(&ps->sola, sr);
 }
 
 
@@ -1569,6 +1611,16 @@ float tSimpleRetune_getInputFrequency (tSimpleRetune* const rt)
     _tSimpleRetune* r = *rt;
     
     return tDualPitchDetector_getFrequency(&r->dp);
+}
+
+void tSimpleRetune_setSampleRate (tSimpleRetune* const rt, float sr)
+{
+    _tSimpleRetune* r = *rt;
+    tDualPitchDetector_setSampleRate(&r->dp, sr);
+    for (int i = 0; i < r->numVoices; ++i)
+    {
+        tPitchShift_setSampleRate(&r->ps[i], sr);
+    }
 }
 
 //============================================================================================================
@@ -1708,6 +1760,16 @@ float tRetune_getInputFrequency (tRetune* const rt)
     return tDualPitchDetector_getFrequency(&r->dp);
 }
 
+void tRetune_setSampleRate(tRetune* const rt, float sr)
+{
+    _tRetune* r = *rt;
+    tDualPitchDetector_setSampleRate(&r->dp, sr);
+    for (int i = 0; i < r->numVoices; ++i)
+    {
+        tPitchShift_setSampleRate(&r->ps[i], sr);
+    }
+}
+
 //============================================================================================================
 // FORMANTSHIFTER
 //============================================================================================================
@@ -1738,14 +1800,16 @@ void tFormantShifter_initToPool (tFormantShifter* const fsr, int order, tMempool
     
     fs->fbuff = (float*) mpool_calloc(sizeof(float*) * fs->ford, m);
 
+    fs->sampleRate = leaf->sampleRate;
+    fs->invSampleRate = leaf->invSampleRate;
     
-    fs->falph = powf(0.001f, 10.0f * leaf->invSampleRate);
-    fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f * leaf->sampleRate)) - 0.1916f);
+    fs->falph = powf(0.001f, 10.0f * fs->invSampleRate);
+    fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f * fs->sampleRate)) - 0.1916f);
     fs->fhp = 0.0f;
     fs->flp = 0.0f;
-    fs->flpa = powf(0.001f, 10.0f * leaf->invSampleRate);
+    fs->flpa = powf(0.001f, 10.0f * fs->invSampleRate);
     fs->fmute = 1.0f;
-    fs->fmutealph = powf(0.001f, 1.0f * leaf->invSampleRate);
+    fs->fmutealph = powf(0.001f, 1.0f * fs->invSampleRate);
     fs->cbi = 0;
     fs->intensity = 1.0f;
     fs->invIntensity = 1.0f;
@@ -1927,8 +1991,6 @@ void tFormantShifter_setIntensity(tFormantShifter* const fsr, float intensity)
 {
     _tFormantShifter* fs = *fsr;
 
-
-
     fs->intensity = LEAF_clip(1.0f, intensity, 100.0f);
 
    // tFeedbackLeveler_setTargetLevel(&fs->fbl1, fs->intensity);
@@ -1942,5 +2004,17 @@ void tFormantShifter_setIntensity(tFormantShifter* const fsr, float intensity)
     {
         fs->invIntensity = 1.0f;
     }
+}
 
+void tFormantShifter_setSampleRate(tFormantShifter* const fsr, float sr)
+{
+    _tFormantShifter* fs = *fsr;
+    fs->sampleRate = sr;
+    fs->invSampleRate = 1.0f/fs->sampleRate;
+    fs->falph = powf(0.001f, 10.0f * fs->invSampleRate);
+    fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f * fs->sampleRate)) - 0.1916f);
+    fs->flpa = powf(0.001f, 10.0f * fs->invSampleRate);
+    fs->fmutealph = powf(0.001f, 1.0f * fs->invSampleRate);
+    tHighpass_setSampleRate(&fs->hp, fs->sampleRate);
+    tHighpass_setSampleRate(&fs->hp2, fs->sampleRate);
 }

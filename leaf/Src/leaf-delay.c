@@ -346,9 +346,6 @@ float tLinearDelay_getGain (tLinearDelay* const dl)
 }
 
 
-
-
-
 /// Hermite Interpolated Delay
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ LinearDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 void tHermiteDelay_init (tHermiteDelay* const dl, float delay, uint32_t maxDelay, LEAF* const leaf)

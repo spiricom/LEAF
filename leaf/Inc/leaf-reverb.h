@@ -78,6 +78,8 @@ extern "C" {
         float mix, t60;
         
         float inv_441;
+        float sampleRate;
+        float invSampleRate;
         
         tDelay allpassDelays[2];
         tDelay combDelay;
@@ -97,6 +99,7 @@ extern "C" {
     float   tPRCReverb_tick         (tPRCReverb* const, float input);
     void    tPRCReverb_setT60       (tPRCReverb* const, float t60);
     void    tPRCReverb_setMix       (tPRCReverb* const, float mix);
+    void    tPRCReverb_setSampleRate(tPRCReverb* const, float sr);
     
     //==============================================================================
     
@@ -149,7 +152,9 @@ extern "C" {
         
         float mix, t60;
         
-        float inv_sr, inv_441;
+        float inv_441;
+        float sampleRate;
+        float invSampleRate;
         
         tLinearDelay allpassDelays[8];
         tLinearDelay combDelays[6];
@@ -171,6 +176,7 @@ extern "C" {
     void    tNReverb_tickStereo     (tNReverb* const rev, float input, float* output);
     void    tNReverb_setT60         (tNReverb* const, float t60);
     void    tNReverb_setMix         (tNReverb* const, float mix);
+    void    tNReverb_setSampleRate  (tNReverb* const, float sr);
     
     //==============================================================================
     
@@ -245,12 +251,13 @@ extern "C" {
         
         tMempool mempool;
         
+        float   sampleRate;
         float   predelay;
         float   input_filter;
         float   feedback_filter;
         float   feedback_gain;
         float   mix;
-        uint32_t frozen;
+        int frozen;
         
         float   size, size_max, t;
         
@@ -296,13 +303,14 @@ extern "C" {
     float   tDattorroReverb_tick              (tDattorroReverb* const, float input);
     void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, float input, float* output);
     void    tDattorroReverb_setMix            (tDattorroReverb* const, float mix);
-    void    tDattorroReverb_setFreeze         (tDattorroReverb* const rev, uint32_t freeze);
+    void    tDattorroReverb_setFreeze         (tDattorroReverb* const rev, int freeze);
     void    tDattorroReverb_setHP             (tDattorroReverb* const, float freq);
     void    tDattorroReverb_setSize           (tDattorroReverb* const, float size);
     void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, float preDelay);
     void    tDattorroReverb_setInputFilter    (tDattorroReverb* const, float freq);
     void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const, float freq);
     void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const, float gain);
+    void    tDattorroReverb_setSampleRate     (tDattorroReverb* const, float sr);
     
 #ifdef __cplusplus
 }

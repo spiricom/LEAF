@@ -34,9 +34,10 @@ void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp
     _tMempool* m = *mp;
     _tBuffer* s = *sb = (_tBuffer*) mpool_alloc(sizeof(_tBuffer), m);
     s->mempool = m;
+    LEAF* leaf = s->mempool->leaf;
     
     s->buff = (float*) mpool_alloc( sizeof(float) * length, m);
-    s->sampleRate = s->mempool->leaf->sampleRate;
+    s->sampleRate = leaf->sampleRate;
     s->channels = 1;
     s->bufferLength = length;
     s->recordedLength = 0;
@@ -191,12 +192,11 @@ void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const m
     
     _tBuffer* s = *b;
     
-    p->leafInvSampleRate = leaf->invSampleRate;
-    p->leafSampleRate = leaf->sampleRate;
-    p->ticksPerSevenMs = 0.007f * p->leafSampleRate;
-    p->rateFactor = s->sampleRate * p->leafInvSampleRate;
+    p->invSampleRate = leaf->invSampleRate;
+    p->sampleRate = leaf->sampleRate;
+    p->ticksPerSevenMs = 0.007f * p->sampleRate;
+    p->rateFactor = s->sampleRate * p->invSampleRate;
     p->channels = s->channels;
-
 
     p->samp = s;
     
@@ -255,9 +255,8 @@ void tSampler_setSample (tSampler* const sp, tBuffer* const b)
     _tBuffer* s = *b;
     
     p->samp = s;
-    
 
-    p->rateFactor = s->sampleRate * p->leafInvSampleRate;
+    p->rateFactor = s->sampleRate * p->invSampleRate;
     p->channels = s->channels;
 
     p->start = 0;
@@ -267,8 +266,6 @@ void tSampler_setSample (tSampler* const sp, tBuffer* const b)
     
     p->idx = 0.f;
 }
-
-
 
 float tSampler_tick        (tSampler* const sp)
 {
@@ -342,9 +339,6 @@ float tSampler_tick        (tSampler* const sp)
     int32_t fadeRightEnd = myEnd;// + (fadeLeftEnd - start);
     //    if (fadeRightEnd >= length) fadeRightEnd = length - 1;
     int32_t fadeRightStart = fadeRightEnd - cfxlen;
-    
-
-
 
     if (p->mode == PlayLoop)
     {
@@ -532,7 +526,6 @@ float tSampler_tick        (tSampler* const sp)
     return p->last;
 }
 
-
 float tSampler_tickStereo        (tSampler* const sp, float* outputArray)
 {
     _tSampler* p = *sp;
@@ -610,9 +603,6 @@ float tSampler_tickStereo        (tSampler* const sp, float* outputArray)
     int32_t fadeRightEnd = myEnd;// + (fadeLeftEnd - start);
     //    if (fadeRightEnd >= length) fadeRightEnd = length - 1;
     int32_t fadeRightStart = fadeRightEnd - cfxlen;
-
-
-
 
     if (p->mode == PlayLoop)
     {
@@ -725,10 +715,7 @@ float tSampler_tickStereo        (tSampler* const sp, float* outputArray)
         }
     }
 
-
-
     attemptStartEndChange(sp);
-
 
     if (p->mode == PlayLoop)
     {
@@ -782,9 +769,6 @@ float tSampler_tickStereo        (tSampler* const sp, float* outputArray)
         outputArray[i]  = outputArray[i] * sampleGain;
     }
 
-
-
-
     if (p->active < 0)
     {
         //if was fading out and reached silence
@@ -816,10 +800,7 @@ float tSampler_tickStereo        (tSampler* const sp, float* outputArray)
         }
     }
 
-
-
     p->last =  outputArray[0];
-
 
     return p->last;
 }
@@ -1089,6 +1070,18 @@ void tSampler_setRate      (tSampler* const sp, float rate)
     p->iinc = 1.f / p->inc;
 }
 
+
+void tSampler_setSampleRate(tSampler* const sp, float sr)
+{
+    _tSampler* p = *sp;
+    _tBuffer* s = p->samp;
+    p->sampleRate = sr;
+    p->invSampleRate = 1.0f/p->sampleRate;
+    p->ticksPerSevenMs = 0.007f * p->sampleRate;
+    p->rateFactor = s->sampleRate * p->invSampleRate;
+    tRamp_setSampleRate(&p->gain, p->sampleRate);
+}
+
 //==============================================================================
 
 void    tAutoSampler_init   (tAutoSampler* const as, tBuffer* const b, LEAF* const leaf)
@@ -1212,6 +1205,11 @@ void    tAutoSampler_setRate    (tAutoSampler* const as, float rate)
     ;
 }
 
+void    tAutoSampler_setSampleRate (tAutoSampler* const as, float sr)
+{
+    _tAutoSampler* a = *as;
+    tSampler_setSampleRate(&a->sampler, sr);
+}
 
 
 void tMBSampler_init(tMBSampler* const sp, tBuffer* const b, LEAF* const leaf)
@@ -1267,8 +1265,6 @@ void tMBSampler_setSample (tMBSampler* const sp, tBuffer* const b)
     
     p->_p = 0.0f;
 }
-
-
 
 float tMBSampler_tick        (tMBSampler* const sp)
 {

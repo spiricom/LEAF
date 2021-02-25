@@ -243,13 +243,12 @@ extern "C" {
     
     typedef struct _tSampler
     {
-        
         tMempool mempool;
         
         tBuffer samp;
         
-        float leafInvSampleRate;
-        float leafSampleRate;
+        float invSampleRate;
+        float sampleRate;
         float ticksPerSevenMs;
         float rateFactor;
         uint32_t channels;
@@ -284,11 +283,11 @@ extern "C" {
     typedef _tSampler* tSampler;
     
     void    tSampler_init               (tSampler* const, tBuffer* const, LEAF* const leaf);
-    void     tSampler_initToPool            (tSampler* const sp, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
+    void    tSampler_initToPool            (tSampler* const sp, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
     void    tSampler_free               (tSampler* const);
     
     float   tSampler_tick               (tSampler* const);
-    float    tSampler_tickStereo            (tSampler* const sp, float* outputArray);
+    float   tSampler_tickStereo            (tSampler* const sp, float* outputArray);
     void    tSampler_setSample          (tSampler* const, tBuffer* const);
     void    tSampler_setMode            (tSampler* const, PlayMode mode);
     void    tSampler_play               (tSampler* const);
@@ -296,8 +295,9 @@ extern "C" {
     void    tSampler_setStart           (tSampler* const, int32_t start);
     void    tSampler_setEnd             (tSampler* const, int32_t end);
     void    tSampler_setLength             (tSampler* const, int32_t length);
-    void    tSampler_setCrossfadeLength (tSampler* const sp, uint32_t length);
+    void    tSampler_setCrossfadeLength (tSampler* const, uint32_t length);
     void    tSampler_setRate            (tSampler* const, float rate);
+    void    tSampler_setSampleRate      (tSampler* const, float sr);
     
     //==============================================================================
     
@@ -388,7 +388,7 @@ extern "C" {
     void    tAutoSampler_setWindowSize      (tAutoSampler* const, uint32_t size);
     void    tAutoSampler_setCrossfadeLength (tAutoSampler* const, uint32_t length);
     void    tAutoSampler_setRate            (tAutoSampler* const, float rate);
-    
+    void    tAutoSampler_setSampleRate      (tAutoSampler* const, float sr);
     
     /*!
      @defgroup tmbsampler tMBSampler

@@ -360,25 +360,11 @@ void tAttackDetection_free (tAttackDetection* const ad)
     mpool_free((char*)a, a->mempool);
 }
 
-/*******Public Functions***********/
-
-
 void tAttackDetection_setBlocksize(tAttackDetection* const ad, int size)
 {
     _tAttackDetection* a = *ad;
     
-    a->blocksize = size;
-}
-
-void tAttackDetection_setSamplerate(tAttackDetection* const ad, int inRate)
-{
-    _tAttackDetection* a = *ad;
-    
-    a->samplerate = inRate;
-    
-    //Reset atk and rel to recalculate coeff
-    tAttackDetection_setAttack(ad, a->atk);
-    tAttackDetection_setRelease(ad, a->rel);
+    a->blockSize = size;
 }
 
 void tAttackDetection_setThreshold(tAttackDetection* const ad, float thres)
@@ -391,16 +377,15 @@ void tAttackDetection_setAttack(tAttackDetection* const ad, int inAtk)
 {
     _tAttackDetection* a = *ad;
     a->atk = inAtk;
-    a->atk_coeff = powf(0.01f, 1.0f/(a->atk * a->samplerate * 0.001f));
+    a->atk_coeff = powf(0.01f, 1.0f/(a->atk * a->sampleRate * 0.001f));
 }
 
 void tAttackDetection_setRelease(tAttackDetection* const ad, int inRel)
 {
     _tAttackDetection* a = *ad;
     a->rel = inRel;
-    a->rel_coeff = powf(0.01f, 1.0f/(a->rel * a->samplerate * 0.001f));
+    a->rel_coeff = powf(0.01f, 1.0f/(a->rel * a->sampleRate * 0.001f));
 }
-
 
 int tAttackDetection_detect(tAttackDetection* const ad, float *in)
 {
@@ -420,6 +405,16 @@ int tAttackDetection_detect(tAttackDetection* const ad, float *in)
     return result;
 }
 
+void tAttackDetection_setSampleRate(tAttackDetection* const ad, float sr)
+{
+    _tAttackDetection* a = *ad;
+    
+    a->sampleRate = sr;
+    
+    tAttackDetection_setAttack(ad, a->atk);
+    tAttackDetection_setRelease(ad, a->rel);
+}
+
 /*******Private Functions**********/
 
 static void atkdtk_init(tAttackDetection* const ad, int blocksize, int atk, int rel)
@@ -428,9 +423,9 @@ static void atkdtk_init(tAttackDetection* const ad, int blocksize, int atk, int 
     LEAF* leaf = a->mempool->leaf;
     
     a->env = 0;
-    a->blocksize = blocksize;
+    a->blockSize = blocksize;
     a->threshold = DEFTHRESHOLD;
-    a->samplerate = leaf->sampleRate;
+    a->sampleRate = leaf->sampleRate;
     a->prevAmp = 0;
     
     a->env = 0;
@@ -445,7 +440,7 @@ static void atkdtk_envelope(tAttackDetection* const ad, float *in)
     
     int i = 0;
     float tmp;
-    for(i = 0; i < a->blocksize; ++i){
+    for(i = 0; i < a->blockSize; ++i){
         tmp = fastabsf(in[i]);
         
         if(tmp > a->env)
@@ -845,6 +840,7 @@ void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, int buf
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
     
+    p->invSampleRate = leaf->invSampleRate;
     p->inBuffer = in;
     p->bufSize = bufSize;
     p->frameSize = frameSize;
@@ -865,7 +861,7 @@ void tPeriodDetection_initToPool (tPeriodDetection* const pd, float* in, int buf
     p->alpha = 1.0f;
     p->tolerance = 1.0f;
     p->timeConstant = DEFTIMECONSTANT;
-    p->radius = expf(-1000.0f * p->hopSize * leaf->invSampleRate / p->timeConstant);
+    p->radius = expf(-1000.0f * p->hopSize * p->invSampleRate / p->timeConstant);
     p->fidelityThreshold = 0.95f;
 }
 
@@ -878,7 +874,7 @@ void tPeriodDetection_free (tPeriodDetection* const pd)
     mpool_free((char*)p, p->mempool);
 }
 
-float tPeriodDetection_tick (tPeriodDetection* pd, float sample)
+float tPeriodDetection_tick (tPeriodDetection* const pd, float sample)
 {
     _tPeriodDetection* p = *pd;
     
@@ -913,49 +909,57 @@ float tPeriodDetection_tick (tPeriodDetection* pd, float sample)
     return p->period;
 }
 
-float tPeriodDetection_getPeriod(tPeriodDetection* pd)
+float tPeriodDetection_getPeriod(tPeriodDetection* const pd)
 {
     _tPeriodDetection* p = *pd;
     return p->period;
 }
 
-float tPeriodDetection_getFidelity(tPeriodDetection* pd)
+float tPeriodDetection_getFidelity(tPeriodDetection* const pd)
 {
     _tPeriodDetection* p = *pd;
     return tSNAC_getFidelity(&p->snac);
 }
 
-void tPeriodDetection_setHopSize(tPeriodDetection* pd, int hs)
+void tPeriodDetection_setHopSize(tPeriodDetection* const pd, int hs)
 {
     _tPeriodDetection* p = *pd;
     p->hopSize = hs;
 }
 
-void tPeriodDetection_setWindowSize(tPeriodDetection* pd, int ws)
+void tPeriodDetection_setWindowSize(tPeriodDetection* const pd, int ws)
 {
     _tPeriodDetection* p = *pd;
     p->windowSize = ws;
 }
 
-void tPeriodDetection_setFidelityThreshold(tPeriodDetection* pd, float threshold)
+void tPeriodDetection_setFidelityThreshold(tPeriodDetection* const pd, float threshold)
 {
     _tPeriodDetection* p = *pd;
     p->fidelityThreshold = threshold;
 }
 
-void tPeriodDetection_setAlpha            (tPeriodDetection* pd, float alpha)
+void tPeriodDetection_setAlpha            (tPeriodDetection* const pd, float alpha)
 {
     _tPeriodDetection* p = *pd;
     p->alpha = LEAF_clip(0.0f, alpha, 1.0f);
 }
 
-void tPeriodDetection_setTolerance        (tPeriodDetection* pd, float tolerance)
+void tPeriodDetection_setTolerance        (tPeriodDetection* const pd, float tolerance)
 {
     _tPeriodDetection* p = *pd;
     if (tolerance < 0.0f) p->tolerance = 0.0f;
     else p->tolerance = tolerance;
 }
 
+void tPeriodDetection_setSampleRate (tPeriodDetection* const pd, float sr)
+{
+    _tPeriodDetection* p = *pd;
+    p->invSampleRate = 1.0f/sr;
+    p->radius = expf(-1000.0f * p->hopSize * p->invSampleRate / p->timeConstant);
+}
+
+//==========================================================================================
 
 void    tZeroCrossingInfo_init  (tZeroCrossingInfo* const zc, LEAF* const leaf)
 {
@@ -1522,8 +1526,12 @@ void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowe
     
     LEAF* leaf = p->mempool->leaf;
     
-    tZeroCrossingCollector_initToPool(&p->_zc, (1.0f / lowestFreq) * leaf->sampleRate * 2.0f, hysteresis, mempool);
-    p->_min_period = (1.0f / highestFreq) * leaf->sampleRate;
+    p->sampleRate = leaf->sampleRate;
+    p->lowestFreq = lowestFreq;
+    p->highestFreq = highestFreq;
+    
+    tZeroCrossingCollector_initToPool(&p->_zc, (1.0f / lowestFreq) * p->sampleRate * 2.0f, hysteresis, mempool);
+    p->_min_period = (1.0f / highestFreq) * p->sampleRate;
     p->_range = highestFreq / lowestFreq;
     
     int windowSize = tZeroCrossingCollector_getWindowSize(&p->_zc);
@@ -1668,6 +1676,18 @@ void    tPeriodDetector_setHysteresis   (tPeriodDetector* const detector, float 
     _tPeriodDetector* p = *detector;
     
     return tZeroCrossingCollector_setHysteresis(&p->_zc, hysteresis);
+}
+
+void    tPeriodDetector_setSampleRate   (tPeriodDetector* const detector, float sr)
+{
+    _tPeriodDetector* p = *detector;
+    _tMempool* m = p->mempool;
+    p->sampleRate = sr;
+    float hysteresis = p->_zc->_hysteresis;
+    
+    tZeroCrossingCollector_free(&p->_zc);
+    tZeroCrossingCollector_initToPool(&p->_zc, (1.0f / p->lowestFreq) * p->sampleRate * 2.0f, hysteresis, &m);
+    p->_min_period = (1.0f / p->highestFreq) * p->sampleRate;
 }
 
 static inline void set_bitstream(tPeriodDetector* const detector)
@@ -1901,11 +1921,13 @@ void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowes
     _tMempool* m = *mempool;
     _tPitchDetector* p = *detector = (_tPitchDetector*) mpool_alloc(sizeof(_tPitchDetector), m);
     p->mempool = m;
+    LEAF* leaf = p->mempool->leaf;
     
     tPeriodDetector_initToPool(&p->_pd, lowestFreq, highestFreq, -120.0f, mempool);
     p->_current.frequency = 0.0f;
     p->_current.periodicity = 0.0f;
     p->_frames_after_shift = 0;
+    p->sampleRate = leaf->sampleRate;
 }
 
 void    tPitchDetector_free (tPitchDetector* const detector)
@@ -1991,11 +2013,10 @@ float   tPitchDetector_harmonic (tPitchDetector* const detector, int harmonicInd
 float   tPitchDetector_predictFrequency (tPitchDetector* const detector)
 {
     _tPitchDetector* p = *detector;
-    LEAF* leaf = p->mempool->leaf;
     
     float period = tPeriodDetector_predictPeriod(&p->_pd);
     if (period > 0.0f)
-        return leaf->sampleRate / period;
+        return p->sampleRate / period;
     return 0.0f;
 }
 
@@ -2009,18 +2030,23 @@ int     tPitchDetector_indeterminate    (tPitchDetector* const detector)
 void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, float hysteresis)
 {
     _tPitchDetector* p = *detector;
-    
     tPeriodDetector_setHysteresis(&p->_pd, hysteresis);
+}
+
+void    tPitchDetector_setSampleRate    (tPitchDetector* const detector, float sr)
+{
+    _tPitchDetector* p = *detector;
+    p->sampleRate = sr;
+    tPeriodDetector_setSampleRate(&p->_pd, p->sampleRate);
 }
 
 static inline float calculate_frequency(tPitchDetector* const detector)
 {
     _tPitchDetector* p = *detector;
-    LEAF* leaf = p->mempool->leaf;
     
     float period = p->_pd->_fundamental.period;
     if (period > 0.0f)
-        return leaf->sampleRate / period;
+        return p->sampleRate / period;
     return 0.0f;
 }
 
@@ -2131,9 +2157,12 @@ void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, flo
     _tMempool* m = *mempool;
     _tDualPitchDetector* p = *detector = (_tDualPitchDetector*) mpool_alloc(sizeof(_tDualPitchDetector), m);
     p->mempool = m;
+    LEAF* leaf = p->mempool->leaf;
     
     tPeriodDetection_initToPool(&p->_pd1, inBuffer, bufSize, bufSize / 2, mempool);
     tPitchDetector_initToPool(&p->_pd2, lowestFreq, highestFreq, mempool);
+    
+    p->sampleRate = leaf->sampleRate;
 
     p->_current.frequency = 0.0f;
     p->_current.periodicity = 0.0f;
@@ -2159,7 +2188,6 @@ void    tDualPitchDetector_free (tDualPitchDetector* const detector)
 int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sample)
 {
     _tDualPitchDetector* p = *detector;
-    LEAF* leaf = p->mempool->leaf;
     
     tPeriodDetection_tick(&p->_pd1, sample);
     int ready = tPitchDetector_tick(&p->_pd2, sample);
@@ -2172,7 +2200,7 @@ int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sa
         if (!pd2_indeterminate && period != 0.0f)
         {
             _pitch_info _i1;
-            _i1.frequency = leaf->sampleRate / tPeriodDetection_getPeriod(&p->_pd1);
+            _i1.frequency = p->sampleRate / tPeriodDetection_getPeriod(&p->_pd1);
             _i1.periodicity = tPeriodDetection_getFidelity(&p->_pd1);
             _pitch_info _i2 = p->_pd2->_current;
             
@@ -2274,6 +2302,14 @@ void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector* const de
     _tDualPitchDetector* p = *detector;
     
     p->thresh = thresh;
+}
+
+void    tDualPitchDetector_setSampleRate (tDualPitchDetector* const detector, float sr)
+{
+    _tDualPitchDetector* p = *detector;
+    p->sampleRate = sr;
+    tPeriodDetection_setSampleRate(&p->_pd1, p->sampleRate);
+    tPitchDetector_setSampleRate(&p->_pd2, p->sampleRate);
 }
 
 static inline void compute_predicted_frequency(tDualPitchDetector* const detector)

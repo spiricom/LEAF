@@ -222,6 +222,16 @@ void tWDF_setSampleRate(tWDF* const wdf, float sample_rate)
 {
     _tWDF* r = *wdf;
     r->sample_rate = sample_rate;
+    if (r->type == Capacitor)
+    {
+        r->port_conductance_up = r->sample_rate * 2.0f * r->value;
+        r->port_resistance_up = 1.0f / r->port_conductance_up; //based on trapezoidal discretization
+    }
+    else if (r->type == Inductor)
+    {
+        r->port_resistance_up = r->sample_rate * 2.0f * r->value; //based on trapezoidal discretization
+        r->port_conductance_up = 1.0f / r->port_resistance_up;
+    }
 }
 
 uint8_t tWDF_isLeaf(tWDF* const wdf)

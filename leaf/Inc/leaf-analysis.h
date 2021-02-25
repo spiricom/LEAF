@@ -364,8 +364,8 @@ extern "C" {
         float atk_coeff;
         float rel_coeff;
         
-        int blocksize;
-        int samplerate;
+        int blockSize;
+        int sampleRate;
         
         //RMS amplitude of previous block - used to decide if attack is present
         float prevAmp;
@@ -385,6 +385,7 @@ extern "C" {
     void    tAttackDetection_setRelease     (tAttackDetection* const, int inRel);
     void    tAttackDetection_setThreshold   (tAttackDetection* const, float thres);
     int     tAttackDetection_detect         (tAttackDetection* const, float *in);
+    void    tAttackDetection_setSampleRate  (tAttackDetection* const, float sr);
     
     //==============================================================================
     
@@ -593,6 +594,7 @@ extern "C" {
         float alpha;
         float tolerance;
         
+        float invSampleRate;
     } _tPeriodDetection;
     
     typedef _tPeriodDetection* tPeriodDetection;
@@ -603,12 +605,13 @@ extern "C" {
     
     float   tPeriodDetection_tick               (tPeriodDetection* const, float sample);
     float   tPeriodDetection_getPeriod          (tPeriodDetection* const);
-    float   tPeriodDetection_getFidelity        (tPeriodDetection* pd);
+    float   tPeriodDetection_getFidelity        (tPeriodDetection* const);
     void    tPeriodDetection_setHopSize         (tPeriodDetection* const, int hs);
     void    tPeriodDetection_setWindowSize      (tPeriodDetection* const, int ws);
     void    tPeriodDetection_setFidelityThreshold(tPeriodDetection* const, float threshold);
     void    tPeriodDetection_setAlpha           (tPeriodDetection* const, float alpha);
     void    tPeriodDetection_setTolerance       (tPeriodDetection* const, float tolerance);
+    void    tPeriodDetection_setSampleRate      (tPeriodDetection* const, float sr);
     
     //==============================================================================
     
@@ -644,7 +647,6 @@ extern "C" {
     
     typedef struct _tZeroCrossingCollector
     {
-        
         tMempool mempool;
         
         tZeroCrossingInfo* _info;
@@ -689,7 +691,6 @@ extern "C" {
     
     typedef struct _tBitset
     {
-        
         tMempool mempool;
         
         unsigned int _value_size;
@@ -718,7 +719,6 @@ extern "C" {
     
     typedef struct _tBACF
     {
-        
         tMempool mempool;
         
         tBitset _bitset;
@@ -806,7 +806,6 @@ extern "C" {
     
     typedef struct _sub_collector
     {
-        
         tMempool mempool;
         
         float             _first_period;
@@ -845,6 +844,10 @@ extern "C" {
         unsigned int            _num_pulses; // = 0;
         int                     _half_empty; // 0;
         
+        float                   sampleRate;
+        float                   lowestFreq;
+        float                   highestFreq;
+        
         tBACF                   _bacf;
         
     } _tPeriodDetector;
@@ -866,6 +869,7 @@ extern "C" {
     int     tPeriodDetector_isReset (tPeriodDetector* const detector);
 
     void    tPeriodDetector_setHysteresis   (tPeriodDetector* const detector, float hysteresis);
+    void    tPeriodDetector_setSampleRate   (tPeriodDetector* const detector, float sr);
     
     //==============================================================================
     
@@ -942,6 +946,8 @@ extern "C" {
         _pitch_info _current;
         int _frames_after_shift;// = 0;
         
+        float sampleRate;
+        
     } _tPitchDetector;
     
     typedef _tPitchDetector* tPitchDetector;
@@ -958,7 +964,7 @@ extern "C" {
     int     tPitchDetector_indeterminate    (tPitchDetector* const detector);
     
     void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, float hysteresis);
-    
+    void    tPitchDetector_setSampleRate    (tPitchDetector* const detector, float sr);
     
     //==============================================================================
     
@@ -1041,6 +1047,8 @@ extern "C" {
         
         float highest, lowest;
         float thresh;
+        
+        float sampleRate;
 
     } _tDualPitchDetector;
     
@@ -1058,9 +1066,7 @@ extern "C" {
     
     void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector, float hysteresis);
     void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector* const detector, float thresh);
-    
-    
-    
+    void    tDualPitchDetector_setSampleRate    (tDualPitchDetector* const detector, float sr);
     
 #ifdef __cplusplus
 }

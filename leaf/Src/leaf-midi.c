@@ -605,7 +605,15 @@ int tPoly_isOn(tPoly* const polyh, uint8_t voice)
     return (poly->voices[voice][0] > 0) ? 1 : 0;
 }
 
-
+void tPoly_setSampleRate(tPoly* const polyh, float sr)
+{
+    _tPoly* poly = *polyh;
+    for (int i = 0; i < poly->maxNumVoices; i++)
+    {
+        tRamp_setSampleRate(&poly->ramps[i], sr);
+    }
+    tRamp_setSampleRate(&poly->pitchBendRamp, sr);
+}
 
 
 //tSimplePoly = much more efficient implementation without ramps and glide

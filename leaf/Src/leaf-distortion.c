@@ -90,6 +90,7 @@ void tOversampler_initToPool (tOversampler* const osr, int maxRatio, int extraQu
         
         os->offset = offset;
         os->maxRatio = maxRatio;
+        os->allowHighQuality = extraQuality;
         os->ratio = os->maxRatio;
         int idx = (int)(log2f(os->ratio))-1+os->offset;
         os->numTaps = __leaf_tablesize_firNumTaps[idx];
@@ -318,12 +319,29 @@ void    tOversampler_setRatio       (tOversampler* const osr, int ratio)
     else if (ratio == 2 || ratio == 4  || ratio == 8 ||
         ratio == 16 || ratio == 32 || ratio == 64)
     {
-        os->ratio = os->ratio;
+        os->ratio = ratio;
         int idx = (int)(log2f(os->ratio))-1+os->offset;
         os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
         os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
     }
+}
+
+void    tOversampler_setQuality     (tOversampler* const osr, int quality)
+{
+    _tOversampler* os = *osr;
+    
+    if (!os->allowHighQuality) return;
+    int offset = 0;
+    if (quality > 0) offset = 6;
+    os->offset = offset;
+    
+    if (os->ratio == 1) return;
+    
+    int idx = (int)(log2f(os->ratio))-1+os->offset;
+    os->numTaps = __leaf_tablesize_firNumTaps[idx];
+    os->phaseLength = os->numTaps / os->ratio;
+    os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
 }
 
 int tOversampler_getLatency(tOversampler* const osr)

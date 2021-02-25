@@ -141,6 +141,17 @@ void t808Cowbell_setStick(t808Cowbell* const cowbellInst, int useStick)
     cowbell->useStick = useStick;
 }
 
+void t808Cowbell_setSampleRate(t808Cowbell* const cowbellInst, float sr)
+{
+    _t808Cowbell* cowbell = *cowbellInst;
+    
+    tSquare_setSampleRate(&cowbell->p[0], sr);
+    tSquare_setSampleRate(&cowbell->p[1], sr);
+    tSVF_setSampleRate(&cowbell->bandpassOsc, sr);
+    tSVF_setSampleRate(&cowbell->bandpassStick, sr);
+    tHighpass_setSampleRate(&cowbell->highpass, sr);
+}
+
 // ----------------- HIHAT ----------------------------//
 
 void t808Hihat_init(t808Hihat* const hihatInst, LEAF* const leaf)
@@ -309,6 +320,22 @@ void t808Hihat_setOscFreq(t808Hihat* const hihatInst, float freq)
     hihat->freq = freq;
 }
 
+void t808Hihat_setSampleRate(t808Hihat* const hihatInst, float sr)
+{
+    _t808Hihat* hihat = *hihatInst;
+    
+    for (int i = 0; i < 6; i++)
+    {
+        tSquare_setSampleRate(&hihat->p[i], sr);
+    }
+    
+    // need to fix SVF to be generic
+    tSVF_setSampleRate(&hihat->bandpassStick, sr);
+    tSVF_setSampleRate(&hihat->bandpassOsc, sr);
+    
+    tHighpass_setSampleRate(&hihat->highpass, sr);
+}
+
 // ----------------- SNARE ----------------------------//
 
 void t808Snare_init (t808Snare* const snareInst, LEAF* const leaf)
@@ -456,6 +483,18 @@ float t808Snare_tick(t808Snare* const snareInst)
     return sample;
 }
 
+void t808Snare_setSampleRate(t808Snare* const snareInst, float sr)
+{
+    _t808Snare* snare = *snareInst;
+    
+    for (int i = 0; i < 2; i++)
+    {
+        tTriangle_setSampleRate(&snare->tone[i], sr);
+        tSVF_setSampleRate(&snare->toneLowpass[i], sr);
+    }
+    tSVF_setSampleRate(&snare->noiseLowpass, sr);
+}
+
 // ----------------- KICK ----------------------------//
 
 void t808Kick_init (t808Kick* const kickInst, LEAF* const leaf)
@@ -539,5 +578,13 @@ void        t808Kick_setChirpAmount         (t808Kick* const kickInst, float chi
 void        t808Kick_setToneNoiseMix       (t808Kick* const kickInst, float toneNoiseMix);
 void        t808Kick_setNoiseFilterFreq    (t808Kick* const kickInst, float noiseFilterFreq);
 void        t808Kick_setNoiseFilterQ       (t808Kick* const kickInst, float noiseFilterQ);
+
+void        t808Kick_setSampleRate  (t808Kick* const kickInst, float sr)
+{
+    _t808Kick* kick = *kickInst;
+    
+    tCycle_setSampleRate(&kick->tone, sr);
+    tSVF_setSampleRate(&kick->toneLowpass, sr);
+}
 
 

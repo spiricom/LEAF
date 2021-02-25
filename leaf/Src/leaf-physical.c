@@ -29,6 +29,8 @@ void    tPluck_initToPool    (tPluck* const pl, float lowestFrequency, tMempool*
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
     
+    p->sampleRate = leaf->sampleRate;
+    
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 10.0f;
     
     tNoise_initToPool(&p->noise, WhiteNoise, mp);
@@ -37,7 +39,7 @@ void    tPluck_initToPool    (tPluck* const pl, float lowestFrequency, tMempool*
     
     tOneZero_initToPool(&p->loopFilter, 0.0f, mp);
     
-    tAllpassDelay_initToPool(&p->delayLine, 0.0f, leaf->sampleRate * 2, mp);
+    tAllpassDelay_initToPool(&p->delayLine, 0.0f, p->sampleRate * 2, mp);
     tAllpassDelay_clear(&p->delayLine);
     
     tPluck_setFrequency(pl, 220.0f);
@@ -106,19 +108,17 @@ void    tPluck_noteOff       (tPluck* const pl, float amplitude )
 void    tPluck_setFrequency  (tPluck* const pl, float frequency )
 {
     _tPluck* p = *pl;
-    LEAF* leaf = p->mempool->leaf;
     
     if ( frequency <= 0.0f )   frequency = 0.001f;
     
     // Delay = length - filter delay.
-    float delay = ( leaf->sampleRate / frequency ) - tOneZero_getPhaseDelay(&p->loopFilter, frequency );
+    float delay = ( p->sampleRate / frequency ) - tOneZero_getPhaseDelay(&p->loopFilter, frequency );
     
     tAllpassDelay_setDelay(&p->delayLine, delay );
     
     p->loopGain = 0.99f + (frequency * 0.000005f);
     
     if ( p->loopGain >= 0.999f ) p->loopGain = 0.999f;
-    
 }
 
 // Perform the control change specified by \e number and \e value (0.0 - 128.0).
@@ -127,10 +127,18 @@ void    tPluck_controlChange (tPluck* const pl, int number, float value)
     return;
 }
 
-void tPluckSampleRateChanged(tPluck* const pl)
+void tPluck_setSampleRate(tPluck* const pl, float sr)
 {
     _tPluck* p = *pl;
+    p->sampleRate = sr;
+    
+    tAllpassDelay_free(&p->delayLine);
+    tAllpassDelay_initToPool(&p->delayLine, 0.0f, p->sampleRate * 2, &p->mempool);
+    tAllpassDelay_clear(&p->delayLine);
+    
     tPluck_setFrequency(pl, p->lastFreq);
+    tOnePole_setSampleRate(&p->pickFilter, p->sampleRate);
+    tOneZero_setSampleRate(&p->loopFilter, p->sampleRate);
 }
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ tKarplusStrong ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
@@ -146,12 +154,14 @@ void    tKarplusStrong_initToPool   (tKarplusStrong* const pl, float lowestFrequ
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
     
+    p->sampleRate = leaf->sampleRate;
+    
     if ( lowestFrequency <= 0.0f )  lowestFrequency = 8.0f;
     
-    tAllpassDelay_initToPool(&p->delayLine, 0.0f, leaf->sampleRate * 2, mp);
+    tAllpassDelay_initToPool(&p->delayLine, 0.0f, p->sampleRate * 2, mp);
     tAllpassDelay_clear(&p->delayLine);
     
-    tLinearDelay_initToPool(&p->combDelay, 0.0f, leaf->sampleRate * 2, mp);
+    tLinearDelay_initToPool(&p->combDelay, 0.0f, p->sampleRate * 2, mp);
     tLinearDelay_clear(&p->combDelay);
     
     tOneZero_initToPool(&p->filter, 0.0f, mp);
@@ -254,12 +264,11 @@ void    tKarplusStrong_noteOff       (tKarplusStrong* const pl, float amplitude 
 void    tKarplusStrong_setFrequency  (tKarplusStrong* const pl, float frequency )
 {
     _tKarplusStrong* p = *pl;
-    LEAF* leaf = p->mempool->leaf;
     
     if ( frequency <= 0.0f )   frequency = 0.001f;
     
     p->lastFrequency = frequency;
-    p->lastLength = leaf->sampleRate / p->lastFrequency;
+    p->lastLength = p->sampleRate / p->lastFrequency;
     float delay = p->lastLength - 0.5f;
     tAllpassDelay_setDelay(&p->delayLine, delay);
     
@@ -270,19 +279,17 @@ void    tKarplusStrong_setFrequency  (tKarplusStrong* const pl, float frequency 
     tKarplusStrong_setStretch(pl, p->stretching);
     
     tLinearDelay_setDelay(&p->combDelay, 0.5f * p->pickupPosition * p->lastLength );
-    
 }
 
 // Set the stretch "factor" of the string (0.0 - 1.0).
 void    tKarplusStrong_setStretch         (tKarplusStrong* const pl, float stretch)
 {
     _tKarplusStrong* p = *pl;
-    LEAF* leaf = p->mempool->leaf;
     
     p->stretching = stretch;
     float coefficient;
     float freq = p->lastFrequency * 2.0f;
-    float dFreq = ( (0.5f * leaf->sampleRate) - freq ) * 0.25f;
+    float dFreq = ( (0.5f * p->sampleRate) - freq ) * 0.25f;
     float temp = 0.5f + (stretch * 0.5f);
     if ( temp > 0.9999f ) temp = 0.9999f;
     
@@ -293,7 +300,7 @@ void    tKarplusStrong_setStretch         (tKarplusStrong* const pl, float stret
         tBiQuad_setB0(&p->biquad[i], coefficient);
         tBiQuad_setB2(&p->biquad[i], 1.0f);
         
-        coefficient = -2.0f * temp * cosf(TWO_PI * freq / leaf->sampleRate);
+        coefficient = -2.0f * temp * cosf(TWO_PI * freq / p->sampleRate);
         tBiQuad_setA1(&p->biquad[i], coefficient);
         tBiQuad_setB1(&p->biquad[i], coefficient);
         
@@ -339,12 +346,26 @@ void    tKarplusStrong_controlChange (tKarplusStrong* const pl, SKControlType ty
         tKarplusStrong_setStretch( pl, 0.91f + (0.09f * (1.0f - normalizedValue)) );
 }
 
-void    tKarplusStrongSampleRateChanged (tKarplusStrong* const pl)
+void    tKarplusStrong_setSampleRate (tKarplusStrong* const pl, float sr)
 {
     _tKarplusStrong* p = *pl;
+    p->sampleRate = sr;
+    
+    tAllpassDelay_free(&p->delayLine);
+    tAllpassDelay_initToPool(&p->delayLine, 0.0f, p->sampleRate * 2, &p->mempool);
+    tAllpassDelay_clear(&p->delayLine);
+    
+    tLinearDelay_free(&p->combDelay);
+    tLinearDelay_initToPool(&p->combDelay, 0.0f, p->sampleRate * 2, &p->mempool);
+    tLinearDelay_clear(&p->combDelay);
     
     tKarplusStrong_setFrequency(pl, p->lastFrequency);
-    tKarplusStrong_setStretch(pl, p->stretching);
+    tOneZero_setSampleRate(&p->filter, p->sampleRate);
+    
+    for (int i = 0; i < 4; i++)
+    {
+        tBiQuad_setSampleRate(&p->biquad[i], p->sampleRate);
+    }
 }
 
 /* Simple Living String*/
@@ -365,8 +386,9 @@ void    tSimpleLivingString_initToPool  (tSimpleLivingString* const pl, float fr
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
     
+    p->sampleRate = leaf->sampleRate;
     p->curr=0.0f;
-    tExpSmooth_initToPool(&p->wlSmooth, leaf->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tExpSmooth_initToPool(&p->wlSmooth, p->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tSimpleLivingString_setFreq(pl, freq);
     tLinearDelay_initToPool(&p->delayLine,p->waveLengthInSamples, 2400, mp);
     tLinearDelay_clear(&p->delayLine);
@@ -393,11 +415,10 @@ void    tSimpleLivingString_free (tSimpleLivingString* const pl)
 void     tSimpleLivingString_setFreq(tSimpleLivingString* const pl, float freq)
 {
     _tSimpleLivingString* p = *pl;
-    LEAF* leaf = p->mempool->leaf;
     
     if (freq<20) freq=20;
     else if (freq>10000) freq=10000;
-    p->waveLengthInSamples = leaf->sampleRate/freq;
+    p->waveLengthInSamples = p->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
@@ -466,6 +487,17 @@ float   tSimpleLivingString_sample(tSimpleLivingString* const pl)
     return p->curr;
 }
 
+void   tSimpleLivingString_setSampleRate(tSimpleLivingString* const pl, float sr)
+{
+    _tSimpleLivingString* p = *pl;
+    float freq = p->sampleRate/p->waveLengthInSamples;
+    p->sampleRate = sr;
+    p->waveLengthInSamples = p->sampleRate/freq;
+    tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+    tOnePole_setSampleRate(&p->bridgeFilter, p->sampleRate);
+    tHighpass_setSampleRate(&p->DCblocker, p->sampleRate);
+}
+
 /* Living String*/
 
 void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, float prepIndex,
@@ -484,8 +516,9 @@ void    tLivingString_initToPool    (tLivingString* const pl, float freq, float 
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
     
+    p->sampleRate = leaf->sampleRate;
     p->curr=0.0f;
-    tExpSmooth_initToPool(&p->wlSmooth, leaf->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tExpSmooth_initToPool(&p->wlSmooth, p->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tLivingString_setFreq(pl, freq);
     p->freq = freq;
     tExpSmooth_initToPool(&p->ppSmooth, pickPos, 0.01f, mp); // smoother for pick position
@@ -538,11 +571,10 @@ void    tLivingString_free (tLivingString* const pl)
 void     tLivingString_setFreq(tLivingString* const pl, float freq)
 {    // NOTE: It is faster to set wavelength in samples directly
     _tLivingString* p = *pl;
-    LEAF* leaf = p->mempool->leaf;
     
     if (freq<20.f) freq=20.f;
     else if (freq>10000.f) freq=10000.f;
-    p->waveLengthInSamples = leaf->sampleRate/freq;
+    p->waveLengthInSamples = p->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
@@ -658,6 +690,21 @@ float   tLivingString_sample(tLivingString* const pl)
     return p->curr;
 }
 
+void   tLivingString_setSampleRate(tLivingString* const pl, float sr)
+{
+    _tLivingString* p = *pl;
+    float freq = p->sampleRate/p->waveLengthInSamples;
+    p->sampleRate = sr;
+    p->waveLengthInSamples = p->sampleRate/freq;
+    tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+    tOnePole_setSampleRate(&p->bridgeFilter, p->sampleRate);
+    tOnePole_setSampleRate(&p->nutFilter, p->sampleRate);
+    tOnePole_setSampleRate(&p->prepFilterU, p->sampleRate);
+    tOnePole_setSampleRate(&p->prepFilterL, p->sampleRate);
+    tHighpass_setSampleRate(&p->DCblockerU, p->sampleRate);
+    tHighpass_setSampleRate(&p->DCblockerL, p->sampleRate);
+}
+
 
 //////////---------------------------
 /* Version of Living String with Hermite Interpolation */
@@ -681,8 +728,9 @@ void    tLivingString2_initToPool    (tLivingString2* const pl, float freq, floa
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
 
+    p->sampleRate = leaf->sampleRate;
     p->curr=0.0f;
-    tExpSmooth_initToPool(&p->wlSmooth, leaf->sampleRate/freq, 0.1f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tExpSmooth_initToPool(&p->wlSmooth, p->sampleRate/freq, 0.1f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tLivingString2_setFreq(pl, freq);
     p->freq = freq;
     p->prepPos = prepPos;
@@ -742,24 +790,24 @@ void    tLivingString2_free (tLivingString2* const pl)
 void     tLivingString2_setFreq(tLivingString2* const pl, float freq)
 {    // NOTE: It is faster to set wavelength in samples directly
     _tLivingString2* p = *pl;
-    LEAF* leaf = p->mempool->leaf;
+    
     if (freq<20.f) freq=20.f;
     else if (freq>10000.f) freq=10000.f;
     freq = freq*2;
     p->freq = freq;
-    p->waveLengthInSamples = (leaf->sampleRate/freq) - 1;
+    p->waveLengthInSamples = (p->sampleRate/p->freq) - 1;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
 void     tLivingString2_setWaveLength(tLivingString2* const pl, float waveLength)
 {
     _tLivingString2* p = *pl;
-    LEAF* leaf = p->mempool->leaf;
+    
     waveLength = waveLength * 0.5f;
     if (waveLength<4.8f) waveLength=4.8f;
     else if (waveLength>2400.f) waveLength=2400.f;
     p->waveLengthInSamples = waveLength - 1;
-    p->freq = leaf->sampleRate / waveLength;
+    p->freq = p->sampleRate / waveLength;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
@@ -927,7 +975,6 @@ float   tLivingString2_tick(tLivingString2* const pl, float input)
     tHermiteDelay_setDelay(&p->delLB, lowLen);
     tHermiteDelay_setDelay(&p->delUF, upLen);
     tHermiteDelay_setDelay(&p->delUB, upLen);
-
     
     uint32_t pickupPosInt;
     float pickupOut = 0.0f;
@@ -962,7 +1009,19 @@ float   tLivingString2_sample(tLivingString2* const pl)
     return p->curr;
 }
 
-
+void    tLivingString2_setSampleRate(tLivingString2* const pl, float sr)
+{
+    _tLivingString2* p = *pl;
+    p->sampleRate = sr;
+    p->waveLengthInSamples = (p->sampleRate/p->freq) - 1;
+    tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+    tTwoZero_setSampleRate(&p->bridgeFilter, p->sampleRate);
+    tTwoZero_setSampleRate(&p->nutFilter, p->sampleRate);
+    tTwoZero_setSampleRate(&p->prepFilterU, p->sampleRate);
+    tTwoZero_setSampleRate(&p->prepFilterL, p->sampleRate);
+    tHighpass_setSampleRate(&p->DCblockerU, p->sampleRate);
+    tHighpass_setSampleRate(&p->DCblockerL, p->sampleRate);
+}
 
 //////////---------------------------
 
@@ -984,8 +1043,9 @@ void    tComplexLivingString_initToPool    (tComplexLivingString* const pl, floa
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
 
+    p->sampleRate = leaf->sampleRate;
     p->curr=0.0f;
-    tExpSmooth_initToPool(&p->wlSmooth, leaf->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tExpSmooth_initToPool(&p->wlSmooth, p->sampleRate/freq, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
     tComplexLivingString_setFreq(pl, freq);
     p->freq = freq;
     tExpSmooth_initToPool(&p->pickPosSmooth, pickPos, 0.01f, mp); // smoother for pick position
@@ -1050,11 +1110,10 @@ void    tComplexLivingString_free (tComplexLivingString* const pl)
 void     tComplexLivingString_setFreq(tComplexLivingString* const pl, float freq)
 {    // NOTE: It is faster to set wavelength in samples directly
     _tComplexLivingString* p = *pl;
-    LEAF* leaf = p->mempool->leaf;
     
     if (freq<20.0f) freq=20.0f;
     else if (freq>10000.0f) freq=10000.0f;
-    p->waveLengthInSamples = leaf->sampleRate/freq;
+    p->waveLengthInSamples = p->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
@@ -1205,7 +1264,20 @@ float   tComplexLivingString_sample(tComplexLivingString* const pl)
     return p->curr;
 }
 
-
+void    tComplexLivingString_setSampleRate(tComplexLivingString* const pl, float sr)
+{
+    _tComplexLivingString* p = *pl;
+    float freq = p->waveLengthInSamples/p->sampleRate;
+    p->sampleRate = sr;
+    p->waveLengthInSamples = p->sampleRate/freq;
+    tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+    tOnePole_setSampleRate(&p->bridgeFilter, p->sampleRate);
+    tOnePole_setSampleRate(&p->nutFilter, p->sampleRate);
+    tOnePole_setSampleRate(&p->prepFilterU, p->sampleRate);
+    tOnePole_setSampleRate(&p->prepFilterL, p->sampleRate);
+    tHighpass_setSampleRate(&p->DCblockerU, p->sampleRate);
+    tHighpass_setSampleRate(&p->DCblockerL, p->sampleRate);
+}
 
 ///Reed Table model
 //default values from STK are 0.6 offset and -0.8 slope
