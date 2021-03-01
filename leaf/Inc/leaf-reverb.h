@@ -77,7 +77,6 @@ extern "C" {
         
         float mix, t60;
         
-        float inv_441;
         float sampleRate;
         float invSampleRate;
         
@@ -152,7 +151,6 @@ extern "C" {
         
         float mix, t60;
         
-        float inv_441;
         float sampleRate;
         float invSampleRate;
         

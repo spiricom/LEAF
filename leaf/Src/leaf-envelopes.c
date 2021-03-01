@@ -234,11 +234,13 @@ void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, fl
         attack = 8192.0f;
     if (attack < 0.0f)
         attack = 0.0f;
+    adsr->attack = attack;
 
     if (decay > 8192.0f)
         decay = 8192.0f;
     if (decay < 0.0f)
         decay = 0.0f;
+    adsr->decay = decay;
 
     if (sustain > 1.0f)
         sustain = 1.0f;
@@ -249,6 +251,7 @@ void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, fl
         release = 8192.0f;
     if (release < 0.0f)
         release = 0.0f;
+    adsr->release = release;
 
     int16_t attackIndex = ((int16_t)(attack * 8.0f))-1;
     int16_t decayIndex = ((int16_t)(decay * 8.0f))-1;
@@ -279,7 +282,9 @@ void    tADSR_initToPool    (tADSR* const adsrenv, float attack, float decay, fl
     adsr->releaseInc = adsr->inc_buff[releaseIndex];
     adsr->rampInc = adsr->inc_buff[rampIndex];
 
+    adsr->baseLeakFactor = 1.0f;
     adsr->leakFactor = 1.0f;
+    adsr->invSampleRate = adsr->mempool->leaf->invSampleRate;
 }
 
 void    tADSR_free (tADSR* const adsrenv)
@@ -293,6 +298,8 @@ void     tADSR_setAttack(tADSR* const adsrenv, float attack)
     _tADSR* adsr = *adsrenv;
 
     int32_t attackIndex;
+    
+    adsr->attack = attack;
 
     if (attack < 0.0f) {
         attackIndex = 0.0f;
@@ -302,7 +309,7 @@ void     tADSR_setAttack(tADSR* const adsrenv, float attack)
         attackIndex = ((int32_t)(8192.0f * 8.0f))-1;
     }
 
-    adsr->attackInc = adsr->inc_buff[attackIndex];
+    adsr->attackInc = adsr->inc_buff[attackIndex] * (44100.f * adsr->invSampleRate);
 }
 
 void     tADSR_setDecay(tADSR* const adsrenv, float decay)
@@ -310,6 +317,8 @@ void     tADSR_setDecay(tADSR* const adsrenv, float decay)
     _tADSR* adsr = *adsrenv;
 
     int32_t decayIndex;
+    
+    adsr->decay = decay;
 
     if (decay < 0.0f) {
         decayIndex = 0.0f;
@@ -319,7 +328,7 @@ void     tADSR_setDecay(tADSR* const adsrenv, float decay)
         decayIndex = ((int32_t)(8192.0f * 8.0f)) - 1;
     }
 
-    adsr->decayInc = adsr->inc_buff[decayIndex];
+    adsr->decayInc = adsr->inc_buff[decayIndex] * (44100.f * adsr->invSampleRate);
 }
 
 void     tADSR_setSustain(tADSR* const adsrenv, float sustain)
@@ -336,6 +345,8 @@ void     tADSR_setRelease(tADSR* const adsrenv, float release)
     _tADSR* adsr = *adsrenv;
 
     int32_t releaseIndex;
+    
+    adsr->release = release;
 
     if (release < 0.0f) {
         releaseIndex = 0.0f;
@@ -345,16 +356,15 @@ void     tADSR_setRelease(tADSR* const adsrenv, float release)
         releaseIndex = ((int32_t)(8192.0f * 8.0f)) - 1;
     }
 
-    adsr->releaseInc = adsr->inc_buff[releaseIndex];
+    adsr->releaseInc = adsr->inc_buff[releaseIndex] * (44100.f * adsr->invSampleRate);
 }
 
 // 0.999999 is slow leak, 0.9 is fast leak
 void     tADSR_setLeakFactor(tADSR* const adsrenv, float leakFactor)
 {
     _tADSR* adsr = *adsrenv;
-
-
-    adsr->leakFactor = leakFactor;
+    adsr->baseLeakFactor = leakFactor;
+    adsr->leakFactor = powf(leakFactor, 44100.0f * adsr->invSampleRate);
 }
 
 void tADSR_on(tADSR* const adsrenv, float velocity)
@@ -482,6 +492,19 @@ float   tADSR_tick(tADSR* const adsrenv)
 
     return adsr->next;
 }
+
+void tADSR_setSampleRate(tADSR* const adsrenv, float sr)
+{
+    _tADSR* adsr = *adsrenv;
+    
+    adsr->invSampleRate = 1.0f/sr;
+    
+    tADSR_setAttack(adsrenv, adsr->attack);
+    tADSR_setDecay(adsrenv, adsr->decay);
+    tADSR_setRelease(adsrenv, adsr->release);
+    tADSR_setLeakFactor(adsrenv, adsr->baseLeakFactor);
+}
+
 #endif // LEAF_INCLUDE_ADSR_TABLES
 
 
@@ -535,7 +558,11 @@ void    tADSRS_initToPool    (tADSRS* const adsrenv, float attack, float decay, 
     adsr->factor = 0.01f;
     adsr->oneMinusFactor = 0.99f;
     adsr->output = 0.0f;
+    
+    adsr->baseLeakFactor = 1.0f;
     adsr->leakFactor = 1.0f;
+    
+    adsr->invSampleRate = leaf->invSampleRate;
 }
 
 void    tADSRS_free  (tADSRS* const adsrenv)
@@ -586,7 +613,8 @@ void     tADSRS_setRelease(tADSRS* const adsrenv, float release)
 void     tADSRS_setLeakFactor(tADSRS* const adsrenv, float leakFactor)
 {
     _tADSRS* adsr = *adsrenv;
-    adsr->leakFactor = leakFactor;
+    adsr->baseLeakFactor = leakFactor;
+    adsr->leakFactor = powf(leakFactor, 44100.0f * adsr->invSampleRate);
 }
 
 void tADSRS_on(tADSRS* const adsrenv, float velocity)
@@ -650,10 +678,12 @@ void tADSRS_setSampleRate(tADSRS* const adsrenv, float sr)
     
     adsr->sampleRate = sr;
     adsr->sampleRateInMs =  adsr->sampleRate * 0.001f;
+    adsr->invSampleRate = 1.0f/sr;
     
     tADSRS_setAttack(adsrenv, adsr->attack);
     tADSRS_setDecay(adsrenv, adsr->decay);
     tADSRS_setRelease(adsrenv, adsr->release);
+    tADSRS_setLeakFactor(adsrenv, adsr->baseLeakFactor);
 }
 
 //================================================================================
@@ -710,7 +740,9 @@ void    tADSRT_initToPool    (tADSRT* const adsrenv, float attack, float decay, 
     adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / release;
     adsr->rampInc = adsr->bufferSizeDividedBySampleRateInMs / 8.0f;
 
+    adsr->baseLeakFactor = 1.0f;
     adsr->leakFactor = 1.0f;
+    adsr->invSampleRate = leaf->invSampleRate;
 }
 
 void    tADSRT_free  (tADSRT* const adsrenv)
@@ -768,7 +800,8 @@ void     tADSRT_setRelease(tADSRT* const adsrenv, float release)
 void     tADSRT_setLeakFactor(tADSRT* const adsrenv, float leakFactor)
 {
     _tADSRT* adsr = *adsrenv;
-    adsr->leakFactor = leakFactor;
+    adsr->baseLeakFactor = leakFactor;
+    adsr->leakFactor = powf(leakFactor, 44100.0f * adsr->invSampleRate);;
 }
 
 void tADSRT_on(tADSRT* const adsrenv, float velocity)
@@ -1010,16 +1043,18 @@ float   tADSRT_tickNoInterp(tADSRT* const adsrenv)
     return adsr->next;
 }
 
-void    tADSRT_setSampleRate (tADSRT* const adsrenv, float sr)
+void    tADSRT_setSampleRate(tADSRT* const adsrenv, float sr)
 {
     _tADSRT* adsr = *adsrenv;
     
     adsr->sampleRate = sr;
+    adsr->invSampleRate = 1.0f/sr;
     adsr->bufferSizeDividedBySampleRateInMs = adsr->buff_size / (adsr->sampleRate * 0.001f);
     adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / adsr->attack;
     adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / adsr->decay;
     adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / adsr->release;
     adsr->rampInc = adsr->bufferSizeDividedBySampleRateInMs / 8.0f;
+    adsr->leakFactor = powf(adsr->baseLeakFactor, 44100.0f * adsr->invSampleRate);
 }
 
 /////-----------------
@@ -1279,12 +1314,13 @@ void    tExpSmooth_initToPool   (tExpSmooth* const expsmooth, float val, float f
     _tExpSmooth* smooth = *expsmooth = (_tExpSmooth*) mpool_alloc(sizeof(_tExpSmooth), m);
     smooth->mempool = m;
     
-    smooth->curr=val;
-    smooth->dest=val;
-    if (factor<0) factor=0;
-    if (factor>1) factor=1;
-    smooth->factor=factor;
-    smooth->oneminusfactor=1.0f-factor;
+    smooth->curr = val;
+    smooth->dest = val;
+    if (factor < 0) factor = 0;
+    if (factor > 1) factor = 1;
+    smooth->factor = factor;
+    smooth->oneminusfactor = 1.0f - factor;
+    smooth->invSampleRate = smooth->mempool->leaf->invSampleRate;
 }
 
 void    tExpSmooth_free (tExpSmooth* const expsmooth)
@@ -1297,12 +1333,12 @@ void     tExpSmooth_setFactor(tExpSmooth* const expsmooth, float factor)
 {   // factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
     _tExpSmooth* smooth = *expsmooth;
     
-    if (factor<0)
-        factor=0;
-    else
-        if (factor>1) factor=1;
-    smooth->factor=factor;
-    smooth->oneminusfactor=1.0f-factor;
+    if (factor < 0)
+        factor = 0;
+    else if (factor > 1) factor = 1;
+    smooth->baseFactor = factor;
+    smooth->factor = powf(factor, 44100.f * smooth->invSampleRate);
+    smooth->oneminusfactor = 1.0f - factor;
 }
 
 void     tExpSmooth_setDest(tExpSmooth* const expsmooth, float dest)
@@ -1335,6 +1371,14 @@ float   tExpSmooth_sample(tExpSmooth* const expsmooth)
 {
     _tExpSmooth* smooth = *expsmooth;
     return smooth->curr;
+}
+
+void    tExpSmooth_setSampleRate(tExpSmooth* const expsmooth, float sr)
+{
+    _tExpSmooth* smooth = *expsmooth;
+    smooth->invSampleRate = 1.0f/sr;
+    smooth->factor = powf(smooth->baseFactor, 44100.f * smooth->invSampleRate);
+    smooth->oneminusfactor = 1.0f - smooth->factor;
 }
 
 //tSlide is based on the max/msp slide~ object

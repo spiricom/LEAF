@@ -58,6 +58,9 @@ extern "C" {
 #define INV_10240      0.00009765625f
 #define INV_20480      0.000048828125f
     
+#define INV_44100      0.00002267573f
+#define INV_48000      0.00002083333f
+    
     
 #define INV_TWELVE                 0.0833333333f
 #define INV_440                     0.0022727273f

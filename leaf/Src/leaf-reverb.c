@@ -33,13 +33,11 @@ void    tPRCReverb_initToPool   (tPRCReverb* const rev, float t60, tMempool* con
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
-    r->inv_441 = 1.0f/44100.0f;
-    
     r->sampleRate = leaf->sampleRate;
     r->invSampleRate = leaf->invSampleRate;
     
     int lengths[4] = { 341, 613, 1557, 2137 }; // Delay lengths for 44100 Hz sample rate.
-    double scaler = r->sampleRate * r->inv_441;
+    double scaler = r->sampleRate * INV_44100;
     
     int delay, i;
     if (scaler != 1.0f)
@@ -144,7 +142,7 @@ void     tPRCReverb_setSampleRate (tPRCReverb* const rev, float sr)
     r->invSampleRate = 1.0f/r->sampleRate;
     
     int lengths[4] = { 341, 613, 1557, 2137 }; // Delay lengths for 44100 Hz sample rate.
-    double scaler = r->sampleRate * r->inv_441;
+    double scaler = r->sampleRate * INV_44100;
     
     int delay, i;
     if (scaler != 1.0f)
@@ -187,12 +185,11 @@ void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
-    r->inv_441 = 1.0f/44100.0f;
     r->sampleRate = leaf->sampleRate;
     r->invSampleRate = leaf->invSampleRate;
     
     int lengths[15] = {1433, 1601, 1867, 2053, 2251, 2399, 347, 113, 37, 59, 53, 43, 37, 29, 19}; // Delay lengths for 44100 Hz sample rate.
-    double scaler = r->sampleRate * r->inv_441;// / 25641.0f;
+    double scaler = r->sampleRate * INV_44100;// / 25641.0f;
     
     int delay, i;
     
@@ -389,7 +386,7 @@ void     tNReverb_setSampleRate (tNReverb* const rev, float sr)
     r->invSampleRate = 1.0f/r->sampleRate;
     
     int lengths[15] = {1433, 1601, 1867, 2053, 2251, 2399, 347, 113, 37, 59, 53, 43, 37, 29, 19}; // Delay lengths for 44100 Hz sample rate.
-    double scaler = r->sampleRate * r->inv_441;// / 25641.0f;
+    double scaler = r->sampleRate * INV_44100;// / 25641.0f;
     
     int delay, i;
     

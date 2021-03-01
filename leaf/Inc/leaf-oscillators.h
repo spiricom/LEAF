@@ -630,7 +630,7 @@ extern "C" {
         
         float voltage, current;
         float timeStep;
-        
+        float invSampleRate;
         float alpha[3];
         float beta[3];
         float rate[3];
@@ -657,6 +657,7 @@ extern "C" {
     void    tNeuron_setV2       (tNeuron* const neuron, float V2);
     void    tNeuron_setV3       (tNeuron* const neuron, float V3);
     void    tNeuron_setTimeStep (tNeuron* const neuron, float timestep);
+    void    tNeuron_setSampleRate(tNeuron* const neuron, float sr);
 
     //==============================================================================
     

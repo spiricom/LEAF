@@ -700,12 +700,14 @@ void tNeuron_initToPool  (tNeuron* const nr, tMempool* const mp)
     _tMempool* m = *mp;
     _tNeuron* n = *nr = (_tNeuron*) mpool_alloc(sizeof(_tNeuron), m);
     n->mempool = m;
+    LEAF* leaf = n->mempool->leaf;
 
     tPoleZero_initToPool(&n->f, mp);
     
     tPoleZero_setBlockZero(&n->f, 0.99f);
     
-    n->timeStep = 1.0f / 50.0f;
+    n->invSampleRate = leaf->invSampleRate;
+    n->timeStep = (44100.0f * n->invSampleRate) / 50.0f;
     
     n->current = 0.0f; // 100.0f for sound
     n->voltage = 0.0f;
@@ -742,7 +744,7 @@ void   tNeuron_reset(tNeuron* const nr)
     
     tPoleZero_setBlockZero(&n->f, 0.99f);
     
-    n->timeStep = 1.0f / 50.0f;
+    n->timeStep = (44100.0f * n->invSampleRate) / 50.0f;
     
     n->current = 0.0f; // 100.0f for sound
     n->voltage = 0.0f;
@@ -786,7 +788,7 @@ void tNeuron_setV3(tNeuron* const nr, float V3)
 void tNeuron_setTimeStep(tNeuron* const nr, float timeStep)
 {
     _tNeuron* n = *nr;
-    n->timeStep = timeStep;
+    n->timeStep = (44100.0f * n->invSampleRate) * timeStep;
 }
 
 void tNeuron_setK(tNeuron* const nr, float K)
@@ -901,6 +903,13 @@ void tNeuron_setCurrent  (tNeuron* const nr, float current)
 {
     _tNeuron* n = *nr;
     n->current = current;
+}
+
+void tNeuron_setSampleRate (tNeuron* const nr, float sr)
+{
+    _tNeuron* n = *nr;
+    n->invSampleRate = 1.0f/sr;
+    n->timeStep = (44100.0f * n->invSampleRate) / 50.0f;
 }
 
 //----------------------------------------------------------------------------------------------------------

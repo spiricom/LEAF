@@ -164,8 +164,9 @@ extern "C" {
     {
         
         tMempool mempool;
-        float factor, oneminusfactor;
+        float baseFactor, factor, oneminusfactor;
         float curr,dest;
+        float invSampleRate;
     } _tExpSmooth;
     
     typedef _tExpSmooth* tExpSmooth;
@@ -179,7 +180,8 @@ extern "C" {
     void    tExpSmooth_setFactor    (tExpSmooth* const, float factor);
     void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
     void    tExpSmooth_setVal       (tExpSmooth* const, float val);
-    void    tExpSmooth_setValAndDest(tExpSmooth* const expsmooth, float val);
+    void    tExpSmooth_setValAndDest(tExpSmooth* const, float val);
+    void    tExpSmooth_setSampleRate(tExpSmooth* const, float sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -252,6 +254,8 @@ extern "C" {
         
         float next;
         
+        float attack, decay, release;
+        
         float attackInc, decayInc, releaseInc, rampInc;
         
         int inAttack, inDecay, inSustain, inRelease, inRamp;
@@ -260,7 +264,9 @@ extern "C" {
         
         float attackPhase, decayPhase, releasePhase, rampPhase;
         
-        float leakFactor;
+        float baseLeakFactor, leakFactor;
+        
+        float invSampleRate;
     } _tADSR;
     
     typedef _tADSR* tADSR;
@@ -277,6 +283,7 @@ extern "C" {
     void    tADSR_setLeakFactor (tADSR* const, float leakFactor);
     void    tADSR_on            (tADSR* const, float velocity);
     void    tADSR_off           (tADSR* const);
+    void    tADSR_setSampleRate (tADSR* const, float sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -358,7 +365,9 @@ extern "C" {
         
         float attackPhase, decayPhase, releasePhase, rampPhase;
         
-        float leakFactor;
+        float baseLeakFactor, leakFactor;
+        
+        float invSampleRate;
     } _tADSRT;
     
     typedef _tADSRT* tADSRT;
@@ -466,12 +475,12 @@ extern "C" {
         float attackBase;
         float decayBase;
         float releaseBase;
-        float leakFactor;
+        float baseLeakFactor, leakFactor;
         float targetGainSquared;
         float factor;
         float oneMinusFactor;
         float gain;
-        
+        float invSampleRate;
     } _tADSRS;
     
     typedef _tADSRS* tADSRS;
