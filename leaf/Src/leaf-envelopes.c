@@ -1318,6 +1318,7 @@ void    tExpSmooth_initToPool   (tExpSmooth* const expsmooth, float val, float f
     smooth->dest = val;
     if (factor < 0) factor = 0;
     if (factor > 1) factor = 1;
+    smooth->baseFactor = factor;
     smooth->factor = factor;
     smooth->oneminusfactor = 1.0f - factor;
     smooth->invSampleRate = smooth->mempool->leaf->invSampleRate;
@@ -1363,7 +1364,7 @@ void     tExpSmooth_setValAndDest(tExpSmooth* const expsmooth, float val)
 float   tExpSmooth_tick(tExpSmooth* const expsmooth)
 {
     _tExpSmooth* smooth = *expsmooth;
-    smooth->curr = smooth->factor*smooth->dest+smooth->oneminusfactor*smooth->curr;
+    smooth->curr = smooth->factor * smooth->dest + smooth->oneminusfactor * smooth->curr;
     return smooth->curr;
 }
 
