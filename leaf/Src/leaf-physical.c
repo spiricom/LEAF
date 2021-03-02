@@ -1003,6 +1003,87 @@ float   tLivingString2_tick(tLivingString2* const pl, float input)
     return p->curr;
 }
 
+float   tLivingString2_tickEfficient(tLivingString2* const pl, float input)
+{
+    _tLivingString2* p = *pl;
+
+    input = input * 0.5f; // drop gain by half since we'll be equally adding it at half amplitude to forward and backward waveguides
+    // from prepPos upwards=forwards
+    //float pickupPos=tExpSmooth_tick(&p->puSmooth);
+    float wLen = p->wlSmooth->dest;
+
+    float pickP = p->ppSmooth->dest;
+
+    //need to determine which delay line to put it into (should be half amplitude into forward and backward lines for the correct portion of string)
+    float prepP = p->prpSmooth->dest;
+    float lowLen=p->prpSmooth->dest*p->wlSmooth->dest;
+    float upLen=(1.0f-p->prpSmooth->dest)*p->wlSmooth->dest;
+    uint32_t pickPInt;
+    if (pickP > prepP)
+    {
+        float fullPickPoint =  ((pickP*wLen) - lowLen);
+        pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
+
+        tHermiteDelay_addTo(&p->delUF, input, pickPInt);
+        tHermiteDelay_addTo(&p->delUB, input, (uint32_t) (upLen - pickPInt));
+    }
+    else
+    {
+        float fullPickPoint =  pickP * wLen;
+        pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
+
+        tHermiteDelay_addTo(&p->delLF, input, pickPInt);
+        tHermiteDelay_addTo(&p->delLB, input, (uint32_t) (lowLen - pickPInt));
+    }
+    float fromLF=tHermiteDelay_tickOut(&p->delLF);
+    float fromUF=tHermiteDelay_tickOut(&p->delUF);
+    float fromUB=tHermiteDelay_tickOut(&p->delUB);
+    float fromLB=tHermiteDelay_tickOut(&p->delLB);
+    // into upper half of string, from bridge, going backwards
+    //float fromBridge=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerU, tTwoZero_tick(&p->bridgeFilter, fromUF)));
+    float fromBridge=-tFeedbackLeveler_tick(&p->fbLevU,tHighpass_tick(&p->DCblockerU, tTwoZero_tick(&p->bridgeFilter, fromUF)));
+    tHermiteDelay_tickIn(&p->delUB, fromBridge);
+    // into lower half of string, from prepPoint, going backwards
+    float fromLowerPrep=-tTwoZero_tick(&p->prepFilterL, fromLF);
+    float intoLower=(p->prepIndex*fromLowerPrep)+((1.0f - p->prepIndex)*fromUB); //used to add input here
+    tHermiteDelay_tickIn(&p->delLB, intoLower);
+    // into lower half of string, from nut
+    //float fromNut=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tTwoZero_tick(&p->nutFilter, fromLB)));
+    float fromNut=-tFeedbackLeveler_tick(&p->fbLevL,tHighpass_tick(&p->DCblockerL, tTwoZero_tick(&p->nutFilter, fromLB)));
+    tHermiteDelay_tickIn(&p->delLF, fromNut);
+    // into upper half of string, from prepPoint, going forwards/upwards
+    float fromUpperPrep=-tTwoZero_tick(&p->prepFilterU, fromUB);
+    float intoUpper=(p->prepIndex*fromUpperPrep)+((1.0f - p->prepIndex)*fromLF);
+    tHermiteDelay_tickIn(&p->delUF, intoUpper);
+    // update all delay lengths
+
+    p->curr = fromBridge;
+
+    //p->curr = fromBridge;
+    //p->curr += fromNut;
+
+    return p->curr;
+}
+
+float   tLivingString2_udpateDelays(tLivingString2* const pl)
+{
+    _tLivingString2* p = *pl;
+
+
+
+    //need to determine which delay line to put it into (should be half amplitude into forward and backward lines for the correct portion of string)
+
+    float lowLen=p->prpSmooth->dest*p->wlSmooth->dest;
+    float upLen=(1.0f-p->prpSmooth->dest)*p->wlSmooth->dest;
+
+
+
+	tHermiteDelay_setDelay(&p->delLF, lowLen);
+    tHermiteDelay_setDelay(&p->delLB, lowLen);
+    tHermiteDelay_setDelay(&p->delUF, upLen);
+    tHermiteDelay_setDelay(&p->delUB, upLen);
+}
+
 float   tLivingString2_sample(tLivingString2* const pl)
 {
     _tLivingString2* p = *pl;

@@ -259,10 +259,10 @@ void    tEnvPD_initToPool       (tEnvPD* const xpd, int ws, int hs, int bs, tMem
     x->hopSize = period;
     x->blockSize = bs;
     
-    for (i = 0; i < MAXOVERLAP; i++) x->x_sumbuf[i] = 0;
+    for (i = 0; i < MAXOVERLAP; i++) x->x_sumbuf[i] = 0.0f;
     for (i = 0; i < npoints; i++)
-    x->buf[i] = (1.0f - cosf((2 * PI * i) / npoints))/npoints;
-    for (; i < npoints+INITVSTAKEN; i++) x->buf[i] = 0;
+    x->buf[i] = (1.0f - cosf((2.0f * PI * i) / npoints))/npoints;
+    for (; i < npoints+INITVSTAKEN; i++) x->buf[i] = 0.0f;
     
     x->x_f = 0;
     
@@ -317,7 +317,7 @@ void tEnvPD_processBlock(tEnvPD* const xpd, float* in)
         }
         *sump = sum;
     }
-    sump[0] = 0;
+    sump[0] = 0.0f;
     x->x_phase -= n;
     if (x->x_phase < 0)
     {
@@ -325,7 +325,7 @@ void tEnvPD_processBlock(tEnvPD* const xpd, float* in)
         for (count = x->x_realperiod, sump = x->x_sumbuf;
              count < x->x_npoints; count += x->x_realperiod, sump++)
         sump[0] = sump[1];
-        sump[0] = 0;
+        sump[0] = 0.0f;
         x->x_phase = x->x_realperiod - n;
     }
 }

@@ -559,6 +559,8 @@ extern "C" {
     void    tLivingString2_free                  (tLivingString2* const);
     
     float   tLivingString2_tick                  (tLivingString2* const, float input);
+    float   tLivingString2_tickEfficient                 (tLivingString2* const, float input);
+    float   tLivingString2_udpateDelays(tLivingString2* const pl); //necessary if using tickEfficient (so that parameter setting can be put in a slower process). included in standard tick.
     float   tLivingString2_sample                (tLivingString2* const);
     void    tLivingString2_setFreq               (tLivingString2* const, float freq);
     void    tLivingString2_setWaveLength         (tLivingString2* const, float waveLength); // in samples
