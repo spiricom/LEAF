@@ -40,6 +40,7 @@ tMBSampler sampler;
 
 const int numWavetables = 1;
 tWaveTable wavetables[numWavetables];
+tSimpleRetune retune;
 
 float gain;
 float dtime;
@@ -61,7 +62,10 @@ int lastLoadedAudioSize = 0;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
-    LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
+    LEAF_init(&leaf, sampleRate, memory, MSIZE, &getRandomFloat);
+    
+    tSimpleRetune_init(&retune, 1, 100, 1200, 2048, &leaf);
+    tSimpleRetune_setMode(&retune, 1);
     
 //    tWaveTable_init(&wt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
 //    tWaveTableS_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
@@ -101,6 +105,10 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
+    tSimpleRetune_tuneVoice(&retune, 0, mtof(roundf(ftom(tSimpleRetune_getInputFrequency(&retune)))));
+    return tSimpleRetune_tick(&retune, input);
+    
+    
     float out = 0.0f;
     for (int i = 0; i < fmin(loadedAudio.size(), numWavetables); ++i)
     {
