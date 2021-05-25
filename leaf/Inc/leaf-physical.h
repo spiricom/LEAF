@@ -337,6 +337,49 @@ extern "C" {
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
+
+
+    typedef struct _tSimpleLivingString2
+    {
+
+        tMempool mempool;
+        float freq, waveLengthInSamples;        // the frequency of the string, determining delay length
+        float brightness;    // frequency for the bridge LP filter, in Hz
+        float decay; // amplitude damping factor for the string (only active in mode 0)
+        int levMode;
+        float curr;
+        tHermiteDelay delayLine;
+        tTwoZero bridgeFilter;
+        tHighpass DCblocker;
+        tFeedbackLeveler fbLev;
+        tExpSmooth wlSmooth;
+        float sampleRate;
+    } _tSimpleLivingString2;
+
+    typedef _tSimpleLivingString2* tSimpleLivingString2;
+
+    void    tSimpleLivingString2_init                (tSimpleLivingString2* const, float freq, float brightness,
+                                                     float decay, float targetLev, float levSmoothFactor,
+                                                     float levStrength, int levMode, LEAF* const leaf);
+    void    tSimpleLivingString2_initToPool          (tSimpleLivingString2* const, float freq, float brightness,
+                                                     float decay, float targetLev, float levSmoothFactor,
+                                                     float levStrength, int levMode, tMempool* const);
+    void    tSimpleLivingString2_free                (tSimpleLivingString2* const);
+
+    float   tSimpleLivingString2_tick                (tSimpleLivingString2* const, float input);
+    float   tSimpleLivingString2_sample              (tSimpleLivingString2* const);
+    void    tSimpleLivingString2_setFreq             (tSimpleLivingString2* const, float freq);
+    void    tSimpleLivingString2_setWaveLength       (tSimpleLivingString2* const, float waveLength); // in samples
+    void    tSimpleLivingString2_setBrightness         (tSimpleLivingString2* const, float brightness);
+    void    tSimpleLivingString2_setDecay            (tSimpleLivingString2* const, float decay); // should be near 1.0
+    void    tSimpleLivingString2_setTargetLev        (tSimpleLivingString2* const, float targetLev);
+    void    tSimpleLivingString2_setLevSmoothFactor  (tSimpleLivingString2* const, float levSmoothFactor);
+    void    tSimpleLivingString2_setLevStrength      (tSimpleLivingString2* const, float levStrength);
+    void    tSimpleLivingString2_setLevMode          (tSimpleLivingString2* const, int levMode);
+    void    tSimpleLivingString2_setSampleRate       (tSimpleLivingString2* const, float sr);
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
     /*!
      @defgroup tlivingstring tLivingString
      @ingroup physical

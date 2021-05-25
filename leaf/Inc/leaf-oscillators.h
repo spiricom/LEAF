@@ -65,9 +65,11 @@ extern "C" {
     {
         tMempool mempool;
         // Underlying phasor
-        float phase;
-        float inc,freq;
-        float invSampleRate;
+        uint32_t phase;
+        uint32_t inc;
+		float freq;
+        float invSampleRateTimesTwoTo32;
+        uint32_t mask;
     } _tCycle;
     
     typedef _tCycle* tCycle;
@@ -977,6 +979,7 @@ extern "C" {
         float* baseTable;
         float** tables;
         int size;
+        int sizeMask;
         int numTables;
         float maxFreq;
         float baseFreq, invBaseFreq;
@@ -1086,34 +1089,47 @@ extern "C" {
      @} */
     
     typedef struct _tWaveSynth
-    {
-        tMempool mempool;
-        
-        tWaveTable* tables;
-        tWaveOsc** oscs;
-        int numTables;
-        int numVoices;
-        float* g;
-        float index;
-        float maxFreq;
-    } _tWaveSynth;
+       {
+           tMempool mempool;
+           tWaveTable* tables;
+           int numTables;
+           float index;
+           float maxFreq;
+           int o1;
+           int o2;
+           float mix;
+           uint32_t phase;
+           int32_t inc;
+           float freq;
+           float invSampleRateTimesTwoTo32;
+           int oct;
+           int size;
+
+           // Determine base frequency
+           float baseFreq;
+           float invBaseFreq;
+           float sampleRate;
+           float w;
+           float aa;
+           int numSubTables;
+
+       } _tWaveSynth;
     
     typedef _tWaveSynth* tWaveSynth;
     
-    void    tWaveSynth_init(tWaveSynth* const osc, int numVoices, float** tables, int* sizes,
-                            int numTables, float maxFreq, LEAF* const leaf);
-    void    tWaveSynth_initToPool(tWaveSynth* const osc, int numVoices, float** tables, int* sizes,
-                                  int numTables, float maxFreq, tMempool* const mempool);
+    void tWaveSynth_init(tWaveSynth* const cy, tWaveTable* tables, int size,
+                                int numTables, float maxFreq, LEAF* const leaf);
+
+    void tWaveSynth_initToPool(tWaveSynth* const cy, tWaveTable* tables, int size,
+                                      int numTables, float maxFreq, tMempool* const mp);
     void    tWaveSynth_free(tWaveSynth* const osc);
     
     float   tWaveSynth_tick(tWaveSynth* const osc);
-    float   tWaveSynth_tickVoice(tWaveSynth* const cy, int voice);
-    void    tWaveSynth_setFreq(tWaveSynth* const osc, int voice, float freq);
+
+    void 	tWaveSynth_setFreq(tWaveSynth* const cy, float freq);
     void    tWaveSynth_setAntiAliasing(tWaveSynth* const osc, float aa);
     void    tWaveSynth_setIndex(tWaveSynth* const osc, float index);
-    void    tWaveSynth_setIndexGain(tWaveSynth* const osc, int i, float gain);
-    void    tWaveSynth_setIndexPhase(tWaveSynth* const osc, int i, float phase);
-//    void    tWaveSynth_setIndexTable(tWaveSynth* const osc, int i, float* table, int size);
+    void 	tWaveSynth_setTables(tWaveSynth* const cy, tWaveTable* tables, int numTables, int size);
     void    tWaveSynth_setSampleRate (tWaveSynth* const osc, float sr);
 
     //==============================================================================
@@ -1154,6 +1170,7 @@ extern "C" {
         float** tables;
         int numTables;
         int* sizes;
+        int* sizeMasks;
         float maxFreq;
         float baseFreq, invBaseFreq;
         tButterworth bl;
@@ -1233,7 +1250,59 @@ extern "C" {
     void    tWaveOscS_setSampleRate (tWaveOscS* const osc, float sr);
     
     //==============================================================================
+    /*!
+     @defgroup twaveoscs tWaveOscS
+     @ingroup oscillators
+     @brief A more space-efficient anti-aliased wavetable oscillator than tWaveOsc but with slightly worse fidelity.
+     @{
+
+     @fn void   tWaveOscS_init  (tWaveOscS* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
+     @brief Initialize a tWaveOscS to the default mempool of a LEAF instance.
+     @param osc A pointer to the tWaveOscS to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wavetable.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
+     @param leaf A pointer to the leaf instance.
+
+     @fn void   tWaveOscS_initToPool   (tWaveOscS* const osc, float* table, int size, float maxFreq, tMempool* const mempool)
+     @brief Initialize a tWaveOscS to a specified mempool.
+     @param osc A pointer to the tWaveOscS to initialize.
+     @param table A pointer to the wavetable data.
+     @param size The number of samples in the wave table.
+     @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
+     @param mempool A pointer to the tMempool to use.
+
+     @fn void   tWaveOscS_free         (tWaveOscS* const osc)
+     @brief Free a tWaveOscS from its mempool.
+     @param osc A pointer to the tWaveOscS to free.
+
+     @fn float  tWaveOscS_tick         (tWaveOscS* const osc)
+     @brief Tick a tWaveOscS oscillator.
+     @param osc A pointer to the relevant tWaveOscS.
+     @return The ticked sample as a float from -1 to 1.
+
+     @fn void   tWaveOscS_setFreq      (tWaveOscS* const osc, float freq)
+     @brief Set the frequency of a tWaveOscS oscillator.
+     @param osc A pointer to the relevant tWaveOscS.
+     @param freq The frequency to set the oscillator to.
+
+     @} */
     
+    typedef struct _tWaveSubOscS
+    {
+        tMempool mempool;
+        tWaveTableS table;
+
+    } _tWaveSubOscS;
+
+    typedef _tWaveSubOscS* tWaveSubOscS;
+
+    void    tWaveSubOscS_init(tWaveSubOscS* const osc, tWaveTableS* const table, LEAF* const leaf);
+    void    tWaveSubOscS_initToPool(tWaveSubOscS* const osc, tWaveTableS* const table, tMempool* const mempool);
+    void    tWaveSubOscS_free(tWaveSubOscS* const osc);
+    float 	tWaveSubOscS_tick(tWaveSubOscS* const cy, float phase, int oct, float w);
+
+    //==============================================================================
     /*!
      @defgroup twavesynths tWaveSynthS
      @ingroup oscillators
@@ -1282,30 +1351,46 @@ extern "C" {
     {
         tMempool mempool;
         
+        //tWaveTableS* tables;
+
         tWaveTableS* tables;
-        tWaveOscS** oscs;
+
+        tWaveSubOscS* oscs;
         int numTables;
-        int numVoices;
-        float* g;
         float index;
         float maxFreq;
+        int o1;
+        int o2;
+        float mix;
+        uint32_t phase;
+        int32_t inc;
+        float freq;
+        float invSampleRateTimesTwoTo32;
+        int oct;
+        int size;
+
+        // Determine base frequency
+        float baseFreq;
+        float invBaseFreq;
+        float sampleRate;
+        float w;
+        float aa;
+        int numSubTables;
+
     } _tWaveSynthS;
     
     typedef _tWaveSynthS* tWaveSynthS;
     
-    void    tWaveSynthS_init(tWaveSynthS* const osc, int numVoices, float** tables, int* sizes,
-                                   int numTables, float maxFreq, LEAF* const leaf);
-    void    tWaveSynthS_initToPool(tWaveSynthS* const osc, int numVoices, float** tables, int* sizes,
+    void 	tWaveSynthS_init(tWaveSynthS* const cy, tWaveTableS* tables, int size,
+                                int numTables, float maxFreq, LEAF* const leaf);
+    void    tWaveSynthS_initToPool(tWaveSynthS* const osc, tWaveTableS* tables, int size,
                                          int numTables, float maxFreq, tMempool* const mempool);
     void    tWaveSynthS_free(tWaveSynthS* const osc);
     
     float   tWaveSynthS_tick(tWaveSynthS* const osc);
-    float   tWaveSynthS_tickVoice(tWaveSynthS* const cy, int voice);
-    void    tWaveSynthS_setFreq(tWaveSynthS* const osc, int voice, float freq);
+    void    tWaveSynthS_setFreq(tWaveSynthS* const osc, float freq);
     void    tWaveSynthS_setAntiAliasing(tWaveSynthS* const osc, float aa);
     void    tWaveSynthS_setIndex(tWaveSynthS* const osc, float index);
-    void    tWaveSynthS_setIndexGain(tWaveSynthS* const osc, int i, float gain);
-    void    tWaveSynthS_setIndexPhase(tWaveSynthS* const osc, int i, float phase);
 //    void    tWaveSynthS_setIndexTable(tWaveSynthS* const osc, int i, float* table, int size);
     void    tWaveSynthS_setSampleRate (tWaveSynthS* const osc, float sr);
     
