@@ -80,6 +80,7 @@ extern "C" {
     
     float   tCycle_tick         (tCycle* const osc);
     void    tCycle_setFreq      (tCycle* const osc, float freq);
+    void    tCycle_setPhase     (tCycle* const osc, float phase);
     void    tCycle_setSampleRate(tCycle* const osc, float sr);
     
     //==============================================================================
@@ -118,14 +119,16 @@ extern "C" {
 
     typedef struct _tTriangle
     {
-        
         tMempool mempool;
         // Underlying phasor
-        float phase;
-        float inc,freq;
+        uint32_t phase;
+        uint32_t inc;
+        float freq;
         int oct;
         float w;
         float invSampleRate;
+        float invSampleRateTimesTwoTo32;
+        uint32_t mask;
     } _tTriangle;
     
     typedef _tTriangle* tTriangle;
@@ -136,6 +139,7 @@ extern "C" {
     
     float   tTriangle_tick          (tTriangle* const osc);
     void    tTriangle_setFreq       (tTriangle* const osc, float freq);
+    void    tTriangle_setPhase      (tTriangle* const osc, float phase);
     void    tTriangle_setSampleRate (tTriangle* const osc, float sr);
     
     //==============================================================================
@@ -174,14 +178,16 @@ extern "C" {
     
     typedef struct _tSquare
     {
-        
         tMempool mempool;
         // Underlying phasor
-        float phase;
-        float inc,freq;
+        uint32_t phase;
+        uint32_t inc;
+        float freq;
         int oct;
         float w;
         float invSampleRate;
+        float invSampleRateTimesTwoTo32;
+        uint32_t mask;
     } _tSquare;
     
     typedef _tSquare* tSquare;
@@ -192,6 +198,7 @@ extern "C" {
 
     float   tSquare_tick        (tSquare* const osc);
     void    tSquare_setFreq     (tSquare* const osc, float freq);
+    void    tSquare_setPhase     (tSquare* const osc, float phase);
     void    tSquare_setSampleRate (tSquare* const osc, float sr);
     
     /*!￼￼￼
@@ -233,14 +240,16 @@ extern "C" {
     
     typedef struct _tSawtooth
     {
-        
         tMempool mempool;
         // Underlying phasor
-        float phase;
-        float inc,freq;
+        uint32_t phase;
+        uint32_t inc;
+        float freq;
         int oct;
         float w;
         float invSampleRate;
+        float invSampleRateTimesTwoTo32;
+        uint32_t mask;
     } _tSawtooth;
     
     typedef _tSawtooth* tSawtooth;
@@ -251,6 +260,7 @@ extern "C" {
 
     float   tSawtooth_tick          (tSawtooth* const osc);
     void    tSawtooth_setFreq       (tSawtooth* const osc, float freq);
+    void    tSawtooth_setPhase      (tSawtooth* const osc, float phase);
     void    tSawtooth_setSampleRate (tSawtooth* const osc, float sr);
     
     //==============================================================================

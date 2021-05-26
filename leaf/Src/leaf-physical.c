@@ -1050,24 +1050,24 @@ float   tLivingString2_tick(tLivingString2* const pl, float input)
     if (pickP > prepP)
     {
         float fullPickPoint =  ((pickP*wLen) - lowLen);
-        pickPInt = (uint) fullPickPoint; // where does the input go? that's the pick point
+        pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
         float pickPFloat = fullPickPoint - pickPInt;
 
         tHermiteDelay_addTo(&p->delUF, input * (1.0f - pickPFloat), pickPInt);
         tHermiteDelay_addTo(&p->delUF, input * pickPFloat, pickPInt + 1);
-        tHermiteDelay_addTo(&p->delUB, input * (1.0f - pickPFloat), (uint) (upLen - pickPInt));
-        tHermiteDelay_addTo(&p->delUB, input * pickPFloat, (uint) (upLen - pickPInt - 1));
+        tHermiteDelay_addTo(&p->delUB, input * (1.0f - pickPFloat), (uint32_t) (upLen - pickPInt));
+        tHermiteDelay_addTo(&p->delUB, input * pickPFloat, (uint32_t) (upLen - pickPInt - 1));
     }
     else
     {
          float fullPickPoint =  pickP * wLen;
-        pickPInt = (uint) fullPickPoint; // where does the input go? that's the pick point
+        pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
         float pickPFloat = fullPickPoint - pickPInt;
 
         tHermiteDelay_addTo(&p->delLF, input * (1.0f - pickPFloat), pickPInt);
         tHermiteDelay_addTo(&p->delLF, input * pickPFloat, pickPInt + 1);
-        tHermiteDelay_addTo(&p->delLB, input * (1.0f - pickPFloat), (uint) (lowLen - pickPInt));
-        tHermiteDelay_addTo(&p->delLB, input * pickPFloat, (uint) (lowLen - pickPInt - 1));
+        tHermiteDelay_addTo(&p->delLB, input * (1.0f - pickPFloat), (uint32_t) (lowLen - pickPInt));
+        tHermiteDelay_addTo(&p->delLB, input * pickPFloat, (uint32_t) (lowLen - pickPInt - 1));
     }
 /*
     if (pickP > prepP)
@@ -1120,24 +1120,24 @@ float   tLivingString2_tick(tLivingString2* const pl, float input)
         if (pupos > prepP)
         {
             float fullPUPoint =  ((pupos*wLen) - lowLen);
-            PUPInt = (uint) fullPUPoint; // where does the input go? that's the pick point
+            PUPInt = (uint32_t) fullPUPoint; // where does the input go? that's the pick point
             float PUPFloat = fullPUPoint - PUPInt;
 
             pickupOut = tHermiteDelay_tapOut(&p->delUF, PUPInt) * (1.0f - PUPFloat);
             pickupOut += tHermiteDelay_tapOut(&p->delUF, PUPInt + 1) * PUPFloat;
-            pickupOut += tHermiteDelay_tapOut(&p->delUB, (uint) (upLen - PUPInt)) * (1.0f - PUPFloat);
-            pickupOut += tHermiteDelay_tapOut(&p->delUB, (uint) (upLen - PUPInt - 1))  * PUPFloat;
+            pickupOut += tHermiteDelay_tapOut(&p->delUB, (uint32_t) (upLen - PUPInt)) * (1.0f - PUPFloat);
+            pickupOut += tHermiteDelay_tapOut(&p->delUB, (uint32_t) (upLen - PUPInt - 1))  * PUPFloat;
         }
         else
         {
              float fullPUPoint =  pupos * wLen;
-            PUPInt = (uint) fullPUPoint; // where does the input go? that's the pick point
+            PUPInt = (uint32_t) fullPUPoint; // where does the input go? that's the pick point
             float PUPFloat = fullPUPoint - PUPInt;
 
             pickupOut = tHermiteDelay_tapOut(&p->delLF, PUPInt) * (1.0f - PUPFloat);
             pickupOut += tHermiteDelay_tapOut(&p->delLF,  PUPInt + 1) * PUPFloat;
-            pickupOut += tHermiteDelay_tapOut(&p->delLB, (uint) (lowLen - PUPInt)) * (1.0f - PUPFloat);
-            pickupOut += tHermiteDelay_tapOut(&p->delLB, (uint) (lowLen - PUPInt - 1)) * PUPFloat;
+            pickupOut += tHermiteDelay_tapOut(&p->delLB, (uint32_t) (lowLen - PUPInt)) * (1.0f - PUPFloat);
+            pickupOut += tHermiteDelay_tapOut(&p->delLB, (uint32_t) (lowLen - PUPInt - 1)) * PUPFloat;
         }
 
         p->curr = pickupOut;
@@ -1232,18 +1232,14 @@ float   tLivingString2_tickEfficient(tLivingString2* const pl, float input)
     return p->curr;
 }
 
-float   tLivingString2_udpateDelays(tLivingString2* const pl)
+void   tLivingString2_updateDelays(tLivingString2* const pl)
 {
     _tLivingString2* p = *pl;
-
-
 
     //need to determine which delay line to put it into (should be half amplitude into forward and backward lines for the correct portion of string)
 
     float lowLen=p->prpSmooth->dest*p->wlSmooth->dest;
     float upLen=(1.0f-p->prpSmooth->dest)*p->wlSmooth->dest;
-
-
 
     tHermiteDelay_setDelay(&p->delLF, lowLen);
     tHermiteDelay_setDelay(&p->delLB, lowLen);
