@@ -722,6 +722,7 @@ extern "C" {
     float   tEfficientSVF_tick          (tEfficientSVF* const, float v0);
     void    tEfficientSVF_setFreq       (tEfficientSVF* const, uint16_t controlFreq);
     void    tEfficientSVF_setQ          (tEfficientSVF* const, float Q);
+    void    tEfficientSVF_setFreqAndQ   (tEfficientSVF* const, uint16_t controlFreq, float Q);
     
     //==============================================================================
     

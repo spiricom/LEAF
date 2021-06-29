@@ -1061,7 +1061,7 @@ void tSOLAD_initToPool (tSOLAD* const wp, int loopSize, tMempool* const mp)
     
     w->loopSize = loopSize;
     w->pitchfactor = 1.;
-    w->delaybuf = (float*) mpool_calloc(sizeof(float) * w->loopSize, m);
+    w->delaybuf = (float*) mpool_calloc(sizeof(float) * (w->loopSize+1), m);
 
     w->timeindex = 0;
     w->xfadevalue = -1;
@@ -1095,7 +1095,7 @@ void tSOLAD_ioSamples(tSOLAD* const wp, float* in, float* out, int blocksize)
     {
         float sample = tHighpass_tick(&w->hp, in[0]);
         w->delaybuf[0] = sample;
-        w->delaybuf[w->loopSize-1] = sample;   // copy one sample for interpolation
+        w->delaybuf[w->loopSize] = sample;   // copy one sample for interpolation
         n--;
         i++;
         in++;
@@ -1500,6 +1500,7 @@ void tSimpleRetune_initToPool (tSimpleRetune* const rt, int numVoices, float min
     r->bufSize = bufSize;
     r->numVoices = numVoices;
     
+    r->pdBuffer = (float*) mpool_alloc(sizeof(float) * 2048, m);
     r->inBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
     r->outBuffer = (float*) mpool_calloc(sizeof(float) * r->bufSize, m);
     
@@ -1510,7 +1511,7 @@ void tSimpleRetune_initToPool (tSimpleRetune* const rt, int numVoices, float min
     
     r->minInputFreq = minInputFreq;
     r->maxInputFreq = maxInputFreq;
-    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, r->inBuffer, r->bufSize, mp);
+    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, r->pdBuffer, 2048, mp);
     
     for (int i = 0; i < r->numVoices; ++i)
     {
@@ -1546,7 +1547,8 @@ float tSimpleRetune_tick(tSimpleRetune* const rt, float sample)
     float out = r->outBuffer[r->index];
     r->outBuffer[r->index] = 0.0f;
     
-    if (++r->index >= r->bufSize)
+    r->index++;
+    if (r->index >= r->bufSize)
     {
         for (int i = 0; i < r->numVoices; ++i)
         {
@@ -1696,7 +1698,8 @@ float* tRetune_tick(tRetune* const rt, float sample)
         r->outBuffers[i][r->index] = 0.0f;
     }
 
-    if (++r->index >= r->bufSize)
+    r->index++;
+    if (r->index >= r->bufSize)
     {
         for (int i = 0; i < r->numVoices; ++i)
         {

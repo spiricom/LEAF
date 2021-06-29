@@ -610,6 +610,7 @@ extern "C" {
         
         tPitchShift* ps;
         
+        float* pdBuffer;
         float* inBuffer;
         float* outBuffer;
         int bufSize;

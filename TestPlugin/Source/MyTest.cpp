@@ -40,6 +40,7 @@ tMBSampler sampler;
 
 const int numWavetables = 1;
 tWaveTable wavetables[numWavetables];
+tSimpleRetune retune;
 
 float gain;
 float dtime;
@@ -61,7 +62,10 @@ int lastLoadedAudioSize = 0;
 
 void    LEAFTest_init            (float sampleRate, int blockSize)
 {
-    LEAF_init(&leaf, sampleRate, blockSize, memory, MSIZE, &getRandomFloat);
+    LEAF_init(&leaf, sampleRate, memory, MSIZE, &getRandomFloat);
+    
+    tSimpleRetune_init(&retune, 1, 100, 1200, 2048, &leaf);
+    tSimpleRetune_setMode(&retune, 1);
     
 //    tWaveTable_init(&wt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
 //    tWaveTableS_init(&cwt, __leaf_table_sawtooth[0], 2048, 10000.f, &leaf);
@@ -81,10 +85,8 @@ void    LEAFTest_init            (float sampleRate, int blockSize)
     set[1] = (float*)__leaf_table_triangle[0];
     set[2] = (float*)__leaf_table_squarewave[0];
     set[3] = (float*)__leaf_table_sawtooth[0];
-    int sizes[4];
-    for (int i = 0; i < 4; i++) sizes[i] = 2048;
     
-    tWaveSynth_init(&ws, 1, set, sizes, 4, 10000.f, &leaf);
+//    tWaveSynth_init(&ws, set, 2048, 4, 10000.f, &leaf);
     
     lastLoadedAudioSize = 0;
     loadedAudio.clear();
@@ -101,6 +103,10 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
+    tSimpleRetune_tuneVoice(&retune, 0, mtof(roundf(ftom(tSimpleRetune_getInputFrequency(&retune)))));
+    return tSimpleRetune_tick(&retune, input);
+    
+    
     float out = 0.0f;
     for (int i = 0; i < fmin(loadedAudio.size(), numWavetables); ++i)
     {
@@ -119,7 +125,7 @@ void    LEAFTest_block           (void)
     tMBSaw_setFreq(&bsaw, val * 10000.f);
 //    tWaveTable_setFreq(&wt, val * 160000.f - 80000.0f);
 //    tWaveTableS_setFreq(&cwt, val * 10000.);
-    tWaveSynth_setFreq(&ws, 0, val * 10000.f);
+    tWaveSynth_setFreq(&ws, val * 10000.f);
 //    tRetune_tuneVoice(&retune, 0, val * 3.0f + 0.5f);
 //    tSimpleRetune_tuneVoice(&sretune, 0, 300);
 

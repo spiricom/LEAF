@@ -995,6 +995,17 @@ void     tEfficientSVF_setQ(tEfficientSVF* const svff, float Q)
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;
 }
+
+void    tEfficientSVF_setFreqAndQ   (tEfficientSVF* const svff, uint16_t input, float Q)
+{
+    _tEfficientSVF* svf = *svff;
+    
+    svf->g = __leaf_table_filtertan[input];
+    svf->k = 1.0f/Q;
+    svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
+    svf->a2 = svf->g * svf->a1;
+    svf->a3 = svf->g * svf->a2;
+}
 #endif // LEAF_INCLUDE_FILTERTAN_TABLE
 
 /* Highpass */

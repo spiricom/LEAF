@@ -14,7 +14,7 @@ void exampleInit()
 {
     LEAF leaf;
     
-    LEAF_init(&leaf, 44100, 128, mempool, 1000, &exampleRandom);
+    LEAF_init(&leaf, 44100, mempool, 1000, &exampleRandom);
     
     tCycle_init(&cycle, &leaf);
     tCycle_setFreq(&cycle, 220);
