@@ -1233,7 +1233,7 @@ float   tLivingString2_tickEfficient(tLivingString2* const pl, float input)
 }
 
 
-float   tLivingString2_udpateDelays(tLivingString2* const pl)
+void tLivingString2_updateDelays(tLivingString2* const pl)
 {
     _tLivingString2* p = *pl;
 
