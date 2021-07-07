@@ -1843,7 +1843,7 @@ void tWaveTable_initToPool(tWaveTable* const cy, float* table, int size, float m
         // Do several passes here to prevent errors at the beginning of the waveform
         // Not sure how many passes to do, seem to need more as the filter cutoff goes down
         // 12 might be excessive but seems to work for now.
-        for (int p = 0; p < 12; ++p)
+        for (int p = 0; p < 4; ++p)
         {
             for (int i = 0; i < c->size; ++i)
             {
@@ -2155,8 +2155,9 @@ void tWaveTableS_initToPool(tWaveTableS* const cy, float* table, int size, float
     // Allocate memory for the tables
     c->tables = (float**) mpool_alloc(sizeof(float*) * c->numTables, c->mempool);
     c->sizes = (int*) mpool_alloc(sizeof(int) * c->numTables, c->mempool);
+    c->sizeMasks = (int*) mpool_alloc(sizeof(int) * c->numTables, c->mempool);
     c->sizes[0] = size;
-    c->sizeMasks[0] = (size - 1);
+    c->sizeMasks[0] = (c->sizes[0] - 1);
     c->baseTable = (float*) mpool_alloc(sizeof(float) * c->sizes[0], c->mempool);
     c->tables[0] = c->baseTable;
     for (int t = 1; t < c->numTables; ++t)
@@ -2220,6 +2221,7 @@ void    tWaveTableS_free(tWaveTableS* const cy)
     }
     mpool_free((char*)c->tables, c->mempool);
     mpool_free((char*)c->sizes, c->mempool);
+    mpool_free((char*)c->sizeMasks, c->mempool);
     mpool_free((char*)c, c->mempool);
 }
 
@@ -2235,6 +2237,7 @@ void    tWaveTableS_setSampleRate(tWaveTableS* const cy, float sr)
     }
     mpool_free((char*)c->tables, c->mempool);
     mpool_free((char*)c->sizes, c->mempool);
+    mpool_free((char*)c->sizeMasks, c->mempool);
     
     c->sampleRate = sr;
     
@@ -2256,9 +2259,11 @@ void    tWaveTableS_setSampleRate(tWaveTableS* const cy, float sr)
     c->sizes = (int*) mpool_alloc(sizeof(int) * c->numTables, c->mempool);
     c->tables[0] = c->baseTable;
     c->sizes[0] = size;
+    c->sizeMasks[0] = (c->sizes[0] - 1);
     for (int t = 1; t < c->numTables; ++t)
     {
         c->sizes[t] = c->sizes[t-1] / 2;
+        c->sizeMasks[t] = (c->sizes[t] - 1);
         c->tables[t] = (float*) mpool_alloc(sizeof(float) * c->sizes[t], c->mempool);
     }
     
