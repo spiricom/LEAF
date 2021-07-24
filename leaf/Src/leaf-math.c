@@ -836,7 +836,7 @@ void place_step_dd(float *buffer, int index, float phase, float w, float scale)
     int i;
     
     r = MINBLEP_PHASES * phase / w;
-    i = floorf(r); //rintf(r - 0.5f); is there a reason to use rintf here
+    i = r; //rintf(r - 0.5f); is there a reason to use rintf here?
     r -= (float)i;
     i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
     /* this would be better than the above, but more expensive:
@@ -860,7 +860,7 @@ void place_slope_dd(float *buffer, int index, float phase, float w, float slope_
     int i;
     
     r = MINBLEP_PHASES * phase / w;
-    i = rintf(r - 0.5f);
+    i = r;
     r -= (float)i;
     i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
     

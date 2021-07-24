@@ -1843,7 +1843,7 @@ void tWaveTable_initToPool(tWaveTable* const cy, float* table, int size, float m
         // Do several passes here to prevent errors at the beginning of the waveform
         // Not sure how many passes to do, seem to need more as the filter cutoff goes down
         // 12 might be excessive but seems to work for now.
-        for (int p = 0; p < 4; ++p)
+        for (int p = 0; p < LEAF_NUM_WAVETABLE_FILTER_PASSES; ++p)
         {
             for (int i = 0; i < c->size; ++i)
             {
@@ -1859,7 +1859,8 @@ void tWaveTable_free(tWaveTable* const cy)
 {
     _tWaveTable* c = *cy;
     
-    for (int t = 0; t < c->numTables; ++t)
+    mpool_free((char*)c->baseTable, c->mempool);
+    for (int t = 1; t < c->numTables; ++t)
     {
         mpool_free((char*)c->tables[t], c->mempool);
     }
@@ -1913,7 +1914,7 @@ void tWaveTable_setSampleRate(tWaveTable* const cy, float sr)
         // Do several passes here to prevent errors at the beginning of the waveform
         // Not sure how many passes to do, seem to need more as the filter cutoff goes down
         // 12 might be excessive but seems to work for now.
-        for (int p = 0; p < 12; ++p)
+        for (int p = 0; p < LEAF_NUM_WAVETABLE_FILTER_PASSES; ++p)
         {
             for (int i = 0; i < c->size; ++i)
             {
@@ -2090,7 +2091,6 @@ void tWaveOsc_setTables(tWaveOsc* const cy, tWaveTable* tables, int numTables)
     c->baseFreq = c->sampleRate / (float) c->size;
     c->invBaseFreq = 1.0f / c->baseFreq;
     c->numSubTables = c->tables[0]->numTables;
-
 }
 
 /*//// eventually gotta finish this so you can X/Y control the indices and fade between non-adjacent tables
@@ -2112,12 +2112,15 @@ void tWaveOscS_setIndexXY(tWaveOscS* const cy, float indexX, float indexY)
 void tWaveOsc_setSampleRate(tWaveOsc* const cy, float sr)
 {
     _tWaveOsc* c = *cy;
-    //TODO: need to fix this -JS
-    for (int i = 0; i < c->numTables; ++i)
-    {
-        tWaveTable_setSampleRate(&c->tables[i], sr);
-        //tWaveSubOscS_setSampleRate(&c->oscs[i], sr);
-    }
+    
+    c->sampleRate = sr;
+    // Determine base frequency
+    c->baseFreq = c->sampleRate / (float) c->size;
+    c->invBaseFreq = 1.0f / c->baseFreq;
+    c->numSubTables = c->tables[0]->numTables;
+    c->invSampleRateTimesTwoTo32 = 1.f/c->sampleRate * TWO_TO_32;
+    
+    tWaveOsc_setFreq(cy, c->freq);
 }
 
 //=======================================================================================
@@ -2184,7 +2187,7 @@ void tWaveTableS_initToPool(tWaveTableS* const cy, float* table, int size, float
         if (c->sizes[t] < c->sizes[t-1])
         {
             // Similar to tWaveTable, doing multiple passes here helps, but not sure what number is optimal
-            for (int p = 0; p < 12; ++p)
+            for (int p = 0; p < LEAF_NUM_WAVETABLE_FILTER_PASSES; ++p)
             {
                 for (int i = 0; i < c->sizes[t]; ++i)
                 {
@@ -2197,7 +2200,7 @@ void tWaveTableS_initToPool(tWaveTableS* const cy, float* table, int size, float
         else
         {
             tButterworth_setF2(&c->bl, f);
-            for (int p = 0; p < 12; ++p)
+            for (int p = 0; p < LEAF_NUM_WAVETABLE_FILTER_PASSES; ++p)
             {
                 for (int i = 0; i < c->sizes[t]; ++i)
                 {
@@ -2215,7 +2218,8 @@ void    tWaveTableS_free(tWaveTableS* const cy)
 {
     _tWaveTableS* c = *cy;
     
-    for (int t = 0; t < c->numTables; ++t)
+    mpool_free((char*)c->baseTable, c->mempool);
+    for (int t = 1; t < c->numTables; ++t)
     {
         mpool_free((char*)c->tables[t], c->mempool);
     }
@@ -2257,32 +2261,49 @@ void    tWaveTableS_setSampleRate(tWaveTableS* const cy, float sr)
     // Allocate memory for the tables
     c->tables = (float**) mpool_alloc(sizeof(float*) * c->numTables, c->mempool);
     c->sizes = (int*) mpool_alloc(sizeof(int) * c->numTables, c->mempool);
-    c->tables[0] = c->baseTable;
+    c->sizeMasks = (int*) mpool_alloc(sizeof(int) * c->numTables, c->mempool);
     c->sizes[0] = size;
     c->sizeMasks[0] = (c->sizes[0] - 1);
+    c->tables[0] = c->baseTable;
     for (int t = 1; t < c->numTables; ++t)
     {
-        c->sizes[t] = c->sizes[t-1] / 2;
+        c->sizes[t] = c->sizes[t-1] / 2 > 128 ? c->sizes[t-1] / 2 : 128;
         c->sizeMasks[t] = (c->sizes[t] - 1);
         c->tables[t] = (float*) mpool_alloc(sizeof(float) * c->sizes[t], c->mempool);
     }
     
     // Make bandlimited copies
+    f = c->sampleRate * 0.25; //start at half nyquist
     // Not worth going over order 8 I think, and even 8 is only marginally better than 4.
-    tButterworth_initToPool(&c->bl, 8, -1.0f, c->sampleRate * 0.25f, &c->mempool);
-    tButterworth_setSampleRate(&c->bl, c->sampleRate);
+    tButterworth_initToPool(&c->bl, 8, -1.0f, f, &c->mempool);
     tOversampler_initToPool(&c->ds, 2, 1, &c->mempool);
     for (int t = 1; t < c->numTables; ++t)
     {
-        // Similar to tWaveTable, doing multiple passes here helps, but not sure what number is optimal
-        for (int p = 0; p < 12; ++p)
+        // Size is going down; we need to downsample
+        if (c->sizes[t] < c->sizes[t-1])
         {
-            for (int i = 0; i < c->sizes[t]; ++i)
+            // Similar to tWaveTable, doing multiple passes here helps, but not sure what number is optimal
+            for (int p = 0; p < LEAF_NUM_WAVETABLE_FILTER_PASSES; ++p)
             {
-                c->dsBuffer[0] = tButterworth_tick(&c->bl, c->tables[t-1][i*2]);
-                c->dsBuffer[1] = tButterworth_tick(&c->bl, c->tables[t-1][(i*2)+1]);
-                c->tables[t][i] = tOversampler_downsample(&c->ds, c->dsBuffer);
+                for (int i = 0; i < c->sizes[t]; ++i)
+                {
+                    c->dsBuffer[0] = tButterworth_tick(&c->bl, c->tables[t-1][i*2]);
+                    c->dsBuffer[1] = tButterworth_tick(&c->bl, c->tables[t-1][(i*2)+1]);
+                    c->tables[t][i] = tOversampler_downsample(&c->ds, c->dsBuffer);
+                }
             }
+        }
+        else
+        {
+            tButterworth_setF2(&c->bl, f);
+            for (int p = 0; p < LEAF_NUM_WAVETABLE_FILTER_PASSES; ++p)
+            {
+                for (int i = 0; i < c->sizes[t]; ++i)
+                {
+                    c->tables[t][i] = tButterworth_tick(&c->bl, c->tables[t-1][i]);
+                }
+            }
+            f *= 0.5f; //halve the cutoff for next pass
         }
     }
     tOversampler_free(&c->ds);
@@ -2305,7 +2326,7 @@ void tWaveOscS_initToPool(tWaveOscS* const cy, tWaveTableS* tables, int numTable
     c->mempool = m;
 
     LEAF* leaf = c->mempool->leaf;
-    c->tables =  tables;
+    c->tables = tables;
     c->numTables = numTables;
     
     c->index = 0.0f;
@@ -2352,12 +2373,13 @@ float tWaveOscS_tick(tWaveOscS* const cy)
     float samp1;
 
     int oct = c->oct;
-
-    int* sizeMasks = c->tables[c->o1]->sizeMasks;
+    
     float** tables = c->tables[c->o1]->tables;
+    int* sizes = c->tables[c->o1]->sizes;
+    int* sizeMasks = c->tables[c->o1]->sizeMasks;
 
     // Wavetable synthesis
-    temp = sizeMasks[oct] * floatPhase;
+    temp = sizes[oct] * floatPhase;
     idx = (int)temp;
     frac = temp - (float)idx;
     samp0 = tables[oct][idx];
@@ -2366,7 +2388,7 @@ float tWaveOscS_tick(tWaveOscS* const cy)
 
     float oct0 = (samp0 + (samp1 - samp0) * frac);
 
-    temp = sizeMasks[oct+1] * floatPhase;
+    temp = sizes[oct+1] * floatPhase;
     idx = (int)temp;
     frac = temp - (float)idx;
     samp0 = tables[oct+1][idx];
@@ -2377,11 +2399,12 @@ float tWaveOscS_tick(tWaveOscS* const cy)
 
     s1 = oct0 + (oct1 - oct0) * c->w;
 
-    sizeMasks = c->tables[c->o2]->sizeMasks;
     tables = c->tables[c->o2]->tables;
+    sizes = c->tables[c->o2]->sizes;
+    sizeMasks = c->tables[c->o2]->sizeMasks;
 
     // Wavetable synthesis
-    temp = sizeMasks[oct] * floatPhase;
+    temp = sizes[oct] * floatPhase;
     idx = (int)temp;
     frac = temp - (float)idx;
     samp0 = tables[oct][idx];
@@ -2390,7 +2413,7 @@ float tWaveOscS_tick(tWaveOscS* const cy)
 
     oct0 = (samp0 + (samp1 - samp0) * frac);
 
-    temp = sizeMasks[oct+1] * floatPhase;
+    temp = sizes[oct+1] * floatPhase;
     idx = (int)temp;
     frac = temp - (float)idx;
     samp0 = tables[oct+1][idx];
@@ -2462,11 +2485,17 @@ void tWaveOscS_setIndexXY(tWaveOscS* const cy, float indexX, float indexY)
 void tWaveOscS_setSampleRate(tWaveOscS* const cy, float sr)
 {
     _tWaveOscS* c = *cy;
-    //TODO: need to fix this -JS
-    for (int i = 0; i < c->numTables; ++i)
-    {
-        tWaveTableS_setSampleRate(&c->tables[i], sr);
-    }
+    
+    if (c->sampleRate == sr) return;
+    
+    c->sampleRate = sr;
+    // Determine base frequency
+    c->baseFreq = c->sampleRate / (float) c->size;
+    c->invBaseFreq = 1.0f / c->baseFreq;
+    c->numSubTables = c->tables[0]->numTables;
+    c->invSampleRateTimesTwoTo32 = (1.f/c->sampleRate) * TWO_TO_32;
+    
+    tWaveOscS_setFreq(cy, c->freq);
 }
 //
 //void tWaveOscS_setIndexTable(tWaveOscS* const cy, int i, float* table, int size)

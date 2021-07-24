@@ -730,8 +730,8 @@ extern "C" {
         float    syncdir;
         int      softsync;
         float   _p, _w, _b, _x, _z;
-        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
         int     _j, _k;
+        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
         bool    _init;
         float invSampleRate;
     } _tMBPulse;
@@ -803,8 +803,8 @@ extern "C" {
         float    syncdir;
         int      softsync;
         float   _p, _w, _b, _z;
-        float   _f [FILLEN + LONGEST_DD_PULSE_LENGTH];
         int     _j, _k;
+        float   _f [FILLEN + LONGEST_DD_PULSE_LENGTH];
         bool    _init;
         float invSampleRate;
     } _tMBTriangle;
@@ -875,8 +875,8 @@ extern "C" {
         float    syncdir;
         int      softsync;
         float   _p, _w, _z;
-        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
         int     _j;
+        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
         bool    _init;
         float invSampleRate;
     } _tMBSaw;
@@ -982,6 +982,8 @@ extern "C" {
      
      @} */
     
+#define LEAF_NUM_WAVETABLE_FILTER_PASSES 5
+    
     typedef struct _tWaveTable
     {
         tMempool mempool;
@@ -1061,7 +1063,7 @@ extern "C" {
            int o2;
            float mix;
            uint32_t phase;
-           int32_t inc;
+           uint32_t inc;
            float freq;
            float invSampleRateTimesTwoTo32;
            int oct;
@@ -1203,7 +1205,7 @@ extern "C" {
         int o2;
         float mix;
         uint32_t phase;
-        int32_t inc;
+        uint32_t inc;
         float freq;
         float invSampleRateTimesTwoTo32;
         int oct;
