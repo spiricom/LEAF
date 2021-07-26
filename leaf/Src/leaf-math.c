@@ -833,10 +833,10 @@ float median3f(float a, float b, float c)
 void place_step_dd(float *buffer, int index, float phase, float w, float scale)
 {
     float r;
-    int i;
+    long i;
     
     r = MINBLEP_PHASES * phase / w;
-    i = r; //rintf(r - 0.5f); is there a reason to use rintf here?
+    i = lrintf(r - 0.5f);
     r -= (float)i;
     i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
     /* this would be better than the above, but more expensive:
@@ -857,10 +857,10 @@ void place_step_dd(float *buffer, int index, float phase, float w, float scale)
 void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta)
 {
     float r;
-    int i;
+    long i;
     
     r = MINBLEP_PHASES * phase / w;
-    i = r;
+    i = lrintf(r - 0.5f);
     r -= (float)i;
     i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
     

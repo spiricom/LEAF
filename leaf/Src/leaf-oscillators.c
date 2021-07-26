@@ -1024,7 +1024,7 @@ float tMBPulse_tick(tMBPulse* const osc)
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
     
     sw = w * c->syncdir;
-    p += sw - (int)sw;
+    p += sw - rintf(sw - 0.5f);
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
         float eof_offset = sync * sw;
@@ -1322,7 +1322,7 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
     
     sw = w * c->syncdir;
-    p += sw - (int)sw;
+    p += sw - rintf(sw - 0.5f);
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
         float eof_offset = sync * sw;
@@ -1627,7 +1627,7 @@ float tMBSaw_tick(tMBSaw* const osc)
     //            else if (sw < 0) place_slope_dd(c->_f, j, 1.0f - p, -sw, -2.0f);
     
     sw = w * c->syncdir;
-    p += sw - (int)sw;
+    p += sw - rintf(sw - 0.5f);
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
         float eof_offset = sync * sw;
