@@ -47,25 +47,22 @@ void    tCycle_free (tCycle* const cy)
 float   tCycle_tick(tCycle* const cy)
 {
     _tCycle* c = *cy;
-    float temp;
-    int idx;
-    float frac;
+    uint32_t tempFrac;
+    uint32_t idx;
     float samp0;
     float samp1;
     
     // Phasor increment
     c->phase += c->inc;
-
     // Wavetable synthesis
-
-    temp = ((float)c->phase * 0.000000476837158f);
-    idx = ((int)temp) & c->mask;
-    frac = temp - (float)idx;
+    idx = c->phase >> 21;
+    tempFrac = (c->phase & 2097151);
+    
     samp0 = __leaf_table_sinewave[idx];
     idx = (idx + 1) & c->mask;
     samp1 = __leaf_table_sinewave[idx];
-
-    return (samp0 + (samp1 - samp0) * frac);
+    
+    return (samp0 + (samp1 - samp0) * ((float)tempFrac * 0.000000476837386f)); // 1/2097151 (2097151 is the 21 bits after the 11 bits that represent the main index)
 }
 
 void     tCycle_setFreq(tCycle* const cy, float freq)
@@ -130,32 +127,25 @@ float   tTriangle_tick(tTriangle* const cy)
 {
     _tTriangle* c = *cy;
     
-    float temp;
-    int idx;
+    uint32_t idx;
     float frac;
     float samp0;
     float samp1;
     
     // Phasor increment
     c->phase += c->inc;
-    
     // Wavetable synthesis
-    temp = ((float)c->phase * 0.000000476837158f);
+    idx = c->phase >> 21;
+    uint32_t idx2 = (idx + 1) & c->mask;
+    uint32_t tempFrac = (c->phase & 2097151);
+    frac = (float)tempFrac * 0.000000476837386f;// 1/2097151 (2097151 is the 21 bits after the 11 bits that represent the main index)
     
-    idx = ((int)temp) & c->mask;
-    frac = temp - (float)idx;
     samp0 = __leaf_table_triangle[c->oct][idx];
-    idx = (idx + 1) & c->mask;
-    samp1 = __leaf_table_triangle[c->oct][idx];
-    
+    samp1 = __leaf_table_triangle[c->oct][idx2];
     float oct0 = (samp0 + (samp1 - samp0) * frac);
     
-    idx = ((int)temp) & c->mask;
-    frac = temp - (float)idx;
     samp0 = __leaf_table_triangle[c->oct+1][idx];
-    idx = (idx + 1) & c->mask;
-    samp1 = __leaf_table_triangle[c->oct+1][idx];
-    
+    samp1 = __leaf_table_triangle[c->oct+1][idx2];
     float oct1 = (samp0 + (samp1 - samp0) * frac);
     
     return oct0 + (oct1 - oct0) * c->w;
@@ -231,32 +221,25 @@ float   tSquare_tick(tSquare* const cy)
 {
     _tSquare* c = *cy;
     
-    float temp;
-    int idx;
+    uint32_t idx;
     float frac;
     float samp0;
     float samp1;
     
     // Phasor increment
     c->phase += c->inc;
-    
     // Wavetable synthesis
-    temp = ((float)c->phase * 0.000000476837158f);
+    idx = c->phase >> 21;
+    uint32_t idx2 = (idx + 1) & c->mask;
+    uint32_t tempFrac = (c->phase & 2097151);
+    frac = (float)tempFrac * 0.000000476837386f;// 1/2097151 (2097151 is the 21 bits after the 11 bits that represent the main index)
     
-    idx = ((int)temp) & c->mask;
-    frac = temp - (float)idx;
     samp0 = __leaf_table_squarewave[c->oct][idx];
-    idx = (idx + 1) & c->mask;
-    samp1 = __leaf_table_squarewave[c->oct][idx];
-    
+    samp1 = __leaf_table_squarewave[c->oct][idx2];
     float oct0 = (samp0 + (samp1 - samp0) * frac);
     
-    idx = ((int)temp) & c->mask;
-    frac = temp - (float)idx;
     samp0 = __leaf_table_squarewave[c->oct+1][idx];
-    idx = (idx + 1) & c->mask;
-    samp1 = __leaf_table_squarewave[c->oct+1][idx];
-    
+    samp1 = __leaf_table_squarewave[c->oct+1][idx2];
     float oct1 = (samp0 + (samp1 - samp0) * frac);
     
     return oct0 + (oct1 - oct0) * c->w;
@@ -332,33 +315,27 @@ float   tSawtooth_tick(tSawtooth* const cy)
 {
     _tSawtooth* c = *cy;
     
-    float temp;
-    int idx;
+    uint32_t idx;
     float frac;
     float samp0;
     float samp1;
     
     // Phasor increment
     c->phase += c->inc;
-    
     // Wavetable synthesis
-    temp = ((float)c->phase * 0.000000476837158f);
+    idx = c->phase >> 21;
+    uint32_t idx2 = (idx + 1) & c->mask;
+    uint32_t tempFrac = (c->phase & 2097151);
+    frac = (float)tempFrac * 0.000000476837386f; // 1/2097151 (2097151 is the 21 bits after the 11 bits that represent the main index)
     
-    idx = ((int)temp) & c->mask;
-    frac = temp - (float)idx;
     samp0 = __leaf_table_sawtooth[c->oct][idx];
-    idx = (idx + 1) & c->mask;
-    samp1 = __leaf_table_sawtooth[c->oct][idx];
-    
+    samp1 = __leaf_table_sawtooth[c->oct][idx2];
     float oct0 = (samp0 + (samp1 - samp0) * frac);
     
-    idx = ((int)temp) & c->mask;
-    frac = temp - (float)idx;
     samp0 = __leaf_table_sawtooth[c->oct+1][idx];
-    idx = (idx + 1) & c->mask;
-    samp1 = __leaf_table_sawtooth[c->oct+1][idx];
-    
+    samp1 = __leaf_table_sawtooth[c->oct+1][idx2];
     float oct1 = (samp0 + (samp1 - samp0) * frac);
+    
     
     return oct0 + (oct1 - oct0) * c->w;
 }
@@ -397,6 +374,7 @@ void     tSawtooth_setSampleRate (tSawtooth* const cy, float sr)
     c->invSampleRateTimesTwoTo32 = c->invSampleRate * TWO_TO_32;
     tSawtooth_setFreq(cy, c->freq);
 }
+
 #endif // LEAF_INCLUDE_SAWTOOTH_TABLE
 
 //==============================================================================
