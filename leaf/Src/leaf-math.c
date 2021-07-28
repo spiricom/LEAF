@@ -839,12 +839,6 @@ void place_step_dd(float *buffer, int index, float phase, float w, float scale)
     i = lrintf(r - 0.5f);
     r -= (float)i;
     i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
-    /* this would be better than the above, but more expensive:
-     *  while (i < 0) {
-     *    i += MINBLEP_PHASES;
-     *    index++;
-     *  }
-     */
     
     while (i < MINBLEP_PHASES * STEP_DD_PULSE_LENGTH) {
         buffer[index] += scale * (step_dd_table[i].value + r * step_dd_table[i].delta);

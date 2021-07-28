@@ -1181,7 +1181,7 @@ float tMBPulse_tick(tMBPulse* const osc)
     c->_j = j;
     c->_k = k;
     
-    return c->out;
+    return -c->out;
 }
 
 void tMBPulse_setFreq(tMBPulse* const osc, float f)
@@ -1483,7 +1483,7 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     c->_j = j;
     c->_k = k;
     
-    return c->out;
+    return -c->out;
 }
 
 void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
@@ -1655,7 +1655,7 @@ float tMBSaw_tick(tMBSaw* const osc)
     c->_z = z;
     c->_j = j;
     
-    return c->out;
+    return -c->out;
 }
 
 void tMBSaw_setFreq(tMBSaw* const osc, float f)
