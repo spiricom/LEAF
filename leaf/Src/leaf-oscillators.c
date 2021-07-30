@@ -1002,7 +1002,7 @@ float tMBPulse_tick(tMBPulse* const osc)
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
     
     sw = w * c->syncdir;
-    p += sw - rintf(sw - 0.5f);
+    p += sw - (int)sw;
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
         float eof_offset = sync * sw;
@@ -1212,6 +1212,12 @@ float tMBPulse_sync(tMBPulse* const osc, float value)
     return value;
 }
 
+void tMBPulse_setPhase(tMBPulse* const osc, float phase)
+{
+    _tMBPulse* c = *osc;
+    c->_p = phase;
+}
+
 void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft)
 {
     _tMBPulse* c = *osc;
@@ -1282,7 +1288,8 @@ float tMBTriangle_tick(tMBTriangle* const osc)
         //                + 1e3 * linm[1] * vco->_port[LING]) / SAMPLERATE;
         w = freq * c->invSampleRate;
         b = 0.5f * (1.0f + c->waveform);
-        p = 0.5f * b;
+//        p = 0.5f * b;
+        p = 0.f;
         /* if we valued alias-free startup over low startup time, we could do:
          *   p -= w;
          *   place_slope_dd(_f, j, 0.0f, w, 1.0f / b); */
@@ -1300,7 +1307,7 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
     
     sw = w * c->syncdir;
-    p += sw - rintf(sw - 0.5f);
+    p += sw - (int)sw;
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
         float eof_offset = sync * sw;
@@ -1514,6 +1521,12 @@ float tMBTriangle_sync(tMBTriangle* const osc, float value)
     return value;
 }
 
+void tMBTriangle_setPhase(tMBTriangle* const osc, float phase)
+{
+    _tMBTriangle* c = *osc;
+    c->_p = phase;
+}
+
 void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft)
 {
     _tMBTriangle* c = *osc;
@@ -1526,8 +1539,8 @@ void tMBTriangle_setSampleRate(tMBTriangle* const osc, float sr)
     c->invSampleRate = 1.0f/sr;
 }
 
-//==========================================================================================================
-//==========================================================================================================
+//==================================================================================================
+//==================================================================================================
 
 void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf)
 {
@@ -1577,7 +1590,8 @@ float tMBSaw_tick(tMBSaw* const osc)
     j = c->_j;  /* index into buffer _f */
     
     if (c->_init) {
-        p = 0.5f;
+//        p = 0.5f;
+        p = 0.f;
         w = freq * c->invSampleRate;
         
         /* if we valued alias-free startup over low startup time, we could do:
@@ -1605,7 +1619,7 @@ float tMBSaw_tick(tMBSaw* const osc)
     //            else if (sw < 0) place_slope_dd(c->_f, j, 1.0f - p, -sw, -2.0f);
     
     sw = w * c->syncdir;
-    p += sw - rintf(sw - 0.5f);
+    p += sw - (int)sw;
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
         float eof_offset = sync * sw;
@@ -1678,6 +1692,12 @@ float tMBSaw_sync(tMBSaw* const osc, float value)
     else c->sync = 0.f;
     
     return value;
+}
+
+void tMBSaw_setPhase(tMBSaw* const osc, float phase)
+{
+    _tMBSaw* c = *osc;
+    c->_p = phase;
 }
 
 void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft)

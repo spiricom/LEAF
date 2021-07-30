@@ -102,11 +102,12 @@ inline double getSawFall(double angle) {
 
 float   LEAFTest_tick            (float input)
 {
-    float out = 0.0f;
-    for (int i = 0; i < numWavetables; ++i)
-    {
-        out += tWaveOsc_tick(&ws);
-    }
+    float out = tMBSaw_tick(&bsaw);
+    
+//    for (int i = 0; i < numWavetables; ++i)
+//    {
+//        out += tWaveOsc_tick(&ws);
+//    }
     return out;
 }
 
@@ -117,7 +118,7 @@ void    LEAFTest_block           (void)
     float val = getSliderValue("slider1");
     tMBTriangle_setFreq(&btri, val * 440.f);
     tMBPulse_setFreq(&bpulse, val * 160000.f - 80000.0f);
-    tMBSaw_setFreq(&bsaw, val * 10000.f);
+    tMBSaw_setFreq(&bsaw, -val * 2000.f + 1000.0f);
 //    tWaveTable_setFreq(&wt, val * 160000.f - 80000.0f);
 //    tWaveTableS_setFreq(&cwt, val * 10000.);
     tWaveOsc_setFreq(&ws, val * 2000.f);

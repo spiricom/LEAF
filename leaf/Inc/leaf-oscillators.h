@@ -746,8 +746,9 @@ extern "C" {
     void tMBPulse_setFreq(tMBPulse* const osc, float f);
     void tMBPulse_setWidth(tMBPulse* const osc, float w);
     float tMBPulse_sync(tMBPulse* const osc, float sync);
+    void tMBPulse_setPhase(tMBPulse* const osc, float phase);
     void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft);
-    void    tMBPulse_setSampleRate (tMBPulse* const osc, float sr);
+    void tMBPulse_setSampleRate (tMBPulse* const osc, float sr);
     
     /*!
      @defgroup tmbtriangle tMBTriangle
@@ -819,8 +820,9 @@ extern "C" {
     void tMBTriangle_setFreq(tMBTriangle* const osc, float f);
     void tMBTriangle_setWidth(tMBTriangle* const osc, float w);
     float tMBTriangle_sync(tMBTriangle* const osc, float sync);
+    void tMBTriangle_setPhase(tMBTriangle* const osc, float phase);
     void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft);
-    void   tMBTriangle_setSampleRate (tMBTriangle* const osc, float sr);
+    void tMBTriangle_setSampleRate (tMBTriangle* const osc, float sr);
     
     
     /*!
@@ -890,8 +892,9 @@ extern "C" {
     float tMBSaw_tick(tMBSaw* const osc);
     void tMBSaw_setFreq(tMBSaw* const osc, float f);
     float tMBSaw_sync(tMBSaw* const osc, float sync);
+    void tMBSaw_setPhase(tMBSaw* const osc, float phase);
     void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft);
-    void    tMBSaw_setSampleRate (tMBSaw* const osc, float sr);
+    void tMBSaw_setSampleRate (tMBSaw* const osc, float sr);
     
     //==============================================================================
     
