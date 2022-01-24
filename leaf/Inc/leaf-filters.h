@@ -1043,9 +1043,10 @@ extern "C" {
         float fc;    // characteristic frequency
         float G;     // gain
         float invG;        //1/gain
+        float Q; //q of filter
         float B;     // bandwidth (in octaves)
         float m;     // morph parameter (0...1)
-        
+        float R2Plusg; //precomputed for the tick
         float sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
         float invSampleRate;
     } _tVZFilter;
@@ -1066,7 +1067,12 @@ extern "C" {
     void    tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, float freq, float bw);
     void    tVZFilter_setFreqAndBandwidthEfficientBP    (tVZFilter* const vf, float freq, float bw);
     void    tVZFilter_setGain                  (tVZFilter* const, float gain);
-
+    void    tVZFilter_setResonance                (tVZFilter* const vf, float res);
+    void    tVZFilter_setFrequencyAndResonance (tVZFilter* const vf, float freq, float res);
+    void    tVZFilter_setFrequencyAndResonanceAndGain (tVZFilter* const vf, float freq, float res, float gains);
+    void    tVZFilter_setFrequencyAndResonanceAndMorph (tVZFilter* const vf, float freq, float res, float morph);
+    void    tVZFilter_setMorphOnly               (tVZFilter* const vf, float morph);
+    void    tVZFilter_setMorph               (tVZFilter* const vf, float morph);
     void    tVZFilter_setType                  (tVZFilter* const, VZFilterType type);
     float   tVZFilter_BandwidthToR        (tVZFilter* const vf, float B);
     float   tVZFilter_BandwidthToREfficientBP(tVZFilter* const vf, float B);
@@ -1105,7 +1111,7 @@ extern "C" {
      ￼￼￼
      @} */
     
-    //diode ladder filter
+    //diode ladder filter by Ivan C, based on mystran's method
     typedef struct _tDiodeFilter
     {
         tMempool mempool;
@@ -1134,6 +1140,38 @@ extern "C" {
     void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance);
     void    tDiodeFilter_setSampleRate(tDiodeFilter* const vf, float sr);
     
+    
+    
+    //transistor ladder filter by aciddose, based on mystran's method, KVR forums
+    typedef struct _tLadderFilter
+    {
+        tMempool mempool;
+        float cutoff;
+        float invSampleRate;
+        int oversampling;
+        float c;
+        float fb;
+        float c2;
+        float a;
+        float s;
+        float d;
+        float b[4]; // stored states
+    } _tLadderFilter;
+    
+    typedef _tLadderFilter* tLadderFilter;
+    
+    void    tLadderFilter_init           (tLadderFilter* const, float freq, float Q, LEAF* const leaf);
+    void    tLadderFilter_initToPool     (tLadderFilter* const, float freq, float Q, tMempool* const);
+    void    tLadderFilter_free           (tLadderFilter* const);
+    
+    float   tLadderFilter_tick               (tLadderFilter* const, float input);
+    void    tLadderFilter_setFreq     (tLadderFilter* const vf, float cutoff);
+    void    tLadderFilter_setQ     (tLadderFilter* const vf, float resonance);
+    void    tLadderFilter_setSampleRate(tLadderFilter* const vf, float sr);
+    
+
+
+
 #ifdef __cplusplus
 }
 #endif
