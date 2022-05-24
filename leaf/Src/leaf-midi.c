@@ -137,6 +137,7 @@ int tStack_addIfNotAlreadyThere(tStack* const stack, uint16_t noteVal)
 // Remove noteVal. return 1 if removed, 0 if not
 int tStack_remove(tStack* const stack, uint16_t noteVal)
 {
+
     _tStack* ns = *stack;
     
     uint8_t k;
@@ -801,7 +802,7 @@ void tSimplePoly_deactivateVoice(tSimplePoly* const polyh, uint8_t voice)
             //grab old notes off the stack if there are notes waiting to replace the free voice
             for (int j = 0; j < tStack_getSize(&poly->stack); ++j)
             {
-                noteToTest = tStack_get(&poly->stack, j);
+                noteToTest = tStack_get(&poly->stack, j); //note to check if it is waiting to be recovered
 
                 if (poly->notes[noteToTest][0] == -3) //if there is a stolen note waiting (marked inactive but on the stack)
                 {
@@ -809,6 +810,8 @@ void tSimplePoly_deactivateVoice(tSimplePoly* const polyh, uint8_t voice)
                     poly->voices[voice][1] = poly->notes[noteToTest][1]; // set the velocity of the voice to be the velocity of that note
                     poly->voices[voice][2] = noteToTest;
                     poly->notes[noteToTest][0] = voice; //mark that it is no longer stolen and is now active
+                    //poly->notes[][0] = -1;
+                    break;
                 }
             }
         }

@@ -66,7 +66,7 @@ extern "C" {
         tMempool mempool;
         // Underlying phasor
         uint32_t phase;
-        uint32_t inc;
+        int32_t inc;
 		float freq;
         float invSampleRateTimesTwoTo32;
         uint32_t mask;
