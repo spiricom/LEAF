@@ -116,7 +116,7 @@ float tOversampler_tick(tOversampler* const osr, float input, float* oversample,
     
     tOversampler_upsample(osr, input, oversample);
     
-    for (int i = 0; i < os->ratio; ++i) {
+    for (int i = 0; i < os->ratio; i++) {
         oversample[i] = effectTick(oversample[i]);
     }
     
