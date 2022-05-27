@@ -145,6 +145,7 @@ extern "C" {
     float   tOversampler_downsample     (tOversampler* const, float* input);
     float   tOversampler_tick           (tOversampler* const, float input, float* oversample,
                                          float (*effectTick)(float));
+
     void    tOversampler_setRatio       (tOversampler* const, int ratio);
     void    tOversampler_setQuality     (tOversampler* const, int quality);
     int     tOversampler_getLatency     (tOversampler* const);

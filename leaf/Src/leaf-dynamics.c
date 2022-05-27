@@ -60,8 +60,8 @@ void tCompressor_initToPool (tCompressor* const comp, tMempool* const mp)
     
     c->T = 0.0f; // Threshold
     c->R = 0.5f; // compression Ratio
-    c->M = 3.0f; // decibel Width of knee transition
-    c->W = 1.0f; // decibel Make-up gain
+    c->M = 3.0f; // decibel Make-up gain
+    c->W = 1.0f; // decibel Width of knee transition
     
     c->sampleRate = leaf->sampleRate;
 }
@@ -120,6 +120,26 @@ float tCompressor_tick(tCompressor* const comp, float in)
     float attenuation = powf(10.0f, ((c->M - c->y_T[0])/20.0f));
     
     return attenuation * in;
+}
+
+////c->tauAttack = 100;
+//c->tauRelease = 100;
+//
+//c->isActive = 0;
+//
+//c->T = 0.0f; // Threshold
+//c->R = 0.5f; // compression Ratio
+//c->M = 3.0f; // decibel Width of knee transition
+//c->W = 1.0f; // decibel Make-up gain
+void tCompressor_setParams(tCompressor* const comp, float thresh, float ratio, float knee, float makeup, float attack, float release)
+{
+    _tCompressor* c = *comp;
+    c->T = thresh;
+    c->R = ratio;
+    c->W = knee;
+    c->M = makeup;
+    c->tauAttack = attack;
+    c->tauRelease = release;
 }
 
 /* Feedback Leveler */

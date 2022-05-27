@@ -80,6 +80,7 @@ extern "C" {
     void    tCompressor_free        (tCompressor* const);
     
     float   tCompressor_tick        (tCompressor* const, float input);
+void    tCompressor_setParams   (tCompressor* const comp, float thresh, float ratio, float knee, float makeup, float attack, float release);
     
     
     /*!
