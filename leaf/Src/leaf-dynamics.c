@@ -52,18 +52,22 @@ void tCompressor_initToPool (tCompressor* const comp, tMempool* const mp)
     _tCompressor* c = *comp = (_tCompressor*) mpool_alloc(sizeof(_tCompressor), m);
     c->mempool = m;
     LEAF* leaf = c->mempool->leaf;
+    c->sampleRate = leaf->sampleRate;
     
-    c->tauAttack = 100;
-    c->tauRelease = 100;
+    c->tauAttack = expf(-1.0f/(0.001f * 50.0f * c->sampleRate));
+    c->tauRelease = expf(-1.0f/(0.001f * 100.0f * c->sampleRate));
     
     c->isActive = 0;
-    
+    c->x_G[0] = 0.0f, c->x_G[1] = 0.0f,
+    c->y_G[0] = 0.0f, c->y_G[1] = 0.0f,
+    c->x_T[0] = 0.0f, c->x_T[1] = 0.0f,
+    c->y_T[0] = 0.0f, c->y_T[1] = 0.0f;
     c->T = 0.0f; // Threshold
     c->R = 0.5f; // compression Ratio
     c->M = 3.0f; // decibel Make-up gain
     c->W = 1.0f; // decibel Width of knee transition
     
-    c->sampleRate = leaf->sampleRate;
+
 }
 
 void tCompressor_free (tCompressor* const comp)
@@ -78,25 +82,27 @@ float tCompressor_tick(tCompressor* const comp, float in)
     _tCompressor* c = *comp;
     
     float slope, overshoot;
-    float alphaAtt, alphaRel;
     
-    float in_db = 20.0f * log10f( fmaxf( fabsf( in), 0.000001f)), out_db = 0.0f;
+    float in_db = LEAF_clip(-90.0f, atodb(fabsf(in)), 0.0f);
+    float out_db = 0.0f;
     
     c->y_T[1] = c->y_T[0];
     
-    slope = c->R - 1.0f; // feed-forward topology; was 1/C->R - 1
+    slope = 1.0f - (1.0f/c->R); // feed-forward topology; 
     
     overshoot = in_db - c->T;
     
-    
+    /*
     if (overshoot <= -(c->W * 0.5f))
     {
         out_db = in_db;
         c->isActive = 0;
     }
+
     else if ((overshoot > -(c->W * 0.5f)) && (overshoot < (c->W * 0.5f)))
     {
-        out_db = in_db + slope * (powf((overshoot + c->W*0.5f),2) / (2.0f * c->W)); // .^ 2 ???
+        float squareit = (overshoot + c->W*0.5f);
+        out_db = in_db + slope * ((squareit * squareit) / (2.0f * c->W)); // .^ 2 ???
         c->isActive = 1;
     }
     else if (overshoot >= (c->W * 0.5f))
@@ -104,21 +110,37 @@ float tCompressor_tick(tCompressor* const comp, float in)
         out_db = in_db + slope * overshoot;
         c->isActive = 1;
     }
-    
-    
+    */
+    if (overshoot <= 0.0f)
+    {
+        out_db = in_db;
+        c->isActive = 0;
+    }
+    else
+    {
+        out_db = in_db + slope * overshoot;
+        c->isActive = 1;
+    }
     
     c->x_T[0] = out_db - in_db;
     
-    alphaAtt = expf(-1.0f/(0.001f * c->tauAttack * c->sampleRate));
-    alphaRel = expf(-1.0f/(0.001f * c->tauRelease * c->sampleRate));
+
     
     if (c->x_T[0] > c->y_T[1])
-        c->y_T[0] = alphaAtt * c->y_T[1] + (1-alphaAtt) * c->x_T[0];
+        c->y_T[0] = c->tauAttack * c->y_T[1] + (1.0f-c->tauAttack) * c->x_T[0];
     else
-        c->y_T[0] = alphaRel * c->y_T[1] + (1-alphaRel) * c->x_T[0];
+        c->y_T[0] = c->tauRelease * c->y_T[1] + (1.0f-c->tauRelease) * c->x_T[0];
+    if (isnan(c->y_T[0]))
+    {
+        out_db = 1.0f;
+    }
     
-    float attenuation = powf(10.0f, ((c->M - c->y_T[0])/20.0f));
-    
+    float attenuation = fasterdbtoa(c->M - c->y_T[0]);
+    if (isnan(attenuation))
+    {
+        out_db = 1.0f;
+    }
+    //float attenuation = 1.0f;
     return attenuation * in;
 }
 
@@ -129,8 +151,8 @@ float tCompressor_tick(tCompressor* const comp, float in)
 //
 //c->T = 0.0f; // Threshold
 //c->R = 0.5f; // compression Ratio
-//c->M = 3.0f; // decibel Width of knee transition
-//c->W = 1.0f; // decibel Make-up gain
+//c->W = 3.0f; // decibel Width of knee transition
+//c->M = 1.0f; // decibel Make-up gain
 void tCompressor_setParams(tCompressor* const comp, float thresh, float ratio, float knee, float makeup, float attack, float release)
 {
     _tCompressor* c = *comp;
@@ -138,8 +160,8 @@ void tCompressor_setParams(tCompressor* const comp, float thresh, float ratio, f
     c->R = ratio;
     c->W = knee;
     c->M = makeup;
-    c->tauAttack = attack;
-    c->tauRelease = release;
+    c->tauAttack = expf(-1.0f/(0.001f * attack * c->sampleRate));
+    c->tauRelease = expf(-1.0f/(0.001f * release * c->sampleRate));
 }
 
 /* Feedback Leveler */
