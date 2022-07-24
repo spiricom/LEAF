@@ -175,7 +175,7 @@ extern "C" {
     //0.001 base gives a good curve that goes from 1 to near zero
     //1000 gives a good curve from -1.0 to 0.0
     void LEAF_generate_exp(float* buffer, float base, float start, float end, float offset, int size);
-
+    void LEAF_generate_table_skew_non_sym(float* buffer, float start, float end, float center, int size);
 
     void LEAF_generate_atodb(float* buffer, int size);
     void LEAF_generate_atodbPositiveClipped(float* buffer, float lowerThreshold, float range, int size);

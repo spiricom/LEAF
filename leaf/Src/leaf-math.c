@@ -565,6 +565,22 @@ void LEAF_generate_exp(float* buffer, float base, float start, float end, float 
     }
 }
 
+//0.001 base gives a good curve that goes from 1 to near zero
+void LEAF_generate_table_skew_non_sym(float* buffer, float start, float end, float center, int size)
+{
+    float skew = logf (0.5f) / logf ((center - start) / (end - start));
+    float increment = (end - start) / (float)size;
+    float x = start;
+    float proportion = 0;
+    for (int i = 0; i < size; i++)
+    {
+        proportion = expf (logf (x) / skew);
+        buffer[i] = start + (end - start) * proportion;
+        x += increment;
+    }
+}
+
+
 void LEAF_generate_atodb(float* buffer, int size)
 {
     float increment = 1.0f / (float)size;
