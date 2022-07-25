@@ -556,7 +556,7 @@ void LEAF_generate_square(float* buffer, float basefreq, int size, LEAF* const l
 //0.001 base gives a good curve that goes from 1 to near zero
 void LEAF_generate_exp(float* buffer, float base, float start, float end, float offset, int size)
 {
-    float increment = (end - start) / (float)size;
+    float increment = (end - start) / (float)(size-1);
     float x = start;
     for (int i = 0; i < size; i++)
     {
@@ -565,17 +565,17 @@ void LEAF_generate_exp(float* buffer, float base, float start, float end, float 
     }
 }
 
-//0.001 base gives a good curve that goes from 1 to near zero
+//
 void LEAF_generate_table_skew_non_sym(float* buffer, float start, float end, float center, int size)
 {
-    float skew = logf (0.5f) / logf ((center - start) / (end - start));
-    float increment = (end - start) / (float)size;
-    float x = start;
-    float proportion = 0;
+    double skew = log (0.5) / log ((center - start) / (end - start));
+    double increment = 1.0 / (double)(size-1);
+    double x = 0.0;
+    double proportion = 0.0;
     for (int i = 0; i < size; i++)
     {
-        proportion = expf (logf (x) / skew);
-        buffer[i] = start + (end - start) * proportion;
+        proportion = exp (log(x) / skew);
+        buffer[i] = (float)(start + (end - start) * proportion);
         x += increment;
     }
 }
@@ -583,7 +583,7 @@ void LEAF_generate_table_skew_non_sym(float* buffer, float start, float end, flo
 
 void LEAF_generate_atodb(float* buffer, int size)
 {
-    float increment = 1.0f / (float)size;
+    float increment = 1.0f / (float)(size-1);
     float x = 0.0f;
     for (int i = 0; i < size; i++)
     {
@@ -595,7 +595,7 @@ void LEAF_generate_atodb(float* buffer, int size)
 
 void LEAF_generate_atodbPositiveClipped(float* buffer, float lowerThreshold, float range, int size)
 {
-    float increment = 1.0f / (float)size;
+    float increment = 1.0f / (float)(size-1);
     float x = 0.0f;
     float scalar = range / fastabsf(lowerThreshold);
     for (int i = 0; i < size; i++)
