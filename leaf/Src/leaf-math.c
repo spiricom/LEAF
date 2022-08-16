@@ -732,7 +732,7 @@ float fast_mtof(float f)
 
 float faster_mtof(float f)
 {
-    return (8.17579891564f * fastexpf(0.0577622650f * f));
+    return (8.17579891564f * fasterexpf(0.0577622650f * f));
 }
 
 float ftom(float f)
