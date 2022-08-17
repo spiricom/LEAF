@@ -10045,7 +10045,7 @@ const float __leaf_table_attack_decay_inc[ATTACK_DECAY_INC_TABLE_SIZE] = {
 0.166707f, 0.166705f, 0.166702f, 0.1667f, 0.166697f, 0.166695f, 0.166692f, 0.16669f, 0.166687f, 0.166684f, 0.166682f, 0.166679f, 0.166677f, 0.166674f, 0.166672f, 0.166669f, 
 };
 #endif // LEAF_INCLUDE_ADSR_TABLES
-
+//this filter table assumes midinote input scaled from 16-130, then scaled into 12-bit (4096 values). So to convert midinote to this format, do this (cutoff-16.0f) * 35.929824561403509f
 #if LEAF_INCLUDE_FILTERTAN_TABLE
 const float __leaf_table_filtertan[FILTERTAN_TABLE_SIZE] = { 
 	0.001349f, 0.001351f, 0.001354f, 0.001356f, 0.001358f, 0.00136f, 0.001362f, 0.001365f, 0.001367f, 0.001369f, 0.001371f, 0.001373f, 0.001376f, 0.001378f, 0.00138f, 0.001382f, 0.001384f, 0.001387f, 0.001389f, 0.001391f,

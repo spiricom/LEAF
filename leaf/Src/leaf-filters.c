@@ -894,6 +894,18 @@ void     tSVF_setFreq(tSVF* const svff, float freq)
     svf->a3 = svf->g * svf->a2;
 }
 
+void    tSVF_setFreqFast     (tSVF* const vf, float cutoff)
+{
+	_tSVF* svf = *vf;
+    int intVer = (int)cutoff;
+    float floatVer = cutoff - (float)intVer;
+
+    svf->g = (__leaf_table_filtertan[intVer] * (1.0f - floatVer)) + (__leaf_table_filtertan[intVer+1] * floatVer);
+    svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
+    svf->a2 = svf->g * svf->a1;
+    svf->a3 = svf->g * svf->a2;
+}
+
 void     tSVF_setQ(tSVF* const svff, float Q)
 {
     _tSVF* svf = *svff;
@@ -1506,6 +1518,131 @@ void   tVZFilter_setFreq           (tVZFilter* const vf, float freq)
     f->fc = LEAF_clip(0.0f, freq, 0.5f * f->sampleRate);
     tVZFilter_calcCoeffs(vf);
 }
+
+void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
+{
+	 _tVZFilter* f = *vf;
+    int intVer = (int)cutoff;
+    float floatVer = cutoff - (float)intVer;
+    f->g = (__leaf_table_filtertan[intVer] * (1.0f - floatVer)) + (__leaf_table_filtertan[intVer+1] * floatVer);
+
+    switch( f->type )
+    {
+        case Bypass:
+        {
+            f->R2 = f->invG;
+            f->cL = 1.0f;
+            f->cB = f->R2;
+            f->cH = 1.0f;
+
+        }
+            break;
+        case Lowpass:
+        {
+            //f->R2 = f->invG;
+            //f->g = tanf(PI * f->fc * f->invSampleRate);  // embedded integrator gain (Fig 3.11)
+            f->cL = 1.0f; f->cB = 0.0f; f->cH = 0.0f;
+
+        }
+            break;
+        case Highpass:
+        {
+            //f->g = tanf(PI * f->fc * f->invSampleRate);  // embedded integrator gain (Fig 3.11)
+            //f->R2 = f->invG;
+            f->cL = 0.0f; f->cB = 0.0f; f->cH = 1.0f;
+        }
+            break;
+        case BandpassSkirt:
+        {
+            //f->g = tanf(PI * f->fc * f->invSampleRate);  // embedded integrator gain (Fig 3.11)
+            //f->R2 = f->invG;
+            f->cL = 0.0f; f->cB = 1.0f; f->cH = 0.0f;
+        }
+            break;
+        case BandpassPeak:
+        {
+            //f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
+            //f->g = tanf(PI * f->fc * f->invSampleRate);  // embedded integrator gain (Fig 3.11)
+            f->cL = 0.0f; f->cB = f->G * f->R2; f->cH = 0.0f;
+            //f->cL = 0.0f; f->cB = f->R2; f->cH = 0.0f;
+        }
+            break;
+        case BandReject:
+        {
+            //f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
+            //f->g = tanf(PI * f->fc * f->invSampleRate);  // embedded integrator gain (Fig 3.11)
+            f->cL = 1.0f; f->cB = 0.0f; f->cH = 1.0f;
+        }
+            break;
+        case Bell:
+        {
+            float fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+            float wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+            float r  = f->g/wl;
+            r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+            // warped upper bandedge, wc the center
+            f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
+            f->cL = 1.0f; f->cB = f->R2*f->G; f->cH = 1.0f;
+        }
+            break;
+        case Lowshelf:
+        {
+            float A = fastsqrtf(f->G);
+            f->g /= fastsqrtf(A);               // scale SVF-cutoff frequency for shelvers
+            //f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
+            //f->R2 = f->invQ;
+            f->cL = f->G; f->cB = f->R2*f->G; f->cH = 1.0f;
+
+        }
+            break;
+        case Highshelf:
+        {
+            float A = fastsqrtf(f->G);
+            f->g *= fastsqrtf(A);               // scale SVF-cutoff frequency for shelvers
+            //f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
+            f->cL = 1.0f; f->cB = f->R2*f->G; f->cH = f->G;
+        }
+            break;
+        case Allpass:
+        {
+            //f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B); if using bandwidth instead of Q
+            f->cL = 1.0f; f->cB = -f->R2; f->cH = 1.0f;
+        }
+            break;
+
+            // experimental - maybe we must find better curves for cL, cB, cH:
+        case Morph:
+        {
+            //f->R2 = 2.0f*tVZFilter_BandwidthToREfficientBP(vf, f->B);
+
+            //f->R2 = f->invG;
+            //float x = f->m-1.0f;
+
+            float x  = (2.0f*f->m-1.0f);
+            //f->cL = maximum(0.0f,(1.0f - (f->m * 2.0f)));
+            //f->cH = maximum(0.0f,(f->m * 2.0f) - 1.0f);
+            //f->cB = maximum(0.0f, 1.0f - f->cH - f->cL);
+            //f->cL = minimum(0.0f,(1.0f - (f->m * 2.0f))) ;
+            f->cL = maximum(-x, 0.0f); /*cL *= cL;*/
+            f->cH = minimum( x, 0.0f); /*cH *= cH;*/
+            f->cB = 1.0f-x*x;
+
+            // bottom line: we need to test different versions for how they feel when tweaking the
+            // morph parameter
+
+            // this scaling ensures constant magnitude at the cutoff point (we divide the coefficients by
+            // the magnitude response value at the cutoff frequency and scale back by the gain):
+            float s = f->G * fastsqrtf((f->R2*f->R2) / (f->cL*f->cL + f->cB*f->cB + f->cH*f->cH - 2.0f*f->cL*f->cH)) * 2.0f;
+            f->cL *= s; f->cB *= s; f->cH *= s;
+        }
+        break;
+
+    }
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback precomputation
+}
+
+
 void   tVZFilter_setFreqAndBandwidth           (tVZFilter* const vf, float freq, float bw)
 {
     _tVZFilter* f = *vf;
@@ -1774,6 +1911,14 @@ void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff)
     f->f = tanf(PI * f->cutoff * f->invSampleRate);
 }
 
+void    tDiodeFilter_setFreqFast     (tDiodeFilter* const vf, float cutoff)
+{
+	_tDiodeFilter* f = *vf;
+    int intVer = (int)cutoff;
+    float floatVer = cutoff - (float)intVer;
+    f->f = (__leaf_table_filtertan[intVer] * (1.0f - floatVer)) + (__leaf_table_filtertan[intVer+1] * floatVer);
+}
+
 void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance)
 {
     _tDiodeFilter* f = *vf;
@@ -1917,6 +2062,16 @@ void    tLadderFilter_setFreq     (tLadderFilter* const vf, float cutoff)
     
     f->cutoff = LEAF_clip(40.0f, cutoff, 18000.0f);
     f->c = tanf(PI * (f->cutoff / (float)f->oversampling) * f->invSampleRate);
+    f->c2 = 2.0f * f->c;
+}
+
+void    tLadderFilter_setFreqFast     (tLadderFilter* const vf, float cutoff)
+{
+    _tLadderFilter* f = *vf;
+    int intVer = (int)cutoff;
+    float floatVer = cutoff - (float)intVer;
+
+    f->c = (__leaf_table_filtertan[intVer] * (1.0f - floatVer)) + (__leaf_table_filtertan[intVer+1] * floatVer);
     f->c2 = 2.0f * f->c;
 }
 

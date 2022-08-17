@@ -663,6 +663,7 @@ extern "C" {
     
     float   tSVF_tick           (tSVF* const, float v0);
     void    tSVF_setFreq        (tSVF* const, float freq);
+    void    tSVF_setFreqFast     (tSVF* const vf, float cutoff);
     void    tSVF_setQ           (tSVF* const, float Q);
     void    tSVF_setFreqAndQ    (tSVF* const svff, float freq, float Q);
     void    tSVF_setSampleRate  (tSVF* const svff, float sr);
@@ -1064,6 +1065,7 @@ extern "C" {
     void    tVZFilter_calcCoeffsEfficientBP           (tVZFilter* const);
     void    tVZFilter_setBandwidth            (tVZFilter* const, float bandWidth);
     void    tVZFilter_setFreq           (tVZFilter* const, float freq);
+    void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff);
     void    tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, float freq, float bw);
     void    tVZFilter_setFreqAndBandwidthEfficientBP    (tVZFilter* const vf, float freq, float bw);
     void    tVZFilter_setGain                  (tVZFilter* const, float gain);
@@ -1138,6 +1140,7 @@ extern "C" {
     
     float   tDiodeFilter_tick               (tDiodeFilter* const, float input);
     void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff);
+    void    tDiodeFilter_setFreqFast     (tDiodeFilter* const vf, float cutoff);
     void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance);
     void    tDiodeFilter_setSampleRate(tDiodeFilter* const vf, float sr);
     
@@ -1167,6 +1170,7 @@ extern "C" {
     
     float   tLadderFilter_tick               (tLadderFilter* const, float input);
     void    tLadderFilter_setFreq     (tLadderFilter* const vf, float cutoff);
+    void    tLadderFilter_setFreqFast     (tLadderFilter* const vf, float cutoff);
     void    tLadderFilter_setQ     (tLadderFilter* const vf, float resonance);
     void    tLadderFilter_setSampleRate(tLadderFilter* const vf, float sr);
     
