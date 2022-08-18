@@ -748,6 +748,7 @@ extern "C" {
     float tMBPulse_sync(tMBPulse* const osc, float sync);
     void tMBPulse_setPhase(tMBPulse* const osc, float phase);
     void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft);
+    void tMBPulse_setBufferOffset(tMBPulse* const osc, int offset);
     void tMBPulse_setSampleRate (tMBPulse* const osc, float sr);
     
     /*!
@@ -822,6 +823,7 @@ extern "C" {
     float tMBTriangle_sync(tMBTriangle* const osc, float sync);
     void tMBTriangle_setPhase(tMBTriangle* const osc, float phase);
     void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft);
+    void tMBTriangle_setBufferOffset(tMBTriangle* const osc, int offset);
     void tMBTriangle_setSampleRate (tMBTriangle* const osc, float sr);
     
     
@@ -894,6 +896,7 @@ extern "C" {
     float tMBSaw_sync(tMBSaw* const osc, float sync);
     void tMBSaw_setPhase(tMBSaw* const osc, float phase);
     void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft);
+    void tMBSaw_setBufferOffset(tMBSaw* const osc, int offset);
     void tMBSaw_setSampleRate (tMBSaw* const osc, float sr);
     
     //==============================================================================
