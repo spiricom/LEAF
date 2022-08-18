@@ -1218,6 +1218,14 @@ void tMBPulse_setPhase(tMBPulse* const osc, float phase)
     c->_p = phase;
 }
 
+//useful if you have several oscillators so the buffer refill is not synchronized
+void tMBPulse_setBufferOffset(tMBPulse* const osc, int offset)
+{
+	_tMBPulse* c = *osc;
+	offset = LEAF_clip(0,offset, FILLEN-1);
+	c->_j = offset;
+}
+
 void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft)
 {
     _tMBPulse* c = *osc;
@@ -1533,6 +1541,14 @@ void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft)
     c->softsync = hardOrSoft > 0 ? 1 : 0;
 }
 
+//useful if you have several oscillators so the buffer refill is not synchronized
+void tMBTriangle_setBufferOffset(tMBTriangle* const osc, int offset)
+{
+	_tMBTriangle* c = *osc;
+	offset = LEAF_clip(0,offset, FILLEN-1);
+	c->_j = offset;
+}
+
 void tMBTriangle_setSampleRate(tMBTriangle* const osc, float sr)
 {
     _tMBTriangle* c = *osc;
@@ -1704,6 +1720,14 @@ void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft)
 {
     _tMBSaw* c = *osc;
     c->softsync = hardOrSoft > 0 ? 1 : 0;
+}
+
+//useful if you have several oscillators so the buffer refill is not synchronized
+void tMBSaw_setBufferOffset(tMBSaw* const osc, int offset)
+{
+	_tMBSaw* c = *osc;
+	offset = LEAF_clip(0,offset, FILLEN-1);
+	c->_j = offset;
 }
 
 void tMBSaw_setSampleRate(tMBSaw* const osc, float sr)
