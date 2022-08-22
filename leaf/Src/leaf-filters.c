@@ -1307,7 +1307,7 @@ void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, float 
     f->s2   = 0.0f;
     f->R2   = f->invG;
     f->R2Plusg = f->R2 + f->g;
-    tVZFilter_setBandwidth(vf,f->B);
+    //tVZFilter_setBandwidth(vf,f->B);
     tVZFilter_calcCoeffs(vf);
 }
 

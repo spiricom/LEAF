@@ -1277,10 +1277,11 @@ extern "C" {
         
         tMempool mempool;
         uint32_t phase;
-        uint32_t inc, freq;
-        uint32_t mask;
+        uint32_t inc;
+        float freq;
+        int32_t mask;
         uint8_t phaseDidReset;
-        uint32_t invSampleRateTimesTwoTo32;
+        int32_t invSampleRateTimesTwoTo32;
     } _tIntPhasor;
     
     typedef _tIntPhasor* tIntPhasor;
