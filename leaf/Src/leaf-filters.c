@@ -875,11 +875,6 @@ float   tSVF_tick(tSVF* const svff, float v0)
     svf->ic1eq = (2.0f * v1) - svf->ic1eq;
     svf->ic2eq = (2.0f * v2) - svf->ic2eq;
     
-    if (isnan(svf->ic1eq))
-    {
-        return 0.0f;
-    }
-    
     return (v0 * svf->cH) + (v1 * svf->cB) + (svf->k * v1 * svf->cBK) + (v2 * svf->cL);
 }
 
@@ -1307,6 +1302,7 @@ void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, float 
     f->s2   = 0.0f;
     f->R2   = f->invG;
     f->R2Plusg = f->R2 + f->g;
+    f->g = tanf(PI * f->fc * f->invSampleRate);  // embedded integrator gain (Fig 3.11)
     tVZFilter_setBandwidth(vf,f->B);
     tVZFilter_calcCoeffs(vf);
 }
