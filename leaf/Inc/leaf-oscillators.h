@@ -1240,6 +1240,117 @@ extern "C" {
 //    void    tWaveOscS_setIndexTable(tWaveOscS* const osc, int i, float* table, int size);
     void    tWaveOscS_setSampleRate (tWaveOscS* const osc, float sr);
     
+
+
+
+     //==============================================================================
+    
+    /*!
+     @defgroup tIntphasor tIntPhasor
+     @ingroup oscillators
+     @brief Aliasing phasor.
+     @{
+     
+     @fn void    tIntPhasor_init        (tIntPhasor* const osc, LEAF* const leaf)
+     @brief Initialize a tIntPhasor to the default mempool of a LEAF instance.
+     @param osc A pointer to the tIntPhasor to initialize.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void    tIntPhasor_initToPool  (tIntPhasor* const osc, tMempool* const)
+     @brief Initialize a tIntPhasor to a specified mempool.
+     @param osc A pointer to the tIntPhasor to initialize.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tIntPhasor_free        (tIntPhasor* const osc)
+     @brief Free a tIntPhasor from its mempool.
+     @param osc A pointer to the tIntPhasor to free.
+     
+     @fn float   tIntPhasor_tick        (tIntPhasor* const osc)
+     @brief
+     @param osc A pointer to the relevant tIntPhasor.
+     
+     @fn void    tIntPhasor_setFreq     (tIntPhasor* const osc, float freq)
+     @brief
+     @param osc A pointer to the relevant tIntPhasor.
+     ￼￼￼
+     @} */
+    
+    typedef struct _tIntPhasor
+    {
+        
+        tMempool mempool;
+        uint32_t phase;
+        uint32_t inc;
+        float freq;
+        int32_t mask;
+        uint8_t phaseDidReset;
+        int32_t invSampleRateTimesTwoTo32;
+    } _tIntPhasor;
+    
+    typedef _tIntPhasor* tIntPhasor;
+    
+    void    tIntPhasor_init        (tIntPhasor* const osc, LEAF* const leaf);
+    void    tIntPhasor_initToPool  (tIntPhasor* const osc, tMempool* const);
+    void    tIntPhasor_free        (tIntPhasor* const osc);
+    
+    float   tIntPhasor_tick        (tIntPhasor* const osc);
+    void    tIntPhasor_setFreq     (tIntPhasor* const osc, float freq);
+    void    tIntPhasor_setSampleRate (tIntPhasor* const osc, float sr);
+    
+    void    tIntPhasor_setPhase(tIntPhasor* const cy, float phase);
+    
+         //==============================================================================
+    
+    /*!
+     @defgroup tSquareLFO tSquareLFO
+     @ingroup oscillators
+     @brief Aliasing phasor.
+     @{
+     
+     @fn void    tSquareLFO_init        (tSquareLFO* const osc, LEAF* const leaf)
+     @brief Initialize a tSquareLFO to the default mempool of a LEAF instance.
+     @param osc A pointer to the tSquareLFO to initialize.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void    tSquareLFO_initToPool  (tSquareLFO* const osc, tMempool* const)
+     @brief Initialize a tSquareLFO to a specified mempool.
+     @param osc A pointer to the tSquareLFO to initialize.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tSquareLFO_free        (tSquareLFO* const osc)
+     @brief Free a tSquareLFO from its mempool.
+     @param osc A pointer to the tSquareLFO to free.
+     
+     @fn float   tSquareLFO_tick        (tSquareLFO* const osc)
+     @brief
+     @param osc A pointer to the relevant tSquareLFO.
+     
+     @fn void    tSquareLFO_setFreq     (tSquareLFO* const osc, float freq)
+     @brief
+     @param osc A pointer to the relevant tSquareLFO.
+     ￼￼￼
+     @} */
+    
+    typedef struct _tSquareLFO
+    {
+        
+        tMempool mempool;
+        float pulsewidth;
+        tIntPhasor phasor;
+        tIntPhasor invPhasor;
+    } _tSquareLFO;
+    
+    typedef _tSquareLFO* tSquareLFO;
+    
+    void    tSquareLFO_init        (tSquareLFO* const osc, LEAF* const leaf);
+    void    tSquareLFO_initToPool  (tSquareLFO* const osc, tMempool* const);
+    void    tSquareLFO_free        (tSquareLFO* const osc);
+    
+    float   tSquareLFO_tick        (tSquareLFO* const osc);
+    void    tSquareLFO_setFreq     (tSquareLFO* const osc, float freq);
+    void    tSquareLFO_setSampleRate (tSquareLFO* const osc, float sr);
+    void    tSquareLFO_setPulseWidth (tSquareLFO* const cy, float pw);
+    
 #ifdef __cplusplus
 }
 #endif

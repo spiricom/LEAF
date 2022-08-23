@@ -55,14 +55,14 @@ float   tCycle_tick(tCycle* const cy)
     // Phasor increment
     c->phase += c->inc;
     // Wavetable synthesis
-    idx = c->phase >> 21;
-    tempFrac = (c->phase & 2097151);
+    idx = c->phase >> 21; //11 bit table 
+    tempFrac = (c->phase & 2097151); //(2^21 - 1) all the lower bits i.e. the remainder of a division by 2^21  (2097151 is the 21 bits after the 11 bits that represent the main index) 
     
     samp0 = __leaf_table_sinewave[idx];
     idx = (idx + 1) & c->mask;
     samp1 = __leaf_table_sinewave[idx];
     
-    return (samp0 + (samp1 - samp0) * ((float)tempFrac * 0.000000476837386f)); // 1/2097151 (2097151 is the 21 bits after the 11 bits that represent the main index)
+    return (samp0 + (samp1 - samp0) * ((float)tempFrac * 0.000000476837386f)); // 1/2097151 
 }
 
 void     tCycle_setFreq(tCycle* const cy, float freq)
@@ -2527,3 +2527,130 @@ void tWaveOscS_setSampleRate(tWaveOscS* const cy, float sr)
 //    tWaveTableS_free(&c->tables[i]);
 //    tWaveTableS_initToPool(&c->tables[i], table, size, c->maxFreq, &c->mempool);
 //}
+
+
+//beep boop adding intphasro
+// Cycle
+void    tIntPhasor_init(tIntPhasor* const cy, LEAF* const leaf)
+{
+    tIntPhasor_initToPool(cy, &leaf->mempool);
+}
+
+void    tIntPhasor_initToPool   (tIntPhasor* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tIntPhasor* c = *cy = (_tIntPhasor*) mpool_alloc(sizeof(_tIntPhasor), m);
+    c->mempool = m;
+    LEAF* leaf = c->mempool->leaf;
+    
+    c->phase    =  0;
+    c->invSampleRateTimesTwoTo32 = (leaf->invSampleRate * TWO_TO_32);
+    c->mask = 0x7FFFFFFF;
+}
+
+void    tIntPhasor_free (tIntPhasor* const cy)
+{
+    _tIntPhasor* c = *cy;
+    
+    mpool_free((char*)c, c->mempool);
+}
+
+//need to check bounds and wrap table properly to allow through-zero FM
+float   tIntPhasor_tick(tIntPhasor* const cy)
+{
+    _tIntPhasor* c = *cy;
+    // Phasor increment
+    c->phase = (c->phase + c->inc);//& c->mask;
+    
+    return c->phase * INV_TWO_TO_32; 
+}
+
+void     tIntPhasor_setFreq(tIntPhasor* const cy, float freq)
+{
+    _tIntPhasor* c = *cy;
+    
+    c->freq  = freq;
+    c->inc = freq * c->invSampleRateTimesTwoTo32;
+}
+
+void    tIntPhasor_setPhase(tIntPhasor* const cy, float phase)
+{
+    _tIntPhasor* c = *cy;
+    
+    int i = phase;
+    phase -= i;
+    c->phase = phase * TWO_TO_32;
+}
+
+void     tIntPhasor_setSampleRate (tIntPhasor* const cy, float sr)
+{
+    _tIntPhasor* c = *cy;
+    
+    c->invSampleRateTimesTwoTo32 = (1.0f/sr) * TWO_TO_32;
+    tIntPhasor_setFreq(cy, c->freq);
+}
+
+//////SQUARE(PUSHER)LFO
+void    tSquareLFO_init(tSquareLFO* const cy, LEAF* const leaf)
+{
+    tSquareLFO_initToPool(cy, &leaf->mempool);
+    _tSquareLFO* c = *cy;
+   
+}
+
+void    tSquareLFO_initToPool   (tSquareLFO* const cy, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSquareLFO* c = *cy = (_tSquareLFO*) mpool_alloc(sizeof(_tSquareLFO), m);
+    c->mempool = m;
+    LEAF* leaf = c->mempool->leaf;
+    tIntPhasor_initToPool(&c->phasor,mp);
+    tIntPhasor_initToPool(&c->invPhasor,mp); 
+
+
+    c->pulsewidth = 50.0f;
+}
+
+void    tSquareLFO_free (tSquareLFO* const cy)
+{
+    _tSquareLFO* c = *cy;
+    tIntPhasor_free(&c->phasor);
+    tIntPhasor_free(&c->invPhasor);
+    mpool_free((char*)c, c->mempool);
+}
+
+//need to check bounds and wrap table properly to allow through-zero FM
+float   tSquareLFO_tick(tSquareLFO* const cy)
+{
+    _tSquareLFO* c = *cy;
+    // Phasor increment
+    float a = tIntPhasor_tick(&c->phasor);
+    float b = tIntPhasor_tick(&c->invPhasor);
+    float tmp = ((a - b)) + c->pulsewidth - 1.0f;
+    return 2 * tmp;
+}
+
+void     tSquareLFO_setFreq(tSquareLFO* const cy, float freq)
+{
+    _tSquareLFO* c = *cy;
+    tIntPhasor_setFreq(&c->phasor,freq);
+    tIntPhasor_setFreq(&c->invPhasor,freq);
+}
+
+
+
+void     tSquareLFO_setSampleRate (tSquareLFO* const cy, float sr)
+{
+    _tSquareLFO* c = *cy;
+    tIntPhasor_setSampleRate(&c->phasor, sr);
+    tIntPhasor_setSampleRate(&c->invPhasor, sr);
+}
+
+void tSquareLFO_setPulseWidth(tSquareLFO* const cy, float pw)
+{
+    _tSquareLFO *c = *cy;
+
+    c->pulsewidth = pw;
+    //c->delay = c->pulsewidth * INV_TWO_TO_32;
+    tIntPhasor_setPhase(&c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
+}
