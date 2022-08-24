@@ -3024,7 +3024,7 @@ void    tTriLFO_initToPool   (tTriLFO* const cy, tMempool* const mp)
     c->phase    =  0;
     c->invSampleRate = leaf->invSampleRate;
     c->invSampleRateTimesTwoTo32 = (c->invSampleRate * TWO_TO_32);
-    c->mask = TRI_TABLE_SIZE - 1;
+    //c->mask = TRI_TABLE_SIZE - 1;
     tTriLFO_setFreq(cy, 220);
 }
 
@@ -3039,10 +3039,20 @@ void    tTriLFO_free (tTriLFO* const cy)
 float   tTriLFO_tick(tTriLFO* const cy)
 {
     _tTriLFO* c = *cy;
-    uint32_t idx;
-    float frac, samp0, samp1;
+    //uint32_t idx;
+    //float frac, samp0, samp1;
     // Phasor increment
     c->phase += c->inc;
+    
+    //bitmask fun
+    //
+    uint32_t mask = c->phase >> 31;
+    int32_t val2 = c->phase + mask;
+    int32_t test = val2 ^ mask;
+    float output =( ((float)test * INV_TWO_TO_31)-0.5f) * 2.0f;
+    return output;
+
+    /*
     // Wavetable synthesis
     idx = c->phase >> 21;
     uint32_t idx2 = (idx + 1) & c->mask;
@@ -3054,7 +3064,9 @@ float   tTriLFO_tick(tTriLFO* const cy)
     float oct0 = (samp0 + (samp1 - samp0) * frac);
    
     
-    return oct0; 
+    return oct0;
+     */
+
 }
 
 void     tTriLFO_setFreq(tTriLFO* const cy, float freq)
@@ -3112,7 +3124,7 @@ float   tSineTriLFO_tick        (tSineTriLFO* const cy)
     _tSineTriLFO* c = *cy;
     float a = tCycle_tick(&c->sine);
     float b = tTriLFO_tick(&c->tri);
-    return  (1 - c->shape) * a + c->shape * b; 
+    return  (1 - c->shape) * a + c->shape * -1.0f * b; 
 }
 void    tSineTriLFO_setFreq     (tSineTriLFO* const cy, float freq)
 {

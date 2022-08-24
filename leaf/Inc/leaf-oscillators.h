@@ -1470,11 +1470,10 @@ extern "C" {
     {
         
         tMempool mempool;
-        uint32_t phase;
-        uint32_t inc;
-        uint32_t prevPhase;
+        int32_t phase;
+        int32_t inc;
+        int32_t prevPhase;
         float freq;
-        int32_t mask;
         uint8_t phaseDidReset;
         uint32_t invSampleRate;
         float invSampleRateTimesTwoTo32;
