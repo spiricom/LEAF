@@ -17,7 +17,10 @@
 #include "../Inc/leaf-filters.h"
 #include "../Inc/leaf-tables.h"
 #include "../leaf.h"
-//#include "tim.h"
+#endif
+
+#ifdef ARM_MATH_CM7
+#include "arm_math.h"
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
@@ -1821,12 +1824,15 @@ float tanhXdX(float x)
     }
     return ((a + 105.0f)*a + 945.0f) / output;
 }
+
 volatile int errorCheckCheck = 0;
+//#define SAFE_FILTER
 float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
 {
     _tDiodeFilter* f = *vf;
-    
+#ifdef SAFE_FILTER
     int errorCheck = 0;
+#endif
     // the input x[n+1] is given by 'in', and x[n] by zi
     // input with half delay
     float ih = 0.5f * (in + f->zi);
@@ -1840,24 +1846,30 @@ float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
     
     // This formula gives the result for y3 thanks to MATLAB
     float y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
+#ifdef SAFE_FILTER
     if (isnan(y3))
     {
         errorCheck = 1;
     }
+#endif
     float tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
+#ifdef SAFE_FILTER
     if (isnan(tempy3denom))
     {
         errorCheck = 2;
     }
+#endif
     if (tempy3denom == 0.0f)
     {
         tempy3denom = 0.000001f;
     }
     y3 = y3 / tempy3denom;
+#ifdef SAFE_FILTER
     if (isnan(y3))
     {
         errorCheck = 3;
     }
+#endif
     if (t1 == 0.0f)
     {
         t1 = 0.000001f;
@@ -1878,19 +1890,22 @@ float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
     
     // update state
     f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
+#ifdef SAFE_FILTER
     if (isnan(f->s0))
     {
         errorCheck = 4;
     }
-    
+
     if (isinf(f->s0))
     {
         errorCheck = 5;
     }
+
     if (errorCheck != 0)
     {
-        errorCheckCheck = 1;
+        errorCheckCheck = errorCheck;
     }
+#endif
     f->s1 += 2.0f * (t2*(y2-y1) - t1*(y1-y0));
     f->s2 += 2.0f * (t3*(y3-y2) - t2*(y2-y1));
     f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));
@@ -1975,7 +1990,16 @@ void    tLadderFilter_free   (tLadderFilter* const vf)
 
 float smoothABS ( float x, const float y) // y controls 'smoothness' usually between 0.002 -> 0.04
 {
-    return (sqrtf((x * x)  + y)) - sqrtf(y);
+	//possible speedup with sqrt CMSIS-DSP approximation? seems to resolve to just a normal call to sqrt. Maybe the vector version since there are two square roots to determine? -JS
+//	#ifdef ARM_MATH_CM7
+//		float output1;
+//		float output2;
+//		arm_sqrt_f32((x * x)  + y, &output1);
+//		arm_sqrt_f32(y, &output2);
+//		return output1 - output2;
+//	#else
+		return (sqrtf((x * x)  + y)) - sqrtf(y);
+//	#endif
 }
 
 float smoothclip (float x, const float a, const float b) // assuming symmetrical clipping

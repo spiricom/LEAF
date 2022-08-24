@@ -847,39 +847,39 @@ float median3f(float a, float b, float c)
 /// MINBLEPS
 // https://github.com/MrBlueXav/Dekrispator_v2 blepvco.c
 void place_step_dd(float *buffer, int index, float phase, float w, float scale)
-{
-    float r;
-    long i;
-    
-    r = MINBLEP_PHASES * phase / w;
-    i = lrintf(r - 0.5f);
-    r -= (float)i;
-    i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
-    
-    while (i < MINBLEP_PHASES * STEP_DD_PULSE_LENGTH) {
-        buffer[index] += scale * (step_dd_table[i].value + r * step_dd_table[i].delta);
-        i += MINBLEP_PHASES;
-        index++;
-    }
-}
-//----------------------------------------------------------------------------------------------------------
+    {
+        float r;
+        long i;
 
-void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta)
-{
-    float r;
-    long i;
-    
-    r = MINBLEP_PHASES * phase / w;
-    i = lrintf(r - 0.5f);
-    r -= (float)i;
-    i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
-    
-    slope_delta *= w;
-    
-    while (i < MINBLEP_PHASES * SLOPE_DD_PULSE_LENGTH) {
-        buffer[index] += slope_delta * (slope_dd_table[i] + r * (slope_dd_table[i + 1] - slope_dd_table[i]));
-        i += MINBLEP_PHASES;
-        index++;
+        r = MINBLEP_PHASES * phase / w;
+        i = lrintf(r - 0.5f);
+        r -= (float)i;
+        i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+
+        while (i < MINBLEP_PHASES * STEP_DD_PULSE_LENGTH) {
+            buffer[index] += scale * (step_dd_table[i].value + r * step_dd_table[i].delta);
+            i += MINBLEP_PHASES;
+            index++;
+        }
     }
-}
+void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta)
+	{
+		float r;
+		long i;
+
+		r = MINBLEP_PHASES * phase / w;
+		i = lrintf(r - 0.5f);
+		r -= (float)i;
+		i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+
+		slope_delta *= w;
+
+		while (i < MINBLEP_PHASES * SLOPE_DD_PULSE_LENGTH) {
+			buffer[index] += slope_delta * (slope_dd_table[i] + r * (slope_dd_table[i + 1] - slope_dd_table[i]));
+			i += MINBLEP_PHASES;
+			index++;
+		}
+	}
 #endif // LEAF_INCLUDE_MINBLEP_TABLES
+    /*! @} */
+

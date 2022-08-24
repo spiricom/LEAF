@@ -721,8 +721,6 @@ extern "C" {
         
         tMempool mempool;
         float    out;
-        float    amp;
-        float    last_amp;
         float    freq;
         float    waveform;    // duty cycle, must be in [-1, 1]
         float    lastsyncin;
@@ -732,7 +730,6 @@ extern "C" {
         float   _p, _w, _b, _x, _z;
         int     _j, _k;
         float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
-        bool    _init;
         float invSampleRate;
     } _tMBPulse;
     
@@ -748,7 +745,7 @@ extern "C" {
     float tMBPulse_sync(tMBPulse* const osc, float sync);
     void tMBPulse_setPhase(tMBPulse* const osc, float phase);
     void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft);
-    void tMBPulse_setBufferOffset(tMBPulse* const osc, int offset);
+    void tMBPulse_setBufferOffset(tMBPulse* const osc, uint32_t offset);
     void tMBPulse_setSampleRate (tMBPulse* const osc, float sr);
     
     /*!
@@ -796,8 +793,6 @@ extern "C" {
         
         tMempool mempool;
         float    out;
-        float    amp;
-        float    last_amp;
         float    freq;
         float    waveform;    // duty cycle, must be in [-1, 1]
         float    lastsyncin;
@@ -807,7 +802,6 @@ extern "C" {
         float   _p, _w, _b, _z;
         int     _j, _k;
         float   _f [FILLEN + LONGEST_DD_PULSE_LENGTH];
-        bool    _init;
         float invSampleRate;
     } _tMBTriangle;
     
@@ -823,7 +817,7 @@ extern "C" {
     float tMBTriangle_sync(tMBTriangle* const osc, float sync);
     void tMBTriangle_setPhase(tMBTriangle* const osc, float phase);
     void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft);
-    void tMBTriangle_setBufferOffset(tMBTriangle* const osc, int offset);
+    void tMBTriangle_setBufferOffset(tMBTriangle* const osc, uint32_t offset);
     void tMBTriangle_setSampleRate (tMBTriangle* const osc, float sr);
     
     
@@ -871,8 +865,6 @@ extern "C" {
     {
         tMempool mempool;
         float    out;
-        float    amp;
-        float    last_amp;
         float    freq;
         float    lastsyncin;
         float    sync;
@@ -881,7 +873,6 @@ extern "C" {
         float   _p, _w, _z;
         int     _j;
         float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
-        bool    _init;
         float invSampleRate;
     } _tMBSaw;
     
@@ -896,11 +887,83 @@ extern "C" {
     float tMBSaw_sync(tMBSaw* const osc, float sync);
     void tMBSaw_setPhase(tMBSaw* const osc, float phase);
     void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft);
-    void tMBSaw_setBufferOffset(tMBSaw* const osc, int offset);
+    void tMBSaw_setBufferOffset(tMBSaw* const osc, uint32_t offset);
     void tMBSaw_setSampleRate (tMBSaw* const osc, float sr);
     
     //==============================================================================
+    /*!
+     @defgroup tmbsaw tMBSawPulse
+     @ingroup oscillators
+     @brief Saw wave mixed with Pulse wave oscillator with minBLEP anti-aliasing.
+     @{
+
+     @fn void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf)
+     @brief Initialize a tMBSaw to the default mempool of a LEAF instance.
+     @param osc A pointer to the tMBSaw to initialize.
+
+     @fn void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const mempool)
+     @brief Initialize a tMBSaw to a specified mempool.
+     @param osc A pointer to the tMBSaw to initialize.
+
+     @fn void tMBSaw_free(tMBSaw* const osc)
+     @brief Free a tMBSaw from its mempool.
+     @param osc A pointer to the tMBSaw to free.
+
+     @fn float tMBSaw_tick(tMBSaw* const osc)
+     @brief Tick the oscillator.
+     @param osc A pointer to the relevant tMBSaw.
+     @return The ticked sample.
+
+     @fn void tMBSaw_setFreq(tMBSaw* const osc, float f)
+     @brief Set the frequency of the oscillator.
+     @param osc A pointer to the relevant tMBSaw.
+     @param freq The new frequency.
+
+     @fn float tMBSaw_sync(tMBSaw* const osc, float sync)
+     @brief Sync this oscillator to another signal.
+     @param osc A pointer to the relevant tMBSaw.
+     @param sync A sample of the signal to sync to.
+     @return The passed in sample.
+
+     @fn void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft)
+     @brief Set the sync behavior of the oscillator.
+     @param hardOrSoft 0 for hard sync, 1 for soft sync
+     ￼￼￼
+     @} */
+
+    typedef struct _tMBSawPulse
+    {
+        tMempool mempool;
+        float    out;
+        float    freq;
+        float    lastsyncin;
+        float    sync;
+        float    syncdir;
+        int      softsync;
+        float    waveform;
+        float   _p, _w, _b, _x, _z, _k;
+        int     _j;
+        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
+        float invSampleRate;
+        float 	shape;
+    } _tMBSawPulse;
     
+    typedef _tMBSawPulse* tMBSawPulse;
+
+    void tMBSawPulse_init(tMBSawPulse* const osc, LEAF* const leaf);
+    void tMBSawPulse_initToPool(tMBSawPulse* const osc, tMempool* const mempool);
+    void tMBSawPulse_free(tMBSawPulse* const osc);
+
+    float tMBSawPulse_tick(tMBSawPulse* const osc);
+    void tMBSawPulse_setFreq(tMBSawPulse* const osc, float f);
+    float tMBSawPulse_sync(tMBSawPulse* const osc, float sync);
+    void tMBSawPulse_setPhase(tMBSawPulse* const osc, float phase);
+    void tMBSawPulse_setShape(tMBSawPulse* const osc, float shape);
+    void tMBSawPulse_setSyncMode(tMBSawPulse* const osc, int hardOrSoft);
+    void tMBSawPulse_setBufferOffset(tMBSawPulse* const osc, uint32_t offset);
+    void tMBSawPulse_setSampleRate (tMBSawPulse* const osc, float sr);
+
+    //==============================================================================
     /*!
      @defgroup ttable tTable
      @ingroup oscillators
