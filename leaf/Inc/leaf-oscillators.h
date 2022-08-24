@@ -1284,7 +1284,7 @@ extern "C" {
         float freq;
         int32_t mask;
         uint8_t phaseDidReset;
-        int32_t invSampleRateTimesTwoTo32;
+        float invSampleRateTimesTwoTo32;
     } _tIntPhasor;
     
     typedef _tIntPhasor* tIntPhasor;
@@ -1350,7 +1350,104 @@ extern "C" {
     void    tSquareLFO_setFreq     (tSquareLFO* const osc, float freq);
     void    tSquareLFO_setSampleRate (tSquareLFO* const osc, float sr);
     void    tSquareLFO_setPulseWidth (tSquareLFO* const cy, float pw);
+    void    tSquareLFO_setPhase (tSquareLFO* const cy, float phase);
+
+    typedef struct _tSawSquareLFO
+    {
+        tMempool mempool;
+        float shape;
+        tIntPhasor saw;
+        tSquareLFO square;
+    } _tSawSquareLFO;
+
+    typedef _tSawSquareLFO* tSawSquareLFO;
+
+    void    tSawSquareLFO_init        (tSawSquareLFO* const osc, LEAF* const leaf);
+    void    tSawSquareLFO_initToPool  (tSawSquareLFO* const osc, tMempool* const);
+    void    tSawSquareLFO_free        (tSawSquareLFO* const osc);
     
+    float   tSawSquareLFO_tick        (tSawSquareLFO* const osc);
+    void    tSawSquareLFO_setFreq     (tSawSquareLFO* const osc, float freq);
+    void    tSawSquareLFO_setSampleRate (tSawSquareLFO* const osc, float sr);
+    void    tSawSquareLFO_setPhase (tSawSquareLFO* const cy, float phase);
+    void    tSawSquareLFO_setShape (tSawSquareLFO* const cy, float shape);
+
+        //==============================================================================
+ /*!
+     @defgroup tTriLFO tTriLFO
+     @ingroup oscillators
+     @brief Aliasing phasor.
+     @{
+     
+     @fn void    tTriLFO_init        (tTriLFO* const osc, LEAF* const leaf)
+     @brief Initialize a tTriLFO to the default mempool of a LEAF instance.
+     @param osc A pointer to the tTriLFO to initialize.
+     @param leaf A pointer to the leaf instance.
+     
+     @fn void    tTriLFO_initToPool  (tTriLFO* const osc, tMempool* const)
+     @brief Initialize a tTriLFO to a specified mempool.
+     @param osc A pointer to the tTriLFO to initialize.
+     @param mempool A pointer to the tMempool to use.
+     
+     @fn void    tTriLFO_free        (tTriLFO* const osc)
+     @brief Free a tTriLFO from its mempool.
+     @param osc A pointer to the tTriLFO to free.
+     
+     @fn float   tTriLFO_tick        (tTriLFO* const osc)
+     @brief
+     @param osc A pointer to the relevant tTriLFO.
+     
+     @fn void    tTriLFO_setFreq     (tTriLFO* const osc, float freq)
+     @brief
+     @param osc A pointer to the relevant tTriLFO.
+     ￼￼￼
+     @} */
+    
+    typedef struct _tTriLFO
+    {
+        
+        tMempool mempool;
+        uint32_t phase;
+        uint32_t inc;
+        uint32_t prevPhase;
+        float freq;
+        int32_t mask;
+        uint8_t phaseDidReset;
+        uint32_t invSampleRate;
+        float invSampleRateTimesTwoTo32;
+    } _tTriLFO;
+    
+    typedef _tTriLFO* tTriLFO;
+    
+    void    tTriLFO_init        (tTriLFO* const osc, LEAF* const leaf);
+    void    tTriLFO_initToPool  (tTriLFO* const osc, tMempool* const);
+    void    tTriLFO_free        (tTriLFO* const osc);
+    
+    float   tTriLFO_tick        (tTriLFO* const osc);
+    void    tTriLFO_setFreq     (tTriLFO* const osc, float freq);
+    void    tTriLFO_setSampleRate (tTriLFO* const osc, float sr);
+    
+    void    tTriLFO_setPhase(tTriLFO* const cy, float phase);
+
+    typedef struct _tSineTriLFO
+    {
+        tMempool mempool;
+        float shape;
+        tTriLFO tri;
+        tCycle sine;
+    } _tSineTriLFO;
+
+    typedef _tSineTriLFO* tSineTriLFO;
+
+    void    tSineTriLFO_init        (tSineTriLFO* const osc, LEAF* const leaf);
+    void    tSineTriLFO_initToPool  (tSineTriLFO* const osc, tMempool* const);
+    void    tSineTriLFO_free        (tSineTriLFO* const osc);
+    
+    float   tSineTriLFO_tick        (tSineTriLFO* const osc);
+    void    tSineTriLFO_setFreq     (tSineTriLFO* const osc, float freq);
+    void    tSineTriLFO_setSampleRate (tSineTriLFO* const osc, float sr);
+    void    tSineTriLFO_setPhase (tSineTriLFO* const cy, float phase);
+    void    tSineTriLFO_setShape (tSineTriLFO* const cy, float shape); 
 #ifdef __cplusplus
 }
 #endif
