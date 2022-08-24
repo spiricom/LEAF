@@ -93,6 +93,9 @@ extern "C" {
 #define INV_TWO_TO_31    0.000000000465661f
 #define TWO_TO_32        4294967296.0f
 #define INV_TWO_TO_32    0.000000000232831f
+
+#define TWO_TO_32_INT        4294967296u
+#define TWO_TO_31_INT        2147483648u
     
 #define ONE_OVER_SQRT2  0.707106781186548f
 

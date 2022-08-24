@@ -3046,8 +3046,9 @@ float   tTriLFO_tick(tTriLFO* const cy)
     
     //bitmask fun
     //
-    uint32_t mask = c->phase >> 31;
-    int32_t val2 = c->phase + mask;
+    int32_t shiftedPhase = c->phase + 1073741824; // offset by 1/4" wave by adding 2^30 to get things in phase with the other LFO oscillators
+    uint32_t mask = shiftedPhase >> 31;
+    int32_t val2 = shiftedPhase + mask;
     int32_t test = val2 ^ mask;
     float output =( ((float)test * INV_TWO_TO_31)-0.5f) * 2.0f;
     return output;
@@ -3083,7 +3084,7 @@ void    tTriLFO_setPhase(tTriLFO* const cy, float phase)
     
     int i = phase;
     phase -= i;
-    c->phase = phase * TWO_TO_32;
+    c->phase = phase * TWO_TO_32_INT;
 }
 
 void     tTriLFO_setSampleRate (tTriLFO* const cy, float sr)
@@ -3124,7 +3125,7 @@ float   tSineTriLFO_tick        (tSineTriLFO* const cy)
     _tSineTriLFO* c = *cy;
     float a = tCycle_tick(&c->sine);
     float b = tTriLFO_tick(&c->tri);
-    return  (1 - c->shape) * a + c->shape * -1.0f * b; 
+    return  (1.0f - c->shape) * a + c->shape * b;
 }
 void    tSineTriLFO_setFreq     (tSineTriLFO* const cy, float freq)
 {
