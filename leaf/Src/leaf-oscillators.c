@@ -2912,7 +2912,7 @@ float   tSquareLFO_tick(tSquareLFO* const cy)
     // Phasor increment
     float a = tIntPhasor_tick(&c->phasor);
     float b = tIntPhasor_tick(&c->invPhasor);
-    float tmp = ((a - b)) + c->pulsewidth - 1.0f;
+    float tmp = ((a - b)) + c->pulsewidth - 0.5f;
     return 2 * tmp;
 }
 
@@ -2974,7 +2974,7 @@ void    tSawSquareLFO_free        (tSawSquareLFO* const cy)
 float   tSawSquareLFO_tick        (tSawSquareLFO* const cy)
 {
     _tSawSquareLFO* c = *cy;
-    float a = tIntPhasor_tick(&c->saw);
+    float a = (tIntPhasor_tick(&c->saw) - 0.5f ) * 2.0f;
     float b = tSquareLFO_tick(&c->square);
     return  (1 - c->shape) * a + c->shape * b; 
 }
@@ -3081,7 +3081,7 @@ void     tTriLFO_setFreq(tTriLFO* const cy, float freq)
 void    tTriLFO_setPhase(tTriLFO* const cy, float phase)
 {
     _tTriLFO* c = *cy;
-    
+    phase = (phase + 0.5f);
     int i = phase;
     phase -= i;
     c->phase = phase * TWO_TO_32_INT;
@@ -3110,7 +3110,7 @@ void    tSineTriLFO_initToPool  (tSineTriLFO* const cy, tMempool* const mp)
     LEAF* leaf = c->mempool->leaf;
     tTriLFO_initToPool(&c->tri,mp);
     tCycle_initToPool(&c->sine,mp); 
-    
+   
 }
 void    tSineTriLFO_free        (tSineTriLFO* const cy)
 {
