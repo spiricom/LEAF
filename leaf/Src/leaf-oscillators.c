@@ -972,6 +972,7 @@ float tMBPulse_tick(tMBPulse* const osc)
     
     sync = c->sync;
 
+
     p = c->_p;  /* phase [0, 1) */
     w = c->_w;  /* phase increment */
     b = c->_b;  /* duty cycle (0, 1) */
@@ -1177,6 +1178,7 @@ void tMBPulse_setWidth(tMBPulse* const osc, float w)
 {
     _tMBPulse* c = *osc;
     c->waveform = w;
+    c->_b = 0.5f * (1.0f + c->waveform);
 }
 
 float tMBPulse_sync(tMBPulse* const osc, float value)
