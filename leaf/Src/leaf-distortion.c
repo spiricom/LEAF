@@ -124,7 +124,11 @@ float tOversampler_tick(tOversampler* const osr, float input, float* oversample,
 }
 
 // From CMSIS DSP Library
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tOversampler_upsample(tOversampler* const osr, float input, float* output)
+#else
 void tOversampler_upsample(tOversampler* const osr, float input, float* output)
+#endif
 {
     _tOversampler* os = *osr;
     
@@ -223,7 +227,11 @@ void tOversampler_upsample(tOversampler* const osr, float input, float* output)
 }
 
 // From CMSIS DSP Library
+#ifdef ITCMRAM
+float __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tOversampler_downsample(tOversampler *const osr, float* input)
+#else
 float tOversampler_downsample(tOversampler *const osr, float* input)
+#endif
 {
     _tOversampler* os = *osr;
     
@@ -613,6 +621,7 @@ float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float in)
 // CRUSHER
 //============================================================================================================
 #define SCALAR 5000.f
+#define INV_SCALAR 0.0002f
 
 void tCrusher_init (tCrusher* const cr, LEAF* const leaf)
 {
@@ -680,14 +689,14 @@ void    tCrusher_setQuality (tCrusher* const cr, float val)
     
     c->div = 0.01f + val * SCALAR;
     
-    c->gain = (c->div / SCALAR) * 0.7f + 0.3f;
+    c->gain = (c->div * INV_SCALAR) * 0.7f + 0.3f;
 }
 
 // what decimal to round to
 void    tCrusher_setRound (tCrusher* const cr, float rnd)
 {
     _tCrusher* c = *cr;
-    c->rnd = fabsf(rnd);
+    c->rnd = rnd;
 }
 
 void    tCrusher_setSamplingRatio (tCrusher* const cr, float ratio)
@@ -695,5 +704,4 @@ void    tCrusher_setSamplingRatio (tCrusher* const cr, float ratio)
     _tCrusher* c = *cr;
     c->srr = ratio;
     tSampleReducer_setRatio(&c->sReducer, ratio);
-
 }

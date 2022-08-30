@@ -323,7 +323,7 @@ float LEAF_round (float input, float rnd)
     
     float scale = 1.f / rnd;
     
-    return roundf(input * scale) / scale;
+    return roundf(input * scale) * rnd;
 }
 
 
@@ -365,7 +365,11 @@ float   LEAF_softClip(float val, float thresh)
     }
 }
 
-float   LEAF_clip(float min, float val, float max)
+#ifdef ITCMRAM
+float __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) LEAF_clip(float min, float val, float max)
+#else
+float LEAF_clip(float min, float val, float max)
+#endif
 {
     float tempmin = min;
     float tempmax = max;
@@ -566,7 +570,9 @@ void LEAF_generate_exp(float* buffer, float base, float start, float end, float 
 }
 
 //
-void LEAF_generate_table_skew_non_sym(float* buffer, float start, float end, float center, int size)
+
+
+void LEAF_generate_table_skew_non_sym_double(float* buffer, float start, float end, float center, int size)
 {
     double skew = log (0.5) / log ((center - start) / (end - start));
     double increment = 1.0 / (double)(size-1);
@@ -575,6 +581,21 @@ void LEAF_generate_table_skew_non_sym(float* buffer, float start, float end, flo
     for (int i = 0; i < size; i++)
     {
         proportion = exp (log(x) / skew);
+        buffer[i] = (float)(start + (end - start) * proportion);
+        x += increment;
+    }
+}
+
+
+void LEAF_generate_table_skew_non_sym(float* buffer, float start, float end, float center, int size)
+{
+    float skew = logf (0.5) / logf ((center - start) / (end - start));
+    float increment = 1.0 / (float)(size-1);
+    float x = 0.0;
+    float proportion = 0.0;
+    for (int i = 0; i < size; i++)
+    {
+        proportion = expf (logf(x) / skew);
         buffer[i] = (float)(start + (end - start) * proportion);
         x += increment;
     }
@@ -846,40 +867,48 @@ float median3f(float a, float b, float c)
 #if LEAF_INCLUDE_MINBLEP_TABLES
 /// MINBLEPS
 // https://github.com/MrBlueXav/Dekrispator_v2 blepvco.c
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_step_dd(float *buffer, int index, float phase, float w, float scale)
+#else
 void place_step_dd(float *buffer, int index, float phase, float w, float scale)
-    {
-        float r;
-        long i;
+#endif
+{
+	float r;
+	long i;
 
-        r = MINBLEP_PHASES * phase / w;
-        i = lrintf(r - 0.5f);
-        r -= (float)i;
-        i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+	r = MINBLEP_PHASES * phase / w;
+	i = lrintf(r - 0.5f);
+	r -= (float)i;
+	i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
 
-        while (i < MINBLEP_PHASES * STEP_DD_PULSE_LENGTH) {
-            buffer[index] += scale * (step_dd_table[i].value + r * step_dd_table[i].delta);
-            i += MINBLEP_PHASES;
-            index++;
-        }
-    }
-void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta)
-	{
-		float r;
-		long i;
-
-		r = MINBLEP_PHASES * phase / w;
-		i = lrintf(r - 0.5f);
-		r -= (float)i;
-		i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
-
-		slope_delta *= w;
-
-		while (i < MINBLEP_PHASES * SLOPE_DD_PULSE_LENGTH) {
-			buffer[index] += slope_delta * (slope_dd_table[i] + r * (slope_dd_table[i + 1] - slope_dd_table[i]));
-			i += MINBLEP_PHASES;
-			index++;
-		}
+	while (i < MINBLEP_PHASES * STEP_DD_PULSE_LENGTH) {
+		buffer[index] += scale * (step_dd_table[i].value + r * step_dd_table[i].delta);
+		i += MINBLEP_PHASES;
+		index++;
 	}
+}
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta)
+#else
+void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta)
+#endif
+{
+	float r;
+	long i;
+
+	r = MINBLEP_PHASES * phase / w;
+	i = lrintf(r - 0.5f);
+	r -= (float)i;
+	i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+
+	slope_delta *= w;
+
+	while (i < MINBLEP_PHASES * SLOPE_DD_PULSE_LENGTH) {
+		buffer[index] += slope_delta * (slope_dd_table[i] + r * (slope_dd_table[i + 1] - slope_dd_table[i]));
+		i += MINBLEP_PHASES;
+		index++;
+	}
+}
 #endif // LEAF_INCLUDE_MINBLEP_TABLES
     /*! @} */
 

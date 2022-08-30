@@ -66,6 +66,10 @@
 #define LEAF_USE_DYNAMIC_ALLOCATION 0
 #endif
 
+#ifndef _CONSTANT_DATA_LOCATION
+#define _CONSTANT_DATA_LOCATION
+#endif
+
 //==============================================================================
 
 #endif // LEAF_CONFIG_H_INCLUDED

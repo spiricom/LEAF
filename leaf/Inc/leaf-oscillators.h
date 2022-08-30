@@ -674,7 +674,9 @@ extern "C" {
     //==============================================================================
     
     
-#define FILLEN 256
+#define FILLEN 128 //was 256 in dekrispator code, but it seems like it just needs to be longer than dd step length (72) and probably a power of 2.
+    // smaller buffer means refilling more often but a less intense load each time it refills
+
     
     /*!
      @defgroup tmbpulse tMBPulse
@@ -799,7 +801,7 @@ extern "C" {
         float    sync;
         float    syncdir;
         int      softsync;
-        float   _p, _w, _b, _z;
+        float   _p, _w, _b, _z, quarterwaveoffset;
         int     _j, _k;
         float   _f [FILLEN + LONGEST_DD_PULSE_LENGTH];
         float invSampleRate;
@@ -954,7 +956,9 @@ extern "C" {
     void tMBSawPulse_initToPool(tMBSawPulse* const osc, tMempool* const mempool);
     void tMBSawPulse_free(tMBSawPulse* const osc);
 
+
     float tMBSawPulse_tick(tMBSawPulse* const osc);
+    float tMBSawPulse_sync(tMBSawPulse* const osc, float value);
     void tMBSawPulse_setFreq(tMBSawPulse* const osc, float f);
     float tMBSawPulse_sync(tMBSawPulse* const osc, float sync);
     void tMBSawPulse_setPhase(tMBSawPulse* const osc, float phase);

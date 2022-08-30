@@ -451,8 +451,9 @@ extern "C" {
      @param sampler A pointer to the relevant tMBSampler.
      
      @} */
-    
-#define FILLEN 256
+#ifndef FILLEN
+#define FILLEN 128
+#endif
 
     typedef struct _tMBSampler
     {
