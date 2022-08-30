@@ -114,7 +114,7 @@ extern "C" {
     
     /* in minblep_tables.c: */
     extern const float_value_delta step_dd_table[];
-    extern const float             slope_dd_table[];
+    extern const  float             slope_dd_table[];
     
     /*! @} */
     

@@ -235,8 +235,16 @@ extern "C" {
     
     float median3f(float a, float b, float c);
 
-    void place_step_dd(float *buffer, int index, float phase, float w, float scale);
-    void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta);
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_step_dd(float *buffer, int index, float phase, float w, float scale);
+#else
+void place_step_dd(float *buffer, int index, float phase, float w, float scale);
+#endif
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta);
+#else
+void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta);
+#endif
     //==============================================================================
     
 #ifdef __cplusplus

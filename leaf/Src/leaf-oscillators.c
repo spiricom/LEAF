@@ -16,6 +16,8 @@
 
 #endif
 
+
+
 #if LEAF_INCLUDE_SINE_TABLE
 // Cycle
 void    tCycle_init(tCycle* const cy, LEAF* const leaf)
@@ -1249,6 +1251,7 @@ void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const pool)
     c->_j = 0;
     c->_p = 0.0f;  /* phase [0, 1) */
     c->_w = c->freq * c->invSampleRate;  /* phase increment */
+    c->quarterwaveoffset = c->_w * 0.25f;
     c->_b = 0.5f * (1.0f + c->waveform);  /* duty cycle (0, 1) */
     c->_k = 0.0f;  /* output state, 0 = high (0.5f), 1 = low (-0.5f) */
     memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
@@ -1286,7 +1289,7 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     invB1 = 1.0f / b1;
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
     
-    sw = w * c->syncdir;
+    sw = w * c->syncdir + c->quarterwaveoffset;
     p += sw - (int)sw;
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
@@ -1478,6 +1481,7 @@ void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
     _tMBTriangle* c = *osc;
     c->freq = f;
     c->_w = c->freq * c->invSampleRate;  /* phase increment */
+    c->quarterwaveoffset = c->_w * 0.25f;
 }
 
 void tMBTriangle_setWidth(tMBTriangle* const osc, float w)
@@ -1742,8 +1746,11 @@ void tMBSawPulse_free(tMBSawPulse* const osc)
 
 
 
-
+#ifdef ITCMRAM
+float __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSawPulse_tick(tMBSawPulse* const osc)
+#else
 float tMBSawPulse_tick(tMBSawPulse* const osc)
+#endif
 {
     _tMBSawPulse* c = *osc;
 
@@ -1982,7 +1989,11 @@ void tMBSawPulse_setFreq(tMBSawPulse* const osc, float f)
     c->_w = c->freq * c->invSampleRate;  /* phase increment */
 }
 
+#ifdef ITCMRAM
+float __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tMBSawPulse_sync(tMBSawPulse* const osc, float value)
+#else
 float tMBSawPulse_sync(tMBSawPulse* const osc, float value)
+#endif
 {
     _tMBSawPulse* c = *osc;
 
