@@ -1472,10 +1472,8 @@ extern "C" {
         tMempool mempool;
         int32_t phase;
         int32_t inc;
-        int32_t prevPhase;
         float freq;
-        uint8_t phaseDidReset;
-        uint32_t invSampleRate;
+        float invSampleRate;
         float invSampleRateTimesTwoTo32;
     } _tTriLFO;
     

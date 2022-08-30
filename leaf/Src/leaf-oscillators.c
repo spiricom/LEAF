@@ -1269,7 +1269,6 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     
     sync = c->sync;
 
-
     p = c->_p;  /* phase [0, 1) */
     w = c->_w;  /* phase increment */
     b = c->_b;  /* duty cycle (0, 1) */
@@ -1482,6 +1481,7 @@ void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
 void tMBTriangle_setWidth(tMBTriangle* const osc, float w)
 {
     _tMBTriangle* c = *osc;
+    w = LEAF_clip(0.0f, w, 0.99f);
     c->waveform = w;
 }
 
@@ -1846,10 +1846,13 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 		 }
 
 
-	   /* now place reset DD for pulse */
+
 		if (sw > 0)
 		{
-			if (k) {
+			/* now place reset DD for saw*/
+			place_step_dd(c->_f, j, p, sw, p_at_reset * sawShape);
+            /* now place reset DD for pulse */
+            if (k) {
 				place_step_dd(c->_f, j, p, sw, 1.0f * shape);
 				k = 0;
 				x = 0.5f;
@@ -1862,6 +1865,9 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 		}
 		else if (sw < 0)
 		{
+	        /* now place reset DD for saw*/
+			place_step_dd(c->_f, j, 1.0f - p, -sw, -p_at_reset * sawShape);
+			 /* now place reset DD for pulse */
 			if (!k) {
 				place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f * shape);
 				k = 1;
@@ -1873,11 +1879,7 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 				x = 0.5f;
 			}
 		}
-        /* now place reset DD for saw*/
-        if (sw > 0)
-            place_step_dd(c->_f, j, p, sw, p_at_reset * sawShape);
-        else if (sw < 0)
-            place_step_dd(c->_f, j, 1.0f - p, -sw, -p_at_reset * sawShape);
+
 
     }
 
@@ -2835,7 +2837,6 @@ void    tIntPhasor_initToPool   (tIntPhasor* const cy, tMempool* const mp)
     
     c->phase    =  0;
     c->invSampleRateTimesTwoTo32 = (leaf->invSampleRate * TWO_TO_32);
-    c->mask = 0x7FFFFFFF;
 }
 
 void    tIntPhasor_free (tIntPhasor* const cy)
@@ -2850,7 +2851,7 @@ float   tIntPhasor_tick(tIntPhasor* const cy)
 {
     _tIntPhasor* c = *cy;
     // Phasor increment
-    c->phase = (c->phase + c->inc);//& c->mask;
+    c->phase = (c->phase + c->inc);
     
     return c->phase * INV_TWO_TO_32; 
 }
@@ -2891,10 +2892,9 @@ void    tSquareLFO_initToPool   (tSquareLFO* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tSquareLFO* c = *cy = (_tSquareLFO*) mpool_alloc(sizeof(_tSquareLFO), m);
     c->mempool = m;
-    LEAF* leaf = c->mempool->leaf;
     tIntPhasor_initToPool(&c->phasor,mp);
     tIntPhasor_initToPool(&c->invPhasor,mp); 
-    tSquareLFO_setPulseWidth(cy, 0.5);
+    tSquareLFO_setPulseWidth(cy, 0.5f);
 }
 
 void    tSquareLFO_free (tSquareLFO* const cy)
@@ -2937,7 +2937,6 @@ void tSquareLFO_setPulseWidth(tSquareLFO* const cy, float pw)
     _tSquareLFO *c = *cy;
 
     c->pulsewidth = pw;
-    //c->delay = c->pulsewidth * INV_TWO_TO_32;
     tIntPhasor_setPhase(&c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
 }
 
@@ -2951,7 +2950,7 @@ void tSquareLFO_setPhase(tSquareLFO* const cy, float phase)
 void    tSawSquareLFO_init        (tSawSquareLFO* const cy, LEAF* const leaf)
 {
     tSawSquareLFO_initToPool(cy, &leaf->mempool);
-    _tSawSquareLFO* c = *cy; 
+
 }
 
 void    tSawSquareLFO_initToPool  (tSawSquareLFO* const cy, tMempool* const mp)
@@ -2959,7 +2958,6 @@ void    tSawSquareLFO_initToPool  (tSawSquareLFO* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tSawSquareLFO* c = *cy = (_tSawSquareLFO*) mpool_alloc(sizeof(_tSawSquareLFO), m);
     c->mempool = m;
-    LEAF* leaf = c->mempool->leaf;
     tSquareLFO_initToPool(&c->square,mp);
     tIntPhasor_initToPool(&c->saw,mp); 
 }
@@ -3024,8 +3022,7 @@ void    tTriLFO_initToPool   (tTriLFO* const cy, tMempool* const mp)
     c->phase    =  0;
     c->invSampleRate = leaf->invSampleRate;
     c->invSampleRateTimesTwoTo32 = (c->invSampleRate * TWO_TO_32);
-    //c->mask = TRI_TABLE_SIZE - 1;
-    tTriLFO_setFreq(cy, 220);
+    tTriLFO_setFreq(cy, 220.0f);
 }
 
 void    tTriLFO_free (tTriLFO* const cy)
@@ -3039,34 +3036,15 @@ void    tTriLFO_free (tTriLFO* const cy)
 float   tTriLFO_tick(tTriLFO* const cy)
 {
     _tTriLFO* c = *cy;
-    //uint32_t idx;
-    //float frac, samp0, samp1;
-    // Phasor increment
     c->phase += c->inc;
     
     //bitmask fun
-    //
     int32_t shiftedPhase = c->phase + 1073741824; // offset by 1/4" wave by adding 2^30 to get things in phase with the other LFO oscillators
-    uint32_t mask = shiftedPhase >> 31;
-    int32_t val2 = shiftedPhase + mask;
-    int32_t test = val2 ^ mask;
-    float output =( ((float)test * INV_TWO_TO_31)-0.5f) * 2.0f;
+    uint32_t mask = shiftedPhase >> 31; //get the sign bit
+    shiftedPhase = shiftedPhase + mask; // add 1 if negative, zero if positive, to balance
+    shiftedPhase = shiftedPhase ^ mask; //invert the value to get absolute value of integer
+    float output = (((float)shiftedPhase * INV_TWO_TO_31) - 0.5f) * 2.0f; //scale it to -1.0f to 1.0f float
     return output;
-
-    /*
-    // Wavetable synthesis
-    idx = c->phase >> 21;
-    uint32_t idx2 = (idx + 1) & c->mask;
-    uint32_t tempFrac = (c->phase & 2097151);
-    frac = (float)tempFrac * 0.000000476837386f;// 1/2097151 (2097151 is the 21 bits after the 11 bits that represent the main index)
-    
-    samp0 = __leaf_table_triangle[0][idx];
-    samp1 = __leaf_table_triangle[0][idx2];
-    float oct0 = (samp0 + (samp1 - samp0) * frac);
-   
-    
-    return oct0;
-     */
 
 }
 
@@ -3081,7 +3059,6 @@ void     tTriLFO_setFreq(tTriLFO* const cy, float freq)
 void    tTriLFO_setPhase(tTriLFO* const cy, float phase)
 {
     _tTriLFO* c = *cy;
-    phase = (phase + 0.5f);
     int i = phase;
     phase -= i;
     c->phase = phase * TWO_TO_32_INT;
@@ -3090,8 +3067,8 @@ void    tTriLFO_setPhase(tTriLFO* const cy, float phase)
 void     tTriLFO_setSampleRate (tTriLFO* const cy, float sr)
 {
     _tTriLFO* c = *cy;
-    
-    c->invSampleRateTimesTwoTo32 = (1.0f/sr) * TWO_TO_32;
+    c->invSampleRate = (1.0f/sr);
+    c->invSampleRateTimesTwoTo32 = c->invSampleRate * TWO_TO_32;
     tTriLFO_setFreq(cy, c->freq);
 }
 ///sinetri
@@ -3099,7 +3076,6 @@ void     tTriLFO_setSampleRate (tTriLFO* const cy, float sr)
 void    tSineTriLFO_init        (tSineTriLFO* const cy, LEAF* const leaf)
 {
     tSineTriLFO_initToPool(cy, &leaf->mempool);
-    _tSineTriLFO* c = *cy; 
 }
 
 void    tSineTriLFO_initToPool  (tSineTriLFO* const cy, tMempool* const mp)
@@ -3107,7 +3083,6 @@ void    tSineTriLFO_initToPool  (tSineTriLFO* const cy, tMempool* const mp)
     _tMempool* m = *mp;
     _tSineTriLFO* c = *cy = (_tSineTriLFO*) mpool_alloc(sizeof(_tSineTriLFO), m);
     c->mempool = m;
-    LEAF* leaf = c->mempool->leaf;
     tTriLFO_initToPool(&c->tri,mp);
     tCycle_initToPool(&c->sine,mp); 
    

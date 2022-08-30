@@ -1822,6 +1822,7 @@ static inline void sub_collector_init(_sub_collector* collector, tZeroCrossingCo
     collector->_fundamental._period = -1;
     collector->_fundamental._periodicity = 0.0f;
     collector->_fundamental._harmonic = 0;
+    collector->_first_period = 0.01f;
 }
 
 static inline float sub_collector_period_of(_sub_collector* collector, _auto_correlation_info info)

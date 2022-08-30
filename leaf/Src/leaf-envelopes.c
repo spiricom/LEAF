@@ -1316,8 +1316,8 @@ void    tExpSmooth_initToPool   (tExpSmooth* const expsmooth, float val, float f
     
     smooth->curr = val;
     smooth->dest = val;
-    if (factor < 0) factor = 0;
-    if (factor > 1) factor = 1;
+    if (factor < 0.0f) factor = 0.0f;
+    if (factor > 1.0f) factor = 1.0f;
     smooth->baseFactor = factor;
     smooth->factor = factor;
     smooth->oneminusfactor = 1.0f - factor;
@@ -1334,9 +1334,9 @@ void     tExpSmooth_setFactor(tExpSmooth* const expsmooth, float factor)
 {   // factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
     _tExpSmooth* smooth = *expsmooth;
     
-    if (factor < 0)
-        factor = 0;
-    else if (factor > 1) factor = 1;
+    if (factor < 0.0f)
+        factor = 0.0f;
+    else if (factor > 1.0f) factor = 1.0f;
     smooth->baseFactor = factor;
     smooth->factor = powf(factor, 44100.f * smooth->invSampleRate);
     smooth->oneminusfactor = 1.0f - factor;

@@ -1281,9 +1281,9 @@ float tMBSampler_tick        (tMBSampler* const sp)
     int start, end, length;
     float* buff;
     int    j;
-    float  syncin;
+    //float  syncin;
     float  a, p, w, z;
-    syncin  = c->syncin;
+   // syncin  = c->syncin;
         
     start = c->start;
     end = c->end;
