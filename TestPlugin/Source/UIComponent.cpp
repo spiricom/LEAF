@@ -163,7 +163,7 @@ void UIComponent::buttonClicked(Button *b)
     {
         juce::FileChooser chooser ("Select a Wave file to play...", {}, "*.wav");
         
-        if (chooser.browseForFileToOpen())
+        /*if (chooser.browseForFileToOpen())
         {
             auto file = chooser.getResult();
             auto* reader = formatManager.createReaderFor (file);
@@ -177,5 +177,6 @@ void UIComponent::buttonClicked(Button *b)
                 loadedAudio.add(buffer);
             }
         }
+         */
     }
 }

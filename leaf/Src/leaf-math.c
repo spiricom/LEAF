@@ -887,6 +887,10 @@ void place_step_dd(float *buffer, int index, float phase, float w, float scale)
 		index++;
 	}
 }
+
+
+
+
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta)
 #else

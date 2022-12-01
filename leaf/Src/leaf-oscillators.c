@@ -1289,7 +1289,7 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     invB1 = 1.0f / b1;
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
     
-    sw = w * c->syncdir + c->quarterwaveoffset;
+    sw = w * c->syncdir;
     p += sw - (int)sw;
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
@@ -1481,7 +1481,7 @@ void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
     _tMBTriangle* c = *osc;
     c->freq = f;
     c->_w = c->freq * c->invSampleRate;  /* phase increment */
-    c->quarterwaveoffset = c->_w * 0.25f;
+    //c->quarterwaveoffset = c->_w * 0.25f;
 }
 
 void tMBTriangle_setWidth(tMBTriangle* const osc, float w)
@@ -1558,8 +1558,12 @@ void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const pool)
     c->_j = 0;
     c->_p = 0.0f;  /* phase [0, 1) */
     c->_w = c->freq * c->invSampleRate;  /* phase increment */
-
-    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
+    c->_inv_w = 1.0f / c->_w;
+    c->numBLEPs = 0;
+    c->mostRecentBLEP = 0;
+    c->maxBLEPphase = MINBLEP_PHASES * STEP_DD_PULSE_LENGTH;
+    memset (c->BLEPindices, 0, 64 * sizeof (uint16_t));
+    memset (c->_f, 0, 8 * sizeof (float));
 }
 
 void tMBSaw_free(tMBSaw* const osc)
@@ -1568,87 +1572,131 @@ void tMBSaw_free(tMBSaw* const osc)
     mpool_free((char*)c, c->mempool);
 }
 
+
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, float phase, float inv_w, float scale)
+#else
+void tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, float phase, float inv_w, float scale)
+#endif
+{
+	_tMBSaw* c = *osc;
+	float r;
+	long i;
+
+	r = MINBLEP_PHASES * phase * inv_w;
+	i = lrintf(r - 0.5f);
+	r -= (float)i;
+	i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+	c->mostRecentBLEP = (c->mostRecentBLEP + 1) & 63;
+	c->BLEPindices[c->mostRecentBLEP] = i;
+    c->BLEPproperties[c->mostRecentBLEP][0] = r;
+    c->BLEPproperties[c->mostRecentBLEP][1] = scale;
+    c->numBLEPs = (c->numBLEPs + 1) & 63;
+}
+
+
+
 float tMBSaw_tick(tMBSaw* const osc)
 {
     _tMBSaw* c = *osc;
-    
+
     int    j;
     float  sync;
-    float  p, w, sw, z;
-    
+    float  p, sw, z;
+
     sync = c->sync;
 
-    
+
     p = c->_p;  /* phase [0, 1) */
-    w = c->_w;  /* phase increment */
     z = c->_z;  /* low pass filter state */
     j = c->_j;  /* index into buffer _f */
 
 
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
+    sw = c->_w * c->syncdir;
+    float inv_sw = c->_inv_w * c->syncdir;
+    p += sw - (int)sw;
+
+   //if (sync > 0.0f && c->softsync > 0) {
     // Should insert minblep for softsync?
 	//	if (p_at_reset >= 1.0f) {
 	//		p_at_reset -= (int)p_at_reset;
-	//		place_slope_dd(c->_f, j, p_at_reset + eof_offset, sw, 2.0f);
+	//		place_slope_dd(osc, j, p_at_reset + eof_offset, inv_sw, 2.0f);
 	//	}
 	//	if (p_at_reset < 0.0f) {
 	//		p_at_reset += 1.0f - (int)p_at_reset;
-	//		place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -2.0f);
+	//		place_slope_dd(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, -2.0f);
 	//	}
-	//	if (sw > 0) place_slope_dd(c->_f, j, p, sw, 2.0f);
-	//	else if (sw < 0) place_slope_dd(c->_f, j, 1.0f - p, -sw, -2.0f);
-    
-    sw = w * c->syncdir;
-    p += sw - (int)sw;
-    
+	//	if (sw > 0) place_slope_dd(osc, j, p, inv_sw, 2.0f);
+	//	else if (sw < 0) place_slope_dd(osc, j, 1.0f - p, -inv_sw, -2.0f);
+    //}
+
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
         float eof_offset = sync * sw;
         float p_at_reset = p - eof_offset;
 
         if (sw > 0) p = eof_offset;
         else if (sw < 0) p = 1.0f - eof_offset;
-        
+
         /* place any DD that may have occurred in subsample before reset */
         if (p_at_reset >= 1.0f) {
             p_at_reset -= 1.0f;
-            place_step_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f);
+            tMBSaw_place_step_dd_noBuffer(osc, j, p_at_reset + eof_offset, inv_sw, 1.0f);
         }
         if (p_at_reset < 0.0f) {
             p_at_reset += 1.0f;
-            place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -1.0f);
+            tMBSaw_place_step_dd_noBuffer(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, -1.0f);
         }
-        
+
         /* now place reset DD */
         if (sw > 0)
-            place_step_dd(c->_f, j, p, sw, p_at_reset);
+        	tMBSaw_place_step_dd_noBuffer(osc, j, p, inv_sw, p_at_reset);
         else if (sw < 0)
-            place_step_dd(c->_f, j, 1.0f - p, -sw, -p_at_reset);
+        	tMBSaw_place_step_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -p_at_reset);
 
     } else if (p >= 1.0f) {  /* normal phase reset */
         p -= 1.0f;
-        place_step_dd(c->_f, j, p, sw, 1.0f);
-        
+        tMBSaw_place_step_dd_noBuffer(osc, j, p, inv_sw, 1.0f);
+
     } else if (p < 0.0f) {
         p += 1.0f;
-        place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
+        tMBSaw_place_step_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -1.0f);
     }
-    c->_f[j + DD_SAMPLE_DELAY] += 0.5f - p;
-    
+
+    //construct the current output sample based on the state of the active BLEPs
+
+    int currentSamp = (j + DD_SAMPLE_DELAY) & 7;
+
+    c->_f[currentSamp] = 0.5f - p;
+
+    volatile uint8_t numBLEPsAtLoopStart = c->numBLEPs;
+    for (int i = 0; i < numBLEPsAtLoopStart; i++)
+    {
+    	volatile uint16_t whichBLEP = (c->mostRecentBLEP - i);
+    	whichBLEP &= 63;
+
+    	//use the scale and r values from the BLEPproperties array to compute the current state of each active BLEP and add it to the output value
+    	c->_f[j] += c->BLEPproperties[whichBLEP][1] * (step_dd_table[c->BLEPindices[whichBLEP]].value + c->BLEPproperties[whichBLEP][0] * step_dd_table[c->BLEPindices[whichBLEP]].delta);
+
+    	//increment the position in the BLEP table
+		c->BLEPindices[whichBLEP] += MINBLEP_PHASES;
+		//check if this BLEP is finished and if so mark it as inactive so it isn't computed anymore.
+		if (c->BLEPindices[whichBLEP] >= c->maxBLEPphase)
+		{
+			c->numBLEPs--;
+		}
+
+    }
+
     z += 0.5f * (c->_f[j] - z); // LP filtering
     c->out = z;
-    
-    if (++j == FILLEN)
-    {
-        j = 0;
-        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (float));
-        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (float));
-    }
-    
+    j = (j+1) & 7; //don't need 128 sample buffer just for lowpass, so only using the first 16 values before wrapping around (probably only need 4 or 8)
+
     c->_p = p;
-    c->_w = w;
     c->_z = z;
     c->_j = j;
-    
+
+
     return -c->out;
 }
 
@@ -1658,6 +1706,7 @@ void tMBSaw_setFreq(tMBSaw* const osc, float f)
     c->freq = f;
 
     c->_w = c->freq * c->invSampleRate;
+    c->_inv_w = 1.0f / c->_w;
 }
 
 float tMBSaw_sync(tMBSaw* const osc, float value)

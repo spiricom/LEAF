@@ -873,8 +873,14 @@ extern "C" {
         float    syncdir;
         int      softsync;
         float   _p, _w, _z;
+        float   _inv_w;
         int     _j;
-        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
+        float   _f[8];
+        uint16_t numBLEPs;
+        uint16_t mostRecentBLEP;
+        uint16_t maxBLEPphase;
+        uint16_t 	BLEPindices[64];
+        float 	BLEPproperties[64][2];
         float invSampleRate;
     } _tMBSaw;
     
@@ -883,7 +889,6 @@ extern "C" {
     void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf);
     void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const mempool);
     void tMBSaw_free(tMBSaw* const osc);
-    
     float tMBSaw_tick(tMBSaw* const osc);
     void tMBSaw_setFreq(tMBSaw* const osc, float f);
     float tMBSaw_sync(tMBSaw* const osc, float sync);
@@ -891,7 +896,13 @@ extern "C" {
     void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft);
     void tMBSaw_setBufferOffset(tMBSaw* const osc, uint32_t offset);
     void tMBSaw_setSampleRate (tMBSaw* const osc, float sr);
-    
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, float phase, float w, float scale);
+#else
+		void tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, float phase, float w, float scale);
+#endif
+
+
     //==============================================================================
     /*!
      @defgroup tmbsaw tMBSawPulse
@@ -958,7 +969,6 @@ extern "C" {
 
 
     float tMBSawPulse_tick(tMBSawPulse* const osc);
-    float tMBSawPulse_sync(tMBSawPulse* const osc, float value);
     void tMBSawPulse_setFreq(tMBSawPulse* const osc, float f);
     float tMBSawPulse_sync(tMBSawPulse* const osc, float sync);
     void tMBSawPulse_setPhase(tMBSawPulse* const osc, float phase);

@@ -339,6 +339,55 @@ extern "C" {
     
 
 
+
+typedef struct _tSimpleLivingString3
+{
+    
+    tMempool mempool;
+    float freq, waveLengthInSamples;        // the frequency of the string, determining delay length
+    float dampFreq;    // frequency for the bridge LP filter, in Hz
+    float decay; // amplitude damping factor for the string (only active in mode 0)
+    int levMode;
+    float curr;
+    float Uout;
+    float Lout;
+    tLinearDelay delayLineU;
+    tLinearDelay delayLineL;
+    tOnePole bridgeFilter;
+    tHighpass DCblocker;
+    tFeedbackLeveler fbLev;
+    tExpSmooth wlSmooth;
+    float sampleRate;
+} _tSimpleLivingString3;
+
+typedef _tSimpleLivingString3* tSimpleLivingString3;
+
+void    tSimpleLivingString3_init                (tSimpleLivingString3* const, float freq, float dampFreq,
+                                                 float decay, float targetLev, float levSmoothFactor,
+                                                 float levStrength, int levMode, LEAF* const leaf);
+void    tSimpleLivingString3_initToPool          (tSimpleLivingString3* const, float freq, float dampFreq,
+                                                 float decay, float targetLev, float levSmoothFactor,
+                                                 float levStrength, int levMode, tMempool* const);
+void    tSimpleLivingString3_free                (tSimpleLivingString3* const);
+
+float   tSimpleLivingString3_pluck              (tSimpleLivingString3* const pl, float input, float position);
+float   tSimpleLivingString3_tick                (tSimpleLivingString3* const, float input);
+float   tSimpleLivingString3_sample              (tSimpleLivingString3* const);
+void    tSimpleLivingString3_setFreq             (tSimpleLivingString3* const, float freq);
+void    tSimpleLivingString3_setWaveLength       (tSimpleLivingString3* const, float waveLength); // in samples
+void    tSimpleLivingString3_setDampFreq         (tSimpleLivingString3* const, float dampFreq);
+void    tSimpleLivingString3_setDecay            (tSimpleLivingString3* const, float decay); // should be near 1.0
+void    tSimpleLivingString3_setTargetLev        (tSimpleLivingString3* const, float targetLev);
+void    tSimpleLivingString3_setLevSmoothFactor  (tSimpleLivingString3* const, float levSmoothFactor);
+void    tSimpleLivingString3_setLevStrength      (tSimpleLivingString3* const, float levStrength);
+void    tSimpleLivingString3_setLevMode          (tSimpleLivingString3* const, int levMode);
+void    tSimpleLivingString3_setSampleRate       (tSimpleLivingString3* const, float sr);
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+
+
+
     typedef struct _tSimpleLivingString2
     {
 

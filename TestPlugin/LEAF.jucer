@@ -10,7 +10,7 @@
               pluginRTASCategory="" aaxIdentifier="com.pumusic.LEAF" pluginAAXCategory="2"
               companyName="Princeton University" companyEmail="mrmulshine@gmail.com"
               displaySplashScreen="1" reportAppUsage="1" splashScreenColour="Dark"
-              buildStandalone="1" enableIAA="0" cppLanguageStandard="11" companyCopyright="Princeton University"
+              buildStandalone="1" enableIAA="0" companyCopyright="Princeton University"
               pluginFormats="buildAU,buildStandalone" pluginCharacteristicsValue="pluginWantsMidiIn"
               jucerFormatVersion="1">
   <MAINGROUP id="F7Bywq" name="LEAF">
