@@ -64,7 +64,8 @@ extern "C" {
         
         float tauAttack, tauRelease;
         float T, R, W, M; // Threshold, compression Ratio, decibel Width of knee transition, decibel Make-up gain
-        
+        float invR;
+        float inv4W;
         float x_G[2], y_G[2], x_T[2], y_T[2];
         
         int isActive;

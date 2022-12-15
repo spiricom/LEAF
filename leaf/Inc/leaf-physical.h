@@ -351,26 +351,28 @@ typedef struct _tSimpleLivingString3
     float curr;
     float Uout;
     float Lout;
+    int maxLength;
     tLinearDelay delayLineU;
     tLinearDelay delayLineL;
     tOnePole bridgeFilter;
     tHighpass DCblocker;
     tFeedbackLeveler fbLev;
     tExpSmooth wlSmooth;
+    int oversampling;
     float sampleRate;
 } _tSimpleLivingString3;
 
 typedef _tSimpleLivingString3* tSimpleLivingString3;
 
-void    tSimpleLivingString3_init                (tSimpleLivingString3* const, float freq, float dampFreq,
+void    tSimpleLivingString3_init                (tSimpleLivingString3* const, int oversampling, float freq, float dampFreq,
                                                  float decay, float targetLev, float levSmoothFactor,
                                                  float levStrength, int levMode, LEAF* const leaf);
-void    tSimpleLivingString3_initToPool          (tSimpleLivingString3* const, float freq, float dampFreq,
-                                                 float decay, float targetLev, float levSmoothFactor,
-                                                 float levStrength, int levMode, tMempool* const);
+void    tSimpleLivingString3_initToPool  (tSimpleLivingString3* const pl, int oversampling, float freq, float dampFreq,
+                                         float decay, float targetLev, float levSmoothFactor,
+                                          float levStrength, int levMode, tMempool* const mp);
 void    tSimpleLivingString3_free                (tSimpleLivingString3* const);
 
-float   tSimpleLivingString3_pluck              (tSimpleLivingString3* const pl, float input, float position);
+void   tSimpleLivingString3_pluck              (tSimpleLivingString3* const pl, float input, float position);
 float   tSimpleLivingString3_tick                (tSimpleLivingString3* const, float input);
 float   tSimpleLivingString3_sample              (tSimpleLivingString3* const);
 void    tSimpleLivingString3_setFreq             (tSimpleLivingString3* const, float freq);

@@ -1524,7 +1524,7 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
     int intVer = (int)cutoff;
     float floatVer = cutoff - (float)intVer;
     f->g = (__leaf_table_filtertan[intVer] * (1.0f - floatVer)) + (__leaf_table_filtertan[intVer+1] * floatVer);
-
+    
     switch( f->type )
     {
         case Bypass:
@@ -1697,6 +1697,18 @@ void tVZFilter_setFrequencyAndResonanceAndGain (tVZFilter* const vf, float freq,
     f->invG = 1.0f/f->G;
     tVZFilter_calcCoeffs(vf);
 }
+
+void tVZFilter_setFastFrequencyAndResonanceAndGain (tVZFilter* const vf, float freq, float res, float gain)
+{
+    _tVZFilter* f = *vf;
+    //f->fc = LEAF_clip(0.1f, freq, 0.4f * f->sampleRate);
+    f->Q = LEAF_clip(0.01f, res, 100.0f);
+    f->R2 = 1.0f / f->Q;
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->invG = 1.0f/f->G;
+    tVZFilter_setFreqFast(vf, freq);
+}
+
 void tVZFilter_setFrequencyAndBandwidthAndGain (tVZFilter* const vf, float freq, float BW, float gain)
 {
     _tVZFilter* f = *vf;
@@ -1707,6 +1719,7 @@ void tVZFilter_setFrequencyAndBandwidthAndGain (tVZFilter* const vf, float freq,
     f->invG = 1.0f/f->G;
     tVZFilter_calcCoeffs(vf);
 }
+
 
 void tVZFilter_setFrequencyAndResonanceAndMorph (tVZFilter* const vf, float freq, float res, float morph)
 {

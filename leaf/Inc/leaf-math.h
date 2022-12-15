@@ -217,6 +217,8 @@ extern "C" {
     
     float atodb(float a);
 
+    float fasteratodb(float a);
+
     float dbtoa(float db);
 
     float fastdbtoa(float db);

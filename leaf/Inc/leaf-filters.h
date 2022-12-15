@@ -1072,6 +1072,7 @@ extern "C" {
     void    tVZFilter_setResonance                (tVZFilter* const vf, float res);
     void    tVZFilter_setFrequencyAndResonance (tVZFilter* const vf, float freq, float res);
     void    tVZFilter_setFrequencyAndResonanceAndGain (tVZFilter* const vf, float freq, float res, float gains);
+    void    tVZFilter_setFastFrequencyAndResonanceAndGain (tVZFilter* const vf, float freq, float res, float gain);
     void    tVZFilter_setFrequencyAndBandwidthAndGain (tVZFilter* const vf, float freq, float BW, float gain);
     void    tVZFilter_setFrequencyAndResonanceAndMorph (tVZFilter* const vf, float freq, float res, float morph);
     void    tVZFilter_setMorphOnly               (tVZFilter* const vf, float morph);
