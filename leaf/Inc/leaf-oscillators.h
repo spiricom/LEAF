@@ -730,9 +730,16 @@ extern "C" {
         float    syncdir;
         int      softsync;
         float   _p, _w, _b, _x, _z;
+        float _inv_w;
         int     _j, _k;
-        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
+        float   _f [8];
+        uint16_t numBLEPs;
+        uint16_t mostRecentBLEP;
+        uint16_t maxBLEPphase;
+        uint16_t BLEPindices[64];
+        float 	BLEPproperties[64][2];
         float invSampleRate;
+
     } _tMBPulse;
     
     typedef _tMBPulse* tMBPulse;
@@ -740,7 +747,11 @@ extern "C" {
     void tMBPulse_init(tMBPulse* const osc, LEAF* const leaf);
     void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const mempool);
     void tMBPulse_free(tMBPulse* const osc);
-    
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase, float inv_w, float scale);
+#else
+void tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase, float inv_w, float scale);
+#endif
     float tMBPulse_tick(tMBPulse* const osc);
     void tMBPulse_setFreq(tMBPulse* const osc, float f);
     void tMBPulse_setWidth(tMBPulse* const osc, float w);
@@ -803,7 +814,15 @@ extern "C" {
         int      softsync;
         float   _p, _w, _b, _z, quarterwaveoffset;
         int     _j, _k;
-        float   _f [FILLEN + LONGEST_DD_PULSE_LENGTH];
+        float _inv_w;
+        float 	shape;
+        float   _f [8];
+        uint16_t numBLEPs;
+        uint16_t mostRecentBLEP;
+        uint16_t maxBLEPphase;
+        uint16_t maxBLEPphaseSlope;
+        uint16_t BLEPindices[64];
+        float 	BLEPproperties[64][3];
         float invSampleRate;
     } _tMBTriangle;
     
@@ -812,7 +831,11 @@ extern "C" {
     void tMBTriangle_init(tMBTriangle* const osc, LEAF* const leaf);
     void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const mempool);
     void tMBTriangle_free(tMBTriangle* const osc);
-    
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
+#else
+void tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
+#endif
     float tMBTriangle_tick(tMBTriangle* const osc);
     void tMBTriangle_setFreq(tMBTriangle* const osc, float f);
     void tMBTriangle_setWidth(tMBTriangle* const osc, float w);
@@ -823,6 +846,57 @@ extern "C" {
     void tMBTriangle_setSampleRate (tMBTriangle* const osc, float sr);
     
     
+
+
+
+    typedef struct _tMBSineTri
+    {
+
+        tMempool mempool;
+        float    out;
+        float    freq;
+        float    waveform;    // duty cycle, must be in [-1, 1]
+        float    lastsyncin;
+        float    sync;
+        float    syncdir;
+        int      softsync;
+        float   _p, _w, _b, _z;
+        float _sinPhase;
+        float shape;
+        int     _j, _k;
+        float _inv_w;
+        float   _f [8];
+        uint16_t numBLEPs;
+        uint16_t mostRecentBLEP;
+        uint16_t maxBLEPphase;
+        uint16_t maxBLEPphaseSlope;
+        uint16_t BLEPindices[64];
+        float 	BLEPproperties[64][3];
+        float invSampleRate;
+        uint32_t sineMask;
+    } _tMBSineTri;
+
+    typedef _tMBSineTri* tMBSineTri;
+
+    void tMBSineTri_init(tMBSineTri* const osc, LEAF* const leaf);
+    void tMBSineTri_initToPool(tMBSineTri* const osc, tMempool* const mempool);
+    void tMBSineTri_free(tMBSineTri* const osc);
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
+#else
+void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
+#endif
+    float tMBSineTri_tick(tMBSineTri* const osc);
+    void tMBSineTri_setFreq(tMBSineTri* const osc, float f);
+    void tMBSineTri_setWidth(tMBSineTri* const osc, float w);
+    float tMBSineTri_sync(tMBSineTri* const osc, float sync);
+    void tMBSineTri_setPhase(tMBSineTri* const osc, float phase);
+    void tMBSineTri_setShape(tMBSineTri* const osc, float shape);
+    void tMBSineTri_setSyncMode(tMBSineTri* const osc, int hardOrSoft);
+    void tMBSineTri_setBufferOffset(tMBSineTri* const osc, uint32_t offset);
+    void tMBSineTri_setSampleRate (tMBSineTri* const osc, float sr);
+
+
     /*!
      @defgroup tmbsaw tMBSaw
      @ingroup oscillators
@@ -956,9 +1030,16 @@ extern "C" {
         float    waveform;
         float   _p, _w, _b, _x, _z, _k;
         int     _j;
-        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
+        float _inv_w;
         float invSampleRate;
         float 	shape;
+        float   _f [8];
+        uint16_t numBLEPs;
+        uint16_t mostRecentBLEP;
+        uint16_t maxBLEPphase;
+        uint16_t BLEPindices[64];
+        float 	BLEPproperties[64][2];
+
     } _tMBSawPulse;
     
     typedef _tMBSawPulse* tMBSawPulse;
@@ -966,8 +1047,11 @@ extern "C" {
     void tMBSawPulse_init(tMBSawPulse* const osc, LEAF* const leaf);
     void tMBSawPulse_initToPool(tMBSawPulse* const osc, tMempool* const mempool);
     void tMBSawPulse_free(tMBSawPulse* const osc);
-
-
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float phase, float inv_w, float scale);
+#else
+void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float phase, float inv_w, float scale);
+#endif
     float tMBSawPulse_tick(tMBSawPulse* const osc);
     void tMBSawPulse_setFreq(tMBSawPulse* const osc, float f);
     float tMBSawPulse_sync(tMBSawPulse* const osc, float sync);

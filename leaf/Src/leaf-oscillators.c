@@ -954,8 +954,12 @@ void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const pool)
     c->_b = 0.5f * (1.0f + c->waveform);  /* duty cycle (0, 1) */
     c->_x = 0.5f;  /* temporary output variable */
     c->_k = 0.0f;  /* output state, 0 = high (0.5f), 1 = low (-0.5f) */
-
-    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
+    c->_inv_w = 1.0f / c->_w;
+    c->numBLEPs = 0;
+    c->mostRecentBLEP = 0;
+    c->maxBLEPphase = MINBLEP_PHASES * STEP_DD_PULSE_LENGTH;
+    memset (c->BLEPindices, 0, 64 * sizeof (uint16_t));
+    memset (c->_f, 0, 8 * sizeof (float));
 }
 
 void tMBPulse_free(tMBPulse* const osc)
@@ -963,6 +967,28 @@ void tMBPulse_free(tMBPulse* const osc)
     _tMBPulse* c = *osc;
     mpool_free((char*)c, c->mempool);
 }
+
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase, float inv_w, float scale)
+#else
+void tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase, float inv_w, float scale)
+#endif
+{
+	_tMBPulse* c = *osc;
+	float r;
+	long i;
+
+	r = MINBLEP_PHASES * phase * inv_w;
+	i = lrintf(r - 0.5f);
+	r -= (float)i;
+	i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+	c->mostRecentBLEP = (c->mostRecentBLEP + 1) & 63;
+	c->BLEPindices[c->mostRecentBLEP] = i;
+    c->BLEPproperties[c->mostRecentBLEP][0] = r;
+    c->BLEPproperties[c->mostRecentBLEP][1] = scale;
+    c->numBLEPs = (c->numBLEPs + 1) & 63;
+}
+
 
 float tMBPulse_tick(tMBPulse* const osc)
 {
@@ -987,6 +1013,7 @@ float tMBPulse_tick(tMBPulse* const osc)
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
     
     sw = w * c->syncdir;
+    float inv_sw = c->_inv_w * c->syncdir;
     p += sw - (int)sw;
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
@@ -1001,13 +1028,13 @@ float tMBPulse_tick(tMBPulse* const osc)
             if (sw > 0)
             {
                 if (p_at_reset >= b) {
-                    place_step_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -1.0f);
+                	tMBPulse_place_step_dd_noBuffer(osc, j, p_at_reset - b + eof_offset, inv_sw, -1.0f);
                     k = 1;
                     x = -0.5f;
                 }
                 if (p_at_reset >= 1.0f) {
                     p_at_reset -= 1.0f;
-                    place_step_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f);
+                    tMBPulse_place_step_dd_noBuffer(osc, j, p_at_reset + eof_offset, inv_sw, 1.0f);
                     k = 0;
                     x = 0.5f;
                 }
@@ -1016,12 +1043,12 @@ float tMBPulse_tick(tMBPulse* const osc)
             {
                 if (p_at_reset < 0.0f) {
                     p_at_reset += 1.0f;
-                    place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -1.0f);
+                    tMBPulse_place_step_dd_noBuffer(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, -1.0f);
                     k = 1;
                     x = -0.5f;
                 }
                 if (k && p_at_reset < b) {
-                    place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, 1.0f);
+                	tMBPulse_place_step_dd_noBuffer(osc, j, b - p_at_reset - eof_offset, -inv_sw, 1.0f);
                     k = 0;
                     x = 0.5f;
                 }
@@ -1031,12 +1058,12 @@ float tMBPulse_tick(tMBPulse* const osc)
             {
                 if (p_at_reset >= 1.0f) {
                     p_at_reset -= 1.0f;
-                    place_step_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f);
+                    tMBPulse_place_step_dd_noBuffer(osc, j, p_at_reset + eof_offset, inv_sw, 1.0f);
                     k = 0;
                     x = 0.5f;
                 }
                 if (!k && p_at_reset >= b) {
-                    place_step_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -1.0f);
+                	tMBPulse_place_step_dd_noBuffer(osc, j, p_at_reset - b + eof_offset, inv_sw, -1.0f);
                     k = 1;
                     x = -0.5f;
                 }
@@ -1044,13 +1071,13 @@ float tMBPulse_tick(tMBPulse* const osc)
             else if (sw < 0)
             {
                 if (p_at_reset < b) {
-                    place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, 1.0f);
+                	tMBPulse_place_step_dd_noBuffer(osc, j, b - p_at_reset - eof_offset, -inv_sw, 1.0f);
                     k = 0;
                     x = 0.5f;
                 }
                 if (p_at_reset < 0.0f) {
                     p_at_reset += 1.0f;
-                    place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -1.0f);
+                    tMBPulse_place_step_dd_noBuffer(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, -1.0f);
                     k = 1;
                     x = -0.5f;
                 }
@@ -1061,12 +1088,12 @@ float tMBPulse_tick(tMBPulse* const osc)
         if (sw > 0)
         {
             if (k) {
-                place_step_dd(c->_f, j, p, sw, 1.0f);
+            	tMBPulse_place_step_dd_noBuffer(osc, j, p, inv_sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
             if (p >= b) {
-                place_step_dd(c->_f, j, p - b, sw, -1.0f);
+            	tMBPulse_place_step_dd_noBuffer(osc, j, p - b, inv_sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
@@ -1074,12 +1101,12 @@ float tMBPulse_tick(tMBPulse* const osc)
         else if (sw < 0)
         {
             if (!k) {
-                place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
+            	tMBPulse_place_step_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
             if (p < b) {
-                place_step_dd(c->_f, j, b - p, -sw, 1.0f);
+            	tMBPulse_place_step_dd_noBuffer(osc, j, b - p, -inv_sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
@@ -1089,13 +1116,13 @@ float tMBPulse_tick(tMBPulse* const osc)
         if (sw > 0)
         {
             if (p >= b) {
-                place_step_dd(c->_f, j, p - b, sw, -1.0f);
+            	tMBPulse_place_step_dd_noBuffer(osc, j, p - b, inv_sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
             if (p >= 1.0f) {
                 p -= 1.0f;
-                place_step_dd(c->_f, j, p, sw, 1.0f);
+                tMBPulse_place_step_dd_noBuffer(osc, j, p, inv_sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
@@ -1104,12 +1131,12 @@ float tMBPulse_tick(tMBPulse* const osc)
         {
             if (p < 0.0f) {
                 p += 1.0f;
-                place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
+                tMBPulse_place_step_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
             if (k && p < b) {
-                place_step_dd(c->_f, j, b - p, -sw, 1.0f);
+            	tMBPulse_place_step_dd_noBuffer(osc, j, b - p, -inv_sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
@@ -1121,12 +1148,12 @@ float tMBPulse_tick(tMBPulse* const osc)
         {
             if (p >= 1.0f) {
                 p -= 1.0f;
-                place_step_dd(c->_f, j, p, sw, 1.0f);
+                tMBPulse_place_step_dd_noBuffer(osc, j, p, inv_sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
             if (!k && p >= b) {
-                place_step_dd(c->_f, j, p - b, sw, -1.0f);
+            	tMBPulse_place_step_dd_noBuffer(osc, j, p - b, inv_sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
@@ -1134,30 +1161,47 @@ float tMBPulse_tick(tMBPulse* const osc)
         else if (sw < 0)
         {
             if (p < b) {
-                place_step_dd(c->_f, j, b - p, -sw, 1.0f);
+            	tMBPulse_place_step_dd_noBuffer(osc, j, b - p, -inv_sw, 1.0f);
                 k = 0;
                 x = 0.5f;
             }
             if (p < 0.0f) {
                 p += 1.0f;
-                place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
+                tMBPulse_place_step_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -1.0f);
                 k = 1;
                 x = -0.5f;
             }
         }
     }
-    c->_f[j + DD_SAMPLE_DELAY] += x;
+
+    int currentSamp = (j + DD_SAMPLE_DELAY) & 7;
     
+    c->_f[currentSamp] = x;
+
+    volatile uint8_t numBLEPsAtLoopStart = c->numBLEPs;
+	for (int i = 0; i < numBLEPsAtLoopStart; i++)
+	{
+		volatile uint16_t whichBLEP = (c->mostRecentBLEP - i);
+		whichBLEP &= 63;
+
+		//use the scale and r values from the BLEPproperties array to compute the current state of each active BLEP and add it to the output value
+		c->_f[j] += c->BLEPproperties[whichBLEP][1] * (step_dd_table[c->BLEPindices[whichBLEP]].value + c->BLEPproperties[whichBLEP][0] * step_dd_table[c->BLEPindices[whichBLEP]].delta);
+
+		//increment the position in the BLEP table
+		c->BLEPindices[whichBLEP] += MINBLEP_PHASES;
+		//check if this BLEP is finished and if so mark it as inactive so it isn't computed anymore.
+		if (c->BLEPindices[whichBLEP] >= c->maxBLEPphase)
+		{
+			c->numBLEPs--;
+		}
+
+	}
+
     z += 0.5f * (c->_f[j] - z);
     c->out = z;
-    
-    if (++j == FILLEN)
-    {
-        j = 0;
-        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (float));
-        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (float));
-    }
-    
+
+    j = (j+1) & 7;
+
     c->_p = p;
     c->_w = w;
     c->_b = b;
@@ -1174,6 +1218,7 @@ void tMBPulse_setFreq(tMBPulse* const osc, float f)
     _tMBPulse* c = *osc;
     c->freq = f;
     c->_w = c->freq * c->invSampleRate;  /* phase increment */
+    c->_inv_w = 1.0f / c->_w;
 }
 
 void tMBPulse_setWidth(tMBPulse* const osc, float w)
@@ -1249,18 +1294,46 @@ void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const pool)
     c->waveform = 0.0f;
     c->_z = 0.0f;
     c->_j = 0;
-    c->_p = 0.0f;  /* phase [0, 1) */
+    c->_p = 0.25f;  /* phase [0, 1) */
     c->_w = c->freq * c->invSampleRate;  /* phase increment */
-    c->quarterwaveoffset = c->_w * 0.25f;
     c->_b = 0.5f * (1.0f + c->waveform);  /* duty cycle (0, 1) */
     c->_k = 0.0f;  /* output state, 0 = high (0.5f), 1 = low (-0.5f) */
-    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
+    c->_inv_w = 1.0f / c->_w;
+    c->numBLEPs = 0;
+    c->mostRecentBLEP = 0;
+    c->maxBLEPphase = MINBLEP_PHASES * STEP_DD_PULSE_LENGTH;
+    c->maxBLEPphaseSlope = MINBLEP_PHASES * SLOPE_DD_PULSE_LENGTH;
+    memset (c->BLEPindices, 0, 64 * sizeof (uint16_t));
+    memset (c->_f, 0, 8 * sizeof (float));
 }
 
 void tMBTriangle_free(tMBTriangle* const osc)
 {
     _tMBTriangle* c = *osc;
     mpool_free((char*)c, c->mempool);
+}
+
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w)
+#else
+void tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w)
+#endif
+{
+	_tMBTriangle* c = *osc;
+	float r;
+	long i;
+
+	r = MINBLEP_PHASES * phase * inv_w;
+	i = lrintf(r - 0.5f);
+	r -= (float)i;
+	i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+	scale *= w;
+	c->mostRecentBLEP = (c->mostRecentBLEP + 1) & 63;
+	c->BLEPindices[c->mostRecentBLEP] = i;
+    c->BLEPproperties[c->mostRecentBLEP][0] = r;
+    c->BLEPproperties[c->mostRecentBLEP][1] = scale;
+    c->BLEPproperties[c->mostRecentBLEP][2] = stepOrSlope;
+    c->numBLEPs = (c->numBLEPs + 1) & 63;
 }
 
 float tMBTriangle_tick(tMBTriangle* const osc)
@@ -1290,6 +1363,7 @@ float tMBTriangle_tick(tMBTriangle* const osc)
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
     
     sw = w * c->syncdir;
+    float inv_sw = c->_inv_w * c->syncdir;
     p += sw - (int)sw;
     
     if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
@@ -1307,13 +1381,13 @@ float tMBTriangle_tick(tMBTriangle* const osc)
             {
                 if (p_at_reset >= b) {
                     x = 0.5f - (p_at_reset - b) * invB1;
-                    place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -invB1 - invB);
+                    tMBTriangle_place_dd_noBuffer(osc, j, p_at_reset - b + eof_offset, inv_sw, -invB1 - invB, 1.0f, sw);
                     k = 1;
                 }
                 if (p_at_reset >= 1.0f) {
                     p_at_reset -= 1.0f;
                     x = -0.5f + p_at_reset * invB;
-                    place_slope_dd(c->_f, j, p_at_reset + eof_offset, sw, invB + invB1);
+                    tMBTriangle_place_dd_noBuffer(osc, j, p_at_reset + eof_offset, inv_sw, invB + invB1, 1.0f, sw);
                     k = 0;
                 }
             }
@@ -1322,12 +1396,12 @@ float tMBTriangle_tick(tMBTriangle* const osc)
                 if (p_at_reset < 0.0f) {
                     p_at_reset += 1.0f;
                     x = 0.5f - (p_at_reset - b)  * invB1;
-                    place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, invB + invB1);
+                    tMBTriangle_place_dd_noBuffer(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, invB + invB1, 1.0f, -sw);
                     k = 1;
                 }
                 if (k && p_at_reset < b) {
                     x = -0.5f + p_at_reset * invB;
-                    place_slope_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, -invB1 - invB);
+                    tMBTriangle_place_dd_noBuffer(osc, j, b - p_at_reset - eof_offset, -inv_sw, -invB1 - invB, 1.0f, -sw);
                     k = 0;
                 }
             }
@@ -1338,12 +1412,12 @@ float tMBTriangle_tick(tMBTriangle* const osc)
                 if (p_at_reset >= 1.0f) {
                     p_at_reset -= 1.0f;
                     x = -0.5f + p_at_reset * invB;
-                    place_slope_dd(c->_f, j, p_at_reset + eof_offset, sw, invB + invB1);
+                    tMBTriangle_place_dd_noBuffer(osc, j, p_at_reset + eof_offset, inv_sw, invB + invB1, 1.0f, sw);
                     k = 0;
                 }
                 if (!k && p_at_reset >= b) {
                     x = 0.5f - (p_at_reset - b) * invB1;
-                    place_slope_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -invB1 - invB);
+                    tMBTriangle_place_dd_noBuffer(osc, j, p_at_reset - b + eof_offset, inv_sw, -invB1 - invB, 1.0f, sw);
                     k = 1;
                 }
             }
@@ -1351,13 +1425,13 @@ float tMBTriangle_tick(tMBTriangle* const osc)
             {
                 if (p_at_reset < b) {
                     x = -0.5f + p_at_reset * invB;
-                    place_slope_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, -invB1 - invB);
+                    tMBTriangle_place_dd_noBuffer(osc, j, b - p_at_reset - eof_offset, -inv_sw, -invB1 - invB, 1.0f, -sw);
                     k = 0;
                 }
                 if (p_at_reset < 0.0f) {
                     p_at_reset += 1.0f;
                     x = 0.5f - (p_at_reset - b) * invB1;
-                    place_slope_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, invB + invB1);
+                    tMBTriangle_place_dd_noBuffer(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, invB + invB1, 1.0f, -sw);
                     k = 1;
                 }
             }
@@ -1367,26 +1441,26 @@ float tMBTriangle_tick(tMBTriangle* const osc)
         if (sw > 0)
         {
             if (k)
-                place_slope_dd(c->_f, j, p, sw, invB + invB1);
-            place_step_dd(c->_f, j, p, sw, -0.5f - x);
+            	tMBTriangle_place_dd_noBuffer(osc, j, p, inv_sw, invB + invB1, 1.0f, sw);
+            tMBTriangle_place_dd_noBuffer(osc, j, p, inv_sw, -0.5f - x, 0.0f, sw);
             x = -0.5f + p * invB;
             k = 0;
             if (p >= b) {
                 x = 0.5f - (p - b) * invB1;
-                place_slope_dd(c->_f, j, p - b, sw, -invB1 - invB);
+                tMBTriangle_place_dd_noBuffer(osc, j, p - b, inv_sw, -invB1 - invB, 1.0f, sw);
                 k = 1;
             }
         }
         else if (sw < 0)
         {
             if (!k)
-                place_slope_dd(c->_f, j, 1.0f - p, -sw, invB + invB1);
-            place_step_dd(c->_f, j, 1.0f - p, -sw, -0.5f - x);
+            	tMBTriangle_place_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, invB + invB1, 1.0f, -sw);
+            tMBTriangle_place_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -0.5f - x, 0.0f, -sw);
             x = 0.5f - (p - b) * invB1;
             k = 1;
             if (p < b) {
                 x = -0.5f + p * invB;
-                place_slope_dd(c->_f, j, b - p, -sw, -invB1 - invB);
+                tMBTriangle_place_dd_noBuffer(osc, j, b - p, -inv_sw, -invB1 - invB, 1.0f, -sw);
                 k = 0;
             }
         }
@@ -1397,13 +1471,13 @@ float tMBTriangle_tick(tMBTriangle* const osc)
         {
             if (p >= b) {
                 x = 0.5f - (p - b) * invB1;;
-                place_slope_dd(c->_f, j, p - b, sw, -invB1 - invB);
+                tMBTriangle_place_dd_noBuffer(osc, j, p - b, inv_sw, -invB1 - invB, 1.0f, sw);
                 k = 1;
             }
             if (p >= 1.0f) {
                 p -= 1.0f;
                 x = -0.5f + p * invB;
-                place_slope_dd(c->_f, j, p, sw, invB + invB1);
+                tMBTriangle_place_dd_noBuffer(osc, j, p, inv_sw, invB + invB1, 1.0f, sw);
                 k = 0;
             }
         }
@@ -1412,12 +1486,12 @@ float tMBTriangle_tick(tMBTriangle* const osc)
             if (p < 0.0f) {
                 p += 1.0f;
                 x = 0.5f - (p - b) * invB1;
-                place_slope_dd(c->_f, j, 1.0f - p, -sw, invB + invB1);
+                tMBTriangle_place_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, invB + invB1, 1.0f, -sw);
                 k = 1;
             }
             if (k && p < b) {
                 x = -0.5f + p * invB;
-                place_slope_dd(c->_f, j, b - p, -sw, -invB1 - invB);
+                tMBTriangle_place_dd_noBuffer(osc, j, b - p, -inv_sw, -invB1 - invB, 1.0f, -sw);
                 k = 0;
             }
         }
@@ -1430,12 +1504,12 @@ float tMBTriangle_tick(tMBTriangle* const osc)
             if (p >= 1.0f) {
                 p -= 1.0f;
                 x = -0.5f + p * invB;
-                place_slope_dd(c->_f, j, p, sw, invB + invB1);
+                tMBTriangle_place_dd_noBuffer(osc, j, p, inv_sw, invB + invB1, 1.0f, sw);
                 k = 0;
             }
             if (!k && p >= b) {
                 x = 0.5f - (p - b) * invB1;
-                place_slope_dd(c->_f, j, p - b, sw, -invB1 - invB);
+                tMBTriangle_place_dd_noBuffer(osc, j, p - b, inv_sw, -invB1 - invB, 1.0f, sw);
                 k = 1;
             }
         }
@@ -1443,29 +1517,56 @@ float tMBTriangle_tick(tMBTriangle* const osc)
         {
             if (p < b) {
                 x = -0.5f + p * invB;
-                place_slope_dd(c->_f, j, b - p, -sw, -invB1 - invB);
+                tMBTriangle_place_dd_noBuffer(osc, j, b - p, -inv_sw, -invB1 - invB, 1.0f, -sw);
                 k = 0;
             }
             if (p < 0.0f) {
                 p += 1.0f;
                 x = 0.5f - (p - b) * invB1;
-                place_slope_dd(c->_f, j, 1.0f - p, -sw, invB + invB1);
+                tMBTriangle_place_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, invB + invB1, 1.0f, -sw);
                 k = 1;
             }
         }
     }
-    c->_f[j + DD_SAMPLE_DELAY] += x;
+    int currentSamp = (j + DD_SAMPLE_DELAY) & 7;
     
+    c->_f[currentSamp] = x;
+
+    volatile uint8_t numBLEPsAtLoopStart = c->numBLEPs;
+    for (int i = 0; i < numBLEPsAtLoopStart; i++)
+    {
+    	volatile uint16_t whichBLEP = (c->mostRecentBLEP - i);
+    	whichBLEP &= 63;
+
+    	//use the scale and r values from the BLEPproperties array to compute the current state of each active BLEP and add it to the output value
+
+    	if (c->BLEPproperties[whichBLEP][2] < 0.5f) //step blep
+    	{
+    		c->_f[j] += c->BLEPproperties[whichBLEP][1] * (step_dd_table[c->BLEPindices[whichBLEP]].value + c->BLEPproperties[whichBLEP][0] * step_dd_table[c->BLEPindices[whichBLEP]].delta);
+        	//increment the position in the BLEP table
+    		c->BLEPindices[whichBLEP] += MINBLEP_PHASES;
+    		//check if this BLEP is finished and if so mark it as inactive so it isn't computed anymore.
+    		if (c->BLEPindices[whichBLEP] >= c->maxBLEPphase)
+    		{
+    			c->numBLEPs--;
+    		}
+    	}
+    	else  // slope blep
+    	{
+    		c->_f[j] += c->BLEPproperties[whichBLEP][1] * (slope_dd_table[c->BLEPindices[whichBLEP]] + c->BLEPproperties[whichBLEP][0] * (slope_dd_table[c->BLEPindices[whichBLEP]+1] - slope_dd_table[c->BLEPindices[whichBLEP]]));
+        	//increment the position in the BLEP table
+    		c->BLEPindices[whichBLEP] += MINBLEP_PHASES;
+    		//check if this BLEP is finished and if so mark it as inactive so it isn't computed anymore.
+    		if (c->BLEPindices[whichBLEP] >= (c->maxBLEPphaseSlope)) //slope bleps are 71 length instead of 72 length so subtract 1
+    		{
+    			c->numBLEPs--;
+    		}
+    	}
+    }
+
     z += 0.5f * (c->_f[j] - z);
     c->out = z;
-    
-    if (++j == FILLEN)
-    {
-        j = 0;
-        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (float));
-        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (float));
-    }
-    
+    j = (j+1) & 7;
     c->_p = p;
     c->_w = w;
     c->_b = b;
@@ -1481,6 +1582,7 @@ void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
     _tMBTriangle* c = *osc;
     c->freq = f;
     c->_w = c->freq * c->invSampleRate;  /* phase increment */
+    c->_inv_w = 1.0f / c->_w;
     //c->quarterwaveoffset = c->_w * 0.25f;
 }
 
@@ -1533,6 +1635,420 @@ void tMBTriangle_setSampleRate(tMBTriangle* const osc, float sr)
     c->invSampleRate = 1.0f/sr;
 }
 
+
+
+//==========================================================================================================
+
+void tMBSineTri_init(tMBSineTri* const osc, LEAF* const leaf)
+{
+    tMBSineTri_initToPool(osc, &leaf->mempool);
+}
+
+void tMBSineTri_initToPool(tMBSineTri* const osc, tMempool* const pool)
+{
+    _tMempool* m = *pool;
+    _tMBSineTri* c = *osc = (_tMBSineTri*) mpool_alloc(sizeof(_tMBSineTri), m);
+    c->mempool = m;
+    LEAF* leaf = c->mempool->leaf;
+
+    c->invSampleRate = leaf->invSampleRate;
+    c->freq = 440.f;
+    c->lastsyncin = 0.0f;
+    c->sync = 0.0f;
+    c->syncdir = 1.0f;
+    c->softsync = 0;
+    c->waveform = 0.0f;
+    c->shape = 0.0f;
+    c->_z = 0.0f;
+    c->_j = 0;
+    c->_sinPhase = 0.0f;
+    c->_p = 0.25f;  /* phase [0, 1) */
+    c->_w = c->freq * c->invSampleRate;  /* phase increment */
+    c->_b = 0.5f * (1.0f + c->waveform);  /* duty cycle (0, 1) */
+    c->_k = 0.0f;  /* output state, 0 = high (0.5f), 1 = low (-0.5f) */
+    c->_inv_w = 1.0f / c->_w;
+    c->numBLEPs = 0;
+    c->mostRecentBLEP = 0;
+    c->maxBLEPphase = MINBLEP_PHASES * STEP_DD_PULSE_LENGTH;
+    c->maxBLEPphaseSlope = MINBLEP_PHASES * SLOPE_DD_PULSE_LENGTH;
+    c->sineMask = 2047;
+    memset (c->BLEPindices, 0, 64 * sizeof (uint16_t));
+    memset (c->_f, 0, 8 * sizeof (float));
+}
+
+void tMBSineTri_free(tMBSineTri* const osc)
+{
+    _tMBSineTri* c = *osc;
+    mpool_free((char*)c, c->mempool);
+}
+
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w)
+#else
+void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w)
+#endif
+{
+	_tMBSineTri* c = *osc;
+	float r;
+	long i;
+
+	r = MINBLEP_PHASES * phase * inv_w;
+	i = lrintf(r - 0.5f);
+	r -= (float)i;
+	i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+	scale *= w;
+	c->mostRecentBLEP = (c->mostRecentBLEP + 1) & 63;
+	c->BLEPindices[c->mostRecentBLEP] = i;
+    c->BLEPproperties[c->mostRecentBLEP][0] = r;
+    c->BLEPproperties[c->mostRecentBLEP][1] = scale;
+    c->BLEPproperties[c->mostRecentBLEP][2] = stepOrSlope;
+    c->numBLEPs = (c->numBLEPs + 1) & 63;
+}
+
+float tMBSineTri_tick(tMBSineTri* const osc)
+{
+    _tMBSineTri* c = *osc;
+
+    int    j, k;
+    float  sync;
+    float  b, b1, invB, invB1, p, sinPhase, w, sw, z;
+    float  x = 0.5f;
+
+    sync = c->sync;
+
+    p = c->_p;  /* phase [0, 1) */
+    sinPhase = c->_sinPhase;
+    w = c->_w;  /* phase increment */
+    b = c->_b;  /* duty cycle (0, 1) */
+    invB = 1.0f / b;
+    z = c->_z;  /* low pass filter state */
+    j = c->_j;  /* index into buffer _f */
+    k = c->_k;  /* output state, 0 = positive slope, 1 = negative slope */
+
+
+
+    b = 0.5f * (1.0f + c->waveform);
+    b1 = 1.0f - b;
+    invB1 = 1.0f / b1;
+    if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
+
+    sw = w * c->syncdir;
+    float inv_sw = c->_inv_w * c->syncdir;
+    float inc_amount = sw - (int)sw;
+    p += inc_amount;
+    sinPhase += inc_amount;
+
+    if (sync > 0.0f && c->softsync == 0) {  /* sync to master */
+        float eof_offset = sync * sw;
+        float p_at_reset = p - eof_offset;
+        if (sw > 0)
+        {
+        	p = eof_offset + 0.25f;
+        	sinPhase = eof_offset;
+        }
+        else if (sw < 0)
+        {
+        	p = (1.0f - eof_offset) + 0.25f;
+        	sinPhase = (1.0f - eof_offset);
+        }
+        //
+        /* place any DDs that may have occurred in subsample before reset */
+
+        if (!k) {
+            x = -0.5f + p_at_reset * invB;
+            if (sw > 0)
+            {
+                if (p_at_reset >= b) {
+                    x = 0.5f - (p_at_reset - b) * invB1;
+                    tMBSineTri_place_dd_noBuffer(osc, j, p_at_reset - b + eof_offset, inv_sw, -invB1 - invB, 1.0f, sw);
+                    k = 1;
+                }
+                if (p_at_reset >= 1.0f) {
+                    p_at_reset -= 1.0f;
+                    x = -0.5f + p_at_reset * invB;
+                    tMBSineTri_place_dd_noBuffer(osc, j, p_at_reset + eof_offset, inv_sw, invB + invB1, 1.0f, sw);
+                    k = 0;
+                }
+            }
+            else if (sw < 0)
+            {
+                if (p_at_reset < 0.0f) {
+                    p_at_reset += 1.0f;
+                    x = 0.5f - (p_at_reset - b)  * invB1;
+                    tMBSineTri_place_dd_noBuffer(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, invB + invB1, 1.0f, -sw);
+                    k = 1;
+                }
+                if (k && p_at_reset < b) {
+                    x = -0.5f + p_at_reset * invB;
+                    tMBSineTri_place_dd_noBuffer(osc, j, b - p_at_reset - eof_offset, -inv_sw, -invB1 - invB, 1.0f, -sw);
+                    k = 0;
+                }
+            }
+        } else {
+            x = 0.5f - (p_at_reset - b) * invB1;
+            if (sw > 0)
+            {
+                if (p_at_reset >= 1.0f) {
+                    p_at_reset -= 1.0f;
+                    x = -0.5f + p_at_reset * invB;
+                    tMBSineTri_place_dd_noBuffer(osc, j, p_at_reset + eof_offset, inv_sw, invB + invB1, 1.0f, sw);
+                    k = 0;
+                }
+                if (!k && p_at_reset >= b) {
+                    x = 0.5f - (p_at_reset - b) * invB1;
+                    tMBSineTri_place_dd_noBuffer(osc, j, p_at_reset - b + eof_offset, inv_sw, -invB1 - invB, 1.0f, sw);
+                    k = 1;
+                }
+            }
+            else if (sw < 0)
+            {
+                if (p_at_reset < b) {
+                    x = -0.5f + p_at_reset * invB;
+                    tMBSineTri_place_dd_noBuffer(osc, j, b - p_at_reset - eof_offset, -inv_sw, -invB1 - invB, 1.0f, -sw);
+                    k = 0;
+                }
+                if (p_at_reset < 0.0f) {
+                    p_at_reset += 1.0f;
+                    x = 0.5f - (p_at_reset - b) * invB1;
+                    tMBSineTri_place_dd_noBuffer(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, invB + invB1, 1.0f, -sw);
+                    k = 1;
+                }
+            }
+        }
+
+        /* now place reset DDs */
+        if (sw > 0)
+        {
+            if (k)
+            	tMBSineTri_place_dd_noBuffer(osc, j, p, inv_sw, invB + invB1, 1.0f, sw);
+            tMBSineTri_place_dd_noBuffer(osc, j, p, inv_sw, 0.0f - x, 0.0f, sw);
+            x = -0.5f + p * invB;
+            k = 0;
+            if (p >= b) {
+                x = 0.5f - (p - b) * invB1;
+                tMBSineTri_place_dd_noBuffer(osc, j, p - b, inv_sw, -invB1 - invB, 1.0f, sw);
+                k = 1;
+            }
+        }
+        else if (sw < 0)
+        {
+            if (!k)
+            	tMBSineTri_place_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, invB + invB1, 1.0f, -sw);
+            tMBSineTri_place_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, 0.0f - x, 0.0f, -sw);
+            x = 0.5f - (p - b) * invB1;
+            k = 1;
+            if (p < b) {
+                x = -0.5f + p * invB;
+                tMBSineTri_place_dd_noBuffer(osc, j, b - p, -inv_sw, -invB1 - invB, 1.0f, -sw);
+                k = 0;
+            }
+        }
+    } else if (!k) {  /* normal operation, slope currently up */
+
+        x = -0.5f + p * invB;
+        if (sw > 0)
+        {
+            if (p >= b) {
+                x = 0.5f - (p - b) * invB1;;
+                tMBSineTri_place_dd_noBuffer(osc, j, p - b, inv_sw, -invB1 - invB, 1.0f, sw);
+                k = 1;
+            }
+            if (p >= 1.0f) {
+                p -= 1.0f;
+                x = -0.5f + p * invB;
+                tMBSineTri_place_dd_noBuffer(osc, j, p, inv_sw, invB + invB1, 1.0f, sw);
+                k = 0;
+            }
+        }
+        else if (sw < 0)
+        {
+            if (p < 0.0f) {
+                p += 1.0f;
+                x = 0.5f - (p - b) * invB1;
+                tMBSineTri_place_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, invB + invB1, 1.0f, -sw);
+                k = 1;
+            }
+            if (k && p < b) {
+                x = -0.5f + p * invB;
+                tMBSineTri_place_dd_noBuffer(osc, j, b - p, -inv_sw, -invB1 - invB, 1.0f, -sw);
+                k = 0;
+            }
+        }
+
+    } else {  /* normal operation, slope currently down */
+
+        x = 0.5f - (p - b) * invB1;
+        if (sw > 0)
+        {
+            if (p >= 1.0f) {
+                p -= 1.0f;
+                x = -0.5f + p * invB;
+                tMBSineTri_place_dd_noBuffer(osc, j, p, inv_sw, invB + invB1, 1.0f, sw);
+                k = 0;
+            }
+            if (!k && p >= b) {
+                x = 0.5f - (p - b) * invB1;
+                tMBSineTri_place_dd_noBuffer(osc, j, p - b, inv_sw, -invB1 - invB, 1.0f, sw);
+                k = 1;
+            }
+        }
+        else if (sw < 0)
+        {
+            if (p < b) {
+                x = -0.5f + p * invB;
+                tMBSineTri_place_dd_noBuffer(osc, j, b - p, -inv_sw, -invB1 - invB, 1.0f, -sw);
+                k = 0;
+            }
+            if (p < 0.0f) {
+                p += 1.0f;
+                x = 0.5f - (p - b) * invB1;
+                tMBSineTri_place_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, invB + invB1, 1.0f, -sw);
+                k = 1;
+            }
+        }
+    }
+    int currentSamp = (j + DD_SAMPLE_DELAY) & 7;
+
+    c->_f[currentSamp] = x * c->shape; //add the triangle
+
+
+    float tempFrac;
+    uint32_t idx;
+    float samp0;
+    float samp1;
+
+    // Wavetable synthesis
+    while (sinPhase >= 1.0f)
+    {
+    	sinPhase -= 1.0f;
+    }
+
+    while (sinPhase < 0.0f)
+    {
+    	sinPhase += 1.0f;
+    }
+    float tempPhase = (sinPhase * 2048.0f);
+    idx = (uint32_t)tempPhase; //11 bit table
+    tempFrac = tempPhase - idx;
+    samp0 = __leaf_table_sinewave[idx];
+    idx = (idx + 1) & c->sineMask;
+    samp1 = __leaf_table_sinewave[idx];
+
+    float sinOut = (samp0 + (samp1 - samp0) * tempFrac) * 0.5f; // 1/2097151
+
+    c->_f[currentSamp] += sinOut * (1.0f - c->shape); //add the sine
+
+
+    volatile uint8_t numBLEPsAtLoopStart = c->numBLEPs;
+    for (int i = 0; i < numBLEPsAtLoopStart; i++)
+    {
+    	volatile uint16_t whichBLEP = (c->mostRecentBLEP - i);
+    	whichBLEP &= 63;
+
+    	//use the scale and r values from the BLEPproperties array to compute the current state of each active BLEP and add it to the output value
+
+    	if (c->BLEPproperties[whichBLEP][2] < 0.5f) //step blep
+    	{
+    		c->_f[j] += c->BLEPproperties[whichBLEP][1] * (step_dd_table[c->BLEPindices[whichBLEP]].value + c->BLEPproperties[whichBLEP][0] * step_dd_table[c->BLEPindices[whichBLEP]].delta);
+        	//increment the position in the BLEP table
+    		c->BLEPindices[whichBLEP] += MINBLEP_PHASES;
+    		//check if this BLEP is finished and if so mark it as inactive so it isn't computed anymore.
+    		if (c->BLEPindices[whichBLEP] >= c->maxBLEPphase)
+    		{
+    			c->numBLEPs--;
+    		}
+    	}
+    	else  // slope blep
+    	{
+    		c->_f[j] += (c->BLEPproperties[whichBLEP][1] * (slope_dd_table[c->BLEPindices[whichBLEP]] + c->BLEPproperties[whichBLEP][0] * (slope_dd_table[c->BLEPindices[whichBLEP]+1] - slope_dd_table[c->BLEPindices[whichBLEP]]))) * c->shape;
+        	//increment the position in the BLEP table
+    		c->BLEPindices[whichBLEP] += MINBLEP_PHASES;
+    		//check if this BLEP is finished and if so mark it as inactive so it isn't computed anymore.
+    		if (c->BLEPindices[whichBLEP] >= (c->maxBLEPphaseSlope)) //slope bleps are 71 length instead of 72 length so subtract 1
+    		{
+    			c->numBLEPs--;
+    		}
+    	}
+    }
+
+    z += 0.5f * (c->_f[j] - z);
+    j = (j+1) & 7;
+    c->out = z;
+    c->_p = p;
+    c->_w = w;
+    c->_b = b;
+    c->_z = z;
+    c->_j = j;
+    c->_k = k;
+    c->_sinPhase = sinPhase;
+
+    return -c->out;
+}
+
+void tMBSineTri_setFreq(tMBSineTri* const osc, float f)
+{
+    _tMBSineTri* c = *osc;
+    c->freq = f;
+    c->_w = c->freq * c->invSampleRate;  /* phase increment */
+    c->_inv_w = 1.0f / c->_w;
+    //c->quarterwaveoffset = c->_w * 0.25f;
+}
+
+void tMBSineTri_setWidth(tMBSineTri* const osc, float w)
+{
+    _tMBSineTri* c = *osc;
+    w = LEAF_clip(0.0f, w, 0.99f);
+    c->waveform = w;
+}
+
+float tMBSineTri_sync(tMBSineTri* const osc, float value)
+{
+    _tMBSineTri* c = *osc;
+
+    //based on https://github.com/VCVRack/Fundamental/blob/5799ee2a9b21492b42ebcb9b65d5395ef5c1cbe2/src/VCO.cpp#L123
+    float last = c->lastsyncin;
+    float delta = value - last;
+    float crossing = -last / delta;
+    c->lastsyncin = value;
+    if ((0.f < crossing) && (crossing <= 1.f) && (value >= 0.f))
+        c->sync = (1.f - crossing) * delta;
+    else c->sync = 0.f;
+
+    return value;
+}
+
+void tMBSineTri_setPhase(tMBSineTri* const osc, float phase)
+{
+    _tMBSineTri* c = *osc;
+    c->_p = phase;
+}
+
+void tMBSineTri_setShape(tMBSineTri* const osc, float shape)
+{
+    _tMBSineTri* c = *osc;
+    c->shape = shape;
+}
+
+
+void tMBSineTri_setSyncMode(tMBSineTri* const osc, int hardOrSoft)
+{
+    _tMBSineTri* c = *osc;
+    c->softsync = hardOrSoft > 0 ? 1 : 0;
+}
+
+//useful if you have several oscillators so the buffer refill is not synchronized
+void tMBSineTri_setBufferOffset(tMBSineTri* const osc, uint32_t offset)
+{
+	_tMBSineTri* c = *osc;
+	offset = offset & (FILLEN-1);
+	c->_j = offset;
+}
+
+void tMBSineTri_setSampleRate(tMBSineTri* const osc, float sr)
+{
+    _tMBSineTri* c = *osc;
+    c->invSampleRate = 1.0f/sr;
+}
 //==================================================================================================
 //==================================================================================================
 
@@ -1780,8 +2296,13 @@ void tMBSawPulse_initToPool(tMBSawPulse* const osc, tMempool* const pool)
     c->_b = 0.5f * (1.0f + c->waveform);  /* duty cycle (0, 1) */
     c->_x = 0.5f;  /* temporary output variable */
     c->_k = 0.0f;  /* output state, 0 = high (0.5f), 1 = low (-0.5f) */
+    c->_inv_w = 1.0f / c->_w;
+    c->numBLEPs = 0;
+    c->mostRecentBLEP = 0;
+    c->maxBLEPphase = MINBLEP_PHASES * STEP_DD_PULSE_LENGTH;
+    memset (c->BLEPindices, 0, 64 * sizeof (uint16_t));
+    memset (c->_f, 0, 8 * sizeof (float));
 
-    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
 }
 
 void tMBSawPulse_free(tMBSawPulse* const osc)
@@ -1791,7 +2312,26 @@ void tMBSawPulse_free(tMBSawPulse* const osc)
 }
 
 
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float phase, float inv_w, float scale)
+#else
+void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float phase, float inv_w, float scale)
+#endif
+{
+    _tMBSawPulse* c = *osc;
+	float r;
+	long i;
 
+	r = MINBLEP_PHASES * phase * inv_w;
+	i = lrintf(r - 0.5f);
+	r -= (float)i;
+	i &= MINBLEP_PHASE_MASK;  /* extreme modulation can cause i to be out-of-range */
+	c->mostRecentBLEP = (c->mostRecentBLEP + 1) & 63;
+	c->BLEPindices[c->mostRecentBLEP] = i;
+    c->BLEPproperties[c->mostRecentBLEP][0] = r;
+    c->BLEPproperties[c->mostRecentBLEP][1] = scale;
+    c->numBLEPs = (c->numBLEPs + 1) & 63;
+}
 
 
 
@@ -1820,6 +2360,7 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
     if (sync > 0.0f && c->softsync > 0) c->syncdir = -c->syncdir;
 
     sw = w * c->syncdir;
+    float inv_sw = c->_inv_w * c->syncdir;
     p += sw - (int)sw;
 
     if (sync > 0.0f && c->softsync == 0)
@@ -1838,14 +2379,14 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 			 {
 				 if (p_at_reset >= b)
 				 {
-					 place_step_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -1.0f * shape);
+					 tMBSawPulse_place_step_dd_noBuffer(osc, j, p_at_reset - b + eof_offset, inv_sw, -1.0f * shape);
 					 k = 1;
 					 x = -0.5f;
 				 }
 				 if (p_at_reset >= 1.0f)
 				 {
 					 p_at_reset -= 1.0f;
-					 place_step_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f);
+					 tMBSawPulse_place_step_dd_noBuffer(osc, j, p_at_reset + eof_offset, inv_sw, 1.0f);
 					 k = 0;
 					 x = 0.5f;
 				 }
@@ -1855,13 +2396,13 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 				 if (p_at_reset < 0.0f)
 				 {
 					 p_at_reset += 1.0f;
-					 place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -1.0f);
+					 tMBSawPulse_place_step_dd_noBuffer(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, -1.0f);
 					 k = 1;
 					 x = -0.5f;
 				 }
 				 if (k && p_at_reset < b)
 				 {
-					 place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, 1.0f * shape);
+					 tMBSawPulse_place_step_dd_noBuffer(osc, j, b - p_at_reset - eof_offset, -inv_sw, 1.0f * shape);
 					 k = 0;
 					 x = 0.5f;
 				 }
@@ -1874,13 +2415,13 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 				 if (p_at_reset >= 1.0f)
 				 {
 					 p_at_reset -= 1.0f;
-					 place_step_dd(c->_f, j, p_at_reset + eof_offset, sw, 1.0f);
+					 tMBSawPulse_place_step_dd_noBuffer(osc, j, p_at_reset + eof_offset, inv_sw, 1.0f);
 					 k = 0;
 					 x = 0.5f;
 				 }
 				 if (!k && p_at_reset >= b)
 				 {
-					 place_step_dd(c->_f, j, p_at_reset - b + eof_offset, sw, -1.0f * shape);
+					 tMBSawPulse_place_step_dd_noBuffer(osc, j, p_at_reset - b + eof_offset, inv_sw, -1.0f * shape);
 					 k = 1;
 					 x = -0.5f;
 				 }
@@ -1889,14 +2430,14 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 			 {
 				 if (p_at_reset < b)
 				 {
-					 place_step_dd(c->_f, j, b - p_at_reset - eof_offset, -sw, 1.0f * shape);
+					 tMBSawPulse_place_step_dd_noBuffer(osc, j, b - p_at_reset - eof_offset, -inv_sw, 1.0f * shape);
 					 k = 0;
 					 x = 0.5f;
 				 }
 				 if (p_at_reset < 0.0f)
 				 {
 					 p_at_reset += 1.0f;
-					 place_step_dd(c->_f, j, 1.0f - p_at_reset - eof_offset, -sw, -1.0f);
+					 tMBSawPulse_place_step_dd_noBuffer(osc, j, 1.0f - p_at_reset - eof_offset, -inv_sw, -1.0f);
 					 k = 1;
 					 x = -0.5f;
 				 }
@@ -1908,15 +2449,15 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 		if (sw > 0)
 		{
 			/* now place reset DD for saw*/
-			place_step_dd(c->_f, j, p, sw, p_at_reset * sawShape);
+			tMBSawPulse_place_step_dd_noBuffer(osc, j, p, inv_sw, p_at_reset * sawShape);
             /* now place reset DD for pulse */
             if (k) {
-				place_step_dd(c->_f, j, p, sw, 1.0f * shape);
+            	tMBSawPulse_place_step_dd_noBuffer(osc, j, p, inv_sw, 1.0f * shape);
 				k = 0;
 				x = 0.5f;
 			}
 			if (p >= b) {
-				place_step_dd(c->_f, j, p - b, sw, -1.0f * shape);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, p - b, inv_sw, -1.0f * shape);
 				k = 1;
 				x = -0.5f;
 			}
@@ -1924,15 +2465,15 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 		else if (sw < 0)
 		{
 	        /* now place reset DD for saw*/
-			place_step_dd(c->_f, j, 1.0f - p, -sw, -p_at_reset * sawShape);
+			tMBSawPulse_place_step_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -p_at_reset * sawShape);
 			 /* now place reset DD for pulse */
 			if (!k) {
-				place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f * shape);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -1.0f * shape);
 				k = 1;
 				x = -0.5f;
 			}
 			if (p < b) {
-				place_step_dd(c->_f, j, b - p, -sw, 1.0f * shape);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, b - p, -inv_sw, 1.0f * shape);
 				k = 0;
 				x = 0.5f;
 			}
@@ -1948,13 +2489,13 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 		if (sw > 0)
 		{
 			if (p >= b) {
-				place_step_dd(c->_f, j, p - b, sw, -1.0f * shape);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, p - b, inv_sw, -1.0f * shape);
 				k = 1;
 				x = -0.5f;
 			}
 			if (p >= 1.0f) {
 				p -= 1.0f;
-				place_step_dd(c->_f, j, p, sw, 1.0f);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, p, inv_sw, 1.0f);
 				k = 0;
 				x = 0.5f;
 			}
@@ -1963,12 +2504,12 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 		{
 			if (p < 0.0f) {
 				p += 1.0f;
-				place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -1.0f);
 				k = 1;
 				x = -0.5f;
 			}
 			if (k && p < b) {
-				place_step_dd(c->_f, j, b - p, -sw, 1.0f * shape);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, b - p, -inv_sw, 1.0f * shape);
 				k = 0;
 				x = 0.5f;
 			}
@@ -1980,12 +2521,12 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 		{
 			if (p >= 1.0f) {
 				p -= 1.0f;
-				place_step_dd(c->_f, j, p, sw, 1.0f);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, p, inv_sw, 1.0f);
 				k = 0;
 				x = 0.5f;
 			}
 			if (!k && p >= b) {
-				place_step_dd(c->_f, j, p - b, sw, -1.0f * shape);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, p - b, inv_sw, -1.0f * shape);
 				k = 1;
 				x = -0.5f;
 			}
@@ -1993,32 +2534,46 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 		else if (sw < 0)
 		{
 			if (p < b) {
-				place_step_dd(c->_f, j, b - p, -sw, 1.0f * shape);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, b - p, -inv_sw, 1.0f * shape);
 				k = 0;
 				x = 0.5f;
 			}
 			if (p < 0.0f) {
 				p += 1.0f;
-				place_step_dd(c->_f, j, 1.0f - p, -sw, -1.0f);
+				tMBSawPulse_place_step_dd_noBuffer(osc, j, 1.0f - p, -inv_sw, -1.0f);
 				k = 1;
 				x = -0.5f;
 			}
 		}
 	}
+    int currentSamp = (j + DD_SAMPLE_DELAY) & 7;
+    c->_f[currentSamp] = ((0.5f - p) * sawShape); //saw
 
-    c->_f[j + DD_SAMPLE_DELAY] += ((0.5f - p) * sawShape); //saw
+    c->_f[currentSamp] += (x * shape);//pulse
 
-    c->_f[j + DD_SAMPLE_DELAY] += (x * shape);//pulse
+    volatile uint8_t numBLEPsAtLoopStart = c->numBLEPs;
+    for (int i = 0; i < numBLEPsAtLoopStart; i++)
+    {
+    	volatile uint16_t whichBLEP = (c->mostRecentBLEP - i);
+    	whichBLEP &= 63;
+
+    	//use the scale and r values from the BLEPproperties array to compute the current state of each active BLEP and add it to the output value
+    	c->_f[j] += c->BLEPproperties[whichBLEP][1] * (step_dd_table[c->BLEPindices[whichBLEP]].value + c->BLEPproperties[whichBLEP][0] * step_dd_table[c->BLEPindices[whichBLEP]].delta);
+
+    	//increment the position in the BLEP table
+		c->BLEPindices[whichBLEP] += MINBLEP_PHASES;
+		//check if this BLEP is finished and if so mark it as inactive so it isn't computed anymore.
+		if (c->BLEPindices[whichBLEP] >= c->maxBLEPphase)
+		{
+			c->numBLEPs--;
+		}
+
+    }
+
 
     z += 0.5f * (c->_f[j] - z); // LP filtering
     c->out = z;
-
-    if (++j == FILLEN)
-    {
-        j = 0;
-        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (float));
-        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (float));
-    }
+    j = (j+1) & 7;
 
     c->_p = p;
     c->_w = w;
@@ -2030,12 +2585,16 @@ float tMBSawPulse_tick(tMBSawPulse* const osc)
 
     return -c->out;
 }
-
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tMBSawPulse_setFreq(tMBSawPulse* const osc, float f)
+#else
 void tMBSawPulse_setFreq(tMBSawPulse* const osc, float f)
+#endif
 {
     _tMBSawPulse* c = *osc;
     c->freq = f;
     c->_w = c->freq * c->invSampleRate;  /* phase increment */
+    c->_inv_w = 1.0f / c->_w;
 }
 
 #ifdef ITCMRAM
