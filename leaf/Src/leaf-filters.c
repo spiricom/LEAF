@@ -892,6 +892,7 @@ void     tSVF_setFreq(tSVF* const svff, float freq)
     svf->a3 = svf->g * svf->a2;
 }
 
+//expects cutoff as a number from 0-4095 based on midinote lookup table
 void    tSVF_setFreqFast     (tSVF* const vf, float cutoff)
 {
 	_tSVF* svf = *vf;
@@ -904,7 +905,7 @@ void    tSVF_setFreqFast     (tSVF* const vf, float cutoff)
     svf->a3 = svf->g * svf->a2;
 }
 
-void     tSVF_setQ(tSVF* const svff, float Q)
+void    tSVF_setQ(tSVF* const svff, float Q)
 {
     _tSVF* svf = *svff;
     svf->Q = Q;
@@ -1441,7 +1442,7 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
         {
             float A = sqrtf(f->G);
             f->g /= sqrtf(A);               // scale SVF-cutoff frequency for shelvers
-            //f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
+            f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f); //if using bandwidth instead of Q
             //f->R2 = f->invQ;
             f->cL = f->G; f->cB = f->R2*f->G; f->cH = 1.0f;
 
@@ -1451,7 +1452,8 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
         {
             float A = sqrtf(f->G);
             f->g *= sqrtf(A);               // scale SVF-cutoff frequency for shelvers
-            //f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
+            f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f); //if using bandwidth instead of Q
+            //f->R2 = f->invQ;
             f->cL = 1.0f; f->cB = f->R2*f->G; f->cH = f->G;
         }
             break;
@@ -1588,7 +1590,8 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
         {
             float A = fastsqrtf(f->G);
             f->g /= fastsqrtf(A);               // scale SVF-cutoff frequency for shelvers
-            //f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
+            //f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f); //if using bandwidth instead of Q
+            f->R2 = 2.0f*sinhf(f->B*0.346573590279973f); //if using bandwidth instead of Q
             //f->R2 = f->invQ;
             f->cL = f->G; f->cB = f->R2*f->G; f->cH = 1.0f;
 
@@ -1598,7 +1601,9 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
         {
             float A = fastsqrtf(f->G);
             f->g *= fastsqrtf(A);               // scale SVF-cutoff frequency for shelvers
-            //f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
+            //f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f); //if using bandwidth instead of Q
+            f->R2 = 2.0f*sinhf(f->B*0.346573590279973f); //if using bandwidth instead of Q
+            //f->R2 = f->invQ;
             f->cL = 1.0f; f->cB = f->R2*f->G; f->cH = f->G;
         }
             break;
