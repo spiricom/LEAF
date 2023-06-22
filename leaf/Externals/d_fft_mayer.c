@@ -50,13 +50,14 @@
 
 /* These pragmas are only used for MSVC, not MinGW or Cygwin <hans@at.or.at> */
 #ifdef _MSC_VER
-#pragma warning( disable : 4305 )  /* uncast const double to float */
-#pragma warning( disable : 4244 )  /* uncast double to float */
+#pragma warning( disable : 4305 )  /* uncast const double to Lfloat */
+#pragma warning( disable : 4244 )  /* uncast double to Lfloat */
 #pragma warning( disable : 4101 )  /* unused local variables */
 #endif
 
+#include ".//leaf-config.h"
 /* the following is needed only to declare pd_fft() as exportable in MSW */
-#define t_sample float
+#define t_sample Lfloat
 
 #define REAL t_sample
 #define GOOD_TRIG

@@ -19,12 +19,12 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ PRCReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tPRCReverb_init(tPRCReverb* const rev, float t60, LEAF* const leaf)
+void    tPRCReverb_init(tPRCReverb* const rev, Lfloat t60, LEAF* const leaf)
 {
     tPRCReverb_initToPool(rev, t60, &leaf->mempool);
 }
 
-void    tPRCReverb_initToPool   (tPRCReverb* const rev, float t60, tMempool* const mp)
+void    tPRCReverb_initToPool   (tPRCReverb* const rev, Lfloat t60, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPRCReverb* r = *rev = (_tPRCReverb*) mpool_alloc(sizeof(_tPRCReverb), m);
@@ -83,7 +83,7 @@ void    tPRCRevert_clear(tPRCReverb* const rev)
     tDelay_clear(&r->combDelay);
 }
 
-void    tPRCReverb_setT60(tPRCReverb* const rev, float t60)
+void    tPRCReverb_setT60(tPRCReverb* const rev, Lfloat t60)
 {
     _tPRCReverb* r = *rev;
     
@@ -94,18 +94,18 @@ void    tPRCReverb_setT60(tPRCReverb* const rev, float t60)
     r->combCoeff = powf(10.0f, (-3.0f * tDelay_getDelay(&r->combDelay) * r->invSampleRate / t60 ));
 }
 
-void    tPRCReverb_setMix(tPRCReverb* const rev, float mix)
+void    tPRCReverb_setMix(tPRCReverb* const rev, Lfloat mix)
 {
     _tPRCReverb* r = *rev;
     r->mix = mix;
 }
 
-float   tPRCReverb_tick(tPRCReverb* const rev, float input)
+Lfloat   tPRCReverb_tick(tPRCReverb* const rev, Lfloat input)
 {
     _tPRCReverb* r = *rev;
     
-    float temp, temp0, temp1, temp2;
-    float out;
+    Lfloat temp, temp0, temp1, temp2;
+    Lfloat out;
     
     r->lastIn = input;
     
@@ -134,7 +134,7 @@ float   tPRCReverb_tick(tPRCReverb* const rev, float input)
     return out;
 }
 
-void     tPRCReverb_setSampleRate (tPRCReverb* const rev, float sr)
+void     tPRCReverb_setSampleRate (tPRCReverb* const rev, Lfloat sr)
 {
     _tPRCReverb* r = *rev;
     
@@ -171,12 +171,12 @@ void     tPRCReverb_setSampleRate (tPRCReverb* const rev, float sr)
 }
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ NReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
-void    tNReverb_init(tNReverb* const rev, float t60, LEAF* const leaf)
+void    tNReverb_init(tNReverb* const rev, Lfloat t60, LEAF* const leaf)
 {
     tNReverb_initToPool(rev, t60, &leaf->mempool);
 }
 
-void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const mp)
+void    tNReverb_initToPool     (tNReverb* const rev, Lfloat t60, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tNReverb* r = *rev = (_tNReverb*) mpool_alloc(sizeof(_tNReverb), m);
@@ -207,7 +207,7 @@ void    tNReverb_initToPool     (tNReverb* const rev, float t60, tMempool* const
     {
         tLinearDelay_initToPool(&r->combDelays[i], lengths[i], lengths[i] * 2, mp);
         tLinearDelay_clear(&r->combDelays[i]);
-        r->combCoeffs[i] = powf(10.0f, (-3.0f * (float)lengths[i] * r->invSampleRate / t60));
+        r->combCoeffs[i] = powf(10.0f, (-3.0f * (Lfloat)lengths[i] * r->invSampleRate / t60));
     }
     
     for ( i=0; i<8; i++ )
@@ -238,7 +238,7 @@ void    tNReverb_free (tNReverb* const rev)
     mpool_free((char*)r, r->mempool);
 }
 
-void    tNReverb_setT60(tNReverb* const rev, float t60)
+void    tNReverb_setT60(tNReverb* const rev, Lfloat t60)
 {
     _tNReverb* r = *rev;
     
@@ -249,7 +249,7 @@ void    tNReverb_setT60(tNReverb* const rev, float t60)
     for (int i=0; i<6; i++) r->combCoeffs[i] = powf(10.0f, (-3.0f * tLinearDelay_getDelay(&r->combDelays[i]) * r->invSampleRate / t60 ));
 }
 
-void    tNReverb_setMix(tNReverb* const rev, float mix)
+void    tNReverb_setMix(tNReverb* const rev, Lfloat mix)
 {
     _tNReverb* r = *rev;
     r->mix = mix;
@@ -270,12 +270,12 @@ void    tNReverb_clear             (tNReverb* const rev)
     }
 }
 
-float   tNReverb_tick(tNReverb* const rev, float input)
+Lfloat   tNReverb_tick(tNReverb* const rev, Lfloat input)
 {
     _tNReverb* r = *rev;
     r->lastIn = input;
     
-    float temp, temp0, temp1, temp2, out;
+    Lfloat temp, temp0, temp1, temp2, out;
     int i;
     
     temp0 = 0.0;
@@ -327,12 +327,12 @@ float   tNReverb_tick(tNReverb* const rev, float input)
     return out;
 }
 
-void   tNReverb_tickStereo(tNReverb* const rev, float input, float* output)
+void   tNReverb_tickStereo(tNReverb* const rev, Lfloat input, Lfloat* output)
 {
     _tNReverb* r = *rev;
     r->lastIn = input;
 
-    float temp, temp0, temp1, temp2, temp3, out;
+    Lfloat temp, temp0, temp1, temp2, temp3, out;
     int i;
 
     temp0 = 0.0;
@@ -360,7 +360,7 @@ void   tNReverb_tickStereo(tNReverb* const rev, float input, float* output)
     tLinearDelay_tick(&r->allpassDelays[3], temp1 );
     temp1 = -(r->allpassCoeff * temp1) + temp;
 
-    float drymix = ( 1.0f - r->mix ) * input;
+    Lfloat drymix = ( 1.0f - r->mix ) * input;
 
     temp = tLinearDelay_getLastOut(&r->allpassDelays[4]);
     temp2 = r->allpassCoeff * temp;
@@ -378,7 +378,7 @@ void   tNReverb_tickStereo(tNReverb* const rev, float input, float* output)
     r->lastOut = out;
 }
 
-void     tNReverb_setSampleRate (tNReverb* const rev, float sr)
+void     tNReverb_setSampleRate (tNReverb* const rev, Lfloat sr)
 {
     _tNReverb* r = *rev;
     
@@ -405,7 +405,7 @@ void     tNReverb_setSampleRate (tNReverb* const rev, float sr)
         tLinearDelay_free(&r->combDelays[i]);
         tLinearDelay_initToPool(&r->combDelays[i], lengths[i], lengths[i] * 2, &r->mempool);
         tLinearDelay_clear(&r->combDelays[i]);
-        r->combCoeffs[i] = powf(10.0f, (-3.0f * (float)lengths[i] * r->invSampleRate / r->t60));
+        r->combCoeffs[i] = powf(10.0f, (-3.0f * (Lfloat)lengths[i] * r->invSampleRate / r->t60));
     }
     
     for ( i=0; i<8; i++ )
@@ -422,8 +422,8 @@ void     tNReverb_setSampleRate (tNReverb* const rev, float sr)
 
 #define SAMP(in) (in*r->t)
 
-float       in_allpass_delays[4] = { 4.771f, 3.595f, 12.73f, 9.307f };
-float       in_allpass_gains[4] = { 0.75f, 0.75f, 0.625f, 0.625f };
+Lfloat       in_allpass_delays[4] = { 4.771f, 3.595f, 12.73f, 9.307f };
+Lfloat       in_allpass_gains[4] = { 0.75f, 0.75f, 0.625f, 0.625f };
 
 void    tDattorroReverb_init              (tDattorroReverb* const rev, LEAF* const leaf)
 {
@@ -546,12 +546,12 @@ void    tDattorroReverb_clear             (tDattorroReverb* const rev)
     tTapeDelay_clear(&r->f2_delay_3);
 }
 
-float   tDattorroReverb_tick              (tDattorroReverb* const rev, float input)
+Lfloat   tDattorroReverb_tick              (tDattorroReverb* const rev, Lfloat input)
 {
     _tDattorroReverb* r = *rev;
     
 
-    float in_sample, f1_sample,f1_delay_2_sample,  f2_sample, f2_delay_2_sample;
+    Lfloat in_sample, f1_sample,f1_delay_2_sample,  f2_sample, f2_delay_2_sample;
 
     if (r->frozen)
     {
@@ -651,15 +651,15 @@ float   tDattorroReverb_tick              (tDattorroReverb* const rev, float inp
     
     f2_sample *=    0.14f;
     
-    float sample = (f1_sample + f2_sample) * 0.5f;
+    Lfloat sample = (f1_sample + f2_sample) * 0.5f;
     
     return (input * (1.0f - r->mix) + sample * r->mix);
 }
 
-void   tDattorroReverb_tickStereo              (tDattorroReverb* const rev, float input, float* output)
+void   tDattorroReverb_tickStereo              (tDattorroReverb* const rev, Lfloat input, Lfloat* output)
 {
     _tDattorroReverb* r = *rev;
-    float in_sample, f1_sample,f1_delay_2_sample,  f2_sample, f2_delay_2_sample;
+    Lfloat in_sample, f1_sample,f1_delay_2_sample,  f2_sample, f2_delay_2_sample;
 
     if (r->frozen)
     {
@@ -775,7 +775,7 @@ void   tDattorroReverb_tickStereo              (tDattorroReverb* const rev, floa
 
 }
 
-void    tDattorroReverb_setMix            (tDattorroReverb* const rev, float mix)
+void    tDattorroReverb_setMix            (tDattorroReverb* const rev, Lfloat mix)
 {
     _tDattorroReverb* r = *rev;
     r->mix = LEAF_clip(0.0f, mix, 1.0f);
@@ -811,16 +811,16 @@ void    tDattorroReverb_setFreeze            (tDattorroReverb* const rev, int fr
 }
 
 
-void    tDattorroReverb_setHP           (tDattorroReverb* const rev, float freq)
+void    tDattorroReverb_setHP           (tDattorroReverb* const rev, Lfloat freq)
 {
     _tDattorroReverb* r = *rev;
-    float newFreq = LEAF_clip(20.0f, freq, 20000.0f);
+    Lfloat newFreq = LEAF_clip(20.0f, freq, 20000.0f);
     tHighpass_setFreq(&r->f1_hp, newFreq);
     tHighpass_setFreq(&r->f2_hp, newFreq);
 }
 
 
-void    tDattorroReverb_setSize           (tDattorroReverb* const rev, float size)
+void    tDattorroReverb_setSize           (tDattorroReverb* const rev, Lfloat size)
 {
     _tDattorroReverb* r = *rev;
     
@@ -852,7 +852,7 @@ void    tDattorroReverb_setSize           (tDattorroReverb* const rev, float siz
     tTapeDelay_setDelay(&r->f2_delay_3, SAMP(106.28f));
 }
 
-void    tDattorroReverb_setInputDelay     (tDattorroReverb* const rev, float preDelay)
+void    tDattorroReverb_setInputDelay     (tDattorroReverb* const rev, Lfloat preDelay)
 {
     _tDattorroReverb* r = *rev;
     
@@ -861,7 +861,7 @@ void    tDattorroReverb_setInputDelay     (tDattorroReverb* const rev, float pre
     tTapeDelay_setDelay(&r->in_delay, SAMP(r->predelay));
 }
 
-void    tDattorroReverb_setInputFilter    (tDattorroReverb* const rev, float freq)
+void    tDattorroReverb_setInputFilter    (tDattorroReverb* const rev, Lfloat freq)
 {
     _tDattorroReverb* r = *rev;
     
@@ -870,7 +870,7 @@ void    tDattorroReverb_setInputFilter    (tDattorroReverb* const rev, float fre
     tOnePole_setFreq(&r->in_filter, r->input_filter);
 }
 
-void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const rev, float freq)
+void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const rev, Lfloat freq)
 {
     _tDattorroReverb* r = *rev;
     
@@ -880,13 +880,13 @@ void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const rev, float fre
     tOnePole_setFreq(&r->f2_filter, r->feedback_filter);
 }
 
-void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const rev, float gain)
+void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const rev, Lfloat gain)
 {
     _tDattorroReverb* r = *rev;
     r->feedback_gain = gain;
 }
 
-void    tDattorroReverb_setSampleRate   (tDattorroReverb* const rev, float sr)
+void    tDattorroReverb_setSampleRate   (tDattorroReverb* const rev, Lfloat sr)
 {
     _tDattorroReverb* r = *rev;
     tMempool* mp = &r->mempool;

@@ -18,7 +18,7 @@
 
 #endif
 
-void LEAF_init(LEAF* const leaf, float sr, char* memory, size_t memorysize, float(*random)(void))
+void LEAF_init(LEAF* const leaf, Lfloat sr, char* memory, size_t memorysize, Lfloat(*random)(void))
 {
     leaf->_internal_mempool.leaf = leaf;
     leaf_pool_init(leaf, memory, memorysize);
@@ -43,14 +43,14 @@ void LEAF_init(LEAF* const leaf, float sr, char* memory, size_t memorysize, floa
     leaf->freeCount = 0;
 }
 
-void LEAF_setSampleRate(LEAF* const leaf, float sampleRate)
+void LEAF_setSampleRate(LEAF* const leaf, Lfloat sampleRate)
 {
     leaf->sampleRate = sampleRate;
     leaf->invSampleRate = 1.0f/sampleRate;
     leaf->twoPiTimesInvSampleRate = leaf->invSampleRate * TWO_PI;
 }
 
-float LEAF_getSampleRate(LEAF* const leaf)
+Lfloat LEAF_getSampleRate(LEAF* const leaf)
 {
     return leaf->sampleRate;
 }

@@ -51,7 +51,7 @@ extern "C" {
      @brief Free a tCompressor from its mempool.
      @param compressor A pointer to the tCompressor to free.
      
-     @fn float   tCompressor_tick        (tCompressor* const, float input)
+     @fn Lfloat   tCompressor_tick        (tCompressor* const, Lfloat input)
      @brief
      @param compressor A pointer to the relevant tCompressor.
      ￼￼￼
@@ -62,15 +62,23 @@ extern "C" {
         
         tMempool mempool;
         
-        float tauAttack, tauRelease;
-        float T, R, W, M; // Threshold, compression Ratio, decibel Width of knee transition, decibel Make-up gain
-        float invR;
-        float inv4W;
-        float x_G[2], y_G[2], x_T[2], y_T[2];
+        Lfloat tauAttack, tauRelease;
+        Lfloat T, R, W, M; // Threshold, compression Ratio, decibel Width of knee transition, decibel Make-up gain
+        Lfloat invR;
+        Lfloat inv4W;
+        Lfloat x_G[2], y_G[2], x_T[2], y_T[2];
         
         int isActive;
         
-        float sampleRate;
+        Lfloat sampleRate;
+        Lfloat* atodbTable;
+        Lfloat* dbtoaTable;
+        Lfloat atodbScalar;
+        Lfloat dbtoaScalar;
+        Lfloat atodbOffset;
+        Lfloat dbtoaOffset;
+        int atodbTableSizeMinus1;
+        int dbtoaTableSizeMinus1;
         
     } _tCompressor;
     
@@ -80,8 +88,11 @@ extern "C" {
     void    tCompressor_initToPool  (tCompressor* const, tMempool* const);
     void    tCompressor_free        (tCompressor* const);
     
-    float   tCompressor_tick        (tCompressor* const, float input);
-void    tCompressor_setParams   (tCompressor* const comp, float thresh, float ratio, float knee, float makeup, float attack, float release);
+    Lfloat   tCompressor_tick        (tCompressor* const, Lfloat input);
+    Lfloat tCompressor_tickWithTable(tCompressor* const comp, Lfloat in);
+    Lfloat tCompressor_tickWithTableHardKnee(tCompressor* const comp, Lfloat in);
+    Lfloat tCompressor_setTables(tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize);
+void    tCompressor_setParams   (tCompressor* const comp, Lfloat thresh, Lfloat ratio, Lfloat knee, Lfloat makeup, Lfloat attack, Lfloat release);
     
     
     /*!
@@ -91,12 +102,12 @@ void    tCompressor_setParams   (tCompressor* const comp, float thresh, float ra
      @details An auto VCA that you put into a feedback circuit to make it stay at the same level. It can enforce level bidirectionally (amplifying and attenuating as needed) or just attenutating. The former option allows for infinite sustain strings, for example, while the latter option allows for decaying strings, which can never exceed a specific level.
      @{
      
-     @fn void tFeedbackLeveler_init (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, LEAF* const leaf)
+     @fn void tFeedbackLeveler_init (tFeedbackLeveler* const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf)
      @brief Initialize a tFeedbackLeveler to the default mempool of a LEAF instance.
      @param leveler A pointer to the tFeedbackLeveler to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void tFeedbackLeveler_initToPool (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, tMempool* const)
+     @fn void tFeedbackLeveler_initToPool (tFeedbackLeveler* const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool* const)
      @brief Initialize a tFeedbackLeveler to a specified mempool.
      @param leveler A pointer to the tFeedbackLeveler to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -105,19 +116,19 @@ void    tCompressor_setParams   (tCompressor* const comp, float thresh, float ra
      @brief Free a tFeedbackLeveler from its mempool.
      @param leveler A pointer to the tFeedbackLeveler to free.
      
-     @fn float   tFeedbackLeveler_tick           (tFeedbackLeveler* const, float input)
+     @fn Lfloat   tFeedbackLeveler_tick           (tFeedbackLeveler* const, Lfloat input)
      @brief
      @param leveler A pointer to the relevant tFeedbackLeveler.
      
-     @fn float   tFeedbackLeveler_sample         (tFeedbackLeveler* const)
+     @fn Lfloat   tFeedbackLeveler_sample         (tFeedbackLeveler* const)
      @brief
      @param leveler A pointer to the relevant tFeedbackLeveler.
      
-     @fn void    tFeedbackLeveler_setTargetLevel (tFeedbackLeveler* const, float TargetLevel)
+     @fn void    tFeedbackLeveler_setTargetLevel (tFeedbackLeveler* const, Lfloat TargetLevel)
      @brief
      @param leveler A pointer to the relevant tFeedbackLeveler.
      
-     @fn void    tFeedbackLeveler_setFactor      (tFeedbackLeveler* const, float factor)
+     @fn void    tFeedbackLeveler_setFactor      (tFeedbackLeveler* const, Lfloat factor)
      @brief
      @param leveler A pointer to the relevant tFeedbackLeveler.
      
@@ -126,7 +137,7 @@ void    tCompressor_setParams   (tCompressor* const comp, float thresh, float ra
      @param leveler A pointer to the relevant tFeedbackLeveler.
      @param mode 0 for upwards limiting only, 1 for biderctional limiting
     
-     @fn void    tFeedbackLeveler_setStrength    (tFeedbackLeveler* const, float strength)
+     @fn void    tFeedbackLeveler_setStrength    (tFeedbackLeveler* const, Lfloat strength)
      @brief
      @param leveler A pointer to the relevant tFeedbackLeveler.
      ￼￼￼
@@ -136,26 +147,26 @@ void    tCompressor_setParams   (tCompressor* const comp, float thresh, float ra
     {
         
         tMempool mempool;
-        float targetLevel;    // target power level
-        float strength;        // how strongly level difference affects the VCA
+        Lfloat targetLevel;    // target power level
+        Lfloat strength;        // how strongly level difference affects the VCA
         int      mode;            // 0 for upwards limiting only, 1 for biderctional limiting
-        float curr;
+        Lfloat curr;
         tPowerFollower pwrFlw;    // internal power follower needed for level tracking
         
     } _tFeedbackLeveler;
     
     typedef _tFeedbackLeveler* tFeedbackLeveler;
     
-    void    tFeedbackLeveler_init           (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, LEAF* const leaf);
-    void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const, float targetLevel, float factor, float strength, int mode, tMempool* const);
+    void    tFeedbackLeveler_init           (tFeedbackLeveler* const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf);
+    void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool* const);
     void    tFeedbackLeveler_free           (tFeedbackLeveler* const);
     
-    float   tFeedbackLeveler_tick           (tFeedbackLeveler* const, float input);
-    float   tFeedbackLeveler_sample         (tFeedbackLeveler* const);
-    void    tFeedbackLeveler_setTargetLevel (tFeedbackLeveler* const, float TargetLevel);
-    void    tFeedbackLeveler_setFactor      (tFeedbackLeveler* const, float factor);
+    Lfloat   tFeedbackLeveler_tick           (tFeedbackLeveler* const, Lfloat input);
+    Lfloat   tFeedbackLeveler_sample         (tFeedbackLeveler* const);
+    void    tFeedbackLeveler_setTargetLevel (tFeedbackLeveler* const, Lfloat TargetLevel);
+    void    tFeedbackLeveler_setFactor      (tFeedbackLeveler* const, Lfloat factor);
     void    tFeedbackLeveler_setMode        (tFeedbackLeveler* const, int mode); // 0 for upwards limiting only, 1 for biderctional limiting
-    void    tFeedbackLeveler_setStrength    (tFeedbackLeveler* const, float strength);
+    void    tFeedbackLeveler_setStrength    (tFeedbackLeveler* const, Lfloat strength);
     
     
     //==============================================================================
@@ -167,12 +178,12 @@ void    tCompressor_setParams   (tCompressor* const comp, float thresh, float ra
      @brief Threshold with hysteresis (like Max/MSP thresh~ object)
      @{
      
-     @fn void    tThreshold_init        (tThreshold* const, float low, float high, LEAF* const leaf)
+     @fn void    tThreshold_init        (tThreshold* const, Lfloat low, Lfloat high, LEAF* const leaf)
      @brief Initialize a tThreshold to the default mempool of a LEAF instance.
      @param threshold A pointer to the tThreshold to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tThreshold_initToPool  (tThreshold* const, float low, float high, tMempool* const)
+     @fn void    tThreshold_initToPool  (tThreshold* const, Lfloat low, Lfloat high, tMempool* const)
      @brief Initialize a tThreshold to a specified mempool.
      @param threshold A pointer to the tThreshold to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -181,15 +192,15 @@ void    tCompressor_setParams   (tCompressor* const comp, float thresh, float ra
      @brief Free a tThreshold from its mempool.
      @param threshold A pointer to the tThreshold to free.
      
-     @fn int   tThreshold_tick        (tThreshold* const, float input)
+     @fn int   tThreshold_tick        (tThreshold* const, Lfloat input)
      @brief
      @param threshold A pointer to the relevant tThreshold.
      
-     @fn void   tThreshold_setLow        (tThreshold* const, float low)
+     @fn void   tThreshold_setLow        (tThreshold* const, Lfloat low)
      @brief
      @param threshold A pointer to the relevant tThreshold.
      
-     @fn void   tThreshold_setHigh       (tThreshold* const, float high)
+     @fn void   tThreshold_setHigh       (tThreshold* const, Lfloat high)
      @brief
      @param threshold A pointer to the relevant tThreshold.
      
@@ -199,19 +210,19 @@ void    tCompressor_setParams   (tCompressor* const comp, float thresh, float ra
     {
         
         tMempool mempool;
-        float highThresh, lowThresh;
+        Lfloat highThresh, lowThresh;
 		int currentValue;
     } _tThreshold;
 
     typedef _tThreshold* tThreshold;
 
-    void    tThreshold_init        (tThreshold* const, float low, float high, LEAF* const leaf);
-    void    tThreshold_initToPool  (tThreshold* const, float low, float high, tMempool* const);
+    void    tThreshold_init        (tThreshold* const, Lfloat low, Lfloat high, LEAF* const leaf);
+    void    tThreshold_initToPool  (tThreshold* const, Lfloat low, Lfloat high, tMempool* const);
     void    tThreshold_free        (tThreshold* const);
 
-    int    tThreshold_tick        (tThreshold* const, float input);
-    void   tThreshold_setLow        (tThreshold* const, float low);
-    void   tThreshold_setHigh       (tThreshold* const, float high);
+    int    tThreshold_tick        (tThreshold* const, Lfloat input);
+    void   tThreshold_setLow        (tThreshold* const, Lfloat low);
+    void   tThreshold_setHigh       (tThreshold* const, Lfloat high);
 
 
 

@@ -25,20 +25,20 @@ extern "C" {
      */
     
 #define COEFFS_SIZE 32
-    extern const float* __leaf_tableref_firCoeffs[COEFFS_SIZE];
-    extern const float __leaf_tablesize_firNumTaps[COEFFS_SIZE];
-    extern const float __leaf_table_fir2XLow[32];
-    extern const float __leaf_table_fir4XLow[64];
-    extern const float __leaf_table_fir8XLow[64];
-    extern const float __leaf_table_fir16XLow[128];
-    extern const float __leaf_table_fir32XLow[256];
-    extern const float __leaf_table_fir64XLow[256];
-    extern const float __leaf_table_fir2XHigh[128];
-    extern const float __leaf_table_fir4XHigh[256];
-    extern const float __leaf_table_fir8XHigh[256];
-    extern const float __leaf_table_fir16XHigh[512];
-    extern const float __leaf_table_fir32XHigh[512];
-    extern const float __leaf_table_fir64XHigh[1024];
+    extern const Lfloat* __leaf_tableref_firCoeffs[COEFFS_SIZE];
+    extern const Lfloat __leaf_tablesize_firNumTaps[COEFFS_SIZE];
+    extern const Lfloat __leaf_table_fir2XLow[32];
+    extern const Lfloat __leaf_table_fir4XLow[64];
+    extern const Lfloat __leaf_table_fir8XLow[64];
+    extern const Lfloat __leaf_table_fir16XLow[128];
+    extern const Lfloat __leaf_table_fir32XLow[256];
+    extern const Lfloat __leaf_table_fir64XLow[256];
+    extern const Lfloat __leaf_table_fir2XHigh[128];
+    extern const Lfloat __leaf_table_fir4XHigh[256];
+    extern const Lfloat __leaf_table_fir8XHigh[256];
+    extern const Lfloat __leaf_table_fir16XHigh[512];
+    extern const Lfloat __leaf_table_fir32XHigh[512];
+    extern const Lfloat __leaf_table_fir64XHigh[1024];
     
 //    typedef enum TableName
 //    {
@@ -58,38 +58,38 @@ extern "C" {
     
     
 #define SHAPER1_TABLE_SIZE 65536
-    extern const float __leaf_table_shaper1[SHAPER1_TABLE_SIZE];
+    extern const Lfloat __leaf_table_shaper1[SHAPER1_TABLE_SIZE];
    
     // mtof lookup table based on input range [0.0,1.0) in 4096 increments - midi frequency values scaled between m25 and m134 (from the Snyderphonics DrumBox code)
 #define MTOF1_TABLE_SIZE 4096
-    extern const float __leaf_table_mtof1[MTOF1_TABLE_SIZE];
+    extern const Lfloat __leaf_table_mtof1[MTOF1_TABLE_SIZE];
 
 #define EXP_DECAY_TABLE_SIZE 65536
-    extern const float __leaf_table_exp_decay[EXP_DECAY_TABLE_SIZE];
+    extern const Lfloat __leaf_table_exp_decay[EXP_DECAY_TABLE_SIZE];
     
 #define ATTACK_DECAY_INC_TABLE_SIZE 65536
-    extern const float __leaf_table_attack_decay_inc[ATTACK_DECAY_INC_TABLE_SIZE];
+    extern const Lfloat __leaf_table_attack_decay_inc[ATTACK_DECAY_INC_TABLE_SIZE];
     
 #define FILTERTAN_TABLE_SIZE 4096
-    extern const float __leaf_table_filtertan[FILTERTAN_TABLE_SIZE];
+    extern const Lfloat __leaf_table_filtertan[FILTERTAN_TABLE_SIZE];
     
 #define TANH1_TABLE_SIZE 65536
-    extern const float __leaf_table_tanh1[TANH1_TABLE_SIZE];
+    extern const Lfloat __leaf_table_tanh1[TANH1_TABLE_SIZE];
     
     //==============================================================================
     
     /* Sine wave table ripped from http://aquaticus.info/pwm-sine-wave. */
 #define SINE_TABLE_SIZE 2048
-    extern const float __leaf_table_sinewave[SINE_TABLE_SIZE];
+    extern const Lfloat __leaf_table_sinewave[SINE_TABLE_SIZE];
     
 #define TRI_TABLE_SIZE 2048
-    extern const float __leaf_table_triangle[11][TRI_TABLE_SIZE];
+    extern const Lfloat __leaf_table_triangle[11][TRI_TABLE_SIZE];
     
 #define SQR_TABLE_SIZE 2048
-    extern const float __leaf_table_squarewave[11][SQR_TABLE_SIZE];
+    extern const Lfloat __leaf_table_squarewave[11][SQR_TABLE_SIZE];
     
 #define SAW_TABLE_SIZE 2048
-    extern const float __leaf_table_sawtooth[11][SAW_TABLE_SIZE];
+    extern const Lfloat __leaf_table_sawtooth[11][SAW_TABLE_SIZE];
     
     //==============================================================================
     
@@ -110,11 +110,11 @@ extern "C" {
     /* delay between start of DD pulse and the discontinuity, in samples: */
 #define DD_SAMPLE_DELAY          4
     
-    typedef struct { float value, delta; } float_value_delta;
+    typedef struct { Lfloat value, delta; } Lfloat_value_delta;
     
     /* in minblep_tables.c: */
-    extern const float_value_delta step_dd_table[];
-    extern const  float             slope_dd_table[];
+    extern const Lfloat_value_delta step_dd_table[];
+    extern const  Lfloat             slope_dd_table[];
     
     /*! @} */
     

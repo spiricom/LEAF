@@ -24,12 +24,12 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tAllpass_init(tAllpass* const ft, float initDelay, uint32_t maxDelay, LEAF* const leaf)
+void    tAllpass_init(tAllpass* const ft, Lfloat initDelay, uint32_t maxDelay, LEAF* const leaf)
 {
     tAllpass_initToPool(ft, initDelay, maxDelay, &leaf->mempool);
 }
 
-void    tAllpass_initToPool     (tAllpass* const ft, float initDelay, uint32_t maxDelay, tMempool* const mp)
+void    tAllpass_initToPool     (tAllpass* const ft, Lfloat initDelay, uint32_t maxDelay, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tAllpass* f = *ft = (_tAllpass*) mpool_alloc(sizeof(_tAllpass), m);
@@ -50,27 +50,27 @@ void    tAllpass_free  (tAllpass* const ft)
     mpool_free((char*)f, f->mempool);
 }
 
-void    tAllpass_setDelay(tAllpass* const ft, float delay)
+void    tAllpass_setDelay(tAllpass* const ft, Lfloat delay)
 {
     _tAllpass* f = *ft;
     
     tLinearDelay_setDelay(&f->delay, delay);
 }
 
-void    tAllpass_setGain(tAllpass* const ft, float gain)
+void    tAllpass_setGain(tAllpass* const ft, Lfloat gain)
 {
     _tAllpass* f = *ft;
     
     f->gain = gain;
 }
 
-float   tAllpass_tick(tAllpass* const ft, float input)
+Lfloat   tAllpass_tick(tAllpass* const ft, Lfloat input)
 {
     _tAllpass* f = *ft;
     
-    float s1 = (-f->gain) * f->lastOut + input;
+    Lfloat s1 = (-f->gain) * f->lastOut + input;
     
-    float s2 = tLinearDelay_tick(&f->delay, s1) + (f->gain) * input;
+    Lfloat s2 = tLinearDelay_tick(&f->delay, s1) + (f->gain) * input;
     
     f->lastOut = s2;
     
@@ -78,12 +78,12 @@ float   tAllpass_tick(tAllpass* const ft, float input)
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tOnePole_init(tOnePole* const ft, float freq, LEAF* const leaf)
+void    tOnePole_init(tOnePole* const ft, Lfloat freq, LEAF* const leaf)
 {
     tOnePole_initToPool(ft, freq, &leaf->mempool);
 }
 
-void    tOnePole_initToPool     (tOnePole* const ft, float freq, tMempool* const mp)
+void    tOnePole_initToPool     (tOnePole* const ft, Lfloat freq, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tOnePole* f = *ft = (_tOnePole*) mpool_alloc(sizeof(_tOnePole), m);
@@ -108,20 +108,20 @@ void    tOnePole_free   (tOnePole* const ft)
     mpool_free((char*)f, f->mempool);
 }
 
-void    tOnePole_setB0(tOnePole* const ft, float b0)
+void    tOnePole_setB0(tOnePole* const ft, Lfloat b0)
 {
     _tOnePole* f = *ft;
     f->b0 = b0;
 }
 
-void    tOnePole_setA1(tOnePole* const ft, float a1)
+void    tOnePole_setA1(tOnePole* const ft, Lfloat a1)
 {
     _tOnePole* f = *ft;
     if (a1 >= 1.0f)     a1 = 0.999999f;
     f->a1 = a1;
 }
 
-void    tOnePole_setPole(tOnePole* const ft, float thePole)
+void    tOnePole_setPole(tOnePole* const ft, Lfloat thePole)
 {
     _tOnePole* f = *ft;
     
@@ -134,7 +134,7 @@ void    tOnePole_setPole(tOnePole* const ft, float thePole)
     f->a1 = -thePole;
 }
 
-void        tOnePole_setFreq        (tOnePole* const ft, float freq)
+void        tOnePole_setFreq        (tOnePole* const ft, Lfloat freq)
 {
     _tOnePole* f = *ft;
     
@@ -144,7 +144,7 @@ void        tOnePole_setFreq        (tOnePole* const ft, float freq)
     f->a1 = 1.0f - f->b0;
 }
 
-void    tOnePole_setCoefficients(tOnePole* const ft, float b0, float a1)
+void    tOnePole_setCoefficients(tOnePole* const ft, Lfloat b0, Lfloat a1)
 {
     _tOnePole* f = *ft;
     if (a1 >= 1.0f)     a1 = 0.999999f;
@@ -152,18 +152,18 @@ void    tOnePole_setCoefficients(tOnePole* const ft, float b0, float a1)
     f->a1 = a1;
 }
 
-void    tOnePole_setGain(tOnePole* const ft, float gain)
+void    tOnePole_setGain(tOnePole* const ft, Lfloat gain)
 {
     _tOnePole* f = *ft;
     f->gain = gain;
 }
 
-float   tOnePole_tick(tOnePole* const ft, float input)
+Lfloat   tOnePole_tick(tOnePole* const ft, Lfloat input)
 {
     _tOnePole* f = *ft;
     
-    float in = input * f->gain;
-    float out = (f->b0 * in) + (f->a1 * f->lastOut);
+    Lfloat in = input * f->gain;
+    Lfloat out = (f->b0 * in) + (f->a1 * f->lastOut);
     
     f->lastIn = in;
     f->lastOut = out;
@@ -171,7 +171,7 @@ float   tOnePole_tick(tOnePole* const ft, float input)
     return out;
 }
 
-void tOnePole_setSampleRate(tOnePole* const ft, float sr)
+void tOnePole_setSampleRate(tOnePole* const ft, Lfloat sr)
 {
     _tOnePole* f = *ft;
     f->twoPiTimesInvSampleRate = (1.0f/sr) * TWO_PI;
@@ -210,12 +210,12 @@ void    tTwoPole_free  (tTwoPole* const ft)
     mpool_free((char*)f, f->mempool);
 }
 
-float   tTwoPole_tick(tTwoPole* const ft, float input)
+Lfloat   tTwoPole_tick(tTwoPole* const ft, Lfloat input)
 {
     _tTwoPole* f = *ft;
     
-    float in = input * f->gain;
-    float out = (f->b0 * in) - (f->a1 * f->lastOut[0]) - (f->a2 * f->lastOut[1]);
+    Lfloat in = input * f->gain;
+    Lfloat out = (f->b0 * in) - (f->a1 * f->lastOut[0]) - (f->a2 * f->lastOut[1]);
     
     f->lastOut[1] = f->lastOut[0];
     f->lastOut[0] = out;
@@ -223,30 +223,30 @@ float   tTwoPole_tick(tTwoPole* const ft, float input)
     return out;
 }
 
-void    tTwoPole_setB0(tTwoPole* const ft, float b0)
+void    tTwoPole_setB0(tTwoPole* const ft, Lfloat b0)
 {
     _tTwoPole* f = *ft;
     f->b0 = b0;
 }
 
-void    tTwoPole_setA1(tTwoPole* const ft, float a1)
+void    tTwoPole_setA1(tTwoPole* const ft, Lfloat a1)
 {
     _tTwoPole* f = *ft;
     f->a1 = a1;
 }
 
-void    tTwoPole_setA2(tTwoPole* const ft, float a2)
+void    tTwoPole_setA2(tTwoPole* const ft, Lfloat a2)
 {
     _tTwoPole* f = *ft;
     f->a2 = a2;
 }
 
-void    tTwoPole_setResonance(tTwoPole* const ft, float frequency, float radius, int normalize)
+void    tTwoPole_setResonance(tTwoPole* const ft, Lfloat frequency, Lfloat radius, int normalize)
 {
     _tTwoPole* f = *ft;
     
-    float sampleRate = f->sampleRate;
-    float twoPiTimesInvSampleRate = f->twoPiTimesInvSampleRate;
+    Lfloat sampleRate = f->sampleRate;
+    Lfloat twoPiTimesInvSampleRate = f->twoPiTimesInvSampleRate;
     
     if (frequency < 0.0f)   frequency = 0.0f;
     if (frequency > (sampleRate * 0.49f))   frequency = sampleRate * 0.49f;
@@ -263,13 +263,13 @@ void    tTwoPole_setResonance(tTwoPole* const ft, float frequency, float radius,
     if ( normalize )
     {
         // Normalize the filter gain ... not terribly efficient.
-        float real = 1 - radius + (f->a2 - radius) * cosf(2 * frequency * twoPiTimesInvSampleRate);
-        float imag = (f->a2 - radius) * sinf(2 * frequency * twoPiTimesInvSampleRate);
+        Lfloat real = 1 - radius + (f->a2 - radius) * cosf(2 * frequency * twoPiTimesInvSampleRate);
+        Lfloat imag = (f->a2 - radius) * sinf(2 * frequency * twoPiTimesInvSampleRate);
         f->b0 = sqrtf( powf(real, 2) + powf(imag, 2) );
     }
 }
 
-void    tTwoPole_setCoefficients(tTwoPole* const ft, float b0, float a1, float a2)
+void    tTwoPole_setCoefficients(tTwoPole* const ft, Lfloat b0, Lfloat a1, Lfloat a2)
 {
     _tTwoPole* f = *ft;
     f->b0 = b0;
@@ -277,13 +277,13 @@ void    tTwoPole_setCoefficients(tTwoPole* const ft, float b0, float a1, float a
     f->a2 = a2;
 }
 
-void    tTwoPole_setGain(tTwoPole* const ft, float gain)
+void    tTwoPole_setGain(tTwoPole* const ft, Lfloat gain)
 {
     _tTwoPole* f = *ft;
     f->gain = gain;
 }
 
-void     tTwoPole_setSampleRate (tTwoPole* const ft, float sr)
+void     tTwoPole_setSampleRate (tTwoPole* const ft, Lfloat sr)
 {
     _tTwoPole* f = *ft;
     
@@ -295,19 +295,19 @@ void     tTwoPole_setSampleRate (tTwoPole* const ft, float sr)
     if ( f->normalize )
     {
         // Normalize the filter gain ... not terribly efficient.
-        float real = 1 - f->radius + (f->a2 - f->radius) * cosf(2 * f->frequency * f->twoPiTimesInvSampleRate);
-        float imag = (f->a2 - f->radius) * sinf(2 * f->frequency * f->twoPiTimesInvSampleRate);
+        Lfloat real = 1 - f->radius + (f->a2 - f->radius) * cosf(2 * f->frequency * f->twoPiTimesInvSampleRate);
+        Lfloat imag = (f->a2 - f->radius) * sinf(2 * f->frequency * f->twoPiTimesInvSampleRate);
         f->b0 = sqrtf( powf(real, 2) + powf(imag, 2) );
     }
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OneZero Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tOneZero_init(tOneZero* const ft, float theZero, LEAF* const leaf)
+void    tOneZero_init(tOneZero* const ft, Lfloat theZero, LEAF* const leaf)
 {
     tOneZero_initToPool(ft, theZero, &leaf->mempool);
 }
 
-void    tOneZero_initToPool     (tOneZero* const ft, float theZero, tMempool* const mp)
+void    tOneZero_initToPool     (tOneZero* const ft, Lfloat theZero, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tOneZero* f = *ft = (_tOneZero*) mpool_alloc(sizeof(_tOneZero), m);
@@ -327,19 +327,19 @@ void    tOneZero_free   (tOneZero* const ft)
     mpool_free((char*)f, f->mempool);
 }
 
-float   tOneZero_tick(tOneZero* const ft, float input)
+Lfloat   tOneZero_tick(tOneZero* const ft, Lfloat input)
 {
     _tOneZero* f = *ft;
     
-    float in = input * f->gain;
-    float out = f->b1 * f->lastIn + f->b0 * in;
+    Lfloat in = input * f->gain;
+    Lfloat out = f->b1 * f->lastIn + f->b0 * in;
     
     f->lastIn = in;
     
     return out;
 }
 
-void    tOneZero_setZero(tOneZero* const ft, float theZero)
+void    tOneZero_setZero(tOneZero* const ft, Lfloat theZero)
 {
     _tOneZero* f = *ft;
     
@@ -350,33 +350,33 @@ void    tOneZero_setZero(tOneZero* const ft, float theZero)
     
 }
 
-void    tOneZero_setB0(tOneZero* const ft, float b0)
+void    tOneZero_setB0(tOneZero* const ft, Lfloat b0)
 {
     _tOneZero* f = *ft;
     
     f->b0 = b0;
 }
 
-void    tOneZero_setB1(tOneZero* const ft, float b1)
+void    tOneZero_setB1(tOneZero* const ft, Lfloat b1)
 {
     _tOneZero* f = *ft;
     f->b1 = b1;
 }
 
-void    tOneZero_setCoefficients(tOneZero* const ft, float b0, float b1)
+void    tOneZero_setCoefficients(tOneZero* const ft, Lfloat b0, Lfloat b1)
 {
     _tOneZero* f = *ft;
     f->b0 = b0;
     f->b1 = b1;
 }
 
-void    tOneZero_setGain(tOneZero *ft, float gain)
+void    tOneZero_setGain(tOneZero *ft, Lfloat gain)
 {
     _tOneZero* f = *ft;
     f->gain = gain;
 }
 
-float   tOneZero_getPhaseDelay(tOneZero* const ft, float frequency )
+Lfloat   tOneZero_getPhaseDelay(tOneZero* const ft, Lfloat frequency )
 {
     _tOneZero* f = *ft;
     
@@ -384,8 +384,8 @@ float   tOneZero_getPhaseDelay(tOneZero* const ft, float frequency )
     
     f->frequency = frequency;
     
-    float omegaT = 2 * PI * frequency * f->invSampleRate;
-    float real = 0.0, imag = 0.0;
+    Lfloat omegaT = 2 * PI * frequency * f->invSampleRate;
+    Lfloat real = 0.0, imag = 0.0;
     
     real += f->b0;
     
@@ -395,7 +395,7 @@ float   tOneZero_getPhaseDelay(tOneZero* const ft, float frequency )
     real *= f->gain;
     imag *= f->gain;
     
-    float phase = atan2f( imag, real );
+    Lfloat phase = atan2f( imag, real );
     
     real = 0.0; imag = 0.0;
     
@@ -406,7 +406,7 @@ float   tOneZero_getPhaseDelay(tOneZero* const ft, float frequency )
     return phase / omegaT;
 }
 
-void    tOneZero_setSampleRate  (tOneZero* const ft, float sr)
+void    tOneZero_setSampleRate  (tOneZero* const ft, Lfloat sr)
 {
     _tOneZero* f = *ft;
     f->invSampleRate = 1.0f/sr;
@@ -437,12 +437,12 @@ void    tTwoZero_free   (tTwoZero* const ft)
     mpool_free((char*)f, f->mempool);
 }
 
-float   tTwoZero_tick(tTwoZero* const ft, float input)
+Lfloat   tTwoZero_tick(tTwoZero* const ft, Lfloat input)
 {
     _tTwoZero* f = *ft;
     
-    float in = input * f->gain;
-    float out = f->b2 * f->lastIn[1] + f->b1 * f->lastIn[0] + f->b0 * in;
+    Lfloat in = input * f->gain;
+    Lfloat out = f->b2 * f->lastIn[1] + f->b1 * f->lastIn[0] + f->b0 * in;
     
     f->lastIn[1] = f->lastIn[0];
     f->lastIn[0] = in;
@@ -450,7 +450,7 @@ float   tTwoZero_tick(tTwoZero* const ft, float input)
     return out;
 }
 
-void    tTwoZero_setNotch(tTwoZero* const ft, float freq, float radius)
+void    tTwoZero_setNotch(tTwoZero* const ft, Lfloat freq, Lfloat radius)
 {
     _tTwoZero* f = *ft;
     
@@ -474,19 +474,19 @@ void    tTwoZero_setNotch(tTwoZero* const ft, float freq, float radius)
     
 }
 
-void    tTwoZero_setB0(tTwoZero* const ft, float b0)
+void    tTwoZero_setB0(tTwoZero* const ft, Lfloat b0)
 {
     _tTwoZero* f = *ft;
     f->b0 = b0;
 }
 
-void    tTwoZero_setB1(tTwoZero* const ft, float b1)
+void    tTwoZero_setB1(tTwoZero* const ft, Lfloat b1)
 {
     _tTwoZero* f = *ft;
     f->b1 = b1;
 }
 
-void    tTwoZero_setCoefficients(tTwoZero* const ft, float b0, float b1, float b2)
+void    tTwoZero_setCoefficients(tTwoZero* const ft, Lfloat b0, Lfloat b1, Lfloat b2)
 {
     _tTwoZero* f = *ft;
     f->b0 = b0;
@@ -494,13 +494,13 @@ void    tTwoZero_setCoefficients(tTwoZero* const ft, float b0, float b1, float b
     f->b2 = b2;
 }
 
-void    tTwoZero_setGain(tTwoZero* const ft, float gain)
+void    tTwoZero_setGain(tTwoZero* const ft, Lfloat gain)
 {
     _tTwoZero* f = *ft;
     f->gain = gain;
 }
 
-void tTwoZero_setSampleRate(tTwoZero* const ft, float sr)
+void tTwoZero_setSampleRate(tTwoZero* const ft, Lfloat sr)
 {
     _tTwoZero* f = *ft;
     
@@ -534,19 +534,19 @@ void    tPoleZero_free      (tPoleZero* const pzf)
     mpool_free((char*)f, f->mempool);
 }
 
-void    tPoleZero_setB0(tPoleZero* const pzf, float b0)
+void    tPoleZero_setB0(tPoleZero* const pzf, Lfloat b0)
 {
     _tPoleZero* f = *pzf;
     f->b0 = b0;
 }
 
-void    tPoleZero_setB1(tPoleZero* const pzf, float b1)
+void    tPoleZero_setB1(tPoleZero* const pzf, Lfloat b1)
 {
     _tPoleZero* f = *pzf;
     f->b1 = b1;
 }
 
-void    tPoleZero_setA1(tPoleZero* const pzf, float a1)
+void    tPoleZero_setA1(tPoleZero* const pzf, Lfloat a1)
 {
     _tPoleZero* f = *pzf;
     
@@ -558,7 +558,7 @@ void    tPoleZero_setA1(tPoleZero* const pzf, float a1)
     f->a1 = a1;
 }
 
-void    tPoleZero_setCoefficients(tPoleZero* const pzf, float b0, float b1, float a1)
+void    tPoleZero_setCoefficients(tPoleZero* const pzf, Lfloat b0, Lfloat b1, Lfloat a1)
 {
     _tPoleZero* f = *pzf;
     
@@ -572,7 +572,7 @@ void    tPoleZero_setCoefficients(tPoleZero* const pzf, float b0, float b1, floa
     f->a1 = a1;
 }
 
-void    tPoleZero_setAllpass(tPoleZero* const pzf, float coeff)
+void    tPoleZero_setAllpass(tPoleZero* const pzf, Lfloat coeff)
 {
     _tPoleZero* f = *pzf;
     
@@ -587,7 +587,7 @@ void    tPoleZero_setAllpass(tPoleZero* const pzf, float coeff)
     f->a1 = coeff;
 }
 
-void    tPoleZero_setBlockZero(tPoleZero* const pzf, float thePole)
+void    tPoleZero_setBlockZero(tPoleZero* const pzf, Lfloat thePole)
 {
     _tPoleZero* f = *pzf;
     
@@ -602,18 +602,18 @@ void    tPoleZero_setBlockZero(tPoleZero* const pzf, float thePole)
     f->a1 = -thePole;
 }
 
-void    tPoleZero_setGain(tPoleZero* const pzf, float gain)
+void    tPoleZero_setGain(tPoleZero* const pzf, Lfloat gain)
 {
     _tPoleZero* f = *pzf;
     f->gain = gain;
 }
 
-float   tPoleZero_tick(tPoleZero* const pzf, float input)
+Lfloat   tPoleZero_tick(tPoleZero* const pzf, Lfloat input)
 {
     _tPoleZero* f = *pzf;
     
-    float in = input * f->gain;
-    float out = (f->b0 * in) + (f->b1 * f->lastIn) - (f->a1 * f->lastOut);
+    Lfloat in = input * f->gain;
+    Lfloat out = (f->b0 * in) + (f->b1 * f->lastIn) - (f->a1 * f->lastOut);
     
     f->lastIn = in;
     f->lastOut = out;
@@ -653,12 +653,12 @@ void    tBiQuad_free   (tBiQuad* const ft)
     mpool_free((char*)f, f->mempool);
 }
 
-float   tBiQuad_tick(tBiQuad* const ft, float input)
+Lfloat   tBiQuad_tick(tBiQuad* const ft, Lfloat input)
 {
     _tBiQuad* f = *ft;
     
-    float in = input * f->gain;
-    float out = f->b0 * in + f->b1 * f->lastIn[0] + f->b2 * f->lastIn[1];
+    Lfloat in = input * f->gain;
+    Lfloat out = f->b0 * in + f->b1 * f->lastIn[0] + f->b2 * f->lastIn[1];
     out -= f->a2 * f->lastOut[1] + f->a1 * f->lastOut[0];
     
     f->lastIn[1] = f->lastIn[0];
@@ -670,7 +670,7 @@ float   tBiQuad_tick(tBiQuad* const ft, float input)
     return out;
 }
 
-void    tBiQuad_setResonance(tBiQuad* const ft, float freq, float radius, int normalize)
+void    tBiQuad_setResonance(tBiQuad* const ft, Lfloat freq, Lfloat radius, int normalize)
 {
     _tBiQuad* f = *ft;
     
@@ -695,7 +695,7 @@ void    tBiQuad_setResonance(tBiQuad* const ft, float freq, float radius, int no
     }
 }
 
-void    tBiQuad_setNotch(tBiQuad* const ft, float freq, float radius)
+void    tBiQuad_setNotch(tBiQuad* const ft, Lfloat freq, Lfloat radius)
 {
     _tBiQuad* f = *ft;
     
@@ -718,37 +718,37 @@ void tBiQuad_setEqualGainZeros(tBiQuad* const ft)
     f->b2 = -1.0f;
 }
 
-void    tBiQuad_setB0(tBiQuad* const ft, float b0)
+void    tBiQuad_setB0(tBiQuad* const ft, Lfloat b0)
 {
     _tBiQuad* f = *ft;
     f->b0 = b0;
 }
 
-void    tBiQuad_setB1(tBiQuad* const ft, float b1)
+void    tBiQuad_setB1(tBiQuad* const ft, Lfloat b1)
 {
     _tBiQuad* f = *ft;
     f->b1 = b1;
 }
 
-void    tBiQuad_setB2(tBiQuad* const ft, float b2)
+void    tBiQuad_setB2(tBiQuad* const ft, Lfloat b2)
 {
     _tBiQuad* f = *ft;
     f->b2 = b2;
 }
 
-void    tBiQuad_setA1(tBiQuad* const ft, float a1)
+void    tBiQuad_setA1(tBiQuad* const ft, Lfloat a1)
 {
     _tBiQuad* f = *ft;
     f->a1 = a1;
 }
 
-void    tBiQuad_setA2(tBiQuad* const ft, float a2)
+void    tBiQuad_setA2(tBiQuad* const ft, Lfloat a2)
 {
     _tBiQuad* f = *ft;
     f->a2 = a2;
 }
 
-void    tBiQuad_setCoefficients(tBiQuad* const ft, float b0, float b1, float b2, float a1, float a2)
+void    tBiQuad_setCoefficients(tBiQuad* const ft, Lfloat b0, Lfloat b1, Lfloat b2, Lfloat a1, Lfloat a2)
 {
     _tBiQuad* f = *ft;
     f->b0 = b0;
@@ -758,13 +758,13 @@ void    tBiQuad_setCoefficients(tBiQuad* const ft, float b0, float b1, float b2,
     f->a2 = a2;
 }
 
-void    tBiQuad_setGain(tBiQuad* const ft, float gain)
+void    tBiQuad_setGain(tBiQuad* const ft, Lfloat gain)
 {
     _tBiQuad* f = *ft;
     f->gain = gain;
 }
 
-void    tBiQuad_setSampleRate(tBiQuad* const ft, float sr)
+void    tBiQuad_setSampleRate(tBiQuad* const ft, Lfloat sr)
 {
     _tBiQuad* f = *ft;
     
@@ -782,9 +782,9 @@ void    tBiQuad_setSampleRate(tBiQuad* const ft, float sr)
     }
 }
 
-// Less efficient, more accurate version of SVF, in which cutoff frequency is taken as floating point Hz value and tanf
+// Less efficient, more accurate version of SVF, in which cutoff frequency is taken as Lfloating point Hz value and tanf
 // is calculated when frequency changes.
-void tSVF_init(tSVF* const svff, SVFType type, float freq, float Q, LEAF* const leaf)
+void tSVF_init(tSVF* const svff, SVFType type, Lfloat freq, Lfloat Q, LEAF* const leaf)
 {
     tSVF_initToPool     (svff, type, freq, Q, &leaf->mempool);
     // or maybe this?
@@ -793,7 +793,7 @@ void tSVF_init(tSVF* const svff, SVFType type, float freq, float Q, LEAF* const 
      */
 }
 
-void    tSVF_initToPool     (tSVF* const svff, SVFType type, float freq, float Q, tMempool* const mp)
+void    tSVF_initToPool     (tSVF* const svff, SVFType type, Lfloat freq, Lfloat Q, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSVF* svf = *svff = (_tSVF*) mpool_alloc(sizeof(_tSVF), m);
@@ -867,11 +867,11 @@ void    tSVF_free   (tSVF* const svff)
     mpool_free((char*)svf, svf->mempool);
 }
 
-float   tSVF_tick(tSVF* const svff, float v0)
+Lfloat   tSVF_tick(tSVF* const svff, Lfloat v0)
 {
     _tSVF* svf = *svff;
     
-    float v1,v2,v3;
+    Lfloat v1,v2,v3;
     v3 = v0 - svf->ic2eq;
     v1 = (svf->a1 * svf->ic1eq) + (svf->a2 * v3);
     v2 = svf->ic2eq + (svf->a2 * svf->ic1eq) + (svf->a3 * v3);
@@ -881,7 +881,7 @@ float   tSVF_tick(tSVF* const svff, float v0)
     return (v0 * svf->cH) + (v1 * svf->cB) + (svf->k * v1 * svf->cBK) + (v2 * svf->cL);
 }
 
-void     tSVF_setFreq(tSVF* const svff, float freq)
+void     tSVF_setFreq(tSVF* const svff, Lfloat freq)
 {
     _tSVF* svf = *svff;
     
@@ -892,20 +892,19 @@ void     tSVF_setFreq(tSVF* const svff, float freq)
     svf->a3 = svf->g * svf->a2;
 }
 
-//expects cutoff as a number from 0-4095 based on midinote lookup table
-void    tSVF_setFreqFast     (tSVF* const vf, float cutoff)
+void    tSVF_setFreqFast     (tSVF* const vf, Lfloat cutoff)
 {
 	_tSVF* svf = *vf;
     int intVer = (int)cutoff;
-    float floatVer = cutoff - (float)intVer;
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
 
-    svf->g = (__leaf_table_filtertan[intVer] * (1.0f - floatVer)) + (__leaf_table_filtertan[intVer+1] * floatVer);
+    svf->g = (__leaf_table_filtertan[intVer] * (1.0f - LfloatVer)) + (__leaf_table_filtertan[intVer+1] * LfloatVer);
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;
 }
 
-void    tSVF_setQ(tSVF* const svff, float Q)
+void     tSVF_setQ(tSVF* const svff, Lfloat Q)
 {
     _tSVF* svf = *svff;
     svf->Q = Q;
@@ -916,7 +915,7 @@ void    tSVF_setQ(tSVF* const svff, float Q)
     svf->a3 = svf->g * svf->a2;
 }
 
-void    tSVF_setFreqAndQ(tSVF* const svff, float freq, float Q)
+void    tSVF_setFreqAndQ(tSVF* const svff, Lfloat freq, Lfloat Q)
 {
     _tSVF* svf = *svff;
     
@@ -928,7 +927,7 @@ void    tSVF_setFreqAndQ(tSVF* const svff, float freq, float Q)
     svf->a3 = svf->g * svf->a2;
 }
 
-void    tSVF_setSampleRate  (tSVF* const svff, float sr)
+void    tSVF_setSampleRate  (tSVF* const svff, Lfloat sr)
 {
     _tSVF* svf = *svff;
     svf->sampleRate = sr;
@@ -938,12 +937,12 @@ void    tSVF_setSampleRate  (tSVF* const svff, float sr)
 
 #if LEAF_INCLUDE_FILTERTAN_TABLE
 // Efficient version of tSVF where frequency is set based on 12-bit integer input for lookup in tanh wavetable.
-void   tEfficientSVF_init(tEfficientSVF* const svff, SVFType type, uint16_t input, float Q, LEAF* const leaf)
+void   tEfficientSVF_init(tEfficientSVF* const svff, SVFType type, uint16_t input, Lfloat Q, LEAF* const leaf)
 {
     tEfficientSVF_initToPool(svff, type, input, Q, &leaf->mempool);
 }
 
-void    tEfficientSVF_initToPool    (tEfficientSVF* const svff, SVFType type, uint16_t input, float Q, tMempool* const mp)
+void    tEfficientSVF_initToPool    (tEfficientSVF* const svff, SVFType type, uint16_t input, Lfloat Q, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tEfficientSVF* svf = *svff = (_tEfficientSVF*) mpool_alloc(sizeof(_tEfficientSVF), m);
@@ -967,11 +966,11 @@ void    tEfficientSVF_free (tEfficientSVF* const svff)
     mpool_free((char*)svf, svf->mempool);
 }
 
-float   tEfficientSVF_tick(tEfficientSVF* const svff, float v0)
+Lfloat   tEfficientSVF_tick(tEfficientSVF* const svff, Lfloat v0)
 {
     _tEfficientSVF* svf = *svff;
     
-    float v1,v2,v3;
+    Lfloat v1,v2,v3;
     v3 = v0 - svf->ic2eq;
     v1 = (svf->a1 * svf->ic1eq) + (svf->a2 * v3);
     v2 = svf->ic2eq + (svf->a2 * svf->ic1eq) + (svf->a3 * v3);
@@ -997,7 +996,7 @@ void     tEfficientSVF_setFreq(tEfficientSVF* const svff, uint16_t input)
     svf->a3 = svf->g * svf->a2;
 }
 
-void     tEfficientSVF_setQ(tEfficientSVF* const svff, float Q)
+void     tEfficientSVF_setQ(tEfficientSVF* const svff, Lfloat Q)
 {
     _tEfficientSVF* svf = *svff;
     
@@ -1007,7 +1006,7 @@ void     tEfficientSVF_setQ(tEfficientSVF* const svff, float Q)
     svf->a3 = svf->g * svf->a2;
 }
 
-void    tEfficientSVF_setFreqAndQ   (tEfficientSVF* const svff, uint16_t input, float Q)
+void    tEfficientSVF_setFreqAndQ   (tEfficientSVF* const svff, uint16_t input, Lfloat Q)
 {
     _tEfficientSVF* svf = *svff;
     
@@ -1020,12 +1019,12 @@ void    tEfficientSVF_setFreqAndQ   (tEfficientSVF* const svff, uint16_t input, 
 #endif // LEAF_INCLUDE_FILTERTAN_TABLE
 
 /* Highpass */
-void tHighpass_init(tHighpass* const ft, float freq, LEAF* const leaf)
+void tHighpass_init(tHighpass* const ft, Lfloat freq, LEAF* const leaf)
 {
     tHighpass_initToPool(ft, freq, &leaf->mempool);
 }
 
-void tHighpass_initToPool    (tHighpass* const ft, float freq, tMempool* const mp)
+void tHighpass_initToPool    (tHighpass* const ft, Lfloat freq, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tHighpass* f = *ft = (_tHighpass*) mpool_calloc(sizeof(_tHighpass), m);
@@ -1046,7 +1045,7 @@ void tHighpass_free  (tHighpass* const ft)
     mpool_free((char*)f, f->mempool);
 }
 
-void tHighpass_setFreq(tHighpass* const ft, float freq)
+void tHighpass_setFreq(tHighpass* const ft, Lfloat freq)
 {
     _tHighpass* f = *ft;
     
@@ -1054,14 +1053,14 @@ void tHighpass_setFreq(tHighpass* const ft, float freq)
     f->R = (1.0f - (freq * f->twoPiTimesInvSampleRate));
 }
 
-float tHighpass_getFreq(tHighpass* const ft)
+Lfloat tHighpass_getFreq(tHighpass* const ft)
 {
     _tHighpass* f = *ft;
     return f->frequency;
 }
 
 // From JOS DC Blocker
-float tHighpass_tick(tHighpass* const ft, float x)
+Lfloat tHighpass_tick(tHighpass* const ft, Lfloat x)
 {
     _tHighpass* f = *ft;
     f->ys = x - f->xs + f->R * f->ys;
@@ -1069,19 +1068,19 @@ float tHighpass_tick(tHighpass* const ft, float x)
     return f->ys;
 }
 
-void tHighpass_setSampleRate(tHighpass* const ft, float sr)
+void tHighpass_setSampleRate(tHighpass* const ft, Lfloat sr)
 {
     _tHighpass* f = *ft;
     f->twoPiTimesInvSampleRate = TWO_PI * (1.0f/sr);
     f->R = (1.0f - (f->frequency * f->twoPiTimesInvSampleRate));
 }
 
-void tButterworth_init(tButterworth* const ft, int order, float f1, float f2, LEAF* const leaf)
+void tButterworth_init(tButterworth* const ft, int order, Lfloat f1, Lfloat f2, LEAF* const leaf)
 {
     tButterworth_initToPool(ft, order, f1, f2, &leaf->mempool);
 }
 
-void    tButterworth_initToPool     (tButterworth* const ft, int order, float f1, float f2, tMempool* const mp)
+void    tButterworth_initToPool     (tButterworth* const ft, int order, Lfloat f1, Lfloat f2, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tButterworth* f = *ft = (_tButterworth*) mpool_alloc(sizeof(_tButterworth), m);
@@ -1117,7 +1116,7 @@ void    tButterworth_free   (tButterworth* const ft)
     mpool_free((char*)f, f->mempool);
 }
 
-float tButterworth_tick(tButterworth* const ft, float samp)
+Lfloat tButterworth_tick(tButterworth* const ft, Lfloat samp)
 {
     _tButterworth* f = *ft;
     
@@ -1127,7 +1126,7 @@ float tButterworth_tick(tButterworth* const ft, float samp)
     return samp;
 }
 
-void tButterworth_setF1(tButterworth* const ft, float f1)
+void tButterworth_setF1(tButterworth* const ft, Lfloat f1)
 {
     _tButterworth* f = *ft;
     
@@ -1137,7 +1136,7 @@ void tButterworth_setF1(tButterworth* const ft, float f1)
     for (int i = 0; i < f->order; ++i) tSVF_setFreq(&f->svf[i], f1);
 }
 
-void tButterworth_setF2(tButterworth* const ft, float f2)
+void tButterworth_setF2(tButterworth* const ft, Lfloat f2)
 {
     _tButterworth* f = *ft;
     
@@ -1149,13 +1148,13 @@ void tButterworth_setF2(tButterworth* const ft, float f2)
     for (int i = 0; i < f->order; ++i) tSVF_setFreq(&f->svf[i+o], f2);
 }
 
-void tButterworth_setFreqs(tButterworth* const ft, float f1, float f2)
+void tButterworth_setFreqs(tButterworth* const ft, Lfloat f1, Lfloat f2)
 {
     tButterworth_setF1(ft, f1);
     tButterworth_setF2(ft, f2);
 }
 
-void    tButterworth_setSampleRate  (tButterworth* const ft, float sr)
+void    tButterworth_setSampleRate  (tButterworth* const ft, Lfloat sr)
 {
     _tButterworth* f = *ft;
     for (int i = 0; i < f->numSVF; ++i) tSVF_setSampleRate(&f->svf[i], sr);
@@ -1163,12 +1162,12 @@ void    tButterworth_setSampleRate  (tButterworth* const ft, float sr)
 
 //================================================================================
 
-void    tFIR_init(tFIR* const firf, float* coeffs, int numTaps, LEAF* const leaf)
+void    tFIR_init(tFIR* const firf, Lfloat* coeffs, int numTaps, LEAF* const leaf)
 {
     tFIR_initToPool(firf, coeffs, numTaps, &leaf->mempool);
 }
 
-void    tFIR_initToPool     (tFIR* const firf, float* coeffs, int numTaps, tMempool* const mp)
+void    tFIR_initToPool     (tFIR* const firf, Lfloat* coeffs, int numTaps, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tFIR* fir = *firf = (_tFIR*) mpool_alloc(sizeof(_tFIR), m);
@@ -1176,7 +1175,7 @@ void    tFIR_initToPool     (tFIR* const firf, float* coeffs, int numTaps, tMemp
     
     fir->numTaps = numTaps;
     fir->coeff = coeffs;
-    fir->past = (float*) mpool_alloc(sizeof(float) * fir->numTaps, m);
+    fir->past = (Lfloat*) mpool_alloc(sizeof(Lfloat) * fir->numTaps, m);
     for (int i = 0; i < fir->numTaps; ++i) fir->past[i] = 0.0f;
 }
 
@@ -1188,12 +1187,12 @@ void    tFIR_free   (tFIR* const firf)
     mpool_free((char*)fir, fir->mempool);
 }
 
-float   tFIR_tick(tFIR* const firf, float input)
+Lfloat   tFIR_tick(tFIR* const firf, Lfloat input)
 {
     _tFIR* fir = *firf;
     
     fir->past[0] = input;
-    float y = 0.0f;
+    Lfloat y = 0.0f;
     for (int i = 0; i < fir->numTaps; ++i) y += fir->past[i]*fir->coeff[i];
     for (int i = fir->numTaps-1; i > 0; --i) fir->past[i] = fir->past[i-1];
     return y;
@@ -1220,7 +1219,7 @@ void    tMedianFilter_initToPool     (tMedianFilter* const mf, int size, tMempoo
     f->middlePosition = size / 2;
     f->last = size - 1;
     f->pos = -1;
-    f->val = (float*) mpool_alloc(sizeof(float) * size, m);
+    f->val = (Lfloat*) mpool_alloc(sizeof(Lfloat) * size, m);
     f->age = (int*) mpool_alloc(sizeof(int) * size, m);
     for (int i = 0; i < f->size; ++i)
     {
@@ -1238,7 +1237,7 @@ void    tMedianFilter_free   (tMedianFilter* const mf)
     mpool_free((char*)f, f->mempool);
 }
 
-float   tMedianFilter_tick           (tMedianFilter* const mf, float input)
+Lfloat   tMedianFilter_tick           (tMedianFilter* const mf, Lfloat input)
 {
     _tMedianFilter* f = *mf;
     
@@ -1254,7 +1253,7 @@ float   tMedianFilter_tick           (tMedianFilter* const mf, float input)
     }
     
     while( f->pos!=0 ) {
-        float test = f->val[f->pos-1];
+        Lfloat test = f->val[f->pos-1];
         if(input < test) {
             f->val[f->pos]=test;
             f->age[f->pos]=f->age[f->pos-1];
@@ -1263,7 +1262,7 @@ float   tMedianFilter_tick           (tMedianFilter* const mf, float input)
     }
     
     while(f->pos != f->last) {
-        float test = f->val[f->pos+1];
+        Lfloat test = f->val[f->pos+1];
         if( input > test) {
             f->val[f->pos] = test;
             f->age[f->pos] = f->age[f->pos+1];
@@ -1279,12 +1278,12 @@ float   tMedianFilter_tick           (tMedianFilter* const mf, float input)
 
 /////
 
-void    tVZFilter_init  (tVZFilter* const vf, VZFilterType type, float freq, float bandWidth, LEAF* const leaf)
+void    tVZFilter_init  (tVZFilter* const vf, VZFilterType type, Lfloat freq, Lfloat bandWidth, LEAF* const leaf)
 {
     tVZFilter_initToPool(vf, type, freq, bandWidth, &leaf->mempool);
 }
 
-void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, float freq, float bandWidth, tMempool* const mp)
+void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, Lfloat freq, Lfloat bandWidth, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tVZFilter* f = *vf = (_tVZFilter*) mpool_alloc(sizeof(_tVZFilter), m);
@@ -1317,12 +1316,12 @@ void    tVZFilter_free   (tVZFilter* const vf)
     mpool_free((char*)f, f->mempool);
 }
 
-float   tVZFilter_tick              (tVZFilter* const vf, float in)
+Lfloat   tVZFilter_tick              (tVZFilter* const vf, Lfloat in)
 {
     _tVZFilter* f = *vf;
     
     
-    float yL, yB, yH, v1, v2;
+    Lfloat yL, yB, yH, v1, v2;
     
     // compute highpass output via Eq. 5.1:
     //yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
@@ -1352,11 +1351,11 @@ float   tVZFilter_tick              (tVZFilter* const vf, float in)
     return f->cL*yL + f->cB*yB + f->cH*yH;
 }
 
-float   tVZFilter_tickEfficient             (tVZFilter* const vf, float in)
+Lfloat   tVZFilter_tickEfficient             (tVZFilter* const vf, Lfloat in)
 {
     _tVZFilter* f = *vf;
     
-    float yL, yB, yH, v1, v2;
+    Lfloat yL, yB, yH, v1, v2;
     
     // compute highpass output via Eq. 5.1:
     //yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
@@ -1429,9 +1428,9 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
             break;
         case Bell:
         {
-            float fl = f->fc*powf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
-            float wl = tanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
-            float r  = f->g/wl;
+            Lfloat fl = f->fc*powf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+            Lfloat wl = tanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+            Lfloat r  = f->g/wl;
             r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
             // warped upper bandedge, wc the center
             f->R2 = 2.0f*sqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
@@ -1440,9 +1439,9 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
             break;
         case Lowshelf:
         {
-            float A = sqrtf(f->G);
+            Lfloat A = sqrtf(f->G);
             f->g /= sqrtf(A);               // scale SVF-cutoff frequency for shelvers
-            f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f); //if using bandwidth instead of Q
+            //f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
             //f->R2 = f->invQ;
             f->cL = f->G; f->cB = f->R2*f->G; f->cH = 1.0f;
 
@@ -1450,10 +1449,9 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
             break;
         case Highshelf:
         {
-            float A = sqrtf(f->G);
+            Lfloat A = sqrtf(f->G);
             f->g *= sqrtf(A);               // scale SVF-cutoff frequency for shelvers
-            f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f); //if using bandwidth instead of Q
-            //f->R2 = f->invQ;
+            //f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
             f->cL = 1.0f; f->cB = f->R2*f->G; f->cH = f->G;
         }
             break;
@@ -1470,9 +1468,9 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
             //f->R2 = 2.0f*tVZFilter_BandwidthToREfficientBP(vf, f->B);
             
             //f->R2 = f->invG;
-            //float x = f->m-1.0f;
+            //Lfloat x = f->m-1.0f;
             
-            float x  = (2.0f*f->m-1.0f);
+            Lfloat x  = (2.0f*f->m-1.0f);
             //f->cL = maximum(0.0f,(1.0f - (f->m * 2.0f)));
             //f->cH = maximum(0.0f,(f->m * 2.0f) - 1.0f);
             //f->cB = maximum(0.0f, 1.0f - f->cH - f->cL);
@@ -1486,7 +1484,7 @@ void   tVZFilter_calcCoeffs           (tVZFilter* const vf)
             
             // this scaling ensures constant magnitude at the cutoff point (we divide the coefficients by
             // the magnitude response value at the cutoff frequency and scale back by the gain):
-            float s = f->G * fastsqrtf((f->R2*f->R2) / (f->cL*f->cL + f->cB*f->cB + f->cH*f->cH - 2.0f*f->cL*f->cH)) * 2.0f;
+            Lfloat s = f->G * fastsqrtf((f->R2*f->R2) / (f->cL*f->cL + f->cB*f->cB + f->cH*f->cH - 2.0f*f->cL*f->cH)) * 2.0f;
             f->cL *= s; f->cB *= s; f->cH *= s;
         }
         break;
@@ -1505,14 +1503,14 @@ void   tVZFilter_calcCoeffsEfficientBP           (tVZFilter* const vf)
     f->h = 1.0f / (1.0f + f->R2*f->g + f->g*f->g);  // factor for feedback precomputation
 }
 
-void   tVZFilter_setBandwidth               (tVZFilter* const vf, float B)
+void   tVZFilter_setBandwidth               (tVZFilter* const vf, Lfloat B)
 {
     _tVZFilter* f = *vf;
     f->B = LEAF_clip(0.0f, B, 100.0f);
     f->R2 = 2.0f*tVZFilter_BandwidthToR(vf, f->B);
     tVZFilter_calcCoeffs(vf);
 }
-void   tVZFilter_setFreq           (tVZFilter* const vf, float freq)
+void   tVZFilter_setFreq           (tVZFilter* const vf, Lfloat freq)
 {
     _tVZFilter* f = *vf;
     
@@ -1520,12 +1518,12 @@ void   tVZFilter_setFreq           (tVZFilter* const vf, float freq)
     tVZFilter_calcCoeffs(vf);
 }
 
-void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
+void    tVZFilter_setFreqFast     (tVZFilter* const vf, Lfloat cutoff)
 {
 	 _tVZFilter* f = *vf;
     int intVer = (int)cutoff;
-    float floatVer = cutoff - (float)intVer;
-    f->g = (__leaf_table_filtertan[intVer] * (1.0f - floatVer)) + (__leaf_table_filtertan[intVer+1] * floatVer);
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->g = (__leaf_table_filtertan[intVer] * (1.0f - LfloatVer)) + (__leaf_table_filtertan[intVer+1] * LfloatVer);
     
     switch( f->type )
     {
@@ -1577,9 +1575,9 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
             break;
         case Bell:
         {
-            float fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
-            float wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
-            float r  = f->g/wl;
+            Lfloat fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+            Lfloat wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+            Lfloat r  = f->g/wl;
             r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
             // warped upper bandedge, wc the center
             f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
@@ -1588,10 +1586,9 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
             break;
         case Lowshelf:
         {
-            float A = fastsqrtf(f->G);
+            Lfloat A = fastsqrtf(f->G);
             f->g /= fastsqrtf(A);               // scale SVF-cutoff frequency for shelvers
-            //f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f); //if using bandwidth instead of Q
-            f->R2 = 2.0f*sinhf(f->B*0.346573590279973f); //if using bandwidth instead of Q
+            //f->R2 = 2*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
             //f->R2 = f->invQ;
             f->cL = f->G; f->cB = f->R2*f->G; f->cH = 1.0f;
 
@@ -1599,11 +1596,9 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
             break;
         case Highshelf:
         {
-            float A = fastsqrtf(f->G);
+            Lfloat A = fastsqrtf(f->G);
             f->g *= fastsqrtf(A);               // scale SVF-cutoff frequency for shelvers
-            //f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f); //if using bandwidth instead of Q
-            f->R2 = 2.0f*sinhf(f->B*0.346573590279973f); //if using bandwidth instead of Q
-            //f->R2 = f->invQ;
+            //f->R2 = 2.0f*sinhf(f->B*logf(2.0f)*0.5f); if using bandwidth instead of Q
             f->cL = 1.0f; f->cB = f->R2*f->G; f->cH = f->G;
         }
             break;
@@ -1620,9 +1615,9 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
             //f->R2 = 2.0f*tVZFilter_BandwidthToREfficientBP(vf, f->B);
 
             //f->R2 = f->invG;
-            //float x = f->m-1.0f;
+            //Lfloat x = f->m-1.0f;
 
-            float x  = (2.0f*f->m-1.0f);
+            Lfloat x  = (2.0f*f->m-1.0f);
             //f->cL = maximum(0.0f,(1.0f - (f->m * 2.0f)));
             //f->cH = maximum(0.0f,(f->m * 2.0f) - 1.0f);
             //f->cB = maximum(0.0f, 1.0f - f->cH - f->cL);
@@ -1636,7 +1631,7 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
 
             // this scaling ensures constant magnitude at the cutoff point (we divide the coefficients by
             // the magnitude response value at the cutoff frequency and scale back by the gain):
-            float s = f->G * fastsqrtf((f->R2*f->R2) / (f->cL*f->cL + f->cB*f->cB + f->cH*f->cH - 2.0f*f->cL*f->cH)) * 2.0f;
+            Lfloat s = f->G * fastsqrtf((f->R2*f->R2) / (f->cL*f->cL + f->cB*f->cB + f->cH*f->cH - 2.0f*f->cL*f->cH)) * 2.0f;
             f->cL *= s; f->cB *= s; f->cH *= s;
         }
         break;
@@ -1647,7 +1642,7 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, float cutoff)
 }
 
 
-void   tVZFilter_setFreqAndBandwidth           (tVZFilter* const vf, float freq, float bw)
+void   tVZFilter_setFreqAndBandwidth           (tVZFilter* const vf, Lfloat freq, Lfloat bw)
 {
     _tVZFilter* f = *vf;
     
@@ -1656,7 +1651,7 @@ void   tVZFilter_setFreqAndBandwidth           (tVZFilter* const vf, float freq,
     tVZFilter_calcCoeffs(vf);
 }
 
-void   tVZFilter_setFreqAndBandwidthEfficientBP           (tVZFilter* const vf, float freq, float bw)
+void   tVZFilter_setFreqAndBandwidthEfficientBP           (tVZFilter* const vf, Lfloat freq, Lfloat bw)
 {
     _tVZFilter* f = *vf;
     
@@ -1665,7 +1660,7 @@ void   tVZFilter_setFreqAndBandwidthEfficientBP           (tVZFilter* const vf, 
     tVZFilter_calcCoeffsEfficientBP(vf);
 }
 
-void   tVZFilter_setGain                (tVZFilter* const vf, float gain)
+void   tVZFilter_setGain                (tVZFilter* const vf, Lfloat gain)
 {
     _tVZFilter* f = *vf;
     f->G = LEAF_clip(0.000001f, gain, 4000.0f);
@@ -1674,7 +1669,7 @@ void   tVZFilter_setGain                (tVZFilter* const vf, float gain)
 }
 
 
-void   tVZFilter_setResonance                (tVZFilter* const vf, float res)
+void   tVZFilter_setResonance                (tVZFilter* const vf, Lfloat res)
 {
     _tVZFilter* f = *vf;
     f->Q = LEAF_clip(0.01f, res, 100.0f);
@@ -1683,7 +1678,7 @@ void   tVZFilter_setResonance                (tVZFilter* const vf, float res)
 }
 
 
-void tVZFilter_setFrequencyAndResonance (tVZFilter* const vf, float freq, float res)
+void tVZFilter_setFrequencyAndResonance (tVZFilter* const vf, Lfloat freq, Lfloat res)
 {
     _tVZFilter* f = *vf;
     f->fc = LEAF_clip(0.1f, freq, 0.4f * f->sampleRate);
@@ -1692,7 +1687,7 @@ void tVZFilter_setFrequencyAndResonance (tVZFilter* const vf, float freq, float 
     tVZFilter_calcCoeffs(vf);
 }
 
-void tVZFilter_setFrequencyAndResonanceAndGain (tVZFilter* const vf, float freq, float res, float gain)
+void tVZFilter_setFrequencyAndResonanceAndGain (tVZFilter* const vf, Lfloat freq, Lfloat res, Lfloat gain)
 {
     _tVZFilter* f = *vf;
     f->fc = LEAF_clip(0.1f, freq, 0.4f * f->sampleRate);
@@ -1703,7 +1698,7 @@ void tVZFilter_setFrequencyAndResonanceAndGain (tVZFilter* const vf, float freq,
     tVZFilter_calcCoeffs(vf);
 }
 
-void tVZFilter_setFastFrequencyAndResonanceAndGain (tVZFilter* const vf, float freq, float res, float gain)
+void tVZFilter_setFastFrequencyAndResonanceAndGain (tVZFilter* const vf, Lfloat freq, Lfloat res, Lfloat gain)
 {
     _tVZFilter* f = *vf;
     //f->fc = LEAF_clip(0.1f, freq, 0.4f * f->sampleRate);
@@ -1714,7 +1709,7 @@ void tVZFilter_setFastFrequencyAndResonanceAndGain (tVZFilter* const vf, float f
     tVZFilter_setFreqFast(vf, freq);
 }
 
-void tVZFilter_setFrequencyAndBandwidthAndGain (tVZFilter* const vf, float freq, float BW, float gain)
+void tVZFilter_setFrequencyAndBandwidthAndGain (tVZFilter* const vf, Lfloat freq, Lfloat BW, Lfloat gain)
 {
     _tVZFilter* f = *vf;
     f->fc = LEAF_clip(0.1f, freq, 0.4f * f->sampleRate);
@@ -1726,7 +1721,7 @@ void tVZFilter_setFrequencyAndBandwidthAndGain (tVZFilter* const vf, float freq,
 }
 
 
-void tVZFilter_setFrequencyAndResonanceAndMorph (tVZFilter* const vf, float freq, float res, float morph)
+void tVZFilter_setFrequencyAndResonanceAndMorph (tVZFilter* const vf, Lfloat freq, Lfloat res, Lfloat morph)
 {
     _tVZFilter* f = *vf;
     f->fc = LEAF_clip(0.1f, freq, 0.4f * f->sampleRate);
@@ -1736,14 +1731,14 @@ void tVZFilter_setFrequencyAndResonanceAndMorph (tVZFilter* const vf, float freq
     tVZFilter_calcCoeffs(vf);
 }
 
-void   tVZFilter_setMorph               (tVZFilter* const vf, float morph)
+void   tVZFilter_setMorph               (tVZFilter* const vf, Lfloat morph)
 {
     _tVZFilter* f = *vf;
     f->m = LEAF_clip(0.0f, morph, 1.0f);
     tVZFilter_calcCoeffs(vf);
 }
 
-void   tVZFilter_setMorphOnly               (tVZFilter* const vf, float morph)
+void   tVZFilter_setMorphOnly               (tVZFilter* const vf, Lfloat morph)
 {
     _tVZFilter* f = *vf;
     f->m = LEAF_clip(0.0f, morph, 1.0f);
@@ -1757,29 +1752,29 @@ void tVZFilter_setType              (tVZFilter* const vf, VZFilterType type)
     tVZFilter_calcCoeffs(vf);
 }
 
-float tVZFilter_BandwidthToR(tVZFilter* const vf, float B)
+Lfloat tVZFilter_BandwidthToR(tVZFilter* const vf, Lfloat B)
 {
     _tVZFilter* f = *vf;
-    float fl = f->fc*powf(2.0f, -B*0.5f); // lower bandedge frequency (in Hz)
-    float gl = tanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
-    float r  = gl/f->g;            // ratio between warped lower bandedge- and center-frequencies
+    Lfloat fl = f->fc*powf(2.0f, -B*0.5f); // lower bandedge frequency (in Hz)
+    Lfloat gl = tanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+    Lfloat r  = gl/f->g;            // ratio between warped lower bandedge- and center-frequencies
     // unwarped: r = pow(2, -B/2) -> approximation for low
     // center-frequencies
     return sqrtf((1.0f-r*r)*(1.0f-r*r)/(4.0f*r*r));
 }
 
-float tVZFilter_BandwidthToREfficientBP(tVZFilter* const vf, float B)
+Lfloat tVZFilter_BandwidthToREfficientBP(tVZFilter* const vf, Lfloat B)
 {
     _tVZFilter* f = *vf;
-    float fl = f->fc*fastPowf(2.0f, -B * 0.5f); // lower bandedge frequency (in Hz)
-    float gl = fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
-    float r  = gl/f->g;            // ratio between warped lower bandedge- and center-frequencies
+    Lfloat fl = f->fc*fastPowf(2.0f, -B * 0.5f); // lower bandedge frequency (in Hz)
+    Lfloat gl = fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+    Lfloat r  = gl/f->g;            // ratio between warped lower bandedge- and center-frequencies
     // unwarped: r = pow(2, -B/2) -> approximation for low
     // center-frequencies
     return fastsqrtf((1.0f-r*r)*(1.0f-r*r)/(4.0f*r*r));
 }
 
-void    tVZFilter_setSampleRate  (tVZFilter* const vf, float sr)
+void    tVZFilter_setSampleRate  (tVZFilter* const vf, Lfloat sr)
 {
     _tVZFilter* f = *vf;
     f->sampleRate = sr;
@@ -1791,12 +1786,12 @@ void    tVZFilter_setSampleRate  (tVZFilter* const vf, float sr)
 //taken from Ivan C's model of the EMS diode ladder, based on mystran's code from KVR forums
 //https://www.kvraudio.com/forum/viewtopic.php?f=33&t=349859&start=255
 
-void    tDiodeFilter_init           (tDiodeFilter* const vf, float cutoff, float resonance, LEAF* const leaf)
+void    tDiodeFilter_init           (tDiodeFilter* const vf, Lfloat cutoff, Lfloat resonance, LEAF* const leaf)
 {
     tDiodeFilter_initToPool(vf, cutoff, resonance, &leaf->mempool);
 }
 
-void    tDiodeFilter_initToPool     (tDiodeFilter* const vf, float cutoff, float resonance, tMempool* const mp)
+void    tDiodeFilter_initToPool     (tDiodeFilter* const vf, Lfloat cutoff, Lfloat resonance, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tDiodeFilter* f = *vf = (_tDiodeFilter*) mpool_alloc(sizeof(_tDiodeFilter), m);
@@ -1807,7 +1802,7 @@ void    tDiodeFilter_initToPool     (tDiodeFilter* const vf, float cutoff, float
     f->invSampleRate = leaf->invSampleRate;
     f->cutoff = cutoff;
     // initialization (the resonance factor is between 0 and 8 according to the article)
-    f->f = (float)tan((double)(PI * cutoff * f->invSampleRate));
+    f->f = (Lfloat)tan((double)(PI * cutoff * f->invSampleRate));
     f->r = (7.f * resonance + 0.5f);
     f->Vt = 0.5f;
     f->n = 1.836f;
@@ -1828,12 +1823,14 @@ void    tDiodeFilter_free   (tDiodeFilter* const vf)
     mpool_free((char*)f, f->mempool);
 }
 
-float tanhXdX(float x)
+Lfloat tanhXdX(Lfloat x)
 {
-    float a = x*x;
+    Lfloat a = x*x;
     // IIRC I got this as Pade-approx for tanh(sqrt(x))/sqrt(x)
-    float testVal = ((15.0f*a + 420.0f)*a + 945.0f);
-    float output = 1.0f;
+#ifdef SAFE_FILTER
+    Lfloat testVal = ((15.0f*a + 420.0f)*a + 945.0f);
+
+    Lfloat output = 1.0f;
     
     if (testVal!= 0.0f)
     {
@@ -1841,11 +1838,14 @@ float tanhXdX(float x)
         
     }
     return ((a + 105.0f)*a + 945.0f) / output;
+#endif
+    Lfloat testVal = ((15.0f*a + 420.0f)*a + 945.0f);
+    return ((a + 105.0f)*a + 945.0f) / testVal;
 }
 
 volatile int errorCheckCheck = 0;
 //#define SAFE_FILTER
-float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
+Lfloat   tDiodeFilter_tick               (tDiodeFilter* const vf, Lfloat in)
 {
     _tDiodeFilter* f = *vf;
 #ifdef SAFE_FILTER
@@ -1853,24 +1853,24 @@ float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
 #endif
     // the input x[n+1] is given by 'in', and x[n] by zi
     // input with half delay
-    float ih = 0.5f * (in + f->zi);
+    Lfloat ih = 0.5f * (in + f->zi);
     
     // evaluate the non-linear factors
-    float t0 = f->f*tanhXdX((ih - f->r * f->s3)*f->g0inv)*f->g0inv;
-    float t1 = f->f*tanhXdX((f->s1-f->s0)*f->g1inv)*f->g1inv;
-    float t2 = f->f*tanhXdX((f->s2-f->s1)*f->g1inv)*f->g1inv;
-    float t3 = f->f*tanhXdX((f->s3-f->s2)*f->g1inv)*f->g1inv;
-    float t4 = f->f*tanhXdX((f->s3)*f->g2inv)*f->g2inv;
+    Lfloat t0 = f->f*tanhXdX((ih - f->r * f->s3)*f->g0inv)*f->g0inv;
+    Lfloat t1 = f->f*tanhXdX((f->s1-f->s0)*f->g1inv)*f->g1inv;
+    Lfloat t2 = f->f*tanhXdX((f->s2-f->s1)*f->g1inv)*f->g1inv;
+    Lfloat t3 = f->f*tanhXdX((f->s3-f->s2)*f->g1inv)*f->g1inv;
+    Lfloat t4 = f->f*tanhXdX((f->s3)*f->g2inv)*f->g2inv;
     
     // This formula gives the result for y3 thanks to MATLAB
-    float y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
+    Lfloat y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
 #ifdef SAFE_FILTER
     if (isnan(y3))
     {
         errorCheck = 1;
     }
 #endif
-    float tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
+    Lfloat tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
 #ifdef SAFE_FILTER
     if (isnan(tempy3denom))
     {
@@ -1901,10 +1901,10 @@ float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
         t3 = 0.000001f;
     }
     // Other outputs
-    float y2 = (f->s3 - (1+t4+t3)*y3) / (-t3);
-    float y1 = (f->s2 - (1+t3+t2)*y2 + t3*y3) / (-t2);
-    float y0 = (f->s1 - (1+t2+t1)*y1 + t2*y2) / (-t1);
-    float xx = (in - f->r*y3);
+    Lfloat y2 = (f->s3 - (1+t4+t3)*y3) / (-t3);
+    Lfloat y1 = (f->s2 - (1+t3+t2)*y2 + t3*y3) / (-t2);
+    Lfloat y0 = (f->s1 - (1+t2+t1)*y1 + t2*y2) / (-t1);
+    Lfloat xx = (in - f->r*y3);
     
     // update state
     f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
@@ -1932,7 +1932,98 @@ float   tDiodeFilter_tick               (tDiodeFilter* const vf, float in)
     return tanhf(y3*f->r);
 }
 
-void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff)
+//#define SAFE_FILTER
+Lfloat   tDiodeFilter_tickEfficient               (tDiodeFilter* const vf, Lfloat in)
+{
+    _tDiodeFilter* f = *vf;
+#ifdef SAFE_FILTER
+    int errorCheck = 0;
+#endif
+    // the input x[n+1] is given by 'in', and x[n] by zi
+    // input with half delay
+    Lfloat ih = 0.5f * (in + f->zi);
+
+    // evaluate the non-linear factors
+    Lfloat t0 = f->f*tanhXdX((ih - f->r * f->s3)*f->g0inv)*f->g0inv;
+    Lfloat t1 = f->f*tanhXdX((f->s1-f->s0)*f->g1inv)*f->g1inv;
+    Lfloat t2 = f->f*tanhXdX((f->s2-f->s1)*f->g1inv)*f->g1inv;
+    Lfloat t3 = f->f*tanhXdX((f->s3-f->s2)*f->g1inv)*f->g1inv;
+    Lfloat t4 = f->f*tanhXdX((f->s3)*f->g2inv)*f->g2inv;
+
+    // This formula gives the result for y3 thanks to MATLAB
+    Lfloat y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
+#ifdef SAFE_FILTER
+    if (isnan(y3))
+    {
+        errorCheck = 1;
+    }
+#endif
+    Lfloat tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
+#ifdef SAFE_FILTER
+    if (isnan(tempy3denom))
+    {
+        errorCheck = 2;
+    }
+
+#endif
+    if (tempy3denom == 0.0f)
+    {
+        tempy3denom = 0.000001f;
+    }
+
+    y3 = y3 / tempy3denom;
+#ifdef SAFE_FILTER
+    if (isnan(y3))
+    {
+        errorCheck = 3;
+    }
+#endif
+    if (t1 == 0.0f)
+    {
+        t1 = 0.000001f;
+    }
+    if (t2 == 0.0f)
+    {
+        t2 = 0.000001f;
+    }
+    if (t3 == 0.0f)
+    {
+        t3 = 0.000001f;
+    }
+
+    // Other outputs
+    Lfloat y2 = (f->s3 - (1+t4+t3)*y3) / (-t3);
+    Lfloat y1 = (f->s2 - (1+t3+t2)*y2 + t3*y3) / (-t2);
+    Lfloat y0 = (f->s1 - (1+t2+t1)*y1 + t2*y2) / (-t1);
+    Lfloat xx = (in - f->r*y3);
+
+    // update state
+    f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
+#ifdef SAFE_FILTER
+    if (isnan(f->s0))
+    {
+        errorCheck = 4;
+    }
+
+    if (isinf(f->s0))
+    {
+        errorCheck = 5;
+    }
+
+    if (errorCheck != 0)
+    {
+        errorCheckCheck = errorCheck;
+    }
+#endif
+    f->s1 += 2.0f * (t2*(y2-y1) - t1*(y1-y0));
+    f->s2 += 2.0f * (t3*(y3-y2) - t2*(y2-y1));
+    f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));
+
+    f->zi = in;
+    return LEAF_tanh(y3*f->r);
+}
+
+void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, Lfloat cutoff)
 {
     _tDiodeFilter* f = *vf;
     
@@ -1940,21 +2031,21 @@ void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff)
     f->f = tanf(PI * f->cutoff * f->invSampleRate);
 }
 
-void    tDiodeFilter_setFreqFast     (tDiodeFilter* const vf, float cutoff)
+void    tDiodeFilter_setFreqFast     (tDiodeFilter* const vf, Lfloat cutoff)
 {
 	_tDiodeFilter* f = *vf;
     int intVer = (int)cutoff;
-    float floatVer = cutoff - (float)intVer;
-    f->f = (__leaf_table_filtertan[intVer] * (1.0f - floatVer)) + (__leaf_table_filtertan[intVer+1] * floatVer);
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->f = (__leaf_table_filtertan[intVer] * (1.0f - LfloatVer)) + (__leaf_table_filtertan[intVer+1] * LfloatVer);
 }
 
-void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance)
+void    tDiodeFilter_setQ     (tDiodeFilter* const vf, Lfloat resonance)
 {
     _tDiodeFilter* f = *vf;
     f->r = LEAF_clip(0.5f, (7.0f * resonance + 0.5f), 8.0f);
 }
 
-void    tDiodeFilter_setSampleRate(tDiodeFilter* const vf, float sr)
+void    tDiodeFilter_setSampleRate(tDiodeFilter* const vf, Lfloat sr)
 {
     _tDiodeFilter* f = *vf;
     
@@ -1963,12 +2054,12 @@ void    tDiodeFilter_setSampleRate(tDiodeFilter* const vf, float sr)
 }
 
 
-void    tLadderFilter_init           (tLadderFilter* const vf, float cutoff, float resonance, LEAF* const leaf)
+void    tLadderFilter_init           (tLadderFilter* const vf, Lfloat cutoff, Lfloat resonance, LEAF* const leaf)
 {
     tLadderFilter_initToPool(vf, cutoff, resonance, &leaf->mempool);
 }
 
-void    tLadderFilter_initToPool     (tLadderFilter* const vf, float cutoff, float resonance, tMempool* const mp)
+void    tLadderFilter_initToPool     (tLadderFilter* const vf, Lfloat cutoff, Lfloat resonance, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tLadderFilter* f = *vf = (_tLadderFilter*) mpool_alloc(sizeof(_tLadderFilter), m);
@@ -1979,7 +2070,7 @@ void    tLadderFilter_initToPool     (tLadderFilter* const vf, float cutoff, flo
     f->invSampleRate = leaf->invSampleRate;
     f->cutoff = cutoff;
     f->oversampling = 1;
-    f->c = (float)tan((double)(PI * (cutoff/(float)f->oversampling)* f->invSampleRate));
+    f->c = (Lfloat)tan((double)(PI * (cutoff/(Lfloat)f->oversampling)* f->invSampleRate));
     f->c2 = 2.0f * f->c;
     //resonance / feedback is from 0 to 4 for 100%, further "drives" feedback
     f->fb = (resonance * 8.0f);
@@ -2006,12 +2097,12 @@ void    tLadderFilter_free   (tLadderFilter* const vf)
     mpool_free((char*)f, f->mempool);
 }
 
-float smoothABS ( float x, const float y) // y controls 'smoothness' usually between 0.002 -> 0.04
+Lfloat smoothABS ( Lfloat x, const Lfloat y) // y controls 'smoothness' usually between 0.002 -> 0.04
 {
 	//possible speedup with sqrt CMSIS-DSP approximation? seems to resolve to just a normal call to sqrt. Maybe the vector version since there are two square roots to determine? -JS
 //	#ifdef ARM_MATH_CM7
-//		float output1;
-//		float output2;
+//		Lfloat output1;
+//		Lfloat output2;
 //		arm_sqrt_f32((x * x)  + y, &output1);
 //		arm_sqrt_f32(y, &output2);
 //		return output1 - output2;
@@ -2020,50 +2111,50 @@ float smoothABS ( float x, const float y) // y controls 'smoothness' usually bet
 //	#endif
 }
 
-float smoothclip (float x, const float a, const float b) // assuming symmetrical clipping
+Lfloat smoothclip (Lfloat x, const Lfloat a, const Lfloat b) // assuming symmetrical clipping
 {
-    float  x1 = smoothABS (x-a, 0.01f);
-    float  x2 = smoothABS (x-b, 0.01f);
+    Lfloat  x1 = smoothABS (x-a, 0.01f);
+    Lfloat  x2 = smoothABS (x-b, 0.01f);
     x = x1 + (a+b);
     x = x - x2;
     x = x * 0.5;
     return (x);
 }
 
-float tanhd(const float x, const float d, const float s)
+Lfloat tanhd(const Lfloat x, const Lfloat d, const Lfloat s)
 {
     return 1.0f - s * (d + 1.0f) * x*x / (d + x*x);
 }
 
-float   tLadderFilter_tick               (tLadderFilter* const vf, float in)
+Lfloat   tLadderFilter_tick               (tLadderFilter* const vf, Lfloat in)
 {
     _tLadderFilter* f = *vf;
     
-    float y3 = 0.0f;
+    Lfloat y3 = 0.0f;
     in += 0.015f;
     // per-sample computation
     for (int i = 0; i < f->oversampling; i++) {
-        float t0 = tanhd(f->b[0] + f->a, f->d, f->s);
-        float t1 = tanhd(f->b[1] + f->a, f->d, f->s);
-        float t2 = tanhd(f->b[2] + f->a, f->d, f->s);
-        float t3 = tanhd(f->b[3] + f->a, f->d, f->s);
+        Lfloat t0 = tanhd(f->b[0] + f->a, f->d, f->s);
+        Lfloat t1 = tanhd(f->b[1] + f->a, f->d, f->s);
+        Lfloat t2 = tanhd(f->b[2] + f->a, f->d, f->s);
+        Lfloat t3 = tanhd(f->b[3] + f->a, f->d, f->s);
         
-        float g0 = 1.0f / (1.0f + f->c*t0);
-        float g1 = 1.0f / (1.0f + f->c*t1);
-        float g2 = 1.0f / (1.0f + f->c*t2);
-        float g3 = 1.0f / (1.0f + f->c*t3);
+        Lfloat g0 = 1.0f / (1.0f + f->c*t0);
+        Lfloat g1 = 1.0f / (1.0f + f->c*t1);
+        Lfloat g2 = 1.0f / (1.0f + f->c*t2);
+        Lfloat g3 = 1.0f / (1.0f + f->c*t3);
         
-        float z0 = f->c*t0 / (1.0f + f->c*t0);
-        float z1 = f->c*t1 / (1.0f + f->c*t1);
-        float z2 = f->c*t2 / (1.0f + f->c*t2);
-        float z3 = f->c*t3 / (1.0f + f->c*t3);
+        Lfloat z0 = f->c*t0 / (1.0f + f->c*t0);
+        Lfloat z1 = f->c*t1 / (1.0f + f->c*t1);
+        Lfloat z2 = f->c*t2 / (1.0f + f->c*t2);
+        Lfloat z3 = f->c*t3 / (1.0f + f->c*t3);
         
-        float f3 = f->c       * t2*g3;
-        float f2 = f->c*f->c     * t1*g2 * t2*g3;
-        float f1 = f->c*f->c*f->c   * t0*g1 * t1*g2 * t2*g3;
-        float f0 = f->c*f->c*f->c*f->c *    g0 * t0*g1 * t1*g2 * t2*g3;
+        Lfloat f3 = f->c       * t2*g3;
+        Lfloat f2 = f->c*f->c     * t1*g2 * t2*g3;
+        Lfloat f1 = f->c*f->c*f->c   * t0*g1 * t1*g2 * t2*g3;
+        Lfloat f0 = f->c*f->c*f->c*f->c *    g0 * t0*g1 * t1*g2 * t2*g3;
         
-        float estimate =
+        Lfloat estimate =
         g3 * f->b[3] +
         f3 * g2 * f->b[2] +
         f2 * g1 * f->b[1] +
@@ -2072,14 +2163,14 @@ float   tLadderFilter_tick               (tLadderFilter* const vf, float in)
         
         // feedback gain coefficient, absolutely critical to get this correct
         // i believe in the original this is computed incorrectly?
-        float cgfbr = 1.0f / (1.0f + f->fb * z0*z1*z2*z3);
+        Lfloat cgfbr = 1.0f / (1.0f + f->fb * z0*z1*z2*z3);
         
         // clamp can be a hard clip, a diode + highpass is better
         // if you implement a highpass do not forget to include it in the computation of the gain coefficients!
-        float xx = in - smoothclip(f->fb * estimate, -1.0f, 1.0f) * cgfbr;
-        float y0 = t0 * g0 * (f->b[0] + f->c * xx);
-        float y1 = t1 * g1 * (f->b[1] + f->c * y0);
-        float y2 = t2 * g2 * (f->b[2] + f->c * y1);
+        Lfloat xx = in - smoothclip(f->fb * estimate, -1.0f, 1.0f) * cgfbr;
+        Lfloat y0 = t0 * g0 * (f->b[0] + f->c * xx);
+        Lfloat y1 = t1 * g1 * (f->b[1] + f->c * y0);
+        Lfloat y2 = t2 * g2 * (f->b[2] + f->c * y1);
         y3 = t3 * g3 * (f->b[3] + f->c * y2);
         
         // update the stored state
@@ -2090,36 +2181,36 @@ float   tLadderFilter_tick               (tLadderFilter* const vf, float in)
     }
     
     // you must limit the compensation if feedback is clamped
-    float compensation = 1.0f + smoothclip(f->fb, 0.0f, 4.0f);
+    Lfloat compensation = 1.0f + smoothclip(f->fb, 0.0f, 4.0f);
     return y3 * compensation;
 }
 
-void    tLadderFilter_setFreq     (tLadderFilter* const vf, float cutoff)
+void    tLadderFilter_setFreq     (tLadderFilter* const vf, Lfloat cutoff)
 {
     _tLadderFilter* f = *vf;
     
     f->cutoff = LEAF_clip(40.0f, cutoff, 18000.0f);
-    f->c = tanf(PI * (f->cutoff / (float)f->oversampling) * f->invSampleRate);
+    f->c = tanf(PI * (f->cutoff / (Lfloat)f->oversampling) * f->invSampleRate);
     f->c2 = 2.0f * f->c;
 }
 
-void    tLadderFilter_setFreqFast     (tLadderFilter* const vf, float cutoff)
+void    tLadderFilter_setFreqFast     (tLadderFilter* const vf, Lfloat cutoff)
 {
     _tLadderFilter* f = *vf;
     int intVer = (int)cutoff;
-    float floatVer = cutoff - (float)intVer;
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
 
-    f->c = (__leaf_table_filtertan[intVer] * (1.0f - floatVer)) + (__leaf_table_filtertan[intVer+1] * floatVer);
+    f->c = (__leaf_table_filtertan[intVer] * (1.0f - LfloatVer)) + (__leaf_table_filtertan[intVer+1] * LfloatVer);
     f->c2 = 2.0f * f->c;
 }
 
-void    tLadderFilter_setQ     (tLadderFilter* const vf, float resonance)
+void    tLadderFilter_setQ     (tLadderFilter* const vf, Lfloat resonance)
 {
     _tLadderFilter* f = *vf;
     f->fb = LEAF_clip(0.2f, resonance, 24.0f);
 }
 
-void    tLadderFilter_setSampleRate(tLadderFilter* const vf, float sr)
+void    tLadderFilter_setSampleRate(tLadderFilter* const vf, Lfloat sr)
 {
     _tLadderFilter* f = *vf;
     

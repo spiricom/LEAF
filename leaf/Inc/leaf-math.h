@@ -27,9 +27,9 @@ extern "C" {
      @{
      */
     
-    // Allows for bitwise operations on floats
-    union unholy_t { /* a union between a float and an integer */
-        float f;
+    // Allows for bitwise operations on Lfloats
+    union unholy_t { /* a union between a Lfloat and an integer */
+        Lfloat f;
         int i;
     };
 
@@ -39,7 +39,8 @@ extern "C" {
 #define PI              (3.14159265358979f)
 #define TWO_PI          (6.28318530717958f)
 #define HALF_PI         (1.570796326794897f)
-
+#define INV_TWO_PI		(0.159154943091895f)
+#define INV_TWO_PI_TIMES_SINE_TABLE_SIZE		(325.949323452201648)
 #define VSF             1.0e-38f
     
 #define MAX_DELAY       8192
@@ -100,55 +101,55 @@ extern "C" {
 #define ONE_OVER_SQRT2  0.707106781186548f
 
 #define LOGTEN 2.302585092994
-    float log2f_approx(float X);
-    float log2f_approx2(float x);
-
+    Lfloat log2f_approx(Lfloat X);
+    Lfloat log2f_approx2(Lfloat x);
+    Lfloat fast_sinf2(Lfloat x);
     // Jones shaper
-    float LEAF_shaper     (float input, float m_drive);
-    float LEAF_reedTable  (float input, float offset, float slope);
+    Lfloat LEAF_shaper     (Lfloat input, Lfloat m_drive);
+    Lfloat LEAF_reedTable  (Lfloat input, Lfloat offset, Lfloat slope);
     
-    float LEAF_reduct (float input, float ratio);
-    float LEAF_round (float input, float rnd);
-    float LEAF_bitwise_xor(float input, uint32_t op);
+    Lfloat LEAF_reduct (Lfloat input, Lfloat ratio);
+    Lfloat LEAF_round (Lfloat input, Lfloat rnd);
+    Lfloat LEAF_bitwise_xor(Lfloat input, uint32_t op);
     
-    float LEAF_reduct (float input, float ratio);
-    float LEAF_round (float input, float rnd);
-    float LEAF_bitwise_xor(float input, uint32_t op);
+    Lfloat LEAF_reduct (Lfloat input, Lfloat ratio);
+    Lfloat LEAF_round (Lfloat input, Lfloat rnd);
+    Lfloat LEAF_bitwise_xor(Lfloat input, uint32_t op);
     
-    float       LEAF_clip               (float min, float val, float max);
+    Lfloat       LEAF_clip               (Lfloat min, Lfloat val, Lfloat max);
     int         LEAF_clipInt            (int min, int val, int max);
-    float       LEAF_softClip           (float val, float thresh);
+    Lfloat       LEAF_softClip           (Lfloat val, Lfloat thresh);
     int         LEAF_isPrime            (uint64_t number );
     
-    float       LEAF_midiToFrequency    (float f);
-    float       LEAF_frequencyToMidi(float f);
+    Lfloat       LEAF_midiToFrequency    (Lfloat f);
+    Lfloat       LEAF_frequencyToMidi(Lfloat f);
     
-    void        LEAF_generate_sine     (float* buffer, int size);
-    void        LEAF_generate_sawtooth (float* buffer, float basefreq, int size, LEAF* const leaf);
-    void        LEAF_generate_triangle (float* buffer, float basefreq, int size, LEAF* const leaf);
-    void        LEAF_generate_square   (float* buffer, float basefreq, int size, LEAF* const leaf);
+    void        LEAF_generate_sine     (Lfloat* buffer, int size);
+    void        LEAF_generate_sawtooth (Lfloat* buffer, Lfloat basefreq, int size, LEAF* const leaf);
+    void        LEAF_generate_triangle (Lfloat* buffer, Lfloat basefreq, int size, LEAF* const leaf);
+    void        LEAF_generate_square   (Lfloat* buffer, Lfloat basefreq, int size, LEAF* const leaf);
     
     // dope af
-    float       LEAF_chebyshevT(float in, int n);
-    float       LEAF_CompoundChebyshevT(float in, int n, float* amps);
+    Lfloat       LEAF_chebyshevT(Lfloat in, int n);
+    Lfloat       LEAF_CompoundChebyshevT(Lfloat in, int n, Lfloat* amps);
     
     // Hermite interpolation
-    float LEAF_interpolate_hermite (float A, float B, float C, float D, float t);
-    float LEAF_interpolate_hermite_x(float yy0, float yy1, float yy2, float yy3, float xx);
-    float LEAF_interpolation_linear (float A, float B, float t);
+    Lfloat LEAF_interpolate_hermite (Lfloat A, Lfloat B, Lfloat C, Lfloat D, Lfloat t);
+    Lfloat LEAF_interpolate_hermite_x(Lfloat yy0, Lfloat yy1, Lfloat yy2, Lfloat yy3, Lfloat xx);
+    Lfloat LEAF_interpolation_linear (Lfloat A, Lfloat B, Lfloat t);
     
-    float interpolate3max(float *buf, const int peakindex);
-    float interpolate3phase(float *buf, const int peakindex);
+    Lfloat interpolate3max(Lfloat *buf, const int peakindex);
+    Lfloat interpolate3phase(Lfloat *buf, const int peakindex);
     
 
-    float fastcosf(float fAngle);
+    Lfloat fastcosf(Lfloat fAngle);
 
-    float fastercosf(float fAngle);
+    Lfloat fastercosf(Lfloat fAngle);
 
-    float fasttanf (float fAngle);
+    Lfloat fasttanf (Lfloat fAngle);
 
 
-    float fastertanf(float fAngle);
+    Lfloat fastertanf(Lfloat fAngle);
 
 
     // alternative implementation for abs()
@@ -156,78 +157,80 @@ extern "C" {
     int fastabs_int(int in);
     
     // alternative implementation for abs()
-    // REQUIRES: 32 bit floats
-    float fastabsf(float f);
+    // REQUIRES: 32 bit Lfloats
+    Lfloat fastabsf(Lfloat f);
     
-    float fastexp2f(float f);
+    Lfloat fastexp2f(Lfloat f);
     
-    float fastPowf(float a, float b) ;
+    Lfloat fastPowf(Lfloat a, Lfloat b) ;
     double fastPow(double a, double b);
 
     
-    void LEAF_crossfade(float fade, float* volumes);
+    void LEAF_crossfade(Lfloat fade, Lfloat* volumes);
 
-    float LEAF_tanh(float x);
-    float LEAF_tanhNoClip(float x);
-    float fast_tanh(float x);
-    float fast_tanh2(float x);
-    float fast_tanh3(float x);
-    float fast_tanh4(float x);
+    Lfloat LEAF_tanh(Lfloat x);
+    Lfloat LEAF_tanhNoClip(Lfloat x);
+    Lfloat fast_tanh(Lfloat x);
+    Lfloat fast_tanh2(Lfloat x);
+    Lfloat fast_tanh3(Lfloat x);
+    Lfloat fast_tanh4(Lfloat x);
 
     //0.001 base gives a good curve that goes from 1 to near zero
     //1000 gives a good curve from -1.0 to 0.0
-    void LEAF_generate_exp(float* buffer, float base, float start, float end, float offset, int size);
-    void LEAF_generate_table_skew_non_sym(float* buffer, float start, float end, float center, int size);
+    void LEAF_generate_exp(Lfloat* buffer, Lfloat base, Lfloat start, Lfloat end, Lfloat offset, int size);
+    void LEAF_generate_table_skew_non_sym(Lfloat* buffer, Lfloat start, Lfloat end, Lfloat center, int size);
 
-    void LEAF_generate_atodb(float* buffer, int size);
-    void LEAF_generate_atodbPositiveClipped(float* buffer, float lowerThreshold, float range, int size);
-
+    void LEAF_generate_atodb(Lfloat* buffer, int size, Lfloat min, Lfloat max);
+    void LEAF_generate_atodbPositiveClipped(Lfloat* buffer, Lfloat lowerThreshold, Lfloat range, int size);
+    void LEAF_generate_dbtoa(Lfloat* buffer, int size, Lfloat minDb, Lfloat maxDb);
+    void LEAF_generate_mtof(Lfloat* buffer, Lfloat startMIDI, Lfloat endMIDI, int size);
+    void LEAF_generate_ftom(Lfloat* buffer, Lfloat startFreq, Lfloat endFreq, int size);
     
-    float LEAF_poly_blep(float t, float dt);
-    float LEAF_midiToFrequency(float f);
+    Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt);
+    Lfloat LEAF_midiToFrequency(Lfloat f);
 
 
-    float fast_mtof(float f);
+    Lfloat fast_mtof(Lfloat f);
 
     double fastexp(double x);
 
-    float fastexpf(float x);
+    Lfloat fastexpf(Lfloat x);
 
     double fasterexp(double x);
 
-    float fasterexpf(float x);
+    Lfloat fasterexpf(Lfloat x);
     
-    float fastsqrtf(float x);
+    Lfloat fastsqrtf(Lfloat x);
 
-    float mtof(float f);
+    Lfloat mtof(Lfloat f);
     
-    float fast_mtof(float f);
+    Lfloat fast_mtof(Lfloat f);
 
-    float faster_mtof(float f);
+    Lfloat faster_mtof(Lfloat f);
 
-    float ftom(float f);
+    Lfloat ftom(Lfloat f);
     
-    float powtodb(float f);
+    Lfloat powtodb(Lfloat f);
     
-    float rmstodb(float f);
+    Lfloat rmstodb(Lfloat f);
     
-    float dbtopow(float f);
+    Lfloat dbtopow(Lfloat f);
     
-    float dbtorms(float f);
+    Lfloat dbtorms(Lfloat f);
     
-    float atodb(float a);
+    Lfloat atodb(Lfloat a);
 
-    float fasteratodb(float a);
+    Lfloat fasteratodb(Lfloat a);
 
-    float dbtoa(float db);
+    Lfloat dbtoa(Lfloat db);
 
-    float fastdbtoa(float db);
+    Lfloat fastdbtoa(Lfloat db);
 
-    float fasterdbtoa(float db);
+    Lfloat fasterdbtoa(Lfloat db);
 
-    float maximum (float num1, float num2);
+    Lfloat maximum (Lfloat num1, Lfloat num2);
 
-    float minimum (float num1, float num2);
+    Lfloat minimum (Lfloat num1, Lfloat num2);
     
     // built in compiler popcount functions should be faster but we want this to be portable
     // could try to add some define that call the correct function depending on compiler
@@ -235,17 +238,17 @@ extern "C" {
     // something to look into...
     int popcount(unsigned int x);
     
-    float median3f(float a, float b, float c);
+    Lfloat median3f(Lfloat a, Lfloat b, Lfloat c);
 
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_step_dd(float *buffer, int index, float phase, float w, float scale);
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_step_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat scale);
 #else
-void place_step_dd(float *buffer, int index, float phase, float w, float scale);
+void place_step_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat scale);
 #endif
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta);
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_slope_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat slope_delta);
 #else
-void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta);
+void place_slope_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat slope_delta);
 #endif
     //==============================================================================
     

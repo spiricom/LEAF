@@ -45,7 +45,7 @@ void tSampleReducer_free (tSampleReducer* const sr)
     mpool_free((char*)s, s->mempool);
 }
 
-float tSampleReducer_tick(tSampleReducer* const sr, float input)
+Lfloat tSampleReducer_tick(tSampleReducer* const sr, Lfloat input)
 {
     _tSampleReducer* s = *sr;
     if (s->count > s->invRatio)
@@ -59,7 +59,7 @@ float tSampleReducer_tick(tSampleReducer* const sr, float input)
 }
 
 
-void tSampleReducer_setRatio(tSampleReducer* const sr, float ratio)
+void tSampleReducer_setRatio(tSampleReducer* const sr, Lfloat ratio)
 {
     _tSampleReducer* s = *sr;
     if ((ratio <= 1.0f) && (ratio >= 0.0f))
@@ -95,9 +95,9 @@ void tOversampler_initToPool (tOversampler* const osr, int maxRatio, int extraQu
         int idx = (int)(log2f(os->ratio))-1+os->offset;
         os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
-        os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
-        os->upState = (float*) mpool_alloc(sizeof(float) * os->numTaps * 2, m);
-        os->downState = (float*) mpool_alloc(sizeof(float) * os->numTaps * 2, m);
+        os->pCoeffs = (Lfloat*) __leaf_tableref_firCoeffs[idx];
+        os->upState = (Lfloat*) mpool_alloc(sizeof(Lfloat) * os->numTaps * 2, m);
+        os->downState = (Lfloat*) mpool_alloc(sizeof(Lfloat) * os->numTaps * 2, m);
     }
 }
 
@@ -110,7 +110,7 @@ void tOversampler_free (tOversampler* const osr)
     mpool_free((char*)os, os->mempool);
 }
 
-float tOversampler_tick(tOversampler* const osr, float input, float* oversample, float (*effectTick)(float))
+Lfloat tOversampler_tick(tOversampler* const osr, Lfloat input, Lfloat* oversample, Lfloat (*effectTick)(Lfloat))
 {
     _tOversampler* os = *osr;
     
@@ -125,9 +125,9 @@ float tOversampler_tick(tOversampler* const osr, float input, float* oversample,
 
 // From CMSIS DSP Library
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tOversampler_upsample(tOversampler* const osr, float input, float* output)
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tOversampler_upsample(tOversampler* const osr, Lfloat input, Lfloat* output)
 #else
-void tOversampler_upsample(tOversampler* const osr, float input, float* output)
+void tOversampler_upsample(tOversampler* const osr, Lfloat input, Lfloat* output)
 #endif
 {
     _tOversampler* os = *osr;
@@ -138,12 +138,12 @@ void tOversampler_upsample(tOversampler* const osr, float input, float* output)
         return;
     }
     
-    float *pState = os->upState;                 /* State pointer */
-    float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
-    float *pStateCur;
-    float *ptr1;                               /* Temporary pointer for state buffer */
-    float *ptr2;                               /* Temporary pointer for coefficient buffer */
-    float sum0;                                /* Accumulators */
+    Lfloat *pState = os->upState;                 /* State pointer */
+    Lfloat *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
+    Lfloat *pStateCur;
+    Lfloat *ptr1;                               /* Temporary pointer for state buffer */
+    Lfloat *ptr2;                               /* Temporary pointer for coefficient buffer */
+    Lfloat sum0;                                /* Accumulators */
     uint32_t i, tapCnt;                    /* Loop counters */
     uint32_t phaseLen = os->phaseLength;            /* Length of each polyphase filter component */
     uint32_t j;
@@ -228,25 +228,25 @@ void tOversampler_upsample(tOversampler* const osr, float input, float* output)
 
 // From CMSIS DSP Library
 #ifdef ITCMRAM
-float __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tOversampler_downsample(tOversampler *const osr, float* input)
+Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tOversampler_downsample(tOversampler *const osr, Lfloat* input)
 #else
-float tOversampler_downsample(tOversampler *const osr, float* input)
+Lfloat tOversampler_downsample(tOversampler *const osr, Lfloat* input)
 #endif
 {
     _tOversampler* os = *osr;
     
     if (os->ratio == 1) return input[0];
     
-    float *pState = os->downState;                 /* State pointer */
-    float *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
-    float *pStateCur;                          /* Points to the current sample of the state */
-    float *px0;                                /* Temporary pointer for state buffer */
-    float *pb;                                 /* Temporary pointer for coefficient buffer */
-    float x0, c0;                              /* Temporary variables to hold state and coefficient values */
-    float acc0;                                /* Accumulator */
+    Lfloat *pState = os->downState;                 /* State pointer */
+    Lfloat *pCoeffs = os->pCoeffs;               /* Coefficient pointer */
+    Lfloat *pStateCur;                          /* Points to the current sample of the state */
+    Lfloat *px0;                                /* Temporary pointer for state buffer */
+    Lfloat *pb;                                 /* Temporary pointer for coefficient buffer */
+    Lfloat x0, c0;                              /* Temporary variables to hold state and coefficient values */
+    Lfloat acc0;                                /* Accumulator */
     uint32_t numTaps = os->numTaps;                 /* Number of filter coefficients in the filter */
     uint32_t i, tapCnt;
-    float output;
+    Lfloat output;
     
     /* os->pState buffer contains previous frame (numTaps - 1) samples */
     /* pStateCur points to the location where the new input data should be written */
@@ -331,7 +331,7 @@ void    tOversampler_setRatio       (tOversampler* const osr, int ratio)
         int idx = (int)(log2f(os->ratio))-1+os->offset;
         os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
-        os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
+        os->pCoeffs = (Lfloat*) __leaf_tableref_firCoeffs[idx];
     }
 }
 
@@ -349,7 +349,7 @@ void    tOversampler_setQuality     (tOversampler* const osr, int quality)
     int idx = (int)(log2f(os->ratio))-1+os->offset;
     os->numTaps = __leaf_tablesize_firNumTaps[idx];
     os->phaseLength = os->numTaps / os->ratio;
-    os->pCoeffs = (float*) __leaf_tableref_firCoeffs[idx];
+    os->pCoeffs = (Lfloat*) __leaf_tableref_firCoeffs[idx];
 }
 
 int tOversampler_getLatency(tOversampler* const osr)
@@ -509,11 +509,11 @@ double tLockhartWavefolderLambert(tLockhartWavefolder* const wf, double x, doubl
     return mwf->w;
 }
 
-float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float in)
+Lfloat tLockhartWavefolder_tick(tLockhartWavefolder* const wf, Lfloat in)
 {
     _tLockhartWavefolder* w = *wf;
 
-    float out = 0.0f;
+    Lfloat out = 0.0f;
     
     // Compute Antiderivative
     w->l = (in > 0.0) - (in < 0.0);
@@ -584,7 +584,7 @@ float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float in)
     		LEAF_error();
     	}
     	*/
-        out = (float)((w->l*w->VT*w->Ln) - (w->a*xn));
+        out = (Lfloat)((w->l*w->VT*w->Ln) - (w->a*xn));
 
     }
     else
@@ -598,7 +598,7 @@ float tLockhartWavefolder_tick(tLockhartWavefolder* const wf, float in)
     		w->tempOutDenom = 10e-5;
     	}
     	
-        out = (float)((w->Fn-w->Fn1)/w->tempOutDenom);
+        out = (Lfloat)((w->Fn-w->Fn1)/w->tempOutDenom);
         /*
         if (isinf(out) || isnan(out))
 		{
@@ -635,7 +635,7 @@ void tCrusher_initToPool (tCrusher* const cr, tMempool* const mp)
     c->mempool = m;
     
     c->op = 4;
-    c->div = SCALAR;
+    c->div = 1.0f / SCALAR;
     c->rnd = 0.25f;
     c->srr = 0.25f;
     tSampleReducer_initToPool(&c->sReducer, mp);
@@ -650,17 +650,17 @@ void tCrusher_free (tCrusher* const cr)
     mpool_free((char*)c, c->mempool);
 }
 
-float tCrusher_tick (tCrusher* const cr, float input)
+Lfloat tCrusher_tick (tCrusher* const cr, Lfloat input)
 {
     _tCrusher* c = *cr;
     
-    float sample = input;
+    Lfloat sample = input;
     
     sample *= SCALAR; // SCALAR is 5000 by default
     
     sample = (int32_t) sample;
     
-    sample /= c->div;
+    sample *= c->div;
     
     sample = LEAF_bitwise_xor(sample, c->op << 23);
     
@@ -674,14 +674,14 @@ float tCrusher_tick (tCrusher* const cr, float input)
     
 }
 
-void    tCrusher_setOperation (tCrusher* const cr, float op)
+void    tCrusher_setOperation (tCrusher* const cr, Lfloat op)
 {
     _tCrusher* c = *cr;
     c->op = (uint32_t) (op * 8.0f);
 }
 
 // 0.0 - 1.0
-void    tCrusher_setQuality (tCrusher* const cr, float val)
+void    tCrusher_setQuality (tCrusher* const cr, Lfloat val)
 {
     _tCrusher* c = *cr;
     
@@ -693,13 +693,13 @@ void    tCrusher_setQuality (tCrusher* const cr, float val)
 }
 
 // what decimal to round to
-void    tCrusher_setRound (tCrusher* const cr, float rnd)
+void    tCrusher_setRound (tCrusher* const cr, Lfloat rnd)
 {
     _tCrusher* c = *cr;
     c->rnd = rnd;
 }
 
-void    tCrusher_setSamplingRatio (tCrusher* const cr, float ratio)
+void    tCrusher_setSamplingRatio (tCrusher* const cr, Lfloat ratio)
 {
     _tCrusher* c = *cr;
     c->srr = ratio;

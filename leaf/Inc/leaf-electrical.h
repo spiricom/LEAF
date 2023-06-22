@@ -34,12 +34,12 @@ extern "C" {
      @brief Wave digital filter component.
      @{
      
-     @fn void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, LEAF* const leaf)
+     @fn void    tWDF_init                   (tWDF* const, WDFComponentType type, Lfloat value, tWDF* const rL, tWDF* const rR, LEAF* const leaf)
      @brief Initialize a tWDF to the default mempool of a LEAF instance.
      @param wdf A pointer to the tWDF to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tWDF_initToPool             (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const)
+     @fn void    tWDF_initToPool             (tWDF* const, WDFComponentType type, Lfloat value, tWDF* const rL, tWDF* const rR, tMempool* const)
      @brief Initialize a tWDF to a specified mempool.
      @param wdf A pointer to the tWDF to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -48,15 +48,15 @@ extern "C" {
      @brief Free a tWDF from its mempool.
      @param wdf A pointer to the tWDF to free.
      
-     @fn float   tWDF_tick                   (tWDF* const, float sample, tWDF* const outputPoint, uint8_t paramsChanged)
+     @fn Lfloat   tWDF_tick                   (tWDF* const, Lfloat sample, tWDF* const outputPoint, uint8_t paramsChanged)
      @brief
      @param wdf A pointer to the relevant tWDF.
      
-     @fn void    tWDF_setValue               (tWDF* const, float value)
+     @fn void    tWDF_setValue               (tWDF* const, Lfloat value)
      @brief
      @param wdf A pointer to the relevant tWDF.
      
-     @fn void    tWDF_setSampleRate          (tWDF* const, float sample_rate)
+     @fn void    tWDF_setSampleRate          (tWDF* const, Lfloat sample_rate)
      @brief
      @param wdf A pointer to the relevant tWDF.
      
@@ -64,27 +64,27 @@ extern "C" {
      @brief
      @param wdf A pointer to the relevant tWDF.
      
-     @fn float   tWDF_getPortResistance      (tWDF* const)
+     @fn Lfloat   tWDF_getPortResistance      (tWDF* const)
      @brief
      @param wdf A pointer to the relevant tWDF.
      
-     @fn float   tWDF_getReflectedWaveUp     (tWDF* const, float input)
+     @fn Lfloat   tWDF_getReflectedWaveUp     (tWDF* const, Lfloat input)
      @brief
      @param wdf A pointer to the relevant tWDF.
      
-     @fn float   tWDF_getReflectedWaveDown   (tWDF* const, float input, float incident_wave)
+     @fn Lfloat   tWDF_getReflectedWaveDown   (tWDF* const, Lfloat input, Lfloat incident_wave)
      @brief
      @param wdf A pointer to the relevant tWDF.
      
-     @fn void    tWDF_setIncidentWave        (tWDF* const, float incident_wave, float input)
+     @fn void    tWDF_setIncidentWave        (tWDF* const, Lfloat incident_wave, Lfloat input)
      @brief
      @param wdf A pointer to the relevant tWDF.
      
-     @fn float   tWDF_getVoltage             (tWDF* const)
+     @fn Lfloat   tWDF_getVoltage             (tWDF* const)
      @brief
      @param wdf A pointer to the relevant tWDF.
      
-     @fn float   tWDF_getCurrent             (tWDF* const)
+     @fn Lfloat   tWDF_getCurrent             (tWDF* const)
      @brief
      @param wdf A pointer to the relevant tWDF.
       
@@ -113,47 +113,47 @@ extern "C" {
         
         tMempool mempool;
         WDFComponentType type;
-        float port_resistance_up;
-        float port_resistance_left;
-        float port_resistance_right;
-        float port_conductance_up;
-        float port_conductance_left;
-        float port_conductance_right;
-        float incident_wave_up;
-        float incident_wave_left;
-        float incident_wave_right;
-        float reflected_wave_up;
-        float reflected_wave_left;
-        float reflected_wave_right;
-        float gamma_zero;
-        float sample_rate;
-        float value;
+        Lfloat port_resistance_up;
+        Lfloat port_resistance_left;
+        Lfloat port_resistance_right;
+        Lfloat port_conductance_up;
+        Lfloat port_conductance_left;
+        Lfloat port_conductance_right;
+        Lfloat incident_wave_up;
+        Lfloat incident_wave_left;
+        Lfloat incident_wave_right;
+        Lfloat reflected_wave_up;
+        Lfloat reflected_wave_left;
+        Lfloat reflected_wave_right;
+        Lfloat gamma_zero;
+        Lfloat sample_rate;
+        Lfloat value;
         tWDF* child_left;
         tWDF* child_right;
-        float (*get_port_resistance)(tWDF* const);
-        float (*get_reflected_wave_up)(tWDF* const, float);
-        float (*get_reflected_wave_down)(tWDF* const, float, float);
-        void (*set_incident_wave)(tWDF* const, float, float);
+        Lfloat (*get_port_resistance)(tWDF* const);
+        Lfloat (*get_reflected_wave_up)(tWDF* const, Lfloat);
+        Lfloat (*get_reflected_wave_down)(tWDF* const, Lfloat, Lfloat);
+        void (*set_incident_wave)(tWDF* const, Lfloat, Lfloat);
     };
     
     //WDF Linear Components
-    void    tWDF_init                   (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, LEAF* const leaf);
-    void    tWDF_initToPool             (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, tMempool* const);
+    void    tWDF_init                   (tWDF* const, WDFComponentType type, Lfloat value, tWDF* const rL, tWDF* const rR, LEAF* const leaf);
+    void    tWDF_initToPool             (tWDF* const, WDFComponentType type, Lfloat value, tWDF* const rL, tWDF* const rR, tMempool* const);
     void    tWDF_free                   (tWDF* const);
     
-    float   tWDF_tick                   (tWDF* const, float sample, tWDF* const outputPoint, uint8_t paramsChanged);
+    Lfloat   tWDF_tick                   (tWDF* const, Lfloat sample, tWDF* const outputPoint, uint8_t paramsChanged);
     
-    void    tWDF_setValue               (tWDF* const, float value);
-    void    tWDF_setSampleRate          (tWDF* const, float sample_rate);
+    void    tWDF_setValue               (tWDF* const, Lfloat value);
+    void    tWDF_setSampleRate          (tWDF* const, Lfloat sample_rate);
     uint8_t tWDF_isLeaf                 (tWDF* const);
     
-    float   tWDF_getPortResistance      (tWDF* const);
-    float   tWDF_getReflectedWaveUp     (tWDF* const, float input); //for tree, only uses input for resistive source
-    float   tWDF_getReflectedWaveDown   (tWDF* const, float input, float incident_wave); //for roots
-    void    tWDF_setIncidentWave        (tWDF* const, float incident_wave, float input);
+    Lfloat   tWDF_getPortResistance      (tWDF* const);
+    Lfloat   tWDF_getReflectedWaveUp     (tWDF* const, Lfloat input); //for tree, only uses input for resistive source
+    Lfloat   tWDF_getReflectedWaveDown   (tWDF* const, Lfloat input, Lfloat incident_wave); //for roots
+    void    tWDF_setIncidentWave        (tWDF* const, Lfloat incident_wave, Lfloat input);
     
-    float   tWDF_getVoltage             (tWDF* const);
-    float   tWDF_getCurrent             (tWDF* const);
+    Lfloat   tWDF_getVoltage             (tWDF* const);
+    Lfloat   tWDF_getCurrent             (tWDF* const);
     
     
     //==============================================================================

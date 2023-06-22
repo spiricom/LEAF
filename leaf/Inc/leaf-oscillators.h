@@ -48,12 +48,12 @@ extern "C" {
      @brief Free a tCycle from its mempool.
      @param osc A pointer to the tCycle to free.
      
-     @fn float   tCycle_tick         (tCycle* const osc)
+     @fn Lfloat   tCycle_tick         (tCycle* const osc)
      @brief Tick a tCycle oscillator.
      @param osc A pointer to the relevant tCycle.
-     @return The ticked sample as a float from -1 to 1.
+     @return The ticked sample as a Lfloat from -1 to 1.
 
-     @fn void    tCycle_setFreq      (tCycle* const osc, float freq)
+     @fn void    tCycle_setFreq      (tCycle* const osc, Lfloat freq)
      @brief Set the frequency of a tCycle oscillator.
      @param osc A pointer to the relevant tCycle.
      @param freq The frequency to set the oscillator to.
@@ -67,8 +67,8 @@ extern "C" {
         // Underlying phasor
         uint32_t phase;
         int32_t inc;
-		float freq;
-        float invSampleRateTimesTwoTo32;
+		Lfloat freq;
+        Lfloat invSampleRateTimesTwoTo32;
         uint32_t mask;
     } _tCycle;
     
@@ -78,10 +78,10 @@ extern "C" {
     void    tCycle_initToPool   (tCycle* const osc, tMempool* const mempool);
     void    tCycle_free         (tCycle* const osc);
     
-    float   tCycle_tick         (tCycle* const osc);
-    void    tCycle_setFreq      (tCycle* const osc, float freq);
-    void    tCycle_setPhase     (tCycle* const osc, float phase);
-    void    tCycle_setSampleRate(tCycle* const osc, float sr);
+    Lfloat   tCycle_tick         (tCycle* const osc);
+    void    tCycle_setFreq      (tCycle* const osc, Lfloat freq);
+    void    tCycle_setPhase     (tCycle* const osc, Lfloat phase);
+    void    tCycle_setSampleRate(tCycle* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -105,12 +105,12 @@ extern "C" {
      @brief Free a tTriangle from its mempool.
      @param osc A pointer to the tTriangle to free.
      
-     @fn float   tTriangle_tick         (tTriangle* const osc)
+     @fn Lfloat   tTriangle_tick         (tTriangle* const osc)
      @brief Tick a tTriangle oscillator.
      @param osc A pointer to the relevant tTriangle.
-     @return The ticked sample as a float from -1 to 1.
+     @return The ticked sample as a Lfloat from -1 to 1.
      
-     @fn void    tTriangle_setFreq      (tTriangle* const osc, float freq)
+     @fn void    tTriangle_setFreq      (tTriangle* const osc, Lfloat freq)
      @brief Set the frequency of a tTriangle oscillator.
      @param osc A pointer to the relevant tTriangle.
      @param freq The frequency to set the oscillator to.
@@ -123,11 +123,11 @@ extern "C" {
         // Underlying phasor
         uint32_t phase;
         uint32_t inc;
-        float freq;
+        Lfloat freq;
         int oct;
-        float w;
-        float invSampleRate;
-        float invSampleRateTimesTwoTo32;
+        Lfloat w;
+        Lfloat invSampleRate;
+        Lfloat invSampleRateTimesTwoTo32;
         uint32_t mask;
     } _tTriangle;
     
@@ -137,10 +137,10 @@ extern "C" {
     void    tTriangle_initToPool    (tTriangle* const osc, tMempool* const mempool);
     void    tTriangle_free          (tTriangle* const osc);
     
-    float   tTriangle_tick          (tTriangle* const osc);
-    void    tTriangle_setFreq       (tTriangle* const osc, float freq);
-    void    tTriangle_setPhase      (tTriangle* const osc, float phase);
-    void    tTriangle_setSampleRate (tTriangle* const osc, float sr);
+    Lfloat   tTriangle_tick          (tTriangle* const osc);
+    void    tTriangle_setFreq       (tTriangle* const osc, Lfloat freq);
+    void    tTriangle_setPhase      (tTriangle* const osc, Lfloat phase);
+    void    tTriangle_setSampleRate (tTriangle* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -164,12 +164,12 @@ extern "C" {
      @brief Free a tSquare from its mempool.
      @param osc A pointer to the tSquare to free.
      
-     @fn float   tSquare_tick         (tSquare* const osc)
+     @fn Lfloat   tSquare_tick         (tSquare* const osc)
      @brief Tick a tSquare oscillator.
      @param osc A pointer to the relevant tSquare.
-     @return The ticked sample as a float from -1 to 1.
+     @return The ticked sample as a Lfloat from -1 to 1.
      
-     @fn void    tSquare_setFreq      (tSquare* const osc, float freq)
+     @fn void    tSquare_setFreq      (tSquare* const osc, Lfloat freq)
      @brief Set the frequency of a tSquare oscillator.
      @param osc A pointer to the relevant tSquare.
      @param freq The frequency to set the oscillator to.
@@ -182,11 +182,11 @@ extern "C" {
         // Underlying phasor
         uint32_t phase;
         uint32_t inc;
-        float freq;
+        Lfloat freq;
         int oct;
-        float w;
-        float invSampleRate;
-        float invSampleRateTimesTwoTo32;
+        Lfloat w;
+        Lfloat invSampleRate;
+        Lfloat invSampleRateTimesTwoTo32;
         uint32_t mask;
     } _tSquare;
     
@@ -196,10 +196,10 @@ extern "C" {
     void    tSquare_initToPool  (tSquare* const osc, tMempool* const);
     void    tSquare_free        (tSquare* const osc);
 
-    float   tSquare_tick        (tSquare* const osc);
-    void    tSquare_setFreq     (tSquare* const osc, float freq);
-    void    tSquare_setPhase     (tSquare* const osc, float phase);
-    void    tSquare_setSampleRate (tSquare* const osc, float sr);
+    Lfloat   tSquare_tick        (tSquare* const osc);
+    void    tSquare_setFreq     (tSquare* const osc, Lfloat freq);
+    void    tSquare_setPhase     (tSquare* const osc, Lfloat phase);
+    void    tSquare_setSampleRate (tSquare* const osc, Lfloat sr);
     
     /*!￼￼￼
      @} */
@@ -226,12 +226,12 @@ extern "C" {
      @brief Free a tSawtooth from its mempool.
      @param osc A pointer to the tSawtooth to free.
      
-     @fn float   tSawtooth_tick         (tSawtooth* const osc)
+     @fn Lfloat   tSawtooth_tick         (tSawtooth* const osc)
      @brief Tick a tSawtooth oscillator.
      @param osc A pointer to the relevant tSawtooth.
-     @return The ticked sample as a float from -1 to 1.
+     @return The ticked sample as a Lfloat from -1 to 1.
      
-     @fn void    tSawtooth_setFreq      (tSawtooth* const osc, float freq)
+     @fn void    tSawtooth_setFreq      (tSawtooth* const osc, Lfloat freq)
      @brief Set the frequency of a tSawtooth oscillator.
      @param osc A pointer to the relevant tSawtooth.
      @param freq The frequency to set the oscillator to.
@@ -244,11 +244,11 @@ extern "C" {
         // Underlying phasor
         uint32_t phase;
         uint32_t inc;
-        float freq;
+        Lfloat freq;
         int oct;
-        float w;
-        float invSampleRate;
-        float invSampleRateTimesTwoTo32;
+        Lfloat w;
+        Lfloat invSampleRate;
+        Lfloat invSampleRateTimesTwoTo32;
         uint32_t mask;
     } _tSawtooth;
     
@@ -258,10 +258,10 @@ extern "C" {
     void    tSawtooth_initToPool    (tSawtooth* const osc, tMempool* const mempool);
     void    tSawtooth_free          (tSawtooth* const osc);
 
-    float   tSawtooth_tick          (tSawtooth* const osc);
-    void    tSawtooth_setFreq       (tSawtooth* const osc, float freq);
-    void    tSawtooth_setPhase      (tSawtooth* const osc, float phase);
-    void    tSawtooth_setSampleRate (tSawtooth* const osc, float sr);
+    Lfloat   tSawtooth_tick          (tSawtooth* const osc);
+    void    tSawtooth_setFreq       (tSawtooth* const osc, Lfloat freq);
+    void    tSawtooth_setPhase      (tSawtooth* const osc, Lfloat phase);
+    void    tSawtooth_setSampleRate (tSawtooth* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -285,15 +285,15 @@ extern "C" {
      @brief Free a tTri from its mempool.
      @param osc A pointer to the tPBTriangle to free.
      
-     @fn float   tPBTriangle_tick          (tPBTriangle* const osc)
+     @fn Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
      @brief
      @param osc A pointer to the relevant tPBTriangle.
      
-     @fn void    tPBTriangle_setFreq       (tPBTriangle* const osc, float freq)
+     @fn void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq)
      @brief
      @param osc A pointer to the relevant tPBTriangle.
      
-     @fn void    tPBTriangle_setSkew       (tPBTriangle* const osc, float skew)
+     @fn void    tPBTriangle_setSkew       (tPBTriangle* const osc, Lfloat skew)
      @brief
      @param osc A pointer to the relevant tPBTriangle.
      ￼￼￼
@@ -302,11 +302,11 @@ extern "C" {
     typedef struct _tPBTriangle
     {
         tMempool mempool;
-        float phase;
-        float inc,freq;
-        float skew;
-        float lastOut;
-        float invSampleRate;
+        Lfloat phase;
+        Lfloat inc,freq;
+        Lfloat skew;
+        Lfloat lastOut;
+        Lfloat invSampleRate;
     } _tPBTriangle;
     
     typedef _tPBTriangle* tPBTriangle;
@@ -315,10 +315,10 @@ extern "C" {
     void    tPBTriangle_initToPool    (tPBTriangle* const osc, tMempool* const mempool);
     void    tPBTriangle_free          (tPBTriangle* const osc);
     
-    float   tPBTriangle_tick          (tPBTriangle* const osc);
-    void    tPBTriangle_setFreq       (tPBTriangle* const osc, float freq);
-    void    tPBTriangle_setSkew       (tPBTriangle* const osc, float skew);
-    void    tPBTriangle_setSampleRate (tPBTriangle* const osc, float sr);
+    Lfloat   tPBTriangle_tick          (tPBTriangle* const osc);
+    void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq);
+    void    tPBTriangle_setSkew       (tPBTriangle* const osc, Lfloat skew);
+    void    tPBTriangle_setSampleRate (tPBTriangle* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -342,15 +342,15 @@ extern "C" {
      @brief Free a tPBPulse from its mempool.
      @param osc A pointer to the tPBPulse to free.
      
-     @fn float   tPBPulse_tick        (tPBPulse* const osc)
+     @fn Lfloat   tPBPulse_tick        (tPBPulse* const osc)
      @brief
      @param osc A pointer to the relevant tPBPulse.
      
-     @fn void    tPBPulse_setFreq     (tPBPulse* const osc, float freq)
+     @fn void    tPBPulse_setFreq     (tPBPulse* const osc, Lfloat freq)
      @brief
      @param osc A pointer to the relevant tPBPulse.
      
-     @fn void    tPBPulse_setWidth    (tPBPulse* const osc, float width)
+     @fn void    tPBPulse_setWidth    (tPBPulse* const osc, Lfloat width)
      @brief
      @param osc A pointer to the relevant tPBPulse.
      ￼￼￼
@@ -359,10 +359,10 @@ extern "C" {
     typedef struct _tPBPulse
     {
         tMempool mempool;
-        float phase;
-        float inc,freq;
-        float width;
-        float invSampleRate;
+        Lfloat phase;
+        Lfloat inc,freq;
+        Lfloat width;
+        Lfloat invSampleRate;
     } _tPBPulse;
     
     typedef _tPBPulse* tPBPulse;
@@ -371,10 +371,10 @@ extern "C" {
     void    tPBPulse_initToPool  (tPBPulse* const osc, tMempool* const);
     void    tPBPulse_free        (tPBPulse* const osc);
     
-    float   tPBPulse_tick        (tPBPulse* const osc);
-    void    tPBPulse_setFreq     (tPBPulse* const osc, float freq);
-    void    tPBPulse_setWidth    (tPBPulse* const osc, float width);
-    void    tPBPulse_setSampleRate (tPBPulse* const osc, float sr);
+    Lfloat   tPBPulse_tick        (tPBPulse* const osc);
+    void    tPBPulse_setFreq     (tPBPulse* const osc, Lfloat freq);
+    void    tPBPulse_setWidth    (tPBPulse* const osc, Lfloat width);
+    void    tPBPulse_setSampleRate (tPBPulse* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -398,11 +398,11 @@ extern "C" {
      @brief Free a tPBSaw from its mempool.
      @param osc A pointer to the tPBSaw to free.
      
-     @fn float   tPBSaw_tick          (tPBSaw* const osc)
+     @fn Lfloat   tPBSaw_tick          (tPBSaw* const osc)
      @brief
      @param osc A pointer to the relevant tPBSaw.
      
-     @fn void    tPBSaw_setFreq       (tPBSaw* const osc, float freq)
+     @fn void    tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq)
      @brief
      @param osc A pointer to the relevant tPBSaw.
      ￼￼￼
@@ -411,9 +411,9 @@ extern "C" {
     typedef struct _tPBSaw
     {
         tMempool mempool;
-        float phase;
-        float inc,freq;
-        float invSampleRate;
+        Lfloat phase;
+        Lfloat inc,freq;
+        Lfloat invSampleRate;
     } _tPBSaw;
     
     typedef _tPBSaw* tPBSaw;
@@ -422,9 +422,9 @@ extern "C" {
     void    tPBSaw_initToPool    (tPBSaw* const osc, tMempool* const mempool);
     void    tPBSaw_free          (tPBSaw* const osc);
     
-    float   tPBSaw_tick          (tPBSaw* const osc);
-    void    tPBSaw_setFreq       (tPBSaw* const osc, float freq);
-    void    tPBSaw_setSampleRate (tPBSaw* const osc, float sr);
+    Lfloat   tPBSaw_tick          (tPBSaw* const osc);
+    void    tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq);
+    void    tPBSaw_setSampleRate (tPBSaw* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -448,11 +448,11 @@ extern "C" {
      @brief Free a tPhasor from its mempool.
      @param osc A pointer to the tPhasor to free.
      
-     @fn float   tPhasor_tick        (tPhasor* const osc)
+     @fn Lfloat   tPhasor_tick        (tPhasor* const osc)
      @brief
      @param osc A pointer to the relevant tPhasor.
      
-     @fn void    tPhasor_setFreq     (tPhasor* const osc, float freq)
+     @fn void    tPhasor_setFreq     (tPhasor* const osc, Lfloat freq)
      @brief
      @param osc A pointer to the relevant tPhasor.
      ￼￼￼
@@ -462,10 +462,10 @@ extern "C" {
     {
         
         tMempool mempool;
-        float phase;
-        float inc,freq;
+        Lfloat phase;
+        Lfloat inc,freq;
         uint8_t phaseDidReset;
-        float invSampleRate;
+        Lfloat invSampleRate;
     } _tPhasor;
     
     typedef _tPhasor* tPhasor;
@@ -474,9 +474,9 @@ extern "C" {
     void    tPhasor_initToPool  (tPhasor* const osc, tMempool* const);
     void    tPhasor_free        (tPhasor* const osc);
     
-    float   tPhasor_tick        (tPhasor* const osc);
-    void    tPhasor_setFreq     (tPhasor* const osc, float freq);
-    void    tPhasor_setSampleRate (tPhasor* const osc, float sr);
+    Lfloat   tPhasor_tick        (tPhasor* const osc);
+    void    tPhasor_setFreq     (tPhasor* const osc, Lfloat freq);
+    void    tPhasor_setSampleRate (tPhasor* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -500,7 +500,7 @@ extern "C" {
      @brief Free a tNoise from its mempool.
      @param noise A pointer to the tNoise to free.
      
-     @fn float   tNoise_tick         (tNoise* const noise)
+     @fn Lfloat   tNoise_tick         (tNoise* const noise)
      @brief
      @param noise A pointer to the relevant tNoise.
      */
@@ -525,8 +525,8 @@ extern "C" {
         
         tMempool mempool;
         NoiseType type;
-        float pinkb0, pinkb1, pinkb2;
-        float(*rand)(void);
+        Lfloat pinkb0, pinkb1, pinkb2;
+        Lfloat(*rand)(void);
     } _tNoise;
     
     typedef _tNoise* tNoise;
@@ -535,7 +535,7 @@ extern "C" {
     void    tNoise_initToPool   (tNoise* const noise, NoiseType type, tMempool* const);
     void    tNoise_free         (tNoise* const noise);
     
-    float   tNoise_tick         (tNoise* const noise);
+    Lfloat   tNoise_tick         (tNoise* const noise);
     
     //==============================================================================
     
@@ -563,57 +563,57 @@ extern "C" {
      @brief Reset the neuron model.
      @param neuron A pointer to the relevant tNeuron.
      
-     @fn float   tNeuron_tick        (tNeuron* const neuron)
+     @fn Lfloat   tNeuron_tick        (tNeuron* const neuron)
      @brief Tick a tNeuron oscillator.
      @param neuron A pointer to the relevant tNeuron.
-     @return The ticked sample as a float from -1 to 1.
+     @return The ticked sample as a Lfloat from -1 to 1.
      
      @fn void    tNeuron_setMode     (tNeuron* const neuron, NeuronMode mode)
      @brief Set the tNeuron shaping mode.
      @param neuron A pointer to the relevant tNeuron.
      @param mode The mode to set the tNeuron to.
      
-     @fn void    tNeuron_setCurrent  (tNeuron* const neuron, float current)
+     @fn void    tNeuron_setCurrent  (tNeuron* const neuron, Lfloat current)
      @brief Set the current.
      @param neuron A pointer to the relevant tNeuron.
      @param current The new current.
      
-     @fn void    tNeuron_setK        (tNeuron* const neuron, float K)
+     @fn void    tNeuron_setK        (tNeuron* const neuron, Lfloat K)
      @brief Set the potassium value.
      @param neuron A pointer to the relevant tNeuron.
      @param K The new potassium.
      
-     @fn void    tNeuron_setL        (tNeuron* const neuron, float L)
+     @fn void    tNeuron_setL        (tNeuron* const neuron, Lfloat L)
      @brief Set the chloride value.
      @param neuron A pointer to the relevant tNeuron.
      @param L The new chloride value.
      
-     @fn void    tNeuron_setN        (tNeuron* const neuron, float N)
+     @fn void    tNeuron_setN        (tNeuron* const neuron, Lfloat N)
      @brief Set the sodium value.
      @param neuron A pointer to the relevant tNeuron.
      @param N The new sodium value.
      
-     @fn void    tNeuron_setC        (tNeuron* const neuron, float C)
+     @fn void    tNeuron_setC        (tNeuron* const neuron, Lfloat C)
      @brief Set the calcium value.
      @param neuron A pointer to the relevant tNeuron.
      @param C The new calcium.
      
-     @fn  void    tNeuron_setV1       (tNeuron* const neuron, float V1)
+     @fn  void    tNeuron_setV1       (tNeuron* const neuron, Lfloat V1)
      @brief Set the V1 value.
      @param neuron A pointer to the relevant tNeuron.
      @param V1 The new V1.
      
-     @fn void    tNeuron_setV2       (tNeuron* const neuron, float V2)
+     @fn void    tNeuron_setV2       (tNeuron* const neuron, Lfloat V2)
      @brief Set the V2 value.
      @param neuron A pointer to the relevant tNeuron.
      @param V2 The new V2.
      
-     @fn void    tNeuron_setV3       (tNeuron* const neuron, float V3)
+     @fn void    tNeuron_setV3       (tNeuron* const neuron, Lfloat V3)
      @brief Set the V3 value.
      @param neuron A pointer to the relevant tNeuron.
      @param V3 The new V3.
      
-     @fn void    tNeuron_setTimeStep (tNeuron* const neuron, float timestep)
+     @fn void    tNeuron_setTimeStep (tNeuron* const neuron, Lfloat timestep)
      @brief Set the time step of the model.
      @param neuron A pointer to the relevant tNeuron.
      @param timestep The new time step.
@@ -640,15 +640,15 @@ extern "C" {
         
         NeuronMode mode;
         
-        float voltage, current;
-        float timeStep;
-        float invSampleRate;
-        float alpha[3];
-        float beta[3];
-        float rate[3];
-        float V[3];
-        float P[3];
-        float gK, gN, gL, C;
+        Lfloat voltage, current;
+        Lfloat timeStep;
+        Lfloat invSampleRate;
+        Lfloat alpha[3];
+        Lfloat beta[3];
+        Lfloat rate[3];
+        Lfloat V[3];
+        Lfloat P[3];
+        Lfloat gK, gN, gL, C;
     } _tNeuron;
     
     typedef _tNeuron* tNeuron;
@@ -658,18 +658,18 @@ extern "C" {
     void    tNeuron_free        (tNeuron* const neuron);
     
     void    tNeuron_reset       (tNeuron* const neuron);
-    float   tNeuron_tick        (tNeuron* const neuron);
+    Lfloat   tNeuron_tick        (tNeuron* const neuron);
     void    tNeuron_setMode     (tNeuron* const neuron, NeuronMode mode);
-    void    tNeuron_setCurrent  (tNeuron* const neuron, float current);
-    void    tNeuron_setK        (tNeuron* const neuron, float K);
-    void    tNeuron_setL        (tNeuron* const neuron, float L);
-    void    tNeuron_setN        (tNeuron* const neuron, float N);
-    void    tNeuron_setC        (tNeuron* const neuron, float C);
-    void    tNeuron_setV1       (tNeuron* const neuron, float V1);
-    void    tNeuron_setV2       (tNeuron* const neuron, float V2);
-    void    tNeuron_setV3       (tNeuron* const neuron, float V3);
-    void    tNeuron_setTimeStep (tNeuron* const neuron, float timestep);
-    void    tNeuron_setSampleRate(tNeuron* const neuron, float sr);
+    void    tNeuron_setCurrent  (tNeuron* const neuron, Lfloat current);
+    void    tNeuron_setK        (tNeuron* const neuron, Lfloat K);
+    void    tNeuron_setL        (tNeuron* const neuron, Lfloat L);
+    void    tNeuron_setN        (tNeuron* const neuron, Lfloat N);
+    void    tNeuron_setC        (tNeuron* const neuron, Lfloat C);
+    void    tNeuron_setV1       (tNeuron* const neuron, Lfloat V1);
+    void    tNeuron_setV2       (tNeuron* const neuron, Lfloat V2);
+    void    tNeuron_setV3       (tNeuron* const neuron, Lfloat V3);
+    void    tNeuron_setTimeStep (tNeuron* const neuron, Lfloat timestep);
+    void    tNeuron_setSampleRate(tNeuron* const neuron, Lfloat sr);
 
     //==============================================================================
     
@@ -696,19 +696,19 @@ extern "C" {
      @brief Free a tMBPulse from its mempool.
      @param osc A pointer to the tMBPulse to free.
      
-     @fn float tMBPulse_tick(tMBPulse* const osc)
+     @fn Lfloat tMBPulse_tick(tMBPulse* const osc)
      @brief
      @param osc A pointer to the relevant tMBPulse.
      
-     @fn void tMBPulse_setFreq(tMBPulse* const osc, float f)
+     @fn void tMBPulse_setFreq(tMBPulse* const osc, Lfloat f)
      @brief
      @param osc A pointer to the relevant tMBPulse.
      
-     @fn void tMBPulse_setWidth(tMBPulse* const osc, float w)
+     @fn void tMBPulse_setWidth(tMBPulse* const osc, Lfloat w)
      @brief
      @param osc A pointer to the relevant tMBPulse.
      
-     @fn float tMBPulse_sync(tMBPulse* const osc, float sync)
+     @fn Lfloat tMBPulse_sync(tMBPulse* const osc, Lfloat sync)
      @brief
      @param osc A pointer to the relevant tMBPulse.
      
@@ -722,23 +722,23 @@ extern "C" {
     {
         
         tMempool mempool;
-        float    out;
-        float    freq;
-        float    waveform;    // duty cycle, must be in [-1, 1]
-        float    lastsyncin;
-        float    sync;
-        float    syncdir;
+        Lfloat    out;
+        Lfloat    freq;
+        Lfloat    waveform;    // duty cycle, must be in [-1, 1]
+        Lfloat    lastsyncin;
+        Lfloat    sync;
+        Lfloat    syncdir;
         int      softsync;
-        float   _p, _w, _b, _x, _z;
-        float _inv_w;
+        Lfloat   _p, _w, _b, _x, _z;
+        Lfloat _inv_w;
         int     _j, _k;
-        float   _f [8];
+        Lfloat   _f [8];
         uint16_t numBLEPs;
         uint16_t mostRecentBLEP;
         uint16_t maxBLEPphase;
         uint16_t BLEPindices[64];
-        float 	BLEPproperties[64][2];
-        float invSampleRate;
+        Lfloat 	BLEPproperties[64][2];
+        Lfloat invSampleRate;
 
     } _tMBPulse;
     
@@ -748,18 +748,18 @@ extern "C" {
     void tMBPulse_initToPool(tMBPulse* const osc, tMempool* const mempool);
     void tMBPulse_free(tMBPulse* const osc);
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase, float inv_w, float scale);
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #else
-void tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase, float inv_w, float scale);
+void tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #endif
-    float tMBPulse_tick(tMBPulse* const osc);
-    void tMBPulse_setFreq(tMBPulse* const osc, float f);
-    void tMBPulse_setWidth(tMBPulse* const osc, float w);
-    float tMBPulse_sync(tMBPulse* const osc, float sync);
-    void tMBPulse_setPhase(tMBPulse* const osc, float phase);
+    Lfloat tMBPulse_tick(tMBPulse* const osc);
+    void tMBPulse_setFreq(tMBPulse* const osc, Lfloat f);
+    void tMBPulse_setWidth(tMBPulse* const osc, Lfloat w);
+    Lfloat tMBPulse_sync(tMBPulse* const osc, Lfloat sync);
+    void tMBPulse_setPhase(tMBPulse* const osc, Lfloat phase);
     void tMBPulse_setSyncMode(tMBPulse* const osc, int hardOrSoft);
     void tMBPulse_setBufferOffset(tMBPulse* const osc, uint32_t offset);
-    void tMBPulse_setSampleRate (tMBPulse* const osc, float sr);
+    void tMBPulse_setSampleRate (tMBPulse* const osc, Lfloat sr);
     
     /*!
      @defgroup tmbtriangle tMBTriangle
@@ -779,19 +779,19 @@ void tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase
      @brief Free a tMBTriangle from its mempool.
      @param osc A pointer to the tMBTriangle to free.
      
-     @fn float tMBTriangle_tick(tMBTriangle* const osc)
+     @fn Lfloat tMBTriangle_tick(tMBTriangle* const osc)
      @brief
      @param osc A pointer to the relevant tMBTriangle.
      
-     @fn void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
+     @fn void tMBTriangle_setFreq(tMBTriangle* const osc, Lfloat f)
      @brief
      @param osc A pointer to the relevant tMBTriangle.
      
-     @fn void tMBTriangle_setWidth(tMBTriangle* const osc, float w)
+     @fn void tMBTriangle_setWidth(tMBTriangle* const osc, Lfloat w)
      @brief
      @param osc A pointer to the relevant tMBTriangle.
      
-     @fn float tMBTriangle_sync(tMBTriangle* const osc, float sync)
+     @fn Lfloat tMBTriangle_sync(tMBTriangle* const osc, Lfloat sync)
      @brief
      @param osc A pointer to the relevant tMBTriangle.
      
@@ -805,25 +805,25 @@ void tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase
     {
         
         tMempool mempool;
-        float    out;
-        float    freq;
-        float    waveform;    // duty cycle, must be in [-1, 1]
-        float    lastsyncin;
-        float    sync;
-        float    syncdir;
+        Lfloat    out;
+        Lfloat    freq;
+        Lfloat    waveform;    // duty cycle, must be in [-1, 1]
+        Lfloat    lastsyncin;
+        Lfloat    sync;
+        Lfloat    syncdir;
         int      softsync;
-        float   _p, _w, _b, _z, quarterwaveoffset;
+        Lfloat   _p, _w, _b, _z, quarterwaveoffset;
         int     _j, _k;
-        float _inv_w;
-        float 	shape;
-        float   _f [8];
+        Lfloat _inv_w;
+        Lfloat 	shape;
+        Lfloat   _f [8];
         uint16_t numBLEPs;
         uint16_t mostRecentBLEP;
         uint16_t maxBLEPphase;
         uint16_t maxBLEPphaseSlope;
         uint16_t BLEPindices[64];
-        float 	BLEPproperties[64][3];
-        float invSampleRate;
+        Lfloat 	BLEPproperties[64][3];
+        Lfloat invSampleRate;
     } _tMBTriangle;
     
     typedef _tMBTriangle* tMBTriangle;
@@ -832,18 +832,18 @@ void tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase
     void tMBTriangle_initToPool(tMBTriangle* const osc, tMempool* const mempool);
     void tMBTriangle_free(tMBTriangle* const osc);
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w);
 #else
-void tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
+void tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w);
 #endif
-    float tMBTriangle_tick(tMBTriangle* const osc);
-    void tMBTriangle_setFreq(tMBTriangle* const osc, float f);
-    void tMBTriangle_setWidth(tMBTriangle* const osc, float w);
-    float tMBTriangle_sync(tMBTriangle* const osc, float sync);
-    void tMBTriangle_setPhase(tMBTriangle* const osc, float phase);
+    Lfloat tMBTriangle_tick(tMBTriangle* const osc);
+    void tMBTriangle_setFreq(tMBTriangle* const osc, Lfloat f);
+    void tMBTriangle_setWidth(tMBTriangle* const osc, Lfloat w);
+    Lfloat tMBTriangle_sync(tMBTriangle* const osc, Lfloat sync);
+    void tMBTriangle_setPhase(tMBTriangle* const osc, Lfloat phase);
     void tMBTriangle_setSyncMode(tMBTriangle* const osc, int hardOrSoft);
     void tMBTriangle_setBufferOffset(tMBTriangle* const osc, uint32_t offset);
-    void tMBTriangle_setSampleRate (tMBTriangle* const osc, float sr);
+    void tMBTriangle_setSampleRate (tMBTriangle* const osc, Lfloat sr);
     
     
 
@@ -853,26 +853,26 @@ void tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, float phas
     {
 
         tMempool mempool;
-        float    out;
-        float    freq;
-        float    waveform;    // duty cycle, must be in [-1, 1]
-        float    lastsyncin;
-        float    sync;
-        float    syncdir;
+        Lfloat    out;
+        Lfloat    freq;
+        Lfloat    waveform;    // duty cycle, must be in [-1, 1]
+        Lfloat    lastsyncin;
+        Lfloat    sync;
+        Lfloat    syncdir;
         int      softsync;
-        float   _p, _w, _b, _z;
-        float _sinPhase;
-        float shape;
+        Lfloat   _p, _w, _b, _z;
+        Lfloat _sinPhase;
+        Lfloat shape;
         int     _j, _k;
-        float _inv_w;
-        float   _f [8];
+        Lfloat _inv_w;
+        Lfloat   _f [8];
         uint16_t numBLEPs;
         uint16_t mostRecentBLEP;
         uint16_t maxBLEPphase;
         uint16_t maxBLEPphaseSlope;
         uint16_t BLEPindices[64];
-        float 	BLEPproperties[64][3];
-        float invSampleRate;
+        Lfloat 	BLEPproperties[64][3];
+        Lfloat invSampleRate;
         uint32_t sineMask;
     } _tMBSineTri;
 
@@ -882,19 +882,19 @@ void tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, float phas
     void tMBSineTri_initToPool(tMBSineTri* const osc, tMempool* const mempool);
     void tMBSineTri_free(tMBSineTri* const osc);
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w);
 #else
-void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
+void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w);
 #endif
-    float tMBSineTri_tick(tMBSineTri* const osc);
-    void tMBSineTri_setFreq(tMBSineTri* const osc, float f);
-    void tMBSineTri_setWidth(tMBSineTri* const osc, float w);
-    float tMBSineTri_sync(tMBSineTri* const osc, float sync);
-    void tMBSineTri_setPhase(tMBSineTri* const osc, float phase);
-    void tMBSineTri_setShape(tMBSineTri* const osc, float shape);
+    Lfloat tMBSineTri_tick(tMBSineTri* const osc);
+    void tMBSineTri_setFreq(tMBSineTri* const osc, Lfloat f);
+    void tMBSineTri_setWidth(tMBSineTri* const osc, Lfloat w);
+    Lfloat tMBSineTri_sync(tMBSineTri* const osc, Lfloat sync);
+    void tMBSineTri_setPhase(tMBSineTri* const osc, Lfloat phase);
+    void tMBSineTri_setShape(tMBSineTri* const osc, Lfloat shape);
     void tMBSineTri_setSyncMode(tMBSineTri* const osc, int hardOrSoft);
     void tMBSineTri_setBufferOffset(tMBSineTri* const osc, uint32_t offset);
-    void tMBSineTri_setSampleRate (tMBSineTri* const osc, float sr);
+    void tMBSineTri_setSampleRate (tMBSineTri* const osc, Lfloat sr);
 
 
     /*!
@@ -915,17 +915,17 @@ void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase,
      @brief Free a tMBSaw from its mempool.
      @param osc A pointer to the tMBSaw to free.
      
-     @fn float tMBSaw_tick(tMBSaw* const osc)
+     @fn Lfloat tMBSaw_tick(tMBSaw* const osc)
      @brief Tick the oscillator.
      @param osc A pointer to the relevant tMBSaw.
      @return The ticked sample.
      
-     @fn void tMBSaw_setFreq(tMBSaw* const osc, float f)
+     @fn void tMBSaw_setFreq(tMBSaw* const osc, Lfloat f)
      @brief Set the frequency of the oscillator.
      @param osc A pointer to the relevant tMBSaw.
      @param freq The new frequency.
      
-     @fn float tMBSaw_sync(tMBSaw* const osc, float sync)
+     @fn Lfloat tMBSaw_sync(tMBSaw* const osc, Lfloat sync)
      @brief Sync this oscillator to another signal.
      @param osc A pointer to the relevant tMBSaw.
      @param sync A sample of the signal to sync to.
@@ -940,22 +940,22 @@ void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase,
     typedef struct _tMBSaw
     {
         tMempool mempool;
-        float    out;
-        float    freq;
-        float    lastsyncin;
-        float    sync;
-        float    syncdir;
+        Lfloat    out;
+        Lfloat    freq;
+        Lfloat    lastsyncin;
+        Lfloat    sync;
+        Lfloat    syncdir;
         int      softsync;
-        float   _p, _w, _z;
-        float   _inv_w;
+        Lfloat   _p, _w, _z;
+        Lfloat   _inv_w;
         int     _j;
-        float   _f[8];
+        Lfloat   _f[8];
         uint16_t numBLEPs;
         uint16_t mostRecentBLEP;
         uint16_t maxBLEPphase;
         uint16_t 	BLEPindices[64];
-        float 	BLEPproperties[64][2];
-        float invSampleRate;
+        Lfloat 	BLEPproperties[64][2];
+        Lfloat invSampleRate;
     } _tMBSaw;
     
     typedef _tMBSaw* tMBSaw;
@@ -963,17 +963,17 @@ void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase,
     void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf);
     void tMBSaw_initToPool(tMBSaw* const osc, tMempool* const mempool);
     void tMBSaw_free(tMBSaw* const osc);
-    float tMBSaw_tick(tMBSaw* const osc);
-    void tMBSaw_setFreq(tMBSaw* const osc, float f);
-    float tMBSaw_sync(tMBSaw* const osc, float sync);
-    void tMBSaw_setPhase(tMBSaw* const osc, float phase);
+    Lfloat tMBSaw_tick(tMBSaw* const osc);
+    void tMBSaw_setFreq(tMBSaw* const osc, Lfloat f);
+    Lfloat tMBSaw_sync(tMBSaw* const osc, Lfloat sync);
+    void tMBSaw_setPhase(tMBSaw* const osc, Lfloat phase);
     void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft);
     void tMBSaw_setBufferOffset(tMBSaw* const osc, uint32_t offset);
-    void tMBSaw_setSampleRate (tMBSaw* const osc, float sr);
+    void tMBSaw_setSampleRate (tMBSaw* const osc, Lfloat sr);
 #ifdef ITCMRAM
-    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, float phase, float w, float scale);
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat w, Lfloat scale);
 #else
-		void tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, float phase, float w, float scale);
+		void tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat w, Lfloat scale);
 #endif
 
 
@@ -996,17 +996,17 @@ void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase,
      @brief Free a tMBSaw from its mempool.
      @param osc A pointer to the tMBSaw to free.
 
-     @fn float tMBSaw_tick(tMBSaw* const osc)
+     @fn Lfloat tMBSaw_tick(tMBSaw* const osc)
      @brief Tick the oscillator.
      @param osc A pointer to the relevant tMBSaw.
      @return The ticked sample.
 
-     @fn void tMBSaw_setFreq(tMBSaw* const osc, float f)
+     @fn void tMBSaw_setFreq(tMBSaw* const osc, Lfloat f)
      @brief Set the frequency of the oscillator.
      @param osc A pointer to the relevant tMBSaw.
      @param freq The new frequency.
 
-     @fn float tMBSaw_sync(tMBSaw* const osc, float sync)
+     @fn Lfloat tMBSaw_sync(tMBSaw* const osc, Lfloat sync)
      @brief Sync this oscillator to another signal.
      @param osc A pointer to the relevant tMBSaw.
      @param sync A sample of the signal to sync to.
@@ -1021,24 +1021,26 @@ void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase,
     typedef struct _tMBSawPulse
     {
         tMempool mempool;
-        float    out;
-        float    freq;
-        float    lastsyncin;
-        float    sync;
-        float    syncdir;
+        Lfloat    out;
+        Lfloat    freq;
+        Lfloat    lastsyncin;
+        Lfloat    sync;
+        Lfloat    syncdir;
         int      softsync;
-        float    waveform;
-        float   _p, _w, _b, _x, _z, _k;
+        Lfloat    waveform;
+        Lfloat   _p, _w, _b, _x, _z, _k;
         int     _j;
-        float _inv_w;
-        float invSampleRate;
-        float 	shape;
-        float   _f [8];
+        Lfloat _inv_w;
+        Lfloat invSampleRate;
+        Lfloat 	shape;
+        Lfloat   _f [8];
         uint16_t numBLEPs;
         uint16_t mostRecentBLEP;
         uint16_t maxBLEPphase;
         uint16_t BLEPindices[64];
-        float 	BLEPproperties[64][2];
+        Lfloat 	BLEPproperties[64][2];
+        Lfloat gain;
+        int active;
 
     } _tMBSawPulse;
     
@@ -1048,18 +1050,18 @@ void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase,
     void tMBSawPulse_initToPool(tMBSawPulse* const osc, tMempool* const mempool);
     void tMBSawPulse_free(tMBSawPulse* const osc);
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float phase, float inv_w, float scale);
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #else
-void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float phase, float inv_w, float scale);
+void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #endif
-    float tMBSawPulse_tick(tMBSawPulse* const osc);
-    void tMBSawPulse_setFreq(tMBSawPulse* const osc, float f);
-    float tMBSawPulse_sync(tMBSawPulse* const osc, float sync);
-    void tMBSawPulse_setPhase(tMBSawPulse* const osc, float phase);
-    void tMBSawPulse_setShape(tMBSawPulse* const osc, float shape);
+    Lfloat tMBSawPulse_tick(tMBSawPulse* const osc);
+    void tMBSawPulse_setFreq(tMBSawPulse* const osc, Lfloat f);
+    Lfloat tMBSawPulse_sync(tMBSawPulse* const osc, Lfloat sync);
+    void tMBSawPulse_setPhase(tMBSawPulse* const osc, Lfloat phase);
+    void tMBSawPulse_setShape(tMBSawPulse* const osc, Lfloat shape);
     void tMBSawPulse_setSyncMode(tMBSawPulse* const osc, int hardOrSoft);
     void tMBSawPulse_setBufferOffset(tMBSawPulse* const osc, uint32_t offset);
-    void tMBSawPulse_setSampleRate (tMBSawPulse* const osc, float sr);
+    void tMBSawPulse_setSampleRate (tMBSawPulse* const osc, Lfloat sr);
 
     //==============================================================================
     /*!
@@ -1068,14 +1070,14 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Simple aliasing wavetable oscillator.
      @{
      
-     @fn void    tTable_init  (tTable* const osc, float* table, int size, LEAF* const leaf)
+     @fn void    tTable_init  (tTable* const osc, Lfloat* table, int size, LEAF* const leaf)
      @brief Initialize a tTable to the default mempool of a LEAF instance.
      @param osc A pointer to the tTable to initialize.
      @param table A pointer to the wavetable data.
      @param size The number of samples in the wavetable.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tTable_initToPool   (tTable* const osc, float* table, int size, tMempool* const mempool)
+     @fn void    tTable_initToPool   (tTable* const osc, Lfloat* table, int size, tMempool* const mempool)
      @brief Initialize a tTable to a specified mempool.
      @param osc A pointer to the tTable to initialize.
      @param table A pointer to the wavetable data.
@@ -1086,12 +1088,12 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Free a tTable from its mempool.
      @param osc A pointer to the tTable to free.
      
-     @fn float   tTable_tick         (tTable* const osc)
+     @fn Lfloat   tTable_tick         (tTable* const osc)
      @brief Tick a tTable oscillator.
      @param osc A pointer to the relevant tTable.
-     @return The ticked sample as a float from -1 to 1.
+     @return The ticked sample as a Lfloat from -1 to 1.
      
-     @fn void    tTable_setFreq      (tTable* const osc, float freq)
+     @fn void    tTable_setFreq      (tTable* const osc, Lfloat freq)
      @brief Set the frequency of a tTable oscillator.
      @param osc A pointer to the relevant tTable.
      @param freq The frequency to set the oscillator to.
@@ -1102,22 +1104,22 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     {
         tMempool mempool;
         
-        float* waveTable;
+        Lfloat* waveTable;
         int size;
-        float inc, freq;
-        float phase;
-        float invSampleRate;
+        Lfloat inc, freq;
+        Lfloat phase;
+        Lfloat invSampleRate;
     } _tTable;
     
     typedef _tTable* tTable;
     
-    void    tTable_init(tTable* const osc, float* table, int size, LEAF* const leaf);
-    void    tTable_initToPool(tTable* const osc, float* table, int size, tMempool* const mempool);
+    void    tTable_init(tTable* const osc, Lfloat* table, int size, LEAF* const leaf);
+    void    tTable_initToPool(tTable* const osc, Lfloat* table, int size, tMempool* const mempool);
     void    tTable_free(tTable* const osc);
     
-    float   tTable_tick(tTable* const osc);
-    void    tTable_setFreq(tTable* const osc, float freq);
-    void    tTable_setSampleRate (tTable* const osc, float sr);
+    Lfloat   tTable_tick(tTable* const osc);
+    void    tTable_setFreq(tTable* const osc, Lfloat freq);
+    void    tTable_setSampleRate (tTable* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -1127,7 +1129,7 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Anti-aliased wavetable generator.
      @{
      
-     @fn void    tWaveTable_init  (tWaveTable* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
+     @fn void    tWaveTable_init  (tWaveTable* const osc, Lfloat* table, int size, Lfloat maxFreq, LEAF* const leaf)
      @brief Initialize a tWaveTable to the default mempool of a LEAF instance.
      @param osc A pointer to the tWaveTable to initialize.
      @param table A pointer to the wavetable data.
@@ -1135,7 +1137,7 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tWaveTable_initToPool   (tWaveTable* const osc, float* table, int size, float maxFreq, tMempool* const mempool)
+     @fn void    tWaveTable_initToPool   (tWaveTable* const osc, Lfloat* table, int size, Lfloat maxFreq, tMempool* const mempool)
      @brief Initialize a tWaveTable to a specified mempool.
      @param osc A pointer to the tWaveTable to initialize.
      @param table A pointer to the wavetable data.
@@ -1155,25 +1157,25 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     {
         tMempool mempool;
         
-        float* baseTable;
-        float** tables;
+        Lfloat* baseTable;
+        Lfloat** tables;
         int size;
         int sizeMask;
         int numTables;
-        float maxFreq;
-        float baseFreq, invBaseFreq;
+        Lfloat maxFreq;
+        Lfloat baseFreq, invBaseFreq;
         tButterworth bl;
-        float sampleRate;
+        Lfloat sampleRate;
     } _tWaveTable;
     
     typedef _tWaveTable* tWaveTable;
     
-    void    tWaveTable_init(tWaveTable* const osc, float* table, int size,
-                            float maxFreq, LEAF* const leaf);
-    void    tWaveTable_initToPool(tWaveTable* const osc, float* table, int size,
-                                  float maxFreq, tMempool* const mempool);
+    void    tWaveTable_init(tWaveTable* const osc, Lfloat* table, int size,
+                            Lfloat maxFreq, LEAF* const leaf);
+    void    tWaveTable_initToPool(tWaveTable* const osc, Lfloat* table, int size,
+                                  Lfloat maxFreq, tMempool* const mempool);
     void    tWaveTable_free(tWaveTable* const osc);
-    void    tWaveTable_setSampleRate (tWaveTable* const osc, float sr);
+    void    tWaveTable_setSampleRate (tWaveTable* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -1183,14 +1185,14 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Set of anti-aliased wavetable oscillators that can be faded between.
      @{
      
-     @fn void    tWaveOsc_init(tWaveOsc* const osc, const float** tables, int n, int size, float maxFreq, LEAF* const leaf)
+     @fn void    tWaveOsc_init(tWaveOsc* const osc, const Lfloat** tables, int n, int size, Lfloat maxFreq, LEAF* const leaf)
      @brief Initialize a tWaveOsc to the default mempool of a LEAF instance.
      @param osc A pointer to the tWaveOsc to initialize.
      @param tables An array of pointers to wavetable data.
      @param n The number of wavetables.
      @param leaf A pointer to the leaf instance.
      
-     @fn void  tWaveOsc_initToPool(tWaveOsc* const osc, const float** tables, int n, int size, float maxFreq, tMempool* const mempool)
+     @fn void  tWaveOsc_initToPool(tWaveOsc* const osc, const Lfloat** tables, int n, int size, Lfloat maxFreq, tMempool* const mempool)
      @brief Initialize a tWaveOsc to a specified mempool.
      @param osc A pointer to the tWaveTable to initialize.
      @param tables An array of pointers to wavetable data.
@@ -1203,17 +1205,17 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Free a tWaveOsc from its mempool.
      @param osc A pointer to the tWaveOsc to free.
      
-     @fn float   tWaveOsc_tick         (tWaveOsc* const osc)
+     @fn Lfloat   tWaveOsc_tick         (tWaveOsc* const osc)
      @brief Tick a tWaveOsc oscillator.
      @param osc A pointer to the relevant tWaveOsc.
-     @return The ticked sample as a float from -1 to 1.
+     @return The ticked sample as a Lfloat from -1 to 1.
      
-     @fn void    tWaveOsc_setFreq      (tWaveOsc* const osc, float freq)
+     @fn void    tWaveOsc_setFreq      (tWaveOsc* const osc, Lfloat freq)
      @brief Set the frequency of a tWaveOsc oscillator.
      @param osc A pointer to the relevant tWaveOsc.
      @param freq The frequency to set the oscillator to.
      
-     @fn void    tWaveOsc_setIndex(tWaveOsc* const osc, float index)
+     @fn void    tWaveOsc_setIndex(tWaveOsc* const osc, Lfloat index)
      @brief Set the output index of the wavetable set.
      @param index The new index from 0.0 to 1.0 as a smooth fade from the first wavetable in the set to the last.
      
@@ -1224,24 +1226,24 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
            tMempool mempool;
            tWaveTable* tables;
            int numTables;
-           float index;
-           float maxFreq;
+           Lfloat index;
+           Lfloat maxFreq;
            int o1;
            int o2;
-           float mix;
+           Lfloat mix;
            uint32_t phase;
            uint32_t inc;
-           float freq;
-           float invSampleRateTimesTwoTo32;
+           Lfloat freq;
+           Lfloat invSampleRateTimesTwoTo32;
            int oct;
            int size;
 
            // Determine base frequency
-           float baseFreq;
-           float invBaseFreq;
-           float sampleRate;
-           float w;
-           float aa;
+           Lfloat baseFreq;
+           Lfloat invBaseFreq;
+           Lfloat sampleRate;
+           Lfloat w;
+           Lfloat aa;
            int numSubTables;
 
        } _tWaveOsc;
@@ -1252,12 +1254,12 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     void tWaveOsc_initToPool(tWaveOsc* const cy, tWaveTable* tables, int numTables, tMempool* const mp);
     void    tWaveOsc_free(tWaveOsc* const osc);
     
-    float   tWaveOsc_tick(tWaveOsc* const osc);
-    void 	tWaveOsc_setFreq(tWaveOsc* const cy, float freq);
-    void    tWaveOsc_setAntiAliasing(tWaveOsc* const osc, float aa);
-    void    tWaveOsc_setIndex(tWaveOsc* const osc, float index);
+    Lfloat   tWaveOsc_tick(tWaveOsc* const osc);
+    void 	tWaveOsc_setFreq(tWaveOsc* const cy, Lfloat freq);
+    void    tWaveOsc_setAntiAliasing(tWaveOsc* const osc, Lfloat aa);
+    void    tWaveOsc_setIndex(tWaveOsc* const osc, Lfloat index);
     void 	tWaveOsc_setTables(tWaveOsc* const cy, tWaveTable* tables, int numTables);
-    void    tWaveOsc_setSampleRate (tWaveOsc* const osc, float sr);
+    void    tWaveOsc_setSampleRate (tWaveOsc* const osc, Lfloat sr);
 
     //==============================================================================
     
@@ -1267,7 +1269,7 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief A more space-efficient anti-aliased wavetable generator than tWaveTable but with slightly worse fidelity.
      @{
      
-     @fn void    tWaveTableS_init  (tWaveTableS* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
+     @fn void    tWaveTableS_init  (tWaveTableS* const osc, Lfloat* table, int size, Lfloat maxFreq, LEAF* const leaf)
      @brief Initialize a tWaveTableS to the default mempool of a LEAF instance.
      @param osc A pointer to the tWaveTableS to initialize.
      @param table A pointer to the wavetable data.
@@ -1275,7 +1277,7 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tWaveTableS_initToPool   (tWaveTableS* const osc, float* table, int size, float maxFreq, tMempool* const mempool)
+     @fn void    tWaveTableS_initToPool   (tWaveTableS* const osc, Lfloat* table, int size, Lfloat maxFreq, tMempool* const mempool)
      @brief Initialize a tWaveTableS to a specified mempool.
      @param osc A pointer to the tWaveTableS to initialize.
      @param table A pointer to the wavetable data.
@@ -1293,25 +1295,25 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     {
         tMempool mempool;
         
-        float* baseTable;
-        float** tables;
+        Lfloat* baseTable;
+        Lfloat** tables;
         int numTables;
         int* sizes;
         int* sizeMasks;
-        float maxFreq;
-        float baseFreq, invBaseFreq;
+        Lfloat maxFreq;
+        Lfloat baseFreq, invBaseFreq;
         tButterworth bl;
-        float dsBuffer[2];
+        Lfloat dsBuffer[2];
         tOversampler ds;
-        float sampleRate;
+        Lfloat sampleRate;
     } _tWaveTableS;
     
     typedef _tWaveTableS* tWaveTableS;
     
-    void    tWaveTableS_init(tWaveTableS* const osc, float* table, int size, float maxFreq, LEAF* const leaf);
-    void    tWaveTableS_initToPool(tWaveTableS* const osc, float* table, int size, float maxFreq, tMempool* const mempool);
+    void    tWaveTableS_init(tWaveTableS* const osc, Lfloat* table, int size, Lfloat maxFreq, LEAF* const leaf);
+    void    tWaveTableS_initToPool(tWaveTableS* const osc, Lfloat* table, int size, Lfloat maxFreq, tMempool* const mempool);
     void    tWaveTableS_free(tWaveTableS* const osc);
-    void    tWaveTableS_setSampleRate (tWaveTableS* const osc, float sr);
+    void    tWaveTableS_setSampleRate (tWaveTableS* const osc, Lfloat sr);
     
 
     //==============================================================================
@@ -1321,14 +1323,14 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Set of anti-aliased wavetable oscillators that can be faded between.
      @{
      
-     @fn void    tWaveOscS_init(tWaveOsc* const osc, const float** tables, int n, int size, float maxFreq, LEAF* const leaf)
+     @fn void    tWaveOscS_init(tWaveOsc* const osc, const Lfloat** tables, int n, int size, Lfloat maxFreq, LEAF* const leaf)
      @brief Initialize a tWaveOscS to the default mempool of a LEAF instance.
      @param osc A pointer to the tWaveOscS to initialize.
      @param tables An array of pointers to wavetable data.
      @param n The number of wavetables.
      @param leaf A pointer to the leaf instance.
      
-     @fn void  tWaveOscS_initToPool(tWaveOsc* const osc, const float** tables, int n, int size, float maxFreq, tMempool* const mempool)
+     @fn void  tWaveOscS_initToPool(tWaveOsc* const osc, const Lfloat** tables, int n, int size, Lfloat maxFreq, tMempool* const mempool)
      @brief Initialize a tWaveOscS to a specified mempool.
      @param osc A pointer to the tWaveTableS to initialize.
      @param tables An array of pointers to wavetable data.
@@ -1341,17 +1343,17 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Free a tWaveOscS from its mempool.
      @param osc A pointer to the tWaveOscS to free.
      
-     @fn float   tWaveOscS_tick         (tWaveOsc* const osc)
+     @fn Lfloat   tWaveOscS_tick         (tWaveOsc* const osc)
      @brief Tick a tWaveOscS oscillator.
      @param osc A pointer to the relevant tWaveOscS.
-     @return The ticked sample as a float from -1 to 1.
+     @return The ticked sample as a Lfloat from -1 to 1.
      
-     @fn void    tWaveOscS_setFreq      (tWaveOsc* const osc, float freq)
+     @fn void    tWaveOscS_setFreq      (tWaveOsc* const osc, Lfloat freq)
      @brief Set the frequency of a tWaveOscS oscillator.
      @param osc A pointer to the relevant tWaveOscS.
      @param freq The frequency to set the oscillator to.
      
-     @fn void    tWaveOscS_setIndex(tWaveOsc* const osc, float index)
+     @fn void    tWaveOscS_setIndex(tWaveOsc* const osc, Lfloat index)
      @brief Set the output index of the wavetable set.
      @param index The new index from 0.0 to 1.0 as a smooth fade from the first wavetable in the set to the last.
      
@@ -1366,24 +1368,24 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
         tWaveTableS* tables;
 
         int numTables;
-        float index;
-        float maxFreq;
+        Lfloat index;
+        Lfloat maxFreq;
         int o1;
         int o2;
-        float mix;
+        Lfloat mix;
         uint32_t phase;
         uint32_t inc;
-        float freq;
-        float invSampleRateTimesTwoTo32;
+        Lfloat freq;
+        Lfloat invSampleRateTimesTwoTo32;
         int oct;
         int size;
 
         // Determine base frequency
-        float baseFreq;
-        float invBaseFreq;
-        float sampleRate;
-        float w;
-        float aa;
+        Lfloat baseFreq;
+        Lfloat invBaseFreq;
+        Lfloat sampleRate;
+        Lfloat w;
+        Lfloat aa;
         int numSubTables;
 
     } _tWaveOscS;
@@ -1394,12 +1396,12 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     void    tWaveOscS_initToPool(tWaveOscS* const osc, tWaveTableS* tables, int numTables, tMempool* const mempool);
     void    tWaveOscS_free(tWaveOscS* const osc);
     
-    float   tWaveOscS_tick(tWaveOscS* const osc);
-    void    tWaveOscS_setFreq(tWaveOscS* const osc, float freq);
-    void    tWaveOscS_setAntiAliasing(tWaveOscS* const osc, float aa);
-    void    tWaveOscS_setIndex(tWaveOscS* const osc, float index);
-//    void    tWaveOscS_setIndexTable(tWaveOscS* const osc, int i, float* table, int size);
-    void    tWaveOscS_setSampleRate (tWaveOscS* const osc, float sr);
+    Lfloat   tWaveOscS_tick(tWaveOscS* const osc);
+    void    tWaveOscS_setFreq(tWaveOscS* const osc, Lfloat freq);
+    void    tWaveOscS_setAntiAliasing(tWaveOscS* const osc, Lfloat aa);
+    void    tWaveOscS_setIndex(tWaveOscS* const osc, Lfloat index);
+//    void    tWaveOscS_setIndexTable(tWaveOscS* const osc, int i, Lfloat* table, int size);
+    void    tWaveOscS_setSampleRate (tWaveOscS* const osc, Lfloat sr);
     
 
 
@@ -1426,11 +1428,11 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Free a tIntPhasor from its mempool.
      @param osc A pointer to the tIntPhasor to free.
      
-     @fn float   tIntPhasor_tick        (tIntPhasor* const osc)
+     @fn Lfloat   tIntPhasor_tick        (tIntPhasor* const osc)
      @brief
      @param osc A pointer to the relevant tIntPhasor.
      
-     @fn void    tIntPhasor_setFreq     (tIntPhasor* const osc, float freq)
+     @fn void    tIntPhasor_setFreq     (tIntPhasor* const osc, Lfloat freq)
      @brief
      @param osc A pointer to the relevant tIntPhasor.
      ￼￼￼
@@ -1442,10 +1444,10 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
         tMempool mempool;
         uint32_t phase;
         uint32_t inc;
-        float freq;
+        Lfloat freq;
         int32_t mask;
         uint8_t phaseDidReset;
-        float invSampleRateTimesTwoTo32;
+        Lfloat invSampleRateTimesTwoTo32;
     } _tIntPhasor;
     
     typedef _tIntPhasor* tIntPhasor;
@@ -1454,11 +1456,11 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     void    tIntPhasor_initToPool  (tIntPhasor* const osc, tMempool* const);
     void    tIntPhasor_free        (tIntPhasor* const osc);
     
-    float   tIntPhasor_tick        (tIntPhasor* const osc);
-    void    tIntPhasor_setFreq     (tIntPhasor* const osc, float freq);
-    void    tIntPhasor_setSampleRate (tIntPhasor* const osc, float sr);
+    Lfloat   tIntPhasor_tick        (tIntPhasor* const osc);
+    void    tIntPhasor_setFreq     (tIntPhasor* const osc, Lfloat freq);
+    void    tIntPhasor_setSampleRate (tIntPhasor* const osc, Lfloat sr);
     
-    void    tIntPhasor_setPhase(tIntPhasor* const cy, float phase);
+    void    tIntPhasor_setPhase(tIntPhasor* const cy, Lfloat phase);
     
          //==============================================================================
     
@@ -1482,11 +1484,11 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Free a tSquareLFO from its mempool.
      @param osc A pointer to the tSquareLFO to free.
      
-     @fn float   tSquareLFO_tick        (tSquareLFO* const osc)
+     @fn Lfloat   tSquareLFO_tick        (tSquareLFO* const osc)
      @brief
      @param osc A pointer to the relevant tSquareLFO.
      
-     @fn void    tSquareLFO_setFreq     (tSquareLFO* const osc, float freq)
+     @fn void    tSquareLFO_setFreq     (tSquareLFO* const osc, Lfloat freq)
      @brief
      @param osc A pointer to the relevant tSquareLFO.
      ￼￼￼
@@ -1496,7 +1498,7 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     {
         
         tMempool mempool;
-        float pulsewidth;
+        Lfloat pulsewidth;
         tIntPhasor phasor;
         tIntPhasor invPhasor;
     } _tSquareLFO;
@@ -1507,16 +1509,16 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     void    tSquareLFO_initToPool  (tSquareLFO* const osc, tMempool* const);
     void    tSquareLFO_free        (tSquareLFO* const osc);
     
-    float   tSquareLFO_tick        (tSquareLFO* const osc);
-    void    tSquareLFO_setFreq     (tSquareLFO* const osc, float freq);
-    void    tSquareLFO_setSampleRate (tSquareLFO* const osc, float sr);
-    void    tSquareLFO_setPulseWidth (tSquareLFO* const cy, float pw);
-    void    tSquareLFO_setPhase (tSquareLFO* const cy, float phase);
+    Lfloat   tSquareLFO_tick        (tSquareLFO* const osc);
+    void    tSquareLFO_setFreq     (tSquareLFO* const osc, Lfloat freq);
+    void    tSquareLFO_setSampleRate (tSquareLFO* const osc, Lfloat sr);
+    void    tSquareLFO_setPulseWidth (tSquareLFO* const cy, Lfloat pw);
+    void    tSquareLFO_setPhase (tSquareLFO* const cy, Lfloat phase);
 
     typedef struct _tSawSquareLFO
     {
         tMempool mempool;
-        float shape;
+        Lfloat shape;
         tIntPhasor saw;
         tSquareLFO square;
     } _tSawSquareLFO;
@@ -1527,11 +1529,11 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     void    tSawSquareLFO_initToPool  (tSawSquareLFO* const osc, tMempool* const);
     void    tSawSquareLFO_free        (tSawSquareLFO* const osc);
     
-    float   tSawSquareLFO_tick        (tSawSquareLFO* const osc);
-    void    tSawSquareLFO_setFreq     (tSawSquareLFO* const osc, float freq);
-    void    tSawSquareLFO_setSampleRate (tSawSquareLFO* const osc, float sr);
-    void    tSawSquareLFO_setPhase (tSawSquareLFO* const cy, float phase);
-    void    tSawSquareLFO_setShape (tSawSquareLFO* const cy, float shape);
+    Lfloat   tSawSquareLFO_tick        (tSawSquareLFO* const osc);
+    void    tSawSquareLFO_setFreq     (tSawSquareLFO* const osc, Lfloat freq);
+    void    tSawSquareLFO_setSampleRate (tSawSquareLFO* const osc, Lfloat sr);
+    void    tSawSquareLFO_setPhase (tSawSquareLFO* const cy, Lfloat phase);
+    void    tSawSquareLFO_setShape (tSawSquareLFO* const cy, Lfloat shape);
 
         //==============================================================================
  /*!
@@ -1554,11 +1556,11 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
      @brief Free a tTriLFO from its mempool.
      @param osc A pointer to the tTriLFO to free.
      
-     @fn float   tTriLFO_tick        (tTriLFO* const osc)
+     @fn Lfloat   tTriLFO_tick        (tTriLFO* const osc)
      @brief
      @param osc A pointer to the relevant tTriLFO.
      
-     @fn void    tTriLFO_setFreq     (tTriLFO* const osc, float freq)
+     @fn void    tTriLFO_setFreq     (tTriLFO* const osc, Lfloat freq)
      @brief
      @param osc A pointer to the relevant tTriLFO.
      ￼￼￼
@@ -1570,9 +1572,9 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
         tMempool mempool;
         int32_t phase;
         int32_t inc;
-        float freq;
-        float invSampleRate;
-        float invSampleRateTimesTwoTo32;
+        Lfloat freq;
+        Lfloat invSampleRate;
+        Lfloat invSampleRateTimesTwoTo32;
     } _tTriLFO;
     
     typedef _tTriLFO* tTriLFO;
@@ -1581,16 +1583,16 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     void    tTriLFO_initToPool  (tTriLFO* const osc, tMempool* const);
     void    tTriLFO_free        (tTriLFO* const osc);
     
-    float   tTriLFO_tick        (tTriLFO* const osc);
-    void    tTriLFO_setFreq     (tTriLFO* const osc, float freq);
-    void    tTriLFO_setSampleRate (tTriLFO* const osc, float sr);
+    Lfloat   tTriLFO_tick        (tTriLFO* const osc);
+    void    tTriLFO_setFreq     (tTriLFO* const osc, Lfloat freq);
+    void    tTriLFO_setSampleRate (tTriLFO* const osc, Lfloat sr);
     
-    void    tTriLFO_setPhase(tTriLFO* const cy, float phase);
+    void    tTriLFO_setPhase(tTriLFO* const cy, Lfloat phase);
 
     typedef struct _tSineTriLFO
     {
         tMempool mempool;
-        float shape;
+        Lfloat shape;
         tTriLFO tri;
         tCycle sine;
     } _tSineTriLFO;
@@ -1601,11 +1603,11 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float
     void    tSineTriLFO_initToPool  (tSineTriLFO* const osc, tMempool* const);
     void    tSineTriLFO_free        (tSineTriLFO* const osc);
     
-    float   tSineTriLFO_tick        (tSineTriLFO* const osc);
-    void    tSineTriLFO_setFreq     (tSineTriLFO* const osc, float freq);
-    void    tSineTriLFO_setSampleRate (tSineTriLFO* const osc, float sr);
-    void    tSineTriLFO_setPhase (tSineTriLFO* const cy, float phase);
-    void    tSineTriLFO_setShape (tSineTriLFO* const cy, float shape); 
+    Lfloat   tSineTriLFO_tick        (tSineTriLFO* const osc);
+    void    tSineTriLFO_setFreq     (tSineTriLFO* const osc, Lfloat freq);
+    void    tSineTriLFO_setSampleRate (tSineTriLFO* const osc, Lfloat sr);
+    void    tSineTriLFO_setPhase (tSineTriLFO* const cy, Lfloat phase);
+    void    tSineTriLFO_setShape (tSineTriLFO* const cy, Lfloat shape); 
 #ifdef __cplusplus
 }
 #endif

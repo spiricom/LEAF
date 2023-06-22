@@ -145,21 +145,21 @@ extern "C" {
      @param sampleRate The default sample rate for object initialized to this LEAF instance.
      @param memory A pointer to the memory that will make up the default mempool of a LEAF instance.
      @param memorySize The size of the memory that will make up the default mempool of a LEAF instance.
-     @param random A pointer to a random number function. Should return a float >= 0 and < 1.
+     @param random A pointer to a random number function. Should return a Lfloat >= 0 and < 1.
      */
-    void        LEAF_init            (LEAF* const leaf, float sampleRate, char* memory, size_t memorySize, float(*random)(void));
+    void        LEAF_init            (LEAF* const leaf, Lfloat sampleRate, char* memory, size_t memorySize, Lfloat(*random)(void));
     
     //! Set the sample rate of LEAF.
     /*!
      @param sampleRate The new audio sample rate.
      */
-    void        LEAF_setSampleRate   (LEAF* const leaf, float sampleRate);
+    void        LEAF_setSampleRate   (LEAF* const leaf, Lfloat sampleRate);
     
     //! Get the sample rate of LEAF.
     /*!
-     @return The current sample rate as a float.
+     @return The current sample rate as a Lfloat.
      */
-    float       LEAF_getSampleRate   (LEAF* const leaf);
+    Lfloat       LEAF_getSampleRate   (LEAF* const leaf);
     
     //! The default callback function for LEAF errors.
     /*!

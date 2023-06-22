@@ -79,14 +79,14 @@ void tCompressor_free (tCompressor* const comp)
     mpool_free((char*)c, c->mempool);
 }
 
-float tCompressor_tick(tCompressor* const comp, float in)
+Lfloat tCompressor_tick(tCompressor* const comp, Lfloat in)
 {
     _tCompressor* c = *comp;
     
-    float slope, overshoot;
+    Lfloat slope, overshoot;
     
-    float in_db = LEAF_clip(-90.0f, fasteratodb(fastabsf(in)), 0.0f);
-    float out_db = 0.0f;
+    Lfloat in_db = LEAF_clip(-90.0f, fasteratodb(fastabsf(in)), 0.0f);
+    Lfloat out_db = 0.0f;
     
     c->y_T[1] = c->y_T[0];
     
@@ -102,7 +102,7 @@ float tCompressor_tick(tCompressor* const comp, float in)
     }
     else if ((overshoot > -(c->W)) && (overshoot < (c->W)))
     {
-        float squareit = (overshoot + c->W);
+        Lfloat squareit = (overshoot + c->W);
         out_db = in_db + slope * ((squareit * squareit) * c->inv4W); // .^ 2 ???
         c->isActive = 1;
     }
@@ -128,8 +128,117 @@ float tCompressor_tick(tCompressor* const comp, float in)
         c->y_T[0] = c->tauAttack * c->y_T[1] + (1.0f-c->tauAttack) * c->x_T[0];
     else
         c->y_T[0] = c->tauRelease * c->y_T[1] + (1.0f-c->tauRelease) * c->x_T[0];
-    float attenuation = fasterdbtoa(c->M - c->y_T[0]);
+    Lfloat attenuation = fasterdbtoa(c->M - c->y_T[0]);
     return attenuation * in;
+}
+
+//requires tables to be set with set function
+//more efficient without soft knee calculation
+Lfloat tCompressor_tickWithTable(tCompressor* const comp, Lfloat in)
+{
+    _tCompressor* c = *comp;
+
+    Lfloat slope, overshoot;
+
+    in = fastabsf(in);
+    int inAmpIndex = LEAF_clip (0, (in * c->atodbScalar) - c->atodbOffset, c->atodbTableSizeMinus1);
+    Lfloat in_db = c->atodbTable[inAmpIndex];
+    Lfloat out_db = 0.0f;
+
+    c->y_T[1] = c->y_T[0];
+
+    slope = 1.0f - c->invR; // feed-forward topology;
+
+    overshoot = in_db - c->T;
+
+
+    if (overshoot <= -(c->W))
+    {
+        out_db = in_db;
+        c->isActive = 0;
+    }
+    else if ((overshoot > -(c->W)) && (overshoot < (c->W)))
+    {
+        Lfloat squareit = (overshoot + c->W);
+        out_db = in_db + slope * ((squareit * squareit) * c->inv4W); // .^ 2 ???
+        c->isActive = 1;
+    }
+    else
+    {
+        out_db = in_db + slope * overshoot;
+        c->isActive = 1;
+    }
+
+    c->x_T[0] = out_db - in_db;
+    if (c->x_T[0] > c->y_T[1])
+        c->y_T[0] = c->tauAttack * c->y_T[1] + (1.0f-c->tauAttack) * c->x_T[0];
+    else
+        c->y_T[0] = c->tauRelease * c->y_T[1] + (1.0f-c->tauRelease) * c->x_T[0];
+    Lfloat attenuationDb = c->M - c->y_T[0];
+   // tempdbToA = dbtoa(attenuationDb);
+    int attenuationDbIndex = LEAF_clip (0, (attenuationDb * c->dbtoaScalar) - c->dbtoaOffset, c->dbtoaTableSizeMinus1);
+    Lfloat attenuation = c->dbtoaTable[attenuationDbIndex];
+    return attenuation * in;
+}
+
+//requires tables to be set with set function
+Lfloat tCompressor_tickWithTableHardKnee(tCompressor* const comp, Lfloat in)
+{
+    _tCompressor* c = *comp;
+
+    Lfloat slope, overshoot;
+
+    in = fastabsf(in);
+    int inAmpIndex = LEAF_clip (0, (in * c->atodbScalar) - c->atodbOffset, c->atodbTableSizeMinus1);
+    Lfloat in_db = c->atodbTable[inAmpIndex];
+    Lfloat out_db = 0.0f;
+
+    c->y_T[1] = c->y_T[0];
+
+    slope = 1.0f - c->invR; // feed-forward topology;
+
+    overshoot = in_db - c->T;
+
+  // simpler hard-knee version (more efficient)
+    if (overshoot <= 0.0f)
+    {
+        out_db = in_db;
+        c->isActive = 0;
+    }
+    else
+    {
+        out_db = in_db + slope * overshoot;
+        c->isActive = 1;
+    }
+
+    c->x_T[0] = out_db - in_db;
+    if (c->x_T[0] > c->y_T[1])
+        c->y_T[0] = c->tauAttack * c->y_T[1] + (1.0f-c->tauAttack) * c->x_T[0];
+    else
+        c->y_T[0] = c->tauRelease * c->y_T[1] + (1.0f-c->tauRelease) * c->x_T[0];
+    Lfloat attenuationDb = c->M - c->y_T[0];
+   // tempdbToA = dbtoa(attenuationDb);
+    int attenuationDbIndex = LEAF_clip (0, (attenuationDb * c->dbtoaScalar) - c->dbtoaOffset, c->dbtoaTableSizeMinus1);
+    Lfloat attenuation = c->dbtoaTable[attenuationDbIndex];
+    return attenuation * in;
+}
+
+Lfloat tCompressor_setTables(tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize)
+{
+    _tCompressor* c = *comp;
+	c->atodbTable = atodb;
+	c->dbtoaTable = dbtoa;
+
+	c->atodbTableSizeMinus1 = atodbTableSize-1;
+	c->dbtoaTableSizeMinus1 = dbtoaTableSize-1;
+
+	c->atodbScalar = c->atodbTableSizeMinus1/(atodbMaxIn-atodbMinIn);
+	c->atodbOffset = atodbMinIn * c->atodbScalar;
+
+
+	c->dbtoaScalar = c->dbtoaTableSizeMinus1/(dbtoaMaxIn-dbtoaMinIn);
+	c->dbtoaOffset = dbtoaMinIn * c->dbtoaScalar;
+
 }
 
 ////c->tauAttack = 100;
@@ -141,7 +250,7 @@ float tCompressor_tick(tCompressor* const comp, float in)
 //c->R = 0.5f; // compression Ratio
 //c->W = 3.0f; // decibel Width of knee transition
 //c->M = 1.0f; // decibel Make-up gain
-void tCompressor_setParams(tCompressor* const comp, float thresh, float ratio, float knee, float makeup, float attack, float release)
+void tCompressor_setParams(tCompressor* const comp, Lfloat thresh, Lfloat ratio, Lfloat knee, Lfloat makeup, Lfloat attack, Lfloat release)
 {
     _tCompressor* c = *comp;
     c->T = thresh;
@@ -156,12 +265,12 @@ void tCompressor_setParams(tCompressor* const comp, float thresh, float ratio, f
 
 /* Feedback Leveler */
 
-void tFeedbackLeveler_init (tFeedbackLeveler* const fb, float targetLevel, float factor, float strength, int mode, LEAF* const leaf)
+void tFeedbackLeveler_init (tFeedbackLeveler* const fb, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf)
 {
     tFeedbackLeveler_initToPool(fb, targetLevel, factor, strength, mode, &leaf->mempool);
 }
 
-void tFeedbackLeveler_initToPool (tFeedbackLeveler* const fb, float targetLevel, float factor, float strength, int mode, tMempool* const mp)
+void tFeedbackLeveler_initToPool (tFeedbackLeveler* const fb, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tFeedbackLeveler* p = *fb = (_tFeedbackLeveler*) mpool_alloc(sizeof(_tFeedbackLeveler), m);
@@ -182,14 +291,14 @@ void tFeedbackLeveler_free (tFeedbackLeveler* const fb)
     mpool_free((char*)p, p->mempool);
 }
 
-void     tFeedbackLeveler_setStrength(tFeedbackLeveler* const fb, float strength)
+void     tFeedbackLeveler_setStrength(tFeedbackLeveler* const fb, Lfloat strength)
 {    // strength is how strongly level diff is affecting the amp ratio
     // try 0.125 for a start
     _tFeedbackLeveler* p = *fb;
     p->strength=strength;
 }
 
-void     tFeedbackLeveler_setFactor(tFeedbackLeveler* const fb, float factor)
+void     tFeedbackLeveler_setFactor(tFeedbackLeveler* const fb, Lfloat factor)
 {
     _tFeedbackLeveler* p = *fb;
     tPowerFollower_setFactor(&p->pwrFlw,factor);
@@ -201,23 +310,23 @@ void     tFeedbackLeveler_setMode(tFeedbackLeveler* const fb, int mode)
     p->mode=mode;
 }
 
-float   tFeedbackLeveler_tick(tFeedbackLeveler* const fb, float input)
+Lfloat   tFeedbackLeveler_tick(tFeedbackLeveler* const fb, Lfloat input)
 {
     _tFeedbackLeveler* p = *fb;
-    float levdiff=(tPowerFollower_tick(&p->pwrFlw, input)-p->targetLevel);
+    Lfloat levdiff=(tPowerFollower_tick(&p->pwrFlw, input)-p->targetLevel);
     if (p->mode==0 && levdiff<0.0f) levdiff=0.0f;
     p->curr=input*(1.0f-p->strength*levdiff);
     return p->curr;
 }
 
-float   tFeedbackLeveler_sample(tFeedbackLeveler* const fb)
+Lfloat   tFeedbackLeveler_sample(tFeedbackLeveler* const fb)
 {
     _tFeedbackLeveler* p = *fb;
     return p->curr;
 }
 
 
-void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const fb, float TargetLevel)
+void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const fb, Lfloat TargetLevel)
 {
     _tFeedbackLeveler* p = *fb;
     p->targetLevel=TargetLevel;
@@ -225,12 +334,12 @@ void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const fb, float Ta
 
 
 
-void tThreshold_init (tThreshold* const th, float low, float high, LEAF* const leaf)
+void tThreshold_init (tThreshold* const th, Lfloat low, Lfloat high, LEAF* const leaf)
 {
 	tThreshold_initToPool(th, low, high, &leaf->mempool);
 }
 
-void tThreshold_initToPool (tThreshold* const th, float low, float high, tMempool* const mp)
+void tThreshold_initToPool (tThreshold* const th, Lfloat low, Lfloat high, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tThreshold* t = *th = (_tThreshold*) mpool_alloc(sizeof(_tThreshold), m);
@@ -249,7 +358,7 @@ void tThreshold_free (tThreshold* const th)
     mpool_free((char*)t, t->mempool);
 }
 
-int tThreshold_tick(tThreshold* const th, float in)
+int tThreshold_tick(tThreshold* const th, Lfloat in)
 {
     _tThreshold* t = *th;
 
@@ -265,14 +374,14 @@ int tThreshold_tick(tThreshold* const th, float in)
     return t->currentValue;
 }
 
-void tThreshold_setLow(tThreshold* const th, float low)
+void tThreshold_setLow(tThreshold* const th, Lfloat low)
 {
     _tThreshold* t = *th;
 
     t->lowThresh = low;
 }
 
-void tThreshold_setHigh(tThreshold* const th, float high)
+void tThreshold_setHigh(tThreshold* const th, Lfloat high)
 {
     _tThreshold* t = *th;
 

@@ -17,12 +17,12 @@
 #endif
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ tPluck ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
-void    tPluck_init         (tPluck* const pl, float lowestFrequency, LEAF* const leaf)
+void    tPluck_init         (tPluck* const pl, Lfloat lowestFrequency, LEAF* const leaf)
 {
     tPluck_initToPool(pl, lowestFrequency, &leaf->mempool);
 }
 
-void    tPluck_initToPool    (tPluck* const pl, float lowestFrequency, tMempool* const mp)
+void    tPluck_initToPool    (tPluck* const pl, Lfloat lowestFrequency, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tPluck* p = *pl = (_tPluck*) mpool_alloc(sizeof(_tPluck), m);
@@ -57,19 +57,19 @@ void    tPluck_free (tPluck* const pl)
     mpool_free((char*)p, p->mempool);
 }
 
-float   tPluck_getLastOut    (tPluck* const pl)
+Lfloat   tPluck_getLastOut    (tPluck* const pl)
 {
     _tPluck* p = *pl;
     return p->lastOut;
 }
 
-float   tPluck_tick          (tPluck* const pl)
+Lfloat   tPluck_tick          (tPluck* const pl)
 {
     _tPluck* p = *pl;
     return (p->lastOut = 3.0f * tAllpassDelay_tick(&p->delayLine, tOneZero_tick(&p->loopFilter, tAllpassDelay_getLastOut(&p->delayLine) * p->loopGain ) ));
 }
 
-void    tPluck_pluck         (tPluck* const pl, float amplitude)
+void    tPluck_pluck         (tPluck* const pl, Lfloat amplitude)
 {
     _tPluck* p = *pl;
     
@@ -85,7 +85,7 @@ void    tPluck_pluck         (tPluck* const pl, float amplitude)
 }
 
 // Start a note with the given frequency and amplitude.;
-void    tPluck_noteOn        (tPluck* const pl, float frequency, float amplitude )
+void    tPluck_noteOn        (tPluck* const pl, Lfloat frequency, Lfloat amplitude )
 {
     _tPluck* p = *pl;
     p->lastFreq = frequency;
@@ -94,7 +94,7 @@ void    tPluck_noteOn        (tPluck* const pl, float frequency, float amplitude
 }
 
 // Stop a note with the given amplitude (speed of decay).
-void    tPluck_noteOff       (tPluck* const pl, float amplitude )
+void    tPluck_noteOff       (tPluck* const pl, Lfloat amplitude )
 {
     _tPluck* p = *pl;
     
@@ -105,14 +105,14 @@ void    tPluck_noteOff       (tPluck* const pl, float amplitude )
 }
 
 // Set instrument parameters for a particular frequency.
-void    tPluck_setFrequency  (tPluck* const pl, float frequency )
+void    tPluck_setFrequency  (tPluck* const pl, Lfloat frequency )
 {
     _tPluck* p = *pl;
     
     if ( frequency <= 0.0f )   frequency = 0.001f;
     
     // Delay = length - filter delay.
-    float delay = ( p->sampleRate / frequency ) - tOneZero_getPhaseDelay(&p->loopFilter, frequency );
+    Lfloat delay = ( p->sampleRate / frequency ) - tOneZero_getPhaseDelay(&p->loopFilter, frequency );
     
     tAllpassDelay_setDelay(&p->delayLine, delay );
     
@@ -122,12 +122,12 @@ void    tPluck_setFrequency  (tPluck* const pl, float frequency )
 }
 
 // Perform the control change specified by \e number and \e value (0.0 - 128.0).
-void    tPluck_controlChange (tPluck* const pl, int number, float value)
+void    tPluck_controlChange (tPluck* const pl, int number, Lfloat value)
 {
     return;
 }
 
-void tPluck_setSampleRate(tPluck* const pl, float sr)
+void tPluck_setSampleRate(tPluck* const pl, Lfloat sr)
 {
     _tPluck* p = *pl;
     p->sampleRate = sr;
@@ -142,12 +142,12 @@ void tPluck_setSampleRate(tPluck* const pl, float sr)
 }
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ tKarplusStrong ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
-void    tKarplusStrong_init (tKarplusStrong* const pl, float lowestFrequency, LEAF* const leaf)
+void    tKarplusStrong_init (tKarplusStrong* const pl, Lfloat lowestFrequency, LEAF* const leaf)
 {
     tKarplusStrong_initToPool(pl, lowestFrequency, &leaf->mempool);
 }
 
-void    tKarplusStrong_initToPool   (tKarplusStrong* const pl, float lowestFrequency, tMempool* const mp)
+void    tKarplusStrong_initToPool   (tKarplusStrong* const pl, Lfloat lowestFrequency, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tKarplusStrong* p = *pl = (_tKarplusStrong*) mpool_alloc(sizeof(_tKarplusStrong), m);
@@ -200,17 +200,17 @@ void    tKarplusStrong_free (tKarplusStrong* const pl)
     mpool_free((char*)p, p->mempool);
 }
 
-float   tKarplusStrong_getLastOut    (tKarplusStrong* const pl)
+Lfloat   tKarplusStrong_getLastOut    (tKarplusStrong* const pl)
 {
     _tKarplusStrong* p = *pl;
     return p->lastOut;
 }
 
-float   tKarplusStrong_tick          (tKarplusStrong* const pl)
+Lfloat   tKarplusStrong_tick          (tKarplusStrong* const pl)
 {
     _tKarplusStrong* p = *pl;
     
-    float temp = tAllpassDelay_getLastOut(&p->delayLine) * p->loopGain;
+    Lfloat temp = tAllpassDelay_getLastOut(&p->delayLine) * p->loopGain;
     
     // Calculate allpass stretching.
     for (int i=0; i<4; i++)     temp = tBiQuad_tick(&p->biquad[i],temp);
@@ -218,14 +218,14 @@ float   tKarplusStrong_tick          (tKarplusStrong* const pl)
     // Moving average filter.
     temp = tOneZero_tick(&p->filter, temp);
     
-    float out = tAllpassDelay_tick(&p->delayLine, temp);
+    Lfloat out = tAllpassDelay_tick(&p->delayLine, temp);
     out = out - tLinearDelay_tick(&p->combDelay, out);
     p->lastOut = out;
     
     return p->lastOut;
 }
 
-void    tKarplusStrong_pluck         (tKarplusStrong* const pl, float amplitude)
+void    tKarplusStrong_pluck         (tKarplusStrong* const pl, Lfloat amplitude)
 {
     _tKarplusStrong* p = *pl;
     
@@ -243,14 +243,14 @@ void    tKarplusStrong_pluck         (tKarplusStrong* const pl, float amplitude)
 }
 
 // Start a note with the given frequency and amplitude.;
-void    tKarplusStrong_noteOn        (tKarplusStrong* const pl, float frequency, float amplitude )
+void    tKarplusStrong_noteOn        (tKarplusStrong* const pl, Lfloat frequency, Lfloat amplitude )
 {
     tKarplusStrong_setFrequency( pl, frequency );
     tKarplusStrong_pluck( pl, amplitude );
 }
 
 // Stop a note with the given amplitude (speed of decay).
-void    tKarplusStrong_noteOff       (tKarplusStrong* const pl, float amplitude )
+void    tKarplusStrong_noteOff       (tKarplusStrong* const pl, Lfloat amplitude )
 {
     _tKarplusStrong* p = *pl;
     
@@ -261,7 +261,7 @@ void    tKarplusStrong_noteOff       (tKarplusStrong* const pl, float amplitude 
 }
 
 // Set instrument parameters for a particular frequency.
-void    tKarplusStrong_setFrequency  (tKarplusStrong* const pl, float frequency )
+void    tKarplusStrong_setFrequency  (tKarplusStrong* const pl, Lfloat frequency )
 {
     _tKarplusStrong* p = *pl;
     
@@ -269,7 +269,7 @@ void    tKarplusStrong_setFrequency  (tKarplusStrong* const pl, float frequency 
     
     p->lastFrequency = frequency;
     p->lastLength = p->sampleRate / p->lastFrequency;
-    float delay = p->lastLength - 0.5f;
+    Lfloat delay = p->lastLength - 0.5f;
     tAllpassDelay_setDelay(&p->delayLine, delay);
     
     // MAYBE MODIFY LOOP GAINS
@@ -282,15 +282,15 @@ void    tKarplusStrong_setFrequency  (tKarplusStrong* const pl, float frequency 
 }
 
 // Set the stretch "factor" of the string (0.0 - 1.0).
-void    tKarplusStrong_setStretch         (tKarplusStrong* const pl, float stretch)
+void    tKarplusStrong_setStretch         (tKarplusStrong* const pl, Lfloat stretch)
 {
     _tKarplusStrong* p = *pl;
     
     p->stretching = stretch;
-    float coefficient;
-    float freq = p->lastFrequency * 2.0f;
-    float dFreq = ( (0.5f * p->sampleRate) - freq ) * 0.25f;
-    float temp = 0.5f + (stretch * 0.5f);
+    Lfloat coefficient;
+    Lfloat freq = p->lastFrequency * 2.0f;
+    Lfloat dFreq = ( (0.5f * p->sampleRate) - freq ) * 0.25f;
+    Lfloat temp = 0.5f + (stretch * 0.5f);
     if ( temp > 0.9999f ) temp = 0.9999f;
     
     for ( int i=0; i<4; i++ )
@@ -309,7 +309,7 @@ void    tKarplusStrong_setStretch         (tKarplusStrong* const pl, float stret
 }
 
 // Set the pluck or "excitation" position along the string (0.0 - 1.0).
-void    tKarplusStrong_setPickupPosition  (tKarplusStrong* const pl, float position )
+void    tKarplusStrong_setPickupPosition  (tKarplusStrong* const pl, Lfloat position )
 {
     _tKarplusStrong* p = *pl;
     
@@ -321,7 +321,7 @@ void    tKarplusStrong_setPickupPosition  (tKarplusStrong* const pl, float posit
 }
 
 // Set the base loop gain.
-void    tKarplusStrong_setBaseLoopGain    (tKarplusStrong* const pl, float aGain )
+void    tKarplusStrong_setBaseLoopGain    (tKarplusStrong* const pl, Lfloat aGain )
 {
     _tKarplusStrong* p = *pl;
     
@@ -331,12 +331,12 @@ void    tKarplusStrong_setBaseLoopGain    (tKarplusStrong* const pl, float aGain
 }
 
 // Perform the control change specified by \e number and \e value (0.0 - 128.0).
-void    tKarplusStrong_controlChange (tKarplusStrong* const pl, SKControlType type, float value)
+void    tKarplusStrong_controlChange (tKarplusStrong* const pl, SKControlType type, Lfloat value)
 {
     if ( value < 0.0f )         value = 0.0f;
     else if (value > 128.0f)   value = 128.0f;
     
-    float normalizedValue = value * INV_128;
+    Lfloat normalizedValue = value * INV_128;
     
     if (type == SKPickPosition) // 4
         tKarplusStrong_setPickupPosition( pl, normalizedValue );
@@ -346,7 +346,7 @@ void    tKarplusStrong_controlChange (tKarplusStrong* const pl, SKControlType ty
         tKarplusStrong_setStretch( pl, 0.91f + (0.09f * (1.0f - normalizedValue)) );
 }
 
-void    tKarplusStrong_setSampleRate (tKarplusStrong* const pl, float sr)
+void    tKarplusStrong_setSampleRate (tKarplusStrong* const pl, Lfloat sr)
 {
     _tKarplusStrong* p = *pl;
     p->sampleRate = sr;
@@ -370,16 +370,16 @@ void    tKarplusStrong_setSampleRate (tKarplusStrong* const pl, float sr)
 
 /* Simple Living String*/
 
-void    tSimpleLivingString_init(tSimpleLivingString* const pl, float freq, float dampFreq,
-                                 float decay, float targetLev, float levSmoothFactor,
-                                 float levStrength, int levMode, LEAF* const leaf)
+void    tSimpleLivingString_init(tSimpleLivingString* const pl, Lfloat freq, Lfloat dampFreq,
+                                 Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                 Lfloat levStrength, int levMode, LEAF* const leaf)
 {
     tSimpleLivingString_initToPool(pl, freq, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf->mempool);
 }
 
-void    tSimpleLivingString_initToPool  (tSimpleLivingString* const pl, float freq, float dampFreq,
-                                         float decay, float targetLev, float levSmoothFactor,
-                                         float levStrength, int levMode, tMempool* const mp)
+void    tSimpleLivingString_initToPool  (tSimpleLivingString* const pl, Lfloat freq, Lfloat dampFreq,
+                                         Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                         Lfloat levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSimpleLivingString* p = *pl = (_tSimpleLivingString*) mpool_alloc(sizeof(_tSimpleLivingString), m);
@@ -412,7 +412,7 @@ void    tSimpleLivingString_free (tSimpleLivingString* const pl)
     mpool_free((char*)p, p->mempool);
 }
 
-void     tSimpleLivingString_setFreq(tSimpleLivingString* const pl, float freq)
+void     tSimpleLivingString_setFreq(tSimpleLivingString* const pl, Lfloat freq)
 {
     _tSimpleLivingString* p = *pl;
     
@@ -422,7 +422,7 @@ void     tSimpleLivingString_setFreq(tSimpleLivingString* const pl, float freq)
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tSimpleLivingString_setWaveLength(tSimpleLivingString* const pl, float waveLength)
+void     tSimpleLivingString_setWaveLength(tSimpleLivingString* const pl, Lfloat waveLength)
 {
     _tSimpleLivingString* p = *pl;
     
@@ -432,31 +432,31 @@ void     tSimpleLivingString_setWaveLength(tSimpleLivingString* const pl, float 
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tSimpleLivingString_setDampFreq(tSimpleLivingString* const pl, float dampFreq)
+void     tSimpleLivingString_setDampFreq(tSimpleLivingString* const pl, Lfloat dampFreq)
 {
     _tSimpleLivingString* p = *pl;
     tOnePole_setFreq(&p->bridgeFilter, dampFreq);
 }
 
-void     tSimpleLivingString_setDecay(tSimpleLivingString* const pl, float decay)
+void     tSimpleLivingString_setDecay(tSimpleLivingString* const pl, Lfloat decay)
 {
     _tSimpleLivingString* p = *pl;
     p->decay=decay;
 }
 
-void     tSimpleLivingString_setTargetLev(tSimpleLivingString* const pl, float targetLev)
+void     tSimpleLivingString_setTargetLev(tSimpleLivingString* const pl, Lfloat targetLev)
 {
     _tSimpleLivingString* p = *pl;
     tFeedbackLeveler_setTargetLevel(&p->fbLev, targetLev);
 }
 
-void     tSimpleLivingString_setLevSmoothFactor(tSimpleLivingString* const pl, float levSmoothFactor)
+void     tSimpleLivingString_setLevSmoothFactor(tSimpleLivingString* const pl, Lfloat levSmoothFactor)
 {
     _tSimpleLivingString* p = *pl;
     tFeedbackLeveler_setFactor(&p->fbLev, levSmoothFactor);
 }
 
-void     tSimpleLivingString_setLevStrength(tSimpleLivingString* const pl, float levStrength)
+void     tSimpleLivingString_setLevStrength(tSimpleLivingString* const pl, Lfloat levStrength)
 {
     _tSimpleLivingString* p = *pl;
     tFeedbackLeveler_setStrength(&p->fbLev, levStrength);
@@ -469,28 +469,28 @@ void     tSimpleLivingString_setLevMode(tSimpleLivingString* const pl, int levMo
     p->levMode=levMode;
 }
 
-float   tSimpleLivingString_tick(tSimpleLivingString* const pl, float input)
+Lfloat   tSimpleLivingString_tick(tSimpleLivingString* const pl, Lfloat input)
 {
     _tSimpleLivingString* p = *pl;
     
-    float stringOut=tOnePole_tick(&p->bridgeFilter,tLinearDelay_tickOut(&p->delayLine));
-    float stringInput=tHighpass_tick(&p->DCblocker, tFeedbackLeveler_tick(&p->fbLev, (p->levMode==0?p->decay*stringOut:stringOut)+input));
+    Lfloat stringOut=tOnePole_tick(&p->bridgeFilter,tLinearDelay_tickOut(&p->delayLine));
+    Lfloat stringInput=tHighpass_tick(&p->DCblocker, tFeedbackLeveler_tick(&p->fbLev, (p->levMode==0?p->decay*stringOut:stringOut)+input));
     tLinearDelay_tickIn(&p->delayLine, stringInput);
     tLinearDelay_setDelay(&p->delayLine, tExpSmooth_tick(&p->wlSmooth));
     p->curr = stringOut;
     return p->curr;
 }
 
-float   tSimpleLivingString_sample(tSimpleLivingString* const pl)
+Lfloat   tSimpleLivingString_sample(tSimpleLivingString* const pl)
 {
     _tSimpleLivingString* p = *pl;
     return p->curr;
 }
 
-void   tSimpleLivingString_setSampleRate(tSimpleLivingString* const pl, float sr)
+void   tSimpleLivingString_setSampleRate(tSimpleLivingString* const pl, Lfloat sr)
 {
     _tSimpleLivingString* p = *pl;
-    float freq = p->sampleRate/p->waveLengthInSamples;
+    Lfloat freq = p->sampleRate/p->waveLengthInSamples;
     p->sampleRate = sr;
     p->waveLengthInSamples = p->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
@@ -501,16 +501,16 @@ void   tSimpleLivingString_setSampleRate(tSimpleLivingString* const pl, float sr
 
 /* Simple Living String*/
 
-void    tSimpleLivingString3_init(tSimpleLivingString3* const pl, int oversampling, float freq, float dampFreq,
-                                 float decay, float targetLev, float levSmoothFactor,
-                                 float levStrength, int levMode, LEAF* const leaf)
+void    tSimpleLivingString3_init(tSimpleLivingString3* const pl, int oversampling, Lfloat freq, Lfloat dampFreq,
+                                 Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                 Lfloat levStrength, int levMode, LEAF* const leaf)
 {
     tSimpleLivingString3_initToPool(pl, oversampling, freq, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf->mempool);
 }
 
-void    tSimpleLivingString3_initToPool  (tSimpleLivingString3* const pl, int oversampling, float freq, float dampFreq,
-                                         float decay, float targetLev, float levSmoothFactor,
-                                         float levStrength, int levMode, tMempool* const mp)
+void    tSimpleLivingString3_initToPool  (tSimpleLivingString3* const pl, int oversampling, Lfloat freq, Lfloat dampFreq,
+                                         Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                         Lfloat levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSimpleLivingString3* p = *pl = (_tSimpleLivingString3*) mpool_alloc(sizeof(_tSimpleLivingString3), m);
@@ -530,12 +530,36 @@ void    tSimpleLivingString3_initToPool  (tSimpleLivingString3* const pl, int ov
     tLinearDelay_clear(&p->delayLineU);
     tLinearDelay_clear(&p->delayLineL);
     p->dampFreq = dampFreq;
-    p->freq = freq;
     tOnePole_initToPool(&p->bridgeFilter, dampFreq, mp);
+    tOnePole_setSampleRate(&p->bridgeFilter, p->sampleRate);
+    tOnePole_setFreq(&p->bridgeFilter, dampFreq);
+
+    tBiQuad_initToPool(&p->bridgeFilter2, mp);
+    tBiQuad_setSampleRate(&p->bridgeFilter2, p->sampleRate);
+
     tHighpass_initToPool(&p->DCblocker,13, mp);
-    p->decay=decay;
+    tHighpass_setSampleRate(&p->DCblocker,p->sampleRate);
+    tHighpass_setFreq(&p->DCblocker,13);
+    p->userDecay = decay;
+
     tFeedbackLeveler_initToPool(&p->fbLev, targetLev, levSmoothFactor, levStrength, levMode, mp);
     p->levMode=levMode;
+    p->changeGainCompensator = 1.0f;
+
+    p->freq = freq;
+    Lfloat waveLength = (p->sampleRate/freq);
+    if (waveLength<4.8) waveLength=4.8f;
+    else if (waveLength>p->maxLength*2) waveLength=p->maxLength*2;
+    p->waveLengthInSamples =  waveLength * 0.5f;
+    tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+
+    Lfloat temp = ((p->userDecay * 0.01f) + 0.01f) * 6.9078f;
+    p->decay = exp(-6.91 * ((1.0 / p->freq)  / temp));
+    p->pickupPoint = 0.9f;
+    //p->decay=powf(0.001f,1.0f/(p->freq*p->userDecay));
+    p->prevDelayLength = p->waveLengthInSamples;
+
+
 }
 
 void    tSimpleLivingString3_free (tSimpleLivingString3* const pl)
@@ -546,24 +570,32 @@ void    tSimpleLivingString3_free (tSimpleLivingString3* const pl)
     tLinearDelay_free(&p->delayLineU);
     tLinearDelay_free(&p->delayLineL);
     tOnePole_free(&p->bridgeFilter);
+    tBiQuad_free(&p->bridgeFilter2),
     tHighpass_free(&p->DCblocker);
     tFeedbackLeveler_free(&p->fbLev);
     
     mpool_free((char*)p, p->mempool);
 }
 
-void     tSimpleLivingString3_setFreq(tSimpleLivingString3* const pl, float freq)
+void     tSimpleLivingString3_setFreq(tSimpleLivingString3* const pl, Lfloat freq)
 {
     _tSimpleLivingString3* p = *pl;
     p->freq = freq;
-    float waveLength = (p->sampleRate/freq);
+    Lfloat waveLength = (p->sampleRate/freq);
     if (waveLength<4.8) waveLength=4.8f;
     else if (waveLength>p->maxLength*2) waveLength=p->maxLength*2;
     p->waveLengthInSamples =  waveLength * 0.5f;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
+    //Lfloat decay = p->userDecay;
+
+    Lfloat temp = ((p->userDecay * 0.01f) + 0.01f) * 6.9078f;
+    p->decay = exp(-6.91 * ((1.0 / p->freq)  / temp));
+    //tBiQuad_setCoefficients(&p->bridgeFilter2,p->temp1,p->temp2, p->temp1, 0.0f, 0.0f);
+
+    //p->decay=powf(0.001f,1.0f/(p->freq*p->userDecay));
 }
 
-void     tSimpleLivingString3_setWaveLength(tSimpleLivingString3* const pl, float waveLength)
+void     tSimpleLivingString3_setWaveLength(tSimpleLivingString3* const pl, Lfloat waveLength)
 {
     _tSimpleLivingString3* p = *pl;
     
@@ -573,31 +605,40 @@ void     tSimpleLivingString3_setWaveLength(tSimpleLivingString3* const pl, floa
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tSimpleLivingString3_setDampFreq(tSimpleLivingString3* const pl, float dampFreq)
+void     tSimpleLivingString3_setDampFreq(tSimpleLivingString3* const pl, Lfloat dampFreq)
 {
     _tSimpleLivingString3* p = *pl;
+    //p->temp1 = (1.0f - brightness) * 0.25f * p->decay;
+    //p->temp2 = (1.0f + brightness) * 0.5f * p->decay;
+    //tBiQuad_setCoefficients(&p->bridgeFilter2, p->temp1 , p->temp2, p->temp1 , 0.0f, 0.0f);
+
     tOnePole_setFreq(&p->bridgeFilter, dampFreq);
 }
 
-void     tSimpleLivingString3_setDecay(tSimpleLivingString3* const pl, float decay)
+void     tSimpleLivingString3_setDecay(tSimpleLivingString3* const pl, Lfloat decay)
 {
     _tSimpleLivingString3* p = *pl;
-    p->decay=decay;
+    p->userDecay = decay;
+
+    Lfloat temp = ((decay * 0.01f) + 0.01f) * 6.9078f;
+    p->decay = exp(-6.9078 * ((1.0 / p->freq)  / temp));
+    //tBiQuad_setCoefficients(&p->bridgeFilter2,p->temp1,p->temp2, p->temp1, 0.0f, 0.0f);
+    //p->decay=powf(0.001f,1.0f/(p->freq*decay));
 }
 
-void     tSimpleLivingString3_setTargetLev(tSimpleLivingString3* const pl, float targetLev)
+void     tSimpleLivingString3_setTargetLev(tSimpleLivingString3* const pl, Lfloat targetLev)
 {
     _tSimpleLivingString3* p = *pl;
     tFeedbackLeveler_setTargetLevel(&p->fbLev, targetLev);
 }
 
-void     tSimpleLivingString3_setLevSmoothFactor(tSimpleLivingString3* const pl, float levSmoothFactor)
+void     tSimpleLivingString3_setLevSmoothFactor(tSimpleLivingString3* const pl, Lfloat levSmoothFactor)
 {
     _tSimpleLivingString3* p = *pl;
     tFeedbackLeveler_setFactor(&p->fbLev, levSmoothFactor);
 }
 
-void     tSimpleLivingString3_setLevStrength(tSimpleLivingString3* const pl, float levStrength)
+void     tSimpleLivingString3_setLevStrength(tSimpleLivingString3* const pl, Lfloat levStrength)
 {
     _tSimpleLivingString3* p = *pl;
     tFeedbackLeveler_setStrength(&p->fbLev, levStrength);
@@ -610,22 +651,30 @@ void     tSimpleLivingString3_setLevMode(tSimpleLivingString3* const pl, int lev
     p->levMode=levMode;
 }
 
-void   tSimpleLivingString3_pluck(tSimpleLivingString3* const pl, float input, float position)
+void   tSimpleLivingString3_pluck(tSimpleLivingString3* const pl, Lfloat input, Lfloat position)
 {
     _tSimpleLivingString3* p = *pl;
     int length = p->waveLengthInSamples;
     int pluckPoint = (int)(length * position);
+    if (pluckPoint < 1)
+    {
+    	pluckPoint = 1;
+    }
+    else if (pluckPoint > (length-1))
+    {
+    	pluckPoint = length-1;
+    }
     int remainder = length-pluckPoint;
     for (int i = 0; i < length; i++)
     {
-        float val = 0.0f;
+        Lfloat val = 0.0f;
         if (i <= pluckPoint)
         {
-            val = input * ((float)i/(float)pluckPoint);
+            val = input * ((Lfloat)i/(Lfloat)pluckPoint);
         }
         else
         {
-            val = input * (1.0f - (((float)i-(float)pluckPoint)/(float)remainder));
+            val = input * (1.0f - (((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder));
                                  
         }
         int bufWritePoint = (i+p->delayLineU->outPoint)%p->delayLineU->maxDelay;
@@ -640,41 +689,86 @@ void   tSimpleLivingString3_pluck(tSimpleLivingString3* const pl, float input, f
     }
 }
 
-float   tSimpleLivingString3_tick(tSimpleLivingString3* const pl, float input)
+Lfloat   tSimpleLivingString3_tick(tSimpleLivingString3* const pl, Lfloat input)
 {
     _tSimpleLivingString3* p = *pl;
-    tLinearDelay_setDelay(&p->delayLineU, tExpSmooth_tick(&p->wlSmooth));
-    tLinearDelay_setDelay(&p->delayLineL, tExpSmooth_tick(&p->wlSmooth));
+
+    //p->changeGainCompensator = 1.0f;
+    Lfloat wl = tExpSmooth_tick(&p->wlSmooth);
+    //Lfloat changeInDelayTime = wl - p->prevDelayLength;
+    //if (changeInDelayTime < 0.0f)
+    {
+    //	p->changeGainCompensator = sqrtf(1.0f - changeInDelayTime);
+    }
+    tLinearDelay_setDelay(&p->delayLineU, wl);
+    tLinearDelay_setDelay(&p->delayLineL, wl);
     
-    p->Uout = tOnePole_tick(&p->bridgeFilter,tLinearDelay_tickOut(&p->delayLineU));
-    p->Lout = tLinearDelay_tickOut(&p->delayLineL);
+    for (int i = 0; i < p->oversampling; i++)
+    {
+		p->Uout = tOnePole_tick(&p->bridgeFilter,tLinearDelay_tickOut(&p->delayLineU))* p->decay;
+		p->Uout = LEAF_clip(-1.0f, tFeedbackLeveler_tick(&p->fbLev, p->Uout), 1.0f);
+    	//p->Uout = tLinearDelay_tickOut(&p->delayLineU) * p->decay;
+		p->Lout = LEAF_clip(-1.0f, tLinearDelay_tickOut(&p->delayLineL), 1.0f);
+
+		tLinearDelay_tickIn(&p->delayLineU, -1.0f * p->Lout);
+		tLinearDelay_tickIn(&p->delayLineL, -1.0f * p->Uout);
+    }
     
-    tLinearDelay_tickIn(&p->delayLineU, -1.0f * p->Lout);
-    tLinearDelay_tickIn(&p->delayLineL, -1.0f * p->Uout);
-    
-    
-    //float stringInput=tHighpass_tick(&p->DCblocker, tFeedbackLeveler_tick(&p->fbLev, (p->levMode==0?p->decay*stringOut:stringOut)+input));
+    //calculate pickup point
+    Lfloat point = wl * p->pickupPoint;
+    Lfloat reversePoint = wl * (1.0f - p->pickupPoint);
+    int32_t whichPoint = ((int32_t)roundf(point));
+    Lfloat LfloatPart = point - whichPoint;
+
+    int32_t outpointplus =((int32_t)p->delayLineU->outPoint + whichPoint);
+    int32_t outpointmod = outpointplus % (int32_t)p->delayLineU->maxDelay;
+    int32_t outpointmod2 = (outpointmod + 1) % (int32_t)p->delayLineU->maxDelay;
+    Lfloat sampleBitOne = (p->delayLineU->buff[outpointmod] * (1.0f - LfloatPart)) + (p->delayLineU->buff[outpointmod2] * LfloatPart);
+
+
+    whichPoint = (int32_t)roundf(reversePoint);
+    LfloatPart = reversePoint - whichPoint;
+    outpointplus =(((int32_t)p->delayLineL->outPoint) + whichPoint);
+    outpointmod = outpointplus % (int32_t)p->delayLineL->maxDelay;
+    outpointmod2 = (outpointmod + 1) % (int32_t)p->delayLineL->maxDelay;
+    Lfloat sampleBitTwo = (p->delayLineL->buff[outpointmod] * (1.0f - LfloatPart)) + (p->delayLineL->buff[outpointmod2] * LfloatPart);
+
+    p->curr = 0.5f * (sampleBitOne + sampleBitTwo);
+    //p->curr = p->Uout;
+
+    p->prevDelayLength = p->waveLengthInSamples;
+    //Lfloat stringInput=tHighpass_tick(&p->DCblocker, tFeedbackLeveler_tick(&p->fbLev, (p->levMode==0?p->decay*stringOut:stringOut)+input));
     //tLinearDelay_tickIn(&p->delayLine, stringInput);
     //tLinearDelay_setDelay(&p->delayLine, tExpSmooth_tick(&p->wlSmooth));
     //p->curr = d1 + d2;
     return p->curr;
 }
 
-float   tSimpleLivingString3_sample(tSimpleLivingString3* const pl)
+
+void   tSimpleLivingString3_setPickupPoint(tSimpleLivingString3* const pl, Lfloat pickupPoint)
+{
+    _tSimpleLivingString3* p = *pl;
+    p->pickupPoint = pickupPoint;
+}
+
+
+Lfloat   tSimpleLivingString3_sample(tSimpleLivingString3* const pl)
 {
     _tSimpleLivingString3* p = *pl;
     return p->curr;
 }
 
-void   tSimpleLivingString3_setSampleRate(tSimpleLivingString3* const pl, float sr)
+void   tSimpleLivingString3_setSampleRate(tSimpleLivingString3* const pl, Lfloat sr)
 {
     _tSimpleLivingString3* p = *pl;
-    float freq = p->sampleRate/p->waveLengthInSamples;
-    p->sampleRate = sr;
+    p->sampleRate = sr*p->oversampling;
+    Lfloat freq = p->sampleRate/p->waveLengthInSamples;
+
     p->waveLengthInSamples = p->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
     tOnePole_setSampleRate(&p->bridgeFilter, p->sampleRate);
     tHighpass_setSampleRate(&p->DCblocker, p->sampleRate);
+    tBiQuad_setSampleRate(&p->bridgeFilter2, p->sampleRate);
 }
 
 
@@ -682,16 +776,16 @@ void   tSimpleLivingString3_setSampleRate(tSimpleLivingString3* const pl, float 
 
 /* Simple Living String*/
 
-void    tSimpleLivingString2_init(tSimpleLivingString2* const pl, float freq, float brightness,
-                                 float decay, float targetLev, float levSmoothFactor,
-                                 float levStrength, int levMode, LEAF* const leaf)
+void    tSimpleLivingString2_init(tSimpleLivingString2* const pl, Lfloat freq, Lfloat brightness,
+                                 Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                 Lfloat levStrength, int levMode, LEAF* const leaf)
 {
     tSimpleLivingString2_initToPool(pl, freq, brightness, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf->mempool);
 }
 
-void    tSimpleLivingString2_initToPool  (tSimpleLivingString2* const pl, float freq, float brightness,
-                                         float decay, float targetLev, float levSmoothFactor,
-                                         float levStrength, int levMode, tMempool* const mp)
+void    tSimpleLivingString2_initToPool  (tSimpleLivingString2* const pl, Lfloat freq, Lfloat brightness,
+                                         Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                         Lfloat levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tSimpleLivingString2* p = *pl = (_tSimpleLivingString2*) mpool_alloc(sizeof(_tSimpleLivingString2), m);
@@ -725,7 +819,7 @@ void    tSimpleLivingString2_free (tSimpleLivingString2* const pl)
     mpool_free((char*)p, p->mempool);
 }
 
-void     tSimpleLivingString2_setFreq(tSimpleLivingString2* const pl, float freq)
+void     tSimpleLivingString2_setFreq(tSimpleLivingString2* const pl, Lfloat freq)
 {
     _tSimpleLivingString2* p = *pl;
 
@@ -735,7 +829,7 @@ void     tSimpleLivingString2_setFreq(tSimpleLivingString2* const pl, float freq
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tSimpleLivingString2_setWaveLength(tSimpleLivingString2* const pl, float waveLength)
+void     tSimpleLivingString2_setWaveLength(tSimpleLivingString2* const pl, Lfloat waveLength)
 {
     _tSimpleLivingString2* p = *pl;
 
@@ -745,33 +839,33 @@ void     tSimpleLivingString2_setWaveLength(tSimpleLivingString2* const pl, floa
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tSimpleLivingString2_setBrightness(tSimpleLivingString2* const pl, float brightness)
+void     tSimpleLivingString2_setBrightness(tSimpleLivingString2* const pl, Lfloat brightness)
 {
     _tSimpleLivingString2* p = *pl;
-    float h0 = (1.0f + brightness) * 0.5f;
-    float h1 = (1.0f - brightness) * 0.25f;
+    Lfloat h0 = (1.0f + brightness) * 0.5f;
+    Lfloat h1 = (1.0f - brightness) * 0.25f;
     tTwoZero_setCoefficients(&p->bridgeFilter, h1, h0, h1);
 }
 
-void     tSimpleLivingString2_setDecay(tSimpleLivingString2* const pl, float decay)
+void     tSimpleLivingString2_setDecay(tSimpleLivingString2* const pl, Lfloat decay)
 {
     _tSimpleLivingString2* p = *pl;
     p->decay=decay;
 }
 
-void     tSimpleLivingString2_setTargetLev(tSimpleLivingString2* const pl, float targetLev)
+void     tSimpleLivingString2_setTargetLev(tSimpleLivingString2* const pl, Lfloat targetLev)
 {
     _tSimpleLivingString2* p = *pl;
     tFeedbackLeveler_setTargetLevel(&p->fbLev, targetLev);
 }
 
-void     tSimpleLivingString2_setLevSmoothFactor(tSimpleLivingString2* const pl, float levSmoothFactor)
+void     tSimpleLivingString2_setLevSmoothFactor(tSimpleLivingString2* const pl, Lfloat levSmoothFactor)
 {
     _tSimpleLivingString2* p = *pl;
     tFeedbackLeveler_setFactor(&p->fbLev, levSmoothFactor);
 }
 
-void     tSimpleLivingString2_setLevStrength(tSimpleLivingString2* const pl, float levStrength)
+void     tSimpleLivingString2_setLevStrength(tSimpleLivingString2* const pl, Lfloat levStrength)
 {
     _tSimpleLivingString2* p = *pl;
     tFeedbackLeveler_setStrength(&p->fbLev, levStrength);
@@ -784,12 +878,12 @@ void     tSimpleLivingString2_setLevMode(tSimpleLivingString2* const pl, int lev
     p->levMode=levMode;
 }
 
-float   tSimpleLivingString2_tick(tSimpleLivingString2* const pl, float input)
+Lfloat   tSimpleLivingString2_tick(tSimpleLivingString2* const pl, Lfloat input)
 {
     _tSimpleLivingString2* p = *pl;
 
-    float stringOut=tTwoZero_tick(&p->bridgeFilter,tHermiteDelay_tickOut(&p->delayLine));
-    float stringInput=tHighpass_tick(&p->DCblocker,(tFeedbackLeveler_tick(&p->fbLev, (p->levMode==0?p->decay*stringOut:stringOut)+input)));
+    Lfloat stringOut=tTwoZero_tick(&p->bridgeFilter,tHermiteDelay_tickOut(&p->delayLine));
+    Lfloat stringInput=tHighpass_tick(&p->DCblocker,(tFeedbackLeveler_tick(&p->fbLev, (p->levMode==0?p->decay*stringOut:stringOut)+input)));
     tHermiteDelay_tickIn(&p->delayLine, stringInput);
     tHermiteDelay_setDelay(&p->delayLine, tExpSmooth_tick(&p->wlSmooth));
     p->curr = stringOut;
@@ -797,16 +891,16 @@ float   tSimpleLivingString2_tick(tSimpleLivingString2* const pl, float input)
 }
 
 
-float   tSimpleLivingString2_sample(tSimpleLivingString2* const pl)
+Lfloat   tSimpleLivingString2_sample(tSimpleLivingString2* const pl)
 {
     _tSimpleLivingString2* p = *pl;
     return p->curr;
 }
 
-void   tSimpleLivingString2_setSampleRate(tSimpleLivingString2* const pl, float sr)
+void   tSimpleLivingString2_setSampleRate(tSimpleLivingString2* const pl, Lfloat sr)
 {
     _tSimpleLivingString2* p = *pl;
-    float freq = p->sampleRate/p->waveLengthInSamples;
+    Lfloat freq = p->sampleRate/p->waveLengthInSamples;
     p->sampleRate = sr;
     p->waveLengthInSamples = p->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
@@ -815,16 +909,16 @@ void   tSimpleLivingString2_setSampleRate(tSimpleLivingString2* const pl, float 
 }
 /* Living String*/
 
-void    tLivingString_init(tLivingString* const pl, float freq, float pickPos, float prepIndex,
-                           float dampFreq, float decay, float targetLev, float levSmoothFactor,
-                           float levStrength, int levMode, LEAF* const leaf)
+void    tLivingString_init(tLivingString* const pl, Lfloat freq, Lfloat pickPos, Lfloat prepIndex,
+                           Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                           Lfloat levStrength, int levMode, LEAF* const leaf)
 {
     tLivingString_initToPool(pl, freq, pickPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf->mempool);
 }
 
-void    tLivingString_initToPool    (tLivingString* const pl, float freq, float pickPos, float prepIndex,
-                                     float dampFreq, float decay, float targetLev, float levSmoothFactor,
-                                     float levStrength, int levMode, tMempool* const mp)
+void    tLivingString_initToPool    (tLivingString* const pl, Lfloat freq, Lfloat pickPos, Lfloat prepIndex,
+                                     Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                     Lfloat levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tLivingString* p = *pl = (_tLivingString*) mpool_alloc(sizeof(_tLivingString), m);
@@ -883,7 +977,7 @@ void    tLivingString_free (tLivingString* const pl)
     mpool_free((char*)p, p->mempool);
 }
 
-void     tLivingString_setFreq(tLivingString* const pl, float freq)
+void     tLivingString_setFreq(tLivingString* const pl, Lfloat freq)
 {    // NOTE: It is faster to set wavelength in samples directly
     _tLivingString* p = *pl;
     
@@ -893,7 +987,7 @@ void     tLivingString_setFreq(tLivingString* const pl, float freq)
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tLivingString_setWaveLength(tLivingString* const pl, float waveLength)
+void     tLivingString_setWaveLength(tLivingString* const pl, Lfloat waveLength)
 {
     _tLivingString* p = *pl;
     if (waveLength<4.8f) waveLength=4.8f;
@@ -902,7 +996,7 @@ void     tLivingString_setWaveLength(tLivingString* const pl, float waveLength)
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tLivingString_setPickPos(tLivingString* const pl, float pickPos)
+void     tLivingString_setPickPos(tLivingString* const pl, Lfloat pickPos)
 {    // between 0 and 1
     _tLivingString* p = *pl;
     if (pickPos<0.f) pickPos=0.f;
@@ -911,7 +1005,7 @@ void     tLivingString_setPickPos(tLivingString* const pl, float pickPos)
     tExpSmooth_setDest(&p->ppSmooth, p->pickPos);
 }
 
-void     tLivingString_setPrepIndex(tLivingString* const pl, float prepIndex)
+void     tLivingString_setPrepIndex(tLivingString* const pl, Lfloat prepIndex)
 {    // between 0 and 1
     _tLivingString* p = *pl;
     if (prepIndex<0.f) prepIndex=0.f;
@@ -919,7 +1013,7 @@ void     tLivingString_setPrepIndex(tLivingString* const pl, float prepIndex)
     p->prepIndex = prepIndex;
 }
 
-void     tLivingString_setDampFreq(tLivingString* const pl, float dampFreq)
+void     tLivingString_setDampFreq(tLivingString* const pl, Lfloat dampFreq)
 {
     _tLivingString* p = *pl;
     tOnePole_setFreq(&p->bridgeFilter, dampFreq);
@@ -928,27 +1022,27 @@ void     tLivingString_setDampFreq(tLivingString* const pl, float dampFreq)
     tOnePole_setFreq(&p->prepFilterL, dampFreq);
 }
 
-void     tLivingString_setDecay(tLivingString* const pl, float decay)
+void     tLivingString_setDecay(tLivingString* const pl, Lfloat decay)
 {
     _tLivingString* p = *pl;
     p->decay=decay;
 }
 
-void     tLivingString_setTargetLev(tLivingString* const pl, float targetLev)
+void     tLivingString_setTargetLev(tLivingString* const pl, Lfloat targetLev)
 {
     _tLivingString* p = *pl;
     tFeedbackLeveler_setTargetLevel(&p->fbLevU, targetLev);
     tFeedbackLeveler_setTargetLevel(&p->fbLevL, targetLev);
 }
 
-void     tLivingString_setLevSmoothFactor(tLivingString* const pl, float levSmoothFactor)
+void     tLivingString_setLevSmoothFactor(tLivingString* const pl, Lfloat levSmoothFactor)
 {
     _tLivingString* p = *pl;
     tFeedbackLeveler_setFactor(&p->fbLevU, levSmoothFactor);
     tFeedbackLeveler_setFactor(&p->fbLevL, levSmoothFactor);
 }
 
-void     tLivingString_setLevStrength(tLivingString* const pl, float levStrength)
+void     tLivingString_setLevStrength(tLivingString* const pl, Lfloat levStrength)
 {
     _tLivingString* p = *pl;
     tFeedbackLeveler_setStrength(&p->fbLevU, levStrength);
@@ -963,34 +1057,34 @@ void     tLivingString_setLevMode(tLivingString* const pl, int levMode)
     p->levMode=levMode;
 }
 
-float   tLivingString_tick(tLivingString* const pl, float input)
+Lfloat   tLivingString_tick(tLivingString* const pl, Lfloat input)
 {
     _tLivingString* p = *pl;
     
     // from pickPos upwards=forwards
-    float fromLF=tLinearDelay_tickOut(&p->delLF);
-    float fromUF=tLinearDelay_tickOut(&p->delUF);
-    float fromUB=tLinearDelay_tickOut(&p->delUB);
-    float fromLB=tLinearDelay_tickOut(&p->delLB);
+    Lfloat fromLF=tLinearDelay_tickOut(&p->delLF);
+    Lfloat fromUF=tLinearDelay_tickOut(&p->delUF);
+    Lfloat fromUB=tLinearDelay_tickOut(&p->delUB);
+    Lfloat fromLB=tLinearDelay_tickOut(&p->delLB);
     // into upper half of string, from nut, going backwards
-    float fromNut=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1)*tHighpass_tick(&p->DCblockerU, tOnePole_tick(&p->nutFilter, fromUF)));
+    Lfloat fromNut=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1)*tHighpass_tick(&p->DCblockerU, tOnePole_tick(&p->nutFilter, fromUF)));
     tLinearDelay_tickIn(&p->delUB, fromNut);
     // into lower half of string, from pickpoint, going backwards
-    float fromLowerPrep=-tOnePole_tick(&p->prepFilterL, fromLF);
-    float intoLower=p->prepIndex*fromLowerPrep+(1.0f - p->prepIndex)*fromUB+input;
+    Lfloat fromLowerPrep=-tOnePole_tick(&p->prepFilterL, fromLF);
+    Lfloat intoLower=p->prepIndex*fromLowerPrep+(1.0f - p->prepIndex)*fromUB+input;
     tLinearDelay_tickIn(&p->delLB, intoLower);
     // into lower half of string, from bridge
-    float fromBridge=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tOnePole_tick(&p->bridgeFilter, fromLB)));
+    Lfloat fromBridge=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tOnePole_tick(&p->bridgeFilter, fromLB)));
     tLinearDelay_tickIn(&p->delLF, fromBridge);
     // into upper half of string, from pickpoint, going forwards/upwards
-    float fromUpperPrep=-tOnePole_tick(&p->prepFilterU, fromUB);
-    float intoUpper=p->prepIndex*fromUpperPrep+(1.0f - p->prepIndex)*fromLF+input;
+    Lfloat fromUpperPrep=-tOnePole_tick(&p->prepFilterU, fromUB);
+    Lfloat intoUpper=p->prepIndex*fromUpperPrep+(1.0f - p->prepIndex)*fromLF+input;
     tLinearDelay_tickIn(&p->delUF, intoUpper);
     // update all delay lengths
-    float pickP=tExpSmooth_tick(&p->ppSmooth);
-    float wLen=tExpSmooth_tick(&p->wlSmooth);
-    float lowLen=pickP*wLen;
-    float upLen=(1.0f-pickP)*wLen;
+    Lfloat pickP=tExpSmooth_tick(&p->ppSmooth);
+    Lfloat wLen=tExpSmooth_tick(&p->wlSmooth);
+    Lfloat lowLen=pickP*wLen;
+    Lfloat upLen=(1.0f-pickP)*wLen;
     tLinearDelay_setDelay(&p->delLF, lowLen);
     tLinearDelay_setDelay(&p->delLB, lowLen);
     tLinearDelay_setDelay(&p->delUF, upLen);
@@ -999,16 +1093,16 @@ float   tLivingString_tick(tLivingString* const pl, float input)
     return p->curr;
 }
 
-float   tLivingString_sample(tLivingString* const pl)
+Lfloat   tLivingString_sample(tLivingString* const pl)
 {
     _tLivingString* p = *pl;
     return p->curr;
 }
 
-void   tLivingString_setSampleRate(tLivingString* const pl, float sr)
+void   tLivingString_setSampleRate(tLivingString* const pl, Lfloat sr)
 {
     _tLivingString* p = *pl;
-    float freq = p->sampleRate/p->waveLengthInSamples;
+    Lfloat freq = p->sampleRate/p->waveLengthInSamples;
     p->sampleRate = sr;
     p->waveLengthInSamples = p->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
@@ -1027,16 +1121,16 @@ void   tLivingString_setSampleRate(tLivingString* const pl, float sr)
 
 /* Living String*/
 
-void    tLivingString2_init(tLivingString2* const pl, float freq, float pickPos, float prepPos, float pickupPos, float prepIndex,
-                           float brightness, float decay, float targetLev, float levSmoothFactor,
-                           float levStrength, int levMode, LEAF* const leaf)
+void    tLivingString2_init(tLivingString2* const pl, Lfloat freq, Lfloat pickPos, Lfloat prepPos, Lfloat pickupPos, Lfloat prepIndex,
+                           Lfloat brightness, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                           Lfloat levStrength, int levMode, LEAF* const leaf)
 {
     tLivingString2_initToPool(pl, freq, pickPos, prepPos, pickupPos, prepIndex, brightness, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf->mempool);
 }
 
-void    tLivingString2_initToPool    (tLivingString2* const pl, float freq, float pickPos, float prepPos, float pickupPos, float prepIndex,
-                                     float brightness, float decay, float targetLev, float levSmoothFactor,
-                                     float levStrength, int levMode, tMempool* const mp)
+void    tLivingString2_initToPool    (tLivingString2* const pl, Lfloat freq, Lfloat pickPos, Lfloat prepPos, Lfloat pickupPos, Lfloat prepIndex,
+                                     Lfloat brightness, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                     Lfloat levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tLivingString2* p = *pl = (_tLivingString2*) mpool_alloc(sizeof(_tLivingString2), m);
@@ -1103,7 +1197,7 @@ void    tLivingString2_free (tLivingString2* const pl)
     mpool_free((char*)p, p->mempool);
 }
 
-void     tLivingString2_setFreq(tLivingString2* const pl, float freq)
+void     tLivingString2_setFreq(tLivingString2* const pl, Lfloat freq)
 {    // NOTE: It is faster to set wavelength in samples directly
     _tLivingString2* p = *pl;
     
@@ -1115,7 +1209,7 @@ void     tLivingString2_setFreq(tLivingString2* const pl, float freq)
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tLivingString2_setWaveLength(tLivingString2* const pl, float waveLength)
+void     tLivingString2_setWaveLength(tLivingString2* const pl, Lfloat waveLength)
 {
     _tLivingString2* p = *pl;
     
@@ -1127,7 +1221,7 @@ void     tLivingString2_setWaveLength(tLivingString2* const pl, float waveLength
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tLivingString2_setPickPos(tLivingString2* const pl, float pickPos)
+void     tLivingString2_setPickPos(tLivingString2* const pl, Lfloat pickPos)
 {    // between 0 and 1
     _tLivingString2* p = *pl;
     if (pickPos<0.f) pickPos=0.f;
@@ -1136,7 +1230,7 @@ void     tLivingString2_setPickPos(tLivingString2* const pl, float pickPos)
     tExpSmooth_setDest(&p->ppSmooth, p->pickPos);
 }
 
-void     tLivingString2_setPrepPos(tLivingString2* const pl, float prepPos)
+void     tLivingString2_setPrepPos(tLivingString2* const pl, Lfloat prepPos)
 {    // between 0 and 1
     _tLivingString2* p = *pl;
     if (prepPos<0.f) prepPos=0.f;
@@ -1145,7 +1239,7 @@ void     tLivingString2_setPrepPos(tLivingString2* const pl, float prepPos)
     tExpSmooth_setDest(&p->prpSmooth, p->prepPos);
 }
 
-void     tLivingString2_setPickupPos(tLivingString2* const pl, float pickupPos)
+void     tLivingString2_setPickupPos(tLivingString2* const pl, Lfloat pickupPos)
 {    // between 0 and 1
     _tLivingString2* p = *pl;
     if (pickupPos<0.f) pickupPos=0.f;
@@ -1154,7 +1248,7 @@ void     tLivingString2_setPickupPos(tLivingString2* const pl, float pickupPos)
     tExpSmooth_setDest(&p->puSmooth, p->pickupPos);
 }
 
-void     tLivingString2_setPrepIndex(tLivingString2* const pl, float prepIndex)
+void     tLivingString2_setPrepIndex(tLivingString2* const pl, Lfloat prepIndex)
 {    // between 0 and 1
     _tLivingString2* p = *pl;
     if (prepIndex<0.f) prepIndex=0.f;
@@ -1162,11 +1256,11 @@ void     tLivingString2_setPrepIndex(tLivingString2* const pl, float prepIndex)
     p->prepIndex = prepIndex;
 }
 
-void     tLivingString2_setBrightness(tLivingString2* const pl, float brightness)
+void     tLivingString2_setBrightness(tLivingString2* const pl, Lfloat brightness)
 {
     _tLivingString2* p = *pl;
-    float h0=(1.0 + brightness) * 0.5f;
-    float h1=(1.0 - brightness) * 0.25f;
+    Lfloat h0=(1.0 + brightness) * 0.5f;
+    Lfloat h1=(1.0 - brightness) * 0.25f;
 
     tTwoZero_setCoefficients(&p->bridgeFilter, h1, h0, h1);
     tTwoZero_setCoefficients(&p->nutFilter, h1, h0, h1);
@@ -1174,27 +1268,27 @@ void     tLivingString2_setBrightness(tLivingString2* const pl, float brightness
     tTwoZero_setCoefficients(&p->prepFilterL, h1, h0, h1);
 }
 
-void     tLivingString2_setDecay(tLivingString2* const pl, float decay)
+void     tLivingString2_setDecay(tLivingString2* const pl, Lfloat decay)
 {
     _tLivingString2* p = *pl;
     p->decay=powf(0.001f,1.0f/(p->freq*decay));
 }
 
-void     tLivingString2_setTargetLev(tLivingString2* const pl, float targetLev)
+void     tLivingString2_setTargetLev(tLivingString2* const pl, Lfloat targetLev)
 {
     _tLivingString2* p = *pl;
     tFeedbackLeveler_setTargetLevel(&p->fbLevU, targetLev);
     tFeedbackLeveler_setTargetLevel(&p->fbLevL, targetLev);
 }
 
-void     tLivingString2_setLevSmoothFactor(tLivingString2* const pl, float levSmoothFactor)
+void     tLivingString2_setLevSmoothFactor(tLivingString2* const pl, Lfloat levSmoothFactor)
 {
     _tLivingString2* p = *pl;
     tFeedbackLeveler_setFactor(&p->fbLevU, levSmoothFactor);
     tFeedbackLeveler_setFactor(&p->fbLevL, levSmoothFactor);
 }
 
-void     tLivingString2_setLevStrength(tLivingString2* const pl, float levStrength)
+void     tLivingString2_setLevStrength(tLivingString2* const pl, Lfloat levStrength)
 {
     _tLivingString2* p = *pl;
     tFeedbackLeveler_setStrength(&p->fbLevU, levStrength);
@@ -1209,50 +1303,50 @@ void     tLivingString2_setLevMode(tLivingString2* const pl, int levMode)
     p->levMode=levMode;
 }
 
-float   tLivingString2_tick(tLivingString2* const pl, float input)
+Lfloat   tLivingString2_tick(tLivingString2* const pl, Lfloat input)
 {
     _tLivingString2* p = *pl;
 
     input = input * 0.5f; // drop gain by half since we'll be equally adding it at half amplitude to forward and backward waveguides
     // from prepPos upwards=forwards
-    float wLen=tExpSmooth_tick(&p->wlSmooth);
+    Lfloat wLen=tExpSmooth_tick(&p->wlSmooth);
 
-    float pickP=tExpSmooth_tick(&p->ppSmooth);
+    Lfloat pickP=tExpSmooth_tick(&p->ppSmooth);
 
-    //float pickupPos=tExpSmooth_tick(&p->puSmooth);
+    //Lfloat pickupPos=tExpSmooth_tick(&p->puSmooth);
 
     //need to determine which delay line to put it into (should be half amplitude into forward and backward lines for the correct portion of string)
-    float prepP=tExpSmooth_tick(&p->prpSmooth);
-    float lowLen=prepP*wLen;
-    float upLen=(1.0f-prepP)*wLen;
+    Lfloat prepP=tExpSmooth_tick(&p->prpSmooth);
+    Lfloat lowLen=prepP*wLen;
+    Lfloat upLen=(1.0f-prepP)*wLen;
     uint32_t pickPInt;
 
     if (pickP > prepP)
     {
-        float fullPickPoint =  ((pickP*wLen) - lowLen);
+        Lfloat fullPickPoint =  ((pickP*wLen) - lowLen);
         pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
-        float pickPFloat = fullPickPoint - pickPInt;
+        Lfloat pickPLfloat = fullPickPoint - pickPInt;
 
-        tHermiteDelay_addTo(&p->delUF, input * (1.0f - pickPFloat), pickPInt);
-        tHermiteDelay_addTo(&p->delUF, input * pickPFloat, pickPInt + 1);
-        tHermiteDelay_addTo(&p->delUB, input * (1.0f - pickPFloat), (uint32_t) (upLen - pickPInt));
-        tHermiteDelay_addTo(&p->delUB, input * pickPFloat, (uint32_t) (upLen - pickPInt - 1));
+        tHermiteDelay_addTo(&p->delUF, input * (1.0f - pickPLfloat), pickPInt);
+        tHermiteDelay_addTo(&p->delUF, input * pickPLfloat, pickPInt + 1);
+        tHermiteDelay_addTo(&p->delUB, input * (1.0f - pickPLfloat), (uint32_t) (upLen - pickPInt));
+        tHermiteDelay_addTo(&p->delUB, input * pickPLfloat, (uint32_t) (upLen - pickPInt - 1));
     }
     else
     {
-         float fullPickPoint =  pickP * wLen;
+         Lfloat fullPickPoint =  pickP * wLen;
         pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
-        float pickPFloat = fullPickPoint - pickPInt;
+        Lfloat pickPLfloat = fullPickPoint - pickPInt;
 
-        tHermiteDelay_addTo(&p->delLF, input * (1.0f - pickPFloat), pickPInt);
-        tHermiteDelay_addTo(&p->delLF, input * pickPFloat, pickPInt + 1);
-        tHermiteDelay_addTo(&p->delLB, input * (1.0f - pickPFloat), (uint32_t) (lowLen - pickPInt));
-        tHermiteDelay_addTo(&p->delLB, input * pickPFloat, (uint32_t) (lowLen - pickPInt - 1));
+        tHermiteDelay_addTo(&p->delLF, input * (1.0f - pickPLfloat), pickPInt);
+        tHermiteDelay_addTo(&p->delLF, input * pickPLfloat, pickPInt + 1);
+        tHermiteDelay_addTo(&p->delLB, input * (1.0f - pickPLfloat), (uint32_t) (lowLen - pickPInt));
+        tHermiteDelay_addTo(&p->delLB, input * pickPLfloat, (uint32_t) (lowLen - pickPInt - 1));
     }
 /*
     if (pickP > prepP)
     {
-        float fullPickPoint =  ((pickP*wLen) - lowLen);
+        Lfloat fullPickPoint =  ((pickP*wLen) - lowLen);
         pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
 
         tHermiteDelay_addTo(&p->delUF, input, pickPInt);
@@ -1260,30 +1354,42 @@ float   tLivingString2_tick(tLivingString2* const pl, float input)
     }
     else
     {
-        float fullPickPoint =  pickP * wLen;
+        Lfloat fullPickPoint =  pickP * wLen;
         pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
 
         tHermiteDelay_addTo(&p->delLF, input, pickPInt);
         tHermiteDelay_addTo(&p->delLB, input, (uint32_t) (lowLen - pickPInt));
     }
 */
-    float fromLF=tHermiteDelay_tickOut(&p->delLF);
-    float fromUF=tHermiteDelay_tickOut(&p->delUF);
-    float fromUB=tHermiteDelay_tickOut(&p->delUB);
-    float fromLB=tHermiteDelay_tickOut(&p->delLB);
+    Lfloat fromLF=tHermiteDelay_tickOut(&p->delLF);
+    Lfloat fromUF=tHermiteDelay_tickOut(&p->delUF);
+    Lfloat fromUB=tHermiteDelay_tickOut(&p->delUB);
+    Lfloat fromLB=tHermiteDelay_tickOut(&p->delLB);
+    fromLB = LEAF_clip(-1.0f, fromLB, 1.0f);
+    fromUB = LEAF_clip(-1.0f, fromUB, 1.0f);
+    fromUF = LEAF_clip(-1.0f, fromUF, 1.0f);
+    fromLF = LEAF_clip(-1.0f, fromLF, 1.0f);
+
     // into upper half of string, from bridge, going backwards
-    float fromBridge=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerU, tTwoZero_tick(&p->bridgeFilter, fromUF)));
+    Lfloat fromBridge=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerU, tTwoZero_tick(&p->bridgeFilter, fromUF)));
+    fromBridge = LEAF_clip(-1.0f, fromBridge, 1.0f);
     tHermiteDelay_tickIn(&p->delUB, fromBridge);
     // into lower half of string, from prepPoint, going backwards
-    float fromLowerPrep=-tTwoZero_tick(&p->prepFilterL, fromLF);
-    float intoLower=p->prepIndex*fromLowerPrep+(1.0f - p->prepIndex)*fromUB; //used to add input here
+    Lfloat fromLowerPrep=-tTwoZero_tick(&p->prepFilterL, fromLF);
+    fromLowerPrep = LEAF_clip(-1.0f, fromLowerPrep, 1.0f);
+    Lfloat intoLower=p->prepIndex*fromLowerPrep+(1.0f - p->prepIndex)*fromUB; //used to add input here
+    intoLower = LEAF_clip(-1.0f, intoLower, 1.0f);
     tHermiteDelay_tickIn(&p->delLB, intoLower);
     // into lower half of string, from nut
-    float fromNut=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tTwoZero_tick(&p->nutFilter, fromLB)));
+    Lfloat fromNut=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tTwoZero_tick(&p->nutFilter, fromLB)));
+    fromNut = LEAF_clip(-1.0f, fromNut, 1.0f);
     tHermiteDelay_tickIn(&p->delLF, fromNut);
     // into upper half of string, from prepPoint, going forwards/upwards
-    float fromUpperPrep=-tTwoZero_tick(&p->prepFilterU, fromUB);
-    float intoUpper=p->prepIndex*fromUpperPrep+(1.0f - p->prepIndex)*fromLF;
+    Lfloat fromUpperPrep=-tTwoZero_tick(&p->prepFilterU, fromUB);
+    fromUpperPrep = LEAF_clip(-1.0f, fromUpperPrep, 1.0f);
+    Lfloat intoUpper=p->prepIndex*fromUpperPrep+(1.0f - p->prepIndex)*fromLF;
+    //intoUpper = tanhf(intoUpper);
+    intoUpper = LEAF_clip(-1.0f, intoUpper, 1.0f);
     tHermiteDelay_tickIn(&p->delUF, intoUpper);
     // update all delay lengths
 
@@ -1293,31 +1399,31 @@ float   tLivingString2_tick(tLivingString2* const pl, float input)
     tHermiteDelay_setDelay(&p->delUB, upLen);
     
     uint32_t PUPInt;
-    float pickupOut = 0.0f;
-    float pupos = tExpSmooth_tick(&p->puSmooth);
+    Lfloat pickupOut = 0.0f;
+    Lfloat pupos = tExpSmooth_tick(&p->puSmooth);
     if (pupos < 0.9999f)
     {
         if (pupos > prepP)
         {
-            float fullPUPoint =  ((pupos*wLen) - lowLen);
+            Lfloat fullPUPoint =  ((pupos*wLen) - lowLen);
             PUPInt = (uint32_t) fullPUPoint; // where does the input go? that's the pick point
-            float PUPFloat = fullPUPoint - PUPInt;
+            Lfloat PUPLfloat = fullPUPoint - PUPInt;
 
-            pickupOut = tHermiteDelay_tapOut(&p->delUF, PUPInt) * (1.0f - PUPFloat);
-            pickupOut += tHermiteDelay_tapOut(&p->delUF, PUPInt + 1) * PUPFloat;
-            pickupOut += tHermiteDelay_tapOut(&p->delUB, (uint32_t) (upLen - PUPInt)) * (1.0f - PUPFloat);
-            pickupOut += tHermiteDelay_tapOut(&p->delUB, (uint32_t) (upLen - PUPInt - 1))  * PUPFloat;
+            pickupOut = tHermiteDelay_tapOut(&p->delUF, PUPInt) * (1.0f - PUPLfloat);
+            pickupOut += tHermiteDelay_tapOut(&p->delUF, PUPInt + 1) * PUPLfloat;
+            pickupOut += tHermiteDelay_tapOut(&p->delUB, (uint32_t) (upLen - PUPInt)) * (1.0f - PUPLfloat);
+            pickupOut += tHermiteDelay_tapOut(&p->delUB, (uint32_t) (upLen - PUPInt - 1))  * PUPLfloat;
         }
         else
         {
-             float fullPUPoint =  pupos * wLen;
+             Lfloat fullPUPoint =  pupos * wLen;
             PUPInt = (uint32_t) fullPUPoint; // where does the input go? that's the pick point
-            float PUPFloat = fullPUPoint - PUPInt;
+            Lfloat PUPLfloat = fullPUPoint - PUPInt;
 
-            pickupOut = tHermiteDelay_tapOut(&p->delLF, PUPInt) * (1.0f - PUPFloat);
-            pickupOut += tHermiteDelay_tapOut(&p->delLF,  PUPInt + 1) * PUPFloat;
-            pickupOut += tHermiteDelay_tapOut(&p->delLB, (uint32_t) (lowLen - PUPInt)) * (1.0f - PUPFloat);
-            pickupOut += tHermiteDelay_tapOut(&p->delLB, (uint32_t) (lowLen - PUPInt - 1)) * PUPFloat;
+            pickupOut = tHermiteDelay_tapOut(&p->delLF, PUPInt) * (1.0f - PUPLfloat);
+            pickupOut += tHermiteDelay_tapOut(&p->delLF,  PUPInt + 1) * PUPLfloat;
+            pickupOut += tHermiteDelay_tapOut(&p->delLB, (uint32_t) (lowLen - PUPInt)) * (1.0f - PUPLfloat);
+            pickupOut += tHermiteDelay_tapOut(&p->delLB, (uint32_t) (lowLen - PUPInt - 1)) * PUPLfloat;
         }
 
         p->curr = pickupOut;
@@ -1326,15 +1432,15 @@ float   tLivingString2_tick(tLivingString2* const pl, float input)
 
 
 /*
-    	float fullPickupPos = (pupos*upLen);
+    	Lfloat fullPickupPos = (pupos*upLen);
         pickupPosInt = (uint32_t) fullPickupPos;
-        float pickupPosFloat = fullPickupPos - pickupPosInt;
+        Lfloat pickupPosLfloat = fullPickupPos - pickupPosInt;
         if (pickupPosInt == 0)
         {
             pickupPosInt = 1;
         }
-        pickupOut = tHermiteDelay_tapOutInterpolated(&p->delUF, pickupPosInt, pickupPosFloat);
-        pickupOut += tHermiteDelay_tapOutInterpolated(&p->delUB, (uint32_t) (upLen - pickupPosInt), pickupPosFloat);
+        pickupOut = tHermiteDelay_tapOutInterpolated(&p->delUF, pickupPosInt, pickupPosLfloat);
+        pickupOut += tHermiteDelay_tapOutInterpolated(&p->delUB, (uint32_t) (upLen - pickupPosInt), pickupPosLfloat);
         p->curr = pickupOut;
         */
     }
@@ -1350,25 +1456,25 @@ float   tLivingString2_tick(tLivingString2* const pl, float input)
     return p->curr;
 }
 
-float   tLivingString2_tickEfficient(tLivingString2* const pl, float input)
+Lfloat   tLivingString2_tickEfficient(tLivingString2* const pl, Lfloat input)
 {
     _tLivingString2* p = *pl;
 
     input = input * 0.5f; // drop gain by half since we'll be equally adding it at half amplitude to forward and backward waveguides
     // from prepPos upwards=forwards
-    //float pickupPos=tExpSmooth_tick(&p->puSmooth);
-    float wLen = p->wlSmooth->dest;
+    //Lfloat pickupPos=tExpSmooth_tick(&p->puSmooth);
+    Lfloat wLen = p->wlSmooth->dest;
 
-    float pickP = p->ppSmooth->dest;
+    Lfloat pickP = p->ppSmooth->dest;
 
     //need to determine which delay line to put it into (should be half amplitude into forward and backward lines for the correct portion of string)
-    float prepP = p->prpSmooth->dest;
-    float lowLen=p->prpSmooth->dest*p->wlSmooth->dest;
-    float upLen=(1.0f-p->prpSmooth->dest)*p->wlSmooth->dest;
+    Lfloat prepP = p->prpSmooth->dest;
+    Lfloat lowLen=p->prpSmooth->dest*p->wlSmooth->dest;
+    Lfloat upLen=(1.0f-p->prpSmooth->dest)*p->wlSmooth->dest;
     uint32_t pickPInt;
     if (pickP > prepP)
     {
-        float fullPickPoint =  ((pickP*wLen) - lowLen);
+        Lfloat fullPickPoint =  ((pickP*wLen) - lowLen);
         pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
 
         tHermiteDelay_addTo(&p->delUF, input, pickPInt);
@@ -1376,31 +1482,31 @@ float   tLivingString2_tickEfficient(tLivingString2* const pl, float input)
     }
     else
     {
-        float fullPickPoint =  pickP * wLen;
+        Lfloat fullPickPoint =  pickP * wLen;
         pickPInt = (uint32_t) fullPickPoint; // where does the input go? that's the pick point
 
         tHermiteDelay_addTo(&p->delLF, input, pickPInt);
         tHermiteDelay_addTo(&p->delLB, input, (uint32_t) (lowLen - pickPInt));
     }
-    float fromLF=tHermiteDelay_tickOut(&p->delLF);
-    float fromUF=tHermiteDelay_tickOut(&p->delUF);
-    float fromUB=tHermiteDelay_tickOut(&p->delUB);
-    float fromLB=tHermiteDelay_tickOut(&p->delLB);
+    Lfloat fromLF=tHermiteDelay_tickOut(&p->delLF);
+    Lfloat fromUF=tHermiteDelay_tickOut(&p->delUF);
+    Lfloat fromUB=tHermiteDelay_tickOut(&p->delUB);
+    Lfloat fromLB=tHermiteDelay_tickOut(&p->delLB);
     // into upper half of string, from bridge, going backwards
-    //float fromBridge=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerU, tTwoZero_tick(&p->bridgeFilter, fromUF)));
-    float fromBridge=-tFeedbackLeveler_tick(&p->fbLevU,tHighpass_tick(&p->DCblockerU, tTwoZero_tick(&p->bridgeFilter, fromUF)));
+    //Lfloat fromBridge=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerU, tTwoZero_tick(&p->bridgeFilter, fromUF)));
+    Lfloat fromBridge=-tFeedbackLeveler_tick(&p->fbLevU,tHighpass_tick(&p->DCblockerU, tTwoZero_tick(&p->bridgeFilter, fromUF)));
     tHermiteDelay_tickIn(&p->delUB, fromBridge);
     // into lower half of string, from prepPoint, going backwards
-    float fromLowerPrep=-tTwoZero_tick(&p->prepFilterL, fromLF);
-    float intoLower=(p->prepIndex*fromLowerPrep)+((1.0f - p->prepIndex)*fromUB); //used to add input here
+    Lfloat fromLowerPrep=-tTwoZero_tick(&p->prepFilterL, fromLF);
+    Lfloat intoLower=(p->prepIndex*fromLowerPrep)+((1.0f - p->prepIndex)*fromUB); //used to add input here
     tHermiteDelay_tickIn(&p->delLB, intoLower);
     // into lower half of string, from nut
-    //float fromNut=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tTwoZero_tick(&p->nutFilter, fromLB)));
-    float fromNut=-tFeedbackLeveler_tick(&p->fbLevL,tHighpass_tick(&p->DCblockerL, tTwoZero_tick(&p->nutFilter, fromLB)));
+    //Lfloat fromNut=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tTwoZero_tick(&p->nutFilter, fromLB)));
+    Lfloat fromNut=-tFeedbackLeveler_tick(&p->fbLevL,tHighpass_tick(&p->DCblockerL, tTwoZero_tick(&p->nutFilter, fromLB)));
     tHermiteDelay_tickIn(&p->delLF, fromNut);
     // into upper half of string, from prepPoint, going forwards/upwards
-    float fromUpperPrep=-tTwoZero_tick(&p->prepFilterU, fromUB);
-    float intoUpper=(p->prepIndex*fromUpperPrep)+((1.0f - p->prepIndex)*fromLF);
+    Lfloat fromUpperPrep=-tTwoZero_tick(&p->prepFilterU, fromUB);
+    Lfloat intoUpper=(p->prepIndex*fromUpperPrep)+((1.0f - p->prepIndex)*fromLF);
     tHermiteDelay_tickIn(&p->delUF, intoUpper);
     // update all delay lengths
 
@@ -1419,8 +1525,8 @@ void tLivingString2_updateDelays(tLivingString2* const pl)
 
     //need to determine which delay line to put it into (should be half amplitude into forward and backward lines for the correct portion of string)
 
-    float lowLen=p->prpSmooth->dest*p->wlSmooth->dest;
-    float upLen=(1.0f-p->prpSmooth->dest)*p->wlSmooth->dest;
+    Lfloat lowLen=p->prpSmooth->dest*p->wlSmooth->dest;
+    Lfloat upLen=(1.0f-p->prpSmooth->dest)*p->wlSmooth->dest;
 
 	tHermiteDelay_setDelay(&p->delLF, lowLen);
     tHermiteDelay_setDelay(&p->delLB, lowLen);
@@ -1428,13 +1534,13 @@ void tLivingString2_updateDelays(tLivingString2* const pl)
     tHermiteDelay_setDelay(&p->delUB, upLen);
 }
 
-float   tLivingString2_sample(tLivingString2* const pl)
+Lfloat   tLivingString2_sample(tLivingString2* const pl)
 {
     _tLivingString2* p = *pl;
     return p->curr;
 }
 
-void    tLivingString2_setSampleRate(tLivingString2* const pl, float sr)
+void    tLivingString2_setSampleRate(tLivingString2* const pl, Lfloat sr)
 {
     _tLivingString2* p = *pl;
     p->sampleRate = sr;
@@ -1453,16 +1559,16 @@ void    tLivingString2_setSampleRate(tLivingString2* const pl, float sr)
 
 /* Complex Living String (has pick position and preparation position separated) */
 
-void    tComplexLivingString_init(tComplexLivingString* const pl, float freq, float pickPos, float prepPos, float prepIndex,
-                           float dampFreq, float decay, float targetLev, float levSmoothFactor,
-                           float levStrength, int levMode, LEAF* const leaf)
+void    tComplexLivingString_init(tComplexLivingString* const pl, Lfloat freq, Lfloat pickPos, Lfloat prepPos, Lfloat prepIndex,
+                           Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                           Lfloat levStrength, int levMode, LEAF* const leaf)
 {
     tComplexLivingString_initToPool(pl, freq, pickPos, prepPos, prepIndex, dampFreq, decay, targetLev, levSmoothFactor, levStrength, levMode, &leaf->mempool);
 }
 
-void    tComplexLivingString_initToPool    (tComplexLivingString* const pl, float freq, float pickPos, float prepPos, float prepIndex,
-                                     float dampFreq, float decay, float targetLev, float levSmoothFactor,
-                                     float levStrength, int levMode, tMempool* const mp)
+void    tComplexLivingString_initToPool    (tComplexLivingString* const pl, Lfloat freq, Lfloat pickPos, Lfloat prepPos, Lfloat prepIndex,
+                                     Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                     Lfloat levStrength, int levMode, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tComplexLivingString* p = *pl = (_tComplexLivingString*) mpool_alloc(sizeof(_tComplexLivingString), m);
@@ -1533,7 +1639,7 @@ void    tComplexLivingString_free (tComplexLivingString* const pl)
     mpool_free((char*)p, p->mempool);
 }
 
-void     tComplexLivingString_setFreq(tComplexLivingString* const pl, float freq)
+void     tComplexLivingString_setFreq(tComplexLivingString* const pl, Lfloat freq)
 {    // NOTE: It is faster to set wavelength in samples directly
     _tComplexLivingString* p = *pl;
     
@@ -1543,7 +1649,7 @@ void     tComplexLivingString_setFreq(tComplexLivingString* const pl, float freq
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tComplexLivingString_setWaveLength(tComplexLivingString* const pl, float waveLength)
+void     tComplexLivingString_setWaveLength(tComplexLivingString* const pl, Lfloat waveLength)
 {
     _tComplexLivingString* p = *pl;
     if (waveLength<4.8f) waveLength=4.8f;
@@ -1552,7 +1658,7 @@ void     tComplexLivingString_setWaveLength(tComplexLivingString* const pl, floa
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
 }
 
-void     tComplexLivingString_setPickPos(tComplexLivingString* const pl, float pickPos)
+void     tComplexLivingString_setPickPos(tComplexLivingString* const pl, Lfloat pickPos)
 {    // between 0 and 1
     _tComplexLivingString* p = *pl;
     if (pickPos<0.5f) pickPos=0.5f;
@@ -1561,7 +1667,7 @@ void     tComplexLivingString_setPickPos(tComplexLivingString* const pl, float p
     tExpSmooth_setDest(&p->pickPosSmooth, p->pickPos);
 }
 
-void     tComplexLivingString_setPrepPos(tComplexLivingString* const pl, float prepPos)
+void     tComplexLivingString_setPrepPos(tComplexLivingString* const pl, Lfloat prepPos)
 {    // between 0 and 1
     _tComplexLivingString* p = *pl;
     if (prepPos<0.f) prepPos=0.f;
@@ -1570,7 +1676,7 @@ void     tComplexLivingString_setPrepPos(tComplexLivingString* const pl, float p
     tExpSmooth_setDest(&p->prepPosSmooth, p->prepPos);
 }
 
-void     tComplexLivingString_setPrepIndex(tComplexLivingString* const pl, float prepIndex)
+void     tComplexLivingString_setPrepIndex(tComplexLivingString* const pl, Lfloat prepIndex)
 {    // between 0 and 1
     _tComplexLivingString* p = *pl;
     if (prepIndex<0.f) prepIndex=0.f;
@@ -1578,7 +1684,7 @@ void     tComplexLivingString_setPrepIndex(tComplexLivingString* const pl, float
     p->prepIndex = prepIndex;
 }
 
-void     tComplexLivingString_setDampFreq(tComplexLivingString* const pl, float dampFreq)
+void     tComplexLivingString_setDampFreq(tComplexLivingString* const pl, Lfloat dampFreq)
 {
     _tComplexLivingString* p = *pl;
     tOnePole_setFreq(&p->bridgeFilter, dampFreq);
@@ -1587,27 +1693,27 @@ void     tComplexLivingString_setDampFreq(tComplexLivingString* const pl, float 
     tOnePole_setFreq(&p->prepFilterL, dampFreq);
 }
 
-void     tComplexLivingString_setDecay(tComplexLivingString* const pl, float decay)
+void     tComplexLivingString_setDecay(tComplexLivingString* const pl, Lfloat decay)
 {
     _tComplexLivingString* p = *pl;
     p->decay=decay;
 }
 
-void     tComplexLivingString_setTargetLev(tComplexLivingString* const pl, float targetLev)
+void     tComplexLivingString_setTargetLev(tComplexLivingString* const pl, Lfloat targetLev)
 {
     _tComplexLivingString* p = *pl;
     tFeedbackLeveler_setTargetLevel(&p->fbLevU, targetLev);
     tFeedbackLeveler_setTargetLevel(&p->fbLevL, targetLev);
 }
 
-void     tComplexLivingString_setLevSmoothFactor(tComplexLivingString* const pl, float levSmoothFactor)
+void     tComplexLivingString_setLevSmoothFactor(tComplexLivingString* const pl, Lfloat levSmoothFactor)
 {
     _tComplexLivingString* p = *pl;
     tFeedbackLeveler_setFactor(&p->fbLevU, levSmoothFactor);
     tFeedbackLeveler_setFactor(&p->fbLevL, levSmoothFactor);
 }
 
-void     tComplexLivingString_setLevStrength(tComplexLivingString* const pl, float levStrength)
+void     tComplexLivingString_setLevStrength(tComplexLivingString* const pl, Lfloat levStrength)
 {
     _tComplexLivingString* p = *pl;
     tFeedbackLeveler_setStrength(&p->fbLevU, levStrength);
@@ -1622,37 +1728,37 @@ void     tComplexLivingString_setLevMode(tComplexLivingString* const pl, int lev
     p->levMode=levMode;
 }
 
-float   tComplexLivingString_tick(tComplexLivingString* const pl, float input)
+Lfloat   tComplexLivingString_tick(tComplexLivingString* const pl, Lfloat input)
 {
     _tComplexLivingString* p = *pl;
 
     // from pickPos upwards=forwards
-    float fromLF=tLinearDelay_tickOut(&p->delLF);
-    float fromMF=tLinearDelay_tickOut(&p->delMF);
-    float fromUF=tLinearDelay_tickOut(&p->delUF);
-    float fromUB=tLinearDelay_tickOut(&p->delUB);
-    float fromMB=tLinearDelay_tickOut(&p->delMB);
-    float fromLB=tLinearDelay_tickOut(&p->delLB);
+    Lfloat fromLF=tLinearDelay_tickOut(&p->delLF);
+    Lfloat fromMF=tLinearDelay_tickOut(&p->delMF);
+    Lfloat fromUF=tLinearDelay_tickOut(&p->delUF);
+    Lfloat fromUB=tLinearDelay_tickOut(&p->delUB);
+    Lfloat fromMB=tLinearDelay_tickOut(&p->delMB);
+    Lfloat fromLB=tLinearDelay_tickOut(&p->delLB);
 
     // into upper part of string, from bridge, going backwards
-    float fromBridge=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1)*tHighpass_tick(&p->DCblockerU, tOnePole_tick(&p->bridgeFilter, fromUF)));
+    Lfloat fromBridge=-tFeedbackLeveler_tick(&p->fbLevU, (p->levMode==0?p->decay:1)*tHighpass_tick(&p->DCblockerU, tOnePole_tick(&p->bridgeFilter, fromUF)));
     tLinearDelay_tickIn(&p->delUB, fromBridge);
 
     // into pick position, take input and add it into the waveguide, going to come out of middle segment
     tLinearDelay_tickIn(&p->delMB, fromUB+input);
 
     // into lower part of string, from prepPos, going backwards
-    float fromLowerPrep=-tOnePole_tick(&p->prepFilterL, fromLF);
-    float intoLower=p->prepIndex*fromLowerPrep+(1.0f - p->prepIndex)*fromMB;
+    Lfloat fromLowerPrep=-tOnePole_tick(&p->prepFilterL, fromLF);
+    Lfloat intoLower=p->prepIndex*fromLowerPrep+(1.0f - p->prepIndex)*fromMB;
     tLinearDelay_tickIn(&p->delLB, intoLower);
 
     // into lower part of string, from nut, going forwards toward prep position
-    float fromNut=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tOnePole_tick(&p->nutFilter, fromLB)));
+    Lfloat fromNut=-tFeedbackLeveler_tick(&p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(&p->DCblockerL, tOnePole_tick(&p->nutFilter, fromLB)));
     tLinearDelay_tickIn(&p->delLF, fromNut);
 
     // into middle part of string, from prep going toward pick position
-    float fromUpperPrep=-tOnePole_tick(&p->prepFilterU, fromUB);
-    float intoMiddle=p->prepIndex*fromUpperPrep+(1.0f - p->prepIndex)*fromLF;
+    Lfloat fromUpperPrep=-tOnePole_tick(&p->prepFilterU, fromUB);
+    Lfloat intoMiddle=p->prepIndex*fromUpperPrep+(1.0f - p->prepIndex)*fromLF;
 
     //pick position, take input and add it into the waveguide, going to come out of middle segment
     tLinearDelay_tickIn(&p->delMF, intoMiddle + input);
@@ -1661,13 +1767,13 @@ float   tComplexLivingString_tick(tComplexLivingString* const pl, float input)
     tLinearDelay_tickIn(&p->delUF, fromMF);
 
     // update all delay lengths
-    float pickP=tExpSmooth_tick(&p->pickPosSmooth);
-    float prepP=tExpSmooth_tick(&p->prepPosSmooth);
-    float wLen=tExpSmooth_tick(&p->wlSmooth);
+    Lfloat pickP=tExpSmooth_tick(&p->pickPosSmooth);
+    Lfloat prepP=tExpSmooth_tick(&p->prepPosSmooth);
+    Lfloat wLen=tExpSmooth_tick(&p->wlSmooth);
 
-    float midLen = (pickP-prepP) * wLen; // the length between the pick and the prep;
-    float lowLen = prepP*wLen; // the length from prep to nut
-    float upLen = (1.0f-pickP)*wLen; // the length from pick to bridge
+    Lfloat midLen = (pickP-prepP) * wLen; // the length between the pick and the prep;
+    Lfloat lowLen = prepP*wLen; // the length from prep to nut
+    Lfloat upLen = (1.0f-pickP)*wLen; // the length from pick to bridge
 
 
     tLinearDelay_setDelay(&p->delLF, lowLen);
@@ -1684,16 +1790,16 @@ float   tComplexLivingString_tick(tComplexLivingString* const pl, float input)
     return p->curr;
 }
 
-float   tComplexLivingString_sample(tComplexLivingString* const pl)
+Lfloat   tComplexLivingString_sample(tComplexLivingString* const pl)
 {
     _tComplexLivingString* p = *pl;
     return p->curr;
 }
 
-void    tComplexLivingString_setSampleRate(tComplexLivingString* const pl, float sr)
+void    tComplexLivingString_setSampleRate(tComplexLivingString* const pl, Lfloat sr)
 {
     _tComplexLivingString* p = *pl;
-    float freq = p->waveLengthInSamples/p->sampleRate;
+    Lfloat freq = p->waveLengthInSamples/p->sampleRate;
     p->sampleRate = sr;
     p->waveLengthInSamples = p->sampleRate/freq;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
@@ -1708,12 +1814,12 @@ void    tComplexLivingString_setSampleRate(tComplexLivingString* const pl, float
 ///Reed Table model
 //default values from STK are 0.6 offset and -0.8 slope
 
-void    tReedTable_init      (tReedTable* const pm, float offset, float slope, LEAF* const leaf)
+void    tReedTable_init      (tReedTable* const pm, Lfloat offset, Lfloat slope, LEAF* const leaf)
 {
     tReedTable_initToPool(pm, offset, slope, &leaf->mempool);
 }
 
-void    tReedTable_initToPool   (tReedTable* const pm, float offset, float slope, tMempool* const mp)
+void    tReedTable_initToPool   (tReedTable* const pm, Lfloat offset, Lfloat slope, tMempool* const mp)
 {
     _tMempool* m = *mp;
     _tReedTable* p = *pm = (_tReedTable*) mpool_alloc(sizeof(_tReedTable), m);
@@ -1730,12 +1836,12 @@ void    tReedTable_free (tReedTable* const pm)
     mpool_free((char*)p, p->mempool);
 }
 
-float   tReedTable_tick      (tReedTable* const pm, float input)
+Lfloat   tReedTable_tick      (tReedTable* const pm, Lfloat input)
 {
     _tReedTable* p = *pm;
     
     // The input is differential pressure across the reed.
-    float output = p->offset + (p->slope * input);
+    Lfloat output = p->offset + (p->slope * input);
     
     // If output is > 1, the reed has slammed shut and the
     // reflection function value saturates at 1.0.
@@ -1749,25 +1855,25 @@ float   tReedTable_tick      (tReedTable* const pm, float input)
     return output;
 }
 
-float   tReedTable_tanh_tick     (tReedTable* const pm, float input)
+Lfloat   tReedTable_tanh_tick     (tReedTable* const pm, Lfloat input)
 {
     _tReedTable* p = *pm;
     
     // The input is differential pressure across the reed.
-    float output = p->offset + (p->slope * input);
+    Lfloat output = p->offset + (p->slope * input);
     
     // If output is > 1, the reed has slammed shut and the
     // reflection function value saturates at 1.0.
     return tanhf(output);
 }
 
-void     tReedTable_setOffset   (tReedTable* const pm, float offset)
+void     tReedTable_setOffset   (tReedTable* const pm, Lfloat offset)
 {
     _tReedTable* p = *pm;
     p->offset = offset;
 }
 
-void     tReedTable_setSlope   (tReedTable* const pm, float slope)
+void     tReedTable_setSlope   (tReedTable* const pm, Lfloat slope)
 {
     _tReedTable* p = *pm;
     p->slope = slope;

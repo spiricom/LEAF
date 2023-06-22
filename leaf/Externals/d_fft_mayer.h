@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-typedef float t_sample;       /* a float type at most the same size */
+typedef Lfloat t_sample;       /* a Lfloat type at most the same size */
 
 #define REAL t_sample
 

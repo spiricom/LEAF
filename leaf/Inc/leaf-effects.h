@@ -44,11 +44,11 @@ extern "C" {
      @brief Free a tTalkbox from its mempool.
      @param talkbox A pointer to the tTalkbox to free.
      
-     @fn float   tTalkbox_tick           (tTalkbox* const, float synth, float voice)
+     @fn Lfloat   tTalkbox_tick           (tTalkbox* const, Lfloat synth, Lfloat voice)
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
-     @fn float     tTalkbox_tickFrozen        (tTalkbox* const voc, float synth, float voice)
+     @fn Lfloat     tTalkbox_tickFrozen        (tTalkbox* const voc, Lfloat synth, Lfloat voice)
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
@@ -60,31 +60,31 @@ extern "C" {
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
-     @fn void    tTalkbox_lpcDurbin      (float *r, int p, float *k, float *g)
+     @fn void    tTalkbox_lpcDurbin      (Lfloat *r, int p, Lfloat *k, Lfloat *g)
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
-     @fn void     tTalkbox_lpc            (float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G)
+     @fn void     tTalkbox_lpc            (Lfloat *buf, Lfloat *car, double* dl, double* Rt, int32_t n, int32_t o, Lfloat warp, int warpOn, Lfloat *k, int freeze, Lfloat *G)
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
-     @fn void    tTalkbox_setQuality     (tTalkbox* const, float quality)
+     @fn void    tTalkbox_setQuality     (tTalkbox* const, Lfloat quality)
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
-     @fn void     tTalkbox_setWarpFactor    (tTalkbox* const voc, float warp)
+     @fn void     tTalkbox_setWarpFactor    (tTalkbox* const voc, Lfloat warp)
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
-     @fn void     tTalkbox_setWarpOn        (tTalkbox* const voc, float warpOn)
+     @fn void     tTalkbox_setWarpOn        (tTalkbox* const voc, Lfloat warpOn)
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
-     @fn void     tTalkbox_setFreeze        (tTalkbox* const voc, float freeze)
+     @fn void     tTalkbox_setFreeze        (tTalkbox* const voc, Lfloat freeze)
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
-     @fn void     tTalkbox_warpedAutocorrelate    (float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda)
+     @fn void     tTalkbox_warpedAutocorrelate    (Lfloat * x, double* dl, double* Rt, unsigned int L, Lfloat * R, unsigned int P, Lfloat lambda)
      @brief
      @param talkbox A pointer to the relevant tTalkbox.
      
@@ -97,28 +97,28 @@ extern "C" {
         
         tMempool mempool;
         
-        float param[NUM_TALKBOX_PARAM];
+        Lfloat param[NUM_TALKBOX_PARAM];
         
         int bufsize;
-        float* car0;
-        float* car1;
-        float* window;
-        float* buf0;
-        float* buf1;
-        float* k;
-        float warpFactor;
+        Lfloat* car0;
+        Lfloat* car1;
+        Lfloat* window;
+        Lfloat* buf0;
+        Lfloat* buf1;
+        Lfloat* k;
+        Lfloat warpFactor;
         int32_t warpOn;
         int freeze;
-        float emphasis;
+        Lfloat emphasis;
         int32_t K, N, O, pos;
-        float wet, dry, FX;
-        float d0, d1, d2, d3, d4;
-        float u0, u1, u2, u3, u4;
-        float G;
+        Lfloat wet, dry, FX;
+        Lfloat d0, d1, d2, d3, d4;
+        Lfloat u0, u1, u2, u3, u4;
+        Lfloat G;
         double* dl;
         double* Rt;
         
-        float sampleRate;
+        Lfloat sampleRate;
         
     } _tTalkbox;
     
@@ -128,137 +128,137 @@ extern "C" {
     void    tTalkbox_initToPool     (tTalkbox* const, int bufsize, tMempool* const);
     void    tTalkbox_free           (tTalkbox* const);
     
-    float   tTalkbox_tick           (tTalkbox* const, float synth, float voice);
-    float   tTalkbox_tickFrozen     (tTalkbox* const voc, float synth, float voice);
+    Lfloat   tTalkbox_tick           (tTalkbox* const, Lfloat synth, Lfloat voice);
+    Lfloat   tTalkbox_tickFrozen     (tTalkbox* const voc, Lfloat synth, Lfloat voice);
     void    tTalkbox_update         (tTalkbox* const);
     void    tTalkbox_suspend        (tTalkbox* const);
-    void    tTalkbox_lpcDurbin      (float *r, int p, float *k, float *g);
-    void    tTalkbox_lpc            (float *buf, float *car, double* dl, double* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G);
-    void    tTalkbox_setQuality     (tTalkbox* const, float quality);
-    void    tTalkbox_setWarpFactor  (tTalkbox* const voc, float warp);
-    void    tTalkbox_setWarpOn      (tTalkbox* const voc, float warpOn);
-    void    tTalkbox_setFreeze      (tTalkbox* const voc, float freeze);
-    void    tTalkbox_warpedAutocorrelate    (float * x, double* dl, double* Rt, unsigned int L, float * R, unsigned int P, float lambda);
-    void    tTalkbox_setSampleRate  (tTalkbox* const voc, float sr);
+    void    tTalkbox_lpcDurbin      (Lfloat *r, int p, Lfloat *k, Lfloat *g);
+    void    tTalkbox_lpc            (Lfloat *buf, Lfloat *car, double* dl, double* Rt, int32_t n, int32_t o, Lfloat warp, int warpOn, Lfloat *k, int freeze, Lfloat *G);
+    void    tTalkbox_setQuality     (tTalkbox* const, Lfloat quality);
+    void    tTalkbox_setWarpFactor  (tTalkbox* const voc, Lfloat warp);
+    void    tTalkbox_setWarpOn      (tTalkbox* const voc, Lfloat warpOn);
+    void    tTalkbox_setFreeze      (tTalkbox* const voc, Lfloat freeze);
+    void    tTalkbox_warpedAutocorrelate    (Lfloat * x, double* dl, double* Rt, unsigned int L, Lfloat * R, unsigned int P, Lfloat lambda);
+    void    tTalkbox_setSampleRate  (tTalkbox* const voc, Lfloat sr);
     
     
     //==============================================================================
     
     
     /*!
-     @defgroup ttalkboxfloat tTalkboxFloat
+     @defgroup ttalkboxLfloat tTalkboxLfloat
      @ingroup effects
      @brief High resolution vocoder from mda using Levinson-Durbin LPC algorithm.
      @{
      
-     @fn void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize, LEAF* const leaf)
-     @brief Initialize a tTalkboxFloat to the default mempool of a LEAF instance.
-     @param talkbox A pointer to the tTalkboxFloat to initialize.
+     @fn void    tTalkboxLfloat_init           (tTalkboxLfloat* const, int bufsize, LEAF* const leaf)
+     @brief Initialize a tTalkboxLfloat to the default mempool of a LEAF instance.
+     @param talkbox A pointer to the tTalkboxLfloat to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tTalkboxFloat_initToPool     (tTalkboxFloat* const, int bufsize, tMempool* const)
-     @brief Initialize a tTalkboxFloat to a specified mempool.
-     @param talkbox A pointer to the tTalkboxFloat to initialize.
+     @fn void    tTalkboxLfloat_initToPool     (tTalkboxLfloat* const, int bufsize, tMempool* const)
+     @brief Initialize a tTalkboxLfloat to a specified mempool.
+     @param talkbox A pointer to the tTalkboxLfloat to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tTalkboxFloat_free           (tTalkboxFloat* const)
-     @brief Free a tTalkboxFloat from its mempool.
-     @param talkbox A pointer to the tTalkboxFloat to free.
+     @fn void    tTalkboxLfloat_free           (tTalkboxLfloat* const)
+     @brief Free a tTalkboxLfloat from its mempool.
+     @param talkbox A pointer to the tTalkboxLfloat to free.
      
-     @fn float   tTalkboxFloat_tick           (tTalkboxFloat* const, float synth, float voice)
+     @fn Lfloat   tTalkboxLfloat_tick           (tTalkboxLfloat* const, Lfloat synth, Lfloat voice)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn float     tTalkboxFloat_tickFrozen        (tTalkboxFloat* const voc, float synth, float voice)
+     @fn Lfloat     tTalkboxLfloat_tickFrozen        (tTalkboxLfloat* const voc, Lfloat synth, Lfloat voice)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn void    tTalkboxFloat_update         (tTalkboxFloat* const)
+     @fn void    tTalkboxLfloat_update         (tTalkboxLfloat* const)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn void    tTalkboxFloat_suspend        (tTalkboxFloat* const)
+     @fn void    tTalkboxLfloat_suspend        (tTalkboxLfloat* const)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn void    tTalkboxFloat_lpcDurbin      (float *r, int p, float *k, float *g)
+     @fn void    tTalkboxLfloat_lpcDurbin      (Lfloat *r, int p, Lfloat *k, Lfloat *g)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn void     tTalkboxFloat_lpc            (float *buf, float *car, float* dl, float* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G)
+     @fn void     tTalkboxLfloat_lpc            (Lfloat *buf, Lfloat *car, Lfloat* dl, Lfloat* Rt, int32_t n, int32_t o, Lfloat warp, int warpOn, Lfloat *k, int freeze, Lfloat *G)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn void    tTalkboxFloat_setQuality     (tTalkboxFloat* const, float quality)
+     @fn void    tTalkboxLfloat_setQuality     (tTalkboxLfloat* const, Lfloat quality)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn void     tTalkboxFloat_setWarpFactor    (tTalkboxFloat* const voc, float warp)
+     @fn void     tTalkboxLfloat_setWarpFactor    (tTalkboxLfloat* const voc, Lfloat warp)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn void     tTalkboxFloat_setWarpOn        (tTalkboxFloat* const voc, float warpOn)
+     @fn void     tTalkboxLfloat_setWarpOn        (tTalkboxLfloat* const voc, Lfloat warpOn)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn void     tTalkboxFloat_setFreeze        (tTalkboxFloat* const voc, float freeze)
+     @fn void     tTalkboxLfloat_setFreeze        (tTalkboxLfloat* const voc, Lfloat freeze)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
-     @fn void     tTalkboxFloat_warpedAutocorrelate    (float * x, float* dl, float* Rt, unsigned int L, float * R, unsigned int P, float lambda)
+     @fn void     tTalkboxLfloat_warpedAutocorrelate    (Lfloat * x, Lfloat* dl, Lfloat* Rt, unsigned int L, Lfloat * R, unsigned int P, Lfloat lambda)
      @brief
-     @param talkbox A pointer to the relevant tTalkboxFloat.
+     @param talkbox A pointer to the relevant tTalkboxLfloat.
      
      @} */
     
-    typedef struct _tTalkboxFloat
+    typedef struct _tTalkboxLfloat
     {
         
         tMempool mempool;
         
-        float param[NUM_TALKBOX_PARAM];
+        Lfloat param[NUM_TALKBOX_PARAM];
         
         int bufsize;
-        float* car0;
-        float* car1;
-        float* window;
-        float* buf0;
-        float* buf1;
-        float* k;
-        float warpFactor;
+        Lfloat* car0;
+        Lfloat* car1;
+        Lfloat* window;
+        Lfloat* buf0;
+        Lfloat* buf1;
+        Lfloat* k;
+        Lfloat warpFactor;
         int32_t warpOn;
         int freeze;
-        float emphasis;
+        Lfloat emphasis;
         int32_t K, N, O, pos;
-        float wet, dry, FX;
-        float d0, d1, d2, d3, d4;
-        float u0, u1, u2, u3, u4;
-        float G;
-        float* dl;
-        float* Rt;
+        Lfloat wet, dry, FX;
+        Lfloat d0, d1, d2, d3, d4;
+        Lfloat u0, u1, u2, u3, u4;
+        Lfloat G;
+        Lfloat* dl;
+        Lfloat* Rt;
         
-        float sampleRate;
+        Lfloat sampleRate;
         
-    } _tTalkboxFloat;
+    } _tTalkboxLfloat;
     
-    typedef _tTalkboxFloat* tTalkboxFloat;
+    typedef _tTalkboxLfloat* tTalkboxLfloat;
     
-    void    tTalkboxFloat_init           (tTalkboxFloat* const, int bufsize, LEAF* const leaf);
-    void    tTalkboxFloat_initToPool     (tTalkboxFloat* const, int bufsize, tMempool* const);
-    void    tTalkboxFloat_free           (tTalkboxFloat* const);
+    void    tTalkboxLfloat_init           (tTalkboxLfloat* const, int bufsize, LEAF* const leaf);
+    void    tTalkboxLfloat_initToPool     (tTalkboxLfloat* const, int bufsize, tMempool* const);
+    void    tTalkboxLfloat_free           (tTalkboxLfloat* const);
     
-    float   tTalkboxFloat_tick           (tTalkboxFloat* const, float synth, float voice);
-    float     tTalkboxFloat_tickFrozen        (tTalkboxFloat* const voc, float synth, float voice);
-    void    tTalkboxFloat_update         (tTalkboxFloat* const);
-    void    tTalkboxFloat_suspend        (tTalkboxFloat* const);
-    void    tTalkboxFloat_lpcDurbin      (float *r, int p, float *k, float *g);
-    void    tTalkboxFloat_lpc           (float *buf, float *car, float* dl, float* Rt, int32_t n, int32_t o, float warp, int warpOn, float *k, int freeze, float *G);
-    void    tTalkboxFloat_setQuality     (tTalkboxFloat* const, float quality);
-    void    tTalkboxFloat_setWarpFactor (tTalkboxFloat* const voc, float warp);
-    void    tTalkboxFloat_setWarpOn     (tTalkboxFloat* const voc, int warpOn);
-    void    tTalkboxFloat_setFreeze     (tTalkboxFloat* const voc, int freeze);
-    void    tTalkboxFloat_warpedAutocorrelate   (float * x, float* dl, float* Rt, unsigned int L, float * R, unsigned int P, float lambda);
-    void    tTalkboxFloat_setSampleRate  (tTalkboxFloat* const voc, float sr);
+    Lfloat   tTalkboxLfloat_tick           (tTalkboxLfloat* const, Lfloat synth, Lfloat voice);
+    Lfloat     tTalkboxLfloat_tickFrozen        (tTalkboxLfloat* const voc, Lfloat synth, Lfloat voice);
+    void    tTalkboxLfloat_update         (tTalkboxLfloat* const);
+    void    tTalkboxLfloat_suspend        (tTalkboxLfloat* const);
+    void    tTalkboxLfloat_lpcDurbin      (Lfloat *r, int p, Lfloat *k, Lfloat *g);
+    void    tTalkboxLfloat_lpc           (Lfloat *buf, Lfloat *car, Lfloat* dl, Lfloat* Rt, int32_t n, int32_t o, Lfloat warp, int warpOn, Lfloat *k, int freeze, Lfloat *G);
+    void    tTalkboxLfloat_setQuality     (tTalkboxLfloat* const, Lfloat quality);
+    void    tTalkboxLfloat_setWarpFactor (tTalkboxLfloat* const voc, Lfloat warp);
+    void    tTalkboxLfloat_setWarpOn     (tTalkboxLfloat* const voc, int warpOn);
+    void    tTalkboxLfloat_setFreeze     (tTalkboxLfloat* const voc, int freeze);
+    void    tTalkboxLfloat_warpedAutocorrelate   (Lfloat * x, Lfloat* dl, Lfloat* Rt, unsigned int L, Lfloat * R, unsigned int P, Lfloat lambda);
+    void    tTalkboxLfloat_setSampleRate  (tTalkboxLfloat* const voc, Lfloat sr);
     //==============================================================================
     
     
@@ -282,7 +282,7 @@ extern "C" {
      @brief Free a tVocoder from its mempool.
      @param vocoder A pointer to the tVocoder to free.
      
-     @fn float   tVocoder_tick           (tVocoder* const, float synth, float voice)
+     @fn Lfloat   tVocoder_tick           (tVocoder* const, Lfloat synth, Lfloat voice)
      @brief
      @param vocoder A pointer to the relevant tVocoder.
      
@@ -304,18 +304,18 @@ extern "C" {
         
         tMempool mempool;
         
-        float param[NUM_VOCODER_PARAM];
+        Lfloat param[NUM_VOCODER_PARAM];
         
-        float gain;         //output level
-        float thru, high;   //hf thru
-        float kout;         //downsampled output
+        Lfloat gain;         //output level
+        Lfloat thru, high;   //hf thru
+        Lfloat kout;         //downsampled output
         int32_t  kval;      //downsample counter
         int32_t  nbnd;      //number of bands
         
         //filter coeffs and buffers - seems it's faster to leave this global than make local copy
-        float f[NBANDS][13]; //[0-8][0 1 2 | 0 1 2 3 | 0 1 2 3 | val rate]
+        Lfloat f[NBANDS][13]; //[0-8][0 1 2 | 0 1 2 3 | 0 1 2 3 | val rate]
         
-        float invSampleRate;
+        Lfloat invSampleRate;
     } _tVocoder;
     
     typedef _tVocoder* tVocoder;
@@ -324,10 +324,10 @@ extern "C" {
     void    tVocoder_initToPool     (tVocoder* const, tMempool* const);
     void    tVocoder_free           (tVocoder* const);
     
-    float   tVocoder_tick           (tVocoder* const, float synth, float voice);
+    Lfloat   tVocoder_tick           (tVocoder* const, Lfloat synth, Lfloat voice);
     void    tVocoder_update         (tVocoder* const);
     void    tVocoder_suspend        (tVocoder* const);
-    void    tVocoder_setSampleRate  (tVocoder* const, float sr);
+    void    tVocoder_setSampleRate  (tVocoder* const, Lfloat sr);
     
     //==============================================================================
     
@@ -351,27 +351,27 @@ extern "C" {
      @brief Free a tRosenbergGlottalPulse from its mempool.
      @param pulse A pointer to the tRosenbergGlottalPulse to free.
      
-     @fn float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const)
+     @fn Lfloat   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const)
      @brief
      @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
-     @fn float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp)
+     @fn Lfloat   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp)
      @brief
      @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
-     @fn void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq)
+     @fn void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, Lfloat freq)
      @brief
      @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
-     @fn void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, float openLength)
+     @fn void   tRosenbergGlottalPulse_setOpenLength           (tRosenbergGlottalPulse* const, Lfloat openLength)
      @brief
      @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
-     @fn void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const, float pulseLength)
+     @fn void   tRosenbergGlottalPulse_setPulseLength           (tRosenbergGlottalPulse* const, Lfloat pulseLength)
      @brief
      @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
-     @fn void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergGlottalPulse* const gp, float openLength, float pulseLength)
+     @fn void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength           (tRosenbergGlottalPulse* const gp, Lfloat openLength, Lfloat pulseLength)
      @brief
      @param pulse A pointer to the relevant tRosenbergGlottalPulse.
      
@@ -381,13 +381,13 @@ extern "C" {
     {
         
         tMempool mempool;
-        float phase;
-        float openLength;
-        float pulseLength;
-        float invPulseLengthMinusOpenLength;
-        float freq;
-        float inc;
-        float invSampleRate;
+        Lfloat phase;
+        Lfloat openLength;
+        Lfloat pulseLength;
+        Lfloat invPulseLengthMinusOpenLength;
+        Lfloat freq;
+        Lfloat inc;
+        Lfloat invSampleRate;
     } _tRosenbergGlottalPulse;
     
     typedef _tRosenbergGlottalPulse* tRosenbergGlottalPulse;
@@ -396,16 +396,16 @@ extern "C" {
     void    tRosenbergGlottalPulse_initToPool     (tRosenbergGlottalPulse* const, tMempool* const);
     void    tRosenbergGlottalPulse_free           (tRosenbergGlottalPulse* const);
     
-    float   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const);
-    float   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp);
-    void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, float freq);
+    Lfloat   tRosenbergGlottalPulse_tick           (tRosenbergGlottalPulse* const);
+    Lfloat   tRosenbergGlottalPulse_tickHQ           (tRosenbergGlottalPulse* const gp);
+    void   tRosenbergGlottalPulse_setFreq           (tRosenbergGlottalPulse* const, Lfloat freq);
     
-    void   tRosenbergGlottalPulse_setOpenLength     (tRosenbergGlottalPulse* const, float openLength);
+    void   tRosenbergGlottalPulse_setOpenLength     (tRosenbergGlottalPulse* const, Lfloat openLength);
     
-    void   tRosenbergGlottalPulse_setPulseLength    (tRosenbergGlottalPulse* const, float pulseLength);
-    void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength(tRosenbergGlottalPulse* const, float
-                                                              openLength, float pulseLength);
-    void   tRosenbergGlottalPulse_setSampleRate(tRosenbergGlottalPulse* const, float sr);
+    void   tRosenbergGlottalPulse_setPulseLength    (tRosenbergGlottalPulse* const, Lfloat pulseLength);
+    void   tRosenbergGlottalPulse_setOpenLengthAndPulseLength(tRosenbergGlottalPulse* const, Lfloat
+                                                              openLength, Lfloat pulseLength);
+    void   tRosenbergGlottalPulse_setSampleRate(tRosenbergGlottalPulse* const, Lfloat sr);
     //==============================================================================
     
     /*!
@@ -428,19 +428,19 @@ extern "C" {
      @brief Free a tSOLAD from its mempool.
      @param solad A pointer to the tSOLAD to free.
      
-     @fn void    tSOLAD_ioSamples        (tSOLAD *w, float* in, float* out, int blocksize)
+     @fn void    tSOLAD_ioSamples        (tSOLAD *w, Lfloat* in, Lfloat* out, int blocksize)
      @brief Send one block of input samples, receive one block of output samples
      @param solad A pointer to the relevant tSOLAD.
      
-     @fn void    tSOLAD_setPeriod        (tSOLAD *w, float period)
+     @fn void    tSOLAD_setPeriod        (tSOLAD *w, Lfloat period)
      @brief Set periodicity analysis data
      @param solad A pointer to the relevant tSOLAD.
      
-     @fn void    tSOLAD_setPitchFactor   (tSOLAD *w, float pitchfactor)
+     @fn void    tSOLAD_setPitchFactor   (tSOLAD *w, Lfloat pitchfactor)
      @brief Set pitch factor between 0.25 and 4
      @param solad A pointer to the relevant tSOLAD.
      
-     @fn void    tSOLAD_setReadLag       (tSOLAD *w, float readlag)
+     @fn void    tSOLAD_setReadLag       (tSOLAD *w, Lfloat readlag)
      @brief Force readpointer lag
      @param solad A pointer to the relevant tSOLAD.
      
@@ -454,7 +454,7 @@ extern "C" {
     //#define LOOPMASK (LOOPSIZE - 1)
 #define PITCHFACTORDEFAULT 1.0f
 #define INITPERIOD 64.0f
-    //#define MAXPERIOD (float)((LOOPSIZE - w->blocksize) * 0.8f)
+    //#define MAXPERIOD (Lfloat)((LOOPSIZE - w->blocksize) * 0.8f)
 #define MINPERIOD 8.0f
     
     typedef struct _tSOLAD
@@ -467,14 +467,14 @@ extern "C" {
         int loopSize;
         uint16_t timeindex;              // current reference time, write index
         uint16_t blocksize;              // signal input / output block size
-        float pitchfactor;        // pitch factor between 0.25 and 4
-        float readlag;            // read pointer's lag behind write pointer
-        float period;             // period length in input signal
-        float jump;               // read pointer jump length and direction
-        float xfadelength;        // crossfade length expressed at input sample rate
-        float xfadevalue;         // crossfade phase and value
+        Lfloat pitchfactor;        // pitch factor between 0.25 and 4
+        Lfloat readlag;            // read pointer's lag behind write pointer
+        Lfloat period;             // period length in input signal
+        Lfloat jump;               // read pointer jump length and direction
+        Lfloat xfadelength;        // crossfade length expressed at input sample rate
+        Lfloat xfadevalue;         // crossfade phase and value
         
-        float* delaybuf;
+        Lfloat* delaybuf;
         
     } _tSOLAD;
     
@@ -485,16 +485,16 @@ extern "C" {
     void    tSOLAD_free             (tSOLAD* const);
     
     // send one block of input samples, receive one block of output samples
-    void    tSOLAD_ioSamples        (tSOLAD *w, float* in, float* out, int blocksize);
+    void    tSOLAD_ioSamples        (tSOLAD *w, Lfloat* in, Lfloat* out, int blocksize);
     // set periodicity analysis data
-    void    tSOLAD_setPeriod        (tSOLAD *w, float period);
+    void    tSOLAD_setPeriod        (tSOLAD *w, Lfloat period);
     // set pitch factor between 0.25 and 4
-    void    tSOLAD_setPitchFactor   (tSOLAD *w, float pitchfactor);
+    void    tSOLAD_setPitchFactor   (tSOLAD *w, Lfloat pitchfactor);
     // force readpointer lag
-    void    tSOLAD_setReadLag       (tSOLAD *w, float readlag);
+    void    tSOLAD_setReadLag       (tSOLAD *w, Lfloat readlag);
     // reset state variables
     void    tSOLAD_resetState       (tSOLAD *w);
-    void    tSOLAD_setSampleRate    (tSOLAD* const, float sr);
+    void    tSOLAD_setSampleRate    (tSOLAD* const, Lfloat sr);
     
     /*!
      @defgroup tpitchshift tPitchShift
@@ -502,12 +502,12 @@ extern "C" {
      @brief SOLAD-based pitch shifter.
      @{
      
-     @fn void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, LEAF* const leaf)
+     @fn void    tPitchShift_init            (tPitchShift* const, tPeriodDetection* const, Lfloat* out, int bufSize, LEAF* const leaf)
      @brief Initialize a tPitchShift to the default mempool of a LEAF instance.
      @param pitchshift A pointer to the tPitchShift to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, float* out, int bufSize, tMempool* const)
+     @fn void    tPitchShift_initToPool      (tPitchShift* const, tPeriodDetection* const, Lfloat* out, int bufSize, tMempool* const)
      @brief Initialize a tPitchShift to a specified mempool.
      @param pitchshift A pointer to the tPitchShift to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -516,19 +516,19 @@ extern "C" {
      @brief Free a tPitchShift from its mempool.
      @param pitchshift A pointer to the tPitchShift to free.
      
-     @fn float   tPitchShift_shift           (tPitchShift* const)
+     @fn Lfloat   tPitchShift_shift           (tPitchShift* const)
      @brief
      @param pitchshift A pointer to the relevant tPitchShift.
      
-     @fn float   tPitchShift_shiftToFunc     (tPitchShift* const, float (*fun)(float))
+     @fn Lfloat   tPitchShift_shiftToFunc     (tPitchShift* const, Lfloat (*fun)(Lfloat))
      @brief
      @param pitchshift A pointer to the relevant tPitchShift.
      
-     @fn float   tPitchShift_shiftToFreq     (tPitchShift* const, float freq)
+     @fn Lfloat   tPitchShift_shiftToFreq     (tPitchShift* const, Lfloat freq)
      @brief
      @param pitchshift A pointer to the relevant tPitchShift.
      
-     @fn void    tPitchShift_setPitchFactor  (tPitchShift* const, float pf)
+     @fn void    tPitchShift_setPitchFactor  (tPitchShift* const, Lfloat pf)
      @brief
      @param pitchshift A pointer to the relevant tPitchShift.
      
@@ -541,14 +541,14 @@ extern "C" {
         _tDualPitchDetector* pd;
         tSOLAD sola;
         
-        float* outBuffer;
-        float* inBuffer;
+        Lfloat* outBuffer;
+        Lfloat* inBuffer;
         int bufSize;
         int index;
         
-        float pickiness;
+        Lfloat pickiness;
         
-        float sampleRate;
+        Lfloat sampleRate;
     } _tPitchShift;
     
     typedef _tPitchShift* tPitchShift;
@@ -557,11 +557,11 @@ extern "C" {
     void    tPitchShift_initToPool (tPitchShift* const, tDualPitchDetector* const, int bufSize, tMempool* const);
     void    tPitchShift_free (tPitchShift* const);
     
-    void    tPitchShift_shiftBy (tPitchShift* const, float factor, float* in, float* out);
-    void    tPitchShift_shiftTo (tPitchShift* const, float freq, float* in, float* out);
+    void    tPitchShift_shiftBy (tPitchShift* const, Lfloat factor, Lfloat* in, Lfloat* out);
+    void    tPitchShift_shiftTo (tPitchShift* const, Lfloat freq, Lfloat* in, Lfloat* out);
     
-    void    tPitchShift_setPickiness (tPitchShift* const, float p);
-    void    tPitchShift_setSampleRate(tPitchShift* const, float sr);
+    void    tPitchShift_setPickiness (tPitchShift* const, Lfloat p);
+    void    tPitchShift_setSampleRate(tPitchShift* const, Lfloat sr);
     
     /*!
      @defgroup tsimpleretune tSimpleRetune
@@ -583,7 +583,7 @@ extern "C" {
      @brief Free a tSimpleRetune from its mempool.
      @param retune A pointer to the tSimpleRetune to free.
      
-     @fn float*  tSimpleRetune_tick                  (tSimpleRetune* const, float sample)
+     @fn Lfloat*  tSimpleRetune_tick                  (tSimpleRetune* const, Lfloat sample)
      @brief
      @param retune A pointer to the relevant tSimpleRetune.
      
@@ -591,11 +591,11 @@ extern "C" {
      @brief
      @param retune A pointer to the relevant tSimpleRetune.
      
-     @fn void    tSimpleRetune_tuneVoices              (tSimpleRetune* const, float f)
+     @fn void    tSimpleRetune_tuneVoices              (tSimpleRetune* const, Lfloat f)
      @brief
      @param retune A pointer to the relevant tSimpleRetune.
      
-     @fn void    tSimpleRetune_tuneVoice              (tSimpleRetune* const, float f, int voice)
+     @fn void    tSimpleRetune_tuneVoice              (tSimpleRetune* const, Lfloat f, int voice)
      @brief
      @param retune A pointer to the relevant tSimpleRetune.
      
@@ -606,36 +606,36 @@ extern "C" {
         tMempool mempool;
         
         tDualPitchDetector dp;
-        float minInputFreq, maxInputFreq;
+        Lfloat minInputFreq, maxInputFreq;
         
         tPitchShift* ps;
         
-        float* pdBuffer;
-        float* inBuffer;
-        float* outBuffer;
+        Lfloat* pdBuffer;
+        Lfloat* inBuffer;
+        Lfloat* outBuffer;
         int bufSize;
         int index;
         
-        void (*shiftFunction)(tPitchShift* const, float, float*, float*);
+        void (*shiftFunction)(tPitchShift* const, Lfloat, Lfloat*, Lfloat*);
         
-        float* shiftValues;
+        Lfloat* shiftValues;
         int numVoices;
     } _tSimpleRetune;
     
     typedef _tSimpleRetune* tSimpleRetune;
     
-    void    tSimpleRetune_init                  (tSimpleRetune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, LEAF* const leaf);
-    void    tSimpleRetune_initToPool            (tSimpleRetune* const, int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const);
+    void    tSimpleRetune_init                  (tSimpleRetune* const, int numVoices, Lfloat minInputFreq, Lfloat maxInputFreq, int bufSize, LEAF* const leaf);
+    void    tSimpleRetune_initToPool            (tSimpleRetune* const, int numVoices, Lfloat minInputFreq, Lfloat maxInputFreq, int bufSize, tMempool* const);
     void    tSimpleRetune_free                  (tSimpleRetune* const);
     
-    float   tSimpleRetune_tick                  (tSimpleRetune* const, float sample);
+    Lfloat   tSimpleRetune_tick                  (tSimpleRetune* const, Lfloat sample);
     void    tSimpleRetune_setMode               (tSimpleRetune* const, int mode);
     void    tSimpleRetune_setNumVoices          (tSimpleRetune* const, int numVoices);
-    void    tSimpleRetune_setPickiness          (tSimpleRetune* const, float p);
-    void    tSimpleRetune_tuneVoices            (tSimpleRetune* const, float* t);
-    void    tSimpleRetune_tuneVoice             (tSimpleRetune* const, int voice, float t);
-    float   tSimpleRetune_getInputFrequency     (tSimpleRetune* const);
-    void    tSimpleRetune_setSampleRate         (tSimpleRetune* const, float sr);
+    void    tSimpleRetune_setPickiness          (tSimpleRetune* const, Lfloat p);
+    void    tSimpleRetune_tuneVoices            (tSimpleRetune* const, Lfloat* t);
+    void    tSimpleRetune_tuneVoice             (tSimpleRetune* const, int voice, Lfloat t);
+    Lfloat   tSimpleRetune_getInputFrequency     (tSimpleRetune* const);
+    void    tSimpleRetune_setSampleRate         (tSimpleRetune* const, Lfloat sr);
 
     /*!
      @defgroup tretune tRetune
@@ -657,7 +657,7 @@ extern "C" {
      @brief Free a tRetune from its mempool.
      @param retune A pointer to the tRetune to free.
      
-     @fn float*  tRetune_tick                (tRetune* const, float sample)
+     @fn Lfloat*  tRetune_tick                (tRetune* const, Lfloat sample)
      @brief
      @param retune A pointer to the relevant tRetune.
      
@@ -665,11 +665,11 @@ extern "C" {
      @brief
      @param retune A pointer to the relevant tRetune.
      
-     @fn void    tRetune_setPitchFactors     (tRetune* const, float pf)
+     @fn void    tRetune_setPitchFactors     (tRetune* const, Lfloat pf)
      @brief
      @param retune A pointer to the relevant tRetune.
      
-     @fn void    tRetune_setPitchFactor      (tRetune* const, float pf, int voice)
+     @fn void    tRetune_setPitchFactor      (tRetune* const, Lfloat pf, int voice)
      @brief
      @param retune A pointer to the relevant tRetune.
      
@@ -680,38 +680,38 @@ extern "C" {
         tMempool mempool;
         
         tDualPitchDetector dp;
-        float minInputFreq, maxInputFreq;
+        Lfloat minInputFreq, maxInputFreq;
         
         tPitchShift* ps;
         
-        float* pdBuffer;
-        float* inBuffer;
-        float** outBuffers;
+        Lfloat* pdBuffer;
+        Lfloat* inBuffer;
+        Lfloat** outBuffers;
         int bufSize;
         int index;
         
-        float* output;
+        Lfloat* output;
         
-        void (*shiftFunction)(tPitchShift* const, float, float*, float*);
+        void (*shiftFunction)(tPitchShift* const, Lfloat, Lfloat*, Lfloat*);
         
-        float* shiftValues;
+        Lfloat* shiftValues;
         int numVoices;
     } _tRetune;
     
     typedef _tRetune* tRetune;
     
-    void    tRetune_init                (tRetune* const, int numVoices, float minInputFreq, float maxInputFreq,  int bufSize, LEAF* const leaf);
-    void    tRetune_initToPool          (tRetune* const,  int numVoices, float minInputFreq, float maxInputFreq, int bufSize, tMempool* const);
+    void    tRetune_init                (tRetune* const, int numVoices, Lfloat minInputFreq, Lfloat maxInputFreq,  int bufSize, LEAF* const leaf);
+    void    tRetune_initToPool          (tRetune* const,  int numVoices, Lfloat minInputFreq, Lfloat maxInputFreq, int bufSize, tMempool* const);
     void    tRetune_free                (tRetune* const);
     
-    float*  tRetune_tick                (tRetune* const, float sample);
+    Lfloat*  tRetune_tick                (tRetune* const, Lfloat sample);
     void    tRetune_setMode             (tRetune* const, int mode);
     void    tRetune_setNumVoices        (tRetune* const, int numVoices);
-    void    tRetune_setPickiness        (tRetune* const, float p);
-    void    tRetune_tuneVoices          (tRetune* const, float* t);
-    void    tRetune_tuneVoice           (tRetune* const, int voice, float t);
-    float   tRetune_getInputFrequency   (tRetune* const);
-    void    tRetune_setSampleRate       (tRetune* const, float sr);
+    void    tRetune_setPickiness        (tRetune* const, Lfloat p);
+    void    tRetune_tuneVoices          (tRetune* const, Lfloat* t);
+    void    tRetune_tuneVoice           (tRetune* const, int voice, Lfloat t);
+    Lfloat   tRetune_getInputFrequency   (tRetune* const);
+    void    tRetune_setSampleRate       (tRetune* const, Lfloat sr);
     
     //==============================================================================
     
@@ -735,27 +735,27 @@ extern "C" {
      @brief Free a tFormantShifter from its mempool.
      @param formant A pointer to the tFormantShifter to free.
      
-     @fn float   tFormantShifter_tick            (tFormantShifter* const, float input)
+     @fn Lfloat   tFormantShifter_tick            (tFormantShifter* const, Lfloat input)
      @brief
      @param formant A pointer to the relevant tFormantShifter.
      
-     @fn float   tFormantShifter_remove          (tFormantShifter* const, float input)
+     @fn Lfloat   tFormantShifter_remove          (tFormantShifter* const, Lfloat input)
      @brief
      @param formant A pointer to the relevant tFormantShifter.
      
-     @fn float   tFormantShifter_add             (tFormantShifter* const, float input)
+     @fn Lfloat   tFormantShifter_add             (tFormantShifter* const, Lfloat input)
      @brief
      @param formant A pointer to the relevant tFormantShifter.
      
-     @fn void    tFormantShifter_ioSamples       (tFormantShifter* const, float* in, float* out, int size, float fwarp)
+     @fn void    tFormantShifter_ioSamples       (tFormantShifter* const, Lfloat* in, Lfloat* out, int size, Lfloat fwarp)
      @brief
      @param formant A pointer to the relevant tFormantShifter.
      
-     @fn void    tFormantShifter_setShiftFactor  (tFormantShifter* const, float shiftFactor)
+     @fn void    tFormantShifter_setShiftFactor  (tFormantShifter* const, Lfloat shiftFactor)
      @brief
      @param formant A pointer to the relevant tFormantShifter.
      
-     @fn void    tFormantShifter_setIntensity    (tFormantShifter* const, float intensity)
+     @fn void    tFormantShifter_setIntensity    (tFormantShifter* const, Lfloat intensity)
      @brief
      @param formant A pointer to the relevant tFormantShifter.
      
@@ -766,31 +766,31 @@ extern "C" {
         
         tMempool mempool;
         int ford;
-        float falph;
-        float flamb;
-        float* fk;
-        float* fb;
-        float* fc;
-        float* frb;
-        float* frc;
-        float* fsig;
-        float* fsmooth;
-        float fhp;
-        float flp;
-        float flpa;
-        float* fbuff;
-        float* ftvec;
-        float fmute;
-        float fmutealph;
+        Lfloat falph;
+        Lfloat flamb;
+        Lfloat* fk;
+        Lfloat* fb;
+        Lfloat* fc;
+        Lfloat* frb;
+        Lfloat* frc;
+        Lfloat* fsig;
+        Lfloat* fsmooth;
+        Lfloat fhp;
+        Lfloat flp;
+        Lfloat flpa;
+        Lfloat* fbuff;
+        Lfloat* ftvec;
+        Lfloat fmute;
+        Lfloat fmutealph;
         unsigned int cbi;
-        float shiftFactor;
-        float intensity, invIntensity;
+        Lfloat shiftFactor;
+        Lfloat intensity, invIntensity;
         tHighpass hp;
         tHighpass hp2;
         tFeedbackLeveler fbl1;
         tFeedbackLeveler fbl2;
-        float sampleRate;
-        float invSampleRate;
+        Lfloat sampleRate;
+        Lfloat invSampleRate;
     } _tFormantShifter;
     
     typedef _tFormantShifter* tFormantShifter;
@@ -799,13 +799,13 @@ extern "C" {
     void    tFormantShifter_initToPool      (tFormantShifter* const, int order, tMempool* const);
     void    tFormantShifter_free            (tFormantShifter* const);
     
-    float   tFormantShifter_tick            (tFormantShifter* const, float input);
-    float   tFormantShifter_remove          (tFormantShifter* const, float input);
-    float   tFormantShifter_add             (tFormantShifter* const, float input);
-    void    tFormantShifter_ioSamples       (tFormantShifter* const, float* in, float* out, int size, float fwarp);
-    void    tFormantShifter_setShiftFactor  (tFormantShifter* const, float shiftFactor);
-    void    tFormantShifter_setIntensity    (tFormantShifter* const, float intensity);
-    void    tFormantShifter_setSampleRate   (tFormantShifter* const fsr, float sr);
+    Lfloat   tFormantShifter_tick            (tFormantShifter* const, Lfloat input);
+    Lfloat   tFormantShifter_remove          (tFormantShifter* const, Lfloat input);
+    Lfloat   tFormantShifter_add             (tFormantShifter* const, Lfloat input);
+    void    tFormantShifter_ioSamples       (tFormantShifter* const, Lfloat* in, Lfloat* out, int size, Lfloat fwarp);
+    void    tFormantShifter_setShiftFactor  (tFormantShifter* const, Lfloat shiftFactor);
+    void    tFormantShifter_setIntensity    (tFormantShifter* const, Lfloat intensity);
+    void    tFormantShifter_setSampleRate   (tFormantShifter* const fsr, Lfloat sr);
     
     //==============================================================================
     

@@ -38,12 +38,12 @@ extern "C" {
      @brief Reverb, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tPRCReverb_init         (tPRCReverb* const, float t60, LEAF* const leaf)
+     @fn void    tPRCReverb_init         (tPRCReverb* const, Lfloat t60, LEAF* const leaf)
      @brief Initialize a tPRCReverb to the default mempool of a LEAF instance.
      @param reverb A pointer to the tPRCReverb to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPRCReverb_initToPool   (tPRCReverb* const, float t60, tMempool* const)
+     @fn void    tPRCReverb_initToPool   (tPRCReverb* const, Lfloat t60, tMempool* const)
      @brief Initialize a tPRCReverb to a specified mempool.
      @param reverb A pointer to the tPRCReverb to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -56,15 +56,15 @@ extern "C" {
      @brief
      @param reverb A pointer to the relevant tPRCReverb.
      
-     @fn float   tPRCReverb_tick         (tPRCReverb* const, float input)
+     @fn Lfloat   tPRCReverb_tick         (tPRCReverb* const, Lfloat input)
      @brief
      @param reverb A pointer to the relevant tPRCReverb.
 
-     @fn void    tPRCReverb_setT60       (tPRCReverb* const, float t60)
+     @fn void    tPRCReverb_setT60       (tPRCReverb* const, Lfloat t60)
      @brief Set reverb time in seconds.
      @param reverb A pointer to the relevant tPRCReverb.
     
-     @fn void    tPRCReverb_setMix       (tPRCReverb* const, float mix)
+     @fn void    tPRCReverb_setMix       (tPRCReverb* const, Lfloat mix)
      @brief Set mix between dry input and wet output signal.
      @param reverb A pointer to the relevant tPRCReverb.
      
@@ -75,30 +75,30 @@ extern "C" {
         
         tMempool mempool;
         
-        float mix, t60;
+        Lfloat mix, t60;
         
-        float sampleRate;
-        float invSampleRate;
+        Lfloat sampleRate;
+        Lfloat invSampleRate;
         
         tDelay allpassDelays[2];
         tDelay combDelay;
-        float allpassCoeff;
-        float combCoeff;
+        Lfloat allpassCoeff;
+        Lfloat combCoeff;
         
-        float lastIn, lastOut;
+        Lfloat lastIn, lastOut;
     } _tPRCReverb;
     
     typedef _tPRCReverb* tPRCReverb;
     
-    void    tPRCReverb_init         (tPRCReverb* const, float t60, LEAF* const leaf);
-    void    tPRCReverb_initToPool   (tPRCReverb* const, float t60, tMempool* const);
+    void    tPRCReverb_init         (tPRCReverb* const, Lfloat t60, LEAF* const leaf);
+    void    tPRCReverb_initToPool   (tPRCReverb* const, Lfloat t60, tMempool* const);
     void    tPRCReverb_free         (tPRCReverb* const);
     
     void    tPRCReverb_clear        (tPRCReverb* const);
-    float   tPRCReverb_tick         (tPRCReverb* const, float input);
-    void    tPRCReverb_setT60       (tPRCReverb* const, float t60);
-    void    tPRCReverb_setMix       (tPRCReverb* const, float mix);
-    void    tPRCReverb_setSampleRate(tPRCReverb* const, float sr);
+    Lfloat   tPRCReverb_tick         (tPRCReverb* const, Lfloat input);
+    void    tPRCReverb_setT60       (tPRCReverb* const, Lfloat t60);
+    void    tPRCReverb_setMix       (tPRCReverb* const, Lfloat mix);
+    void    tPRCReverb_setSampleRate(tPRCReverb* const, Lfloat sr);
     
     //==============================================================================
     
@@ -108,12 +108,12 @@ extern "C" {
      @brief Reverb, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tNReverb_init           (tNReverb* const, float t60, LEAF* const leaf)
+     @fn void    tNReverb_init           (tNReverb* const, Lfloat t60, LEAF* const leaf)
      @brief Initialize a tNReverb to the default mempool of a LEAF instance.
      @param reverb A pointer to the tNReverb to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tNReverb_initToPool     (tNReverb* const, float t60, tMempool* const)
+     @fn void    tNReverb_initToPool     (tNReverb* const, Lfloat t60, tMempool* const)
      @brief Initialize a tNReverb to a specified mempool.
      @param reverb A pointer to the tNReverb to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -126,19 +126,19 @@ extern "C" {
      @brief
      @param reverb A pointer to the relevant tNReverb.
      
-     @fn float   tNReverb_tick           (tNReverb* const, float input)
+     @fn Lfloat   tNReverb_tick           (tNReverb* const, Lfloat input)
      @brief
      @param reverb A pointer to the relevant tNReverb.
      
-     @fn void    tNReverb_tickStereo     (tNReverb* const rev, float input, float* output)
+     @fn void    tNReverb_tickStereo     (tNReverb* const rev, Lfloat input, Lfloat* output)
      @brief 
      @param reverb A pointer to the relevant tNReverb.
      
-     @fn void    tNReverb_setT60         (tNReverb* const, float t60)
+     @fn void    tNReverb_setT60         (tNReverb* const, Lfloat t60)
      @brief Set reverb time in seconds.
      @param reverb A pointer to the relevant tNReverb.
      
-     @fn void    tNReverb_setMix         (tNReverb* const, float mix)
+     @fn void    tNReverb_setMix         (tNReverb* const, Lfloat mix)
      @brief Set mix between dry input and wet output signal.
      @param reverb A pointer to the relevant tNReverb.
       
@@ -149,32 +149,32 @@ extern "C" {
         
         tMempool mempool;
         
-        float mix, t60;
+        Lfloat mix, t60;
         
-        float sampleRate;
-        float invSampleRate;
+        Lfloat sampleRate;
+        Lfloat invSampleRate;
         
         tLinearDelay allpassDelays[8];
         tLinearDelay combDelays[6];
-        float allpassCoeff;
-        float combCoeffs[6];
-        float lowpassState;
+        Lfloat allpassCoeff;
+        Lfloat combCoeffs[6];
+        Lfloat lowpassState;
         
-        float lastIn, lastOut;
+        Lfloat lastIn, lastOut;
     } _tNReverb;
     
     typedef _tNReverb* tNReverb;
     
-    void    tNReverb_init           (tNReverb* const, float t60, LEAF* const leaf);
-    void    tNReverb_initToPool     (tNReverb* const, float t60, tMempool* const);
+    void    tNReverb_init           (tNReverb* const, Lfloat t60, LEAF* const leaf);
+    void    tNReverb_initToPool     (tNReverb* const, Lfloat t60, tMempool* const);
     void    tNReverb_free           (tNReverb* const);
     
     void    tNReverb_clear          (tNReverb* const);
-    float   tNReverb_tick           (tNReverb* const, float input);
-    void    tNReverb_tickStereo     (tNReverb* const rev, float input, float* output);
-    void    tNReverb_setT60         (tNReverb* const, float t60);
-    void    tNReverb_setMix         (tNReverb* const, float mix);
-    void    tNReverb_setSampleRate  (tNReverb* const, float sr);
+    Lfloat   tNReverb_tick           (tNReverb* const, Lfloat input);
+    void    tNReverb_tickStereo     (tNReverb* const rev, Lfloat input, Lfloat* output);
+    void    tNReverb_setT60         (tNReverb* const, Lfloat t60);
+    void    tNReverb_setMix         (tNReverb* const, Lfloat mix);
+    void    tNReverb_setSampleRate  (tNReverb* const, Lfloat sr);
     
     //==============================================================================
     
@@ -202,15 +202,15 @@ extern "C" {
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn float   tDattorroReverb_tick              (tDattorroReverb* const, float input)
+     @fn Lfloat   tDattorroReverb_tick              (tDattorroReverb* const, Lfloat input)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, float input, float* output)
+     @fn void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, Lfloat input, Lfloat* output)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn void    tDattorroReverb_setMix            (tDattorroReverb* const, float mix)
+     @fn void    tDattorroReverb_setMix            (tDattorroReverb* const, Lfloat mix)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
@@ -218,27 +218,27 @@ extern "C" {
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn void    tDattorroReverb_setHP             (tDattorroReverb* const, float freq)
+     @fn void    tDattorroReverb_setHP             (tDattorroReverb* const, Lfloat freq)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn void    tDattorroReverb_setSize           (tDattorroReverb* const, float size)
+     @fn void    tDattorroReverb_setSize           (tDattorroReverb* const, Lfloat size)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, float preDelay)
+     @fn void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, Lfloat preDelay)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn void    tDattorroReverb_setInputFilter    (tDattorroReverb* const, float freq)
+     @fn void    tDattorroReverb_setInputFilter    (tDattorroReverb* const, Lfloat freq)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const, float freq)
+     @fn void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const, Lfloat freq)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const, float gain)
+     @fn void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const, Lfloat gain)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
@@ -249,20 +249,20 @@ extern "C" {
         
         tMempool mempool;
         
-        float   sampleRate;
-        float   predelay;
-        float   input_filter;
-        float   feedback_filter;
-        float   feedback_gain;
-        float   mix;
+        Lfloat   sampleRate;
+        Lfloat   predelay;
+        Lfloat   input_filter;
+        Lfloat   feedback_filter;
+        Lfloat   feedback_gain;
+        Lfloat   mix;
         int frozen;
         
-        float   size, size_max, t;
+        Lfloat   size, size_max, t;
         
-        float   f1_delay_2_last,
+        Lfloat   f1_delay_2_last,
         f2_delay_2_last;
         
-        float   f1_last,
+        Lfloat   f1_last,
         f2_last;
         
         // INPUT
@@ -298,17 +298,17 @@ extern "C" {
     void    tDattorroReverb_free              (tDattorroReverb* const);
     
     void    tDattorroReverb_clear             (tDattorroReverb* const);
-    float   tDattorroReverb_tick              (tDattorroReverb* const, float input);
-    void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, float input, float* output);
-    void    tDattorroReverb_setMix            (tDattorroReverb* const, float mix);
+    Lfloat   tDattorroReverb_tick              (tDattorroReverb* const, Lfloat input);
+    void    tDattorroReverb_tickStereo        (tDattorroReverb* const rev, Lfloat input, Lfloat* output);
+    void    tDattorroReverb_setMix            (tDattorroReverb* const, Lfloat mix);
     void    tDattorroReverb_setFreeze         (tDattorroReverb* const rev, int freeze);
-    void    tDattorroReverb_setHP             (tDattorroReverb* const, float freq);
-    void    tDattorroReverb_setSize           (tDattorroReverb* const, float size);
-    void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, float preDelay);
-    void    tDattorroReverb_setInputFilter    (tDattorroReverb* const, float freq);
-    void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const, float freq);
-    void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const, float gain);
-    void    tDattorroReverb_setSampleRate     (tDattorroReverb* const, float sr);
+    void    tDattorroReverb_setHP             (tDattorroReverb* const, Lfloat freq);
+    void    tDattorroReverb_setSize           (tDattorroReverb* const, Lfloat size);
+    void    tDattorroReverb_setInputDelay     (tDattorroReverb* const, Lfloat preDelay);
+    void    tDattorroReverb_setInputFilter    (tDattorroReverb* const, Lfloat freq);
+    void    tDattorroReverb_setFeedbackFilter (tDattorroReverb* const, Lfloat freq);
+    void    tDattorroReverb_setFeedbackGain   (tDattorroReverb* const, Lfloat gain);
+    void    tDattorroReverb_setSampleRate     (tDattorroReverb* const, Lfloat sr);
     
 #ifdef __cplusplus
 }

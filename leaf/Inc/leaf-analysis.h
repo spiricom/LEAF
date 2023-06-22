@@ -39,14 +39,14 @@ extern "C" {
      @brief Detects and returns the basic envelope of incoming audio data.
      @{
      
-     @fn void    tEnvelopeFollower_init          (tEnvelopeFollower* const follower, float attackThreshold, float decayCoeff, LEAF* const leaf)
+     @fn void    tEnvelopeFollower_init          (tEnvelopeFollower* const follower, Lfloat attackThreshold, Lfloat decayCoeff, LEAF* const leaf)
      @brief Initialize a tEnvelopeFollower to the default mempool of a LEAF instance.
      @param follower A pointer to the tEnvelopeFollower to initialize.
      @param attackThreshold Amplitude threshold for determining an envelope onset. 0.0 to 1.0
      @param decayCoefficient Multiplier to determine the envelope rate of decay. 0.0 to 1.0, above 0.95 recommended.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const follower, float attackThreshold, float decayCoeff, tMempool* const mempool)
+     @fn void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const follower, Lfloat attackThreshold, Lfloat decayCoeff, tMempool* const mempool)
      @brief Initialize a tEnvelopeFollower to a specified mempool.
      @param follower A pointer to the tEnvelopeFollower to initialize.
      @param attackThreshold Amplitude threshold for determining an envelope onset. 0.0 to 1.0
@@ -57,18 +57,18 @@ extern "C" {
      @brief Free a tEnvelopeFollower from its mempool.
      @param follower A pointer to the tEnvelopeFollower to free.
      
-     @fn float   tEnvelopeFollower_tick          (tEnvelopeFollower* const follower, float input)
+     @fn Lfloat   tEnvelopeFollower_tick          (tEnvelopeFollower* const follower, Lfloat input)
      @brief Tick the tEnvelopeFollower.
      @param follower A pointer to the relevant tEnvelopeFollower.
      @param input The input sample.
      @return The envelope value.
      
-     @fn void    tEnvelopeFollower_setDecayCoefficient    (tEnvelopeFollower* const follower, float decayCoeff)
+     @fn void    tEnvelopeFollower_setDecayCoefficient    (tEnvelopeFollower* const follower, Lfloat decayCoeff)
      @brief Set the envelope decay coefficient.
      @param follower A pointer to the relevant tEnvelopeFollower.
      @param decayCoefficient Multiplier to determine the envelope rate of decay. 0.0 to 1.0, above 0.95 recommended.
      
-     @fn void    tEnvelopeFollower_setAttackThreshold  (tEnvelopeFollower* const follower, float attackThresh)
+     @fn void    tEnvelopeFollower_setAttackThreshold  (tEnvelopeFollower* const follower, Lfloat attackThresh)
      @brief Set the envelope attack threshold.
      @param follower A pointer to the relevant tEnvelopeFollower.
      @param attackThreshold The new threshold to determine envelope onset as an amplitude from 0.0 to 1.0
@@ -79,21 +79,21 @@ extern "C" {
     {
         
         tMempool mempool;
-        float y;
-        float a_thresh;
-        float d_coeff;
+        Lfloat y;
+        Lfloat a_thresh;
+        Lfloat d_coeff;
         
     } _tEnvelopeFollower;
     
     typedef _tEnvelopeFollower* tEnvelopeFollower;
     
-    void    tEnvelopeFollower_init          (tEnvelopeFollower* const follower, float attackThreshold, float decayCoefficient, LEAF* const leaf);
-    void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const follower, float attackThreshold, float decayCoefficient, tMempool* const mempool);
+    void    tEnvelopeFollower_init          (tEnvelopeFollower* const follower, Lfloat attackThreshold, Lfloat decayCoefficient, LEAF* const leaf);
+    void    tEnvelopeFollower_initToPool    (tEnvelopeFollower* const follower, Lfloat attackThreshold, Lfloat decayCoefficient, tMempool* const mempool);
     void    tEnvelopeFollower_free          (tEnvelopeFollower* const follower);
     
-    float   tEnvelopeFollower_tick          (tEnvelopeFollower* const follower, float sample);
-    void    tEnvelopeFollower_setDecayCoefficient    (tEnvelopeFollower* const follower, float decayCoefficient);
-    void    tEnvelopeFollower_setAttackThreshold  (tEnvelopeFollower* const follower, float attackThreshold);
+    Lfloat   tEnvelopeFollower_tick          (tEnvelopeFollower* const follower, Lfloat sample);
+    void    tEnvelopeFollower_setDecayCoefficient    (tEnvelopeFollower* const follower, Lfloat decayCoefficient);
+    void    tEnvelopeFollower_setAttackThreshold  (tEnvelopeFollower* const follower, Lfloat attackThreshold);
     
     /*!
      @defgroup tzerocrossingcounter tZeroCrossingCounter
@@ -117,13 +117,13 @@ extern "C" {
      @brief Free a tZeroCrossingCounter from its mempool.
      @param counter A pointer to the tZeroCrossingCounter to free.
      
-     @fn float   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const counter, float input)
+     @fn Lfloat   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const counter, Lfloat input)
      @brief Tick the tZeroCrossingCounter.
      @param counter A pointer to the relevant tZeroCrossingCounter.
      @param input The input sample.
      @return The amount of zero crossings as a proportion of the window.
      
-     @fn void    tZeroCrossingCounter_setWindowSize (tZeroCrossingCounter* const counter, float windowSize)
+     @fn void    tZeroCrossingCounter_setWindowSize (tZeroCrossingCounter* const counter, Lfloat windowSize)
      @brief Set the size of the window. Cannot be greater than the max size given on initialization.
      @param counter A pointer to the relevant tZeroCrossingCounter.
      @param windowSize The new window size.
@@ -138,8 +138,8 @@ extern "C" {
         int count;
         int maxWindowSize;
         int currentWindowSize;
-        float invCurrentWindowSize;
-        float* inBuffer;
+        Lfloat invCurrentWindowSize;
+        Lfloat* inBuffer;
         uint16_t* countBuffer;
         int prevPosition;
         int position;
@@ -151,8 +151,8 @@ extern "C" {
     void    tZeroCrossingCounter_initToPool   (tZeroCrossingCounter* const, int maxWindowSize, tMempool* const mempool);
     void    tZeroCrossingCounter_free         (tZeroCrossingCounter* const);
     
-    float   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const, float input);
-    void    tZeroCrossingCounter_setWindowSize    (tZeroCrossingCounter* const, float windowSize);
+    Lfloat   tZeroCrossingCounter_tick         (tZeroCrossingCounter* const, Lfloat input);
+    void    tZeroCrossingCounter_setWindowSize    (tZeroCrossingCounter* const, Lfloat windowSize);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -162,13 +162,13 @@ extern "C" {
      @brief Measure and follow the power of an input signal using an exponential moving average for smoothing.
      @{
      
-     @fn void    tPowerFollower_init         (tPowerFollower* const, float factor, LEAF* const leaf)
+     @fn void    tPowerFollower_init         (tPowerFollower* const, Lfloat factor, LEAF* const leaf)
      @brief Initialize a tPowerFollower to the default mempool of a LEAF instance.
      @param follower A pointer to the tPowerFollower to initialize.
      @param factor Smoothing factor of the moving average. 0.0-1.0, with a higher value discounting older inputs more quickly.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPowerFollower_initToPool   (tPowerFollower* const, float factor, tMempool* const)
+     @fn void    tPowerFollower_initToPool   (tPowerFollower* const, Lfloat factor, tMempool* const)
      @brief Initialize a tPowerFollower to a specified mempool.
      @param follower A pointer to the tPowerFollower to initialize.
      @param factor Smoothing factor of the moving average. 0.0-1.0, with a higher value discounting older inputs more quickly.
@@ -178,18 +178,18 @@ extern "C" {
      @brief Free a tPowerFollower from its mempool.
      @param follower A pointer to the tPowerFollower to free.
      
-     @fn float   tPowerFollower_tick         (tPowerFollower* const, float input)
+     @fn Lfloat   tPowerFollower_tick         (tPowerFollower* const, Lfloat input)
      @brief Pass a sample into the power follower and return the current power.
      @param follower A pointer to the relevant tPowerFollower.
      @param input The input sample
      @return The current power.
      
-     @fn float   tPowerFollower_getPower       (tPowerFollower* const)
+     @fn Lfloat   tPowerFollower_getPower       (tPowerFollower* const)
      @brief Get the current power.
      @param follower A pointer to the relevant tPowerFollower.
      @return The current power.
      
-     @fn int     tPowerFollower_setFactor    (tPowerFollower* const, float factor)
+     @fn int     tPowerFollower_setFactor    (tPowerFollower* const, Lfloat factor)
      @brief Set the smoothing factor for the moving average.
      @param follower A pointer to the relevant tPowerFollower.
      @param factor Smoothing factor of the moving average. 0.0-1.0, with a higher value discounting older inputs more quickly.
@@ -201,20 +201,20 @@ extern "C" {
     {
         
         tMempool mempool;
-        float factor, oneminusfactor;
-        float curr;
+        Lfloat factor, oneminusfactor;
+        Lfloat curr;
         
     } _tPowerFollower;
     
     typedef _tPowerFollower* tPowerFollower;
     
-    void    tPowerFollower_init         (tPowerFollower* const, float factor, LEAF* const leaf);
-    void    tPowerFollower_initToPool   (tPowerFollower* const, float factor, tMempool* const);
+    void    tPowerFollower_init         (tPowerFollower* const, Lfloat factor, LEAF* const leaf);
+    void    tPowerFollower_initToPool   (tPowerFollower* const, Lfloat factor, tMempool* const);
     void    tPowerFollower_free         (tPowerFollower* const);
     
-    float   tPowerFollower_tick         (tPowerFollower* const, float input);
-    float   tPowerFollower_getPower     (tPowerFollower* const);
-    void    tPowerFollower_setFactor    (tPowerFollower* const, float factor);
+    Lfloat   tPowerFollower_tick         (tPowerFollower* const, Lfloat input);
+    Lfloat   tPowerFollower_getPower     (tPowerFollower* const);
+    void    tPowerFollower_setFactor    (tPowerFollower* const, Lfloat factor);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -244,11 +244,11 @@ extern "C" {
      @brief Free a tEnvPD from its mempool.
      @param env  A pointer to the tEnvPD to free.
      
-     @fn float   tEnvPD_tick             (tEnvPD* const)
+     @fn Lfloat   tEnvPD_tick             (tEnvPD* const)
      @brief
      @param env
      
-     @fn void    tEnvPD_processBlock     (tEnvPD* const, float* in)
+     @fn void    tEnvPD_processBlock     (tEnvPD* const, Lfloat* in)
      @brief
      @param env
      @param inputBlock
@@ -264,14 +264,14 @@ extern "C" {
     {
         
         tMempool mempool;
-        float buf[ENV_WINDOW_SIZE + INITVSTAKEN];
+        Lfloat buf[ENV_WINDOW_SIZE + INITVSTAKEN];
         int x_phase;                    /* number of points since last output */
         int x_period;                   /* requested period of output */
         int x_realperiod;               /* period rounded up to vecsize multiple */
         int x_npoints;                  /* analysis window size in samples */
-        float x_result;                 /* result to output */
-        float x_sumbuf[MAXOVERLAP];     /* summing buffer */
-        float x_f;
+        Lfloat x_result;                 /* result to output */
+        Lfloat x_sumbuf[MAXOVERLAP];     /* summing buffer */
+        Lfloat x_f;
         int windowSize, hopSize, blockSize;
         int x_allocforvs;               /* extra buffer for DSP vector size */
     } _tEnvPD;
@@ -282,8 +282,8 @@ extern "C" {
     void    tEnvPD_initToPool       (tEnvPD* const, int windowSize, int hopSize, int blockSize, tMempool* const);
     void    tEnvPD_free             (tEnvPD* const);
     
-    float   tEnvPD_tick             (tEnvPD* const);
-    void    tEnvPD_processBlock     (tEnvPD* const, float* in);
+    Lfloat   tEnvPD_tick             (tEnvPD* const);
+    void    tEnvPD_processBlock     (tEnvPD* const, Lfloat* in);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -333,12 +333,12 @@ extern "C" {
      @param detection A pointer to the relevant tAttackDetection.
      @param release
      
-     @fn void    tAttackDetection_setThreshold   (tAttackDetection* const, float thres)
+     @fn void    tAttackDetection_setThreshold   (tAttackDetection* const, Lfloat thres)
      @brief Set level above which values are identified as attacks
      @param detection A pointer to the relevant tAttackDetection.
      @param threshold
      
-     @fn int     tAttackDetection_detect         (tAttackDetection* const, float *in)
+     @fn int     tAttackDetection_detect         (tAttackDetection* const, Lfloat *in)
      @brief Find the largest transient in input block, return index of attack
      @param detection A pointer to the relevant tAttackDetection.
      @param inputBlock
@@ -354,23 +354,23 @@ extern "C" {
     typedef struct _tAttackDetection
     {
         tMempool mempool;
-        float env;
+        Lfloat env;
         
         //Attack & Release times in msec
         int atk;
         int rel;
         
         //Attack & Release coefficients based on times
-        float atk_coeff;
-        float rel_coeff;
+        Lfloat atk_coeff;
+        Lfloat rel_coeff;
         
         int blockSize;
         int sampleRate;
         
         //RMS amplitude of previous block - used to decide if attack is present
-        float prevAmp;
+        Lfloat prevAmp;
         
-        float threshold;
+        Lfloat threshold;
     } _tAttackDetection;
     
     typedef _tAttackDetection* tAttackDetection;
@@ -383,9 +383,9 @@ extern "C" {
     void    tAttackDetection_setSamplerate  (tAttackDetection* const, int inRate);
     void    tAttackDetection_setAttack      (tAttackDetection* const, int inAtk);
     void    tAttackDetection_setRelease     (tAttackDetection* const, int inRel);
-    void    tAttackDetection_setThreshold   (tAttackDetection* const, float thres);
-    int     tAttackDetection_detect         (tAttackDetection* const, float *in);
-    void    tAttackDetection_setSampleRate  (tAttackDetection* const, float sr);
+    void    tAttackDetection_setThreshold   (tAttackDetection* const, Lfloat thres);
+    int     tAttackDetection_detect         (tAttackDetection* const, Lfloat *in);
+    void    tAttackDetection_setSampleRate  (tAttackDetection* const, Lfloat sr);
     
     //==============================================================================
     
@@ -411,7 +411,7 @@ extern "C" {
      @brief Free a tSNAC from its mempool.
      @param snac A pointer to the tSNAC to free.
      
-     @fn void    tSNAC_ioSamples     (tSNAC *s, float *in, float *out, int size)
+     @fn void    tSNAC_ioSamples     (tSNAC *s, Lfloat *in, Lfloat *out, int size)
      @brief
      @param snac A pointer to the relevant tSNAC.
      @param input
@@ -423,22 +423,22 @@ extern "C" {
      @param snac A pointer to the relevant tSNAC.
      @param overlap
      
-     @fn void    tSNAC_setBias       (tSNAC *s, float bias)
+     @fn void    tSNAC_setBias       (tSNAC *s, Lfloat bias)
      @brief
      @param snac A pointer to the relevant tSNAC.
      @param bias
      
-     @fn void    tSNAC_setMinRMS     (tSNAC *s, float rms)
+     @fn void    tSNAC_setMinRMS     (tSNAC *s, Lfloat rms)
      @brief
      @param snac A pointer to the relevant tSNAC.
      @param rms
      
-     @fn float   tSNAC_getPeriod     (tSNAC *s)
+     @fn Lfloat   tSNAC_getPeriod     (tSNAC *s)
      @brief
      @param snac A pointer to the relevant tSNAC.
      @return The detected period of the input
      
-     @fn float   tSNAC_getFidelity   (tSNAC *s)
+     @fn Lfloat   tSNAC_getFidelity   (tSNAC *s)
      @brief
      @param snac A pointer to the relevant tSNAC.
      @return The periodic fidelity of the input
@@ -455,19 +455,19 @@ extern "C" {
     {
         tMempool mempool;
         
-        float* inputbuf;
-        float* processbuf;
-        float* spectrumbuf;
-        float* biasbuf;
+        Lfloat* inputbuf;
+        Lfloat* processbuf;
+        Lfloat* spectrumbuf;
+        Lfloat* biasbuf;
         uint16_t timeindex;
         uint16_t framesize;
         uint16_t overlap;
         uint16_t periodindex;
         
-        float periodlength;
-        float fidelity;
-        float biasfactor;
-        float minrms;
+        Lfloat periodlength;
+        Lfloat fidelity;
+        Lfloat biasfactor;
+        Lfloat minrms;
         
     } _tSNAC;
     
@@ -477,14 +477,14 @@ extern "C" {
     void    tSNAC_initToPool    (tSNAC* const, int overlaparg, tMempool* const);
     void    tSNAC_free          (tSNAC* const);
     
-    void    tSNAC_ioSamples     (tSNAC *s, float *in, int size);
+    void    tSNAC_ioSamples     (tSNAC *s, Lfloat *in, int size);
     void    tSNAC_setOverlap    (tSNAC *s, int lap);
-    void    tSNAC_setBias       (tSNAC *s, float bias);
-    void    tSNAC_setMinRMS     (tSNAC *s, float rms);
+    void    tSNAC_setBias       (tSNAC *s, Lfloat bias);
+    void    tSNAC_setMinRMS     (tSNAC *s, Lfloat rms);
     
     /*To get freq, perform SAMPLE_RATE/snac_getperiod() */
-    float   tSNAC_getPeriod     (tSNAC *s);
-    float   tSNAC_getFidelity   (tSNAC *s);
+    Lfloat   tSNAC_getPeriod     (tSNAC *s);
+    Lfloat   tSNAC_getFidelity   (tSNAC *s);
     
     /*!
      @defgroup tperioddetection tPeriodDetection
@@ -492,7 +492,7 @@ extern "C" {
      @brief Period detection algorithm from Katja Vetters http://www.katjaas.nl/helmholtz/helmholtz.html
      @{
 
-     @fn void    tPeriodDetection_init               (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, LEAF* const leaf)
+     @fn void    tPeriodDetection_init               (tPeriodDetection* const, Lfloat* in, Lfloat* out, int bufSize, int frameSize, LEAF* const leaf)
      @brief Initialize a tPeriodDetection to the default mempool of a LEAF instance.
      @param detection A pointer to the tPeriodDetection to initialize.
      @param in
@@ -501,7 +501,7 @@ extern "C" {
      @param frameSize
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPeriodDetection_initToPool  (tPeriodDetection* const, float* in, float* out, int bufSize, int frameSize, tMempool* const)
+     @fn void    tPeriodDetection_initToPool  (tPeriodDetection* const, Lfloat* in, Lfloat* out, int bufSize, int frameSize, tMempool* const)
      @brief Initialize a tPeriodDetection to a specified mempool.
      @param detection A pointer to the tPeriodDetection to initialize.
      @param in
@@ -514,13 +514,13 @@ extern "C" {
      @brief Free a tPeriodDetection from its mempool.
      @param detection A pointer to the tPeriodDetection to free.
      
-     @fn float   tPeriodDetection_tick               (tPeriodDetection* const, float sample)
+     @fn Lfloat   tPeriodDetection_tick               (tPeriodDetection* const, Lfloat sample)
      @brief
      @param detection A pointer to the relevant tPeriodDetection.
      @param input
      @return
      
-     @fn float   tPeriodDetection_getPeriod          (tPeriodDetection* const)
+     @fn Lfloat   tPeriodDetection_getPeriod          (tPeriodDetection* const)
      @brief
      @param detection A pointer to the relevant tPeriodDetection.
      @return The detected period.
@@ -535,17 +535,17 @@ extern "C" {
      @param detection A pointer to the relevant tPeriodDetection.
      @param windowSize
      
-     @fn void    tPeriodDetection_setFidelityThreshold(tPeriodDetection* const, float threshold)
+     @fn void    tPeriodDetection_setFidelityThreshold(tPeriodDetection* const, Lfloat threshold)
      @brief
      @param detection A pointer to the relevant tPeriodDetection.
      @param threshold
      
-     @fn void    tPeriodDetection_setAlpha           (tPeriodDetection* const, float alpha)
+     @fn void    tPeriodDetection_setAlpha           (tPeriodDetection* const, Lfloat alpha)
      @brief
      @param detection A pointer to the relevant tPeriodDetection.
      @param alpha
      
-     @fn void    tPeriodDetection_setTolerance       (tPeriodDetection* const, float tolerance)
+     @fn void    tPeriodDetection_setTolerance       (tPeriodDetection* const, Lfloat tolerance)
      @brief
      @param detection A pointer to the relevant tPeriodDetection.
      @param tolerance
@@ -565,8 +565,8 @@ extern "C" {
         
         tEnvPD env;
         tSNAC snac;
-        float* inBuffer;
-        float* outBuffer;
+        Lfloat* inBuffer;
+        Lfloat* outBuffer;
         int frameSize;
         int bufSize;
         int framesPerBuffer;
@@ -576,42 +576,42 @@ extern "C" {
         int indexstore;
         int iLast;
         int index;
-        float period;
+        Lfloat period;
         
         uint16_t hopSize;
         uint16_t windowSize;
         uint8_t fba;
         
-        float timeConstant;
-        float radius;
-        float max;
-        float lastmax;
-        float deltamax;
+        Lfloat timeConstant;
+        Lfloat radius;
+        Lfloat max;
+        Lfloat lastmax;
+        Lfloat deltamax;
         
-        float fidelityThreshold;
+        Lfloat fidelityThreshold;
         
-        float history;
-        float alpha;
-        float tolerance;
+        Lfloat history;
+        Lfloat alpha;
+        Lfloat tolerance;
         
-        float invSampleRate;
+        Lfloat invSampleRate;
     } _tPeriodDetection;
     
     typedef _tPeriodDetection* tPeriodDetection;
     
-    void    tPeriodDetection_init               (tPeriodDetection* const, float* in, int bufSize, int frameSize, LEAF* const leaf);
-    void    tPeriodDetection_initToPool         (tPeriodDetection* const, float* in, int bufSize, int frameSize, tMempool* const);
+    void    tPeriodDetection_init               (tPeriodDetection* const, Lfloat* in, int bufSize, int frameSize, LEAF* const leaf);
+    void    tPeriodDetection_initToPool         (tPeriodDetection* const, Lfloat* in, int bufSize, int frameSize, tMempool* const);
     void    tPeriodDetection_free               (tPeriodDetection* const);
     
-    float   tPeriodDetection_tick               (tPeriodDetection* const, float sample);
-    float   tPeriodDetection_getPeriod          (tPeriodDetection* const);
-    float   tPeriodDetection_getFidelity        (tPeriodDetection* const);
+    Lfloat   tPeriodDetection_tick               (tPeriodDetection* const, Lfloat sample);
+    Lfloat   tPeriodDetection_getPeriod          (tPeriodDetection* const);
+    Lfloat   tPeriodDetection_getFidelity        (tPeriodDetection* const);
     void    tPeriodDetection_setHopSize         (tPeriodDetection* const, int hs);
     void    tPeriodDetection_setWindowSize      (tPeriodDetection* const, int ws);
-    void    tPeriodDetection_setFidelityThreshold(tPeriodDetection* const, float threshold);
-    void    tPeriodDetection_setAlpha           (tPeriodDetection* const, float alpha);
-    void    tPeriodDetection_setTolerance       (tPeriodDetection* const, float tolerance);
-    void    tPeriodDetection_setSampleRate      (tPeriodDetection* const, float sr);
+    void    tPeriodDetection_setFidelityThreshold(tPeriodDetection* const, Lfloat threshold);
+    void    tPeriodDetection_setAlpha           (tPeriodDetection* const, Lfloat alpha);
+    void    tPeriodDetection_setTolerance       (tPeriodDetection* const, Lfloat tolerance);
+    void    tPeriodDetection_setSampleRate      (tPeriodDetection* const, Lfloat sr);
     
     //==============================================================================
     
@@ -621,13 +621,13 @@ extern "C" {
         
         tMempool mempool;
         
-        float _before_crossing;
-        float _after_crossing;
+        Lfloat _before_crossing;
+        Lfloat _after_crossing;
         
-        float             _peak;
+        Lfloat             _peak;
         int               _leading_edge;// = undefined_edge; int_min
         int               _trailing_edge;// = undefined_edge;
-        float             _width;// = 0.0f;
+        Lfloat             _width;// = 0.0f;
     } _tZeroCrossingInfo;
     
     typedef _tZeroCrossingInfo* tZeroCrossingInfo;
@@ -636,11 +636,11 @@ extern "C" {
     void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo* const, tMempool* const);
     void    tZeroCrossingInfo_free  (tZeroCrossingInfo* const);
     
-    int     tZeroCrossingInfo_tick(tZeroCrossingInfo* const, float s);
+    int     tZeroCrossingInfo_tick(tZeroCrossingInfo* const, Lfloat s);
     int     tZeroCrossingInfo_getState(tZeroCrossingInfo* const);
-    void    tZeroCrossingInfo_updatePeak(tZeroCrossingInfo* const, float s, int pos);
+    void    tZeroCrossingInfo_updatePeak(tZeroCrossingInfo* const, Lfloat s, int pos);
     int     tZeroCrossingInfo_period(tZeroCrossingInfo* const, tZeroCrossingInfo* const next);
-    float   tZeroCrossingInfo_fractionalPeriod(tZeroCrossingInfo* const, tZeroCrossingInfo* const next);
+    Lfloat   tZeroCrossingInfo_fractionalPeriod(tZeroCrossingInfo* const, tZeroCrossingInfo* const next);
     int     tZeroCrossingInfo_getWidth(tZeroCrossingInfo* const);
     
     //==============================================================================
@@ -654,24 +654,24 @@ extern "C" {
         unsigned int _pos;
         unsigned int _mask;
         
-        float                _prev;// = 0.0f;
-        float                _hysteresis;
+        Lfloat                _prev;// = 0.0f;
+        Lfloat                _hysteresis;
         int                  _state;// = false;
         int                  _num_edges;// = 0;
         int                  _window_size;
         int                  _frame;// = 0;
         int                  _ready;// = false;
-        float                _peak_update;// = 0.0f;
-        float                _peak;// = 0.0f;
+        Lfloat                _peak_update;// = 0.0f;
+        Lfloat                _peak;// = 0.0f;
     } _tZeroCrossingCollector;
     
     typedef _tZeroCrossingCollector* tZeroCrossingCollector;
     
-    void    tZeroCrossingCollector_init  (tZeroCrossingCollector* const, int windowSize, float hysteresis, LEAF* const leaf);
-    void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const, int windowSize, float hysteresis, tMempool* const);
+    void    tZeroCrossingCollector_init  (tZeroCrossingCollector* const, int windowSize, Lfloat hysteresis, LEAF* const leaf);
+    void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const, int windowSize, Lfloat hysteresis, tMempool* const);
     void    tZeroCrossingCollector_free  (tZeroCrossingCollector* const);
     
-    int     tZeroCrossingCollector_tick(tZeroCrossingCollector* const, float s);
+    int     tZeroCrossingCollector_tick(tZeroCrossingCollector* const, Lfloat s);
     int     tZeroCrossingCollector_getState(tZeroCrossingCollector* const);
     
     int     tZeroCrossingCollector_getNumEdges(tZeroCrossingCollector* const zc);
@@ -680,12 +680,12 @@ extern "C" {
     int     tZeroCrossingCollector_getWindowSize(tZeroCrossingCollector* const zc);
     
     int     tZeroCrossingCollector_isReady(tZeroCrossingCollector* const zc);
-    float   tZeroCrossingCollector_getPeak(tZeroCrossingCollector* const zc);
+    Lfloat   tZeroCrossingCollector_getPeak(tZeroCrossingCollector* const zc);
     int     tZeroCrossingCollector_isReset(tZeroCrossingCollector* const zc);
     
     tZeroCrossingInfo const tZeroCrossingCollector_getCrossing(tZeroCrossingCollector* const zc, int index);
 
-    void    tZeroCrossingCollector_setHysteresis(tZeroCrossingCollector* const zc, float hysteresis);
+    void    tZeroCrossingCollector_setHysteresis(tZeroCrossingCollector* const zc, Lfloat hysteresis);
     
     //==============================================================================
     
@@ -742,12 +742,12 @@ extern "C" {
      @brief Period detection algorithm from Joel de Guzman's Q Audio DSP Library
      @{
      
-     @fn void    tPeriodDetector_init    (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, LEAF* const leaf)
+     @fn void    tPeriodDetector_init    (tPeriodDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat hysteresis, LEAF* const leaf)
      @brief Initialize a tPeriodDetector to the default mempool of a LEAF instance.
      @param
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool)
+     @fn void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat hysteresis, tMempool* const mempool)
      @brief Initialize a tPeriodDetector to a specified mempool.
      @param
      @param mempool A pointer to the tMempool to use.
@@ -756,23 +756,23 @@ extern "C" {
      @brief Free a tPeriodDetector from its mempool.
      @param detector A pointer to the tPeriodDetector to free.
      
-     @fn int     tPeriodDetector_tick    (tPeriodDetector* const detector, float sample)
+     @fn int     tPeriodDetector_tick    (tPeriodDetector* const detector, Lfloat sample)
      @brief
      @param
      
-     @fn float   tPeriodDetector_getPeriod   (tPeriodDetector* const detector)
+     @fn Lfloat   tPeriodDetector_getPeriod   (tPeriodDetector* const detector)
      @brief Get the periodicity for a given harmonic of the detected pitch.
      @param
      
-     @fn float   tPeriodDetector_getPeriodicity  (tPeriodDetector* const detector)
+     @fn Lfloat   tPeriodDetector_getPeriodicity  (tPeriodDetector* const detector)
      @brief
      @param
      
-     @fn float   tPeriodDetector_harmonic    (tPeriodDetector* const detector, int harmonicIndex)
+     @fn Lfloat   tPeriodDetector_harmonic    (tPeriodDetector* const detector, int harmonicIndex)
      @brief
      @param
      
-     @fn float   tPeriodDetector_predictPeriod   (tPeriodDetector* const detector)
+     @fn Lfloat   tPeriodDetector_predictPeriod   (tPeriodDetector* const detector)
      @brief
      @param
      
@@ -784,7 +784,7 @@ extern "C" {
      @brief
      @param
      ￼￼￼
-     @fn void    tPeriodDetector_setHysteresis    (tPeriodDetector* const detector, float hysteresis)
+     @fn void    tPeriodDetector_setHysteresis    (tPeriodDetector* const detector, Lfloat hysteresis)
      @brief Set the hysteresis used in zero crossing detection.
      @param detector A pointer to the relevant tPeriodDetector.
      @param hysteresis The hysteresis in decibels. Defaults to -40db.
@@ -800,7 +800,7 @@ extern "C" {
         int               _i1;// = -1;
         int               _i2;// = -1;
         int               _period;// = -1;
-        float             _periodicity;// = 0.0f;
+        Lfloat             _periodicity;// = 0.0f;
         unsigned int      _harmonic;
     } _auto_correlation_info;
     
@@ -808,22 +808,22 @@ extern "C" {
     {
         tMempool mempool;
         
-        float             _first_period;
+        Lfloat             _first_period;
         
         _auto_correlation_info _fundamental;
         
         // passed in, not initialized
         tZeroCrossingCollector    _zc;
         
-        float             _harmonic_threshold;
-        float             _periodicity_diff_threshold;
+        Lfloat             _harmonic_threshold;
+        Lfloat             _periodicity_diff_threshold;
         int               _range;
     } _sub_collector;
 
     typedef struct _period_info
     {
-        float period; // -1.0f
-        float periodicity;
+        Lfloat period; // -1.0f
+        Lfloat periodicity;
     } _period_info;
 
     typedef struct _tPeriodDetector
@@ -835,18 +835,18 @@ extern "C" {
         unsigned int            _min_period;
         int                     _range;
         tBitset                 _bits;
-        float                   _weight;
+        Lfloat                   _weight;
         unsigned int            _mid_point;
-        float                   _periodicity_diff_threshold;
-        float                   _predicted_period;// = -1.0f;
+        Lfloat                   _periodicity_diff_threshold;
+        Lfloat                   _predicted_period;// = -1.0f;
         unsigned int            _edge_mark;// = 0;
         unsigned int            _predict_edge;// = 0;
         unsigned int            _num_pulses; // = 0;
         int                     _half_empty; // 0;
         
-        float                   sampleRate;
-        float                   lowestFreq;
-        float                   highestFreq;
+        Lfloat                   sampleRate;
+        Lfloat                   lowestFreq;
+        Lfloat                   highestFreq;
         
         tBACF                   _bacf;
         
@@ -854,22 +854,22 @@ extern "C" {
     
     typedef _tPeriodDetector* tPeriodDetector;
     
-    void    tPeriodDetector_init    (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, LEAF* const leaf);
-    void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool* const mempool);
+    void    tPeriodDetector_init    (tPeriodDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat hysteresis, LEAF* const leaf);
+    void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat hysteresis, tMempool* const mempool);
     void    tPeriodDetector_free    (tPeriodDetector* const detector);
     
-    int     tPeriodDetector_tick    (tPeriodDetector* const detector, float sample);
+    int     tPeriodDetector_tick    (tPeriodDetector* const detector, Lfloat sample);
     
     // get the periodicity for a given harmonic
-    float   tPeriodDetector_getPeriod   (tPeriodDetector* const detector);
-    float   tPeriodDetector_getPeriodicity  (tPeriodDetector* const detector);
-    float   tPeriodDetector_harmonic    (tPeriodDetector* const detector, int harmonicIndex);
-    float   tPeriodDetector_predictPeriod   (tPeriodDetector* const detector);
+    Lfloat   tPeriodDetector_getPeriod   (tPeriodDetector* const detector);
+    Lfloat   tPeriodDetector_getPeriodicity  (tPeriodDetector* const detector);
+    Lfloat   tPeriodDetector_harmonic    (tPeriodDetector* const detector, int harmonicIndex);
+    Lfloat   tPeriodDetector_predictPeriod   (tPeriodDetector* const detector);
     int     tPeriodDetector_isReady (tPeriodDetector* const detector);
     int     tPeriodDetector_isReset (tPeriodDetector* const detector);
 
-    void    tPeriodDetector_setHysteresis   (tPeriodDetector* const detector, float hysteresis);
-    void    tPeriodDetector_setSampleRate   (tPeriodDetector* const detector, float sr);
+    void    tPeriodDetector_setHysteresis   (tPeriodDetector* const detector, Lfloat hysteresis);
+    void    tPeriodDetector_setSampleRate   (tPeriodDetector* const detector, Lfloat sr);
     
     //==============================================================================
     
@@ -879,7 +879,7 @@ extern "C" {
      @brief Pitch detection algorithm from Joel de Guzman's Q Audio DSP Library
      @{
      
-     @fn void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq, LEAF* const leaf)
+     @fn void    tPitchDetector_init (tPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, LEAF* const leaf)
      @brief Initialize a tPitchDetector to the default mempool of a LEAF instance.
      @param detector A pointer to the relevant tPitchDetector.
      @param lowestFreq
@@ -887,7 +887,7 @@ extern "C" {
      @param leaf A pointer to the leaf instance.
      
      
-     @fn void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool)
+     @fn void    tPitchDetector_initToPool   (tPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, tMempool* const mempool)
      @brief Initialize a tPitchDetector to a specified mempool.
      @param detector A pointer to the relevant tPitchDetector.
      @param lowestFreq
@@ -898,29 +898,29 @@ extern "C" {
      @brief Free a tPitchDetector from its mempool.
      @param detector A pointer to the relevant tPitchDetector.
      
-     @fn int     tPitchDetector_tick    (tPitchDetector* const detector, float sample)
+     @fn int     tPitchDetector_tick    (tPitchDetector* const detector, Lfloat sample)
      @brief
      @param detector A pointer to the relevant tPitchDetector.
      @param input
      
-     @fn float   tPitchDetector_getFrequency    (tPitchDetector* const detector)
+     @fn Lfloat   tPitchDetector_getFrequency    (tPitchDetector* const detector)
      @brief
      @param detector A pointer to the relevant tPitchDetector.
      
-     @fn float   tPitchDetector_getPeriodicity  (tPitchDetector* const detector)
+     @fn Lfloat   tPitchDetector_getPeriodicity  (tPitchDetector* const detector)
      @brief
      @param detector A pointer to the relevant tPitchDetector.
      
-     @fn float   tPitchDetector_harmonic    (tPitchDetector* const detector, int harmonicIndex)
+     @fn Lfloat   tPitchDetector_harmonic    (tPitchDetector* const detector, int harmonicIndex)
      @brief
      @param detector A pointer to the relevant tPitchDetector.
      @param harmonicIndex
      
-     @fn float   tPitchDetector_predictFrequency (tPitchDetector* const detector)
+     @fn Lfloat   tPitchDetector_predictFrequency (tPitchDetector* const detector)
      @brief
      @param detector A pointer to the relevant tPitchDetector.
      
-     @fn void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, float hysteresis)
+     @fn void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, Lfloat hysteresis)
      @brief Set the hysteresis used in zero crossing detection.
      @param detector A pointer to the relevant tPitchDetector.
      @param hysteresis The hysteresis in decibels. Defaults to -40db.
@@ -933,8 +933,8 @@ extern "C" {
 
     typedef struct _pitch_info
     {
-        float frequency;
-        float periodicity;
+        Lfloat frequency;
+        Lfloat periodicity;
     } _pitch_info;
     
     typedef struct _tPitchDetector
@@ -946,25 +946,25 @@ extern "C" {
         _pitch_info _current;
         int _frames_after_shift;// = 0;
         
-        float sampleRate;
+        Lfloat sampleRate;
         
     } _tPitchDetector;
     
     typedef _tPitchDetector* tPitchDetector;
     
-    void    tPitchDetector_init (tPitchDetector* const detector, float lowestFreq, float highestFreq, LEAF* const leaf);
-    void    tPitchDetector_initToPool   (tPitchDetector* const detector, float lowestFreq, float highestFreq, tMempool* const mempool);
+    void    tPitchDetector_init (tPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, LEAF* const leaf);
+    void    tPitchDetector_initToPool   (tPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, tMempool* const mempool);
     void    tPitchDetector_free (tPitchDetector* const detector);
     
-    int     tPitchDetector_tick    (tPitchDetector* const detector, float sample);
-    float   tPitchDetector_getFrequency    (tPitchDetector* const detector);
-    float   tPitchDetector_getPeriodicity  (tPitchDetector* const detector);
-    float   tPitchDetector_harmonic    (tPitchDetector* const detector, int harmonicIndex);
-    float   tPitchDetector_predictFrequency (tPitchDetector* const detector);
+    int     tPitchDetector_tick    (tPitchDetector* const detector, Lfloat sample);
+    Lfloat   tPitchDetector_getFrequency    (tPitchDetector* const detector);
+    Lfloat   tPitchDetector_getPeriodicity  (tPitchDetector* const detector);
+    Lfloat   tPitchDetector_harmonic    (tPitchDetector* const detector, int harmonicIndex);
+    Lfloat   tPitchDetector_predictFrequency (tPitchDetector* const detector);
     int     tPitchDetector_indeterminate    (tPitchDetector* const detector);
     
-    void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, float hysteresis);
-    void    tPitchDetector_setSampleRate    (tPitchDetector* const detector, float sr);
+    void    tPitchDetector_setHysteresis    (tPitchDetector* const detector, Lfloat hysteresis);
+    void    tPitchDetector_setSampleRate    (tPitchDetector* const detector, Lfloat sr);
     
     //==============================================================================
     
@@ -974,21 +974,21 @@ extern "C" {
      @brief Combined pitch detection algorithm using both Joel de Guzman's Q Audio DSP Library and Katya Vetters algorithms
      @{
      
-     @fn void tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, LEAF* const leaf)
+     @fn void tDualPitchDetector_init (tDualPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat* inBuffer, int bufSize, LEAF* const leaf)
      @brief Initialize a tDualPitchDetector to the default mempool of a LEAF instance.
      @param detector A pointer to the relevant tDualPitchDetector.
      @param lowestFreq
      @param highestFreq
-     @param inputBuffer A buffer of float to store input to the pitch detector.
+     @param inputBuffer A buffer of Lfloat to store input to the pitch detector.
      @param bufferSize Size of the input buffer.
      @param leaf A pointer to the leaf instance.
      
-     @fn void tDualPitchDetector_initToPool (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, tMempool* const mempool)
+     @fn void tDualPitchDetector_initToPool (tDualPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat* inBuffer, int bufSize, tMempool* const mempool)
      @brief Initialize a tDualPitchDetector to a specified mempool.
      @param detector A pointer to the relevant tPitchDualDetector.
      @param lowestFreq
      @param highestFreq
-     @param inputBuffer A buffer of float to store input to the pitch detector.
+     @param inputBuffer A buffer of Lfloat to store input to the pitch detector.
      @param bufferSize Size of the input buffer.
      @param mempool A pointer to the tMempool to use.
      
@@ -996,38 +996,38 @@ extern "C" {
      @brief Free a tDualPitchDetector from its mempool.
      @param detector A pointer to the relevant tDualPitchDetector.
      
-     @fn int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sample)
+     @fn int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, Lfloat sample)
      @brief
      @param detector A pointer to the relevant tDualPitchDetector.
      @param input
      
-     @fn float   tDualPitchDetector_getFrequency    (tDualPitchDetector* const detector)
+     @fn Lfloat   tDualPitchDetector_getFrequency    (tDualPitchDetector* const detector)
      @brief
      @param detector A pointer to the relevant tDualPitchDetector.
      @return The detected frequency.
      
-     @fn float   tDualPitchDetector_getPeriodicity  (tDualPitchDetector* const detector)
+     @fn Lfloat   tDualPitchDetector_getPeriodicity  (tDualPitchDetector* const detector)
      @brief
      @param detector A pointer to the relevant tDualPitchDetector.
      @return The periodicity of the input.
      
-     @fn float   tDualPitchDetector_harmonic    (tDualPitchDetector* const detector, int harmonicIndex)
+     @fn Lfloat   tDualPitchDetector_harmonic    (tDualPitchDetector* const detector, int harmonicIndex)
      @brief
      @param detector A pointer to the relevant tDualPitchDetector.
      @param harmonicIndex
      @return
      
-     @fn float tDualPitchDetector_predictFrequency (tDualPitchDetector* const detector)
+     @fn Lfloat tDualPitchDetector_predictFrequency (tDualPitchDetector* const detector)
      @brief
      @param detector A pointer to the relevant tDualPitchDetector.
      @return The predicted frequency in Hz.
      
-     @fn void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector, float hysteresis)
+     @fn void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector, Lfloat hysteresis)
      @brief Set the hysteresis used in zero crossing detection.
      @param detector A pointer to the relevant tDualPitchDetector.
      @param hysteresis The hysteresis in decibels. Defaults to -40db.
      
-     @fn void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector* const detector, float thresh)
+     @fn void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector* const detector, Lfloat thresh)
      @brief Set the threshold for periodicity of a signal to be considered as pitched.
      @param detector A pointer to the relevant tDualPitchDetector.
      @param threshold The periodicity threshold from 0.0 to 1.0 with 1.0 being perfectly periodic.
@@ -1041,32 +1041,32 @@ extern "C" {
         tPeriodDetection _pd1;
         tPitchDetector _pd2;
         _pitch_info _current;
-        float _mean;
-        float _predicted_frequency;
+        Lfloat _mean;
+        Lfloat _predicted_frequency;
         int _first;
         
-        float highest, lowest;
-        float thresh;
+        Lfloat highest, lowest;
+        Lfloat thresh;
         
-        float sampleRate;
+        Lfloat sampleRate;
 
     } _tDualPitchDetector;
     
     typedef _tDualPitchDetector* tDualPitchDetector;
     
-    void    tDualPitchDetector_init (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, LEAF* const leaf);
-    void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, tMempool* const mempool);
+    void    tDualPitchDetector_init (tDualPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat* inBuffer, int bufSize, LEAF* const leaf);
+    void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat* inBuffer, int bufSize, tMempool* const mempool);
     void    tDualPitchDetector_free (tDualPitchDetector* const detector);
     
-    int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, float sample);
-    float   tDualPitchDetector_getFrequency    (tDualPitchDetector* const detector);
-    float   tDualPitchDetector_getPeriodicity  (tDualPitchDetector* const detector);
-    float   tDualPitchDetector_harmonic    (tDualPitchDetector* const detector, int harmonicIndex);
-    float   tDualPitchDetector_predictFrequency (tDualPitchDetector* const detector);
+    int     tDualPitchDetector_tick    (tDualPitchDetector* const detector, Lfloat sample);
+    Lfloat   tDualPitchDetector_getFrequency    (tDualPitchDetector* const detector);
+    Lfloat   tDualPitchDetector_getPeriodicity  (tDualPitchDetector* const detector);
+    Lfloat   tDualPitchDetector_harmonic    (tDualPitchDetector* const detector, int harmonicIndex);
+    Lfloat   tDualPitchDetector_predictFrequency (tDualPitchDetector* const detector);
     
-    void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector, float hysteresis);
-    void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector* const detector, float thresh);
-    void    tDualPitchDetector_setSampleRate    (tDualPitchDetector* const detector, float sr);
+    void    tDualPitchDetector_setHysteresis    (tDualPitchDetector* const detector, Lfloat hysteresis);
+    void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector* const detector, Lfloat thresh);
+    void    tDualPitchDetector_setSampleRate    (tDualPitchDetector* const detector, Lfloat sr);
     
 #ifdef __cplusplus
 }

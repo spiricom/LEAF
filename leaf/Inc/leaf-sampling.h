@@ -56,18 +56,18 @@ extern "C" {
      @brief Free a tBuffer from its mempool.
      @param sampler A pointer to the tBuffer to free.
      
-     @fn void  tBuffer_tick                  (tBuffer* const, float sample)
+     @fn void  tBuffer_tick                  (tBuffer* const, Lfloat sample)
      @brief If recording, add a sample to the buffer. Otherwise do nothing.
      @param sampler A pointer to the relevant tBuffer.
      @param input The input sample.
      
-     @fn void  tBuffer_read                  (tBuffer* const, float* buff, uint32_t len)
+     @fn void  tBuffer_read                  (tBuffer* const, Lfloat* buff, uint32_t len)
      @brief Read an input buffer into the buffer.
      @param sampler A pointer to the relevant tBuffer.
      @param inputBuffer The input buffer.
      @param length The length of the input buffer.
      
-     @fn float tBuffer_get                   (tBuffer* const, int idx)
+     @fn Lfloat tBuffer_get                   (tBuffer* const, int idx)
      @brief Get the sample recorded at a given position in the buffer.
      @param sampler A pointer to the relevant tBuffer.
      @param position The position to get a sample from.
@@ -134,7 +134,7 @@ extern "C" {
         
         tMempool mempool;
         
-        float* buff;
+        Lfloat* buff;
         
         uint32_t idx;
         uint32_t bufferLength;
@@ -152,12 +152,12 @@ extern "C" {
     void  tBuffer_initToPool             (tBuffer* const sb, uint32_t length, tMempool* const mp);
     void  tBuffer_free                  (tBuffer* const);
     
-    void  tBuffer_tick                  (tBuffer* const, float sample);
-    void  tBuffer_read                  (tBuffer* const, float* buff, uint32_t len);
-    float tBuffer_get                   (tBuffer* const, int idx);
+    void  tBuffer_tick                  (tBuffer* const, Lfloat sample);
+    void  tBuffer_read                  (tBuffer* const, Lfloat* buff, uint32_t len);
+    Lfloat tBuffer_get                   (tBuffer* const, int idx);
     void  tBuffer_record                (tBuffer* const);
     void  tBuffer_stop                  (tBuffer* const);
-    void tBuffer_setBuffer                (tBuffer* const sb, float* externalBuffer, int length, int channels, int sampleRate);
+    void tBuffer_setBuffer                (tBuffer* const sb, Lfloat* externalBuffer, int length, int channels, int sampleRate);
     int   tBuffer_getRecordPosition     (tBuffer* const);
     void   tBuffer_setRecordPosition    (tBuffer* const, int pos);
     void  tBuffer_setRecordMode         (tBuffer* const, RecordMode mode);
@@ -191,7 +191,7 @@ extern "C" {
      @brief Free a tSampler from its mempool.
      @param sampler A pointer to the tSampler to free.
      
-     @fn float   tSampler_tick               (tSampler* const)
+     @fn Lfloat   tSampler_tick               (tSampler* const)
      @brief
      @param sampler A pointer to the relevant tSampler.
      
@@ -227,7 +227,7 @@ extern "C" {
      @brief
      @param sampler A pointer to the relevant tSampler.
      
-     @fn void    tSampler_setRate            (tSampler* const, float rate)
+     @fn void    tSampler_setRate            (tSampler* const, Lfloat rate)
      @brief
      @param sampler A pointer to the relevant tSampler.
      
@@ -247,18 +247,18 @@ extern "C" {
         
         tBuffer samp;
         
-        float invSampleRate;
-        float sampleRate;
-        float ticksPerSevenMs;
-        float rateFactor;
+        Lfloat invSampleRate;
+        Lfloat sampleRate;
+        Lfloat ticksPerSevenMs;
+        Lfloat rateFactor;
         uint32_t channels;
         
         tRamp gain;
         
-        float idx;
-        float inc;
-        float last;
-        float iinc;
+        Lfloat idx;
+        Lfloat inc;
+        Lfloat last;
+        Lfloat iinc;
         int8_t dir;
         int8_t flip;
         int8_t bnf;
@@ -268,7 +268,7 @@ extern "C" {
         
         uint32_t len;
         uint32_t cfxlen;
-        float numticks;
+        Lfloat numticks;
         PlayMode mode;
         int retrigger;
         
@@ -276,8 +276,8 @@ extern "C" {
         
         uint8_t inCrossfade;
         
-        float flipStart;
-        float flipIdx;
+        Lfloat flipStart;
+        Lfloat flipIdx;
     } _tSampler;
     
     typedef _tSampler* tSampler;
@@ -286,8 +286,8 @@ extern "C" {
     void    tSampler_initToPool            (tSampler* const sp, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
     void    tSampler_free               (tSampler* const);
     
-    float   tSampler_tick               (tSampler* const);
-    float   tSampler_tickStereo            (tSampler* const sp, float* outputArray);
+    Lfloat   tSampler_tick               (tSampler* const);
+    Lfloat   tSampler_tickStereo            (tSampler* const sp, Lfloat* outputArray);
     void    tSampler_setSample          (tSampler* const, tBuffer* const);
     void    tSampler_setMode            (tSampler* const, PlayMode mode);
     void    tSampler_play               (tSampler* const);
@@ -296,8 +296,8 @@ extern "C" {
     void    tSampler_setEnd             (tSampler* const, int32_t end);
     void    tSampler_setLength             (tSampler* const, int32_t length);
     void    tSampler_setCrossfadeLength (tSampler* const, uint32_t length);
-    void    tSampler_setRate            (tSampler* const, float rate);
-    void    tSampler_setSampleRate      (tSampler* const, float sr);
+    void    tSampler_setRate            (tSampler* const, Lfloat rate);
+    void    tSampler_setSampleRate      (tSampler* const, Lfloat sr);
     
     //==============================================================================
     
@@ -321,7 +321,7 @@ extern "C" {
      @brief Free a tAutoSampler from its mempool.
      @param sampler A pointer to the tAutoSampler to free.
      
-     @fn float   tAutoSampler_tick               (tAutoSampler* const, float input)
+     @fn Lfloat   tAutoSampler_tick               (tAutoSampler* const, Lfloat input)
      @brief
      @param sampler A pointer to the relevant tAutoSampler.
      
@@ -341,7 +341,7 @@ extern "C" {
      @brief
      @param sampler A pointer to the relevant tAutoSampler.
      
-     @fn void    tAutoSampler_setThreshold       (tAutoSampler* const, float thresh)
+     @fn void    tAutoSampler_setThreshold       (tAutoSampler* const, Lfloat thresh)
      @brief
      @param sampler A pointer to the relevant tAutoSampler.
      
@@ -353,7 +353,7 @@ extern "C" {
      @brief
      @param sampler A pointer to the relevant tAutoSampler.
      
-     @fn void    tAutoSampler_setRate            (tAutoSampler* const, float rate)
+     @fn void    tAutoSampler_setRate            (tAutoSampler* const, Lfloat rate)
      @brief
      @param sampler A pointer to the relevant tAutoSampler.
      
@@ -366,8 +366,8 @@ extern "C" {
         tSampler sampler;
         tEnvelopeFollower ef;
         uint32_t windowSize;
-        float threshold;
-        float previousPower;
+        Lfloat threshold;
+        Lfloat previousPower;
         uint32_t sampleCounter;
         uint32_t powerCounter;
         uint8_t sampleTriggered;
@@ -379,16 +379,16 @@ extern "C" {
     void    tAutoSampler_initToPool         (tAutoSampler* const as, tBuffer* const b, tMempool* const mp, LEAF* const leaf);
     void    tAutoSampler_free               (tAutoSampler* const);
     
-    float   tAutoSampler_tick               (tAutoSampler* const, float input);
+    Lfloat   tAutoSampler_tick               (tAutoSampler* const, Lfloat input);
     void    tAutoSampler_setBuffer          (tAutoSampler* const, tBuffer* const);
     void    tAutoSampler_setMode            (tAutoSampler* const, PlayMode mode);
     void    tAutoSampler_play               (tAutoSampler* const);
     void    tAutoSampler_stop               (tAutoSampler* const);
-    void    tAutoSampler_setThreshold       (tAutoSampler* const, float thresh);
+    void    tAutoSampler_setThreshold       (tAutoSampler* const, Lfloat thresh);
     void    tAutoSampler_setWindowSize      (tAutoSampler* const, uint32_t size);
     void    tAutoSampler_setCrossfadeLength (tAutoSampler* const, uint32_t length);
-    void    tAutoSampler_setRate            (tAutoSampler* const, float rate);
-    void    tAutoSampler_setSampleRate      (tAutoSampler* const, float sr);
+    void    tAutoSampler_setRate            (tAutoSampler* const, Lfloat rate);
+    void    tAutoSampler_setSampleRate      (tAutoSampler* const, Lfloat sr);
     
     /*!
      @defgroup tmbsampler tMBSampler
@@ -410,7 +410,7 @@ extern "C" {
      @brief Free a tMBSampler from its mempool.
      @param sampler A pointer to the tMBSampler to free.
      
-     @fn float   tMBSampler_tick               (tMBSampler* const)
+     @fn Lfloat   tMBSampler_tick               (tMBSampler* const)
      @brief
      @param sampler A pointer to the relevant tMBSampler.
      
@@ -446,7 +446,7 @@ extern "C" {
      @brief
      @param sampler A pointer to the relevant tMBSampler.
      
-     @fn void    tMBSampler_setRate            (tMBSampler* const, float rate)
+     @fn void    tMBSampler_setRate            (tMBSampler* const, Lfloat rate)
      @brief
      @param sampler A pointer to the relevant tMBSampler.
      
@@ -466,14 +466,14 @@ extern "C" {
         
         tExpSmooth gain;
         
-        float    out;
-        float    last, beforeLast;
-        float    amp;
-        float    last_amp;
-        float    syncin;
-        float   _p, _w, _z;
-        float   _last_w;
-        float   _f [FILLEN + STEP_DD_PULSE_LENGTH];
+        Lfloat    out;
+        Lfloat    last, beforeLast;
+        Lfloat    amp;
+        Lfloat    last_amp;
+        Lfloat    syncin;
+        Lfloat   _p, _w, _z;
+        Lfloat   _last_w;
+        Lfloat   _f [FILLEN + STEP_DD_PULSE_LENGTH];
         int     _j;
         
         int     start, end;
@@ -486,7 +486,7 @@ extern "C" {
     void    tMBSampler_initToPool         (tMBSampler* const, tBuffer* const, tMempool* const);
     void    tMBSampler_free               (tMBSampler* const);
     
-    float   tMBSampler_tick               (tMBSampler* const);
+    Lfloat   tMBSampler_tick               (tMBSampler* const);
     void    tMBSampler_setSample          (tMBSampler* const, tBuffer* const);
     void    tMBSampler_setMode            (tMBSampler* const, PlayMode mode);
     void    tMBSampler_play               (tMBSampler* const);
@@ -494,7 +494,7 @@ extern "C" {
     void    tMBSampler_setStart           (tMBSampler* const, int32_t start);
     void    tMBSampler_setEnd             (tMBSampler* const, int32_t end);
     void    tMBSampler_setLength          (tMBSampler* const, int32_t length);
-    void    tMBSampler_setRate            (tMBSampler* const, float rate);
+    void    tMBSampler_setRate            (tMBSampler* const, Lfloat rate);
     
 #ifdef __cplusplus
 }

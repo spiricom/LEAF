@@ -182,21 +182,21 @@ extern "C" {
      @param poly A pointer to the relevant tPoly.
      @param isActive Whether pitch glide should be active or not.
      
-     @fn void    tPoly_setPitchGlideTime     (tPoly* const poly, float t)
+     @fn void    tPoly_setPitchGlideTime     (tPoly* const poly, Lfloat t)
      @brief Set how long pitch glide over note changes in voices takes.
      @param poly A pointer to the relevant tPoly.
      @param t The time to glide in milliseconds.
      
-     @fn void    tPoly_setPitchBend          (tPoly* const poly, float pitchBend)
+     @fn void    tPoly_setPitchBend          (tPoly* const poly, Lfloat pitchBend)
      @brief Set the amount of pitch bend
      @param poly A pointer to the relevant tPoly.
      @param pitchBend The new amount of pitch bend.
      
-     @fn void     tPoly_setBendGlideTime        (tPoly* const poly, float t)
+     @fn void     tPoly_setBendGlideTime        (tPoly* const poly, Lfloat t)
      @brief
      @param
      
-     @fn void     tPoly_setBendSamplesPerTick    (tPoly* const poly, float t)
+     @fn void     tPoly_setBendSamplesPerTick    (tPoly* const poly, Lfloat t)
      @brief
      @param
      
@@ -222,7 +222,7 @@ extern "C" {
      @param poly A pointer to the relevant tPoly.
      @return The number of voices currently playing notes.
      
-     @fn float   tPoly_getPitch              (tPoly* const poly, uint8_t voice)
+     @fn Lfloat   tPoly_getPitch              (tPoly* const poly, uint8_t voice)
      @brief Get the current pitch of a given voice.
      @param poly A pointer to the relevant tPoly.
      @param voice The voice to get the pitch of.
@@ -257,9 +257,9 @@ extern "C" {
         tStack orderStack;
         
         tRamp* ramps;
-        float* rampVals;
+        Lfloat* rampVals;
         int* firstReceived;
-        float glideTime;
+        Lfloat glideTime;
         int pitchGlideIsActive;
         
         int numVoices;
@@ -276,7 +276,7 @@ extern "C" {
         
         int lastVoiceToChange;
         
-        float pitchBend;
+        Lfloat pitchBend;
         tRamp pitchBendRamp;
         
         int currentNote;
@@ -296,20 +296,20 @@ extern "C" {
     void    tPoly_orderedAddToStack     (tPoly* const poly, uint8_t note);
     void    tPoly_setNumVoices          (tPoly* const poly, uint8_t numVoices);
     void    tPoly_setPitchGlideActive   (tPoly* const poly, int isActive);
-    void    tPoly_setPitchGlideTime     (tPoly* const poly, float t);
-    void    tPoly_setPitchBend          (tPoly* const poly, float pitchBend);
-    void 	tPoly_setBendGlideTime		(tPoly* const poly, float t);
-    void 	tPoly_setBendSamplesPerTick	(tPoly* const poly, float t);
+    void    tPoly_setPitchGlideTime     (tPoly* const poly, Lfloat t);
+    void    tPoly_setPitchBend          (tPoly* const poly, Lfloat pitchBend);
+    void 	tPoly_setBendGlideTime		(tPoly* const poly, Lfloat t);
+    void 	tPoly_setBendSamplesPerTick	(tPoly* const poly, Lfloat t);
     void    tPoly_tickPitch             (tPoly* const poly);
     void    tPoly_tickPitchGlide        (tPoly* const poly);
     void    tPoly_tickPitchBend         (tPoly* const poly);
     int     tPoly_getNumVoices          (tPoly* const poly);
     int     tPoly_getNumActiveVoices    (tPoly* const poly);
-    float   tPoly_getPitch              (tPoly* const poly, uint8_t voice);
+    Lfloat   tPoly_getPitch              (tPoly* const poly, uint8_t voice);
     int     tPoly_getKey                (tPoly* const poly, uint8_t voice);
     int     tPoly_getVelocity           (tPoly* const poly, uint8_t voice);
     int     tPoly_isOn                  (tPoly* const poly, uint8_t voice);
-    void    tPoly_setSampleRate         (tPoly* const poly, float sr);
+    void    tPoly_setSampleRate         (tPoly* const poly, Lfloat sr);
     
     //==============================================================================
 

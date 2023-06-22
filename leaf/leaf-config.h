@@ -70,6 +70,12 @@
 #define _CONSTANT_DATA_LOCATION
 #endif
 
+#ifdef SIMD_64
+#define Lfloat poly_float
+#else
+#define Lfloat float
+#endif
+
 //==============================================================================
 
 #endif // LEAF_CONFIG_H_INCLUDED
