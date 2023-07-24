@@ -909,6 +909,7 @@ Lfloat   tADSRT_tick(tADSRT* const adsrenv)
             {
                 adsr->whichStage = env_sustain;
                 adsr->next = adsr->gain * adsr->sustain;
+                adsr->sustainWithLeak = 1.0f;
             }
 
             else
@@ -933,7 +934,7 @@ Lfloat   tADSRT_tick(tADSRT* const adsrenv)
             break;
 
         case env_sustain:
-            adsr->next = adsr->next * adsr->leakFactor;
+        	 adsr->next = adsr->sustain * adsr->gain * (adsr->leakFactor * adsr->sustainWithLeak);
             break;
 
         case env_release:
@@ -1010,6 +1011,7 @@ Lfloat   tADSRT_tickNoInterp(tADSRT* const adsrenv)
             {
                 adsr->whichStage = env_sustain;
                 adsr->next = adsr->gain * adsr->sustain;
+                adsr->sustainWithLeak = 1.0f;
             }
 
             else
@@ -1022,7 +1024,7 @@ Lfloat   tADSRT_tickNoInterp(tADSRT* const adsrenv)
             break;
 
         case env_sustain:
-            adsr->next = adsr->next * adsr->leakFactor;
+            adsr->next = adsr->sustain * adsr->gain * (adsr->leakFactor * adsr->sustainWithLeak);
             break;
 
         case env_release:

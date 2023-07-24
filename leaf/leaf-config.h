@@ -71,7 +71,9 @@
 #endif
 
 #ifdef SIMD_64
+#include "leaf_polyvalues.h"
 #define Lfloat poly_float
+
 #else
 #define Lfloat float
 #endif

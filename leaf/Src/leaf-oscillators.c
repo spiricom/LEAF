@@ -559,13 +559,12 @@ void    tPBSaw_free  (tPBSaw* const osc)
 Lfloat   tPBSaw_tick          (tPBSaw* const osc)
 {
     _tPBSaw* c = *osc;
-    
     Lfloat out = (c->phase * 2.0f) - 1.0f;
     out -= LEAF_poly_blep(c->phase, c->inc);
     
     c->phase += c->inc - (int)c->inc;
-    if (c->phase >= 1.0f) c->phase -= 1.0f;
-    if (c->phase < 0.0f) c->phase += 1.0f;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase < 0.0f) c->phase += 1.0f;
     
     return out;
 }
@@ -587,6 +586,82 @@ void    tPBSaw_setSampleRate (tPBSaw* const osc, Lfloat sr)
 }
 
 //========================================================================
+
+
+//==============================================================================
+
+/* tSawtooth: Anti-aliased Sawtooth waveform. */
+void    tSawOS_init          (tSawOS* const osc, uint8_t OS_ratio, uint8_t filterOrder, LEAF* const leaf)
+{
+	tSawOS_initToPool(osc, OS_ratio, filterOrder, &leaf->mempool);
+}
+
+void    tSawOS_initToPool    (tSawOS* const osc, uint8_t OS_ratio, uint8_t filterOrder, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSawOS* c = *osc = (_tSawOS*) mpool_alloc(sizeof(_tSawOS), m);
+    c->mempool = m;
+    LEAF* leaf = c->mempool->leaf;
+    c->OSratio = OS_ratio;
+    c->inc      = 0;
+    c->phase    = 0;
+    c->invSampleRateOS = 1.0f / (leaf->sampleRate * OS_ratio);
+    c->invSampleRateTimesTwoTo32OS = (c->invSampleRateOS * TWO_TO_32);
+    c->filterOrder = filterOrder;
+    c->aaFilter = (tSVF*) mpool_alloc(sizeof(tSVF) * filterOrder, m);
+    
+    for (int i = 0; i < filterOrder; i++)
+    {
+        Lfloat Qval = 0.5f/cosf((1.0f+2.0f*i)*PI/(4*filterOrder));
+
+		tSVF_initToPool(&c->aaFilter[i], SVFTypeLowpass, (19000.0f / OS_ratio), Qval, mp);
+    }
+    tSawOS_setFreq(osc, 220.0f);
+}
+
+void    tSawOS_free  (tSawOS* const osc)
+{
+    _tSawOS* c = *osc;
+    for (int i = 0; i < c->filterOrder; ++i) tSVF_free(&c->aaFilter[i]);
+    mpool_free((char*)c->aaFilter, c->mempool);
+    mpool_free((char*)c, c->mempool);
+}
+
+Lfloat   tSawOS_tick          (tSawOS* const osc)
+{
+    _tSawOS* c = *osc;
+
+    Lfloat tempFloat = 0.0f;
+    for (int i = 0; i < c->OSratio; i++)
+    {
+    	c->phase = (c->phase + c->inc);
+        tempFloat = ((c->phase * INV_TWO_TO_32) * 2.0f)- 1.0f; // inv 2 to 32, then multiplied by 2, same as inv 2 to 16
+    	for (int k = 0; k < c->filterOrder; k++)
+    	{
+    		tempFloat = tSVF_tick(&c->aaFilter[k], tempFloat);
+    	}
+    }
+    return tempFloat;
+}
+
+void    tSawOS_setFreq       (tSawOS* const osc, Lfloat freq)
+{
+    _tSawOS* c = *osc;
+
+    c->freq  = freq;
+    c->inc = freq * c->invSampleRateTimesTwoTo32OS;
+}
+
+void    tSawOS_setSampleRate (tSawOS* const osc, Lfloat sr)
+{
+    _tSawOS* c = *osc;
+
+    c->invSampleRateOS = 1.0f/(sr * c->OSratio);
+    tSawOS_setFreq(osc, c->freq);
+}
+
+//========================================================================
+
 /* Phasor */
 
 void    tPhasor_init(tPhasor* const ph, LEAF* const leaf)
@@ -3481,7 +3556,7 @@ void    tIntPhasor_free (tIntPhasor* const cy)
     mpool_free((char*)c, c->mempool);
 }
 
-//need to check bounds and wrap table properly to allow through-zero FM
+
 Lfloat   tIntPhasor_tick(tIntPhasor* const cy)
 {
     _tIntPhasor* c = *cy;

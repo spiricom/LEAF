@@ -55,7 +55,7 @@
 #pragma warning( disable : 4101 )  /* unused local variables */
 #endif
 
-#include ".//leaf-config.h"
+#include "../leaf-config.h"
 /* the following is needed only to declare pd_fft() as exportable in MSW */
 #define t_sample Lfloat
 

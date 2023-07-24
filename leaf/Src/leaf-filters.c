@@ -870,7 +870,12 @@ void    tSVF_free   (tSVF* const svff)
 Lfloat   tSVF_tick(tSVF* const svff, Lfloat v0)
 {
     _tSVF* svf = *svff;
-    
+#ifdef SAFE_FILTER
+    if (isnan(v0))
+    {
+        v0 = 0.0f;
+    }
+#endif
     Lfloat v1,v2,v3;
     v3 = v0 - svf->ic2eq;
     v1 = (svf->a1 * svf->ic1eq) + (svf->a2 * v3);
@@ -1827,7 +1832,7 @@ Lfloat tanhXdX(Lfloat x)
 {
     Lfloat a = x*x;
     // IIRC I got this as Pade-approx for tanh(sqrt(x))/sqrt(x)
-#ifdef SAFE_FILTER
+
     Lfloat testVal = ((15.0f*a + 420.0f)*a + 945.0f);
 
     Lfloat output = 1.0f;
@@ -1838,9 +1843,6 @@ Lfloat tanhXdX(Lfloat x)
         
     }
     return ((a + 105.0f)*a + 945.0f) / output;
-#endif
-    Lfloat testVal = ((15.0f*a + 420.0f)*a + 945.0f);
-    return ((a + 105.0f)*a + 945.0f) / testVal;
 }
 
 volatile int errorCheckCheck = 0;

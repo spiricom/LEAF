@@ -366,6 +366,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, Lfloat dest);
         Lfloat sampleRate;
         Lfloat bufferSizeDividedBySampleRateInMs;
         Lfloat next;
+        Lfloat sustainWithLeak;
         
         Lfloat attack, decay, release;
         Lfloat attackInc, decayInc, releaseInc, rampInc;

@@ -414,6 +414,8 @@ extern "C" {
         Lfloat phase;
         Lfloat inc,freq;
         Lfloat invSampleRate;
+        Lfloat lastsyncin;
+        Lfloat sync;
     } _tPBSaw;
     
     typedef _tPBSaw* tPBSaw;
@@ -428,6 +430,35 @@ extern "C" {
     
     //==============================================================================
     
+
+    typedef struct _tSawOS
+    {
+        tMempool mempool;
+        uint32_t phase;
+        uint32_t inc;
+        Lfloat freq;
+        int32_t mask;
+        uint8_t phaseDidReset;
+        Lfloat invSampleRateOS;
+        uint8_t OSratio;
+        uint32_t invSampleRateTimesTwoTo32OS;
+        tSVF* aaFilter;
+        uint8_t filterOrder;
+    } _tSawOS;
+
+    typedef _tSawOS* tSawOS;
+
+    void    tSawOS_init          (tSawOS* const osc, uint8_t OS_ratio, uint8_t filterOrder, LEAF* const leaf);
+    void    tSawOS_initToPool    (tSawOS* const osc, uint8_t OS_ratio, uint8_t filterOrder, tMempool* const mp);
+    void    tSawOS_free          (tSawOS* const osc);
+
+    Lfloat   tSawOS_tick          (tSawOS* const osc);
+    void    tSawOS_setFreq       (tSawOS* const osc, Lfloat freq);
+    void    tSawOS_setSampleRate (tSawOS* const osc, Lfloat sr);
+
+    //==============================================================================
+
+
     /*!
      @defgroup tphasor tPhasor
      @ingroup oscillators
