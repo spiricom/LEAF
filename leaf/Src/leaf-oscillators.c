@@ -396,8 +396,11 @@ void    tPBTriangle_initToPool    (tPBTriangle* const osc, tMempool* const mp)
 
     c->invSampleRate = leaf->invSampleRate;
     c->inc      =  0.0f;
-    c->phase    =  0.0f;
+    c->phase    =  0.25f;
     c->skew     =  0.5f;
+    c->invSkew = 2.0f;
+    c->oneMinusSkew     =  0.5f;
+    c->invOneMinusSkew     =  2.0f;
     c->lastOut  =  0.0f;
 }
 
@@ -413,30 +416,49 @@ Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
     _tPBTriangle* c = *osc;
     
     Lfloat out;
-    Lfloat skew;
     
-    if (c->phase < c->skew)
+
+    out = 0.0f;
+    Lfloat theSkew = 0.0f;
+    
+    c->phase += c->inc - (int)c->inc;
+
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase < 0.0f) c->phase += 1.0f;
+    if (c->phase <= c->skew) //goin up
     {
         out = 1.0f;
-        skew = (1.0f - c->skew) * 2.0f;
+        theSkew = c->oneMinusSkew * 2.0f;
     }
-    else
+    else //goin down
     {
         out = -1.0f;
-        skew = c->skew * 2.0f;
+        theSkew = c->skew * 2.0f;
     }
     
     out += LEAF_poly_blep(c->phase, c->inc);
-    out -= LEAF_poly_blep(fmodf(c->phase + (1.0f - c->skew), 1.0f), c->inc);
+    out -= LEAF_poly_blep(fmodf((c->phase + c->oneMinusSkew), 1.0f), c->inc);
     
-    out = (skew * c->inc * out) + ((1 - c->inc) * c->lastOut);
+    /*
+    if (c->phase <= c->skew) //goin down
+    {
+        //out += -0.5f + c->phase * c->invSkew;
+        //out += 1.0f - (c->phase - c->skew) * c->invOneMinusSkew;
+        out += 1.0f - (c->phase * c->invSkew);
+    }
+    else
+    {
+        out += -1.0f + (c->phase * c->invSkew);
+        //out += 0.5f - (c->phase - c->skew) * c->invOneMinusSkew;
+    }
+    */
+    out = (theSkew * c->inc * out) + ((1.0f - c->inc) * c->lastOut);
+    out = LEAF_clip(-1.0f, out, 1.0f); //remove this when we have negative inc fixed
+    //TODO: //seems like there's an issue with negative increments - negative freqs break it -JS
     c->lastOut = out;
     
-    c->phase += c->inc - (int)c->inc;
-    if (c->phase >= 1.0f) c->phase -= 1.0f;
-    if (c->phase < 0.0f) c->phase += 1.0f;
-    
-    return out;
+    //return out;
+    return out * c->invOneMinusSkew * c->invSkew;
 }
 
 void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq)
@@ -447,10 +469,15 @@ void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq)
     c->inc = freq * c->invSampleRate;
 }
 
-void    tPBTriangle_setSkew       (tPBTriangle* const osc, Lfloat skew)
+void    tPBTriangle_setSkew       (tPBTriangle* const osc, Lfloat mySkew)
 {
     _tPBTriangle* c = *osc;
-    c->skew = (skew + 1.0f) * 0.5f;
+    mySkew = mySkew * 0.75f;
+    mySkew = LEAF_clip(0.01f, mySkew, 0.75f);
+    c->skew = (mySkew + 1.0f) * 0.5f;
+    c->invSkew = 1.0f / c->skew;
+    c->oneMinusSkew = 1.0f - c->skew;
+    c->invOneMinusSkew = (1.0f / c->oneMinusSkew);
 }
 
 void     tPBTriangle_setSampleRate (tPBTriangle* const osc, Lfloat sr)
@@ -462,6 +489,104 @@ void     tPBTriangle_setSampleRate (tPBTriangle* const osc, Lfloat sr)
 }
 
 
+//==============================================================================
+
+/* tPBSineTriangle: Anti-aliased Triangle waveform with sine wave, crossfaded between them with shape param. */
+void    tPBSineTriangle_init          (tPBSineTriangle* const osc, LEAF* const leaf)
+{
+	tPBSineTriangle_initToPool(osc, &leaf->mempool);
+}
+
+void    tPBSineTriangle_initToPool    (tPBSineTriangle* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPBSineTriangle* c = *osc = (_tPBSineTriangle*) mpool_alloc(sizeof(_tPBSineTriangle), m);
+    c->mempool = m;
+    LEAF* leaf = c->mempool->leaf;
+    tCycle_initToPool(&c->sine, mp);
+    c->invSampleRate = leaf->invSampleRate;
+    c->inc      =  0.0f;
+    c->phase    =  0.25f;
+    c->shape     =  0.0f;
+    c->skew 	 = 0.5f;
+    c->oneMinusShape = 1.0f;
+    c->lastOut  =  0.0f;
+}
+
+void    tPBSineTriangle_free (tPBSineTriangle* const cy)
+{
+    _tPBSineTriangle* c = *cy;
+    tCycle_free(&c->sine);
+    mpool_free((char*)c, c->mempool);
+}
+
+Lfloat   tPBSineTriangle_tick          (tPBSineTriangle* const osc)
+{
+    _tPBSineTriangle* c = *osc;
+
+    Lfloat out = c->lastOut;
+    Lfloat skew = 0.0f;
+
+    if ((c->phase <= c->skew) && (c->inc >= 0.0f))
+    {
+        out = 1.0f;
+        skew = (1.0f - c->skew) * 2.0f;
+    }
+    
+    else if ((c->phase <= c->skew) && (c->inc < 0.0f))
+    {
+        out = -1.0f;
+        skew = c->skew * 2.0f;
+    }
+    
+    else if ((c->phase > c->skew) && (c->inc >= 0.0f))
+    {
+        out = -1.0f;
+        skew = c->skew * 2.0f;
+    }
+    else if ((c->phase > c->skew) && (c->inc < 0.0f))
+    {
+        out = 1.0f;
+        skew = (1.0f - c->skew) * 2.0f;
+    }
+
+    out += LEAF_poly_blep(c->phase, c->inc);
+    out -= LEAF_poly_blep(fmodf(c->phase + (1.0f - c->skew), 1.0f), c->inc);
+
+    out = (skew * c->inc * out) + ((1 - c->inc) * c->lastOut);
+    c->lastOut = out;
+
+    c->phase += c->inc - (int)c->inc;
+    if (c->phase >= 1.0f) c->phase -= 1.0f;
+    if (c->phase < 0.0f) c->phase += 1.0f;
+    out = out * (c->shape * 4.0f);
+    out = out + (tCycle_tick(&c->sine) * c->oneMinusShape);
+    return out;
+}
+
+void    tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq)
+{
+    _tPBSineTriangle* c = *osc;
+
+    c->freq  = freq;
+    c->inc = freq * c->invSampleRate;
+    tCycle_setFreq(&c->sine, freq);
+}
+
+void    tPBSineTriangle_setShape       (tPBSineTriangle* const osc, Lfloat shape)
+{
+    _tPBSineTriangle* c = *osc;
+    c->shape = shape;
+    c->oneMinusShape = 1.0f - shape;
+}
+
+void    tPBSineTriangle_setSampleRate (tPBSineTriangle* const osc, Lfloat sr)
+{
+    _tPBSineTriangle* c = *osc;
+
+    c->invSampleRate = 1.0f/sr;
+    tPBSineTriangle_setFreq(osc, c->freq);
+}
 //==============================================================================
 
 /* tPulse: Anti-aliased pulse waveform. */
@@ -566,7 +691,7 @@ Lfloat   tPBSaw_tick          (tPBSaw* const osc)
     while (c->phase >= 1.0f) c->phase -= 1.0f;
     while (c->phase < 0.0f) c->phase += 1.0f;
     
-    return out;
+    return (-1.0f * out);
 }
 
 void    tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq)
@@ -583,6 +708,86 @@ void    tPBSaw_setSampleRate (tPBSaw* const osc, Lfloat sr)
     
     c->invSampleRate = 1.0f/sr;
     tPBSaw_setFreq(osc, c->freq);
+}
+
+//========================================================================
+
+
+/* tSawtooth: Anti-aliased Sawtooth waveform. */
+void    tPBSawSquare_init          (tPBSawSquare* const osc, LEAF* const leaf)
+{
+    tPBSawSquare_initToPool(osc, &leaf->mempool);
+}
+
+void    tPBSawSquare_initToPool    (tPBSawSquare* const osc, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPBSawSquare* c = *osc = (_tPBSawSquare*) mpool_alloc(sizeof(_tPBSawSquare), m);
+    c->mempool = m;
+    LEAF* leaf = c->mempool->leaf;
+    
+    c->inc      =  0.0f;
+    c->phase    =  0.0f;
+    c->shape = 0.0f;
+    c->oneMinusShape = 1.0f;
+    c->invSampleRate = leaf->invSampleRate;
+}
+
+void    tPBSawSquare_free  (tPBSawSquare* const osc)
+{
+    _tPBSawSquare* c = *osc;
+    
+    mpool_free((char*)c, c->mempool);
+}
+
+Lfloat   tPBSawSquare_tick          (tPBSawSquare* const osc)
+{
+    _tPBSawSquare* c = *osc;
+
+    
+    
+    float resetBlep = LEAF_poly_blep(c->phase, c->inc);
+    float midBlep = LEAF_poly_blep(fmod(c->phase + 0.5f, 1.0f), c->inc);
+    
+    Lfloat sawOut = (c->phase * 2.0f) - 1.0f;
+    sawOut -= resetBlep;
+    
+    Lfloat squareOut = 0.0f;
+    if (c->phase < 0.5f) squareOut = 1.0f;
+    else squareOut = -1.0f;
+    squareOut += resetBlep;
+    squareOut -= midBlep;
+    
+    
+    c->phase += c->inc - (int)c->inc;
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase < 0.0f) c->phase += 1.0f;
+    
+    return ((-1.0f * sawOut) * c->oneMinusShape) + (squareOut * c->shape);
+}
+
+void    tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq)
+{
+    _tPBSawSquare* c = *osc;
+    
+    c->freq  = freq;
+    c->inc = freq * c->invSampleRate;
+}
+
+void    tPBSawSquare_setShape      (tPBSawSquare* const osc, Lfloat inputShape)
+{
+    _tPBSawSquare* c = *osc;
+    
+    c->shape  = inputShape;
+    c->oneMinusShape = 1.0f - inputShape;
+}
+
+void    tPBSawSquare_setSampleRate (tPBSawSquare* const osc, Lfloat sr)
+{
+    _tPBSawSquare* c = *osc;
+    
+    c->invSampleRate = 1.0f/sr;
+    tPBSawSquare_setFreq(osc, c->freq);
 }
 
 //========================================================================

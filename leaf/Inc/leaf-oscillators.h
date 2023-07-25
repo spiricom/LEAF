@@ -299,12 +299,40 @@ extern "C" {
      ￼￼￼
      @} */
 
+    typedef struct _tPBSineTriangle
+    {
+        tMempool mempool;
+        Lfloat phase;
+        Lfloat inc,freq;
+        Lfloat shape;
+        Lfloat lastOut;
+        Lfloat invSampleRate;
+        tCycle sine;
+        Lfloat oneMinusShape;
+        Lfloat skew;
+    } _tPBSineTriangle;
+
+    typedef _tPBSineTriangle* tPBSineTriangle;
+
+    void    tPBSineTriangle_init          (tPBSineTriangle* const osc, LEAF* const leaf);
+    void    tPBSineTriangle_initToPool    (tPBSineTriangle* const osc, tMempool* const mempool);
+    void    tPBSineTriangle_free          (tPBSineTriangle* const osc);
+
+    Lfloat   tPBSineTriangle_tick          (tPBSineTriangle* const osc);
+    void    tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq);
+    void    tPBSineTriangle_setShape       (tPBSineTriangle* const osc, Lfloat shape);
+    void    tPBSineTriangle_setSampleRate (tPBSineTriangle* const osc, Lfloat sr);
+
+    //==============================================================================
     typedef struct _tPBTriangle
     {
         tMempool mempool;
         Lfloat phase;
         Lfloat inc,freq;
         Lfloat skew;
+        Lfloat invSkew;
+        Lfloat oneMinusSkew;
+        Lfloat invOneMinusSkew;
         Lfloat lastOut;
         Lfloat invSampleRate;
     } _tPBTriangle;
@@ -321,7 +349,6 @@ extern "C" {
     void    tPBTriangle_setSampleRate (tPBTriangle* const osc, Lfloat sr);
     
     //==============================================================================
-    
     /*!
      @defgroup tpbpulse tPBPulse
      @ingroup oscillators
@@ -430,7 +457,30 @@ extern "C" {
     
     //==============================================================================
     
+typedef struct _tPBSawSquare
+{
+    tMempool mempool;
+    Lfloat phase;
+    Lfloat inc,freq;
+    Lfloat invSampleRate;
+    Lfloat lastsyncin;
+    Lfloat sync;
+    Lfloat shape;
+    Lfloat oneMinusShape;
+} _tPBSawSquare;
 
+typedef _tPBSawSquare* tPBSawSquare;
+
+void    tPBSawSquare_init          (tPBSawSquare* const osc, LEAF* const leaf);
+void    tPBSawSquare_initToPool    (tPBSawSquare* const osc, tMempool* const mempool);
+void    tPBSawSquare_free          (tPBSawSquare* const osc);
+
+Lfloat   tPBSawSquare_tick          (tPBSawSquare* const osc);
+void    tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq);
+void    tPBSawSquare_setShape      (tPBSawSquare* const osc, Lfloat shape);
+void    tPBSawSquare_setSampleRate (tPBSawSquare* const osc, Lfloat sr);
+
+//==============================================================================
     typedef struct _tSawOS
     {
         tMempool mempool;
