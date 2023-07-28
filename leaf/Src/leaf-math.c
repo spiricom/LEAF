@@ -706,7 +706,7 @@ Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
     // 0 otherwise
     else return 0.0f;
     
-//
+//this version is from this discussion: https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
 //    Lfloat y = 0.0f;
 //    if (t < 2.0f * dt)
 //    {
@@ -736,9 +736,33 @@ Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
 //            y += 4.0f * v;
 //        }
 //    }
-//    return y / 12.0f;
+//    return y * 0.083333333333333f; // divide by 12
 }
 
+
+//this version is from this discussion: https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
+Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt)
+{
+
+    Lfloat y = 0;
+    if ((0 <= t) && (t < (2.0f * dt)))
+    {
+        Lfloat x = (t / dt);
+        Lfloat u = 2.0f - x;
+        Lfloat u2 = u * u;
+        u *= u2 * u2;
+        y -= u;
+        if (t < dt)
+        {
+        	Lfloat v = 1.0f - x;
+        	Lfloat v2 = v * v;
+            v *= v2 * v2;
+            y += 4.0f * v;
+        }
+    }
+    return y * dt / 0.066666666666667f; // divide by 15
+
+}
 
 //-----------------------------------------------------------------------------
 // name: mtof()

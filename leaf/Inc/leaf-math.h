@@ -187,6 +187,7 @@ extern "C" {
     void LEAF_generate_ftom(Lfloat* buffer, Lfloat startFreq, Lfloat endFreq, int size);
     
     Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt);
+    Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt);
     Lfloat LEAF_midiToFrequency(Lfloat f);
 
 

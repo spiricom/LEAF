@@ -419,8 +419,39 @@ Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
     
 
     out = 0.0f;
-    Lfloat theSkew = 0.0f;
-    
+
+// TODO: this is the non-integration version, haven't tested, doesn't have skew yet, may break on negative phase increment. -JS
+
+
+
+    Lfloat t = c->phase;
+    Lfloat dt = 0.0f;
+    if (c->inc >=0)
+    {
+        dt = -1.0f * c->inc;
+    }
+    else
+    {
+        dt = c->inc;
+    }
+    //compute the naive waveform
+    Lfloat v = 2.0f * fabsf((2.0f * c->phase) - 1.0f) - 1.0f;
+
+    //add the blamps
+    v += LEAF_poly_blamp(t,  dt);
+    v += LEAF_poly_blamp(1.0f - t,  dt);
+    t += 0.5f;
+    t -= (int)(t);
+    v -= LEAF_poly_blamp(t, dt);
+    v -= LEAF_poly_blamp(1.0f - t,  dt);
+
+    //increment phase for next tick
+    c->phase += c->inc - (int)c->inc;
+	while (c->phase >= 1.0f) c->phase -= 1.0f;
+	while (c->phase < 0.0f) c->phase += 1.0f;
+	return -v;
+
+/*
     c->phase += c->inc - (int)c->inc;
 
     while (c->phase >= 1.0f) c->phase -= 1.0f;
@@ -438,7 +469,7 @@ Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
     
     out += LEAF_poly_blep(c->phase, c->inc);
     out -= LEAF_poly_blep(fmodf((c->phase + c->oneMinusSkew), 1.0f), c->inc);
-    
+    */
     /*
     if (c->phase <= c->skew) //goin down
     {
@@ -452,6 +483,7 @@ Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
         //out += 0.5f - (c->phase - c->skew) * c->invOneMinusSkew;
     }
     */
+    /*
     out = (theSkew * c->inc * out) + ((1.0f - c->inc) * c->lastOut);
     out = LEAF_clip(-1.0f, out, 1.0f); //remove this when we have negative inc fixed
     //TODO: //seems like there's an issue with negative increments - negative freqs break it -JS
@@ -459,6 +491,7 @@ Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
     
     //return out;
     return out * c->invOneMinusSkew * c->invSkew;
+    */
 }
 
 void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq)
@@ -523,43 +556,36 @@ void    tPBSineTriangle_free (tPBSineTriangle* const cy)
 Lfloat   tPBSineTriangle_tick          (tPBSineTriangle* const osc)
 {
     _tPBSineTriangle* c = *osc;
-
-    Lfloat out = c->lastOut;
-    Lfloat skew = 0.0f;
-
-    if ((c->phase <= c->skew) && (c->inc >= 0.0f))
+    Lfloat out = 0.0f;
+   
+    Lfloat t = c->phase;
+    Lfloat dt = 0.0f;
+    if (c->inc >=0)
     {
-        out = 1.0f;
-        skew = (1.0f - c->skew) * 2.0f;
+        dt = -1.0f * c->inc;
     }
-    
-    else if ((c->phase <= c->skew) && (c->inc < 0.0f))
+    else
     {
-        out = -1.0f;
-        skew = c->skew * 2.0f;
-    }
-    
-    else if ((c->phase > c->skew) && (c->inc >= 0.0f))
-    {
-        out = -1.0f;
-        skew = c->skew * 2.0f;
-    }
-    else if ((c->phase > c->skew) && (c->inc < 0.0f))
-    {
-        out = 1.0f;
-        skew = (1.0f - c->skew) * 2.0f;
+        dt = c->inc;
     }
 
-    out += LEAF_poly_blep(c->phase, c->inc);
-    out -= LEAF_poly_blep(fmodf(c->phase + (1.0f - c->skew), 1.0f), c->inc);
+    //compute the naive waveform
+    Lfloat v = 2.0f * fabsf((2.0f * c->phase) - 1.0f) - 1.0f;
 
-    out = (skew * c->inc * out) + ((1 - c->inc) * c->lastOut);
-    c->lastOut = out;
+    //add the blamps
+    v += LEAF_poly_blamp(t,  dt);
+    v += LEAF_poly_blamp(1.0f - t,  dt);
+    t += 0.5f;
+    t -= (int)(t);
+    v -= LEAF_poly_blamp(t, dt);
+    v -= LEAF_poly_blamp(1.0f - t,  dt);
 
+    //increment phase for next tick
     c->phase += c->inc - (int)c->inc;
-    if (c->phase >= 1.0f) c->phase -= 1.0f;
-    if (c->phase < 0.0f) c->phase += 1.0f;
-    out = out * (c->shape * 4.0f);
+    while (c->phase >= 1.0f) c->phase -= 1.0f;
+    while (c->phase < 0.0f) c->phase += 1.0f;
+    out = v * c->shape; // shape handles the inversion so it's in phase with sine (already * -1.0f)
+
     out = out + (tCycle_tick(&c->sine) * c->oneMinusShape);
     return out;
 }
@@ -576,7 +602,7 @@ void    tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq)
 void    tPBSineTriangle_setShape       (tPBSineTriangle* const osc, Lfloat shape)
 {
     _tPBSineTriangle* c = *osc;
-    c->shape = shape;
+    c->shape = -1.0f * shape; // inverted because triangle output is inverted
     c->oneMinusShape = 1.0f - shape;
 }
 
