@@ -1024,7 +1024,8 @@ Lfloat   tADSRT_tickNoInterp(tADSRT* const adsrenv)
             break;
 
         case env_sustain:
-            adsr->next = adsr->sustain * adsr->gain * (adsr->leakFactor * adsr->sustainWithLeak);
+            adsr->sustainWithLeak *= adsr->leakFactor;
+            adsr->next = adsr->sustain * adsr->gain * adsr->sustainWithLeak;
             break;
 
         case env_release:
