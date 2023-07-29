@@ -414,15 +414,6 @@ void    tPBTriangle_free (tPBTriangle* const cy)
 Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
 {
     _tPBTriangle* c = *osc;
-    
-    Lfloat out;
-    
-
-    out = 0.0f;
-
-// TODO: this is the non-integration version, haven't tested, doesn't have skew yet, may break on negative phase increment. -JS
-
-
 
     Lfloat t = c->phase;
     Lfloat dt = 0.0f;
@@ -435,7 +426,18 @@ Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
         dt = c->inc;
     }
     //compute the naive waveform
-    Lfloat v = 2.0f * fabsf((2.0f * c->phase) - 1.0f) - 1.0f;
+    
+    //Lfloat v = 2.0f * fabsf((2.0f * c->phase) - 1.0f) - 1.0f;
+    Lfloat v = 0.0f;
+    
+    if (t < c->skew)
+    {
+        v = 2.0f * t / c->skew - 1.0f;
+    }
+    if (t >= c->skew)
+    {
+        v = -2.0f * (t - c->skew) / (1.0f - c->skew) + 1.0f;
+    }
 
     //add the blamps
     v += LEAF_poly_blamp(t,  dt);
@@ -450,48 +452,6 @@ Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
 	while (c->phase >= 1.0f) c->phase -= 1.0f;
 	while (c->phase < 0.0f) c->phase += 1.0f;
 	return -v;
-
-/*
-    c->phase += c->inc - (int)c->inc;
-
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
-    if (c->phase <= c->skew) //goin up
-    {
-        out = 1.0f;
-        theSkew = c->oneMinusSkew * 2.0f;
-    }
-    else //goin down
-    {
-        out = -1.0f;
-        theSkew = c->skew * 2.0f;
-    }
-    
-    out += LEAF_poly_blep(c->phase, c->inc);
-    out -= LEAF_poly_blep(fmodf((c->phase + c->oneMinusSkew), 1.0f), c->inc);
-    */
-    /*
-    if (c->phase <= c->skew) //goin down
-    {
-        //out += -0.5f + c->phase * c->invSkew;
-        //out += 1.0f - (c->phase - c->skew) * c->invOneMinusSkew;
-        out += 1.0f - (c->phase * c->invSkew);
-    }
-    else
-    {
-        out += -1.0f + (c->phase * c->invSkew);
-        //out += 0.5f - (c->phase - c->skew) * c->invOneMinusSkew;
-    }
-    */
-    /*
-    out = (theSkew * c->inc * out) + ((1.0f - c->inc) * c->lastOut);
-    out = LEAF_clip(-1.0f, out, 1.0f); //remove this when we have negative inc fixed
-    //TODO: //seems like there's an issue with negative increments - negative freqs break it -JS
-    c->lastOut = out;
-    
-    //return out;
-    return out * c->invOneMinusSkew * c->invSkew;
-    */
 }
 
 void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq)
@@ -506,7 +466,7 @@ void    tPBTriangle_setSkew       (tPBTriangle* const osc, Lfloat mySkew)
 {
     _tPBTriangle* c = *osc;
     mySkew = mySkew * 0.75f;
-    mySkew = LEAF_clip(0.01f, mySkew, 0.75f);
+    mySkew = LEAF_clip(0.01f, mySkew, 0.99f);
     c->skew = (mySkew + 1.0f) * 0.5f;
     c->invSkew = 1.0f / c->skew;
     c->oneMinusSkew = 1.0f - c->skew;
