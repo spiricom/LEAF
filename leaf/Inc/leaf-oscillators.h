@@ -330,9 +330,7 @@ extern "C" {
         Lfloat phase;
         Lfloat inc,freq;
         Lfloat skew;
-        Lfloat invSkew;
         Lfloat oneMinusSkew;
-        Lfloat invOneMinusSkew;
         Lfloat lastOut;
         Lfloat invSampleRate;
     } _tPBTriangle;

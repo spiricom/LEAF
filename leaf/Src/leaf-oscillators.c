@@ -398,9 +398,7 @@ void    tPBTriangle_initToPool    (tPBTriangle* const osc, tMempool* const mp)
     c->inc      =  0.0f;
     c->phase    =  0.25f;
     c->skew     =  0.5f;
-    c->invSkew = 2.0f;
     c->oneMinusSkew     =  0.5f;
-    c->invOneMinusSkew     =  2.0f;
     c->lastOut  =  0.0f;
 }
 
@@ -436,7 +434,7 @@ Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
     }
     if (t >= c->skew)
     {
-        v = -2.0f * (t - c->skew) / (1.0f - c->skew) + 1.0f;
+        v = -2.0f * (t - c->skew) / c->oneMinusSkew + 1.0f;
     }
 
     //add the blamps
@@ -465,12 +463,10 @@ void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq)
 void    tPBTriangle_setSkew       (tPBTriangle* const osc, Lfloat mySkew)
 {
     _tPBTriangle* c = *osc;
-    mySkew = mySkew * 0.75f;
+
     mySkew = LEAF_clip(0.01f, mySkew, 0.99f);
     c->skew = (mySkew + 1.0f) * 0.5f;
-    c->invSkew = 1.0f / c->skew;
     c->oneMinusSkew = 1.0f - c->skew;
-    c->invOneMinusSkew = (1.0f / c->oneMinusSkew);
 }
 
 void     tPBTriangle_setSampleRate (tPBTriangle* const osc, Lfloat sr)
