@@ -392,20 +392,14 @@ Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) LEAF
 Lfloat LEAF_clip(Lfloat min, Lfloat val, Lfloat max)
 #endif
 {
-    Lfloat tempmin = min;
-    Lfloat tempmax = max;
-    if (min > max)
+
+    if (val < min)
     {
-        tempmin = max;
-        tempmax = min;
+        return min;
     }
-    if (val < tempmin)
+    else if (val > max)
     {
-        return tempmin;
-    }
-    else if (val > tempmax)
-    {
-        return tempmax;
+        return max;
     }
     else
     {
@@ -693,6 +687,7 @@ void LEAF_generate_ftom(Lfloat* buffer, Lfloat startFreq, Lfloat endFreq, int si
 // assumes discontinuity at 0, so offset inputs as needed
 Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
 {
+    
     // 0 <= t < 1
     if (t < dt) {
         t /= dt;
@@ -707,6 +702,7 @@ Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
     else return 0.0f;
     
 //this version is from this discussion: https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
+//    dt = -1.0f*dt;
 //    Lfloat y = 0.0f;
 //    if (t < 2.0f * dt)
 //    {

@@ -409,7 +409,12 @@ void    tPBTriangle_free (tPBTriangle* const cy)
     mpool_free((char*)c, c->mempool);
 }
 
+#ifdef ITCMRAM
+    Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBTriangle_tick          (tPBTriangle* const osc)
+#else
 Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
+#endif
+
 {
     _tPBTriangle* c = *osc;
 
@@ -452,7 +457,12 @@ Lfloat   tPBTriangle_tick          (tPBTriangle* const osc)
 	return -v;
 }
 
+
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq)
+#else
 void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq)
+#endif
 {
     _tPBTriangle* c = *osc;
     
@@ -509,7 +519,11 @@ void    tPBSineTriangle_free (tPBSineTriangle* const cy)
     mpool_free((char*)c, c->mempool);
 }
 
+#ifdef ITCMRAM
+    Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSineTriangle_tick          (tPBSineTriangle* const osc)
+#else
 Lfloat   tPBSineTriangle_tick          (tPBSineTriangle* const osc)
+#endif
 {
     _tPBSineTriangle* c = *osc;
     Lfloat out = 0.0f;
@@ -546,7 +560,11 @@ Lfloat   tPBSineTriangle_tick          (tPBSineTriangle* const osc)
     return out;
 }
 
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq)
+#else
 void    tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq)
+#endif
 {
     _tPBSineTriangle* c = *osc;
 
@@ -597,7 +615,11 @@ void    tPBPulse_free (tPBPulse* const osc)
     mpool_free((char*)c, c->mempool);
 }
 
+#ifdef ITCMRAM
+    Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBPulse_tick        (tPBPulse* const osc)
+#else
 Lfloat   tPBPulse_tick        (tPBPulse* const osc)
+#endif
 {
     _tPBPulse* c = *osc;
     
@@ -614,7 +636,11 @@ Lfloat   tPBPulse_tick        (tPBPulse* const osc)
     return out;
 }
 
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBPulse_setFreq     (tPBPulse* const osc, Lfloat freq)
+#else
 void    tPBPulse_setFreq     (tPBPulse* const osc, Lfloat freq)
+#endif
 {
     _tPBPulse* c = *osc;
     
@@ -663,7 +689,11 @@ void    tPBSaw_free  (tPBSaw* const osc)
     mpool_free((char*)c, c->mempool);
 }
 
+#ifdef ITCMRAM
+    Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSaw_tick          (tPBSaw* const osc)
+#else
 Lfloat   tPBSaw_tick          (tPBSaw* const osc)
+#endif
 {
     _tPBSaw* c = *osc;
     Lfloat out = (c->phase * 2.0f) - 1.0f;
@@ -676,7 +706,11 @@ Lfloat   tPBSaw_tick          (tPBSaw* const osc)
     return (-1.0f * out);
 }
 
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq)
+#else
 void    tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq)
+#endif
 {
     _tPBSaw* c = *osc;
     
@@ -722,7 +756,12 @@ void    tPBSawSquare_free  (tPBSawSquare* const osc)
     mpool_free((char*)c, c->mempool);
 }
 
+
+#ifdef ITCMRAM
+Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tPBSawSquare_tick          (tPBSawSquare* const osc)
+#else
 Lfloat   tPBSawSquare_tick          (tPBSawSquare* const osc)
+#endif
 {
     _tPBSawSquare* c = *osc;
 
@@ -748,7 +787,11 @@ Lfloat   tPBSawSquare_tick          (tPBSawSquare* const osc)
     return ((-1.0f * sawOut) * c->oneMinusShape) + (squareOut * c->shape);
 }
 
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq)
+#else
 void    tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq)
+#endif
 {
     _tPBSawSquare* c = *osc;
     

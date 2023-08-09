@@ -318,12 +318,23 @@ extern "C" {
     void    tPBSineTriangle_initToPool    (tPBSineTriangle* const osc, tMempool* const mempool);
     void    tPBSineTriangle_free          (tPBSineTriangle* const osc);
 
+
+#ifdef ITCMRAM
+    Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSineTriangle_tick          (tPBSineTriangle* const osc);
+#else
     Lfloat   tPBSineTriangle_tick          (tPBSineTriangle* const osc);
+#endif
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq);
+#else
     void    tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq);
+#endif
     void    tPBSineTriangle_setShape       (tPBSineTriangle* const osc, Lfloat shape);
     void    tPBSineTriangle_setSampleRate (tPBSineTriangle* const osc, Lfloat sr);
 
     //==============================================================================
+
+
     typedef struct _tPBTriangle
     {
         tMempool mempool;
@@ -341,8 +352,16 @@ extern "C" {
     void    tPBTriangle_initToPool    (tPBTriangle* const osc, tMempool* const mempool);
     void    tPBTriangle_free          (tPBTriangle* const osc);
     
+#ifdef ITCMRAM
+    Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBTriangle_tick          (tPBTriangle* const osc);
+#else
     Lfloat   tPBTriangle_tick          (tPBTriangle* const osc);
+#endif
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq);
+#else
     void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq);
+#endif
     void    tPBTriangle_setSkew       (tPBTriangle* const osc, Lfloat skew);
     void    tPBTriangle_setSampleRate (tPBTriangle* const osc, Lfloat sr);
     
@@ -396,8 +415,16 @@ extern "C" {
     void    tPBPulse_initToPool  (tPBPulse* const osc, tMempool* const);
     void    tPBPulse_free        (tPBPulse* const osc);
     
+#ifdef ITCMRAM
+    Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBPulse_tick        (tPBPulse* const osc);
+#else
     Lfloat   tPBPulse_tick        (tPBPulse* const osc);
+#endif
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBPulse_setFreq     (tPBPulse* const osc, Lfloat freq);
+#else
     void    tPBPulse_setFreq     (tPBPulse* const osc, Lfloat freq);
+#endif
     void    tPBPulse_setWidth    (tPBPulse* const osc, Lfloat width);
     void    tPBPulse_setSampleRate (tPBPulse* const osc, Lfloat sr);
     
@@ -449,8 +476,16 @@ extern "C" {
     void    tPBSaw_initToPool    (tPBSaw* const osc, tMempool* const mempool);
     void    tPBSaw_free          (tPBSaw* const osc);
     
+#ifdef ITCMRAM
+    Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSaw_tick          (tPBSaw* const osc);
+#else
     Lfloat   tPBSaw_tick          (tPBSaw* const osc);
+#endif
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq);
+#else
     void    tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq);
+#endif
     void    tPBSaw_setSampleRate (tPBSaw* const osc, Lfloat sr);
     
     //==============================================================================
@@ -473,8 +508,16 @@ void    tPBSawSquare_init          (tPBSawSquare* const osc, LEAF* const leaf);
 void    tPBSawSquare_initToPool    (tPBSawSquare* const osc, tMempool* const mempool);
 void    tPBSawSquare_free          (tPBSawSquare* const osc);
 
+#ifdef ITCMRAM
+    Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSawSquare_tick          (tPBSawSquare* const osc);
+#else
 Lfloat   tPBSawSquare_tick          (tPBSawSquare* const osc);
+#endif
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq);
+#else
 void    tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq);
+#endif
 void    tPBSawSquare_setShape      (tPBSawSquare* const osc, Lfloat shape);
 void    tPBSawSquare_setSampleRate (tPBSawSquare* const osc, Lfloat sr);
 
