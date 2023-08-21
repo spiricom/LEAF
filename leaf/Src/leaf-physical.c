@@ -533,6 +533,8 @@ void    tSimpleLivingString3_initToPool  (tSimpleLivingString3* const pl, int ov
     tOnePole_initToPool(&p->bridgeFilter, dampFreq, mp);
     tOnePole_setSampleRate(&p->bridgeFilter, p->sampleRate);
     tOnePole_setFreq(&p->bridgeFilter, dampFreq);
+    p->rippleGain = 0.0f;
+    p->rippleDelay = 0.5f;
 
     tBiQuad_initToPool(&p->bridgeFilter2, mp);
     tBiQuad_setSampleRate(&p->bridgeFilter2, p->sampleRate);
@@ -705,13 +707,14 @@ Lfloat   tSimpleLivingString3_tick(tSimpleLivingString3* const pl, Lfloat input)
     
     for (int i = 0; i < p->oversampling; i++)
     {
-		p->Uout = tOnePole_tick(&p->bridgeFilter,tLinearDelay_tickOut(&p->delayLineU))* p->decay;
+		p->Uout = tHighpass_tick(&p->DCblocker,tOnePole_tick(&p->bridgeFilter,tLinearDelay_tickOut(&p->delayLineU))* (p->decay - p->rippleGain));
 		p->Uout = LEAF_clip(-1.0f, tFeedbackLeveler_tick(&p->fbLev, p->Uout), 1.0f);
     	//p->Uout = tLinearDelay_tickOut(&p->delayLineU) * p->decay;
 		p->Lout = LEAF_clip(-1.0f, tLinearDelay_tickOut(&p->delayLineL), 1.0f);
 
-		tLinearDelay_tickIn(&p->delayLineU, -1.0f * p->Lout);
+		tLinearDelay_tickIn(&p->delayLineU, (-1.0f * p->Lout) + input);
 		tLinearDelay_tickIn(&p->delayLineL, -1.0f * p->Uout);
+		tLinearDelay_addTo (&p->delayLineU, p->Lout * p->rippleGain, p->rippleDelay*wl);
     }
     
     //calculate pickup point

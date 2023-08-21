@@ -397,6 +397,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, Lfloat dest);
     void    tADSRT_setLeakFactor (tADSRT* const, Lfloat leakFactor);
     void    tADSRT_on            (tADSRT* const, Lfloat velocity);
     void    tADSRT_off           (tADSRT* const);
+    void 	tADSRT_clear		 (tADSRT* const adsrenv);
     void    tADSRT_setSampleRate (tADSRT* const, Lfloat sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~

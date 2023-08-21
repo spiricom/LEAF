@@ -751,7 +751,11 @@ void    tADSRT_free  (tADSRT* const adsrenv)
     mpool_free((char*)adsr, adsr->mempool);
 }
 
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_setAttack(tADSRT* const adsrenv, Lfloat attack)
+#else
 void     tADSRT_setAttack(tADSRT* const adsrenv, Lfloat attack)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
 
@@ -763,7 +767,11 @@ void     tADSRT_setAttack(tADSRT* const adsrenv, Lfloat attack)
     adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / attack;
 }
 
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_setDecay(tADSRT* const adsrenv, Lfloat decay)
+#else
 void     tADSRT_setDecay(tADSRT* const adsrenv, Lfloat decay)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
 
@@ -775,7 +783,11 @@ void     tADSRT_setDecay(tADSRT* const adsrenv, Lfloat decay)
     adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / decay;
 }
 
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setSustain(tADSRT* const adsrenv, Lfloat sustain)
+#else
 void     tADSRT_setSustain(tADSRT* const adsrenv, Lfloat sustain)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
 
@@ -784,7 +796,11 @@ void     tADSRT_setSustain(tADSRT* const adsrenv, Lfloat sustain)
     else                     adsr->sustain = sustain;
 }
 
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setRelease(tADSRT* const adsrenv, Lfloat release)
+#else
 void     tADSRT_setRelease(tADSRT* const adsrenv, Lfloat release)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
 
@@ -797,14 +813,22 @@ void     tADSRT_setRelease(tADSRT* const adsrenv, Lfloat release)
 }
 
 // 0.999999 is slow leak, 0.9 is fast leak
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setLeakFactor(tADSRT* const adsrenv, Lfloat leakFactor)
+#else
 void     tADSRT_setLeakFactor(tADSRT* const adsrenv, Lfloat leakFactor)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
     adsr->baseLeakFactor = leakFactor;
     adsr->leakFactor = powf(leakFactor, 44100.0f * adsr->invSampleRate);;
 }
 
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_on(tADSRT* const adsrenv, Lfloat velocity)
+#else
 void tADSRT_on(tADSRT* const adsrenv, Lfloat velocity)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
 
@@ -825,7 +849,11 @@ void tADSRT_on(tADSRT* const adsrenv, Lfloat velocity)
     adsr->gain = velocity;
 }
 
-void tADSRT_off(tADSRT* const adsrenv)
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_off(tADSRT* const adsrenv)
+#else
+    void tADSRT_off(tADSRT* const adsrenv)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
 
@@ -840,7 +868,23 @@ void tADSRT_off(tADSRT* const adsrenv)
     }
 }
 
-Lfloat   tADSRT_tick(tADSRT* const adsrenv)
+#ifdef ITCMRAM
+    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_clear(tADSRT* const adsrenv)
+#else
+	void	tADSRT_clear(tADSRT* const adsrenv)
+#endif
+{
+    _tADSRT* adsr = *adsrenv;
+
+    adsr->whichStage = env_idle;
+    adsr->next = 0.0f;
+}
+
+#ifdef ITCMRAM
+    Lfloat  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))   tADSRT_tick(tADSRT* const adsrenv)
+#else
+		Lfloat  tADSRT_tick(tADSRT* const adsrenv)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
 
@@ -966,7 +1010,11 @@ Lfloat   tADSRT_tick(tADSRT* const adsrenv)
     return adsr->next;
 }
 
+#ifdef ITCMRAM
+    Lfloat  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_tickNoInterp(tADSRT* const adsrenv)
+#else
 Lfloat   tADSRT_tickNoInterp(tADSRT* const adsrenv)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
 
@@ -1046,7 +1094,11 @@ Lfloat   tADSRT_tickNoInterp(tADSRT* const adsrenv)
     return adsr->next;
 }
 
+#ifdef ITCMRAM
+    void  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_setSampleRate(tADSRT* const adsrenv, Lfloat sr)
+#else
 void    tADSRT_setSampleRate(tADSRT* const adsrenv, Lfloat sr)
+#endif
 {
     _tADSRT* adsr = *adsrenv;
     

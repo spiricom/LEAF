@@ -366,6 +366,8 @@ typedef struct _tSimpleLivingString3
     tExpSmooth wlSmooth;
     int oversampling;
     Lfloat sampleRate;
+    Lfloat rippleGain;
+    Lfloat rippleDelay;
 } _tSimpleLivingString3;
 
 typedef _tSimpleLivingString3* tSimpleLivingString3;
