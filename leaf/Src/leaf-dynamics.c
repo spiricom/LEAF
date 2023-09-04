@@ -223,7 +223,7 @@ Lfloat tCompressor_tickWithTableHardKnee(tCompressor* const comp, Lfloat in)
     return attenuation * in;
 }
 
-Lfloat tCompressor_setTables(tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize)
+void tCompressor_setTables(tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize)
 {
     _tCompressor* c = *comp;
 	c->atodbTable = atodb;

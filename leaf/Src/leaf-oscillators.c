@@ -603,9 +603,12 @@ void    tPBPulse_initToPool  (tPBPulse* const osc, tMempool* const mp)
     LEAF* leaf = c->mempool->leaf;
     
     c->invSampleRate = leaf->invSampleRate;
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
-    c->width     =  0.5f;
+    c->invSampleRateTimesTwoTo32 = c->invSampleRate * TWO_TO_32;
+    c->inc      =  0;
+    c->phase    =  0;
+    c->width     =  (0.5f * TWO_TO_32);
+    c->oneMinusWidth =  c->width;
+    c->freq = 0.0f;
 }
 
 void    tPBPulse_free (tPBPulse* const osc)
@@ -623,16 +626,14 @@ Lfloat   tPBPulse_tick        (tPBPulse* const osc)
 {
     _tPBPulse* c = *osc;
     
-    Lfloat out;
-    if (c->phase < c->width) out = 1.0f;
-    else out = -1.0f;
-    out += LEAF_poly_blep(c->phase, c->inc);
-    out -= LEAF_poly_blep(fmodf(c->phase + (1.0f - c->width), 1.0f), c->inc);
-    
-    c->phase += c->inc - (int)c->inc;
-    if (c->phase >= 1.0f) c->phase -= 1.0f;
-    if (c->phase < 0.0f) c->phase += 1.0f;
-    
+
+    Lfloat phaseFloat = c->phase *  INV_TWO_TO_32;
+    Lfloat incFloat = c->inc *  INV_TWO_TO_32;
+    Lfloat backwardsPhaseFloat = (c->phase + c->oneMinusWidth) * INV_TWO_TO_32;
+    Lfloat out = ((c->phase < c->width) * 2.0f) - 1.0f;
+    out += LEAF_poly_blep(phaseFloat,incFloat);
+    out -= LEAF_poly_blep(backwardsPhaseFloat, incFloat);
+    c->phase += c->inc;
     return out;
 }
 
@@ -645,13 +646,14 @@ void    tPBPulse_setFreq     (tPBPulse* const osc, Lfloat freq)
     _tPBPulse* c = *osc;
     
     c->freq  = freq;
-    c->inc = freq * c->invSampleRate;
+    c->inc = freq * c->invSampleRateTimesTwoTo32;
 }
 
 void    tPBPulse_setWidth    (tPBPulse* const osc, Lfloat width)
 {
     _tPBPulse* c = *osc;
-    c->width = width;
+    c->oneMinusWidth = (1.0f - width) * TWO_TO_32;
+    c->width = width * TWO_TO_32;
 }
 
 void    tPBPulse_setSampleRate (tPBPulse* const osc, Lfloat sr)
@@ -659,6 +661,7 @@ void    tPBPulse_setSampleRate (tPBPulse* const osc, Lfloat sr)
     _tPBPulse* c = *osc;
     
     c->invSampleRate = 1.0f/sr;
+    c->invSampleRateTimesTwoTo32 = c->invSampleRate * TWO_TO_32;
     tPBPulse_setFreq(osc, c->freq);
 }
 
@@ -677,9 +680,11 @@ void    tPBSaw_initToPool    (tPBSaw* const osc, tMempool* const mp)
     c->mempool = m;
     LEAF* leaf = c->mempool->leaf;
     
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
     c->invSampleRate = leaf->invSampleRate;
+    c->invSampleRateTimesTwoTo32 = c->invSampleRate * TWO_TO_32;
+    c->inc      =  0;
+    c->phase    =  0;
+    c->freq = 0.0f;
 }
 
 void    tPBSaw_free  (tPBSaw* const osc)
@@ -697,12 +702,11 @@ Lfloat   tPBSaw_tick          (tPBSaw* const osc)
 {
     _tPBSaw* c = *osc;
     Lfloat out = (c->phase * 2.0f) - 1.0f;
-    out -= LEAF_poly_blep(c->phase, c->inc);
-    
-    c->phase += c->inc - (int)c->inc;
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
-    
+
+    Lfloat phaseFloat = c->phase * TWO_TO_32;
+    Lfloat incFloat = c->inc * TWO_TO_32;
+    out -= LEAF_poly_blep(phaseFloat, incFloat);
+    c->phase += c->inc;
     return (-1.0f * out);
 }
 
@@ -715,7 +719,7 @@ void    tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq)
     _tPBSaw* c = *osc;
     
     c->freq  = freq;
-    c->inc = freq * c->invSampleRate;
+    c->inc = freq * c->invSampleRateTimesTwoTo32;
 }
 
 void    tPBSaw_setSampleRate (tPBSaw* const osc, Lfloat sr)
@@ -723,6 +727,7 @@ void    tPBSaw_setSampleRate (tPBSaw* const osc, Lfloat sr)
     _tPBSaw* c = *osc;
     
     c->invSampleRate = 1.0f/sr;
+    c->invSampleRateTimesTwoTo32 = c->invSampleRate * TWO_TO_32;
     tPBSaw_setFreq(osc, c->freq);
 }
 
@@ -742,11 +747,12 @@ void    tPBSawSquare_initToPool    (tPBSawSquare* const osc, tMempool* const mp)
     c->mempool = m;
     LEAF* leaf = c->mempool->leaf;
     
-    c->inc      =  0.0f;
-    c->phase    =  0.0f;
-    c->shape = 0.0f;
-    c->oneMinusShape = 1.0f;
     c->invSampleRate = leaf->invSampleRate;
+    c->invSampleRateTimesTwoTo32 = c->invSampleRate * TWO_TO_32;
+    c->inc      =  0;
+    c->phase    =  0;
+    c->freq = 0.0f;
+
 }
 
 void    tPBSawSquare_free  (tPBSawSquare* const osc)
@@ -765,24 +771,21 @@ Lfloat   tPBSawSquare_tick          (tPBSawSquare* const osc)
 {
     _tPBSawSquare* c = *osc;
 
+    Lfloat phaseFloat = c->phase *  INV_TWO_TO_32;
+    Lfloat incFloat = c->inc *  INV_TWO_TO_32;
+    Lfloat backwardsPhaseFloat = (c->phase + 2147483648u) * INV_TWO_TO_32; // 2147483648 = 0.5 * TWO_TO_32
+    Lfloat squareOut = ((c->phase < 2147483648u) * 2.0f) - 1.0f;
+    Lfloat sawOut = (phaseFloat * 2.0f) - 1.0f;
+    Lfloat resetBlep = LEAF_poly_blep(phaseFloat,incFloat);
+    Lfloat midBlep = LEAF_poly_blep(backwardsPhaseFloat, incFloat);
     
-    
-    float resetBlep = LEAF_poly_blep(c->phase, c->inc);
-    float midBlep = LEAF_poly_blep(fmod(c->phase + 0.5f, 1.0f), c->inc);
-    
-    Lfloat sawOut = (c->phase * 2.0f) - 1.0f;
+
     sawOut -= resetBlep;
     
-    Lfloat squareOut = 0.0f;
-    if (c->phase < 0.5f) squareOut = 1.0f;
-    else squareOut = -1.0f;
     squareOut += resetBlep;
     squareOut -= midBlep;
-    
-    
-    c->phase += c->inc - (int)c->inc;
-    while (c->phase >= 1.0f) c->phase -= 1.0f;
-    while (c->phase < 0.0f) c->phase += 1.0f;
+
+    c->phase += c->inc;
     
     return ((-1.0f * sawOut) * c->oneMinusShape) + (squareOut * c->shape);
 }
@@ -796,7 +799,8 @@ void    tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq)
     _tPBSawSquare* c = *osc;
     
     c->freq  = freq;
-    c->inc = freq * c->invSampleRate;
+    c->inc = freq * c->invSampleRateTimesTwoTo32;
+
 }
 
 void    tPBSawSquare_setShape      (tPBSawSquare* const osc, Lfloat inputShape)
@@ -812,6 +816,7 @@ void    tPBSawSquare_setSampleRate (tPBSawSquare* const osc, Lfloat sr)
     _tPBSawSquare* c = *osc;
     
     c->invSampleRate = 1.0f/sr;
+    c->invSampleRateTimesTwoTo32 = c->invSampleRate * TWO_TO_32;
     tPBSawSquare_setFreq(osc, c->freq);
 }
 
@@ -865,7 +870,7 @@ Lfloat   tSawOS_tick          (tSawOS* const osc)
     for (int i = 0; i < c->OSratio; i++)
     {
     	c->phase = (c->phase + c->inc);
-        tempFloat = ((c->phase * INV_TWO_TO_32) * 2.0f)- 1.0f; // inv 2 to 32, then multiplied by 2, same as inv 2 to 16
+        tempFloat = (c->phase * INV_TWO_TO_16)- 1.0f; // inv 2 to 32, then multiplied by 2, same as inv 2 to 16
     	for (int k = 0; k < c->filterOrder; k++)
     	{
     		tempFloat = tSVF_tick(&c->aaFilter[k], tempFloat);
@@ -906,10 +911,10 @@ void    tPhasor_initToPool  (tPhasor* const ph, tMempool* const mp)
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
     
-    p->phase = 0.0f;
-    p->inc = 0.0f;
-    p->phaseDidReset = 0;
+    p->phase = 0;
+    p->inc = 0;
     p->invSampleRate = leaf->invSampleRate;
+    p->invSampleRateTimesTwoTo32 = p->invSampleRate * TWO_TO_32;
 }
 
 void    tPhasor_free (tPhasor* const ph)
@@ -924,30 +929,15 @@ void    tPhasor_setFreq(tPhasor* const ph, Lfloat freq)
     _tPhasor* p = *ph;
 
     p->freq  = freq;
-    
-    p->inc = freq * p->invSampleRate;
-    p->inc -= (int)p->inc;
+    p->inc = freq * p->invSampleRateTimesTwoTo32;
 }
 
 Lfloat   tPhasor_tick(tPhasor* const ph)
 {
     _tPhasor* p = *ph;
     
-    p->phase += p->inc;
-
-    p->phaseDidReset = 0;
-    if (p->phase >= 1.0f)
-    {
-        p->phaseDidReset = 1;
-        p->phase -= 1.0f;
-    }
-    else if (p->phase < 0.0f)
-    {
-        p->phaseDidReset = 1;
-        p->phase += 1.0f;
-    }
-    
-    return p->phase;
+    p->phase += p->inc; // no need to phase wrap, since integer overflow does it for us
+    return p->phase * INV_TWO_TO_32; //smush back to 0.0-1.0 range
 }
 
 void     tPhasor_setSampleRate (tPhasor* const ph, Lfloat sr)
@@ -955,6 +945,7 @@ void     tPhasor_setSampleRate (tPhasor* const ph, Lfloat sr)
     _tPhasor* p = *ph;
     
     p->invSampleRate = 1.0f/sr;
+    p->invSampleRateTimesTwoTo32 = p->invSampleRate * TWO_TO_32;
     tPhasor_setFreq(ph, p->freq);
 };
 
@@ -3776,6 +3767,7 @@ void    tIntPhasor_initToPool   (tIntPhasor* const cy, tMempool* const mp)
     LEAF* leaf = c->mempool->leaf;
     
     c->phase    =  0;
+    c->inc  = 0;
     c->invSampleRateTimesTwoTo32 = (leaf->invSampleRate * TWO_TO_32);
 }
 

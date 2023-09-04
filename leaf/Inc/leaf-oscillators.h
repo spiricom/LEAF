@@ -403,10 +403,13 @@ extern "C" {
     typedef struct _tPBPulse
     {
         tMempool mempool;
-        Lfloat phase;
-        Lfloat inc,freq;
-        Lfloat width;
+        uint32_t phase;
+        uint32_t inc;
+        Lfloat freq;
+        uint32_t width;
+        uint32_t oneMinusWidth;
         Lfloat invSampleRate;
+        Lfloat invSampleRateTimesTwoTo32;
     } _tPBPulse;
     
     typedef _tPBPulse* tPBPulse;
@@ -463,9 +466,11 @@ extern "C" {
     typedef struct _tPBSaw
     {
         tMempool mempool;
-        Lfloat phase;
-        Lfloat inc,freq;
+        uint32_t phase;
+        uint32_t inc;
+        Lfloat freq;
         Lfloat invSampleRate;
+        Lfloat invSampleRateTimesTwoTo32;
         Lfloat lastsyncin;
         Lfloat sync;
     } _tPBSaw;
@@ -493,13 +498,16 @@ extern "C" {
 typedef struct _tPBSawSquare
 {
     tMempool mempool;
-    Lfloat phase;
-    Lfloat inc,freq;
+    uint32_t phase;
+    uint32_t inc;
+    Lfloat freq;
     Lfloat invSampleRate;
+    Lfloat invSampleRateTimesTwoTo32;
     Lfloat lastsyncin;
     Lfloat sync;
     Lfloat shape;
     Lfloat oneMinusShape;
+
 } _tPBSawSquare;
 
 typedef _tPBSawSquare* tPBSawSquare;
@@ -584,10 +592,11 @@ void    tPBSawSquare_setSampleRate (tPBSawSquare* const osc, Lfloat sr);
     {
         
         tMempool mempool;
-        Lfloat phase;
-        Lfloat inc,freq;
-        uint8_t phaseDidReset;
+        uint32_t phase;
+        uint32_t inc;
+        Lfloat freq;
         Lfloat invSampleRate;
+        Lfloat invSampleRateTimesTwoTo32;
     } _tPhasor;
     
     typedef _tPhasor* tPhasor;

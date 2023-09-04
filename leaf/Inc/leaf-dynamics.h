@@ -54,7 +54,7 @@ extern "C" {
      @fn Lfloat   tCompressor_tick        (tCompressor* const, Lfloat input)
      @brief
      @param compressor A pointer to the relevant tCompressor.
-     ￼￼￼
+     
      @} */
    
     typedef struct _tCompressor
@@ -91,7 +91,7 @@ extern "C" {
     Lfloat   tCompressor_tick        (tCompressor* const, Lfloat input);
     Lfloat tCompressor_tickWithTable(tCompressor* const comp, Lfloat in);
     Lfloat tCompressor_tickWithTableHardKnee(tCompressor* const comp, Lfloat in);
-    Lfloat tCompressor_setTables(tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize);
+    void tCompressor_setTables(tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize);
 void    tCompressor_setParams   (tCompressor* const comp, Lfloat thresh, Lfloat ratio, Lfloat knee, Lfloat makeup, Lfloat attack, Lfloat release);
     
     
@@ -140,7 +140,7 @@ void    tCompressor_setParams   (tCompressor* const comp, Lfloat thresh, Lfloat 
      @fn void    tFeedbackLeveler_setStrength    (tFeedbackLeveler* const, Lfloat strength)
      @brief
      @param leveler A pointer to the relevant tFeedbackLeveler.
-     ￼￼￼
+     
      @} */
     
     typedef struct _tFeedbackLeveler

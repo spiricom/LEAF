@@ -591,7 +591,7 @@ void LEAF_generate_table_skew_non_sym_double(Lfloat* buffer, Lfloat start, Lfloa
 {
     double skew = log (0.5) / log ((center - start) / (end - start));
     double increment = 1.0 / (double)(size-1);
-    double x = 0.0;
+    double x = 0.0000000001;
     double proportion = 0.0;
     for (int i = 0; i < size; i++)
     {
@@ -606,7 +606,7 @@ void LEAF_generate_table_skew_non_sym(Lfloat* buffer, Lfloat start, Lfloat end, 
 {
     Lfloat skew = logf (0.5) / logf ((center - start) / (end - start));
     Lfloat increment = 1.0 / (Lfloat)(size-1);
-    Lfloat x = 0.0;
+    Lfloat x = 0.0000000001f;
     Lfloat proportion = 0.0;
     for (int i = 0; i < size; i++)
     {
@@ -643,7 +643,7 @@ void LEAF_generate_dbtoa(Lfloat* buffer, int size, Lfloat minDb, Lfloat maxDb)
 void LEAF_generate_atodbPositiveClipped(Lfloat* buffer, Lfloat lowerThreshold, Lfloat range, int size)
 {
     Lfloat increment = 1.0f / (Lfloat)(size-1);
-    Lfloat x = 0.0f;
+    Lfloat x = 0.000000001f;
     Lfloat scalar = range / fastabsf(lowerThreshold);
     for (int i = 0; i < size; i++)
     {
