@@ -92,8 +92,8 @@ extern "C" {
     Lfloat tCompressor_tickWithTable(tCompressor* const comp, Lfloat in);
     Lfloat tCompressor_tickWithTableHardKnee(tCompressor* const comp, Lfloat in);
     void tCompressor_setTables(tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize);
-void    tCompressor_setParams   (tCompressor* const comp, Lfloat thresh, Lfloat ratio, Lfloat knee, Lfloat makeup, Lfloat attack, Lfloat release);
-    
+    void    tCompressor_setParams   (tCompressor* const comp, Lfloat thresh, Lfloat ratio, Lfloat knee, Lfloat makeup, Lfloat attack, Lfloat release);
+    void tCompressor_setSampleRate(tCompressor* const comp, Lfloat sampleRate);
     
     /*!
      @defgroup tfeedbackleveler tFeedbackLeveler
@@ -167,7 +167,6 @@ void    tCompressor_setParams   (tCompressor* const comp, Lfloat thresh, Lfloat 
     void    tFeedbackLeveler_setFactor      (tFeedbackLeveler* const, Lfloat factor);
     void    tFeedbackLeveler_setMode        (tFeedbackLeveler* const, int mode); // 0 for upwards limiting only, 1 for biderctional limiting
     void    tFeedbackLeveler_setStrength    (tFeedbackLeveler* const, Lfloat strength);
-    
     
     //==============================================================================
     

@@ -914,6 +914,7 @@ Lfloat tTapeDelay_getGain (tTapeDelay* const dl)
 
 
 
+
 void    tRingBuffer_init     (tRingBuffer* const ring, int size, LEAF* const leaf)
 {
     tRingBuffer_initToPool(ring, size, &leaf->mempool);

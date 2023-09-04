@@ -92,7 +92,7 @@ void tOversampler_initToPool (tOversampler* const osr, int maxRatio, int extraQu
         os->maxRatio = maxRatio;
         os->allowHighQuality = extraQuality;
         os->ratio = os->maxRatio;
-        int idx = (int)(log2f(os->ratio))-1+os->offset;
+        uint_fast16_t idx = (int)(log2f(os->ratio))-1+os->offset;
         os->numTaps = __leaf_tablesize_firNumTaps[idx];
         os->phaseLength = os->numTaps / os->ratio;
         os->pCoeffs = (Lfloat*) __leaf_tableref_firCoeffs[idx];
@@ -144,9 +144,9 @@ void tOversampler_upsample(tOversampler* const osr, Lfloat input, Lfloat* output
     Lfloat *ptr1;                               /* Temporary pointer for state buffer */
     Lfloat *ptr2;                               /* Temporary pointer for coefficient buffer */
     Lfloat sum0;                                /* Accumulators */
-    uint32_t i, tapCnt;                    /* Loop counters */
-    uint32_t phaseLen = os->phaseLength;            /* Length of each polyphase filter component */
-    uint32_t j;
+    uint_fast16_t i, tapCnt;                    /* Loop counters */
+    uint_fast16_t phaseLen = os->phaseLength;            /* Length of each polyphase filter component */
+    uint_fast16_t j;
     
     /* os->pState buffer contains previous frame (phaseLen - 1) samples */
     /* pStateCur points to the location where the new input data should be written */

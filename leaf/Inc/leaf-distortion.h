@@ -124,15 +124,15 @@ extern "C" {
     typedef struct _tOversampler
     {
         tMempool mempool;
-        int maxRatio;
-        int allowHighQuality;
-        int ratio;
-        int offset;
+        uint_fast16_t maxRatio;
+        uint_fast8_t allowHighQuality;
+        uint_fast8_t ratio;
+        uint_fast16_t offset;
         Lfloat* pCoeffs;
         Lfloat* upState;
         Lfloat* downState;
-        int numTaps;
-        int phaseLength;
+        uint_fast16_t numTaps;
+        uint_fast16_t phaseLength;
     } _tOversampler;
     
     typedef _tOversampler* tOversampler;

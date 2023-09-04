@@ -26,7 +26,7 @@ extern "C" {
     
 #define COEFFS_SIZE 32
     extern const Lfloat* __leaf_tableref_firCoeffs[COEFFS_SIZE];
-    extern const Lfloat __leaf_tablesize_firNumTaps[COEFFS_SIZE];
+    extern const uint_fast16_t __leaf_tablesize_firNumTaps[COEFFS_SIZE];
     extern const Lfloat __leaf_table_fir2XLow[32];
     extern const Lfloat __leaf_table_fir4XLow[64];
     extern const Lfloat __leaf_table_fir8XLow[64];

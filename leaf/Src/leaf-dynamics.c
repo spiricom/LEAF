@@ -263,6 +263,11 @@ void tCompressor_setParams(tCompressor* const comp, Lfloat thresh, Lfloat ratio,
     c->tauRelease = fasterexpf(-1.0f/(0.001f * release * c->sampleRate));
 }
 
+void tCompressor_setSampleRate(tCompressor* const comp, Lfloat sampleRate)
+{
+    _tCompressor* c = *comp;
+    c->sampleRate = sampleRate;
+}
 /* Feedback Leveler */
 
 void tFeedbackLeveler_init (tFeedbackLeveler* const fb, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf)
@@ -331,7 +336,6 @@ void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const fb, Lfloat T
     _tFeedbackLeveler* p = *fb;
     p->targetLevel=TargetLevel;
 }
-
 
 
 void tThreshold_init (tThreshold* const th, Lfloat low, Lfloat high, LEAF* const leaf)

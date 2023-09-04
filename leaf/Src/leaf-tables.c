@@ -49,7 +49,7 @@ const Lfloat __leaf_table_fir64XHigh[1024] = {    0.000022913289467138396,    0.
 const Lfloat* __leaf_tableref_firCoeffs[COEFFS_SIZE] = { __leaf_table_fir2XLow, __leaf_table_fir4XLow, __leaf_table_fir8XLow, __leaf_table_fir16XLow, __leaf_table_fir32XLow, __leaf_table_fir64XLow, __leaf_table_fir2XHigh, __leaf_table_fir4XHigh, __leaf_table_fir8XHigh, __leaf_table_fir16XHigh, __leaf_table_fir32XHigh, __leaf_table_fir64XHigh
 };
 
-const Lfloat __leaf_tablesize_firNumTaps[COEFFS_SIZE] = { 32, 64, 64, 128, 256, 256, 128, 256, 256, 512, 512, 1024 };
+const uint_fast16_t __leaf_tablesize_firNumTaps[COEFFS_SIZE] = { 32, 64, 64, 128, 256, 256, 128, 256, 256, 512, 512, 1024 };
 #endif // LEAF_INCLUDE_OVERSAMPLER_TABLES
 
 #if LEAF_INCLUDE_SHAPER_TABLE
