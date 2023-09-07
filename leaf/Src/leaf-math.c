@@ -448,6 +448,8 @@ Lfloat LEAF_tanh(Lfloat x)
         return x * ( 27.0f + x * x ) / ( 27.0f + 9.0f * x * x );
 }
 
+
+
 // Adapted from MusicDSP: http://www.musicdsp.org/showone.php?id=238
 Lfloat LEAF_tanhNoClip(Lfloat x)
 {
@@ -487,6 +489,34 @@ Lfloat   fast_tanh4 (Lfloat x)
     return (result);
 }
 
+//from raphx on this post : https://www.kvraudio.com/forum/viewtopic.php?t=332930&start=30
+Lfloat fast_tanh5(Lfloat x)
+{
+	Lfloat a = x + 0.16489087f * x*x*x + 0.00985468f * x*x*x*x*x;
+	return a / sqrtf(1.0f + a * a);
+}
+
+Lfloat leaf_softClip(Lfloat sample)
+{
+    if (sample < -1.0f)
+    {
+        sample = -1.0f;
+    } else if (sample > 1.0f)
+    {
+        sample = 1.0f;
+    }
+    return (1.5f * (sample - (((sample * sample * sample))* 0.3333333f)));
+}
+
+//from Olli Niemitalo
+//https://dsp.stackexchange.com/questions/46629/finding-polynomial-approximations-of-a-sine-wave
+Lfloat fastSine(Lfloat x)
+{
+	Lfloat term1 = x * 1.570034357f;
+	Lfloat term2 = x * x * x * -0.6425216143f;
+	Lfloat term3 = x * x * x * x * x * 0.07248725712f;
+	return term1+term2+term3;
+}
 
 void LEAF_generate_sine(Lfloat* buffer, int size)
 {
@@ -605,7 +635,7 @@ void LEAF_generate_table_skew_non_sym_double(Lfloat* buffer, Lfloat start, Lfloa
 void LEAF_generate_table_skew_non_sym(Lfloat* buffer, Lfloat start, Lfloat end, Lfloat center, int size)
 {
     Lfloat skew = logf (0.5) / logf ((center - start) / (end - start));
-    Lfloat increment = 1.0 / (Lfloat)(size-1);
+    Lfloat increment = 1.0f / (Lfloat)(size-1);
     Lfloat x = 0.0000000001f;
     Lfloat proportion = 0.0;
     for (int i = 0; i < size; i++)
@@ -735,6 +765,24 @@ Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
 //    return y * 0.083333333333333f; // divide by 12
 }
 
+//this is messed up right now, don't use -- JS
+Lfloat LEAF_poly_blepInt(uint32_t t, uint32_t dt)
+{
+
+    // 0 <= t < 1
+	uint32_t maxInt32minusDt = 4294967295u-dt;
+    if (t < dt) {
+    	float tF = (((float) t) / ((float) dt));
+        return tF+tF - tF*tF - 1.0f;
+    }
+    // -1 < t < 0
+    else if (t > maxInt32minusDt) {
+        float tF = (((float)(t - maxInt32minusDt)) / (float)dt);
+        return tF*tF + tF+tF + 1.0f;
+    }
+    // 0 otherwise
+    else return 0.0f;
+}
 
 //this version is from this discussion: https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
 Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt)
@@ -800,6 +848,30 @@ Lfloat LEAF_interpolate_hermite_x(Lfloat yy0, Lfloat yy1, Lfloat yy2, Lfloat yy3
     
     return ((c3 * xx + c2) * xx + c1) * xx + c0;
 }
+
+//this is a direct way of computing the thing. Another method is suggested in this paper:
+//https://www.researchgate.net/publication/224312927_A_computationally_efficient_coefficient_update_technique_for_Lagrange_fractional_delay_filters
+//but the advantages of that only happen above 3rd-order. For 3rd-order interpolation, the mults and adds would be the same.
+Lfloat LEAF_interpolate_lagrange(Lfloat y0, Lfloat y1, Lfloat y2, Lfloat y3, Lfloat d)
+{
+    //
+	Lfloat dp1 = d+1.0f;
+	Lfloat dm1 = d-1.0f;
+	Lfloat dm2 = d-2.0f;
+
+	Lfloat pdp1d = dp1*d;
+	Lfloat pddm1 = d*dm1;
+	Lfloat pdm1dm2 = dm1*dm2;
+
+	Lfloat h0 = -0.166666666666667f * pddm1 * dm2;
+	Lfloat h1 = 0.5f * dp1 * pdm1dm2;
+	Lfloat h2 = -0.5f * pdp1d * dm2;
+	Lfloat h3 = 0.166666666666667f * pdp1d * dm2;
+
+    return ((h3*y3) + (h2*y2) + (h1*y1)+ (h0*y0));
+}
+
+
 
 // alpha, [0.0, 1.0]
 Lfloat LEAF_interpolation_linear (Lfloat A, Lfloat B, Lfloat alpha)

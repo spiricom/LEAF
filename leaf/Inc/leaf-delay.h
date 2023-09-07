@@ -405,6 +405,142 @@ extern "C" {
     
     //==============================================================================
     
+    //==============================================================================
+
+    /*!
+     @defgroup thermitedelay tHermiteDelay
+     @ingroup delay
+     @brief Hermite-interpolating delay, created by adapting STK linear delay with Hermite interpolation.
+     @{
+
+     @fn void       tHermiteDelay_init             (tHermiteDelay* const dl, Lfloat delay, uint32_t maxDelay, LEAF* const leaf)
+     @brief Initialize a tHermiteDelay to the default mempool of a LEAF instance.
+     @param delay A pointer to the tHermiteDelay to initialize.
+     @param initialLength
+     @param maxLength
+     @param leaf A pointer to the leaf instance.
+
+     @fn void    tHermiteDelay_initToPool      (tHermiteDelay* const dl, Lfloat delay, uint32_t maxDelay, tMempool* const mp)
+     @brief Initialize a tHermiteDelay to a specified mempool.
+     @param delay A pointer to the tHermiteDelay to initialize.
+     @param initialLength
+     @param maxLength
+     @param mempool A pointer to the tMempool to use.
+
+     @fn void     tHermiteDelay_free            (tHermiteDelay* const dl)
+     @brief Free a tHermiteDelay from its mempool.
+     @param delay A pointer to the tHermiteDelay to free.
+
+     @fn void    tHermiteDelay_clear            (tHermiteDelay* const dl)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+
+     @fn Lfloat   tHermiteDelay_tick             (tHermiteDelay* const dl, Lfloat input)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @param input
+     @return
+
+     @fn void       tHermiteDelay_tickIn         (tHermiteDelay* const dl, Lfloat input)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @param input
+
+     @fn Lfloat   tHermiteDelay_tickOut         (tHermiteDelay* const dl)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @return
+
+     @fn void    tHermiteDelay_setDelay         (tHermiteDelay* const dl, Lfloat delay)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @param delayLength The new delay length in samples. Cannot be greater than the max delay length given on initialization.
+
+     @fn Lfloat     tHermiteDelay_tapOut         (tHermiteDelay* const dl, uint32_t tapDelay)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @param position
+     @return
+
+     @fn Lfloat   tHermiteDelay_tapOutInterpolated (tHermiteDelay* const dl, uint32_t tapDelay, Lfloat alpha);
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @param integer position
+     @param fractional portion of the position
+     @return
+
+     @fn void     tHermiteDelay_tapIn         (tHermiteDelay* const dl, Lfloat value, uint32_t tapDelay)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @param input
+     @param position
+
+     @fn Lfloat     tHermiteDelay_addTo         (tHermiteDelay* const dl, Lfloat value, uint32_t tapDelay)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @param input
+     @param position
+     @return
+
+     @fn Lfloat   tHermiteDelay_getDelay         (tHermiteDelay* const dl)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @return
+
+     @fn Lfloat   tHermiteDelay_getLastOut     (tHermiteDelay* const dl)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @return
+
+     @fn Lfloat   tHermiteDelay_getLastIn     (tHermiteDelay* const dl)
+     @brief
+     @param delay A pointer to the relevant tHermiteDelay.
+     @return
+
+     ￼￼￼
+     @} */
+
+    typedef struct _tLagrangeDelay
+    {
+        tMempool mempool;
+
+        Lfloat* buff;
+        uint32_t bufferMask;
+        Lfloat lastOut, lastIn;
+
+        uint32_t inPoint, outPoint;
+
+        uint32_t maxDelay;
+        Lfloat delay;
+
+        //coefficients for lagrange interpolation (calculated when delay length changes
+        Lfloat h0;
+        Lfloat h1;
+        Lfloat h2;
+        Lfloat h3;
+    } _tLagrangeDelay;
+
+    typedef _tLagrangeDelay* tLagrangeDelay;
+
+    void    tLagrangeDelay_init (tLagrangeDelay* const dl, Lfloat delay, uint32_t maxDelay, LEAF* const leaf);
+    void    tLagrangeDelay_initToPool (tLagrangeDelay* const dl, Lfloat delay, uint32_t maxDelay, tMempool* const mp);
+    void    tLagrangeDelay_free          (tLagrangeDelay* const dl);
+
+    void    tLagrangeDelay_clear         (tLagrangeDelay* const dl);
+    Lfloat   tLagrangeDelay_tick          (tLagrangeDelay* const dl, Lfloat input);
+    void    tLagrangeDelay_tickIn        (tLagrangeDelay* const dl, Lfloat input);
+    Lfloat   tLagrangeDelay_tickOut       (tLagrangeDelay* const dl);
+    void    tLagrangeDelay_setDelay      (tLagrangeDelay* const dl, Lfloat delay);
+    Lfloat   tLagrangeDelay_tapOut        (tLagrangeDelay* const dl, uint32_t tapDelay);
+    Lfloat   tLagrangeDelay_tapOutInterpolated (tLagrangeDelay* const dl, uint32_t tapDelay, Lfloat alpha);
+    void    tLagrangeDelay_tapIn         (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay);
+    Lfloat   tLagrangeDelay_addTo         (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay);
+    Lfloat   tLagrangeDelay_getDelay      (tLagrangeDelay* const dl);
+    Lfloat   tLagrangeDelay_getLastOut    (tLagrangeDelay* const dl);
+    Lfloat   tLagrangeDelay_getLastIn     (tLagrangeDelay* const dl);
+
+    //==============================================================================
+
     /*!
      @defgroup tallpassdelay tAllpassDelay
      @ingroup delay

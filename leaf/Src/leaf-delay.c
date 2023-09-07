@@ -560,6 +560,216 @@ Lfloat tHermiteDelay_getGain (tHermiteDelay* const dl)
 
 
 
+/// Lagrange Interpolated Delay
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ LinearDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+void tLagrangeDelay_init (tLagrangeDelay* const dl, Lfloat delay, uint32_t maxDelay, LEAF* const leaf)
+{
+	tLagrangeDelay_initToPool(dl, delay, maxDelay, &leaf->mempool);
+}
+
+void tLagrangeDelay_initToPool  (tLagrangeDelay* const dl, Lfloat delay, uint32_t maxDelay, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tLagrangeDelay* d = *dl = (_tLagrangeDelay*) mpool_alloc(sizeof(_tLagrangeDelay), m);
+    d->mempool = m;
+
+    d->maxDelay = maxDelay;
+
+    if (delay > maxDelay)   d->delay = maxDelay;
+    else if (delay < 0.0f)  d->delay = 0.0f;
+    else                    d->delay = delay;
+
+
+    if ((maxDelay != 0) && ((maxDelay & (maxDelay - 1)) == 0))
+    {
+        d->maxDelay = maxDelay;
+        d->bufferMask = maxDelay - 1;
+    }
+    else
+    {
+        //make the delay size into a power of 2
+        maxDelay--;
+        maxDelay |= maxDelay >> 1;
+        maxDelay |= maxDelay >> 2;
+        maxDelay |= maxDelay >> 4;
+        maxDelay |= maxDelay >> 8;
+        maxDelay |= maxDelay >> 16;
+        maxDelay++;
+        d->maxDelay = maxDelay;
+        d->bufferMask = maxDelay - 1;
+    }
+    d->buff = (Lfloat*) mpool_alloc(sizeof(Lfloat) * maxDelay, m);
+
+
+    d->lastIn = 0.0f;
+    d->lastOut = 0.0f;
+
+    d->inPoint = 0;
+    d->outPoint = 0;
+
+    tLagrangeDelay_setDelay(dl, d->delay);
+}
+
+void tLagrangeDelay_free (tLagrangeDelay* const dl)
+{
+    _tLagrangeDelay* d = *dl;
+
+    mpool_free((char*)d->buff, d->mempool);
+    mpool_free((char*)d, d->mempool);
+}
+
+
+void    tLagrangeDelay_clear(tLagrangeDelay* const dl)
+{
+	_tLagrangeDelay* d = *dl;
+    for (unsigned i = 0; i < d->maxDelay; i++)
+    {
+        d->buff[i] = 0;
+    }
+}
+
+Lfloat   tLagrangeDelay_tick (tLagrangeDelay* const dl, Lfloat input)
+{
+	_tLagrangeDelay* d = *dl;
+
+    d->buff[d->inPoint] = input;
+
+
+    // Increment input pointer modulo length.
+    d->inPoint = (d->inPoint + 1) & d->bufferMask;
+
+
+    uint32_t idx = (uint32_t) d->outPoint;
+    d->lastOut =    (d->buff[((idx - 1) + d->maxDelay) & d->bufferMask] * d->h0) +
+    		(d->buff[idx] * d->h1) +
+			(d->buff[(idx + 1) & d->bufferMask] * d->h2) +
+			(d->buff[(idx + 2) & d->bufferMask] * d->h3);
+
+    // Increment output pointer modulo length
+    d->outPoint = (d->outPoint + 1) & d->bufferMask;
+
+    return d->lastOut;
+}
+
+void   tLagrangeDelay_tickIn (tLagrangeDelay* const dl, Lfloat input)
+{
+	_tLagrangeDelay* d = *dl;
+
+    d->buff[d->inPoint] = input;
+
+    // Increment input pointer modulo length.
+    d->inPoint = (d->inPoint + 1) & d->bufferMask;
+}
+
+Lfloat   tLagrangeDelay_tickOut (tLagrangeDelay* const dl)
+{
+	_tLagrangeDelay* d = *dl;
+
+    uint32_t idx = (uint32_t) d->outPoint;
+
+
+
+    d->lastOut =    (d->buff[((idx - 1) + d->maxDelay) & d->bufferMask] * d->h0) +
+    		(d->buff[idx] * d->h1) +
+			(d->buff[(idx + 1) & d->bufferMask] * d->h2) +
+			(d->buff[(idx + 2) & d->bufferMask] * d->h3);
+
+    // Increment output pointer modulo length
+    d->outPoint = (d->outPoint + 1) & d->bufferMask;
+
+    return d->lastOut;
+}
+
+void tLagrangeDelay_setDelay (tLagrangeDelay* const dl, Lfloat delay)
+{
+	_tLagrangeDelay* d = *dl;
+    //d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
+    d->delay = delay; // not safe but faster
+    Lfloat outPointer = d->inPoint - d->delay - 1.0f; // minus 1 because interpolation needs value from 1->2 so lagrange interp will add the 1 back
+    while ( outPointer < 0 )
+        outPointer += d->maxDelay; // modulo maximum length
+
+    d->outPoint = (uint32_t) outPointer;   // integer part
+
+    Lfloat alpha = outPointer - d->outPoint; // fractional part
+
+	Lfloat dp1 = alpha+1.0f;
+	Lfloat dm1 = alpha-1.0f;
+	Lfloat dm2 = alpha-2.0f;
+
+	Lfloat pdp1d = dp1*alpha;
+	Lfloat pddm1 = alpha*dm1;
+	Lfloat pdm1dm2 = dm1*dm2;
+
+	d->h0 = -0.166666666666667f * pddm1 * dm2;
+	d->h1 = 0.5f * dp1 * pdm1dm2;
+	d->h2 = -0.5f * pdp1d * dm2;
+	d->h3 = 0.166666666666667f * pdp1d * dm2;
+
+    d->outPoint &= d->bufferMask;
+}
+
+Lfloat tLagrangeDelay_tapOut (tLagrangeDelay* const dl, uint32_t tapDelay)
+{
+	_tLagrangeDelay* d = *dl;
+
+    int32_t tap = (d->inPoint - tapDelay - 1) & d->bufferMask;
+
+    return d->buff[tap];
+
+}
+
+Lfloat   tLagrangeDelay_tapOutInterpolated (tLagrangeDelay* const dl, uint32_t tapDelay, Lfloat alpha)
+{
+	_tLagrangeDelay* d = *dl;
+
+    int32_t idx = (d->inPoint - tapDelay - 1) & d->bufferMask;
+
+    return    (d->buff[((idx - 1) + d->maxDelay) & d->bufferMask] * d->h0) +
+    		(d->buff[idx] * d->h1) +
+			(d->buff[(idx + 1) & d->bufferMask] * d->h2) +
+			(d->buff[(idx + 2) & d->bufferMask] * d->h3);
+
+}
+
+void tLagrangeDelay_tapIn (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay)
+{
+	_tLagrangeDelay* d = *dl;
+
+    int32_t tap = (d->inPoint - tapDelay - 1)  & d->bufferMask;
+
+    d->buff[tap] = value;
+}
+
+Lfloat tLagrangeDelay_addTo (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay)
+{
+	_tLagrangeDelay* d = *dl;
+
+    int32_t tap = (d->inPoint - tapDelay - 1)  & d->bufferMask;
+
+    return (d->buff[tap] += value);
+}
+
+Lfloat   tLagrangeDelay_getDelay (tLagrangeDelay* const dl)
+{
+	_tLagrangeDelay* d = *dl;
+    return d->delay;
+}
+
+Lfloat   tLagrangeDelay_getLastOut (tLagrangeDelay* const dl)
+{
+	_tLagrangeDelay* d = *dl;
+    return d->lastOut;
+}
+
+Lfloat   tLagrangeDelay_getLastIn (tLagrangeDelay* const dl)
+{
+	_tLagrangeDelay* d = *dl;
+    return d->lastIn;
+}
+
+
+
 
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ AllpassDelay ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //

@@ -652,6 +652,15 @@ void    tPBPulse_setFreq     (tPBPulse* const osc, Lfloat freq)
 void    tPBPulse_setWidth    (tPBPulse* const osc, Lfloat width)
 {
     _tPBPulse* c = *osc;
+    //clip width to avoid silence from pulse widths of 0 or 1
+    if (width < 0.05f)
+    {
+        width = 0.05f;
+    }
+    if (width > 0.95f)
+    {
+        width = 0.95f;
+    }
     c->oneMinusWidth = (1.0f - width) * TWO_TO_32;
     c->width = width * TWO_TO_32;
 }
@@ -701,10 +710,10 @@ Lfloat   tPBSaw_tick          (tPBSaw* const osc)
 #endif
 {
     _tPBSaw* c = *osc;
-    Lfloat out = (c->phase * 2.0f) - 1.0f;
+    Lfloat out = (c->phase * INV_TWO_TO_31) - 1.0f;
 
-    Lfloat phaseFloat = c->phase * TWO_TO_32;
-    Lfloat incFloat = c->inc * TWO_TO_32;
+    Lfloat phaseFloat = c->phase * INV_TWO_TO_32;
+    Lfloat incFloat = c->inc * INV_TWO_TO_32;
     out -= LEAF_poly_blep(phaseFloat, incFloat);
     c->phase += c->inc;
     return (-1.0f * out);
@@ -771,11 +780,11 @@ Lfloat   tPBSawSquare_tick          (tPBSawSquare* const osc)
 {
     _tPBSawSquare* c = *osc;
 
-    Lfloat phaseFloat = c->phase *  INV_TWO_TO_32;
-    Lfloat incFloat = c->inc *  INV_TWO_TO_32;
-    Lfloat backwardsPhaseFloat = (c->phase + 2147483648u) * INV_TWO_TO_32; // 2147483648 = 0.5 * TWO_TO_32
     Lfloat squareOut = ((c->phase < 2147483648u) * 2.0f) - 1.0f;
-    Lfloat sawOut = (phaseFloat * 2.0f) - 1.0f;
+    Lfloat sawOut = (c->phase * INV_TWO_TO_32 * 2.0f) - 1.0f;
+    Lfloat phaseFloat = c->phase * INV_TWO_TO_32;
+    Lfloat incFloat = c->inc * INV_TWO_TO_32;
+    Lfloat backwardsPhaseFloat = (c->phase + 2147483648u) * INV_TWO_TO_32;
     Lfloat resetBlep = LEAF_poly_blep(phaseFloat,incFloat);
     Lfloat midBlep = LEAF_poly_blep(backwardsPhaseFloat, incFloat);
     
@@ -799,7 +808,7 @@ void    tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq)
     _tPBSawSquare* c = *osc;
     
     c->freq  = freq;
-    c->inc = freq * c->invSampleRateTimesTwoTo32;
+    c->inc = (uint32_t)(freq * c->invSampleRateTimesTwoTo32);
 
 }
 

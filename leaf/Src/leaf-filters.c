@@ -1300,9 +1300,9 @@ void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, Lfloat
     f->invSampleRate = leaf->invSampleRate;
     f->fc   = LEAF_clip(0.0f, freq, 0.5f * f->sampleRate);
     f->type = type;
-    f->G    = ONE_OVER_SQRT2;
+    f->G    = INV_SQRT2;
 
-    f->invG = 1.0f/ONE_OVER_SQRT2;
+    f->invG = SQRT2;
     f->B    = bandWidth;
     f->m    = 0.0f;
     f->Q    = 0.5f;
@@ -1788,6 +1788,402 @@ void    tVZFilter_setSampleRate  (tVZFilter* const vf, Lfloat sr)
 }
 
 
+void    tVZFilterLS_init           (tVZFilterLS* const vf,Lfloat freq, Lfloat Q, Lfloat gain, LEAF* const leaf)
+{
+    tVZFilterLS_initToPool(vf, freq, Q, gain, &leaf->mempool);
+}
+
+void    tVZFilterLS_initToPool     (tVZFilterLS* const vf, Lfloat freq, Lfloat Q, Lfloat gain, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tVZFilterLS* f = *vf = (_tVZFilterLS*) mpool_alloc(sizeof(_tVZFilterLS), m);
+    f->mempool = m;
+    
+    LEAF* leaf = f->mempool->leaf;
+    
+    f->sampleRate = leaf->sampleRate;
+    f->sampRatio = 48000.0f / f->sampleRate;
+    f->invSampleRate = leaf->invSampleRate;
+    f->fc   = LEAF_clip(0.0f, freq, 0.5f * f->sampleRate);
+    f->Q    = Q;
+    f->R2 =    1.0f/Q;
+    f->s1    = 0.0f;
+    f->s2   = 0.0f;
+    f->gPreDiv = tanf(PI * f->fc * f->invSampleRate);
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->invSqrtA = 1.0f / (fastsqrtf(fastsqrtf(f->G)));
+    f->g = f->gPreDiv * f->invSqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterLS_free   (tVZFilterLS* const vf)
+{
+    _tVZFilterLS* f = *vf;
+    mpool_free((char*)f, f->mempool);
+}
+
+void    tVZFilterLS_setSampleRate  (tVZFilterLS* const vf, Lfloat sampleRate)
+{
+        _tVZFilterLS* f = *vf;
+        f->sampleRate = sampleRate;
+    f->invSampleRate = 1.0f / sampleRate;
+    f->sampRatio = 48000.0f / f->sampleRate;
+}
+Lfloat   tVZFilterLS_tick               (tVZFilterLS* const vf, Lfloat input)
+{
+        _tVZFilterLS* f = *vf;
+    
+    Lfloat yL, yB, yH, v1, v2;
+    
+    // compute highpass output via Eq. 5.1:
+    //yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
+    yH = (input - (f->R2Plusg*f->s1) - f->s2) * f->h;
+    // compute bandpass output by applying 1st integrator to highpass output:
+    v1 = f->g*yH;
+    yB = v1 + f->s1;
+    f->s1 = v1 + yB; // state update in 1st integrator
+    
+    // compute lowpass output by applying 2nd integrator to bandpass output:
+    v2 = f->g*yB;
+    yL = v2 + f->s2;
+    f->s2 = v2 + yL; // state update in 2nd integrator
+    
+    return f->G*yL + f->R2*f->G*yB + yH;
+}
+
+void    tVZFilterLS_setFreqFast           (tVZFilterLS* const vf, Lfloat cutoff)
+{
+        _tVZFilterLS* f = *vf;
+        int intVer = (int)cutoff;
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->gPreDiv = (__leaf_table_filtertan[intVer] * (1.0f - LfloatVer)) + (__leaf_table_filtertan[intVer+1] * LfloatVer) * f->sampRatio;
+
+    f->g = f->gPreDiv * f->invSqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+               
+void    tVZFilterLS_setBandwidthSlow            (tVZFilterLS* const vf, Lfloat bandWidth)
+{
+        _tVZFilterLS* f = *vf;
+        f->R2 = 2.0f*sinhf(bandWidth*logf(2.0f)*0.5f);
+}
+void    tVZFilterLS_setFreq           (tVZFilterLS* const vf, Lfloat freq)
+{
+        _tVZFilterLS* f = *vf;
+        f->g = tanf(PI * freq * f->invSampleRate);
+    f->g = f->gPreDiv * f->invSqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterLS_setGain                  (tVZFilterLS* const vf, Lfloat gain)
+{
+        _tVZFilterLS* f = *vf;
+        f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->invSqrtA = 1.0f / (fastsqrtf(fastsqrtf(f->G)));
+    f->g = f->gPreDiv * f->invSqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterLS_setResonance                (tVZFilterLS* const vf, Lfloat res)
+{
+        _tVZFilterLS* f = *vf;
+        f->Q = res;
+        f->R2 = 1.0f/res;
+        f->R2Plusg = f->R2+f->g;
+        f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterLS_setFreqFastAndResonanceAndGain           (tVZFilterLS* const vf, Lfloat cutoff, Lfloat res, Lfloat gain)
+{
+    _tVZFilterLS* f = *vf;
+    int intVer = (int)cutoff;
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->gPreDiv = (__leaf_table_filtertan[intVer] * (1.0f - LfloatVer)) + (__leaf_table_filtertan[intVer+1] * LfloatVer) * f->sampRatio;
+
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->invSqrtA = 1.0f / (fastsqrtf(fastsqrtf(f->G)));
+    f->g = f->gPreDiv * f->invSqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->Q = res;
+    f->R2 = 1.0f/res;
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+//High shelf!
+void    tVZFilterHS_init           (tVZFilterHS* const vf,Lfloat freq, Lfloat Q, Lfloat gain, LEAF* const leaf)
+{
+    tVZFilterHS_initToPool(vf, freq, Q, gain, &leaf->mempool);
+}
+
+void    tVZFilterHS_initToPool     (tVZFilterHS* const vf, Lfloat freq, Lfloat Q, Lfloat gain, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tVZFilterHS* f = *vf = (_tVZFilterHS*) mpool_alloc(sizeof(_tVZFilterHS), m);
+    f->mempool = m;
+    
+    LEAF* leaf = f->mempool->leaf;
+    
+    f->sampleRate = leaf->sampleRate;
+    f->invSampleRate = leaf->invSampleRate;
+    f->sampRatio = 48000.0f / f->sampleRate;
+    f->fc   = LEAF_clip(0.0f, freq, 0.5f * f->sampleRate);
+    f->Q    = Q;
+    f->R2 =    1.0f/Q;
+    f->s1    = 0.0f;
+    f->s2   = 0.0f;
+    f->gPreDiv = tanf(PI * f->fc * f->invSampleRate);
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->sqrtA = (fastsqrtf(fastsqrtf(f->G)));
+    f->g = f->gPreDiv * f->sqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterHS_free   (tVZFilterHS* const vf)
+{
+    _tVZFilterHS* f = *vf;
+    mpool_free((char*)f, f->mempool);
+}
+
+void    tVZFilterHS_setSampleRate  (tVZFilterHS* const vf, Lfloat sampleRate)
+{
+        _tVZFilterHS* f = *vf;
+        f->sampleRate = sampleRate;
+    f->invSampleRate = 1.0f / sampleRate;
+    f->sampRatio = 48000.0f / f->sampleRate;
+}
+Lfloat   tVZFilterHS_tick               (tVZFilterHS* const vf, Lfloat input)
+{
+        _tVZFilterHS* f = *vf;
+    
+    Lfloat yL, yB, yH, v1, v2;
+    
+    // compute highpass output via Eq. 5.1:
+    //yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
+    yH = (input - (f->R2Plusg*f->s1) - f->s2) * f->h;
+    // compute bandpass output by applying 1st integrator to highpass output:
+    v1 = f->g*yH;
+    yB = v1 + f->s1;
+    f->s1 = v1 + yB; // state update in 1st integrator
+    
+    // compute lowpass output by applying 2nd integrator to bandpass output:
+    v2 = f->g*yB;
+    yL = v2 + f->s2;
+    f->s2 = v2 + yL; // state update in 2nd integrator
+    
+    return yL + f->R2*f->G*yB + f->G*yH;
+}
+
+void    tVZFilterHS_setFreqFast           (tVZFilterHS* const vf, Lfloat cutoff)
+{
+        _tVZFilterHS* f = *vf;
+        int intVer = (int)cutoff;
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->gPreDiv = (__leaf_table_filtertan[intVer] * (1.0f - LfloatVer)) + (__leaf_table_filtertan[intVer+1] * LfloatVer) * f->sampRatio;
+
+    f->g = f->gPreDiv * f->sqrtA;               // scale SVF-cutoff frequency for shelvers
+    
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+               
+void    tVZFilterHS_setBandwidthSlow            (tVZFilterHS* const vf, Lfloat bandWidth)
+{
+        _tVZFilterHS* f = *vf;
+        f->R2 = 2.0f*sinhf(bandWidth*logf(2.0f)*0.5f);
+}
+void    tVZFilterHS_setFreq           (tVZFilterHS* const vf, Lfloat freq)
+{
+        _tVZFilterHS* f = *vf;
+        f->gPreDiv = tanf(PI * freq * f->invSampleRate);
+    f->g = f->gPreDiv * f->sqrtA;               // scale SVF-cutoff frequency for shelvers
+    
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterHS_setGain                  (tVZFilterHS* const vf, Lfloat gain)
+{
+        _tVZFilterHS* f = *vf;
+        f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->sqrtA = fastsqrtf(fastsqrtf(f->G));
+    f->g = f->gPreDiv * f->sqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterHS_setResonance                (tVZFilterHS* const vf, Lfloat res)
+{
+        _tVZFilterHS* f = *vf;
+        f->Q = res;
+        f->R2 = 1.0f/res;
+        f->R2Plusg = f->R2+f->g;
+        f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+
+void    tVZFilterHS_setFreqFastAndResonanceAndGain           (tVZFilterHS* const vf, Lfloat cutoff, Lfloat res, Lfloat gain)
+{
+    _tVZFilterHS* f = *vf;
+    int intVer = (int)cutoff;
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->gPreDiv = (__leaf_table_filtertan[intVer] * (1.0f - LfloatVer)) + (__leaf_table_filtertan[intVer+1] * LfloatVer) * f->sampRatio;
+
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->sqrtA = fastsqrtf(fastsqrtf(f->G));
+    f->g = f->gPreDiv * f->sqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->Q = res;
+    f->R2 = 1.0f/res;
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+//Bell
+void    tVZFilterBell_init           (tVZFilterBell* const vf,Lfloat freq, Lfloat BW, Lfloat gain, LEAF* const leaf)
+{
+    tVZFilterBell_initToPool(vf, freq, BW, gain, &leaf->mempool);
+}
+
+void    tVZFilterBell_initToPool     (tVZFilterBell* const vf, Lfloat freq, Lfloat BW, Lfloat gain, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tVZFilterBell* f = *vf = (_tVZFilterBell*) mpool_alloc(sizeof(_tVZFilterBell), m);
+    f->mempool = m;
+    
+    LEAF* leaf = f->mempool->leaf;
+    
+    f->sampleRate = leaf->sampleRate;
+    f->invSampleRate = leaf->invSampleRate;
+    f->sampRatio = 48000.0f / f->sampleRate;
+    f->fc   = LEAF_clip(0.0f, freq, 0.5f * f->sampleRate);
+    f->B = BW;
+    f->s1    = 0.0f;
+    f->s2   = 0.0f;
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->g = tanf(PI * freq * f->invSampleRate);
+    Lfloat fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+    Lfloat wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+    Lfloat r  = f->g/wl;
+    r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+    // warped upper bandedge, wc the center
+    f->rToUse = r;
+    f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterBell_free   (tVZFilterBell* const vf)
+{
+    _tVZFilterBell* f = *vf;
+    mpool_free((char*)f, f->mempool);
+}
+
+void    tVZFilterBell_setSampleRate  (tVZFilterBell* const vf, Lfloat sampleRate)
+{
+        _tVZFilterBell* f = *vf;
+        f->sampleRate = sampleRate;
+    f->invSampleRate = 1.0f / sampleRate;
+    f->sampRatio = 48000.0f / f->sampleRate;
+}
+Lfloat   tVZFilterBell_tick               (tVZFilterBell* const vf, Lfloat input)
+{
+        _tVZFilterBell* f = *vf;
+    
+    Lfloat yL, yB, yH, v1, v2;
+    
+    // compute highpass output via Eq. 5.1:
+    //yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
+    yH = (input - (f->R2Plusg*f->s1) - f->s2) * f->h;
+    // compute bandpass output by applying 1st integrator to highpass output:
+    v1 = f->g*yH;
+    yB = v1 + f->s1;
+    f->s1 = v1 + yB; // state update in 1st integrator
+    
+    // compute lowpass output by applying 2nd integrator to bandpass output:
+    v2 = f->g*yB;
+    yL = v2 + f->s2;
+    f->s2 = v2 + yL; // state update in 2nd integrator
+    
+    return yL + f->R2*f->G*yB + yH;
+}
+
+
+               
+void    tVZFilterBell_setBandwidth           (tVZFilterBell* const vf, Lfloat bandWidth)
+{
+        _tVZFilterBell* f = *vf;
+    f->B = bandWidth;
+    Lfloat fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+    Lfloat wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+    Lfloat r  = f->g/wl;
+    r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+    // warped upper bandedge, wc the center
+    f->rToUse = r;
+    f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
+}
+void    tVZFilterBell_setFreq           (tVZFilterBell* const vf, Lfloat freq)
+{
+    _tVZFilterBell* f = *vf;
+    f->fc = freq;
+    f->g = tanf(PI * freq * f->invSampleRate);
+    Lfloat fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+    Lfloat wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+    Lfloat r  = f->g/wl;
+    r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+    // warped upper bandedge, wc the center
+    f->rToUse = r;
+    f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterBell_setGain                  (tVZFilterBell* const vf, Lfloat gain)
+{
+    _tVZFilterBell* f = *vf;
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->R2 = 2.0f*fastsqrtf(((f->rToUse*f->rToUse+1.0f)/f->rToUse-2.0f)/(4.0f*f->G));
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterBell_setFrequencyAndGain           (tVZFilterBell* const vf, Lfloat freq, Lfloat gain)
+{
+    _tVZFilterBell* f = *vf;
+    f->fc = freq;
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->g = fastertanf(PI * freq * f->invSampleRate);
+    Lfloat fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+    Lfloat wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+    Lfloat r  = f->g/wl;
+    r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+    // warped upper bandedge, wc the center
+    f->rToUse = r;
+    f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterBell_setFrequencyAndBandwidthAndGain           (tVZFilterBell* const vf, Lfloat freq, Lfloat bandwidth, Lfloat gain)
+{
+    _tVZFilterBell* f = *vf;
+    f->fc = freq;
+    f->B = bandwidth;
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->g = fastertanf(PI * freq * f->invSampleRate);
+    Lfloat fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+    Lfloat wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+    Lfloat r  = f->g/wl;
+    r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+    // warped upper bandedge, wc the center
+    f->rToUse = r;
+    f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
 //taken from Ivan C's model of the EMS diode ladder, based on mystran's code from KVR forums
 //https://www.kvraudio.com/forum/viewtopic.php?f=33&t=349859&start=255
 
@@ -2022,7 +2418,7 @@ Lfloat   tDiodeFilter_tickEfficient               (tDiodeFilter* const vf, Lfloa
     f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));
 
     f->zi = in;
-    return LEAF_tanh(y3*f->r);
+    return fast_tanh5(y3*f->r);
 }
 
 void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, Lfloat cutoff)

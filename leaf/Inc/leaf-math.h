@@ -98,7 +98,8 @@ extern "C" {
 #define TWO_TO_32_INT        4294967296u
 #define TWO_TO_31_INT        2147483648u
     
-#define ONE_OVER_SQRT2  0.707106781186548f
+#define SQRT2  1.414213562373095f
+#define INV_SQRT2  0.707106781186548f
 
 #define LOGTEN 2.302585092994
     Lfloat log2f_approx(Lfloat X);
@@ -174,6 +175,10 @@ extern "C" {
     Lfloat fast_tanh2(Lfloat x);
     Lfloat fast_tanh3(Lfloat x);
     Lfloat fast_tanh4(Lfloat x);
+    Lfloat fast_tanh5(Lfloat x);
+    Lfloat leaf_softClip(Lfloat sample);
+    Lfloat fastSine(Lfloat x);
+
 
     //0.001 base gives a good curve that goes from 1 to near zero
     //1000 gives a good curve from -1.0 to 0.0
@@ -187,6 +192,7 @@ extern "C" {
     void LEAF_generate_ftom(Lfloat* buffer, Lfloat startFreq, Lfloat endFreq, int size);
     
     Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt);
+    Lfloat LEAF_poly_blepInt(uint32_t t, uint32_t dt);
     Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt);
     Lfloat LEAF_midiToFrequency(Lfloat f);
 

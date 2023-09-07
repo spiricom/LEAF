@@ -1081,6 +1081,127 @@ extern "C" {
     Lfloat   tVZFilter_BandwidthToR        (tVZFilter* const vf, Lfloat B);
     Lfloat   tVZFilter_BandwidthToREfficientBP(tVZFilter* const vf, Lfloat B);
     
+
+
+
+typedef struct _tVZFilterLS
+{
+    tMempool mempool;
+    // state:
+    Lfloat s1, s2;
+    
+    // filter coefficients:
+    Lfloat g;          // embedded integrator gain
+    Lfloat R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+    Lfloat h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+    
+    // parameters:
+    Lfloat fc;    // characteristic frequency
+    Lfloat G;     // gain
+    Lfloat Q; //q of filter
+    Lfloat B;     // bandwidth (in octaves)
+    Lfloat R2Plusg; //precomputed for the tick
+    Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+    Lfloat invSampleRate;
+    Lfloat gPreDiv;
+    Lfloat invSqrtA;
+    Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+} _tVZFilterLS;
+
+typedef _tVZFilterLS* tVZFilterLS;
+
+void    tVZFilterLS_init           (tVZFilterLS* const,Lfloat freq, Lfloat Q, Lfloat gain, LEAF* const leaf);
+void    tVZFilterLS_initToPool     (tVZFilterLS* const, Lfloat freq, Lfloat Q, Lfloat gain,  tMempool* const);
+void    tVZFilterLS_free           (tVZFilterLS* const);
+
+void    tVZFilterLS_setSampleRate  (tVZFilterLS* const, Lfloat sampleRate);
+Lfloat   tVZFilterLS_tick               (tVZFilterLS* const, Lfloat input);
+void    tVZFilterLS_setBandwidthSlow            (tVZFilterLS* const, Lfloat bandWidth);
+void    tVZFilterLS_setFreq           (tVZFilterLS* const, Lfloat freq);
+void    tVZFilterLS_setFreqFast     (tVZFilterLS* const vf, Lfloat cutoff);
+void    tVZFilterLS_setGain                  (tVZFilterLS* const, Lfloat gain);
+void    tVZFilterLS_setResonance                (tVZFilterLS* const vf, Lfloat res);
+void    tVZFilterLS_setFreqFastAndResonanceAndGain           (tVZFilterLS* const vf, Lfloat cutoff, Lfloat res, Lfloat gain);
+
+
+typedef struct _tVZFilterHS
+{
+    tMempool mempool;
+    // state:
+    Lfloat s1, s2;
+    
+    // filter coefficients:
+    Lfloat g;          // embedded integrator gain
+    Lfloat R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+    Lfloat h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+
+    
+    // parameters:
+    Lfloat fc;    // characteristic frequency
+    Lfloat G;     // gain
+    Lfloat Q; //q of filter
+    Lfloat B;     // bandwidth (in octaves)
+    Lfloat R2Plusg; //precomputed for the tick
+    Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+    Lfloat invSampleRate;
+    Lfloat gPreDiv;
+    Lfloat sqrtA;
+    Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+} _tVZFilterHS;
+
+typedef _tVZFilterHS* tVZFilterHS;
+
+void    tVZFilterHS_init           (tVZFilterHS* const,Lfloat freq, Lfloat Q, Lfloat gain, LEAF* const leaf);
+void    tVZFilterHS_initToPool     (tVZFilterHS* const, Lfloat freq, Lfloat Q, Lfloat gain,  tMempool* const);
+void    tVZFilterHS_free           (tVZFilterHS* const);
+
+void    tVZFilterHS_setSampleRate  (tVZFilterHS* const, Lfloat sampleRate);
+Lfloat   tVZFilterHS_tick               (tVZFilterHS* const, Lfloat input);
+void    tVZFilterHS_setBandwidthSlow            (tVZFilterHS* const, Lfloat bandWidth);
+void    tVZFilterHS_setFreq           (tVZFilterHS* const, Lfloat freq);
+void    tVZFilterHS_setFreqFast     (tVZFilterHS* const vf, Lfloat cutoff);
+void    tVZFilterHS_setGain                  (tVZFilterHS* const, Lfloat gain);
+void    tVZFilterHS_setResonance                (tVZFilterHS* const vf, Lfloat res);
+void    tVZFilterHS_setFreqFastAndResonanceAndGain           (tVZFilterHS* const vf, Lfloat cutoff, Lfloat res, Lfloat gain);
+
+typedef struct _tVZFilterBell
+{
+    tMempool mempool;
+    // state:
+    Lfloat s1, s2;
+    
+    // filter coefficients:
+    Lfloat g;          // embedded integrator gain
+    Lfloat R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+    Lfloat h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+
+    
+    // parameters:
+    Lfloat fc;    // characteristic frequency
+    Lfloat G;     // gain
+    Lfloat B;     // bandwidth (in octaves)
+    Lfloat R2Plusg; //precomputed for the tick
+    Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+    Lfloat invSampleRate;
+    Lfloat rToUse;
+    Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+} _tVZFilterBell;
+
+typedef _tVZFilterBell* tVZFilterBell;
+
+void    tVZFilterBell_init           (tVZFilterBell* const,Lfloat freq, Lfloat BW, Lfloat gain, LEAF* const leaf);
+void    tVZFilterBell_initToPool     (tVZFilterBell* const, Lfloat freq, Lfloat BW, Lfloat gain,  tMempool* const);
+void    tVZFilterBell_free           (tVZFilterBell* const);
+
+void    tVZFilterBell_setSampleRate  (tVZFilterBell* const, Lfloat sampleRate);
+Lfloat   tVZFilterBell_tick               (tVZFilterBell* const, Lfloat input);
+void    tVZFilterBell_setBandwidth            (tVZFilterBell* const, Lfloat bandWidth);
+void    tVZFilterBell_setFreq           (tVZFilterBell* const, Lfloat freq);
+void    tVZFilterBell_setFrequencyAndGain           (tVZFilterBell* const, Lfloat freq, Lfloat gain);
+void    tVZFilterBell_setFrequencyAndBandwidthAndGain           (tVZFilterBell* const vf, Lfloat freq, Lfloat bandwidth, Lfloat gain);
+void    tVZFilterBell_setGain                  (tVZFilterBell* const, Lfloat gain);
+
+
     /*!
      @defgroup tdiodefilter tDiodeFilter
      @ingroup filters
