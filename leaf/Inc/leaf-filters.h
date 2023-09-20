@@ -648,11 +648,12 @@ extern "C" {
     {
         tMempool mempool;
         SVFType type;
-        Lfloat cutoff, Q;
+        Lfloat cutoff, Q, cutoffMIDI;
         Lfloat ic1eq,ic2eq;
         Lfloat g,k,a1,a2,a3,cH,cB,cL,cBK;
         Lfloat sampleRate;
         Lfloat invSampleRate;
+        const Lfloat *table;
     } _tSVF;
     
     typedef _tSVF* tSVF;
@@ -712,6 +713,7 @@ extern "C" {
         Lfloat cutoff, Q;
         Lfloat ic1eq,ic2eq;
         Lfloat g,k,a1,a2,a3;
+        const Lfloat *table;
     } _tEfficientSVF;
     
     typedef _tEfficientSVF* tEfficientSVF;
@@ -721,10 +723,10 @@ extern "C" {
     void    tEfficientSVF_free          (tEfficientSVF* const);
     
     Lfloat   tEfficientSVF_tick          (tEfficientSVF* const, Lfloat v0);
-    void    tEfficientSVF_setFreq       (tEfficientSVF* const, uint16_t controlFreq);
+    void     tEfficientSVF_setFreq(tEfficientSVF* const svff, Lfloat cutoff);
     void    tEfficientSVF_setQ          (tEfficientSVF* const, Lfloat Q);
     void    tEfficientSVF_setFreqAndQ   (tEfficientSVF* const, uint16_t controlFreq, Lfloat Q);
-    
+    void    tEfficientSVF_setSampleRate  (tEfficientSVF* const, Lfloat sampleRate);
     //==============================================================================
     
     /*!
@@ -1050,6 +1052,8 @@ extern "C" {
         Lfloat R2Plusg; //precomputed for the tick
         Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
         Lfloat invSampleRate;
+        Lfloat cutoffMIDI;
+        const Lfloat *table;
     } _tVZFilter;
     
     typedef _tVZFilter* tVZFilter;
@@ -1106,6 +1110,8 @@ typedef struct _tVZFilterLS
     Lfloat gPreDiv;
     Lfloat invSqrtA;
     Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+    const Lfloat *table;
+    Lfloat cutoffMIDI;
 } _tVZFilterLS;
 
 typedef _tVZFilterLS* tVZFilterLS;
@@ -1147,6 +1153,8 @@ typedef struct _tVZFilterHS
     Lfloat gPreDiv;
     Lfloat sqrtA;
     Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+    const Lfloat *table;
+    Lfloat cutoffMIDI;
 } _tVZFilterHS;
 
 typedef _tVZFilterHS* tVZFilterHS;
@@ -1185,6 +1193,8 @@ typedef struct _tVZFilterBell
     Lfloat invSampleRate;
     Lfloat rToUse;
     Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+    const Lfloat *table;
+    Lfloat cutoffMIDI;
 } _tVZFilterBell;
 
 typedef _tVZFilterBell* tVZFilterBell;
@@ -1197,6 +1207,7 @@ void    tVZFilterBell_setSampleRate  (tVZFilterBell* const, Lfloat sampleRate);
 Lfloat   tVZFilterBell_tick               (tVZFilterBell* const, Lfloat input);
 void    tVZFilterBell_setBandwidth            (tVZFilterBell* const, Lfloat bandWidth);
 void    tVZFilterBell_setFreq           (tVZFilterBell* const, Lfloat freq);
+void    tVZFilterBell_setFreqFast           (tVZFilterBell* const vf, Lfloat cutoff);
 void    tVZFilterBell_setFrequencyAndGain           (tVZFilterBell* const, Lfloat freq, Lfloat gain);
 void    tVZFilterBell_setFrequencyAndBandwidthAndGain           (tVZFilterBell* const vf, Lfloat freq, Lfloat bandwidth, Lfloat gain);
 void    tVZFilterBell_setGain                  (tVZFilterBell* const, Lfloat gain);
@@ -1252,6 +1263,8 @@ void    tVZFilterBell_setGain                  (tVZFilterBell* const, Lfloat gai
         Lfloat g2inv;
         Lfloat s0, s1, s2, s3;
         Lfloat invSampleRate;
+        const Lfloat *table;
+        Lfloat cutoffMIDI;
     } _tDiodeFilter;
     
     typedef _tDiodeFilter* tDiodeFilter;
@@ -1285,6 +1298,8 @@ void    tVZFilterBell_setGain                  (tVZFilterBell* const, Lfloat gai
         Lfloat s;
         Lfloat d;
         Lfloat b[4]; // stored states
+        const Lfloat *table;
+        Lfloat cutoffMIDI;
     } _tLadderFilter;
     
     typedef _tLadderFilter* tLadderFilter;

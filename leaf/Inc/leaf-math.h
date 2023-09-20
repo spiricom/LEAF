@@ -98,7 +98,7 @@ extern "C" {
 #define TWO_TO_32_INT        4294967296u
 #define TWO_TO_31_INT        2147483648u
     
-#define SQRT2  1.414213562373095f
+//#define SQRT2  1.414213562373095f
 #define INV_SQRT2  0.707106781186548f
 
 #define LOGTEN 2.302585092994

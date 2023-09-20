@@ -1273,11 +1273,11 @@ void tMBPulse_free(tMBPulse* const osc)
     mpool_free((char*)c, c->mempool);
 }
 
-#ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
-#else
+//#ifdef ITCMRAM
+//void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
+//#else
 void tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
-#endif
+//#endif
 {
 	_tMBPulse* c = *osc;
 	Lfloat r;
@@ -1618,11 +1618,11 @@ void tMBTriangle_free(tMBTriangle* const osc)
     mpool_free((char*)c, c->mempool);
 }
 
-#ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
-#else
+//#ifdef ITCMRAM
+//void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
+//#else
 void tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
-#endif
+//#endif
 {
 	_tMBTriangle* c = *osc;
 	Lfloat r;
@@ -1987,11 +1987,11 @@ void tMBSineTri_free(tMBSineTri* const osc)
     mpool_free((char*)c, c->mempool);
 }
 
-#ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
-#else
+//#ifdef ITCMRAM
+//void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
+//#else
 void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
-#endif
+//#endif
 {
 	_tMBSineTri* c = *osc;
 	Lfloat r;
@@ -2394,11 +2394,11 @@ void tMBSaw_free(tMBSaw* const osc)
 }
 
 
-#ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
-#else
+//#ifdef ITCMRAM
+//void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
+//#else
 void tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
-#endif
+//#endif
 {
 	_tMBSaw* c = *osc;
 	Lfloat r;

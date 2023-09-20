@@ -58,10 +58,14 @@ void tCompressor_initToPool (tCompressor* const comp, tMempool* const mp)
     c->tauRelease = expf(-1.0f/(0.001f * 100.0f * c->sampleRate));
     
     c->isActive = 0;
-    c->x_G[0] = 0.0f, c->x_G[1] = 0.0f,
-    c->y_G[0] = 0.0f, c->y_G[1] = 0.0f,
-    c->x_T[0] = 0.0f, c->x_T[1] = 0.0f,
-    c->y_T[0] = 0.0f, c->y_T[1] = 0.0f;
+    c->x_G[0] = 0.0f;
+    c->x_G[1] = 0.0f;
+    c->y_G[0] = 0.0f;
+    c->y_G[1] = 0.0f;
+    c->x_T[0] = 0.0f;
+    c->x_T[1] = 0.0f;
+    c->y_T[0] = 0.0f;
+    c->y_T[1] = 0.0f;
     c->T = 0.0f; // Threshold
     c->R = 0.5f; // compression Ratio
     c->invR = 2.0f; //inverse of ratio

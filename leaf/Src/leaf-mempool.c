@@ -70,18 +70,15 @@ void mpool_create (char* memory, size_t size, _tMempool* pool)
     
     pool->mpool = (char*)memory;
     pool->usize  = 0;
+    if (size < pool->leaf->header_size)
+    {
+        size = pool->leaf->header_size;
+    }
     pool->msize  = size;
     
     pool->head = create_node(pool->mpool, NULL, NULL, pool->msize - pool->leaf->header_size, pool->leaf->header_size);
-    
-    /*
-    for (int i = 0; i < pool->head->size; i++)
-    {
-        memory[i+leaf.header_size]=0;
-    }
-    */
-    //is zeroing out the memory necessary? This takes a long time on large pools - JS
 }
+
 
 void leaf_pool_init(LEAF* const leaf, char* memory, size_t size)
 {
@@ -429,7 +426,6 @@ static inline mpool_node_t* create_node(char* block_location, mpool_node_t* next
     node->next = next;
     node->prev = prev;
     node->size = size;
-    
     return node;
 }
 

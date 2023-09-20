@@ -572,7 +572,7 @@ void    tSimpleLivingString3_free (tSimpleLivingString3* const pl)
     tLinearDelay_free(&p->delayLineU);
     tLinearDelay_free(&p->delayLineL);
     tOnePole_free(&p->bridgeFilter);
-    tBiQuad_free(&p->bridgeFilter2),
+    tBiQuad_free(&p->bridgeFilter2);
     tHighpass_free(&p->DCblocker);
     tFeedbackLeveler_free(&p->fbLev);
     
