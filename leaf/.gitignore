@@ -9,3 +9,5 @@
 *.zip
 *.swp
 */Builds
+*/build
+leaf/build/

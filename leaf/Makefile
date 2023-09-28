@@ -45,6 +45,7 @@ Src/leaf-reverb.c \
 Src/leaf-midi.c \
 Src/leaf-physical.c \
 Src/leaf-sampling.c \
+leaf.c \
 Externals/d_fft_mayer.c
 
 
@@ -117,7 +118,7 @@ C_DEFS =  \
 
 C_INCLUDES = \
 -I$(MODULE_DIR) \
--IInc \
+-IInc/ \
 -IExternals \
 -I. \
 
