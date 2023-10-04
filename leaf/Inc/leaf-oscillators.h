@@ -1101,11 +1101,11 @@ void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase
     void tMBSaw_setSyncMode(tMBSaw* const osc, int hardOrSoft);
     void tMBSaw_setBufferOffset(tMBSaw* const osc, uint32_t offset);
     void tMBSaw_setSampleRate (tMBSaw* const osc, Lfloat sr);
-#ifdef ITCMRAM
-    void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat w, Lfloat scale);
-#else
+//#ifdef ITCMRAM
+    //void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat w, Lfloat scale);
+//#else
 		void tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat w, Lfloat scale);
-#endif
+//#endif
 
 
     //==============================================================================

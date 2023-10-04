@@ -71,8 +71,9 @@ extern "C" {
     extern const Lfloat __leaf_table_attack_decay_inc[ATTACK_DECAY_INC_TABLE_SIZE];
     
 #define FILTERTAN_TABLE_SIZE 4096
-    extern const Lfloat __leaf_table_filtertan[FILTERTAN_TABLE_SIZE];
-    
+    //extern const Lfloat __leaf_table_filtertan[FILTERTAN_TABLE_SIZE];
+    extern const Lfloat __filterTanhTable_48000[4096];
+    extern const Lfloat __filterTanhTable_96000[4096];
 #define TANH1_TABLE_SIZE 65536
     extern const Lfloat __leaf_table_tanh1[TANH1_TABLE_SIZE];
     
