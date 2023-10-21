@@ -1531,9 +1531,10 @@ void tSimpleRetune_free (tSimpleRetune* const rt)
         tPitchShift_free(&r->ps[i]);
     }
     mpool_free((char*)r->shiftValues, r->mempool);
-    mpool_free((char*)r->ps, r->mempool);
-    mpool_free((char*)r->inBuffer, r->mempool);
+    //mpool_free((char*)r->ps, r->mempool);
     mpool_free((char*)r->outBuffer, r->mempool);
+    mpool_free((char*)r->inBuffer, r->mempool);
+    mpool_free((char*)r->pdBuffer, r->mempool);
     mpool_free((char*)r, r->mempool);
 }
 

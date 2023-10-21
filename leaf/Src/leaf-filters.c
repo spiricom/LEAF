@@ -950,6 +950,50 @@ void    tSVF_setFreqAndQ(tSVF* const svff, Lfloat freq, Lfloat Q)
     svf->a3 = svf->g * svf->a2;
 }
 
+void    tSVF_setFilterType(tSVF* const svff, SVFType type)
+{
+    _tSVF* svf = *svff;
+ 
+    if (type == SVFTypeLowpass)
+    {
+        svf->cH = 0.0f;
+        svf->cB = 0.0f;
+        svf->cBK = 0.0f;
+        svf->cL = 1.0f;
+    }
+    else if (type == SVFTypeBandpass)
+    {
+        svf->cH = 0.0f;
+        svf->cB = 1.0f;
+        svf->cBK = 0.0f;
+        svf->cL = 0.0f;
+    }
+    
+    else if (type == SVFTypeHighpass)
+    {
+        svf->cH = 1.0f;
+        svf->cB = 0.0f;
+        svf->cBK = -1.0f;
+        svf->cL = -1.0f;
+    }
+    
+    else if (type == SVFTypeNotch)
+    {
+        svf->cH = 1.0f;
+        svf->cB = 0.0f;
+        svf->cBK = -1.0f;
+        svf->cL = 0.0f;
+    }
+    
+    else if (type == SVFTypePeak)
+    {
+        svf->cH = 1.0f;
+        svf->cB = 0.0f;
+        svf->cBK = -1.0f;
+        svf->cL = -2.0f;
+    }
+}
+
 void    tSVF_setSampleRate  (tSVF* const svff, Lfloat sr)
 {
     _tSVF* svf = *svff;

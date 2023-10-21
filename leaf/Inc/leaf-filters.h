@@ -667,6 +667,7 @@ extern "C" {
     void    tSVF_setFreqFast     (tSVF* const vf, Lfloat cutoff);
     void    tSVF_setQ           (tSVF* const, Lfloat Q);
     void    tSVF_setFreqAndQ    (tSVF* const svff, Lfloat freq, Lfloat Q);
+    void    tSVF_setFilterType  (tSVF* const svff, SVFType type);
     void    tSVF_setSampleRate  (tSVF* const svff, Lfloat sr);
     
     //==============================================================================

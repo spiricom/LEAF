@@ -51,6 +51,7 @@
 #include ".\Inc\leaf-sampling.h"
 #include ".\Inc\leaf-physical.h"
 #include ".\Inc\leaf-electrical.h"
+#include ".\Inc\leaf-vocal.h"
 
 #else
 
@@ -72,6 +73,7 @@
 #include "./Inc/leaf-sampling.h"
 #include "./Inc/leaf-physical.h"
 #include "./Inc/leaf-electrical.h"
+#include "./Inc/leaf-vocal.h"
 
 #endif
 
