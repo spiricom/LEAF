@@ -631,6 +631,10 @@ extern "C" {
      @brief
      @param filter A pointer to the relevant tSVF.
      ￼￼￼
+     @fn void    tSVF_setFilterType    (tSVF* const svff, SVFType type)
+     @brief
+     @param filter A pointer to the relevant tSVF.
+     @param type which kind of filter do you want to change the SVF to?
      @} */
     
     typedef enum SVFType
