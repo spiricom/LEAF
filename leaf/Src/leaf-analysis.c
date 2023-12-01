@@ -205,8 +205,8 @@ void tPowerFollower_setFactor(tPowerFollower* const pf, Lfloat factor)
 {
     _tPowerFollower* p = *pf;
     
-    if (factor<0) factor=0;
-    if (factor>1) factor=1;
+    if (factor<0.0f) factor=0.0f;
+    if (factor>1.0f) factor=1.0f;
     p->factor=factor;
     p->oneminusfactor=1.0f-factor;
 }

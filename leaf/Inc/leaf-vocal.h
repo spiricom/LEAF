@@ -140,8 +140,8 @@ typedef struct _tract
 } _tract;
 
 typedef _tract* tract;
-void tract_init(tract *t,  LEAF* const leaf);
-void tract_initToPool(tract *t,  tMempool* const mp);
+void tract_init(tract* const t,  int numTractSections, LEAF* const leaf);
+void tract_initToPool(tract* const t,  int numTractSections, tMempool* const mp);
 void tract_calculate_reflections(tract *t);
 void tract_reshape(tract *t);
 void tract_compute(tract *t, Lfloat  in, Lfloat  lambda);
@@ -168,8 +168,8 @@ typedef struct _tVoc
 
 typedef _tVoc* tVoc;
 
-void    tVoc_init         (tVoc* const voc, LEAF* const leaf);
-void    tVoc_initToPool   (tVoc* const voc, tMempool* const mempool);
+void    tVoc_init         (tVoc* const voc, int numTractSections,LEAF* const leaf);
+void    tVoc_initToPool   (tVoc* const voc, int numTractSections,tMempool* const mempool);
 void    tVoc_free         (tVoc* const voc);
 
 Lfloat   tVoc_tick         (tVoc* const voc);

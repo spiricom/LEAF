@@ -141,6 +141,7 @@ extern "C" {
     
     Lfloat interpolate3max(Lfloat *buf, const int peakindex);
     Lfloat interpolate3phase(Lfloat *buf, const int peakindex);
+    float LEAF_map(float value, float istart, float istop, float ostart, float ostop);
     
 
     Lfloat fastcosf(Lfloat fAngle);

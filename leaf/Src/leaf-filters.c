@@ -2565,6 +2565,10 @@ Lfloat   tDiodeFilter_tick               (tDiodeFilter* const vf, Lfloat in)
     f->s2 += 2.0f * (t3*(y3-y2) - t2*(y2-y1));
     f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));
     
+    f->s0 = tanhf(f->s0);
+    f->s1 = tanhf(f->s1);
+    f->s2 = tanhf(f->s2);
+    f->s3 = tanhf(f->s3);
     f->zi = in;
     return tanhf(y3*f->r);
 }
@@ -2655,9 +2659,12 @@ Lfloat   tDiodeFilter_tickEfficient               (tDiodeFilter* const vf, Lfloa
     f->s1 += 2.0f * (t2*(y2-y1) - t1*(y1-y0));
     f->s2 += 2.0f * (t3*(y3-y2) - t2*(y2-y1));
     f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));
-
+    f->s0 = fast_tanh4(f->s0);
+    f->s1 = fast_tanh4(f->s1);
+    f->s2 = fast_tanh4(f->s2);
+    f->s3 = fast_tanh4(f->s3);
     f->zi = in;
-    return fast_tanh5(y3*f->r);
+    return fast_tanh4(y3*f->r);
 }
 
 void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, Lfloat cutoff)

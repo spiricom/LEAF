@@ -1044,6 +1044,76 @@ void tSampler_setEnd       (tSampler* const sp, int32_t end)
     p->targetend = -1;
 }
 
+void tSampler_setEndUnsafe     (tSampler* const sp, int32_t end)
+{
+    _tSampler* p = *sp;
+    
+    int tempflip;
+    
+    /*
+    if (end == p->start)
+    {
+        return;
+    }
+    */
+    if (p->active) // only bother with these checks if we're actually playing
+    {
+        if (p->start > end)
+        {
+            tempflip = -1;
+        }
+        else
+        {
+            tempflip = 1;
+        }
+        
+        int dir = p->bnf * p->dir * tempflip;
+        
+        uint32_t cfxlen = p->cfxlen;
+        if (p->len * 0.25f < cfxlen) cfxlen = p->len * 0.25f;
+        
+        if (p->inCrossfade || p->flipStart >= 0)
+        {
+            p->targetend = end;
+            return;
+        }
+        if (tempflip > 0 && dir < 0) // end is end and we're playing in reverse
+        {
+            if (end < p->idx) // end given is before current index or we're in a crossfade
+            {
+                p->targetend = end;
+                Lfloat tempLen = abs(end - p->start) * 0.25f;
+                if (cfxlen > tempLen)
+                {
+                    p->cfxlen = tempLen;
+                }
+                return;
+            }
+        }
+        else if (tempflip < 0 && dir > 0) // end is start and we're playing forward
+        {
+            if (end > p->idx) // end given is after current index or we're in a crossfade
+            {
+                p->targetend = end;
+                Lfloat tempLen = abs(end - p->start) * 0.25f;
+                if (cfxlen > tempLen)
+                {
+                    p->cfxlen = tempLen;
+                }
+                return;
+            }
+        }
+        if (tempflip != p->flip && p->flipStart < 0)
+        {
+            p->flipIdx = 0;
+        }
+    }
+    
+    p->end = LEAF_clipInt(0, end, end);
+    handleStartEndChange(sp);
+    p->targetend = -1;
+}
+
 void    tSampler_setLength    (tSampler* const sp, int32_t length)
 {
     _tSampler* p = *sp;

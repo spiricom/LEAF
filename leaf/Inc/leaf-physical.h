@@ -337,7 +337,49 @@ extern "C" {
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
+
+    typedef struct _tSimpleLivingString2
+    {
+
+        tMempool mempool;
+        Lfloat freq, waveLengthInSamples;        // the frequency of the string, determining delay length
+        Lfloat brightness;    // frequency for the bridge LP filter, in Hz
+        Lfloat decay; // amplitude damping factor for the string (only active in mode 0)
+        int levMode;
+        Lfloat curr;
+        tHermiteDelay delayLine;
+        tTwoZero bridgeFilter;
+        tHighpass DCblocker;
+        tFeedbackLeveler fbLev;
+        tExpSmooth wlSmooth;
+        Lfloat sampleRate;
+    } _tSimpleLivingString2;
+
+    typedef _tSimpleLivingString2* tSimpleLivingString2;
+
+    void    tSimpleLivingString2_init                (tSimpleLivingString2* const, Lfloat freq, Lfloat brightness,
+                                                     Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                                     Lfloat levStrength, int levMode, LEAF* const leaf);
+    void    tSimpleLivingString2_initToPool          (tSimpleLivingString2* const, Lfloat freq, Lfloat brightness,
+                                                     Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                                     Lfloat levStrength, int levMode, tMempool* const);
+    void    tSimpleLivingString2_free                (tSimpleLivingString2* const);
+
+    Lfloat   tSimpleLivingString2_tick                (tSimpleLivingString2* const, Lfloat input);
+    Lfloat   tSimpleLivingString2_sample              (tSimpleLivingString2* const);
+    void    tSimpleLivingString2_setFreq             (tSimpleLivingString2* const, Lfloat freq);
+    void    tSimpleLivingString2_setWaveLength       (tSimpleLivingString2* const, Lfloat waveLength); // in samples
+    void    tSimpleLivingString2_setBrightness         (tSimpleLivingString2* const, Lfloat brightness);
+    void    tSimpleLivingString2_setDecay            (tSimpleLivingString2* const, Lfloat decay); // should be near 1.0
+    void    tSimpleLivingString2_setTargetLev        (tSimpleLivingString2* const, Lfloat targetLev);
+    void    tSimpleLivingString2_setLevSmoothFactor  (tSimpleLivingString2* const, Lfloat levSmoothFactor);
+    void    tSimpleLivingString2_setLevStrength      (tSimpleLivingString2* const, Lfloat levStrength);
+    void    tSimpleLivingString2_setLevMode          (tSimpleLivingString2* const, int levMode);
+    void    tSimpleLivingString2_setSampleRate       (tSimpleLivingString2* const, Lfloat sr);
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 
 typedef struct _tSimpleLivingString3
@@ -395,50 +437,139 @@ void    tSimpleLivingString3_setLevMode          (tSimpleLivingString3* const, i
 void    tSimpleLivingString3_setSampleRate       (tSimpleLivingString3* const, Lfloat sr);
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+typedef struct _tSimpleLivingString4
+{
+    
+    tMempool mempool;
+    Lfloat freq, waveLengthInSamples;        // the frequency of the string, determining delay length
+    Lfloat dampFreq;    // frequency for the bridge LP filter, in Hz
+    Lfloat decay, userDecay; // amplitude damping factor for the string (only active in mode 0)
+    Lfloat prevDelayLength;
+    Lfloat changeGainCompensator;
+    int levMode;
+    Lfloat curr;
+    Lfloat Uout;
+    Lfloat Lout;
+    int maxLength;
+    tLinearDelay delayLineU;
+    tLinearDelay delayLineL;
+    tOnePole bridgeFilter;
+    tBiQuad bridgeFilter2;
+    Lfloat temp1;
+    Lfloat temp2;
+    Lfloat pickupPoint;
+    Lfloat pluckPosition;
+    tHighpass DCblocker;
+    tFeedbackLeveler fbLev;
+    tExpSmooth wlSmooth;
+    int oversampling;
+    Lfloat sampleRate;
+    Lfloat rippleGain;
+    Lfloat rippleDelay;
+} _tSimpleLivingString4;
+
+typedef _tSimpleLivingString4* tSimpleLivingString4;
+
+void    tSimpleLivingString4_init                (tSimpleLivingString4* const, int oversampling, Lfloat freq, Lfloat dampFreq,
+                                                 Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                                 Lfloat levStrength, int levMode, LEAF* const leaf);
+void    tSimpleLivingString4_initToPool  (tSimpleLivingString4* const pl, int oversampling, Lfloat freq, Lfloat dampFreq,
+                                         Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
+                                          Lfloat levStrength, int levMode, tMempool* const mp);
+void    tSimpleLivingString4_free                (tSimpleLivingString4* const);
+
+void   tSimpleLivingString4_pluck              (tSimpleLivingString4* const pl, Lfloat input, Lfloat position);
+void   tSimpleLivingString4_pluckNoPosition             (tSimpleLivingString4* const pl, Lfloat input);
+void   tSimpleLivingString4_setPluckPosition(tSimpleLivingString4* const pl, Lfloat position);
+Lfloat   tSimpleLivingString4_tick                (tSimpleLivingString4* const, Lfloat input);
+void   tSimpleLivingString4_setPickupPoint(tSimpleLivingString4* const pl, Lfloat pickupPoint);
+Lfloat   tSimpleLivingString4_sample              (tSimpleLivingString4* const);
+void    tSimpleLivingString4_setFreq             (tSimpleLivingString4* const, Lfloat freq);
+void    tSimpleLivingString4_setWaveLength       (tSimpleLivingString4* const, Lfloat waveLength); // in samples
+void    tSimpleLivingString4_setDampFreq         (tSimpleLivingString4* const, Lfloat dampFreq);
+void    tSimpleLivingString4_setDecay            (tSimpleLivingString4* const, Lfloat decay); // should be near 1.0
+void    tSimpleLivingString4_setTargetLev        (tSimpleLivingString4* const, Lfloat targetLev);
+void    tSimpleLivingString4_setLevSmoothFactor  (tSimpleLivingString4* const, Lfloat levSmoothFactor);
+void    tSimpleLivingString4_setLevStrength      (tSimpleLivingString4* const, Lfloat levStrength);
+void    tSimpleLivingString4_setLevMode          (tSimpleLivingString4* const, int levMode);
+void    tSimpleLivingString4_setSampleRate       (tSimpleLivingString4* const, Lfloat sr);
+
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+typedef struct _tSimpleLivingString5
+{
+    
+    tMempool mempool;
+    Lfloat freq, waveLengthInSamples;        // the frequency of the string, determining delay length
+    Lfloat dampFreq;    // frequency for the bridge LP filter, in Hz
+    Lfloat decay, userDecay; // amplitude damping factor for the string (only active in mode 0)
+    Lfloat prevDelayLength;
+    Lfloat changeGainCompensator;
+    int levMode;
+    Lfloat curr;
+    Lfloat Uout;
+    Lfloat Lout;
+    int maxLength;
+    Lfloat prepIndex;
+    Lfloat prepPos;
+    tLinearDelay delLF,delUF,delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
+    tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
+    Lfloat temp1;
+    Lfloat temp2;
+    Lfloat pickupPoint;
+    Lfloat pluckPosition;
+    tHighpass DCblocker;
+    tHighpass DCblocker2;
+    tFeedbackLeveler fbLev;
+    tFeedbackLeveler fbLev2;
+    tWavefolder wf1;
+    tWavefolder wf2;
+    tWavefolder wf3;
+    tWavefolder wf4;
+    tExpSmooth wlSmooth, prepPosSmooth, prepIndexSmooth;
+    int oversampling;
+    Lfloat sampleRate;
+    Lfloat rippleGain;
+    Lfloat rippleDelay;
+    Lfloat ff;
+    Lfloat fb;
+} _tSimpleLivingString5;
+
+typedef _tSimpleLivingString5* tSimpleLivingString5;
+
+void    tSimpleLivingString5_init                (tSimpleLivingString5* const, int oversampling, Lfloat freq, Lfloat dampFreq,
+                                                 Lfloat decay, Lfloat prepPos, Lfloat prepIndex, Lfloat pluckPos, Lfloat targetLev, Lfloat levSmoothFactor,
+                                                 Lfloat levStrength, int levMode, LEAF* const leaf);
+void    tSimpleLivingString5_initToPool  (tSimpleLivingString5* const pl, int oversampling, Lfloat freq, Lfloat dampFreq,
+                                         Lfloat decay, Lfloat prepPos, Lfloat prepIndex, Lfloat pluckPos, Lfloat targetLev, Lfloat levSmoothFactor,
+                                          Lfloat levStrength, int levMode, tMempool* const mp);
+void    tSimpleLivingString5_free                (tSimpleLivingString5* const);
+
+void   tSimpleLivingString5_pluck              (tSimpleLivingString5* const pl, Lfloat input, Lfloat position);
+void   tSimpleLivingString5_pluckNoPosition             (tSimpleLivingString5* const pl, Lfloat input);
+void   tSimpleLivingString5_setPluckPosition(tSimpleLivingString5* const pl, Lfloat position);
+void   tSimpleLivingString5_setPrepPosition(tSimpleLivingString5* const pl, Lfloat prepPosition);
+void   tSimpleLivingString5_setPrepIndex(tSimpleLivingString5* const pl, Lfloat prepIndex);
+Lfloat   tSimpleLivingString5_tick                (tSimpleLivingString5* const, Lfloat input);
+void   tSimpleLivingString5_setPickupPoint(tSimpleLivingString5* const pl, Lfloat pickupPoint);
+Lfloat   tSimpleLivingString5_sample              (tSimpleLivingString5* const);
+void    tSimpleLivingString5_setFreq             (tSimpleLivingString5* const, Lfloat freq);
+void    tSimpleLivingString5_setWaveLength       (tSimpleLivingString5* const, Lfloat waveLength); // in samples
+void    tSimpleLivingString5_setDampFreq         (tSimpleLivingString5* const, Lfloat dampFreq);
+void    tSimpleLivingString5_setDecay            (tSimpleLivingString5* const, Lfloat decay); // should be near 1.0
+void    tSimpleLivingString5_setTargetLev        (tSimpleLivingString5* const, Lfloat targetLev);
+void    tSimpleLivingString5_setLevSmoothFactor  (tSimpleLivingString5* const, Lfloat levSmoothFactor);
+void    tSimpleLivingString5_setLevStrength      (tSimpleLivingString5* const, Lfloat levStrength);
+void    tSimpleLivingString5_setLevMode          (tSimpleLivingString5* const, int levMode);
+void    tSimpleLivingString5_setSampleRate       (tSimpleLivingString5* const, Lfloat sr);
+void   tSimpleLivingString5_setFBAmount(tSimpleLivingString5* const pl, Lfloat fb);
+void   tSimpleLivingString5_setFFAmount(tSimpleLivingString5* const pl, Lfloat ff);
+void   tSimpleLivingString5_setFoldDepth(tSimpleLivingString5* const pl, Lfloat depth);
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 
 
-
-    typedef struct _tSimpleLivingString2
-    {
-
-        tMempool mempool;
-        Lfloat freq, waveLengthInSamples;        // the frequency of the string, determining delay length
-        Lfloat brightness;    // frequency for the bridge LP filter, in Hz
-        Lfloat decay; // amplitude damping factor for the string (only active in mode 0)
-        int levMode;
-        Lfloat curr;
-        tHermiteDelay delayLine;
-        tTwoZero bridgeFilter;
-        tHighpass DCblocker;
-        tFeedbackLeveler fbLev;
-        tExpSmooth wlSmooth;
-        Lfloat sampleRate;
-    } _tSimpleLivingString2;
-
-    typedef _tSimpleLivingString2* tSimpleLivingString2;
-
-    void    tSimpleLivingString2_init                (tSimpleLivingString2* const, Lfloat freq, Lfloat brightness,
-                                                     Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
-                                                     Lfloat levStrength, int levMode, LEAF* const leaf);
-    void    tSimpleLivingString2_initToPool          (tSimpleLivingString2* const, Lfloat freq, Lfloat brightness,
-                                                     Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
-                                                     Lfloat levStrength, int levMode, tMempool* const);
-    void    tSimpleLivingString2_free                (tSimpleLivingString2* const);
-
-    Lfloat   tSimpleLivingString2_tick                (tSimpleLivingString2* const, Lfloat input);
-    Lfloat   tSimpleLivingString2_sample              (tSimpleLivingString2* const);
-    void    tSimpleLivingString2_setFreq             (tSimpleLivingString2* const, Lfloat freq);
-    void    tSimpleLivingString2_setWaveLength       (tSimpleLivingString2* const, Lfloat waveLength); // in samples
-    void    tSimpleLivingString2_setBrightness         (tSimpleLivingString2* const, Lfloat brightness);
-    void    tSimpleLivingString2_setDecay            (tSimpleLivingString2* const, Lfloat decay); // should be near 1.0
-    void    tSimpleLivingString2_setTargetLev        (tSimpleLivingString2* const, Lfloat targetLev);
-    void    tSimpleLivingString2_setLevSmoothFactor  (tSimpleLivingString2* const, Lfloat levSmoothFactor);
-    void    tSimpleLivingString2_setLevStrength      (tSimpleLivingString2* const, Lfloat levStrength);
-    void    tSimpleLivingString2_setLevMode          (tSimpleLivingString2* const, int levMode);
-    void    tSimpleLivingString2_setSampleRate       (tSimpleLivingString2* const, Lfloat sr);
-
-    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
     /*!
      @defgroup tlivingstring tLivingString

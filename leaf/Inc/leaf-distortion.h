@@ -18,6 +18,7 @@ extern "C" {
 #include "leaf-global.h"
 #include "leaf-mempool.h"
 #include "leaf-math.h"
+#include "leaf-filters.h"
     
     /*!
      * @internal
@@ -151,6 +152,64 @@ extern "C" {
     int     tOversampler_getLatency     (tOversampler* const);
     
     //==============================================================================
+/*!
+ @defgroup tWavefolder tWavefolder
+ @ingroup distortion
+ @brief more efficient and simpler wavefolder.
+ @{
+ 
+ @fn void    tWavefolder_init    (tWavefolder* const, LEAF* const leaf)
+ @brief Initialize a tWavefolder to the default mempool of a LEAF instance.
+ @param wavefolder A pointer to the tWavefolder to initialize.
+ @param leaf A pointer to the leaf instance.
+ 
+ @fn void    tWavefolder_initToPool   (tWavefolder* const, tMempool* const)
+ @brief Initialize a tWavefolder to a specified mempool.
+ @param wavefolder A pointer to the tWavefolder to initialize.
+ @param mempool A pointer to the tMempool to use.
+ 
+ @fn void    tWavefolder_free    (tWavefolder* const)
+ @brief Free a tWavefolder from its mempool.
+ @param wavefolder A pointer to the tWavefolder to free.
+ 
+ @fn Lfloat   tWavefolder_tick    (tWavefolder* const, Lfloat samp)
+ @brief
+ @param wavefolder A pointer to the relevant tWavefolder.
+ ￼￼￼
+ @} */
+
+typedef struct _tWavefolder
+{
+    
+    tMempool mempool;
+    
+    Lfloat FBsample;
+    Lfloat gain;
+    Lfloat offset;
+    Lfloat foldDepth;
+    Lfloat FBAmount;
+    Lfloat invFBAmount;
+    Lfloat FFAmount;
+    tHighpass dcBlock;
+} _tWavefolder;
+
+typedef _tWavefolder* tWavefolder;
+
+void    tWavefolder_init    (tWavefolder* const, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, LEAF* const leaf);
+void    tWavefolder_initToPool   (tWavefolder* const, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, tMempool* const);
+
+void    tWavefolder_free    (tWavefolder* const);
+
+void tWavefolder_setFFAmount(tWavefolder* const wf, Lfloat ffAmount);
+void tWavefolder_setFBAmount(tWavefolder* const wf, Lfloat fbAmount);
+void tWavefolder_setFoldDepth(tWavefolder* const wf, Lfloat foldDepth);
+void tWavefolder_setOffset(tWavefolder* const wf, Lfloat offset);
+void tWavefolder_setGain(tWavefolder* const wf, Lfloat gain);
+
+Lfloat   tWavefolder_tick    (tWavefolder* const, Lfloat samp);
+
+
+//==============================================================================
     
     /*!
      @defgroup tlockhartwavefolder tLockhartWavefolder

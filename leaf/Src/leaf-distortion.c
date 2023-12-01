@@ -10,12 +10,18 @@
 
 #include "..\Inc\leaf-distortion.h"
 #include "..\Inc\leaf-tables.h"
+#include "..\Inc\leaf-math.h"
+#include "..\Inc\leaf-filters.h"
 #else
 
 
 #include "../Inc/leaf-distortion.h"
 #include "../Inc/leaf-tables.h"
-
+#include "../Inc/leaf-math.h"
+#include "../Inc/leaf-filters.h"
+#ifdef ARM_MATH_CM7
+#include "../../Drivers/CMSIS/DSP/Include/arm_math.h"
+#endif
 #endif
 
 //============================================================================================================
@@ -358,6 +364,115 @@ int tOversampler_getLatency(tOversampler* const osr)
     return os->phaseLength;
 }
 #endif // LEAF_INCLUDE_OVERSAMPLER_TABLES
+
+//============================================================================================================
+// SIMPLER WAVEFOLDER
+//============================================================================================================
+
+void tWavefolder_init (tWavefolder* const wf, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, LEAF* const leaf)
+{
+    tWavefolder_initToPool   (wf, ffAmount, fbAmount, foldDepth, &leaf->mempool);
+}
+
+void tWavefolder_initToPool (tWavefolder* const wf, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tWavefolder* w = *wf = (_tWavefolder*) mpool_alloc(sizeof(_tWavefolder), m);
+    w->mempool = m;
+    tHighpass_initToPool(&w->dcBlock, 1.0f, mp);
+    w->FBsample = 0.0f;
+    w->offset = 0.0f;
+    w->gain = 1.0f;
+    w->foldDepth = foldDepth;
+    w->FBAmount = fbAmount;
+    w->FFAmount = ffAmount;
+    w->invFBAmount = 1.0f / (1.0f + fbAmount);
+}
+
+void tWavefolder_free (tWavefolder* const wf)
+{
+    _tWavefolder* w = *wf;
+    
+    mpool_free((char*)w, w->mempool);
+}
+
+void tWavefolder_setFFAmount(tWavefolder* const wf, Lfloat ffAmount)
+{
+    _tWavefolder* w = *wf;
+    w->FFAmount = ffAmount;
+}
+void tWavefolder_setFBAmount(tWavefolder* const wf, Lfloat fbAmount)
+{
+    _tWavefolder* w = *wf;
+    w->FBAmount = fbAmount;
+    
+    w->invFBAmount = 1.0f / (1.0f + fbAmount);
+}
+
+void tWavefolder_setFoldDepth(tWavefolder* const wf, Lfloat foldDepth)
+{
+    _tWavefolder* w = *wf;
+    w->foldDepth = foldDepth;
+}
+
+void tWavefolder_setOffset(tWavefolder* const wf, Lfloat offset)
+{
+    _tWavefolder* w = *wf;
+    w->offset = offset;
+}
+
+void tWavefolder_setGain(tWavefolder* const wf, Lfloat gain)
+{
+    _tWavefolder* w = *wf;
+    w->gain = gain;
+}
+
+Lfloat tWavefolder_tick(tWavefolder* const wf, Lfloat in)
+{
+    _tWavefolder* w = *wf;
+
+    //Lfloat sample = in * w->offset + (w->gain * w->offset);
+    Lfloat sample = in;
+    float curFB = w->FBAmount;
+    float curFF = w->FFAmount;
+
+    //softclip approx for tanh saturation in original code
+    float ffSample = sample;
+    if (ffSample <= -1.0f)
+    {
+        ffSample = -1.0f;
+    } else if (ffSample >= 1.0f)
+    {
+        ffSample = 1.0f;
+    }
+    ffSample = ffSample - ((ffSample * ffSample * ffSample)* 0.3333333f);
+    ffSample *= 1.499999f;
+    float ff = (curFF * ffSample) + ((1.0f - curFF) * sample);
+
+    //softclip approx for tanh saturation in original code
+    float fbSample = w->FBsample;
+    if (fbSample <= -1.0f)
+    {
+        fbSample = -1.0f;
+    } else if (fbSample >= 1.0f)
+    {
+        fbSample = 1.0f;
+    }
+    fbSample = fbSample - ((fbSample * fbSample * fbSample)* 0.3333333f);
+    fbSample *= 1.499999f;
+    float fb = curFB * fbSample;
+
+    Lfloat tempVal = 0.0f;
+#ifdef ARM_MATH_CM7
+    tempVal =arm_sin_f32(TWO_PI * sample);
+#else
+    tempVal =sinf(TWO_PI * sample);
+#endif
+    w->FBsample = (ff + fb) - w->foldDepth * tempVal;
+    sample = w->FBsample * w->invFBAmount;
+    sample = tHighpass_tick(&w->dcBlock, sample);
+    return sample;
+}
 
 //============================================================================================================
 // WAVEFOLDER

@@ -249,6 +249,7 @@ Lfloat   tLinearDelay_tickOut (tLinearDelay* const dl)
     // First 1/2 of interpolation
     d->lastOut = d->buff[idx] * d->omAlpha;
         // Second 1/2 of interpolation
+        
     if ((idx + 1) < d->maxDelay)
         d->lastOut += d->buff[idx+1] * d->alpha;
     else
@@ -264,7 +265,7 @@ void     tLinearDelay_setDelay (tLinearDelay* const dl, Lfloat delay)
 {
     _tLinearDelay* d = *dl;
 
-    d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
+    d->delay = LEAF_clip(2.0f, delay,  d->maxDelay);
 
     Lfloat outPointer = d->inPoint - d->delay;
 
@@ -289,6 +290,26 @@ Lfloat tLinearDelay_tapOut (tLinearDelay* const dl, uint32_t tapDelay)
 
     return d->buff[tap];
 }
+
+//Lfloat tLinearDelay_tapOutInterpolated (tLinearDelay* const dl, Lfloat tapDelay)
+//{
+   // _tLinearDelay* d = *dl;
+/*
+    int32_t tap = d->inPoint - tapDelay - 1.0-f;
+    uint32_t idx = (uint32_t) d->outPoint;
+    // First 1/2 of interpolation
+    d->lastOut = d->buff[idx] * d->omAlpha;
+        // Second 1/2 of interpolation
+        
+    if ((idx + 1) < d->maxDelay)
+        d->lastOut += d->buff[idx+1] * d->alpha;
+    else
+        d->lastOut += d->buff[0] * d->alpha;
+    // Check for wraparound.
+    while ( tap < 0 )   tap += d->maxDelay;
+*/
+    //return d->buff[tap];
+//}
 
 void tLinearDelay_tapIn (tLinearDelay* const dl, Lfloat value, uint32_t tapDelay)
 {

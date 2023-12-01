@@ -69,7 +69,10 @@ Lfloat interpolate3phase(Lfloat *buf, const int peakindex)
     return(fraction);
 }
 
-
+float LEAF_map(float value, float istart, float istop, float ostart, float ostop)
+{
+    return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
+}
 // from http://www.wild-magic.com - found on music-dsp list
 Lfloat fastcosf(Lfloat fAngle)
 {

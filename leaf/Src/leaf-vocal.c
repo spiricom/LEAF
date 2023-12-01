@@ -186,12 +186,12 @@ Lfloat glottis_compute(glottis* const glo)
 
 
 
-void tract_init(tract* const t,  LEAF* const leaf)
+void tract_init(tract* const t,  int numTractSections, LEAF* const leaf)
 {
-	tract_initToPool(t,  &leaf->mempool);
+	tract_initToPool(t, numTractSections, &leaf->mempool);
 }
 
-void tract_initToPool(tract* const t,  tMempool* const mp)
+void tract_initToPool(tract* const t,  int numTractSections, tMempool* const mp)
 {
 	_tMempool* m = *mp;
 	_tract* tr = *t = (_tract*) mpool_calloc(sizeof(_tract), m);
@@ -200,7 +200,7 @@ void tract_initToPool(tract* const t,  tMempool* const mp)
 
 	int i;
     Lfloat diameter, d; /* needed to set up diameter arrays */
-    Lfloat n = 44;
+    Lfloat n = numTractSections;
     tr->n = n; //44
     tr->nose_length = n*0.636363636363636f; //28
     tr->nose_start = (n - tr->nose_length) + 1; //17
@@ -406,9 +406,9 @@ void tract_addTurbulenceNoise(tract* const t)
 void tract_addTurbulenceNoiseAtPosition(tract* const t, Lfloat turbulenceNoise, Lfloat position, Lfloat diameter)
 {
 	_tract* tr = *t;
-	int i = floorf(position);
+	int i = (int)floorf(position);
 	Lfloat delta = position - i;
-	Lfloat mapped = map(diameter, 0.38f, 0.245f, 0.0f, 1.0f);
+	Lfloat mapped = LEAF_map(diameter, 0.38f, 0.245f, 0.0f, 1.0f);
 	Lfloat thinness0 = LEAF_clip(0.0f, 8.0f * (0.09f - diameter),  1.0f);
 	Lfloat openness = LEAF_clip(0.0f, 30.0f * (diameter), 1.0f);
 	Lfloat noise0 = turbulenceNoise * (1.0f - delta) * thinness0 * openness * 0.5f;
@@ -593,18 +593,18 @@ Lfloat move_towards(Lfloat current, Lfloat target,
 
 
 
-void    tVoc_init         (tVoc* const voc, LEAF* const leaf)
+void    tVoc_init         (tVoc* const voc, int numTractSections, LEAF* const leaf)
 {
-	tVoc_initToPool   (voc, &leaf->mempool);
+	tVoc_initToPool   (voc, numTractSections, &leaf->mempool);
 }
 
-void    tVoc_initToPool   (tVoc* const voc, tMempool* const mp)
+void    tVoc_initToPool   (tVoc* const voc, int numTractSections, tMempool* const mp)
 {
 	_tMempool* m = *mp;
 	_tVoc* v = *voc = (_tVoc*) mpool_alloc(sizeof(_tVoc), m);
 	v->mempool = m;
 	glottis_initToPool(&v->glot, &m); /* initialize glottis */
-	tract_initToPool(&v->tr, &m); /* initialize vocal tract */
+	tract_initToPool(&v->tr, numTractSections, &m); /* initialize vocal tract */
 	v->counter = 0;
 }
 void    tVoc_free         (tVoc* const voc)
@@ -652,8 +652,8 @@ Lfloat   tVoc_tick         (tVoc* const voc)
 	tract_compute(&v->tr, glot, lambda1);
 	vocal_output += v->tr->lip_output + v->tr->nose_output;
 
-	tract_compute(&v->tr, glot, lambda2);
-	vocal_output += v->tr->lip_output + v->tr->nose_output;
+	//tract_compute(&v->tr, glot, lambda2);
+	//vocal_output += v->tr->lip_output + v->tr->nose_output;
 	//v->buf[i] = vocal_output * 0.125f;
 
 
