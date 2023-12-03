@@ -356,9 +356,9 @@ void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
         
         tTriangle_setFreq(&snare->tone[i], ratio[i] * 400.0f);
         tSVF_initToPool(&snare->toneLowpass[i], SVFTypeLowpass, 4000, 1.0f, mp);
-        tEnvelope_initToPool(&snare->toneEnvOsc[i], 0.0f, 50.0f, 0, mp);
-        tEnvelope_initToPool(&snare->toneEnvGain[i], 1.0f, 150.0f, 0, mp);
-        tEnvelope_initToPool(&snare->toneEnvFilter[i], 1.0f, 2000.0f, 0, mp);
+        tEnvelope_initToPool(&snare->toneEnvOsc[i], 0.0f, 50.0f, 0,  mp);
+        tEnvelope_initToPool_initToPool(&snare->toneEnvGain[i], 1.0f, 150.0f, 0, mp);
+        tEnvelope_initToPool_initToPool(&snare->toneEnvFilter[i], 1.0f, 2000.0f, 0, mp);
         
         snare->toneGain[i] = 0.5f;
     }
@@ -368,8 +368,8 @@ void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
     snare->noiseFilterFreq = 3000.0f;
     tNoise_initToPool(&snare->noiseOsc, WhiteNoise, mp);
     tSVF_initToPool(&snare->noiseLowpass, SVFTypeLowpass, 12000.0f, 0.8f, mp);
-    tEnvelope_initToPool(&snare->noiseEnvGain, 0.0f, 100.0f, 0, mp);
-    tEnvelope_initToPool(&snare->noiseEnvFilter, 0.0f, 1000.0f, 0, mp);
+    tEnvelope_initToPool_initToPool(&snare->noiseEnvGain, 0.0f, 100.0f, 0, mp);
+    tEnvelope_initToPool_initToPool(&snare->noiseEnvFilter, 0.0f, 1000.0f, 0, mp);
     snare->noiseGain = 1.0f;
 }
 
@@ -495,6 +495,165 @@ void t808Snare_setSampleRate(t808Snare* const snareInst, Lfloat sr)
     tSVF_setSampleRate(&snare->noiseLowpass, sr);
 }
 
+
+// ----------------- SNARE WITHOUT ENVELOPE TABLE (SMALLER) ----------------------------//
+
+void t808SnareSmall_init (t808SnareSmall* const snareInst, LEAF* const leaf)
+{
+    t808SnareSmall_initToPool(snareInst, &leaf->mempool);
+}
+
+void    t808SnareSmall_initToPool    (t808SnareSmall* const snareInst, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _t808SnareSmall* snare = *snareInst = (_t808SnareSmall*) mpool_alloc(sizeof(_t808SnareSmall), m);
+    snare->mempool = m;
+    
+    Lfloat ratio[2] = {1.0, 1.5};
+    for (int i = 0; i < 2; i++)
+    {
+        tPBTriangle_initToPool(&snare->tone[i], mp);
+        tPBTriangle_setFreq(&snare->tone[i], ratio[i] * 400.0f);
+        tSVF_initToPool(&snare->toneLowpass[i], SVFTypeLowpass, 4000, 1.0f, mp);
+        tADSRS_initToPool(&snare->toneEnvOsc[i], 0.0f, 50.0f, 0.0f, 50.0f, mp);
+        tADSRS_initToPool(&snare->toneEnvGain[i], 1.0f, 150.0f, 0.0f, 50.0f, mp);
+        tADSRS_initToPool(&snare->toneEnvFilter[i], 1.0f, 2000.0f, 0.0f, 50.0f, mp);
+        
+        snare->toneGain[i] = 0.5f;
+    }
+    
+    snare->tone1Freq = ratio[0] * 100.0f;
+    snare->tone2Freq = ratio[1] * 100.0f;
+    snare->noiseFilterFreq = 3000.0f;
+    tNoise_initToPool(&snare->noiseOsc, WhiteNoise, mp);
+    tSVF_initToPool(&snare->noiseLowpass, SVFTypeLowpass, 12000.0f, 0.8f, mp);
+    tADSRS_initToPool(&snare->noiseEnvGain, 0.0f, 100.0f, 0.0f, 50.0f, mp);
+    tADSRS_initToPool(&snare->noiseEnvFilter, 0.0f, 1000.0f, 0.0f, 50.0f, mp);
+    snare->noiseGain = 1.0f;
+}
+
+void    t808SnareSmall_free  (t808SnareSmall* const snareInst)
+{
+    _t808SnareSmall* snare = *snareInst;
+    
+    for (int i = 0; i < 2; i++)
+    {
+        tPBTriangle_free(&snare->tone[i]);
+        tSVF_free(&snare->toneLowpass[i]);
+        tADSRS_free(&snare->toneEnvOsc[i]);
+        tADSRS_free(&snare->toneEnvGain[i]);
+        tADSRS_free(&snare->toneEnvFilter[i]);
+    }
+    
+    tNoise_free(&snare->noiseOsc);
+    tSVF_free(&snare->noiseLowpass);
+    tADSRS_free(&snare->noiseEnvGain);
+    tADSRS_free(&snare->noiseEnvFilter);
+    
+    mpool_free((char*)snare, snare->mempool);
+}
+
+void t808SnareSmall_on(t808SnareSmall* const snareInst, Lfloat vel)
+{
+    _t808SnareSmall* snare = *snareInst;
+    
+    for (int i = 0; i < 2; i++)
+    {
+        tADSRS_on(&snare->toneEnvOsc[i], vel);
+        tADSRS_on(&snare->toneEnvGain[i], vel);
+        tADSRS_on(&snare->toneEnvFilter[i], vel);
+    }
+    
+    tADSRS_on(&snare->noiseEnvGain, vel);
+    tADSRS_on(&snare->noiseEnvFilter, vel);
+}
+
+void t808SnareSmall_setTone1Freq(t808SnareSmall* const snareInst, Lfloat freq)
+{
+    _t808SnareSmall* snare = *snareInst;
+    snare->tone1Freq = freq;
+    tTriangle_setFreq(&snare->tone[0], freq);
+}
+
+void t808SnareSmall_setTone2Freq(t808SnareSmall* const snareInst, Lfloat freq)
+{
+    _t808SnareSmall* snare = *snareInst;
+    snare->tone2Freq = freq;
+    tPBTriangle_setFreq(&snare->tone[1],freq);
+}
+
+void t808SnareSmall_setTone1Decay(t808SnareSmall* const snareInst, Lfloat decay)
+{
+    _t808SnareSmall* snare = *snareInst;
+    tADSRS_setDecay(&snare->toneEnvGain[0],decay);
+}
+
+void t808SnareSmall_setTone2Decay(t808SnareSmall* const snareInst, Lfloat decay)
+{
+    _t808SnareSmall* snare = *snareInst;
+    tADSRS_setDecay(&snare->toneEnvGain[1],decay);
+}
+
+void t808SnareSmall_setNoiseDecay(t808SnareSmall* const snareInst, Lfloat decay)
+{
+    _t808SnareSmall* snare = *snareInst;
+    tADSRS_setDecay(&snare->noiseEnvGain,decay);
+}
+
+void t808SnareSmall_setToneNoiseMix(t808SnareSmall* const snareInst, Lfloat toneNoiseMix)
+{
+    _t808SnareSmall* snare = *snareInst;
+    snare->toneNoiseMix = toneNoiseMix;
+}
+
+void t808SnareSmall_setNoiseFilterFreq(t808SnareSmall* const snareInst, Lfloat noiseFilterFreq)
+{
+    _t808SnareSmall* snare = *snareInst;
+    snare->noiseFilterFreq = noiseFilterFreq;
+}
+
+void t808SnareSmall_setNoiseFilterQ(t808SnareSmall* const snareInst, Lfloat noiseFilterQ)
+{
+    _t808SnareSmall* snare = *snareInst;
+    tSVF_setQ(&snare->noiseLowpass, noiseFilterQ);
+}
+
+static Lfloat tone[2];
+
+Lfloat t808SnareSmall_tick(t808SnareSmall* const snareInst)
+{
+    _t808SnareSmall* snare = *snareInst;
+    
+    for (int i = 0; i < 2; i++)
+    {
+        tPBTriangle_setFreq(&snare->tone[i], snare->tone1Freq + (20.0f * tADSRS_tick(&snare->toneEnvOsc[i])));
+        tone[i] = tPBTriangle_tick(&snare->tone[i]);
+        
+        tSVF_setFreq(&snare->toneLowpass[i], 2000.0f + (500.0f * tADSRS_tick(&snare->toneEnvFilter[i])));
+        tone[i] = tSVF_tick(&snare->toneLowpass[i], tone[i]) * tADSRS_tick(&snare->toneEnvGain[i]);
+    }
+    
+    Lfloat noise = tNoise_tick(&snare->noiseOsc);
+    tSVF_setFreq(&snare->noiseLowpass, snare->noiseFilterFreq + (1000.0f * tADSRS_tick(&snare->noiseEnvFilter)));
+    noise = tSVF_tick(&snare->noiseLowpass, noise) * tADSRS_tick(&snare->noiseEnvGain);
+    
+    Lfloat sample = (snare->toneNoiseMix)*(tone[0] * snare->toneGain[0] + tone[1] * snare->toneGain[1]) + (1.0f-snare->toneNoiseMix) * (noise * snare->noiseGain);
+    //sample = tanhf(sample * 2.0f);
+    return sample;
+}
+
+void t808SnareSmall_setSampleRate(t808SnareSmall* const snareInst, Lfloat sr)
+{
+    _t808SnareSmall* snare = *snareInst;
+    
+    for (int i = 0; i < 2; i++)
+    {
+        tPBTriangle_setSampleRate(&snare->tone[i], sr);
+        tSVF_setSampleRate(&snare->toneLowpass[i], sr);
+    }
+    tSVF_setSampleRate(&snare->noiseLowpass, sr);
+}
+
 // ----------------- KICK ----------------------------//
 
 void t808Kick_init (t808Kick* const kickInst, LEAF* const leaf)
@@ -586,5 +745,99 @@ void        t808Kick_setSampleRate  (t808Kick* const kickInst, Lfloat sr)
     tCycle_setSampleRate(&kick->tone, sr);
     tSVF_setSampleRate(&kick->toneLowpass, sr);
 }
+
+
+// ----------------- KICK ----------------------------//
+
+void t808KickSmall_init (t808KickSmall* const kickInst, LEAF* const leaf)
+{
+    t808KickSmall_initToPool(kickInst, &leaf->mempool);
+}
+
+void t808KickSmall_initToPool (t808KickSmall* const kickInst, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _t808KickSmall* kick = *kickInst = (_t808KickSmall*) mpool_alloc(sizeof(_t808KickSmall), m);
+    kick->mempool = m;
+    
+    tCycle_initToPool(&kick->tone, mp);
+    kick->toneInitialFreq = 40.0f;
+    kick->sighAmountInHz = 7.0f;
+    kick->chirpRatioMinusOne = 3.3f;
+    tCycle_setFreq(&kick->tone, 50.0f);
+    tSVF_initToPool(&kick->toneLowpass, SVFTypeLowpass, 2000.0f, 0.5f, mp);
+    tADSRS_initToPool(&kick->toneEnvOscChirp, 0.0f, 20.0f, 0.0f, 0.0f, mp);
+    tADSRS_initToPool(&kick->toneEnvOscSigh, 0.0f, 2500.0f, 0.0f, 0.0f, mp);
+    tADSRS_initToPool(&kick->toneEnvGain, 0.0f, 800.0f, 0.0f, 0.0f, mp);
+    tNoise_initToPool(&kick->noiseOsc, PinkNoise, mp);
+    tADSRS_initToPool(&kick->noiseEnvGain, 0.0f, 1.0f, 0.0f, 0.0f, mp);
+    kick->noiseGain = 0.3f;
+}
+
+void    t808KickSmall_free   (t808KickSmall* const kickInst)
+{
+    _t808KickSmall* kick = *kickInst;
+    
+    tCycle_free(&kick->tone);
+    tSVF_free(&kick->toneLowpass);
+    tADSRS_free(&kick->toneEnvOscChirp);
+    tADSRS_free(&kick->toneEnvOscSigh);
+    tADSRS_free(&kick->toneEnvGain);
+    tNoise_free(&kick->noiseOsc);
+    tADSRS_free(&kick->noiseEnvGain);
+    
+    mpool_free((char*)kick, kick->mempool);
+}
+
+Lfloat       t808KickSmall_tick                  (t808KickSmall* const kickInst)
+{
+    _t808KickSmall* kick = *kickInst;
+    
+	tCycle_setFreq(&kick->tone, (kick->toneInitialFreq * (1.0f + (kick->chirpRatioMinusOne * tADSRS_tick(&kick->toneEnvOscChirp)))) + (kick->sighAmountInHz * tADSRS_tick(&kick->toneEnvOscSigh)));
+	Lfloat sample = tCycle_tick(&kick->tone) * tADSRS_tick(&kick->toneEnvGain);
+	sample+= tNoise_tick(&kick->noiseOsc) * tADSRS_tick(&kick->noiseEnvGain);
+	//add distortion here
+	sample = tSVF_tick(&kick->toneLowpass, sample);
+	return sample;
+}
+
+void        t808KickSmall_on                    (t808KickSmall* const kickInst, Lfloat vel)
+{
+    _t808KickSmall* kick = *kickInst;
+	tADSRS_on(&kick->toneEnvOscChirp, vel);
+	tADSRS_on(&kick->toneEnvOscSigh, vel);
+	tADSRS_on(&kick->toneEnvGain, vel);
+	tADSRS_on(&kick->noiseEnvGain, vel);
+
+}
+void        t808KickSmall_setToneFreq          (t808KickSmall* const kickInst, Lfloat freq)
+{
+    _t808KickSmall* kick = *kickInst;
+	kick->toneInitialFreq = freq;
+
+}
+
+void        t808KickSmall_setToneDecay         (t808KickSmall* const kickInst, Lfloat decay)
+{
+    _t808KickSmall* kick = *kickInst;
+	tADSRS_setDecay(&kick->toneEnvGain,decay);
+	tADSRS_setDecay(&kick->toneEnvGain,decay * 3.0f);
+}
+
+void        t808KickSmall_setNoiseDecay         (t808KickSmall* const kickInst, Lfloat decay);
+void        t808KickSmall_setSighAmount         (t808KickSmall* const kickInst, Lfloat sigh);
+void        t808KickSmall_setChirpAmount         (t808KickSmall* const kickInst, Lfloat chirp);
+void        t808KickSmall_setToneNoiseMix       (t808KickSmall* const kickInst, Lfloat toneNoiseMix);
+void        t808KickSmall_setNoiseFilterFreq    (t808KickSmall* const kickInst, Lfloat noiseFilterFreq);
+void        t808KickSmall_setNoiseFilterQ       (t808KickSmall* const kickInst, Lfloat noiseFilterQ);
+
+void        t808KickSmall_setSampleRate  (t808KickSmall* const kickInst, Lfloat sr)
+{
+    _t808KickSmall* kick = *kickInst;
+    
+    tCycle_setSampleRate(&kick->tone, sr);
+    tSVF_setSampleRate(&kick->toneLowpass, sr);
+}
+
 
 
