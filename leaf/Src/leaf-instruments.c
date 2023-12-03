@@ -357,8 +357,8 @@ void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
         tTriangle_setFreq(&snare->tone[i], ratio[i] * 400.0f);
         tSVF_initToPool(&snare->toneLowpass[i], SVFTypeLowpass, 4000, 1.0f, mp);
         tEnvelope_initToPool(&snare->toneEnvOsc[i], 0.0f, 50.0f, 0,  mp);
-        tEnvelope_initToPool_initToPool(&snare->toneEnvGain[i], 1.0f, 150.0f, 0, mp);
-        tEnvelope_initToPool_initToPool(&snare->toneEnvFilter[i], 1.0f, 2000.0f, 0, mp);
+        tEnvelope_initToPool(&snare->toneEnvGain[i], 1.0f, 150.0f, 0, mp);
+        tEnvelope_initToPool(&snare->toneEnvFilter[i], 1.0f, 2000.0f, 0, mp);
         
         snare->toneGain[i] = 0.5f;
     }
@@ -368,8 +368,8 @@ void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
     snare->noiseFilterFreq = 3000.0f;
     tNoise_initToPool(&snare->noiseOsc, WhiteNoise, mp);
     tSVF_initToPool(&snare->noiseLowpass, SVFTypeLowpass, 12000.0f, 0.8f, mp);
-    tEnvelope_initToPool_initToPool(&snare->noiseEnvGain, 0.0f, 100.0f, 0, mp);
-    tEnvelope_initToPool_initToPool(&snare->noiseEnvFilter, 0.0f, 1000.0f, 0, mp);
+    tEnvelope_initToPool(&snare->noiseEnvGain, 0.0f, 100.0f, 0, mp);
+    tEnvelope_initToPool(&snare->noiseEnvFilter, 0.0f, 1000.0f, 0, mp);
     snare->noiseGain = 1.0f;
 }
 
