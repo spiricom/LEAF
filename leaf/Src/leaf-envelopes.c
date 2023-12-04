@@ -1452,6 +1452,7 @@ void    tSlide_init          (tSlide* const sl, Lfloat upSlide, Lfloat downSlide
     tSlide_initToPool    (sl, upSlide, downSlide, &leaf->mempool);
 }
 
+//upslide and downslide are in samples
 void    tSlide_initToPool    (tSlide* const sl, Lfloat upSlide, Lfloat downSlide, tMempool* const mp)
 {
     _tMempool* m = *mp;

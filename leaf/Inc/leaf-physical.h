@@ -526,13 +526,15 @@ typedef struct _tSimpleLivingString5
     tWavefolder wf2;
     tWavefolder wf3;
     tWavefolder wf4;
-    tExpSmooth wlSmooth, prepPosSmooth, prepIndexSmooth;
+    tExpSmooth wlSmooth, prepPosSmooth, prepIndexSmooth, pluckPosSmooth;
     int oversampling;
     Lfloat sampleRate;
     Lfloat rippleGain;
     Lfloat rippleDelay;
     Lfloat ff;
     Lfloat fb;
+    Lfloat fbSample1;
+    Lfloat fbSample2;
 } _tSimpleLivingString5;
 
 typedef _tSimpleLivingString5* tSimpleLivingString5;

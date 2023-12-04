@@ -1306,10 +1306,13 @@ void    tSimpleLivingString5_initToPool  (tSimpleLivingString5* const pl, int ov
     p->prepPos = prepPos;
     p->prepIndex = prepIndex;
     p->pluckPosition = pluckPos;
-    tExpSmooth_initToPool(&p->prepPosSmooth, prepPos, 0.01f, mp);
-    tExpSmooth_initToPool(&p->prepIndexSmooth, prepIndex, 0.01f, mp);
+    tExpSmooth_initToPool(&p->prepPosSmooth, prepPos, 0.002f / oversampling, mp);
+    tExpSmooth_initToPool(&p->prepIndexSmooth, prepIndex, 0.002f / oversampling, mp);
 
-    tExpSmooth_initToPool(&p->wlSmooth, p->sampleRate/freq/2.0f, 0.01f, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    tExpSmooth_initToPool(&p->wlSmooth, p->sampleRate/freq/2.0f, 0.002f / oversampling, mp); // smoother for string wavelength (not freq, to avoid expensive divisions)
+    
+    tExpSmooth_initToPool(&p->pluckPosSmooth, pluckPos, 0.002f / oversampling, mp);
+    
     tLinearDelay_initToPool(&p->delUF,p->waveLengthInSamples, p->maxLength, mp);
     tLinearDelay_initToPool(&p->delUB,p->waveLengthInSamples, p->maxLength, mp);
     tLinearDelay_initToPool(&p->delLF,p->waveLengthInSamples, p->maxLength, mp);
@@ -1386,6 +1389,7 @@ void    tSimpleLivingString5_free (tSimpleLivingString5* const pl)
     tExpSmooth_free(&p->wlSmooth);
     tExpSmooth_free(&p->prepIndexSmooth);
     tExpSmooth_free(&p->prepPosSmooth);
+    tExpSmooth_free(&p->pluckPosSmooth);
     tLinearDelay_free(&p->delUF);
     tLinearDelay_free(&p->delUB);
     tLinearDelay_free(&p->delLF);
@@ -1462,11 +1466,13 @@ void   tSimpleLivingString5_setPrepPosition(tSimpleLivingString5* const pl, Lflo
 {
      _tSimpleLivingString5* p = *pl;
     p->prepPos = prepPosition;
+    tExpSmooth_setDest(&p->prepPosSmooth, prepPosition);
 }
 void   tSimpleLivingString5_setPrepIndex(tSimpleLivingString5* const pl, Lfloat prepIndex)
 {
      _tSimpleLivingString5* p = *pl;
      p->prepIndex = prepIndex;
+    tExpSmooth_setDest(&p->prepIndexSmooth, prepIndex);
 }
 
 void     tSimpleLivingString5_setTargetLev(tSimpleLivingString5* const pl, Lfloat targetLev)
@@ -1502,6 +1508,8 @@ void   tSimpleLivingString5_setPluckPosition(tSimpleLivingString5* const pl, Lfl
 {
     _tSimpleLivingString5* p = *pl;
     p->pluckPosition = position;
+    tExpSmooth_setDest(&p->pluckPosSmooth, position);
+    
 }
 
 
@@ -1640,6 +1648,7 @@ Lfloat   tSimpleLivingString5_tick(tSimpleLivingString5* const pl, Lfloat input)
 
     //p->changeGainCompensator = 1.0f;
     Lfloat wl = tExpSmooth_tick(&p->wlSmooth);
+    
     //volatile Lfloat changeInDelayTime = -0.01875f*(wl*0.5f - p->prevDelayLength*0.5f);
     //if (changeInDelayTime < -0.1f)
     {
@@ -1649,16 +1658,17 @@ Lfloat   tSimpleLivingString5_tick(tSimpleLivingString5* const pl, Lfloat input)
     {
     //    p->changeGainCompensator = 1.0f;
     }
-    Lfloat FLen = wl*(1.0f-p->prepPos);
+    Lfloat prepPosSmoothed = tExpSmooth_tick(&p->prepPosSmooth);
+    Lfloat FLen = wl*(1.0f-prepPosSmoothed);
     uint32_t FLenInt = (uint32_t)FLen;
-    Lfloat BLen = wl*p->prepPos;
+    Lfloat BLen = wl*prepPosSmoothed;
     uint32_t BLenInt = (uint32_t)BLen;
     tLinearDelay_setDelay(&p->delUF, FLen);
     tLinearDelay_setDelay(&p->delUB, BLen);
     tLinearDelay_setDelay(&p->delLF, FLen);
     tLinearDelay_setDelay(&p->delLB, BLen);
-
-    Lfloat pluckPosInSamples = p->pluckPosition * wl;
+    Lfloat pluckPosSmoothed = tExpSmooth_tick(&p->pluckPosSmooth);
+    Lfloat pluckPosInSamples = pluckPosSmoothed * wl;
     uint32_t pluckPosInSamplesInt = (uint32_t) pluckPosInSamples;
     Lfloat alpha = pluckPosInSamples - pluckPosInSamplesInt;
 
@@ -1696,9 +1706,14 @@ Lfloat   tSimpleLivingString5_tick(tSimpleLivingString5* const pl, Lfloat input)
         Lfloat fromLF=tLinearDelay_tickOut(&p->delLF);
         Lfloat fromLB=tLinearDelay_tickOut(&p->delLB);
         Lfloat fromUB=tLinearDelay_tickOut(&p->delUB);
-        
-        fromUF = tWavefolder_tick(&p->wf1, fromUF);
-        fromLB = tWavefolder_tick(&p->wf2, fromLB);
+        //fromUF = tanhf(p->fbSample1) * p->fb + fromUF*0.1f;
+        //fromLB = tanhf(p->fbSample2) * p->fb + fromLB*0.1f;
+        //p->fbSample1 = fromUF;
+        //p->fbSample2 = fromLB;
+        //fromUF = fromUF * 1.0f / (1.0f+p->fb);
+        //fromLB = fromLB * 1.0f / (1.0f+p->fb);
+        //fromUF = tWavefolder_tick(&p->wf1, fromUF);
+        //fromLB = tWavefolder_tick(&p->wf2, fromLB);
 
 
 #if 0
@@ -1869,6 +1884,7 @@ void   tSimpleLivingString5_setSampleRate(tSimpleLivingString5* const pl, Lfloat
 void   tSimpleLivingString5_setFBAmount(tSimpleLivingString5* const pl, Lfloat fb)
 {
     _tSimpleLivingString5* p = *pl;
+    p->fb = fb;
     tWavefolder_setFBAmount(&p->wf1, fb);
     tWavefolder_setFBAmount(&p->wf2, fb);
 }

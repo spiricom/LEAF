@@ -464,7 +464,7 @@ static Lfloat tone[2];
 Lfloat t808Snare_tick(t808Snare* const snareInst)
 {
     _t808Snare* snare = *snareInst;
-    
+    Lfloat tone[2];
     for (int i = 0; i < 2; i++)
     {
         tTriangle_setFreq(&snare->tone[i], snare->tone1Freq + (20.0f * tEnvelope_tick(&snare->toneEnvOsc[i])));
@@ -622,7 +622,7 @@ void t808SnareSmall_setNoiseFilterQ(t808SnareSmall* const snareInst, Lfloat nois
 Lfloat t808SnareSmall_tick(t808SnareSmall* const snareInst)
 {
     _t808SnareSmall* snare = *snareInst;
-    
+    Lfloat tone[2];
     for (int i = 0; i < 2; i++)
     {
         tPBTriangle_setFreq(&snare->tone[i], snare->tone1Freq + (20.0f * tADSRS_tick(&snare->toneEnvOsc[i])));
