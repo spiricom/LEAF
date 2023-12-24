@@ -512,7 +512,7 @@ typedef struct _tSimpleLivingString5
     int maxLength;
     Lfloat prepIndex;
     Lfloat prepPos;
-    tLinearDelay delLF,delUF,delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
+    tLagrangeDelay delLF,delUF,delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
     tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
     Lfloat temp1;
     Lfloat temp2;
@@ -522,19 +522,14 @@ typedef struct _tSimpleLivingString5
     tHighpass DCblocker2;
     tFeedbackLeveler fbLev;
     tFeedbackLeveler fbLev2;
-    tWavefolder wf1;
-    tWavefolder wf2;
-    tWavefolder wf3;
-    tWavefolder wf4;
-    tExpSmooth wlSmooth, prepPosSmooth, prepIndexSmooth, pluckPosSmooth;
+
+    tExpSmooth wlSmooth, prepPosSmooth, prepIndexSmooth, pluckPosSmooth, pickupPointSmooth;
     int oversampling;
     Lfloat sampleRate;
     Lfloat rippleGain;
     Lfloat rippleDelay;
     Lfloat ff;
     Lfloat fb;
-    Lfloat fbSample1;
-    Lfloat fbSample2;
 } _tSimpleLivingString5;
 
 typedef _tSimpleLivingString5* tSimpleLivingString5;
@@ -564,9 +559,8 @@ void    tSimpleLivingString5_setLevSmoothFactor  (tSimpleLivingString5* const, L
 void    tSimpleLivingString5_setLevStrength      (tSimpleLivingString5* const, Lfloat levStrength);
 void    tSimpleLivingString5_setLevMode          (tSimpleLivingString5* const, int levMode);
 void    tSimpleLivingString5_setSampleRate       (tSimpleLivingString5* const, Lfloat sr);
-void   tSimpleLivingString5_setFBAmount(tSimpleLivingString5* const pl, Lfloat fb);
 void   tSimpleLivingString5_setFFAmount(tSimpleLivingString5* const pl, Lfloat ff);
-void   tSimpleLivingString5_setFoldDepth(tSimpleLivingString5* const pl, Lfloat depth);
+
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -938,8 +932,109 @@ void   tSimpleLivingString5_setFoldDepth(tSimpleLivingString5* const pl, Lfloat 
     void    tComplexLivingString_setSampleRate         (tComplexLivingString* const, Lfloat sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//Bow Table
+typedef struct _tBowTable {
+    tMempool mempool;
+    Lfloat offSet;
+    Lfloat slope;
+    Lfloat lastOutput;
+} _tBowTable;
+
+typedef _tBowTable* tBowTable;
+
+void    tBowTable_init                  (tBowTable* const bt, LEAF* const leaf);
+void    tBowTable_initToPool            (tBowTable* const bt, tMempool* const mp);
+void    tBowTable_free                 (tBowTable* const bt);
+Lfloat    tBowTable_lookup               (tBowTable* const bt, Lfloat sample);
+
+typedef struct _tBowed
+{
+    tMempool mempool;
+    int oversampling;
+    // user controlled vars
+    Lfloat x_bp;      // bow pressure
+    Lfloat x_bpos;    // bow position
+    Lfloat x_bv;      // bow velocity
+    Lfloat x_fr;      // frequency
+
+    Lfloat fr_save;
+
+    // delay lines
+    tLinearDelay neckDelay;
+    tLinearDelay bridgeDelay;
+
+    // one pole filter
+    tCookOnePole reflFilt;
+
+    tBowTable bowTabl;
+
+    // stuff
+    Lfloat maxVelocity, baseDelay, betaRatio;
+    Lfloat sampleRate;
+    Lfloat invSampleRate;
+    tSVF lowpass;
+    Lfloat output;
+} _tBowed;
+
+typedef _tBowed* tBowed;
+
+void    tBowed_init                  (tBowed* const, int oversampling, LEAF* const leaf);
+void    tBowed_initToPool            (tBowed* const, int oversampling, tMempool* const);
+void    tBowed_free                  (tBowed* const);
+
+Lfloat   tBowed_tick                  (tBowed* const);
+
+void    tBowed_setFreq               (tBowed* const, Lfloat freq);
+void    tBowed_setWaveLength         (tBowed* const, Lfloat waveLength); // in samples
+void    tBowed_setSampleRate         (tBowed* const, Lfloat sr);
+
+
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+//from Plucked-string synthesis algorithms with tension modulation nonlinearity
+//by Vesa Valimaki
+typedef struct _tTString
+{
+    tMempool mempool;
+    int oversampling;
+    Lfloat invOversampling;
+    // delay lines
+    tLagrangeDelay delay;
+    Lfloat power;
+    Lfloat M;
     
-    
+    // one pole filter
+    tCookOnePole reflFilt;
+    Lfloat baseDelay;
+    uint32_t halfBaseDelay;
+    Lfloat sampleRate;
+    Lfloat invSampleRate;
+    Lfloat output;
+    Lfloat prevTension;
+    Lfloat tensionGain;
+    Lfloat a;
+    tSlide slide;
+    tHighpass dcBlock;
+    tThiranAllpassSOCascade allpass;
+    Lfloat allpassDelay;
+    int stop;
+} _tTString;
+
+typedef _tTString* tTString;
+
+void    tTString_init                  (tTString* const, int oversampling, LEAF* const leaf);
+void    tTString_initToPool            (tTString* const, int oversampling, tMempool* const);
+void    tTString_free                  (tTString* const);
+
+Lfloat   tTString_tick                  (tTString* const);
+
+void    tTString_setFreq               (tTString* const, Lfloat freq);
+void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloat amplitude);
+void    tTString_setWaveLength         (tTString* const, Lfloat waveLength); // in samples
+void    tTString_setSampleRate         (tTString* const, Lfloat sr);
+void    tTString_setHarmonicity         (tTString* const, Lfloat B, Lfloat freq);
+
     /*!
      @defgroup treedtable tReedTable
      @ingroup physical

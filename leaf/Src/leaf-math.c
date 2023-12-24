@@ -21,6 +21,7 @@
 #define EXPONENTIAL_TABLE_SIZE 65536
 
 #define log10f_fast(x)  (log2f_approx(x)*0.3010299956639812f)
+#define twelfthRootOf2    1.0594630943592952646f 
 
 // This is a fast approximation to log2() found on http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html credited to this post https://community.arm.com/developer/tools-software/tools/f/armds-forum/4292/cmsis-dsp-new-functionality-proposal/22621#22621
 // Y = C[0]*F*F*F + C[1]*F*F + C[2]*F + C[3] + E;
@@ -279,7 +280,25 @@ double fastPow(double a, double b) {
 
 
 
-
+int getBinCoeff(int N, int K)
+{
+   // This function gets the total number of unique combinations based upon N and K.
+   // N is the total number of items.
+   // K is the size of the group.
+   // Total number of unique combinations = N! / ( K! (N - K)! ).
+   // This function is less efficient, but is more likely to not overflow when N and K are large.
+   // Taken from:  http://blog.plover.com/math/choose.html
+   //
+    int r = 1;
+    int d;
+   if (K > N) return 0;
+   for (d = 1; d <= K; d++)
+   {
+      r *= N--;
+      r /= d;
+   }
+   return r;
+}
 
 /*
  you pass in a Lfloat array to get back two indexes representing the volumes of the left (index 0) and right (index 1) channels

@@ -291,25 +291,28 @@ Lfloat tLinearDelay_tapOut (tLinearDelay* const dl, uint32_t tapDelay)
     return d->buff[tap];
 }
 
-//Lfloat tLinearDelay_tapOutInterpolated (tLinearDelay* const dl, Lfloat tapDelay)
-//{
-   // _tLinearDelay* d = *dl;
-/*
-    int32_t tap = d->inPoint - tapDelay - 1.0-f;
-    uint32_t idx = (uint32_t) d->outPoint;
-    // First 1/2 of interpolation
-    d->lastOut = d->buff[idx] * d->omAlpha;
+Lfloat tLinearDelay_tapOutInterpolated (tLinearDelay* const dl, Lfloat tapDelay)
+{
+    _tLinearDelay* d = *dl;
+   
+    Lfloat tap = (float)d->inPoint - tapDelay - 1.0f;
+    while ( tap < 0.0f )   tap += d->maxDelay;
+    uint32_t tapInt = (uint32_t)tap;
+    Lfloat alpha = tap - (Lfloat)tapInt;
+
+    uint32_t tapIntPlusOne = tapInt + 1;
+    if (tapIntPlusOne > d->maxDelay)
+    {
+        tapIntPlusOne = 0;
+    }
+        // First 1/2 of interpolation
+    Lfloat tapOut = d->buff[tapInt] * (1.0f - alpha);
         // Second 1/2 of interpolation
-        
-    if ((idx + 1) < d->maxDelay)
-        d->lastOut += d->buff[idx+1] * d->alpha;
-    else
-        d->lastOut += d->buff[0] * d->alpha;
-    // Check for wraparound.
-    while ( tap < 0 )   tap += d->maxDelay;
-*/
-    //return d->buff[tap];
-//}
+    tapOut += d->buff[tapIntPlusOne] * alpha;
+   
+
+    return tapOut;
+}
 
 void tLinearDelay_tapIn (tLinearDelay* const dl, Lfloat value, uint32_t tapDelay)
 {
@@ -666,6 +669,8 @@ Lfloat   tLagrangeDelay_tick (tLagrangeDelay* const dl, Lfloat input)
 			(d->buff[(idx + 1) & d->bufferMask] * d->h2) +
 			(d->buff[(idx + 2) & d->bufferMask] * d->h3);
 
+    //clear the sample that is no longer used
+    d->buff[((idx - 2) + d->maxDelay) & d->bufferMask] = 0.0f;
     // Increment output pointer modulo length
     d->outPoint = (d->outPoint + 1) & d->bufferMask;
 
@@ -697,7 +702,6 @@ Lfloat   tLagrangeDelay_tickOut (tLagrangeDelay* const dl)
 
     // Increment output pointer modulo length
     d->outPoint = (d->outPoint + 1) & d->bufferMask;
-
     return d->lastOut;
 }
 
@@ -722,10 +726,10 @@ void tLagrangeDelay_setDelay (tLagrangeDelay* const dl, Lfloat delay)
 	Lfloat pddm1 = alpha*dm1;
 	Lfloat pdm1dm2 = dm1*dm2;
 
-	d->h0 = -0.166666666666667f * pddm1 * dm2;
-	d->h1 = 0.5f * dp1 * pdm1dm2;
-	d->h2 = -0.5f * pdp1d * dm2;
-	d->h3 = 0.166666666666667f * pdp1d * dm2;
+	d->h0 = -0.166666666666667f * (pddm1 * dm2);
+	d->h1 = 0.5f * (dp1 * pdm1dm2);
+	d->h2 = -0.5f * (pdp1d * dm2);
+	d->h3 = 0.166666666666667f * (pdp1d * dm1);
 
     d->outPoint &= d->bufferMask;
 }
@@ -734,7 +738,7 @@ Lfloat tLagrangeDelay_tapOut (tLagrangeDelay* const dl, uint32_t tapDelay)
 {
 	_tLagrangeDelay* d = *dl;
 
-    int32_t tap = (d->inPoint - tapDelay - 1) & d->bufferMask;
+    uint32_t tap = ((uint32_t)(d->inPoint - tapDelay - 1)) & d->bufferMask;
 
     return d->buff[tap];
 
@@ -744,12 +748,25 @@ Lfloat   tLagrangeDelay_tapOutInterpolated (tLagrangeDelay* const dl, uint32_t t
 {
 	_tLagrangeDelay* d = *dl;
 
-    int32_t idx = (d->inPoint - tapDelay - 1) & d->bufferMask;
+    uint32_t idx = ((uint32_t)(d->inPoint - (int32_t)tapDelay - 1)) & d->bufferMask;
 
-    return    (d->buff[((idx - 1) + d->maxDelay) & d->bufferMask] * d->h0) +
-    		(d->buff[idx] * d->h1) +
-			(d->buff[(idx + 1) & d->bufferMask] * d->h2) +
-			(d->buff[(idx + 2) & d->bufferMask] * d->h3);
+    Lfloat dp1 = alpha+1.0f;
+    Lfloat dm1 = alpha-1.0f;
+    Lfloat dm2 = alpha-2.0f;
+
+    Lfloat pdp1d = dp1*alpha;
+    Lfloat pddm1 = alpha*dm1;
+    Lfloat pdm1dm2 = dm1*dm2;
+
+    Lfloat h0 = -0.166666666666667f * pddm1 * dm2;
+    Lfloat h1 = 0.5f * dp1 * pdm1dm2;
+    Lfloat h2 = -0.5f * pdp1d * dm2;
+    Lfloat h3 = 0.166666666666667f * pdp1d * dm1;
+    
+    return    (d->buff[((idx - 1) + d->maxDelay) & d->bufferMask] * h0) +
+    		(d->buff[idx] * h1) +
+			(d->buff[(idx + 1) & d->bufferMask] * h2) +
+			(d->buff[(idx + 2) & d->bufferMask] * h3);
 
 }
 

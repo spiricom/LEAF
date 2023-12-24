@@ -76,6 +76,172 @@ Lfloat   tAllpass_tick(tAllpass* const ft, Lfloat input)
     
     return f->lastOut;
 }
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 2nd order Allpass Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+
+void    tAllpassSO_init(tAllpassSO* const ft, LEAF* const leaf)
+{
+    tAllpassSO_initToPool(ft, &leaf->mempool);
+}
+
+void    tAllpassSO_initToPool     (tAllpassSO* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tAllpassSO* f = *ft = (_tAllpassSO*) mpool_alloc(sizeof(_tAllpassSO), m);
+    f->mempool = m;
+    
+    f->prevSamp = 0.0f;
+    f->prevPrevSamp = 0.0f;
+    f->a1 = 0.0f;
+    f->a2 = 0.0f;
+}
+
+void    tAllpassSO_free  (tAllpassSO* const ft)
+{
+    _tAllpassSO* f = *ft;
+    mpool_free((char*)f, f->mempool);
+}
+
+void    tAllpassSO_setCoeff(tAllpassSO* const ft, Lfloat a1, Lfloat a2)
+{
+    _tAllpassSO* f = *ft;
+    Lfloat prevSum = f->a1 + f->a2;
+    Lfloat newSum = a1+a2;
+    Lfloat ratio = 1.0f;
+    if (prevSum != 0.0f)
+    {
+        ratio = fabsf(newSum / prevSum);
+    }
+
+    f->a1 = a1;
+    f->a2 = a2;
+    f->prevSamp *= ratio;
+    f->prevPrevSamp *= ratio;
+}
+
+Lfloat   tAllpassSO_tick(tAllpassSO* const ft, Lfloat input)
+{
+    _tAllpassSO* f = *ft;
+    
+    Lfloat c = -f->a2;
+    Lfloat d1mc = f->a1;
+    
+    Lfloat vn = input + (f->prevSamp * -d1mc) + (f->prevPrevSamp * c);
+
+    Lfloat output = (vn * -c) + (f->prevSamp * d1mc) + f->prevPrevSamp;
+    
+    f->prevPrevSamp = f->prevSamp;
+    f->prevSamp = vn;
+    
+    return output;
+}
+
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Cascade of 2nd order Thiran Allpass Filters ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+
+void    tThiranAllpassSOCascade_init(tThiranAllpassSOCascade* const ft, int numFilts, LEAF* const leaf)
+{
+    tThiranAllpassSOCascade_initToPool(ft, numFilts, &leaf->mempool);
+}
+
+void    tThiranAllpassSOCascade_initToPool     (tThiranAllpassSOCascade* const ft, int numFilts, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tThiranAllpassSOCascade* f = *ft = (_tThiranAllpassSOCascade*) mpool_alloc(sizeof(_tThiranAllpassSOCascade), m);
+    f->mempool = m;
+    f->numFilts = numFilts;
+    f->filters = (tAllpassSO*) mpool_calloc(sizeof(tAllpassSO) * numFilts, m);
+    f->k1[0] = -0.00050469f;
+    f->k2[0] = -0.0064264f;
+    f->k3[0] = -2.8743f;
+    f->C1[0] = 0.069618f;
+    f->C2[0] = 2.0427f;
+    f->k1[1] = -0.0026580f;
+    f->k2[1] = -0.014811f;
+    f->k3[1] = -2.9018f;
+    f->C1[1] = 0.071089f;
+    f->C2[1] = 2.1074f;
+    f->isHigh = 0;
+    f->numFiltsMap[0] = numFilts;
+    f->numFiltsMap[1] = 1;
+    f->numActiveFilters = numFilts;
+    for (int i = 0; i < numFilts; i++)
+    {
+        tAllpassSO_initToPool(&f->filters[i], mp);
+    }
+}
+
+void    tThiranAllpassSOCascade_free  (tThiranAllpassSOCascade* const ft)
+{
+    _tThiranAllpassSOCascade* f = *ft;
+    for (int i = 0; i < f->numFilts; i++)
+    {
+        tAllpassSO_free(&f->filters[i]);
+    }
+    //mpool_free((char*)f->filters, f->mempool); //do I need to free the pointers separately?
+    mpool_free((char*)f, f->mempool);
+}
+
+float    tThiranAllpassSOCascade_setCoeff(tThiranAllpassSOCascade* const ft, Lfloat dispersionCoeff, Lfloat freq)
+{
+    _tThiranAllpassSOCascade* f = *ft;
+
+    f->B = dispersionCoeff;
+    f->iKey = (49.0f + 12.0f * log2f(freq * INV_440));
+    //f->iKey = logf((110.0f*twelfthRootOf2) / 27.5f)/ logf(twelfthRootOf2);
+    f->isHigh = freq > 400.0f;//switch to different coefficients for higher notes
+    
+    double logB = logf(f->B);
+    double temp = (f->k1[f->isHigh ]*logB*logB)+(f->k2[f->isHigh] * logB)+f->k3[f->isHigh ];
+    double kd = expf(temp);
+    double Cd = expf((f->C1[f->isHigh ] * logB) + f->C2[f->isHigh]);
+    double D = expf(Cd-(f->iKey*kd));
+    f->D = D;
+    f->numActiveFilters = f->numFiltsMap[f->isHigh];
+    int N = 2;
+    //a[0] = 1.0f;
+    for (int k = 1; k <=N; k++)
+    {
+        double a_k = ( (k % 2)  ? -1 : 1) * getBinCoeff(N,k);
+        for (int n = 0; n <= N; n++)
+        {
+          a_k *= (D - N + n);
+          a_k /= (D - N + k + n);
+        }
+        f->a[k] = a_k;
+    }
+    for (int i = 0; i < f->numActiveFilters; i++)
+    {
+        tAllpassSO_setCoeff(&f->filters[i], f->a[1], f->a[2]);
+        //f->filters[i]->prevSamp = 0.0f;
+        //f->filters[i]->prevPrevSamp = 0.0f;
+        //probably should adjust the gain of the internal state variables (prevSamp and prevPrevSamp) if the gain total of the two coefficients goes //up, since the internals of the allpass boosts gain and then attenuates it, so leaving super big values in there that won't be //attenuated enough can make it distort or nan.
+    }
+    return D*f->numActiveFilters;
+}
+
+Lfloat   tThiranAllpassSOCascade_tick(tThiranAllpassSOCascade* const ft, Lfloat input)
+{
+    _tThiranAllpassSOCascade* f = *ft;
+    Lfloat sample = input;
+    for (int i = 0; i < f->numActiveFilters; i++)
+    {
+        sample = tAllpassSO_tick(&f->filters[i], sample);
+    }
+    return sample;
+}
+
+void   tThiranAllpassSOCascade_clear(tThiranAllpassSOCascade* const ft)
+{
+    _tThiranAllpassSOCascade* f = *ft;
+    for (int i = 0; i < f->numFilts; i++)
+    {
+        //tAllpassSO_setCoeff(&f->filters[i], f->a[1], f->a[2]);
+        f->filters[i]->prevSamp = 0.0f;
+        f->filters[i]->prevPrevSamp = 0.0f;
+
+    }
+}
+
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
 void    tOnePole_init(tOnePole* const ft, Lfloat freq, LEAF* const leaf)
@@ -178,6 +344,83 @@ void tOnePole_setSampleRate(tOnePole* const ft, Lfloat sr)
     f->b0 = f->freq * f->twoPiTimesInvSampleRate;
     f->b0 = LEAF_clip(0.0f, f->b0, 1.0f);
     f->a1 = 1.0f - f->b0;
+}
+
+
+// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ CookOnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
+void    tCookOnePole_init(tCookOnePole* const ft, LEAF* const leaf)
+{
+    tCookOnePole_initToPool(ft, &leaf->mempool);
+}
+
+void    tCookOnePole_initToPool     (tCookOnePole* const ft, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tCookOnePole* f = *ft = (_tCookOnePole*) mpool_alloc(sizeof(_tCookOnePole), m);
+    f->mempool = m;
+    LEAF* leaf = f->mempool->leaf;
+    
+    f->poleCoeff     = 0.9f;
+    f->gain         = 1.0f;
+    f->sgain         = 0.1f;
+    f->output         = 0.0f;
+    f->lastOutput    = 0.f;
+    
+    f->twoPiTimesInvSampleRate = leaf->twoPiTimesInvSampleRate;
+}
+
+void    tCookOnePole_free   (tCookOnePole* const ft)
+{
+    _tCookOnePole* f = *ft;
+    
+    mpool_free((char*)f, f->mempool);
+}
+
+
+void    tCookOnePole_setPole(tCookOnePole* const ft, Lfloat aValue)
+{
+    _tCookOnePole* onepole = *ft;
+    
+    onepole->poleCoeff = aValue;
+      if (onepole->poleCoeff > 0.0)                   // Normalize gain to 1.0 max
+        onepole->sgain = onepole->gain * (1.0 - onepole->poleCoeff);
+      else
+        onepole->sgain = onepole->gain * (1.0 + onepole->poleCoeff);
+}
+
+void    tCookOnePole_setGain(tCookOnePole* const ft, Lfloat aValue)
+{
+    _tCookOnePole* onepole = *ft;
+    onepole->gain = aValue;
+      if (onepole->poleCoeff > 0.0)
+        onepole->sgain = onepole->gain * (1.0 - onepole->poleCoeff);  // Normalize gain to 1.0 max
+      else
+        onepole->sgain = onepole->gain * (1.0 + onepole->poleCoeff);
+}
+
+void    tCookOnePole_setGainAndPole(tCookOnePole* const ft, Lfloat gain, Lfloat pole)
+{
+    _tCookOnePole* onepole = *ft;
+    
+    onepole->poleCoeff = pole;
+
+    onepole->sgain = gain;
+     
+}
+    
+Lfloat   tCookOnePole_tick(tCookOnePole* const ft, Lfloat sample)
+{
+    _tCookOnePole* onepole = *ft;
+    
+    onepole->output = (onepole->sgain * sample) + (onepole->poleCoeff * onepole->output);
+    onepole->lastOutput = onepole->output;
+    return onepole->lastOutput;
+}
+
+void tCookOnePole_setSampleRate(tCookOnePole* const ft, Lfloat sr)
+{
+    _tCookOnePole* f = *ft;
+    f->twoPiTimesInvSampleRate = (1.0f/sr) * TWO_PI;
 }
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ TwoPole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
@@ -572,7 +815,7 @@ void    tPoleZero_setCoefficients(tPoleZero* const pzf, Lfloat b0, Lfloat b1, Lf
     f->a1 = a1;
 }
 
-void    tPoleZero_setAllpass(tPoleZero* const pzf, Lfloat coeff)
+void    tPoleZero_setThiranAllpassSOCascade(tPoleZero* const pzf, Lfloat coeff)
 {
     _tPoleZero* f = *pzf;
     

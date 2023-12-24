@@ -408,7 +408,7 @@ void tract_addTurbulenceNoiseAtPosition(tract* const t, Lfloat turbulenceNoise, 
 	_tract* tr = *t;
 	int i = (int)floorf(position);
 	Lfloat delta = position - i;
-	Lfloat mapped = LEAF_map(diameter, 0.38f, 0.245f, 0.0f, 1.0f);
+	//Lfloat mapped = LEAF_map(diameter, 0.38f, 0.245f, 0.0f, 1.0f);
 	Lfloat thinness0 = LEAF_clip(0.0f, 8.0f * (0.09f - diameter),  1.0f);
 	Lfloat openness = LEAF_clip(0.0f, 30.0f * (diameter), 1.0f);
 	Lfloat noise0 = turbulenceNoise * (1.0f - delta) * thinness0 * openness * 0.5f;

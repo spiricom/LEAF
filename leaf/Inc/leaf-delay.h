@@ -251,6 +251,7 @@ extern "C" {
     Lfloat   tLinearDelay_getDelay    (tLinearDelay* const);
     void    tLinearDelay_tapIn       (tLinearDelay* const, Lfloat in, uint32_t tapDelay);
     Lfloat   tLinearDelay_tapOut      (tLinearDelay* const, uint32_t tapDelay);
+    Lfloat tLinearDelay_tapOutInterpolated (tLinearDelay* const dl, Lfloat tapDelay);
     Lfloat   tLinearDelay_addTo       (tLinearDelay* const, Lfloat value, uint32_t tapDelay);
     Lfloat   tLinearDelay_tick        (tLinearDelay* const, Lfloat sample);
     void    tLinearDelay_tickIn      (tLinearDelay* const, Lfloat input);
@@ -513,7 +514,7 @@ extern "C" {
         uint32_t maxDelay;
         Lfloat delay;
 
-        //coefficients for lagrange interpolation (calculated when delay length changes
+        //coefficients for lagrange interpolation (calculated when delay length changes)
         Lfloat h0;
         Lfloat h1;
         Lfloat h2;

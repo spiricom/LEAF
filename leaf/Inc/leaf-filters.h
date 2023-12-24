@@ -86,8 +86,100 @@ extern "C" {
     void    tAllpass_setGain        (tAllpass* const, Lfloat gain);
     void    tAllpass_setDelay       (tAllpass* const, Lfloat delay);
     
+//==============================================================================
+
+/*!
+ @defgroup tallpass tAllpassSO
+ @ingroup filters
+ @brief Schroeder allpass. Comb-filter with feedforward and feedback.
+ @{
+ 
+ @fn void    tAllpassSO_init           (tAllpassSO* const, Lfloat initDelay, uint32_t maxDelay, LEAF* const leaf)
+ @brief Initialize a tAllpassSO to the default mempool of a LEAF instance.
+ @param filter A pointer to the tAllpassSO to initialize.
+ @param leaf A pointer to the leaf instance.
+ 
+ @fn void    tAllpassSO_initToPool     (tAllpassSO* const, Lfloat initDelay, uint32_t maxDelay, tMempool* const)
+ @brief Initialize a tAllpassSO to a specified mempool.
+ @param filter A pointer to the tAllpassSO to initialize.
+ @param mempool A pointer to the tMempool to use.
+ 
+ @fn void    tAllpassSO_free           (tAllpassSO* const)
+ @brief Free a tAllpassSO from its mempool.
+ @param filter A pointer to the tAllpassSO to free.
+ 
+ @fn Lfloat   tAllpassSO_tick           (tAllpassSO* const, Lfloat input)
+ @brief
+ @param filter A pointer to the relevant tAllpassSO.
+ 
+ @fn void    tAllpassSO_setGain        (tAllpassSO* const, Lfloat gain)
+ @brief
+ @param filter A pointer to the relevant tAllpassSO.
+ 
+ @fn void    tAllpassSO_setDelay       (tAllpassSO* const, Lfloat delay)
+ @brief
+ @param filter A pointer to the relevant tAllpassSO.
+ ￼￼￼
+ @} */
+
+typedef struct _tAllpassSO
+{
     
+    tMempool mempool;
+    
+    Lfloat prevSamp;
+    Lfloat prevPrevSamp;
+    Lfloat a1;
+    Lfloat a2;
+    Lfloat D;
+
+} _tAllpassSO;
+
+typedef _tAllpassSO* tAllpassSO;
+
+void    tAllpassSO_init           (tAllpassSO* const, LEAF* const leaf);
+void    tAllpassSO_initToPool     (tAllpassSO* const, tMempool* const);
+void    tAllpassSO_free           (tAllpassSO* const);
+
+Lfloat   tAllpassSO_tick           (tAllpassSO* const, Lfloat input);
+void    tAllpassSO_setCoeff     (tAllpassSO* const ft, Lfloat a1, Lfloat a2);
     //==============================================================================
+
+
+typedef struct _tThiranAllpassSOCascade
+{
+    
+    tMempool mempool;
+    
+    int numFilts;
+    tAllpassSO* filters;
+    Lfloat B;
+    Lfloat iKey;
+    Lfloat a[3];
+    
+    Lfloat k1[2];
+    Lfloat k2[2];
+    Lfloat k3[2];
+    Lfloat C1[2];
+    Lfloat C2[2];
+    int numActiveFilters;
+    int numFiltsMap[2];
+    int isHigh;
+    Lfloat D;
+} _tThiranAllpassSOCascade;
+
+typedef _tThiranAllpassSOCascade* tThiranAllpassSOCascade;
+
+void    tThiranAllpassSOCascade_init           (tThiranAllpassSOCascade* const, int order, LEAF* const leaf);
+void    tThiranAllpassSOCascade_initToPool     (tThiranAllpassSOCascade* const, int order, tMempool* const);
+void    tThiranAllpassSOCascade_free           (tThiranAllpassSOCascade* const);
+
+Lfloat   tThiranAllpassSOCascade_tick           (tThiranAllpassSOCascade* const, Lfloat input);
+Lfloat    tThiranAllpassSOCascade_setCoeff     (tThiranAllpassSOCascade* const ft, Lfloat a1, Lfloat a2);
+void   tThiranAllpassSOCascade_clear            (tThiranAllpassSOCascade* const ft);
+    //==============================================================================
+
+
     
     /*!
      @defgroup tonepole tOnePole
@@ -167,7 +259,78 @@ extern "C" {
     void    tOnePole_setSampleRate  (tOnePole* const, Lfloat sr);
     
     //==============================================================================
+//==============================================================================
+
+/*!
+ @defgroup tonepole tOnePole
+ @ingroup filters
+ @brief OnePole filter, reimplemented from STK (Cook and Scavone).
+ @{
+ 
+ @fn void    tOnePole_init           (tOnePole* const, Lfloat thePole, LEAF* const leaf)
+ @brief Initialize a tOnePole to the default mempool of a LEAF instance.
+ @param filter A pointer to the tOnePole to initialize.
+ @param leaf A pointer to the leaf instance.
+ 
+ @fn void    tOnePole_initToPool     (tOnePole* const, Lfloat thePole, tMempool* const)
+ @brief Initialize a tOnePole to a specified mempool.
+ @param filter A pointer to the tOnePole to initialize.
+ @param mempool A pointer to the tMempool to use.
+ 
+ @fn void    tOnePole_free           (tOnePole* const)
+ @brief Free a tOnePole from its mempool.
+ @param filter A pointer to the tOnePole to free.
+ 
+ @fn Lfloat   tOnePole_tick           (tOnePole* const, Lfloat input)
+ @brief
+ @param filter A pointer to the relevant tOnePole.
+ 
+ @fn void    tOnePole_setB0          (tOnePole* const, Lfloat b0)
+ @brief
+ @param filter A pointer to the relevant tOnePole.
+ 
+ @fn void    tOnePole_setA1          (tOnePole* const, Lfloat a1)
+ @brief
+ @param filter A pointer to the relevant tOnePole.
+ 
+ @fn void    tOnePole_setPole        (tOnePole* const, Lfloat thePole)
+ @brief
+ @param filter A pointer to the relevant tOnePole.
+ 
+ @fn void    tOnePole_setFreq        (tOnePole* const, Lfloat freq)
+ @brief
+ @param filter A pointer to the relevant tOnePole.
+ 
+ @fn void    tOnePole_setCoefficients(tOnePole* const, Lfloat b0, Lfloat a1)
+ @brief
+ @param filter A pointer to the relevant tOnePole.
+ 
+ @fn void    tOnePole_setGain        (tOnePole* const, Lfloat gain)
+ @brief
+ @param filter A pointer to the relevant tOnePole.
+ ￼￼￼
+ @} */
+
+typedef struct _tCookOnePole
+{
     
+    tMempool mempool;
+    Lfloat poleCoeff, gain, sgain, output, lastOutput;
+    Lfloat twoPiTimesInvSampleRate;
+} _tCookOnePole;
+
+typedef _tCookOnePole* tCookOnePole;
+
+void    tCookOnePole_init           (tCookOnePole* const, LEAF* const leaf);
+void    tCookOnePole_initToPool     (tCookOnePole* const, tMempool* const);
+void    tCookOnePole_free           (tCookOnePole* const);
+Lfloat   tCookOnePole_tick           (tCookOnePole* const, Lfloat input);
+void    tCookOnePole_setPole        (tCookOnePole* const, Lfloat thePole);
+void    tCookOnePole_setGain        (tCookOnePole* const, Lfloat gain);
+void    tCookOnePole_setGainAndPole(tCookOnePole* const ft, Lfloat gain, Lfloat pole);
+void    tCookOnePole_setSampleRate  (tCookOnePole* const, Lfloat sr);
+
+//==============================================================================
     /*!
      @defgroup ttwopole tTwoPole
      @ingroup filters
