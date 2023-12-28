@@ -186,12 +186,12 @@ Lfloat glottis_compute(glottis* const glo)
 
 
 
-void tract_init(tract* const t,  int numTractSections, LEAF* const leaf)
+void tract_init(tract* const t,  int numTractSections, int maxNumTractSections, LEAF* const leaf)
 {
-	tract_initToPool(t, numTractSections, &leaf->mempool);
+	tract_initToPool(t, numTractSections, maxNumTractSections, &leaf->mempool);
 }
 
-void tract_initToPool(tract* const t,  int numTractSections, tMempool* const mp)
+void tract_initToPool(tract* const t,  int numTractSections, int maxNumTractSections, tMempool* const mp)
 {
 	_tMempool* m = *mp;
 	_tract* tr = *t = (_tract*) mpool_calloc(sizeof(_tract), m);
@@ -201,6 +201,7 @@ void tract_initToPool(tract* const t,  int numTractSections, tMempool* const mp)
 	int i;
     Lfloat diameter, d; /* needed to set up diameter arrays */
     Lfloat n = numTractSections;
+    tr->maxNumTractSections = maxNumTractSections;
     tr->n = n; //44
     tr->nose_length = n*0.636363636363636f; //28
     tr->nose_start = (n - tr->nose_length) + 1; //17
@@ -233,24 +234,24 @@ void tract_initToPool(tract* const t,  int numTractSections, tMempool* const mp)
     Lfloat invN = 1.0f / tr->n;
     Lfloat invNoseLength = 1.0f / tr->nose_length;
 
-    tr->diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->n, m);
-    tr->rest_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->n, m);
-    tr->target_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->n, m);
-    tr->new_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->n, m);
-    tr->L = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->n, m);
-    tr->R = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->n, m);
-    tr->reflection = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (tr->n + 1), m);
-    tr->new_reflection = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (tr->n + 1), m);
-    tr->junction_outL = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (tr->n + 1), m);
-    tr->junction_outR = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (tr->n + 1), m);
-    tr->A = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->n, m);
-    tr->noseL = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->nose_length, m);
-    tr->noseR = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->nose_length, m);
-    tr->nose_junc_outL = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (tr->nose_length + 1), m);
-    tr->nose_junc_outR = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (tr->nose_length + 1), m);
-    tr->nose_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->nose_length, m);
-    tr->nose_reflection = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->nose_length, m);
-    tr->noseA = (Lfloat*) mpool_calloc(sizeof(Lfloat) * tr->nose_length, m);
+    tr->diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->rest_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->target_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->new_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->L = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->R = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->reflection = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
+    tr->new_reflection = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
+    tr->junction_outL = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
+    tr->junction_outR = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
+    tr->A = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->noseL = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->noseR = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->nose_junc_outL = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
+    tr->nose_junc_outR = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
+    tr->nose_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->nose_reflection = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->noseA = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
 
     for(i = 0; i < tr->n; i++) {
         diameter = 0;
@@ -345,7 +346,81 @@ void tract_calculate_reflections(tract* const t)
     tr->new_reflection_nose = (Lfloat)(2.0f * tr->noseA[0] - sum) * invSum;
 }
 
+void tract_newLength(tract* const t, int numTractSections)
+{
+	_tract* tr = *t;
+	int i;
+	Lfloat diameter, d;
+    Lfloat n;
+    if (numTractSections < tr->maxNumTractSections)
+    {
+    	n = numTractSections;
+    }
+    else
+    {
+    	n = tr->maxNumTractSections;
+    }
+    tr->n = n; //44
+    tr->nose_length = n*0.636363636363636f; //28
+    tr->nose_start = (n - tr->nose_length) + 1; //17
 
+    tr->reflection_left = 0.0f;
+    tr->reflection_right = 0.0f;
+    tr->reflection_nose = 0.0f;
+    tr->new_reflection_left = 0.0f;
+    tr->new_reflection_right= 0.0f;
+    tr->new_reflection_nose = 0.0f;
+    tr->velum_target = 0.01f;
+    tr->glottal_reflection = 0.75f;
+    tr->lip_reflection = -0.85f;
+    tr->last_obstruction = -1;
+    tr->movement_speed = 200.0f;
+    tr->lip_output = 0.0f;
+    tr->nose_output = 0.0f;
+    tr->tip_start = n*0.727272727272727f;
+    tr->blade_start = n*0.227272727272727f;
+    tr->lip_start = n*0.886363636363636f;
+
+	tr->tongueUpperBound = (tr->tip_start-(n*0.068181818181818f));
+	tr->tongueLowerBound = (tr->blade_start+(n*0.045454545454545f));
+
+	tr->turbuluencePointPosition[0] = n* 0.45f;
+	tr->turbuluencePointPosition[1] = n* 0.5f;
+	tr->turbuluencePointDiameter[0] = 1.5f;
+	tr->turbuluencePointDiameter[1] = 1.5f;
+
+    Lfloat invN = 1.0f / tr->n;
+
+    for(i = 0; i < tr->n; i++) {
+        diameter = 0.0f;
+        if(i < (int)((n*0.159090909090909f) * ((Lfloat)tr->n * invN) - 0.5f)) { //was 7
+            diameter = 0.6f;
+        } else if( i < (int)((n*0.272727272727273f) * (Lfloat)tr->n * invN)) { //was 12
+            diameter = 1.1f;
+        } else {
+            diameter = 1.5f;
+        }
+
+        tr->diameter[i] =
+            tr->rest_diameter[i] =
+            tr->target_diameter[i] =
+            tr->new_diameter[i] = diameter;
+
+    }
+
+    Lfloat invNoseLength = 1.0f / tr->nose_length;
+	for(i = 0; i < tr->nose_length; i++) {
+		d = 2.0f * ((Lfloat)i * invNoseLength);
+		if(d < 1.0f) {
+			diameter = 0.4f + 1.6f * d;
+		} else {
+			diameter = 0.5f + 1.5f*(2.0f-d);
+		}
+		diameter = MIN(diameter, 1.9f);
+		tr->nose_diameter[i] = diameter;
+	}
+
+}
 
 void tract_reshape(tract* const t)
 {
@@ -429,16 +504,16 @@ void tract_compute(tract* const t, Lfloat  in, Lfloat  lambda)
 	_tract* tr = *t;
 	Lfloat  r, w;
     int i;
-    Lfloat  amp;
-    int current_size;
-    _transient_pool *thepool;
-    _transient *n;
+    //Lfloat  amp;
+    //int current_size;
+   // _transient_pool *thepool;
+    //_transient *n;
 
+    Lfloat oneMinusLambda = 1.0f - lambda;
 
-
-    thepool = tr->tpool;
-	current_size = thepool->size;
-
+   // thepool = tr->tpool;
+	//current_size = thepool->size;
+	/*
 	n = thepool->root;
 	for(i = 0; i < current_size; i++) {
 		amp = n->strength * fastPowf(2.0f, -1.0f * n->exponent * n->time_alive);
@@ -450,13 +525,13 @@ void tract_compute(tract* const t, Lfloat  in, Lfloat  lambda)
 		}
 		n = n->next;
 	}
-                               
+                  */
 	tract_addTurbulenceNoise(&tr);
     tr->junction_outR[0] = tr->L[0] * tr->glottal_reflection + in;
     tr->junction_outL[tr->n] = tr->R[tr->n - 1] * tr->lip_reflection;
 
     for(i = 1; i < tr->n; i++) {
-        r = tr->reflection[i] * (1 - lambda) + tr->new_reflection[i] * lambda;
+        r = tr->reflection[i] * oneMinusLambda + tr->new_reflection[i] * lambda;
         w = r * (tr->R[i - 1] + tr->L[i]);
         tr->junction_outR[i] = tr->R[i - 1] - w;
         tr->junction_outL[i] = tr->L[i] + w;
@@ -464,11 +539,11 @@ void tract_compute(tract* const t, Lfloat  in, Lfloat  lambda)
 
 
     i = tr->nose_start;
-    r = tr->new_reflection_left * (1.0f - lambda) + tr->reflection_left*lambda;
+    r = tr->new_reflection_left * oneMinusLambda + tr->reflection_left*lambda;
     tr->junction_outL[i] = r*tr->R[i-1] + (1.0f+r)*(tr->noseL[0]+tr->L[i]);
-    r = tr->new_reflection_right * (1.0f - lambda) + tr->reflection_right * lambda;
+    r = tr->new_reflection_right * oneMinusLambda + tr->reflection_right * lambda;
     tr->junction_outR[i] = r*tr->L[i] + (1.0f+r)*(tr->R[i-1]+tr->noseL[0]);
-    r = tr->new_reflection_nose * (1.0f - lambda) + tr->reflection_nose * lambda;
+    r = tr->new_reflection_nose * oneMinusLambda + tr->reflection_nose * lambda;
     tr->nose_junc_outR[0] = r * tr->noseL[0]+(1.0f+r)*(tr->L[i]+tr->R[i-1]);
 
 
@@ -593,18 +668,18 @@ Lfloat move_towards(Lfloat current, Lfloat target,
 
 
 
-void    tVoc_init         (tVoc* const voc, int numTractSections, LEAF* const leaf)
+void    tVoc_init         (tVoc* const voc, int numTractSections, int maxNumTractSections, LEAF* const leaf)
 {
-	tVoc_initToPool   (voc, numTractSections, &leaf->mempool);
+	tVoc_initToPool   (voc, numTractSections, maxNumTractSections, &leaf->mempool);
 }
 
-void    tVoc_initToPool   (tVoc* const voc, int numTractSections, tMempool* const mp)
+void    tVoc_initToPool   (tVoc* const voc, int numTractSections, int maxNumTractSections, tMempool* const mp)
 {
 	_tMempool* m = *mp;
 	_tVoc* v = *voc = (_tVoc*) mpool_alloc(sizeof(_tVoc), m);
 	v->mempool = m;
 	glottis_initToPool(&v->glot, &m); /* initialize glottis */
-	tract_initToPool(&v->tr, numTractSections, &m); /* initialize vocal tract */
+	tract_initToPool(&v->tr, numTractSections, maxNumTractSections, &m); /* initialize vocal tract */
 	v->counter = 0;
 }
 void    tVoc_free         (tVoc* const voc)
@@ -620,7 +695,7 @@ Lfloat   tVoc_tick         (tVoc* const voc)
 {
 	_tVoc* v = *voc;
 	Lfloat vocal_output, glot;
-	Lfloat lambda1, lambda2;
+	Lfloat lambda1,lambda2;
 
 	if(v->counter == 0) {
 		tract_reshape(&v->tr);
@@ -652,14 +727,22 @@ Lfloat   tVoc_tick         (tVoc* const voc)
 	tract_compute(&v->tr, glot, lambda1);
 	vocal_output += v->tr->lip_output + v->tr->nose_output;
 
-	//tract_compute(&v->tr, glot, lambda2);
-	//vocal_output += v->tr->lip_output + v->tr->nose_output;
+	if (v->doubleCompute)
+	{
+		tract_compute(&v->tr, glot, lambda2);
+		vocal_output += v->tr->lip_output + v->tr->nose_output;
+		vocal_output *= 0.25f;
+	}
+	else
+	{
+		vocal_output *= 0.5f;
+	}
 	//v->buf[i] = vocal_output * 0.125f;
 
 
 	//vocal_output = glot;
 	v->counter = (v->counter + 1) & 63;
-	return vocal_output * 0.25f;
+	return vocal_output;
 }
 
 void    tVoc_tractCompute     (tVoc* const voc, Lfloat *in, Lfloat *out)
@@ -686,7 +769,11 @@ void    tVoc_tractCompute     (tVoc* const voc, Lfloat *in, Lfloat *out)
     *out = vocal_output * 0.125;
     v->counter = (v->counter + 1) & 511;
 }
-
+void    tVoc_setDoubleComputeFlag(tVoc* const voc, int doubleCompute)
+{
+	_tVoc* v = *voc;
+	v->doubleCompute = doubleCompute;
+}
 void    tVoc_setSampleRate(tVoc* const voc, Lfloat sr)
 {
 	_tVoc* v = *voc;
@@ -762,6 +849,11 @@ void tVoc_set_tongue_shape_and_touch(tVoc* const voc, Lfloat tongue_index, Lfloa
 	v->tr->turbuluencePointPosition[1] = touch_index;
 	v->tr->turbuluencePointDiameter[1] = touch_diameter;
 }
+void tVoc_set_tractLength(tVoc* const voc, int newLength)
+{
+	_tVoc* v = *voc;
+	tract_newLength(&v->tr, newLength);
+}
 
 void tVoc_set_tenseness(tVoc* const voc, Lfloat tenseness)
 {
@@ -818,10 +910,12 @@ void tVoc_set_tongue_and_touch_diameters(tVoc* const voc, Lfloat tongue_index, L
 
 	//now do additional constrictions (touch position)
 	Lfloat width=2.0f;
-
-	if (touch_index< (v->tr->n * 0.568181818181818f)) width = 10.0f; //25 in original code
-	else if (touch_index>=v->tr->tip_start) width= 5.0f;
-	else width = 10.0f-5.0f*(touch_index-25.0f)/(v->tr->tip_start-25.0f);
+	Lfloat tenwidth = v->tr->n*0.227272727272727f;
+	Lfloat fivewidth = v->tr->n*0.113636363636364f;
+	Lfloat twentyfivewidth = v->tr->n *0.568181818181818f;
+	if (touch_index< (twentyfivewidth)) width = tenwidth; //25 in original code
+	else if (touch_index>=v->tr->tip_start) width= fivewidth;
+	else width = tenwidth-fivewidth*(touch_index-twentyfivewidth)/(v->tr->tip_start-twentyfivewidth);
 	Lfloat invWidth = 1.0f / width;
 	if ((touch_index < v->tr->n) && (touch_diameter < 3.0f))
 	{

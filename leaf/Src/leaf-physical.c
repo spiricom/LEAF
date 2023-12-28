@@ -746,13 +746,13 @@ void    tSimpleLivingString3_initToPool  (tSimpleLivingString3* const pl, int ov
 void    tSimpleLivingString3_free (tSimpleLivingString3* const pl)
 {
     _tSimpleLivingString3* p = *pl;
-    
-    tExpSmooth_free(&p->wlSmooth);
-    tLinearDelay_free(&p->delayLineU);
-    tLinearDelay_free(&p->delayLineL);
-    tOnePole_free(&p->bridgeFilter);
-    tHighpass_free(&p->DCblocker);
     tFeedbackLeveler_free(&p->fbLev);
+    tHighpass_free(&p->DCblocker);
+    tLinearDelay_free(&p->delayLineL);
+    tLinearDelay_free(&p->delayLineU);
+    tOnePole_free(&p->bridgeFilter);
+    tExpSmooth_free(&p->wlSmooth);
+
     
     mpool_free((char*)p, p->mempool);
 }
@@ -2737,36 +2737,52 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, tM
     x->oversampling = oversampling;
     x->invOversampling = 1.0f / oversampling;
     x->sampleRate          = leaf->sampleRate * oversampling;
-    x->invSampleRate = 1.f / (x->sampleRate * oversampling);
+    x->invSampleRate = 1.f / x->sampleRate;
     x->prevTension = 0.0f;
     x->tensionGain = 10.0f;
     x->a = -0.0001f;
     x->allpassDelay = 0.f;
-    tLagrangeDelay_initToPool(&x->delay, 100.0f, 2400.0f*oversampling, mp);
-    
+    x->decayCoeff = 1.0f;
+    x->muteCoeff = 1.0f;
+    tLagrangeDelay_initToPool(&x->delay, 100.0f, 1200.0f*oversampling, mp);
     tLagrangeDelay_clear(&x->delay);
+    tLagrangeDelay_initToPool(&x->delayP, 100.0f, 1200.0f*oversampling, mp);
+    tLagrangeDelay_clear(&x->delayP);
     
     tCookOnePole_initToPool(&x->reflFilt, mp);
     tCookOnePole_setSampleRate(&x->reflFilt, x->sampleRate);
+    tCookOnePole_initToPool(&x->reflFiltP, mp);
+    tCookOnePole_setSampleRate(&x->reflFiltP, x->sampleRate);
     
     //tCookOnePole_setPole(&x->reflFilt, 0.6f - (0.1f * 22050.f / x->sampleRate));
     //tCookOnePole_setGain(&x->reflFilt, .999999f);
     tCookOnePole_setGainAndPole(&x->reflFilt,0.999f, -0.0014f);
-    
+    tCookOnePole_setGainAndPole(&x->reflFiltP,0.999f, -0.0014f);
    
     tTString_setFreq(&x, 440.0f);
-    tSlide_initToPool(&x->slide, 0, 8000, mp);
-    tHighpass_initToPool(&x->dcBlock, .01f,  mp);
+    //tSlide_initToPool(&x->slide, 0, 8000, mp);
+    //tHighpass_initToPool(&x->dcBlock, .01f,  mp);
     tThiranAllpassSOCascade_initToPool(&x->allpass, 4, mp);
-    x->allpassDelay = tThiranAllpassSOCascade_setCoeff(&x->allpass, 0.01f, 440.0f);
-    
+    tThiranAllpassSOCascade_initToPool(&x->allpassP, 4, mp);
+    x->allpassDelay = tThiranAllpassSOCascade_setCoeff(&x->allpass, 0.0001f, 100.0f, x->invOversampling);
+    x->allpassDelayP = tThiranAllpassSOCascade_setCoeff(&x->allpassP, 0.000025f, 100.0f, x->invOversampling);
+
+    tSVF_initToPool(&x->lowpassP, SVFTypeLowpass, 8000.0f, 0.8f, mp);
+    tSVF_initToPool(&x->highpassP, SVFTypeHighpass, 2000.0f, 0.8f, mp);
+    x->twoPiTimesInvSampleRate = TWO_PI * x->invSampleRate;
 }
 void    tTString_free                  (tTString* const bw)
 {
     _tTString* x = *bw;
-    tLagrangeDelay_free(&x->delay);
-    tCookOnePole_free(&x->reflFilt);
+
+    tSVF_free(&x->highpassP);
+    tSVF_free(&x->lowpassP),
+    tThiranAllpassSOCascade_free(&x->allpassP);
     tThiranAllpassSOCascade_free(&x->allpass);
+    tCookOnePole_free(&x->reflFiltP);
+    tCookOnePole_free(&x->reflFilt);
+    tLagrangeDelay_free(&x->delayP);
+    tLagrangeDelay_free(&x->delay);
     mpool_free((char*)x, x->mempool);
 }
 
@@ -2778,14 +2794,14 @@ Lfloat   tTString_tick                  (tTString* const bw)
     {
         Lfloat tension = 0.0f;
         Lfloat powerSum = 0.0f;
-        
+        /*
         for (int j = 0; j < x->halfBaseDelay; j++)
         {
             Lfloat squared = tLagrangeDelay_tapOut(&x->delay, j) - tLagrangeDelay_tapOut(&x->delay, x->baseDelay - j);
             squared = squared * squared;
             powerSum += squared;
         }
-        
+        */
         //tension = tSlide_tick(&x->slide, powerSum) * -x->tensionGain;
         
         //tension =powerSum * -x->tensionGain * ((1.0f + (x->a)/ (1.0f +(x->a * x->prevTension))));
@@ -2796,20 +2812,31 @@ Lfloat   tTString_tick                  (tTString* const bw)
         Lfloat currentDelay = x->baseDelay - x->allpassDelay + (tension);
         tLagrangeDelay_setDelay(&x->delay, currentDelay);
         Lfloat delayOut = tCookOnePole_tick(&x->reflFilt, x->output);
-        //Lfloat delayOut =x->output;
         Lfloat output = tLagrangeDelay_tick(&x->delay, delayOut);
-        if (isnan(output))
-        {
-            x->stop = 1;
-        }
         output = tThiranAllpassSOCascade_tick(&x->allpass, output);
-        if (isnan(output))
+        x->output = output * x->decayCoeff * x->muteCoeff;
+
+        Lfloat currentDelayP = x->baseDelay - x->allpassDelayP + (tension);
+        tLagrangeDelay_setDelay(&x->delayP, currentDelayP);
+        Lfloat delayOutP = tCookOnePole_tick(&x->reflFiltP, x->outputP);
+        Lfloat outputP = tLagrangeDelay_tick(&x->delayP, delayOutP);
+        outputP = tThiranAllpassSOCascade_tick(&x->allpassP, outputP);
+
+
+
+        x->outputP = outputP * x->decayCoeff * x->muteCoeff;
+        if (isnan(outputP))
         {
-            x->stop = 1;
+        	x->stop =1;
         }
-        x->output = output;
+
+
     }
-    return x->output;
+
+    Lfloat outputPfilt = tSVF_tick(&x->lowpassP, x->outputP );
+    outputPfilt = tSVF_tick(&x->highpassP, outputPfilt);
+
+    return x->output + outputPfilt;
 }
 
 void    tTString_setFreq               (tTString* const bw, Lfloat freq)
@@ -2818,16 +2845,40 @@ void    tTString_setFreq               (tTString* const bw, Lfloat freq)
     if (freq < 20.f)
         freq = 20.f;
     //freq = freq * x->invOversampling;
-    x->baseDelay = (x->sampleRate / (freq * 0.5f)) - 2.0f;
+    x->freq = freq;
+    x->baseDelay = (x->sampleRate / freq) - 2.0f;
     x->halfBaseDelay = (uint32_t) (x->baseDelay * 0.5f);
 }
 
+void    tTString_setDecay               (tTString* const bw, Lfloat decay)
+{
+	 _tTString* x = *bw;
+	 decay = LEAF_map(decay, 0.0f, 1.0f, 0.99f, 1.01f);
+	 decay = LEAF_clip(0.99f, decay, 1.0f);
+	 x->decayCoeff = decay;
+}
+
+void    tTString_mute              (tTString* const bw)
+{
+	 _tTString* x = *bw;
+	 x->muteCoeff = 0.8f;
+}
+
+void    tTString_setFilter              (tTString* const bw, Lfloat filter)
+{
+	 _tTString* x = *bw;
+
+	 filter = ((filter * 18000.0f) + 20.0f)* x->twoPiTimesInvSampleRate;
+	tCookOnePole_setPole(&x->reflFilt,filter);
+	tCookOnePole_setPole(&x->reflFiltP,filter);
+
+}
 
 void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloat amplitude)
 {
     _tTString* x = *bw;
     Lfloat currentDelay = x->baseDelay - x->allpassDelay;
-    
+    x->muteCoeff = 1.0f;
     uint32_t halfCurrentDelay = currentDelay * 0.5f;
     volatile Lfloat pluckPoint = position * halfCurrentDelay;
     pluckPoint = LEAF_clip(1.0f, pluckPoint, halfCurrentDelay-1.0f);
@@ -2850,7 +2901,36 @@ void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloa
         tLagrangeDelay_tapIn(&x->delay, -val, halfCurrentDelay*2-i);
     }
     tThiranAllpassSOCascade_clear(&x->allpass);
+
+
+
+    Lfloat currentDelayP = x->baseDelay - x->allpassDelayP;
+
+    uint32_t halfCurrentDelayP = currentDelayP * 0.5f;
+    volatile Lfloat pluckPointP = position * halfCurrentDelayP;
+    pluckPointP = LEAF_clip(1.0f, pluckPoint, halfCurrentDelayP-1.0f);
+    uint32_t pluckPointIntP = (uint32_t) pluckPointP;
+    volatile Lfloat remainderP = halfCurrentDelayP-pluckPointP;
+    tLagrangeDelay_clear(&x->delayP);
+    for (uint32_t i = 0; i < halfCurrentDelayP; i++)
+    {
+        Lfloat val = 0.0f;
+        if (i <= pluckPointIntP)
+        {
+            val = amplitude * ((Lfloat)i/(Lfloat)pluckPointIntP);
+        }
+        else
+        {
+            val = amplitude * (1.0f - (((Lfloat)i-(Lfloat)pluckPointIntP)/(Lfloat)remainderP));
+        }
+
+        tLagrangeDelay_tapIn(&x->delayP, val, i);
+        tLagrangeDelay_tapIn(&x->delayP, -val, halfCurrentDelayP*2-i);
+    }
+    tThiranAllpassSOCascade_clear(&x->allpassP);
 }
+
+
 
 void    tTString_setWaveLength         (tTString* const, Lfloat waveLength); // in samples
 void    tTString_setSampleRate         (tTString* const, Lfloat sr);
@@ -2858,8 +2938,8 @@ void    tTString_setSampleRate         (tTString* const, Lfloat sr);
 void    tTString_setHarmonicity         (tTString* const bw, Lfloat B, Lfloat freq)
 {
     _tTString* x = *bw;
-    x->allpassDelay = tThiranAllpassSOCascade_setCoeff(&x->allpass, B, freq * x->invOversampling);
-    
+    x->allpassDelay = tThiranAllpassSOCascade_setCoeff(&x->allpass, B, freq * x->invOversampling, x->oversampling);
+    x->allpassDelayP = tThiranAllpassSOCascade_setCoeff(&x->allpassP, B * 0.25f, freq * x->invOversampling, x->oversampling);
 }
 
 

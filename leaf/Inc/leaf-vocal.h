@@ -77,7 +77,7 @@ typedef struct _tract
 {
 	tMempool mempool;
 	int n;
-
+	int maxNumTractSections;
 	    Lfloat*  diameter;
 	    Lfloat*  rest_diameter;
 	    Lfloat*  target_diameter;
@@ -136,13 +136,15 @@ typedef struct _tract
 	    Lfloat turbuluencePointPosition[2];
 	    Lfloat turbuluencePointDiameter[2];
 	    transient_pool tpool;
+
 	    Lfloat  T;
 } _tract;
 
 typedef _tract* tract;
-void tract_init(tract* const t,  int numTractSections, LEAF* const leaf);
-void tract_initToPool(tract* const t,  int numTractSections, tMempool* const mp);
+void tract_init(tract* const t,  int numTractSections, int maxNumTractSections, LEAF* const leaf);
+void tract_initToPool(tract* const t,  int numTractSections, int maxNumTractSections, tMempool* const mp);
 void tract_calculate_reflections(tract *t);
+void tract_newLength(tract *t, int newLength);
 void tract_reshape(tract *t);
 void tract_compute(tract *t, Lfloat  in, Lfloat  lambda);
 void tract_calculate_nose_reflections(tract *t);
@@ -160,7 +162,7 @@ typedef struct _tVoc
     tMempool mempool;
     glottis  glot; /*The Glottis*/
     tract  tr; /*The Vocal Tract */
-
+    int doubleCompute;
     //Lfloat*  buf;
     int counter;
     int sampleRate;
@@ -168,8 +170,8 @@ typedef struct _tVoc
 
 typedef _tVoc* tVoc;
 
-void    tVoc_init         (tVoc* const voc, int numTractSections,LEAF* const leaf);
-void    tVoc_initToPool   (tVoc* const voc, int numTractSections,tMempool* const mempool);
+void    tVoc_init         (tVoc* const voc, int numTractSections, int maxNumTractSections, LEAF* const leaf);
+void    tVoc_initToPool   (tVoc* const voc, int numTractSections,int maxNumTractSections, tMempool* const mempool);
 void    tVoc_free         (tVoc* const voc);
 
 Lfloat   tVoc_tick         (tVoc* const voc);
@@ -185,6 +187,7 @@ void    tVoc_setFreq      (tVoc* const voc, Lfloat freq);
 Lfloat* tVoc_get_tract_diameters(tVoc* const voc);
 Lfloat* tVoc_get_current_tract_diameters(tVoc* const voc);
 Lfloat* tVoc_get_tract_rest_diameters(tVoc* const voc);
+void tVoc_set_tractLength(tVoc* const voc, int newLength);
 int tVoc_get_tract_size(tVoc* const voc);
 Lfloat* tVoc_get_nose_diameters(tVoc* const voc);
 int tVoc_get_nose_size(tVoc* const voc);
@@ -194,7 +197,7 @@ void tVoc_set_tenseness(tVoc* const voc, Lfloat breathiness);
 Lfloat * tVoc_get_tenseness_ptr(tVoc* const voc);
 void tVoc_set_velum(tVoc* const voc, Lfloat velum);
 Lfloat * tVoc_get_velum_ptr(tVoc* const voc);
-
+void    tVoc_setDoubleComputeFlag(tVoc* const voc, int doubleCompute);
 int tVoc_get_counter(tVoc* const voc);
 
 

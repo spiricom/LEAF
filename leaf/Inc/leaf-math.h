@@ -196,7 +196,7 @@ extern "C" {
     Lfloat LEAF_poly_blepInt(uint32_t t, uint32_t dt);
     Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt);
     Lfloat LEAF_midiToFrequency(Lfloat f);
-
+    int getBinCoeff(int N, int K);
 
     Lfloat fast_mtof(Lfloat f);
 

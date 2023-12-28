@@ -129,9 +129,10 @@ typedef struct _tAllpassSO
     
     Lfloat prevSamp;
     Lfloat prevPrevSamp;
+    Lfloat prevSamp2;
+    Lfloat prevPrevSamp2;
     Lfloat a1;
     Lfloat a2;
-    Lfloat D;
 
 } _tAllpassSO;
 
@@ -155,7 +156,7 @@ typedef struct _tThiranAllpassSOCascade
     tAllpassSO* filters;
     Lfloat B;
     Lfloat iKey;
-    Lfloat a[3];
+    Lfloat a[2];
     
     Lfloat k1[2];
     Lfloat k2[2];
@@ -175,7 +176,7 @@ void    tThiranAllpassSOCascade_initToPool     (tThiranAllpassSOCascade* const, 
 void    tThiranAllpassSOCascade_free           (tThiranAllpassSOCascade* const);
 
 Lfloat   tThiranAllpassSOCascade_tick           (tThiranAllpassSOCascade* const, Lfloat input);
-Lfloat    tThiranAllpassSOCascade_setCoeff     (tThiranAllpassSOCascade* const ft, Lfloat a1, Lfloat a2);
+Lfloat    tThiranAllpassSOCascade_setCoeff     (tThiranAllpassSOCascade* const ft, Lfloat dispersionCoeff, Lfloat freq, Lfloat invOversampling);
 void   tThiranAllpassSOCascade_clear            (tThiranAllpassSOCascade* const ft);
     //==============================================================================
 

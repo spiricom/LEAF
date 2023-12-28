@@ -16,6 +16,7 @@
 
 #include "../Inc/leaf-filters.h"
 #include "../Inc/leaf-tables.h"
+#include "../Inc/leaf-math.h"
 #include "../leaf.h"
 #endif
 
@@ -104,35 +105,63 @@ void    tAllpassSO_free  (tAllpassSO* const ft)
 void    tAllpassSO_setCoeff(tAllpassSO* const ft, Lfloat a1, Lfloat a2)
 {
     _tAllpassSO* f = *ft;
-    Lfloat prevSum = f->a1 + f->a2;
-    Lfloat newSum = a1+a2;
-    Lfloat ratio = 1.0f;
-    if (prevSum != 0.0f)
-    {
-        ratio = fabsf(newSum / prevSum);
-    }
+
+    //Lfloat prevSum = f->a1 + f->a2;
+    //Lfloat newSum = a1+a2;
+    //Lfloat ratio = 1.0f;
+    ////if (prevSum != 0.0f)
+    //{
+    //    ratio = fabsf(newSum / prevSum);
+    //}
 
     f->a1 = a1;
     f->a2 = a2;
-    f->prevSamp *= ratio;
-    f->prevPrevSamp *= ratio;
+    //f->prevSamp *= ratio;
+    //f->prevPrevSamp *= ratio;
 }
 
 Lfloat   tAllpassSO_tick(tAllpassSO* const ft, Lfloat input)
 {
     _tAllpassSO* f = *ft;
-    
-    Lfloat c = -f->a2;
-    Lfloat d1mc = f->a1;
-    
-    Lfloat vn = input + (f->prevSamp * -d1mc) + (f->prevPrevSamp * c);
 
-    Lfloat output = (vn * -c) + (f->prevSamp * d1mc) + f->prevPrevSamp;
+    
+    //DFII version, efficient but causes issues with coefficient changes happening fast (due to high gain of state variables)
+    /*
+
+    Lfloat vn = input + (f->prevSamp * -f->a1) + (f->prevPrevSamp * -f->a2);
+
+    Lfloat output = (vn * f->a2) + (f->prevSamp * f->a1) + f->prevPrevSamp;
     
     f->prevPrevSamp = f->prevSamp;
     f->prevSamp = vn;
-    
+    */
+
+    //a0 = 1.0f
+    //a1 = a1
+    //a2 = a2
+    //b0 = a2
+    //b1 = a1
+    //b2 = 1.0f
+
+    //DFII Transposed version
+/*
+    Lfloat vn = (input * f->a2) + f->prevSamp;
+    f->prevSamp = (input * f->a1) + (vn * -f->a1) + f->prevPrevSamp;
+    f->prevPrevSamp = input + (vn * -f->a2);
+    return vn;]
+
+*/
+    //DFI version
+    Lfloat vn = input * f->a2 + (f->prevSamp * f->a1 + f->prevPrevSamp);
+    Lfloat output = vn + (f->prevSamp2 * -f->a1) +  (f->prevPrevSamp2 * -f->a2);
+    f->prevPrevSamp = f->prevSamp;
+    f->prevSamp = input;
+    f->prevPrevSamp2 = f->prevSamp2;
+    f->prevSamp2 = output;
+
     return output;
+
+
 }
 
 
@@ -177,41 +206,72 @@ void    tThiranAllpassSOCascade_free  (tThiranAllpassSOCascade* const ft)
     {
         tAllpassSO_free(&f->filters[i]);
     }
-    //mpool_free((char*)f->filters, f->mempool); //do I need to free the pointers separately?
+    mpool_free((char*)f->filters, f->mempool); //do I need to free the pointers separately?
     mpool_free((char*)f, f->mempool);
 }
 
-float    tThiranAllpassSOCascade_setCoeff(tThiranAllpassSOCascade* const ft, Lfloat dispersionCoeff, Lfloat freq)
+volatile Lfloat binTest;
+float    tThiranAllpassSOCascade_setCoeff(tThiranAllpassSOCascade* const ft, Lfloat dispersionCoeff, Lfloat freq, Lfloat oversampling)
 {
     _tThiranAllpassSOCascade* f = *ft;
 
     f->B = dispersionCoeff;
     f->iKey = (49.0f + 12.0f * log2f(freq * INV_440));
+    Lfloat iKey2 = (49.0f + 12.0f * log2f(freq * oversampling * INV_440));
     //f->iKey = logf((110.0f*twelfthRootOf2) / 27.5f)/ logf(twelfthRootOf2);
-    f->isHigh = freq > 400.0f;//switch to different coefficients for higher notes
-    
-    double logB = logf(f->B);
-    double temp = (f->k1[f->isHigh ]*logB*logB)+(f->k2[f->isHigh] * logB)+f->k3[f->isHigh ];
-    double kd = expf(temp);
-    double Cd = expf((f->C1[f->isHigh ] * logB) + f->C2[f->isHigh]);
-    double D = expf(Cd-(f->iKey*kd));
+    //f->isHigh = freq > 400.0f;//switch to different coefficients for higher notes
+    Lfloat howHigh = LEAF_map(iKey2, 16.0f, 46.0f, 0.0f, 1.0f);
+    howHigh = LEAF_clip(0.0f, howHigh, 1.0f);
+    Lfloat oneMinusHowHigh = 1.0f - howHigh;
+
+    Lfloat k1 = (f->k1[0] * oneMinusHowHigh) + (f->k1[1] * howHigh);
+    Lfloat k2 = (f->k2[0] * oneMinusHowHigh) + (f->k2[1] * howHigh);
+    Lfloat k3 = (f->k3[0] * oneMinusHowHigh) + (f->k3[1] * howHigh);
+    Lfloat C1 = (f->C1[0] * oneMinusHowHigh) + (f->C1[1] * howHigh);
+    Lfloat C2 = (f->C2[0] * oneMinusHowHigh) + (f->C2[1] * howHigh);
+    Lfloat logB = logf(f->B);
+    Lfloat temp = (k1*logB*logB)+(k2 * logB)+k3;
+    Lfloat kd = expf(temp);
+    Lfloat Cd = expf((C1 * logB) + C2);
+    Lfloat D = expf(Cd-(f->iKey*kd));
     f->D = D;
-    f->numActiveFilters = f->numFiltsMap[f->isHigh];
-    int N = 2;
-    //a[0] = 1.0f;
-    for (int k = 1; k <=N; k++)
-    {
-        double a_k = ( (k % 2)  ? -1 : 1) * getBinCoeff(N,k);
-        for (int n = 0; n <= N; n++)
-        {
-          a_k *= (D - N + n);
-          a_k /= (D - N + k + n);
-        }
-        f->a[k] = a_k;
-    }
+
+	Lfloat a_k = -2.0f;
+
+	a_k *= (D - 2.0f);
+	a_k /= (D - 1.0f);
+
+	a_k *= (D - 1.0f);
+	a_k /= D;
+
+	a_k *= D;
+	a_k /= (D + 1.0f);
+
+	f->a[0] = a_k;
+
+	a_k = 1.0f;
+
+	a_k *= (D - 2.0f);
+	a_k /= D;
+
+	a_k *= (D - 1.0f);
+	a_k /= (D + 1.0f);
+
+	a_k *= D;
+	a_k /= (D + 2.0f);
+
+	f->a[1] = a_k;
+
+	if (f->a[0] > 0.99999999f)
+	{
+		f->a[0] = 0.99999999f;
+	}
+	//f->a[0] = LEAF_clip(0.0f, f->a[0], 1.0f);
+	//f->a[1] = LEAF_clip(-1.999999f, f->a[1], 2.0f);
+
     for (int i = 0; i < f->numActiveFilters; i++)
     {
-        tAllpassSO_setCoeff(&f->filters[i], f->a[1], f->a[2]);
+        tAllpassSO_setCoeff(&f->filters[i], f->a[0], f->a[1]);
         //f->filters[i]->prevSamp = 0.0f;
         //f->filters[i]->prevPrevSamp = 0.0f;
         //probably should adjust the gain of the internal state variables (prevSamp and prevPrevSamp) if the gain total of the two coefficients goes //up, since the internals of the allpass boosts gain and then attenuates it, so leaving super big values in there that won't be //attenuated enough can make it distort or nan.
@@ -305,9 +365,9 @@ void        tOnePole_setFreq        (tOnePole* const ft, Lfloat freq)
     _tOnePole* f = *ft;
     
     f->freq = freq;
-    f->b0 = f->freq * f->twoPiTimesInvSampleRate;
-    f->b0 = LEAF_clip(0.0f, f->b0, 1.0f);
-    f->a1 = 1.0f - f->b0;
+    f->a1 = f->freq * f->twoPiTimesInvSampleRate;
+    f->a1 = LEAF_clip(0.0f, f->a1, 1.0f);
+    f->b0 = 1.0f - f->a1;
 }
 
 void    tOnePole_setCoefficients(tOnePole* const ft, Lfloat b0, Lfloat a1)

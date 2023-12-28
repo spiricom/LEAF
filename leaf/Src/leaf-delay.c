@@ -670,7 +670,7 @@ Lfloat   tLagrangeDelay_tick (tLagrangeDelay* const dl, Lfloat input)
 			(d->buff[(idx + 2) & d->bufferMask] * d->h3);
 
     //clear the sample that is no longer used
-    d->buff[((idx - 2) + d->maxDelay) & d->bufferMask] = 0.0f;
+    //d->buff[((idx - 2) + d->maxDelay) & d->bufferMask] = 0.0f;
     // Increment output pointer modulo length
     d->outPoint = (d->outPoint + 1) & d->bufferMask;
 

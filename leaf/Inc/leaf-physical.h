@@ -1001,24 +1001,35 @@ typedef struct _tTString
     Lfloat invOversampling;
     // delay lines
     tLagrangeDelay delay;
+    tLagrangeDelay delayP;
     Lfloat power;
     Lfloat M;
     
     // one pole filter
     tCookOnePole reflFilt;
+    tCookOnePole reflFiltP;
     Lfloat baseDelay;
     uint32_t halfBaseDelay;
     Lfloat sampleRate;
     Lfloat invSampleRate;
     Lfloat output;
+    Lfloat outputP;
     Lfloat prevTension;
     Lfloat tensionGain;
     Lfloat a;
-    tSlide slide;
-    tHighpass dcBlock;
+    //tSlide slide;
+    //tHighpass dcBlock;
     tThiranAllpassSOCascade allpass;
+    tThiranAllpassSOCascade allpassP;
     Lfloat allpassDelay;
+    Lfloat allpassDelayP;
+    Lfloat freq;
+    tSVF lowpassP;
+    tSVF highpassP;
     int stop;
+    Lfloat twoPiTimesInvSampleRate;
+    Lfloat decayCoeff;
+    Lfloat muteCoeff;
 } _tTString;
 
 typedef _tTString* tTString;
@@ -1028,7 +1039,9 @@ void    tTString_initToPool            (tTString* const, int oversampling, tMemp
 void    tTString_free                  (tTString* const);
 
 Lfloat   tTString_tick                  (tTString* const);
-
+void    tTString_setDecay               (tTString* const bw, Lfloat decay);
+void    tTString_mute              (tTString* const bw);
+void    tTString_setFilter              (tTString* const bw, Lfloat filter);
 void    tTString_setFreq               (tTString* const, Lfloat freq);
 void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloat amplitude);
 void    tTString_setWaveLength         (tTString* const, Lfloat waveLength); // in samples
