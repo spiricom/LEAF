@@ -537,6 +537,7 @@ extern "C" {
     void    tLagrangeDelay_tapIn         (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay);
     Lfloat   tLagrangeDelay_addTo         (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay);
     Lfloat   tLagrangeDelay_getDelay      (tLagrangeDelay* const dl);
+    Lfloat   tLagrangeDelay_getMaxDelay (tLagrangeDelay* const dl);
     Lfloat   tLagrangeDelay_getLastOut    (tLagrangeDelay* const dl);
     Lfloat   tLagrangeDelay_getLastIn     (tLagrangeDelay* const dl);
 

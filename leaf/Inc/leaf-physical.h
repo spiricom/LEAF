@@ -999,26 +999,30 @@ typedef struct _tTString
     tMempool mempool;
     int oversampling;
     Lfloat invOversampling;
+    Lfloat invOversamplingTimesTwo;
     // delay lines
     tLagrangeDelay delay;
     tLagrangeDelay delayP;
     Lfloat power;
     Lfloat M;
-    
+    tHighpass dcBlock;
+    tHighpass dcBlockP;
     // one pole filter
     tCookOnePole reflFilt;
     tCookOnePole reflFiltP;
     Lfloat baseDelay;
-    uint32_t halfBaseDelay;
     Lfloat sampleRate;
     Lfloat invSampleRate;
     Lfloat output;
     Lfloat outputP;
+    tCookOnePole tensionFilt;
     Lfloat prevTension;
     Lfloat tensionGain;
-    Lfloat a;
-    //tSlide slide;
-    //tHighpass dcBlock;
+    tSlide slide;
+    Lfloat prevDelay;
+    Lfloat prevDelayP;
+    tExpSmooth tensionSmoother;
+    tExpSmooth pitchSmoother;
     tThiranAllpassSOCascade allpass;
     tThiranAllpassSOCascade allpassP;
     Lfloat allpassDelay;
@@ -1026,27 +1030,69 @@ typedef struct _tTString
     Lfloat freq;
     tSVF lowpassP;
     tSVF highpassP;
-    int stop;
     Lfloat twoPiTimesInvSampleRate;
     Lfloat decayCoeff;
     Lfloat muteCoeff;
+    Lfloat r;
+    Lfloat rippleRate;
+    Lfloat harmonic;
+    Lfloat decayInSeconds;
+    Lfloat invOnePlusr;
+    Lfloat actualLowestFreq;
+    Lfloat pickupOut;
+    Lfloat pickupOutP;
+    Lfloat pickupPos;
+    Lfloat tempSum;
+    Lfloat ldev;
+    Lfloat tensionSum;
+    Lfloat tensionAmount;
+    Lfloat prevSum;
+    uint32_t doTension;
+    tCycle tensionModOsc;
+    Lfloat phantomGain;
+    tCycle pickupModOsc;
+    Lfloat pickupModOscFreq;
+    Lfloat pickupModOscAmp;
+    tSVF pickupFilter;
+    Lfloat pickupPosL;
+    Lfloat pickupPosR;
+    Lfloat pickupPosLAlpha;
+    Lfloat pickupPosRAlpha;
+    Lfloat backwards;
+
+    Lfloat slideAmount;
+    Lfloat absSlideAmount;
+    Lfloat smoothedSlideAmount;
+    tNoise noise;
+    Lfloat slideNoise;
+    Lfloat slideGain;
+
 } _tTString;
 
 typedef _tTString* tTString;
 
-void    tTString_init                  (tTString* const, int oversampling, LEAF* const leaf);
-void    tTString_initToPool            (tTString* const, int oversampling, tMempool* const);
+void    tTString_init                  (tTString* const, int oversampling, Lfloat lowestFreq, LEAF* const leaf);
+void    tTString_initToPool            (tTString* const, int oversampling, Lfloat lowestFreq, tMempool* const);
 void    tTString_free                  (tTString* const);
 
 Lfloat   tTString_tick                  (tTString* const);
 void    tTString_setDecay               (tTString* const bw, Lfloat decay);
 void    tTString_mute              (tTString* const bw);
 void    tTString_setFilter              (tTString* const bw, Lfloat filter);
+void   tTString_setTensionGain                  (tTString* const bw, Lfloat tensionGain);
+void   tTString_setTensionSpeed                  (tTString* const bw, Lfloat tensionSpeed);
 void    tTString_setFreq               (tTString* const, Lfloat freq);
 void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloat amplitude);
 void    tTString_setWaveLength         (tTString* const, Lfloat waveLength); // in samples
 void    tTString_setSampleRate         (tTString* const, Lfloat sr);
 void    tTString_setHarmonicity         (tTString* const, Lfloat B, Lfloat freq);
+void   tTString_setRippleDepth                  (tTString* const bw, Lfloat depth);
+void   tTString_setHarmonic                  (tTString* const bw, Lfloat harmonic);
+void   tTString_setPhantomHarmonicsGain                  (tTString* const bw, Lfloat gain);
+void   tTString_setSlideGain                  (tTString* const bw, Lfloat gain);
+void    tTString_setPickupPos               (tTString* const bw, Lfloat pos);
+void    tTString_setPickupModAmp               (tTString* const bw, Lfloat amp);
+void    tTString_setPickupModFreq               (tTString* const bw, Lfloat freq);
 
     /*!
      @defgroup treedtable tReedTable
