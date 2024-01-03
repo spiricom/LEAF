@@ -1066,6 +1066,14 @@ typedef struct _tTString
     tNoise noise;
     Lfloat slideNoise;
     Lfloat slideGain;
+    uint32_t wound;
+    tBiQuad barFilter1;
+    tBiQuad barFilter2;
+    tExpSmooth barPulse;
+    Lfloat barPulseInc;
+    uint32_t barPulsePhasor;
+    tSVF barResonator;
+    tSVF barLowpass;
 
 } _tTString;
 
@@ -1093,6 +1101,9 @@ void   tTString_setSlideGain                  (tTString* const bw, Lfloat gain);
 void    tTString_setPickupPos               (tTString* const bw, Lfloat pos);
 void    tTString_setPickupModAmp               (tTString* const bw, Lfloat amp);
 void    tTString_setPickupModFreq               (tTString* const bw, Lfloat freq);
+
+
+
 
     /*!
      @defgroup treedtable tReedTable

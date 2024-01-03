@@ -2760,6 +2760,8 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
     x->prevSum = 0.0f;
     x->pickupPos = 0.0f;
     x->slideGain = 0.0f;
+    x->wound = 1;
+    x->barPulsePhasor = 0;
     Lfloat maxDelayTemp = x->sampleRate / lowestFreq;
     tLagrangeDelay_initToPool(&x->delay, 100.0f, maxDelayTemp, mp);
     x->actualLowestFreq = x->sampleRate / tLagrangeDelay_getMaxDelay (&x->delay); //adjusted to create a power-of-two size buffer
@@ -2783,8 +2785,8 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
     tCookOnePole_setGainAndPole(&x->reflFiltP,0.999f, -0.0014f);
    
     tTString_setFreq(&x, 440.0f);
-    Lfloat slideTime = x->sampleRate * 0.000555555555556f;
-    tSlide_initToPool(&x->slide, 6000, 6000, mp);
+    //Lfloat slideTime = x->sampleRate * 0.000555555555556f;
+    tSlide_initToPool(&x->slide, 5000, 8000, mp);
     //tHighpass_initToPool(&x->dcBlock, .01f,  mp);
     tExpSmooth_initToPool(&x->tensionSmoother, 0.0f, 0.001f, mp);
 
@@ -2816,8 +2818,20 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
 
     tSVF_setFreq(&x->pickupFilter, 3500.0f);
     tNoise_initToPool(&x->noise, WhiteNoise, mp);
-    tHighpass_initToPool(&x->dcBlock, 5.0f, mp);
-    tHighpass_initToPool(&x->dcBlockP, 5.0f, mp);
+    tHighpass_initToPool(&x->dcBlock, 1.0f, mp);
+    tHighpass_initToPool(&x->dcBlockP, 1.0f, mp);
+
+    tBiQuad_initToPool(&x->barFilter1, mp);
+    tBiQuad_setCoefficients(&x->barFilter1, 0.294f, -0.54f, 0.249f, -1.98f, 0.984f);
+
+
+    tBiQuad_initToPool(&x->barFilter2, mp);
+    tBiQuad_setCoefficients(&x->barFilter2, 0.031f, -0.051f, 0.020f, -1.985f, 0.986f);
+
+    tExpSmooth_initToPool(&x->barPulse, 0.0f, 0.02f, mp);
+    tExpSmooth_setDest(&x->barPulse, 0.0f);
+    tSVF_initToPool(&x->barResonator, SVFTypeBandpass, 440.0f, 10.0f, mp);
+    tSVF_initToPool(&x->barLowpass, SVFTypeLowpass, 10.0f, 0.707f, mp);
 }
 void    tTString_free                  (tTString* const bw)
 {
@@ -2867,15 +2881,52 @@ Lfloat   tTString_tick                  (tTString* const bw)
         Lfloat halfCurrentDelay = currentDelay * 0.5f;
 
         Lfloat tempSlide = fabsf(x->baseDelay - x->prevDelay);
-        if ((tempSlide > 0.01f) || (tempSlide < 0.00005f))
+        x->slideAmount = LEAF_clip(0.0f, tempSlide, 0.01f);
+        x->slideAmount = tSVF_tick(&x->barLowpass, x->slideAmount) * 1.0f;
+        //tempSlide = LEAF_clip(0.002f, tempSlide, 0.01f);
+        //if (tempSlide > 0.006f)
+        //{
+        //	tempSlide = 0.006f;
+        //}
+        //tempSlide = LEAF_map(tempSlide, 0.002f, 0.01f, 0.0f, 100.0f);
+        //x->slideAmount = LEAF_map(x->slideAmount, 0.0001f, 0.01f, 0.0f, 1.0f);
+
+        x->slideAmount = tSlide_tick(&x->slide, x->slideAmount * 20.0f);
+
+        Lfloat barFreq = LEAF_map(x->slideAmount, 0.0f, 0.2f, 500.0f, 2000.0f) ;
+
+        tSVF_setFreq(&x->barResonator, barFreq * x->invOversampling);
+        x->barPulseInc = 1.0f / barFreq * x->sampleRate;
+
+
+        if (x->barPulsePhasor > x->barPulseInc)
         {
-        	tempSlide = 0.0f;
+        	x->barPulsePhasor = 0;
+        	tExpSmooth_setVal(&x->barPulse, 1.0f);
         }
+        x->barPulsePhasor++;
 
-        x->slideAmount = tSlide_tick(&x->slide, tempSlide);
+        x->slideNoise = tNoise_tick(&x->noise);// * (Lfloat)(x->muteCoeff > 0.9f);
+        if (x->wound)
+        {
+        	Lfloat val = tExpSmooth_tick(&x->barPulse);
+        	x->slideNoise +=  val;
+        	x->slideNoise *=  val;
+
+        }
+        Lfloat tempSlideNoise1 = x->slideNoise * x->slideGain * x->slideAmount;
+
+        Lfloat tempSlideNoise2 = tempSlideNoise1;
+        Lfloat tempSlideNoise3 = tempSlideNoise1;
+
+        tempSlideNoise1 = tBiQuad_tick(&x->barFilter1, tempSlideNoise1);
+        tempSlideNoise1 = tBiQuad_tick(&x->barFilter2, tempSlideNoise1);
+
+        tempSlideNoise2 = tSVF_tick(&x->barResonator, tempSlideNoise2);
+        tempSlideNoise2 = LEAF_tanh(tempSlideNoise2 * 2.0f);
 
 
-        x->slideNoise = tNoise_tick(&x->noise) * x->slideAmount * x->slideGain;
+        x->slideNoise = tempSlideNoise1 * 0.4f + tempSlideNoise2 * 0.4f + tempSlideNoise3 * 0.2f;
         x->prevDelay = x->baseDelay;
 
        // volatile uint32_t tensionDelayNominal = x->baseDelay - x->allpassDelay;
@@ -2987,7 +3038,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
         //x->tempSum -= delayOut;
         //Lfloat delayOut = x->output;
         Lfloat output = tLagrangeDelay_tickOut(&x->delay);
-
+/*
         Lfloat rippleLength = x->rippleRate * currentDelay;
         if (rippleLength > currentDelay)
         {
@@ -3000,7 +3051,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
         uint32_t rippleLengthInt = (uint32_t) rippleLength;
         Lfloat rippleLengthAlpha = rippleLength - rippleLengthInt;
         output += (tLagrangeDelay_tapOutInterpolated(&x->delay,rippleLengthInt,rippleLengthAlpha) * x->r);
-
+*/
 
         output = tThiranAllpassSOCascade_tick(&x->allpass, output);
         x->output = LEAF_clip(-1.0f, (output * (x->decayCoeff * x->invOnePlusr) * x->muteCoeff), 1.0f);
@@ -3069,7 +3120,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
         x->pickupPosLAlpha = pickupPosAlpha;
         x->pickupPosRAlpha = inversePickupPosAlpha;
         x->backwards = backwards;
-
+/*
         Lfloat currentDelayP = x->baseDelay - x->allpassDelayP - x->tensionAmount;
         if (currentDelayP < 10.0f)
         {
@@ -3087,7 +3138,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
         {
         	tLagrangeDelay_setDelay(&x->delayP, currentDelayP);
         }
-/*
+
 
         Lfloat delayOutP = tCookOnePole_tick(&x->reflFilt, x->outputP);
         //x->tempSum -= delayOut;
@@ -3134,7 +3185,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
         outputPfilt = tSVF_tick(&x->highpassP, outputPfilt);
 
         Lfloat prefilter = (x->pickupOut + (outputPfilt * x->phantomGain)) * 2.0f;
-        theOutput = tSVF_tick(&x->pickupFilter, prefilter);// + x->slideNoise;
+        theOutput = tSVF_tick(&x->pickupFilter, prefilter ) + x->slideNoise;
     }
     return theOutput;
 
@@ -3349,6 +3400,7 @@ void    tTString_setHarmonicity         (tTString* const bw, Lfloat B, Lfloat fr
     x->allpassDelay = tThiranAllpassSOCascade_setCoeff(&x->allpass, B, freq * x->invOversampling, x->oversampling);
     x->allpassDelayP = tThiranAllpassSOCascade_setCoeff(&x->allpassP, B * 0.25f, freq * x->invOversampling, x->oversampling);
 }
+
 
 
 ////BOW TABLE OBJECT
