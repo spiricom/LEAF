@@ -1013,6 +1013,7 @@ typedef struct _tTString
     Lfloat baseDelay;
     Lfloat sampleRate;
     Lfloat invSampleRate;
+    Lfloat invSampleRateTimesTwoPi;
     Lfloat output;
     Lfloat outputP;
     tCookOnePole tensionFilt;
@@ -1095,6 +1096,9 @@ typedef struct _tTString
     Lfloat barDrive;
     uint32_t bumpOsc;
     uint32_t bumpCount;
+    Lfloat phaseComp;
+    Lfloat poleCoeff;
+    Lfloat muted;
 
 } _tTString;
 

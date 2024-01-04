@@ -16,6 +16,10 @@
 
 #endif
 
+#ifdef ARM_MATH_CM7
+#include <arm_math.h>
+#endif
+
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ tPluck ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 void    tPluck_init         (tPluck* const pl, Lfloat lowestFrequency, LEAF* const leaf)
 {
@@ -2739,6 +2743,7 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
     x->invOversamplingTimesTwo = x->invOversampling * 2.0f;
     x->sampleRate          = leaf->sampleRate * oversampling;
     x->invSampleRate = 1.f / x->sampleRate;
+    x->invSampleRateTimesTwoPi = TWO_PI * x->invSampleRate;
     x->prevTension = 0.0f;
     x->tensionGain = 0.0f;
     x->allpassDelay = 0.f;
@@ -2878,73 +2883,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
 {
     _tTString* x = *bw;
     Lfloat theOutput = 0.0f;
-    //return x->mempool->leaf->random() * 2.0f - 1.0f;
-/*
-    //bar noise not oversampled
-    Lfloat tempSlide = fabsf(x->barPosition - x->prevBarPosition) * 100.0f;// * 500.0f;
-	//tempSlide *= 0.25f;
-    if (tempSlide > 1.0f)
-    {
-    	tempSlide = 1.0f;
-    }
-	tempSlide = tSVF_tick(&x->barLowpass, tempSlide) ;
 
-	x->slideAmount = tSlide_tick(&x->slide, tempSlide);
-
-
-
-	Lfloat thresholdedGain = 1.0f;
-	if (x->slideAmount < 0.007f)
-	{
-		thresholdedGain = LEAF_map(x->slideAmount, 0.005f, 0.007f, 0.0, 1.0f);
-		{
-			if (thresholdedGain < 0.0f)
-			{
-				thresholdedGain = 0.0f;
-			}
-		}
-	}
-	x->slideAmount *= 10.0f * thresholdedGain;
-
-
-	Lfloat barFreq = LEAF_map(x->slideAmount, 0.0000f, 0.07f, 5.0f, 1000.0f) ; //was 500 to 2000
-	tSVF_setFreq(&x->barResonator, barFreq);
-	x->barPulseInc = 1.0f / barFreq * x->sampleRate * x->invOversampling;
-	if (x->barPulsePhasor > x->barPulseInc)
-	{
-		x->barPulsePhasor = 0;
-		tExpSmooth_setVal(&x->barPulse, 1.0f);
-	}
-	x->barPulsePhasor++;
-
-	x->slideNoise = tNoise_tick(&x->noise) * (Lfloat)(x->muteCoeff > 0.9f);
-	if (x->wound)
-	{
-		Lfloat val = tExpSmooth_tick(&x->barPulse);
-
-		//x->slideNoise *=  val;
-		x->slideNoise =  val;
-		//x->slideNoise =  val;
-	   Lfloat tempSlideNoise1 = x->slideNoise * x->slideGain * x->slideAmount * thresholdedGain;
-
-	   Lfloat tempSlideNoise2 = tempSlideNoise1;
-	   Lfloat tempSlideNoise3 = tempSlideNoise1;
-
-	   //tempSlideNoise1 = tBiQuad_tick(&x->barFilter1, tempSlideNoise1);
-	   //tempSlideNoise1 = tBiQuad_tick(&x->barFilter2, tempSlideNoise1);
-
-	   //tempSlideNoise2 = tSVF_tick(&x->barResonator, tempSlideNoise2) * thresholdedGain;
-	   //tempSlideNoise2 = LEAF_tanh(tempSlideNoise2 * 1.4f);
-
-	   x->slideNoise = tempSlideNoise1 * 0.3f + tempSlideNoise2 * 0.4f + tempSlideNoise3 * 0.3f;
-	}
-	else
-	{
-		x->slideNoise = x->slideNoise * x->slideGain * x->slideAmount * thresholdedGain;
-	}
-
-
-	*/
     Lfloat barPos = x->barPosition;
     //currentBump = tSVF_tick(&x->barLowpass, currentBump) ;
     if ((barPos > (x->prevBarPosSmoothed + 3.0f)) || (barPos < (x->prevBarPosSmoothed - 3.0f)))
@@ -3059,7 +2998,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
    	//tempSlideNoise1 = tBiQuad_tick(&x->barFilter2, tempSlideNoise1);
    	x->slideNoise = ((tempSlideNoise1 * dryAmount) + (tempSlideNoise2 * filterAmount * filterFade));// * x->slideAmount;
    	//x->slideNoise =tempSlideNoise2 * filterAmount* filterFade * x->slideAmount;
-   	x->slideNoise *= (Lfloat)(x->muteCoeff > 0.99f);
+   	x->slideNoise *= (Lfloat)(x->muteCoeff > 0.9999f);
    	x->slideNoise = tHighpass_tick(&x->barHP, x->slideNoise);
    	x->slideNoise = tSVF_tick(&x->barLP, x->slideNoise * x->slideGain * 2.0f * volCut);
    	x->slideNoise = x->slideNoise * x->slideGain;
@@ -3069,8 +3008,8 @@ Lfloat   tTString_tick                  (tTString* const bw)
     {
     	x->baseDelay = tExpSmooth_tick(&x->pitchSmoother);
 
-        Lfloat currentDelay = x->baseDelay - x->allpassDelay - x->tensionAmount;
-
+        //Lfloat currentDelay = x->baseDelay - x->allpassDelay - x->tensionAmount;
+    	Lfloat currentDelay = x->baseDelay;// - x->allpassDelay - x->tensionAmount;
     	//Lfloat currentDelay = x->baseDelay;
         if (currentDelay < 10.0f)
         {
@@ -3088,10 +3027,9 @@ Lfloat   tTString_tick                  (tTString* const bw)
 
     	x->tensionAmount = (tension + (tCycle_tick(&x->tensionModOsc) * tension * 0.1f)) * 0.01f;
 
-        if (currentDelay > 10.0f)
-        {
-        	tLagrangeDelay_setDelay(&x->delay, currentDelay);
-        }
+
+        tLagrangeDelay_setDelay(&x->delay, currentDelay - ((x->phaseComp / TWO_PI )* currentDelay));
+
 
 
         Lfloat delayOut = tCookOnePole_tick(&x->reflFilt, x->output);
@@ -3099,13 +3037,22 @@ Lfloat   tTString_tick                  (tTString* const bw)
         //Lfloat delayOut = x->output;
         Lfloat output = tLagrangeDelay_tickOut(&x->delay);
 
-        Lfloat rippleLength = x->rippleRate * x->baseDelay;
+
+        currentDelay = x->baseDelay;
+        halfCurrentDelay = currentDelay * 0.5f;
+        Lfloat rippleLength = x->rippleRate *  currentDelay;
+        //Lfloat rippleLength = 0.0f;
         uint32_t rippleLengthInt = (uint32_t) rippleLength;
         Lfloat rippleLengthAlpha = rippleLength - rippleLengthInt;
+
+        Lfloat rippleLength2 = currentDelay - rippleLength;
+        uint32_t rippleLengthInt2 = (uint32_t) rippleLength2;
+        Lfloat rippleLengthAlpha2 = rippleLength2 - rippleLengthInt2;
+
         output += (tLagrangeDelay_tapOutInterpolated(&x->delay,rippleLengthInt,rippleLengthAlpha) * x->r);
+        //output -= (tLagrangeDelay_tapOutInterpolated(&x->delay,rippleLengthInt2,rippleLengthAlpha2) * x->r);
 
-
-        output = tThiranAllpassSOCascade_tick(&x->allpass, output);
+        //output = tThiranAllpassSOCascade_tick(&x->allpass, output);
         x->output = LEAF_clip(-1.0f, (output * (x->decayCoeff * x->invOnePlusr) * x->muteCoeff), 1.0f);
 
 
@@ -3113,8 +3060,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
         uint32_t backwards = 0;
         Lfloat invert = 1.0f;
 
-        currentDelay = x->baseDelay;
-        halfCurrentDelay = currentDelay * 0.5f;
+
         //Lfloat pickupPos = x->openStringLength * x->pickupPos + (tCycle_tick(&x->pickupModOsc) * x->pickupModOscAmp * x->openStringLength);//(x->pickupPos) * halfCurrentDelay;
         Lfloat positionMin = (x->openStringLength * 0.104166666666667f);
         Lfloat positionMax = (x->openStringLength * 0.021666666666667f);
@@ -3172,7 +3118,8 @@ Lfloat   tTString_tick                  (tTString* const bw)
         x->pickupPosRAlpha = inversePickupPosAlpha;
         x->backwards = backwards;
 
-        Lfloat currentDelayP = x->baseDelay - x->allpassDelayP - x->tensionAmount;
+        //Lfloat currentDelayP = x->baseDelay - x->allpassDelayP - x->tensionAmount;
+        Lfloat currentDelayP = x->baseDelay;// - x->allpassDelayP - x->tensionAmount;
         if (currentDelayP < 10.0f)
         {
         	currentDelayP = 10.0f;
@@ -3183,32 +3130,17 @@ Lfloat   tTString_tick                  (tTString* const bw)
         	currentDelayP = maxDelayP;
         }
 
-        if (currentDelayP > 10.0f)
-        {
-        	tLagrangeDelay_setDelay(&x->delayP, currentDelayP);
-        }
+        tLagrangeDelay_setDelay(&x->delayP, currentDelayP);
 
-
-        Lfloat delayOutP = tCookOnePole_tick(&x->reflFilt, x->outputP);
+        Lfloat delayOutP = tCookOnePole_tick(&x->reflFiltP, x->outputP);
 
         Lfloat outputP = tLagrangeDelay_tickOut(&x->delayP);
-/*
-        Lfloat rippleLengthP = x->rippleRate * currentDelayP;
-        if (rippleLengthP > currentDelayP)
-        {
-        	rippleLengthP = currentDelayP;
-        }
-        if (rippleLengthP < 10.0f)
-        {
-        	rippleLengthP = 10.0f;
-        }
-        uint32_t rippleLengthIntP = (uint32_t) rippleLengthP;
-        Lfloat rippleLengthAlphaP = rippleLengthP - rippleLengthIntP;
-        */
+
+
         outputP += (tLagrangeDelay_tapOutInterpolated(&x->delayP,rippleLengthInt,rippleLengthAlpha) * x->r);
 
 
-        outputP = tThiranAllpassSOCascade_tick(&x->allpassP, outputP);
+        //outputP = tThiranAllpassSOCascade_tick(&x->allpassP, outputP);
         x->outputP = LEAF_clip(-1.0f, (outputP * (x->decayCoeff * x->invOnePlusr) * x->muteCoeff), 1.0f);
 
 
@@ -3218,7 +3150,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
         leftgoing += tLagrangeDelay_tapOut(&x->delayP, inversePickupPosInt + 1) * inversePickupPosAlpha;
 
 
-        x->pickupOutP =  (rightgoing - leftgoing);
+        //x->pickupOutP =  (rightgoing - leftgoing);
 
         //tLagrangeDelay_tickIn(&x->delayP, tHighpass_tick(&x->dcBlockP, delayOutP + x->slideNoise));
         tLagrangeDelay_tickIn(&x->delayP, delayOutP + x->slideNoise);
@@ -3241,8 +3173,16 @@ void    tTString_setFreq               (tTString* const bw, Lfloat freq)
         freq = x->actualLowestFreq;
     //freq = freq * x->invOversampling;
     x->freq = freq;
-    tExpSmooth_setDest(&x->pitchSmoother, (x->sampleRate / freq) - 2.0f);
+    Lfloat Fc = (freq*x->invSampleRateTimesTwoPi);
+
+    tExpSmooth_setDest(&x->pitchSmoother, (x->sampleRate / freq) - 1.0f);
     tCycle_setFreq(&x->tensionModOsc, freq * x->invOversamplingTimesTwo);
+#ifdef ARM_MATH_CM7
+    x->phaseComp = atan2f(x->poleCoeff *  arm_sin_f32(Fc) , 1.0f - (x->poleCoeff *  arm_cos_f32(Fc)));
+    //if I can figure out how to use a newer CMSIS DSP pack, the new version 1.15 has an atan2f approximation that's likely faster
+#else
+    x->phaseComp = atan2f((x->poleCoeff * sinf(Fc)) , (1.0f - (x->poleCoeff * cosf(Fc))));
+#endif
 }
 
 void    tTString_setDecay               (tTString* const bw, Lfloat decay)
@@ -3297,6 +3237,7 @@ void    tTString_setFilter              (tTString* const bw, Lfloat filter)
 	 filter = ((filter * 18000.0f) + 20.0f)* x->twoPiTimesInvSampleRate;
 	tCookOnePole_setPole(&x->reflFilt,filter);
 	tCookOnePole_setPole(&x->reflFiltP,filter);
+	x->poleCoeff = filter;
 
 }
 
@@ -3423,7 +3364,7 @@ void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloa
 
 
 
-    Lfloat currentDelayP = x->baseDelay - x->allpassDelayP;
+    Lfloat currentDelayP = x->baseDelay;// - x->allpassDelayP;
 
     uint32_t halfCurrentDelayP = currentDelayP * 0.5f;
     volatile Lfloat pluckPointP = position * halfCurrentDelayP;
