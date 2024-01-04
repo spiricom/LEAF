@@ -1074,6 +1074,27 @@ typedef struct _tTString
     uint32_t barPulsePhasor;
     tSVF barResonator;
     tSVF barLowpass;
+    Lfloat barPosition;
+    Lfloat prevBarPosition;
+    Lfloat openStringLength;
+    Lfloat pickupRatio;
+    Lfloat lastBump;
+    Lfloat timeSinceLastBump;
+    uint32_t sampleCount;
+    tCycle barOsc;
+    tSlide barSmooth;
+    tHighpass barHP;
+    tSVF barLP;
+    tSlide barPulseSlide;
+    tExpSmooth barSmooth2;
+    tExpSmooth barSmoothVol;
+    Lfloat prevBarPosSmoothVol;
+    Lfloat prevBumpSmoothed;
+    Lfloat prevBarPosSmoothed;
+    Lfloat bumpSmoothed;
+    Lfloat barDrive;
+    uint32_t bumpOsc;
+    uint32_t bumpCount;
 
 } _tTString;
 
@@ -1101,9 +1122,10 @@ void   tTString_setSlideGain                  (tTString* const bw, Lfloat gain);
 void    tTString_setPickupPos               (tTString* const bw, Lfloat pos);
 void    tTString_setPickupModAmp               (tTString* const bw, Lfloat amp);
 void    tTString_setPickupModFreq               (tTString* const bw, Lfloat freq);
-
-
-
+void   tTString_setBarPosition                  (tTString* const bw, Lfloat barPosition);
+void   tTString_setOpenStringFrequency                  (tTString* const bw, Lfloat openStringFrequency);
+void   tTString_setPickupRatio                  (tTString* const bw, Lfloat ratio);
+void   tTString_setBarDrive                  (tTString* const bw, Lfloat drive);
 
     /*!
      @defgroup treedtable tReedTable
