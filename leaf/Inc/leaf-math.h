@@ -102,6 +102,8 @@ extern "C" {
 #define INV_SQRT2  0.707106781186548f
 
 #define LOGTEN 2.302585092994
+
+    Lfloat my_faster_logf (Lfloat a);
     Lfloat log2f_approx(Lfloat X);
     Lfloat log2f_approx2(Lfloat x);
     Lfloat fast_sinf2(Lfloat x);
@@ -142,8 +144,8 @@ extern "C" {
     Lfloat interpolate3max(Lfloat *buf, const int peakindex);
     Lfloat interpolate3phase(Lfloat *buf, const int peakindex);
     float LEAF_map(float value, float istart, float istop, float ostart, float ostop);
-    
-
+    float LEAF_mapFromZeroToOneInput(float value, float ostart, float ostop);
+    float LEAF_mapToZeroToOneOutput(float value, float istart, float istop);
     Lfloat fastcosf(Lfloat fAngle);
 
     Lfloat fastercosf(Lfloat fAngle);
@@ -163,7 +165,7 @@ extern "C" {
     Lfloat fastabsf(Lfloat f);
     
     Lfloat fastexp2f(Lfloat f);
-    
+
     Lfloat fastPowf(Lfloat a, Lfloat b) ;
     double fastPow(double a, double b);
 
@@ -207,7 +209,9 @@ extern "C" {
     double fasterexp(double x);
 
     Lfloat fasterexpf(Lfloat x);
-    
+
+    float fastExp3(register float x);
+    float fastExp4(register float x);
     Lfloat fastsqrtf(Lfloat x);
 
     Lfloat mtof(Lfloat f);

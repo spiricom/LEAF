@@ -25,7 +25,7 @@
 
 // This is a fast approximation to log2() found on http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html credited to this post https://community.arm.com/developer/tools-software/tools/f/armds-forum/4292/cmsis-dsp-new-functionality-proposal/22621#22621
 // Y = C[0]*F*F*F + C[1]*F*F + C[2]*F + C[3] + E;
-Lfloat log2f_approx(Lfloat X) {
+inline Lfloat log2f_approx(Lfloat X) {
     Lfloat Y, F;
     int E;
     F = frexpf(fabsf(X), &E);
@@ -41,12 +41,12 @@ Lfloat log2f_approx(Lfloat X) {
 }
 
 //another log2Approximation
-Lfloat log2f_approx2(Lfloat x)
+inline Lfloat log2f_approx2(Lfloat x)
 {
     return (0.1640425613334452f * x*x*x) + (-1.098865286222744f * x*x) + (3.148297929334117f * x) + -2.213475204444817f;
 }
 
-Lfloat interpolate3max(Lfloat *buf, const int peakindex)
+inline Lfloat interpolate3max(Lfloat *buf, const int peakindex)
 {
     Lfloat a = buf[peakindex-1];
     Lfloat b = buf[peakindex];
@@ -58,7 +58,7 @@ Lfloat interpolate3max(Lfloat *buf, const int peakindex)
     return(realpeak);
 }
 
-Lfloat interpolate3phase(Lfloat *buf, const int peakindex)
+inline Lfloat interpolate3phase(Lfloat *buf, const int peakindex)
 {
     Lfloat a = buf[peakindex-1];
     Lfloat b = buf[peakindex];
@@ -70,12 +70,23 @@ Lfloat interpolate3phase(Lfloat *buf, const int peakindex)
     return(fraction);
 }
 
-float LEAF_map(float value, float istart, float istop, float ostart, float ostop)
+inline float LEAF_map(float value, float istart, float istop, float ostart, float ostop)
 {
     return ostart + (ostop - ostart) * ((value - istart) / (istop - istart));
 }
+
+inline float LEAF_mapFromZeroToOneInput(float value, float ostart, float ostop)
+{
+    return ostart + (ostop - ostart) * value;
+}
+
+inline float LEAF_mapToZeroToOneOutput(float value, float istart, float istop)
+{
+	return ((value - istart) / (istop - istart));
+}
+
 // from http://www.wild-magic.com - found on music-dsp list
-Lfloat fastcosf(Lfloat fAngle)
+inline Lfloat fastcosf(Lfloat fAngle)
 {
     Lfloat fASqr = fAngle*fAngle;
     Lfloat fResult = -2.605e-07f;
@@ -92,7 +103,7 @@ Lfloat fastcosf(Lfloat fAngle)
     return fResult;
 }
 
-Lfloat fastercosf(Lfloat fAngle)
+inline Lfloat fastercosf(Lfloat fAngle)
 {
     Lfloat fASqr = fAngle*fAngle;
     Lfloat fResult = 3.705e-02f;
@@ -103,7 +114,7 @@ Lfloat fastercosf(Lfloat fAngle)
     return fResult;
 }
 
-Lfloat fasttanf (Lfloat fAngle)
+inline Lfloat fasttanf (Lfloat fAngle)
 {
     Lfloat fASqr = fAngle*fAngle;
     Lfloat fResult = 9.5168091e-03f;
@@ -123,7 +134,7 @@ Lfloat fasttanf (Lfloat fAngle)
     return fResult;
 }
 
-Lfloat fastertanf(Lfloat fAngle)
+inline Lfloat fastertanf(Lfloat fAngle)
 {
     Lfloat fASqr = fAngle*fAngle;
     Lfloat fResult = 2.033e-01f;
@@ -134,9 +145,31 @@ Lfloat fastertanf(Lfloat fAngle)
     fResult *= fAngle;
     return fResult;
 }
-
+/* natural log on [0x1.f7a5ecp-127, 0x1.fffffep127]. Maximum relative error 9.4529e-5 */
+inline Lfloat my_faster_logf (Lfloat a)
+{
+	Lfloat m, r, s, t, i, f;
+    int32_t e;
+    union unholy_t unholy;
+    unholy.f = a;
+    e = (unholy.i - 0x3f2aaaab) & 0xff800000;
+    union unholy_t unholy2;
+    unholy2.i = (unholy.i - e);
+    m = unholy2.f;
+    i = (Lfloat)e * 1.19209290e-7f; // 0x1.0p-23
+    /* m in [2/3, 4/3] */
+    f = m - 1.0f;
+    s = f * f;
+    /* Compute log1p(f) for f in [-1/3, 1/3] */
+    r = fmaf (0.230836749f, f, -0.279208571f); // 0x1.d8c0f0p-3, -0x1.1de8dap-2
+    t = fmaf (0.331826031f, f, -0.498910338f); // 0x1.53ca34p-2, -0x1.fee25ap-2
+    r = fmaf (r, s, t);
+    r = fmaf (r, s, f);
+    r = fmaf (i, 0.693147182f, r); // 0x1.62e430p-1 // log(2)
+    return r;
+}
 // from Heng Li, a combination of inverse square root (see wiki) and inversion: https://bits.stephan-brumme.com/inverse.html
-Lfloat fastsqrtf(Lfloat x)
+inline Lfloat fastsqrtf(Lfloat x)
 {
 	union { Lfloat f; uint32_t i; } z = { x };
 	z.i  = 0x5f3759df - (z.i >> 1);
@@ -147,7 +180,7 @@ Lfloat fastsqrtf(Lfloat x)
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit integers
-int fastabs_int(int in){
+inline int fastabs_int(int in){
     unsigned int r;
     int const mask = in >> 31;
     
@@ -158,7 +191,7 @@ int fastabs_int(int in){
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit Lfloats
-Lfloat fastabsf(Lfloat f)
+inline  Lfloat fastabsf(Lfloat f)
 {
     union
     {
@@ -171,7 +204,7 @@ Lfloat fastabsf(Lfloat f)
     return alias.f;
 }
 
-double fastexp(double x) {
+inline  double fastexp(double x) {
     x = 1.0 + (x * 0.0009765625);
     x *= x; x *= x; x *= x; x *= x;
     x *= x; x *= x; x *= x; x *= x;
@@ -187,7 +220,7 @@ inline Lfloat fastexpf(Lfloat x) {
     return x;
 }
 
-double fasterexp(double x) {
+inline  double fasterexp(double x) {
     x = 1.0 + (x * 0.00390625);
     x *= x; x *= x; x *= x; x *= x;
     x *= x; x *= x; x *= x; x *= x;
@@ -201,7 +234,32 @@ inline Lfloat fasterexpf(Lfloat x) {
     return x;
 }
 
-Lfloat fast_sinf2(Lfloat x)
+inline Lfloat fastExp3(register Lfloat x)  // cubic spline approximation
+{
+    union { Lfloat f; int32_t i; } reinterpreter;
+
+    reinterpreter.i = (int32_t)(12102203.0f*x) + 127*(1 << 23);
+    int32_t m = (reinterpreter.i >> 7) & 0xFFFF;  // copy mantissa
+    // empirical values for small maximum relative error (8.34e-5):
+    reinterpreter.i +=
+         ((((((((1277*m) >> 14) + 14825)*m) >> 14) - 79749)*m) >> 11) - 626;
+    return reinterpreter.f;
+}
+
+inline float fastExp4(register Lfloat x)  // quartic spline approximation
+{
+    union { Lfloat f; int32_t i; } reinterpreter;
+
+    reinterpreter.i = (int32_t)(12102203.0f*x) + 127*(1 << 23);
+    int32_t m = (reinterpreter.i >> 7) & 0xFFFF;  // copy mantissa
+    // empirical values for small maximum relative error (1.21e-5):
+    reinterpreter.i += (((((((((((3537*m) >> 16)
+        + 13668)*m) >> 18) + 15817)*m) >> 14) - 80470)*m) >> 11);
+    return reinterpreter.f;
+}
+
+//not sure that this works
+inline Lfloat fast_sinf2(Lfloat x)
 {
 	Lfloat invert = 1.0f;
 	Lfloat out;
@@ -222,9 +280,10 @@ Lfloat fast_sinf2(Lfloat x)
 	out *= invert;
 	return out;
 }
+
 // fast Lfloating-point exp2 function taken from Robert Bristow Johnson's
 // post in the music-dsp list on Date: Tue, 02 Sep 2014 16:50:11 -0400
-Lfloat fastexp2f(Lfloat x)
+inline Lfloat fastexp2f(Lfloat x)
 {
     if (x >= -127.0)
     {
@@ -254,7 +313,7 @@ Lfloat fastexp2f(Lfloat x)
 }
 
 
-Lfloat fastPowf(Lfloat a, Lfloat b) {
+inline Lfloat fastPowf(Lfloat a, Lfloat b) {
     union 
     { 
         Lfloat d; int x; 
@@ -266,7 +325,7 @@ Lfloat fastPowf(Lfloat a, Lfloat b) {
 }
 
 
-double fastPow(double a, double b) {
+inline double fastPow(double a, double b) {
     union {
         double d;
         int x[2];
@@ -280,7 +339,7 @@ double fastPow(double a, double b) {
 
 
 
-int getBinCoeff(int N, int K)
+inline int getBinCoeff(int N, int K)
 {
    // This function gets the total number of unique combinations based upon N and K.
    // N is the total number of items.
@@ -307,20 +366,20 @@ int getBinCoeff(int N, int K)
  when t = 1, volumes[0] = 1, volumes[1] = 0
  */
 
-void LEAF_crossfade(Lfloat fade, Lfloat* volumes) {
+inline void LEAF_crossfade(Lfloat fade, Lfloat* volumes) {
     volumes[0] = sqrtf(0.5f * (1.0f + fade));
     volumes[1] = sqrtf(0.5f * (1.0f - fade));
 }
 
 // dope af
-Lfloat LEAF_chebyshevT(Lfloat in, int n){
+inline Lfloat LEAF_chebyshevT(Lfloat in, int n){
     if (n == 0) return 1;
     else if (n == 1) return in;
     else return 2.0f * in * LEAF_chebyshevT(in, n-1) - LEAF_chebyshevT(in, n-2);
 }
 
 #if !(_WIN32 || _WIN64)
-Lfloat LEAF_CompoundChebyshevT(Lfloat in, int n, Lfloat* amps){
+inline Lfloat LEAF_CompoundChebyshevT(Lfloat in, int n, Lfloat* amps){
     Lfloat T[n+1];
     T[0] = 1.0f;
     T[1] = in;
@@ -336,13 +395,13 @@ Lfloat LEAF_CompoundChebyshevT(Lfloat in, int n, Lfloat* amps){
 }
 #endif
 
-Lfloat LEAF_frequencyToMidi(Lfloat f)
+inline Lfloat LEAF_frequencyToMidi(Lfloat f)
 {
     return (69.0f + 12.0f * log2f(f * INV_440));
 }
 
 // Jones shaper
-Lfloat LEAF_shaper(Lfloat input, Lfloat m_drive)
+inline Lfloat LEAF_shaper(Lfloat input, Lfloat m_drive)
 {
     Lfloat fx = input * 2.0f;    // prescale
     Lfloat w, c, xc, xc2, xc4;
@@ -358,7 +417,7 @@ Lfloat LEAF_shaper(Lfloat input, Lfloat m_drive)
 }
 
 // round input to nearest rnd
-Lfloat LEAF_round (Lfloat input, Lfloat rnd)
+inline Lfloat LEAF_round (Lfloat input, Lfloat rnd)
 {
     rnd = fabsf(rnd);
     
@@ -371,7 +430,7 @@ Lfloat LEAF_round (Lfloat input, Lfloat rnd)
 
 
 
-Lfloat LEAF_bitwise_xor(Lfloat input, uint32_t op)
+inline Lfloat LEAF_bitwise_xor(Lfloat input, uint32_t op)
 {
     union unholy_t unholy;
     unholy.f = input;
@@ -380,7 +439,7 @@ Lfloat LEAF_bitwise_xor(Lfloat input, uint32_t op)
     return unholy.f;
 }
 
-Lfloat LEAF_reedTable(Lfloat input, Lfloat offset, Lfloat slope)
+inline Lfloat LEAF_reedTable(Lfloat input, Lfloat offset, Lfloat slope)
 {
     Lfloat output = offset + (slope * input);
     if ( output > 1.0f) output = 1.0f;
@@ -388,7 +447,7 @@ Lfloat LEAF_reedTable(Lfloat input, Lfloat offset, Lfloat slope)
     return output;
 }
 
-Lfloat   LEAF_softClip(Lfloat val, Lfloat thresh)
+inline Lfloat   LEAF_softClip(Lfloat val, Lfloat thresh)
 {
     Lfloat x;
     
@@ -411,7 +470,7 @@ Lfloat   LEAF_softClip(Lfloat val, Lfloat thresh)
 #ifdef ITCMRAM
 Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) LEAF_clip(Lfloat min, Lfloat val, Lfloat max)
 #else
-Lfloat LEAF_clip(Lfloat min, Lfloat val, Lfloat max)
+		inline Lfloat LEAF_clip(Lfloat min, Lfloat val, Lfloat max)
 #endif
 {
 
@@ -429,7 +488,7 @@ Lfloat LEAF_clip(Lfloat min, Lfloat val, Lfloat max)
     }
 }
 
-int   LEAF_clipInt(int min, int val, int max)
+inline int   LEAF_clipInt(int min, int val, int max)
 {
     int tempmin = min;
     int tempmax = max;
@@ -447,7 +506,7 @@ int   LEAF_clipInt(int min, int val, int max)
     }
 }
 
-int     LEAF_isPrime(uint64_t number )
+inline int     LEAF_isPrime(uint64_t number )
 {
     if ( number == 2 ) return 1;
     if ( number & 1 ) {
@@ -459,7 +518,7 @@ int     LEAF_isPrime(uint64_t number )
 }
 
 // Adapted from MusicDSP: http://www.musicdsp.org/showone.php?id=238
-Lfloat LEAF_tanh(Lfloat x)
+inline Lfloat LEAF_tanh(Lfloat x)
 {
     
     if( x < -3.0f )
@@ -473,32 +532,32 @@ Lfloat LEAF_tanh(Lfloat x)
 
 
 // Adapted from MusicDSP: http://www.musicdsp.org/showone.php?id=238
-Lfloat LEAF_tanhNoClip(Lfloat x)
+inline Lfloat LEAF_tanhNoClip(Lfloat x)
 {
         return x * ( 27.0f + x * x ) / ( 27.0f + 9.0f * x * x );
 }
 
 // https://math.stackexchange.com/questions/107292/rapid-approximation-of-tanhx
-Lfloat fast_tanh(Lfloat x){
+inline Lfloat fast_tanh(Lfloat x){
   Lfloat x2 = x * x;
   Lfloat a = x * (135135.0f + x2 * (17325.0f + x2 * (378.0f + x2)));
   Lfloat b = 135135.0f + x2 * (62370.0f + x2 * (3150.0f + x2 * 28.0f));
   return a / b;
 }
 
-Lfloat fast_tanh2(Lfloat x)
+inline Lfloat fast_tanh2(Lfloat x)
 {
     return x*(2027025.0f+270270.0f*x*x+6930.0f*x*x*x*x+36.0f*x*x*x*x*x*x)/(2027025.0f+945945.0f*x*x+51975.0f*x*x*x*x+630.0f*x*x*x*x*x*x+x*x*x*x*x*x*x*x);
 }
 
-Lfloat fast_tanh3(Lfloat x)
+inline Lfloat fast_tanh3(Lfloat x)
 {
     Lfloat exp2x = fastexpf(2.0f*x);
     return(exp2x - 1.0f) / (exp2x + 1.0f);
 }
 
 //from antto on KVR forum
-Lfloat   fast_tanh4 (Lfloat x)
+inline Lfloat   fast_tanh4 (Lfloat x)
 {
     Lfloat xa = fabsf(x);
     Lfloat x2 = xa * xa;
@@ -512,13 +571,13 @@ Lfloat   fast_tanh4 (Lfloat x)
 }
 
 //from raphx on this post : https://www.kvraudio.com/forum/viewtopic.php?t=332930&start=30
-Lfloat fast_tanh5(Lfloat x)
+inline Lfloat fast_tanh5(Lfloat x)
 {
 	Lfloat a = x + 0.16489087f * x*x*x + 0.00985468f * x*x*x*x*x;
 	return a / sqrtf(1.0f + a * a);
 }
 
-Lfloat leaf_softClip(Lfloat sample)
+inline Lfloat leaf_softClip(Lfloat sample)
 {
     if (sample < -1.0f)
     {
@@ -532,7 +591,7 @@ Lfloat leaf_softClip(Lfloat sample)
 
 //from Olli Niemitalo
 //https://dsp.stackexchange.com/questions/46629/finding-polynomial-approximations-of-a-sine-wave
-Lfloat fastSine(Lfloat x)
+inline Lfloat fastSine(Lfloat x)
 {
 	Lfloat term1 = x * 1.570034357f;
 	Lfloat term2 = x * x * x * -0.6425216143f;
@@ -540,7 +599,7 @@ Lfloat fastSine(Lfloat x)
 	return term1+term2+term3;
 }
 
-void LEAF_generate_sine(Lfloat* buffer, int size)
+inline void LEAF_generate_sine(Lfloat* buffer, int size)
 {
     Lfloat phase;
     for (int i = 0; i < size; i++)
@@ -737,7 +796,7 @@ void LEAF_generate_ftom(Lfloat* buffer, Lfloat startFreq, Lfloat endFreq, int si
 // http://www.kvraudio.com/forum/viewtopic.php?t=375517
 // t = phase, dt = inc, assuming 0-1 phase
 // assumes discontinuity at 0, so offset inputs as needed
-Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
+inline Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
 {
     
     // 0 <= t < 1
@@ -807,7 +866,7 @@ Lfloat LEAF_poly_blepInt(uint32_t t, uint32_t dt)
 }
 
 //this version is from this discussion: https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
-Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt)
+inline Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt)
 {
 
     Lfloat y = 0;
@@ -874,7 +933,7 @@ Lfloat LEAF_interpolate_hermite_x(Lfloat yy0, Lfloat yy1, Lfloat yy2, Lfloat yy3
 //this is a direct way of computing the thing. Another method is suggested in this paper:
 //https://www.researchgate.net/publication/224312927_A_computationally_efficient_coefficient_update_technique_for_Lagrange_fractional_delay_filters
 //but the advantages of that only happen above 3rd-order. For 3rd-order interpolation, the mults and adds would be the same.
-Lfloat LEAF_interpolate_lagrange(Lfloat y0, Lfloat y1, Lfloat y2, Lfloat y3, Lfloat d)
+inline Lfloat LEAF_interpolate_lagrange(Lfloat y0, Lfloat y1, Lfloat y2, Lfloat y3, Lfloat d)
 {
     //
 	Lfloat dp1 = d+1.0f;
@@ -896,7 +955,7 @@ Lfloat LEAF_interpolate_lagrange(Lfloat y0, Lfloat y1, Lfloat y2, Lfloat y3, Lfl
 
 
 // alpha, [0.0, 1.0]
-Lfloat LEAF_interpolation_linear (Lfloat A, Lfloat B, Lfloat alpha)
+inline Lfloat LEAF_interpolation_linear (Lfloat A, Lfloat B, Lfloat alpha)
 {
     alpha = LEAF_clip(0.0f, alpha, 1.0f);
     
@@ -988,31 +1047,31 @@ Lfloat fasteratodb(Lfloat a)
 	return 20.0f*log10f_fast(a);
 }
 
-Lfloat dbtoa(Lfloat db)
+inline Lfloat dbtoa(Lfloat db)
 {
     return powf(10.0f, db * 0.05f);
 }
 
 
-Lfloat fastdbtoa(Lfloat db)
+inline Lfloat fastdbtoa(Lfloat db)
 {
     //return powf(10.0f, db * 0.05f);
     return expf(0.115129254649702f * db); //faster version from http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html
 }
 
-Lfloat fasterdbtoa(Lfloat db)
+inline Lfloat fasterdbtoa(Lfloat db)
 {
     //return powf(10.0f, db * 0.05f);
     return fasterexpf(0.115129254649702f * db); //faster version from http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html
 }
 
 
-Lfloat maximum (Lfloat num1, Lfloat num2)
+inline Lfloat maximum (Lfloat num1, Lfloat num2)
 {
     return (num1 > num2 ) ? num1 : num2;
 }
 
-Lfloat minimum (Lfloat num1, Lfloat num2)
+inline Lfloat minimum (Lfloat num1, Lfloat num2)
 {
     return (num1 < num2 ) ? num1 : num2;
 }

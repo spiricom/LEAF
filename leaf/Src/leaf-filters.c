@@ -220,7 +220,8 @@ float    tThiranAllpassSOCascade_setCoeff(tThiranAllpassSOCascade* const ft, Lfl
     Lfloat iKey2 = (49.0f + 12.0f * log2f(freq * oversampling * INV_440));
     //f->iKey = logf((110.0f*twelfthRootOf2) / 27.5f)/ logf(twelfthRootOf2);
     //f->isHigh = freq > 400.0f;//switch to different coefficients for higher notes
-    Lfloat howHigh = LEAF_map(iKey2, 16.0f, 46.0f, 0.0f, 1.0f);
+    //Lfloat howHigh = LEAF_mapToZeroToOneOutput(iKey2, 16.0f, 76.0f);
+    Lfloat howHigh = (iKey2 - 16.0f) * 0.03f;
     howHigh = LEAF_clip(0.0f, howHigh, 1.0f);
     Lfloat oneMinusHowHigh = 1.0f - howHigh;
 
@@ -231,9 +232,9 @@ float    tThiranAllpassSOCascade_setCoeff(tThiranAllpassSOCascade* const ft, Lfl
     Lfloat C2 = (f->C2[0] * oneMinusHowHigh) + (f->C2[1] * howHigh);
     Lfloat logB = logf(f->B);
     Lfloat temp = (k1*logB*logB)+(k2 * logB)+k3;
-    Lfloat kd = expf(temp);
-    Lfloat Cd = expf((C1 * logB) + C2);
-    Lfloat D = expf(Cd-(f->iKey*kd));
+    Lfloat kd = fastExp3(temp);
+    Lfloat Cd = fastExp3((C1 * logB) + C2);
+    Lfloat D = fastExp3(Cd-(f->iKey*kd));
     f->D = D;
 
 	Lfloat a_k = -2.0f;
@@ -262,9 +263,11 @@ float    tThiranAllpassSOCascade_setCoeff(tThiranAllpassSOCascade* const ft, Lfl
 
 	f->a[1] = a_k;
 
-	if (f->a[0] > 0.99999999f)
+	if (f->a[0] > 0.99f)
 	{
-		f->a[0] = 0.99999999f;
+		f->a[0] = 0.99f;
+		f->a[1] = 0.01f;
+		D = 1.0f;
 	}
 	//f->a[0] = LEAF_clip(0.0f, f->a[0], 1.0f);
 	//f->a[1] = LEAF_clip(-1.999999f, f->a[1], 2.0f);
@@ -421,10 +424,8 @@ void    tCookOnePole_initToPool     (tCookOnePole* const ft, tMempool* const mp)
     LEAF* leaf = f->mempool->leaf;
     
     f->poleCoeff     = 0.9f;
-    f->gain         = 1.0f;
     f->sgain         = 0.1f;
     f->output         = 0.0f;
-    f->lastOutput    = 0.f;
     
     f->twoPiTimesInvSampleRate = leaf->twoPiTimesInvSampleRate;
 }
@@ -443,20 +444,11 @@ void    tCookOnePole_setPole(tCookOnePole* const ft, Lfloat aValue)
     
     onepole->poleCoeff = aValue;
       if (onepole->poleCoeff > 0.0)                   // Normalize gain to 1.0 max
-        onepole->sgain = onepole->gain * (1.0 - onepole->poleCoeff);
+        onepole->sgain = (1.0 - onepole->poleCoeff);
       else
-        onepole->sgain = onepole->gain * (1.0 + onepole->poleCoeff);
+        onepole->sgain = (1.0 + onepole->poleCoeff);
 }
 
-void    tCookOnePole_setGain(tCookOnePole* const ft, Lfloat aValue)
-{
-    _tCookOnePole* onepole = *ft;
-    onepole->gain = aValue;
-      if (onepole->poleCoeff > 0.0)
-        onepole->sgain = onepole->gain * (1.0 - onepole->poleCoeff);  // Normalize gain to 1.0 max
-      else
-        onepole->sgain = onepole->gain * (1.0 + onepole->poleCoeff);
-}
 
 void    tCookOnePole_setGainAndPole(tCookOnePole* const ft, Lfloat gain, Lfloat pole)
 {
@@ -473,8 +465,7 @@ Lfloat   tCookOnePole_tick(tCookOnePole* const ft, Lfloat sample)
     _tCookOnePole* onepole = *ft;
     
     onepole->output = (onepole->sgain * sample) + (onepole->poleCoeff * onepole->output);
-    onepole->lastOutput = onepole->output;
-    return onepole->lastOutput;
+    return onepole->output;
 }
 
 void tCookOnePole_setSampleRate(tCookOnePole* const ft, Lfloat sr)

@@ -1000,11 +1000,10 @@ typedef struct _tTString
     int oversampling;
     Lfloat invOversampling;
     Lfloat invOversamplingTimesTwo;
+    Lfloat twoPiTimesInvSampleRate;
     // delay lines
     tLagrangeDelay delay;
     tLagrangeDelay delayP;
-    Lfloat power;
-    Lfloat M;
     tHighpass dcBlock;
     tHighpass dcBlockP;
     // one pole filter
@@ -1016,12 +1015,8 @@ typedef struct _tTString
     Lfloat invSampleRateTimesTwoPi;
     Lfloat output;
     Lfloat outputP;
-    tCookOnePole tensionFilt;
-    Lfloat prevTension;
     Lfloat tensionGain;
     tSlide slide;
-    Lfloat prevDelay;
-    Lfloat prevDelayP;
     tExpSmooth tensionSmoother;
     tExpSmooth pitchSmoother;
     tThiranAllpassSOCascade allpass;
@@ -1031,7 +1026,7 @@ typedef struct _tTString
     Lfloat freq;
     tSVF lowpassP;
     tSVF highpassP;
-    Lfloat twoPiTimesInvSampleRate;
+
     Lfloat decayCoeff;
     Lfloat muteCoeff;
     Lfloat r;
@@ -1043,23 +1038,14 @@ typedef struct _tTString
     Lfloat pickupOut;
     Lfloat pickupOutP;
     Lfloat pickupPos;
-    Lfloat tempSum;
-    Lfloat ldev;
-    Lfloat tensionSum;
+
     Lfloat tensionAmount;
-    Lfloat prevSum;
-    uint32_t doTension;
     tCycle tensionModOsc;
     Lfloat phantomGain;
     tCycle pickupModOsc;
     Lfloat pickupModOscFreq;
     Lfloat pickupModOscAmp;
     tSVF pickupFilter;
-    Lfloat pickupPosL;
-    Lfloat pickupPosR;
-    Lfloat pickupPosLAlpha;
-    Lfloat pickupPosRAlpha;
-    Lfloat backwards;
 
     Lfloat slideAmount;
     Lfloat absSlideAmount;
@@ -1068,8 +1054,6 @@ typedef struct _tTString
     Lfloat slideNoise;
     Lfloat slideGain;
     uint32_t wound;
-    tBiQuad barFilter1;
-    tBiQuad barFilter2;
     tExpSmooth barPulse;
     Lfloat barPulseInc;
     uint32_t barPulsePhasor;
@@ -1082,7 +1066,6 @@ typedef struct _tTString
     Lfloat lastBump;
     Lfloat timeSinceLastBump;
     uint32_t sampleCount;
-    tCycle barOsc;
     tSlide barSmooth;
     tHighpass barHP;
     tSVF barLP;
@@ -1099,7 +1082,26 @@ typedef struct _tTString
     Lfloat phaseComp;
     Lfloat poleCoeff;
     Lfloat muted;
-
+    uint32_t inharmonic;
+    Lfloat inharmonicMult;
+    uint32_t maxDelay;
+    uint32_t barJumps;
+    uint32_t pitchJumps;
+    uint32_t tensionJumps;
+    Lfloat prevBaseDelay;
+    Lfloat coupling;
+    tFeedbackLeveler feedback;
+    tFeedbackLeveler feedbackP;
+    Lfloat feedbackNoise;
+    Lfloat feedbackNoiseLevel;
+    Lfloat quarterSampleRate;
+    Lfloat windingsPerInch;
+    uint32_t wavelength;
+    Lfloat pluckRatio;
+    Lfloat pickup_Ratio;
+    tExpSmooth pickNoise;
+    tNoise pickNoiseSource;
+    Lfloat pluckPoint_forInput;
 } _tTString;
 
 typedef _tTString* tTString;
@@ -1116,7 +1118,7 @@ void   tTString_setTensionGain                  (tTString* const bw, Lfloat tens
 void   tTString_setTensionSpeed                  (tTString* const bw, Lfloat tensionSpeed);
 void    tTString_setFreq               (tTString* const, Lfloat freq);
 void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloat amplitude);
-void    tTString_setWaveLength         (tTString* const, Lfloat waveLength); // in samples
+void    tTString_setWavelength         (tTString* const, uint32_t waveLength); // in samples
 void    tTString_setSampleRate         (tTString* const, Lfloat sr);
 void    tTString_setHarmonicity         (tTString* const, Lfloat B, Lfloat freq);
 void   tTString_setRippleDepth                  (tTString* const bw, Lfloat depth);
@@ -1130,6 +1132,9 @@ void   tTString_setBarPosition                  (tTString* const bw, Lfloat barP
 void   tTString_setOpenStringFrequency                  (tTString* const bw, Lfloat openStringFrequency);
 void   tTString_setPickupRatio                  (tTString* const bw, Lfloat ratio);
 void   tTString_setBarDrive                  (tTString* const bw, Lfloat drive);
+void   tTString_setFeedbackStrength                  (tTString* const bw, Lfloat strength);
+void   tTString_setFeedbackReactionSpeed                  (tTString* const bw, Lfloat speed);
+void    tTString_setInharmonic         (tTString* const bw, uint32_t onOrOff);
 
     /*!
      @defgroup treedtable tReedTable

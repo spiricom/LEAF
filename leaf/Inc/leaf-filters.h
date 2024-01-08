@@ -316,7 +316,7 @@ typedef struct _tCookOnePole
 {
     
     tMempool mempool;
-    Lfloat poleCoeff, gain, sgain, output, lastOutput;
+    Lfloat poleCoeff, sgain, output;
     Lfloat twoPiTimesInvSampleRate;
 } _tCookOnePole;
 
