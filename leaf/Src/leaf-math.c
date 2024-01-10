@@ -234,7 +234,7 @@ inline Lfloat fasterexpf(Lfloat x) {
     return x;
 }
 
-inline Lfloat fastExp3(register Lfloat x)  // cubic spline approximation
+inline Lfloat fastExp3(Lfloat x)  // cubic spline approximation
 {
     union { Lfloat f; int32_t i; } reinterpreter;
 
@@ -246,7 +246,7 @@ inline Lfloat fastExp3(register Lfloat x)  // cubic spline approximation
     return reinterpreter.f;
 }
 
-inline float fastExp4(register Lfloat x)  // quartic spline approximation
+inline float fastExp4(Lfloat x)  // quartic spline approximation
 {
     union { Lfloat f; int32_t i; } reinterpreter;
 

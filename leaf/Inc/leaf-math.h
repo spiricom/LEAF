@@ -210,8 +210,8 @@ extern "C" {
 
     Lfloat fasterexpf(Lfloat x);
 
-    float fastExp3(register float x);
-    float fastExp4(register float x);
+    float fastExp3(float x);
+    float fastExp4(float x);
     Lfloat fastsqrtf(Lfloat x);
 
     Lfloat mtof(Lfloat f);

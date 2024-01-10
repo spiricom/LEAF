@@ -2858,7 +2858,7 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
     tSVF_setFreq(&x->pickupFilter2, 4100.0f);
 
 
-    tSVF_initToPool(&x->peakFilt, SVFTypePeak, 1000.0f, 2.0f, mp);
+    tSVF_initToPool(&x->peakFilt, SVFTypePeak, 1000.0f, .9f, mp);
     tSVF_setSampleRate(&x->peakFilt, x->sampleRate);
 
     tSVF_setFreq(&x->peakFilt, 1000.0f);
@@ -3067,7 +3067,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
 		x->slideNoise = ((tempSlideNoise1 * dryAmount) + (tempSlideNoise2 * filterAmount * filterFade));// * x->slideAmount;
 		x->slideNoise *= x->muted;
 		x->slideNoise = tHighpass_tick(&x->barHP, x->slideNoise);
-		x->slideNoise = tSVF_tick(&x->barLP, x->slideNoise * x->slideGain * 2.0f * volCut);
+		x->slideNoise = tSVF_tick(&x->barLP, x->slideNoise * x->slideGain * volCut);
 		x->slideNoise = x->slideNoise * x->slideGain;
     }
     else
@@ -3228,9 +3228,9 @@ Lfloat   tTString_tick                  (tTString* const bw)
         Lfloat prefilter = (x->pickupOut + (outputPfilt * x->phantomGain)) * 2.0f;
         Lfloat prefilter2 = tSVF_tick(&x->pickupFilter2, prefilter);// + x->slideNoise;
         Lfloat prefilter3 = tSVF_tick(&x->pickupFilter, prefilter2);// + x->slideNoise;
-        Lfloat prefilter4 = tSVF_tick(&x->peakFilt, prefilter3);// + x->slideNoise;
+        //Lfloat prefilter4 = tSVF_tick(&x->peakFilt, prefilter3);// + x->slideNoise;
 
-        theOutput = (prefilter4 * volumes[1]) + (prefilter2 * 1.5f * volumes[0]);
+        theOutput = (prefilter3 * volumes[1]) + (prefilter2 * 1.5f * volumes[0]);
     }
     return theOutput;
 }
