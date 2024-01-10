@@ -20,6 +20,42 @@
 #include <arm_math.h>
 #endif
 
+Lfloat   pickupNonLinearity          (Lfloat x)
+{
+
+	x = x * 2.0f;
+	Lfloat out = (0.075f * x) + (0.00675f * x * x) +( 0.00211f * x * x * x) + (0.000475f * x * x * x * x) + (0.000831f * x * x * x * x *x);
+	out *= 4.366812227074236f;
+	return out;
+}
+
+
+void   tPickupNonLinearity_init          (tPickupNonLinearity* const pl, LEAF* const leaf)
+{
+	tPickupNonLinearity_initToPool(pl, &leaf->mempool);
+}
+void   tPickupNonLinearity_initToPool          (tPickupNonLinearity* const pl, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPickupNonLinearity* p = *pl = (_tPickupNonLinearity*) mpool_alloc(sizeof(_tPickupNonLinearity), m);
+    p->mempool = m;
+    p->prev = 0.0f;
+}
+void   tPickupNonLinearity_free          (tPickupNonLinearity* const pl)
+{
+	_tPickupNonLinearity* p = *pl;
+	mpool_free((char*)p, p->mempool);
+}
+Lfloat   tPickupNonLinearity_tick          (tPickupNonLinearity* const pl, Lfloat x)
+{
+	_tPickupNonLinearity* p = *pl;
+	x = x * 2.0f;
+	Lfloat out = (0.075f * x) + (0.00675f * x * x) +( 0.00211f * x * x * x) + (0.000475f * x * x * x * x) + (0.000831f * x * x * x * x *x);
+	out *= 4.366812227074236f;
+	Lfloat y = out - p->prev;
+	return y;
+}
+
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ tPluck ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
 void    tPluck_init         (tPluck* const pl, Lfloat lowestFrequency, LEAF* const leaf)
 {
@@ -721,7 +757,7 @@ void    tSimpleLivingString3_initToPool  (tSimpleLivingString3* const pl, int ov
     tOnePole_setFreq(&p->bridgeFilter, dampFreq);
     p->rippleGain = 0.0f;
     p->rippleDelay = 0.5f;
-
+    p->invOnePlusr = 1.0f;
     tHighpass_initToPool(&p->DCblocker,13, mp);
     tHighpass_setSampleRate(&p->DCblocker,p->sampleRate);
     tHighpass_setFreq(&p->DCblocker,13);
@@ -752,9 +788,10 @@ void    tSimpleLivingString3_free (tSimpleLivingString3* const pl)
     _tSimpleLivingString3* p = *pl;
     tFeedbackLeveler_free(&p->fbLev);
     tHighpass_free(&p->DCblocker);
+    tOnePole_free(&p->bridgeFilter);
     tLinearDelay_free(&p->delayLineL);
     tLinearDelay_free(&p->delayLineU);
-    tOnePole_free(&p->bridgeFilter);
+
     tExpSmooth_free(&p->wlSmooth);
 
     
@@ -806,6 +843,8 @@ void     tSimpleLivingString3_setDecay(tSimpleLivingString3* const pl, Lfloat de
 
     Lfloat temp = ((decay * 0.01f) + 0.01f) * 6.9078f;
     p->decay = exp(-6.9078 * ((1.0 / p->freq)  / temp));
+
+
     //tBiQuad_setCoefficients(&p->bridgeFilter2,p->temp1,p->temp2, p->temp1, 0.0f, 0.0f);
     //p->decay=powf(0.001f,1.0f/(p->freq*decay));
 }
@@ -889,7 +928,7 @@ Lfloat   tSimpleLivingString3_tick(tSimpleLivingString3* const pl, Lfloat input)
     
     for (int i = 0; i < p->oversampling; i++)
     {
-		p->Uout = tHighpass_tick(&p->DCblocker,tOnePole_tick(&p->bridgeFilter,tLinearDelay_tickOut(&p->delayLineU))* (p->decay - p->rippleGain));
+		p->Uout = tHighpass_tick(&p->DCblocker,tOnePole_tick(&p->bridgeFilter,tLinearDelay_tickOut(&p->delayLineU))* (p->decay * p->invOnePlusr));
 		p->Uout = LEAF_clip(-1.0f, tFeedbackLeveler_tick(&p->fbLev, p->Uout), 1.0f);
     	//p->Uout = tLinearDelay_tickOut(&p->delayLineU) * p->decay;
 		p->Lout = LEAF_clip(-1.0f, tLinearDelay_tickOut(&p->delayLineL), 1.0f);
@@ -2761,8 +2800,8 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
 
     x->pickupPos = 0.0f;
     x->slideGain = 0.4f;
-    x->barDrive = 0.5f;
-    x->wound = 0;
+    x->barDrive = 1.5f;
+    x->wound = 1;
     x->barPulsePhasor = 0;
     Lfloat maxDelayTemp = x->sampleRate / lowestFreq;
     tLagrangeDelay_initToPool(&x->delay, 100.0f, maxDelayTemp, mp);
@@ -2788,14 +2827,14 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
     tExpSmooth_setDest(&x->tensionSmoother, 0.0f);
     tExpSmooth_initToPool(&x->pitchSmoother, 100.0f, 0.04f * x->invOversampling, mp);
     tExpSmooth_setDest(&x->pitchSmoother, 100.0f);
-    tExpSmooth_initToPool(&x->pickNoise, 0.0f, 0.01f * x->invOversampling, mp);
+    tExpSmooth_initToPool(&x->pickNoise, 0.0f, 0.09f * x->invOversampling, mp);
     tExpSmooth_setDest(&x->pickNoise, 0.0f);
     tThiranAllpassSOCascade_initToPool(&x->allpass, 4, mp);
     tThiranAllpassSOCascade_initToPool(&x->allpassP, 4, mp);
     x->allpassDelay = tThiranAllpassSOCascade_setCoeff(&x->allpass, 0.0001f, 100.0f, x->invOversampling);
     x->allpassDelayP = tThiranAllpassSOCascade_setCoeff(&x->allpassP, 0.000025f, 100.0f, x->invOversampling);
 
-    tSVF_initToPool(&x->lowpassP, SVFTypeLowpass, 6000.0f, 0.8f, mp);
+    tSVF_initToPool(&x->lowpassP, SVFTypeLowpass, 5000.0f, 0.8f, mp);
     tSVF_setSampleRate(&x->lowpassP, x->sampleRate);
     tSVF_setFreq(&x->lowpassP, 6000.0f);
     tSVF_initToPool(&x->highpassP, SVFTypeHighpass, 1800.0f, 0.8f, mp);
@@ -2808,10 +2847,22 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
     tCycle_setSampleRate(&x->pickupModOsc, x->sampleRate);
     x->pickupModOscFreq = 440.0f;
     x->pickupModOscAmp = 1.0f;
-    tSVF_initToPool(&x->pickupFilter, SVFTypeLowpass, 3500.0f, 0.8f, mp);
+    tSVF_initToPool(&x->pickupFilter, SVFTypeLowpass, 2900.0f, 1.0f, mp);
     tSVF_setSampleRate(&x->pickupFilter, x->sampleRate);
 
-    tSVF_setFreq(&x->pickupFilter, 3500.0f);
+    tSVF_setFreq(&x->pickupFilter, 3900.0f);
+
+    tSVF_initToPool(&x->pickupFilter2, SVFTypeLowpass, 3800.0f, 1.1f, mp);
+    tSVF_setSampleRate(&x->pickupFilter2, x->sampleRate);
+
+    tSVF_setFreq(&x->pickupFilter2, 4100.0f);
+
+
+    tSVF_initToPool(&x->peakFilt, SVFTypePeak, 1000.0f, 2.0f, mp);
+    tSVF_setSampleRate(&x->peakFilt, x->sampleRate);
+
+    tSVF_setFreq(&x->peakFilt, 1000.0f);
+
     tNoise_initToPool(&x->noise, PinkNoise, mp);
     tHighpass_initToPool(&x->dcBlock, 1.0f, mp);
     tHighpass_setSampleRate(&x->dcBlock,x->sampleRate);
@@ -2820,7 +2871,7 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
     tSlide_initToPool(&x->slide, 0, 3000, mp);//100 1400
     if (x->wound)
     {
-    	tSlide_initToPool(&x->barSmooth, 1000, 1000, mp);//600 600
+
     	tExpSmooth_initToPool(&x->barSmooth2, 0.0f,0.0005f, mp); //was 0.0005
     	    tExpSmooth_setDest(&x->barSmooth2, 0.0f);
     	    tExpSmooth_initToPool(&x->barSmoothVol, 0.0f,0.0008f, mp); //was 0.008
@@ -2828,49 +2879,66 @@ void    tTString_initToPool            (tTString* const bw, int oversampling, Lf
     }
     else
     {
-    	tSlide_initToPool(&x->barSmooth, 1000, 1000, mp);//600 600
+
     	tExpSmooth_initToPool(&x->barSmooth2, 0.0f,0.005f, mp); //was 0.0005
     	tExpSmooth_setDest(&x->barSmooth2, 0.0f);
     	tExpSmooth_initToPool(&x->barSmoothVol, 0.0f,0.004f, mp); //was 0.008
     	tExpSmooth_setDest(&x->barSmoothVol, 0.0f);
     }
+    tSlide_initToPool(&x->barSmooth, 1000, 1000, mp);//600 600
     tSlide_initToPool(&x->barPulseSlide, 2, 30, mp);//100 1400 // 10 3000
     tExpSmooth_initToPool(&x->barPulse, 0.0f,0.05f, mp); //was 0.05
     tExpSmooth_setDest(&x->barPulse, 0.0f);
 
 
     tSVF_initToPool(&x->barResonator, SVFTypeBandpass, 5.0f, 15.0f, mp);
-    tSVF_initToPool(&x->barLowpass, SVFTypeLowpass, 300.0f, 0.707f, mp);
 
     x->timeSinceLastBump = 1;
     tHighpass_initToPool(&x->barHP, 30.0f, mp);
-    tSVF_initToPool(&x->barLP, SVFTypeLowpass, 8000.0f, 0.7f, mp);
+    tSVF_initToPool(&x->barLP, SVFTypeLowpass, 7000.0f, 0.9f, mp);
 
     x->inharmonic = 1;
     x->inharmonicMult = 1.0f;
-    x->coupling = 0.000000f;
     tFeedbackLeveler_initToPool(&x->feedback, 0.25f, 0.04f * x->invOversampling, 0.1f, 1, mp);
     tFeedbackLeveler_initToPool(&x->feedbackP, 0.25f, 0.04f * x->invOversampling, 0.1f, 1, mp);
     x->quarterSampleRate = x->sampleRate * 0.245f; // a little less than a quarter because we want to compute filters with it ( normalized filter cutoff needs to be less than half pi to work with freq approximation)
     x->windingsPerInch = 70.0f;
 
-    tNoise_initToPool(&x->pickNoiseSource, WhiteNoise, mp);
+    tNoise_initToPool(&x->pickNoiseSource, PinkNoise, mp);
+    x->pickupAmount = 0.0f;
+    tPickupNonLinearity_initToPool(&x->p, mp);
 }
 void    tTString_free                  (tTString* const bw)
 {
     _tTString* x = *bw;
+    tPickupNonLinearity_free(&x->p);
+    tNoise_free(&x->pickNoiseSource);
+    tFeedbackLeveler_free(&x->feedbackP);
+    tFeedbackLeveler_free(&x->feedback);
+    tSVF_free(&x->barLP);
+    tHighpass_free(&x->barHP);
+    tSVF_free(&x->barResonator);
+    tExpSmooth_free(&x->barPulse);
+    tSlide_free(&x->barPulseSlide);
+    tSlide_free(&x->barSmooth);
+	tExpSmooth_free(&x->barSmoothVol);
+	tExpSmooth_free(&x->barSmooth2);
+	tSlide_free(&x->slide);
     tHighpass_free(&x->dcBlockP);
     tHighpass_free(&x->dcBlock);
     tNoise_free(&x->noise);
+    tSVF_free(&x->peakFilt);
+    tSVF_free(&x->pickupFilter2);
     tSVF_free(&x->pickupFilter);
+    tCycle_free(&x->pickupModOsc);
     tCycle_free(&x->tensionModOsc);
     tSVF_free(&x->highpassP);
     tSVF_free(&x->lowpassP),
     tThiranAllpassSOCascade_free(&x->allpassP);
     tThiranAllpassSOCascade_free(&x->allpass);
+    tExpSmooth_free(&x->pickNoise);
     tExpSmooth_free(&x->pitchSmoother);
     tExpSmooth_free(&x->tensionSmoother);
-    tSlide_free(&x->slide);
     tCookOnePole_free(&x->reflFiltP);
     tCookOnePole_free(&x->reflFilt);
     tLagrangeDelay_free(&x->delayP);
@@ -2885,7 +2953,6 @@ Lfloat   tTString_tick                  (tTString* const bw)
     x->feedbackNoise = tNoise_tick(&x->noise);
 
     Lfloat barPos = x->barPosition;
-    //currentBump = tSVF_tick(&x->barLowpass, currentBump) ;
     if ((barPos > (x->prevBarPosSmoothed + 3.0f)) || (barPos < (x->prevBarPosSmoothed - 3.0f)))
 	{
     	tExpSmooth_setValAndDest(&x->barSmooth2,barPos);
@@ -3000,7 +3067,7 @@ Lfloat   tTString_tick                  (tTString* const bw)
 		x->slideNoise = ((tempSlideNoise1 * dryAmount) + (tempSlideNoise2 * filterAmount * filterFade));// * x->slideAmount;
 		x->slideNoise *= x->muted;
 		x->slideNoise = tHighpass_tick(&x->barHP, x->slideNoise);
-		x->slideNoise = tSVF_tick(&x->barLP, x->slideNoise * x->slideGain * volCut);
+		x->slideNoise = tSVF_tick(&x->barLP, x->slideNoise * x->slideGain * 2.0f * volCut);
 		x->slideNoise = x->slideNoise * x->slideGain;
     }
     else
@@ -3009,14 +3076,12 @@ Lfloat   tTString_tick                  (tTString* const bw)
     	x->slideNoise = x->feedbackNoise;
 		x->slideNoise *= x->muted;
 		x->slideNoise = tHighpass_tick(&x->barHP, x->slideNoise);
-		x->slideNoise = tSVF_tick(&x->barLP, x->slideNoise * x->slideGain * volCut);
+		x->slideNoise = tSVF_tick(&x->barLP, x->slideNoise * x->slideGain * 0.5f * volCut);
 		x->slideNoise = x->slideNoise * x->slideGain;
     }
     for (int i = 0; i < x->oversampling; i++)
     {
     	x->baseDelay = tExpSmooth_tick(&x->pitchSmoother);
-
-    	x->prevBaseDelay = x->baseDelay;
 
     	Lfloat tension = tExpSmooth_tick(&x->tensionSmoother) * x->tensionGain * x->baseDelay;
 
@@ -3045,7 +3110,8 @@ Lfloat   tTString_tick                  (tTString* const bw)
 
 
         Lfloat pickNoiseSound = tNoise_tick(&x->pickNoiseSource) * tExpSmooth_tick(&x->pickNoise);
-        tLagrangeDelay_addTo(&x->delay,pickNoiseSound, (uint32_t)x->pluckPoint_forInput);
+        tLagrangeDelay_addTo(&x->delay,pickNoiseSound * 2.0f, (uint32_t)x->pluckPoint_forInput);
+        tLagrangeDelay_addTo(&x->delayP,pickNoiseSound * 2.0f, (uint32_t)x->pluckPoint_forInput);
 
         Lfloat filterOut = tCookOnePole_tick(&x->reflFilt, x->output);
         Lfloat filterOutP = tCookOnePole_tick(&x->reflFiltP, x->outputP);
@@ -3140,16 +3206,16 @@ Lfloat   tTString_tick                  (tTString* const bw)
         Lfloat leftgoing = tLagrangeDelay_tapOut(&x->delay, inversePickupPosInt) * oneMinusinversePickupPosAlpha;
         leftgoing += tLagrangeDelay_tapOut(&x->delay, inversePickupPosIntPlusOne) * inversePickupPosAlpha;
 
-        x->pickupOut =  (rightgoing - leftgoing);
-
+        //x->pickupOut =  (((volumes[1] * pickupNonLinearity(rightgoing)) + (volumes[0] * rightgoing)) - ((volumes[1] * pickupNonLinearity(leftgoing)) + (volumes[0] * leftgoing)));
+        x->pickupOut =  (pickupNonLinearity(rightgoing) - pickupNonLinearity(leftgoing));
         rightgoing = tLagrangeDelay_tapOut(&x->delayP, pickupPosInt) * oneMinusPickupPosAlpha;
 		rightgoing += tLagrangeDelay_tapOut(&x->delayP, pickupPosIntPlusOne) * pickupPosAlpha;
 		leftgoing = tLagrangeDelay_tapOut(&x->delayP, inversePickupPosInt) * oneMinusinversePickupPosAlpha;
 		leftgoing += tLagrangeDelay_tapOut(&x->delayP, inversePickupPosIntPlusOne) * inversePickupPosAlpha;
 
-		x->pickupOutP =  (rightgoing - leftgoing);
+		x->pickupOutP =  (pickupNonLinearity(rightgoing) - pickupNonLinearity(leftgoing));
 
-		Lfloat inputSample = tFeedbackLeveler_tick(&x->feedback, tHighpass_tick(&x->dcBlock, filterOut + (filterOutP * x->coupling) + x->slideNoise + x->feedbackNoise * x->feedbackNoiseLevel));
+		Lfloat inputSample = tFeedbackLeveler_tick(&x->feedback, tHighpass_tick(&x->dcBlock, filterOut + x->slideNoise + x->feedbackNoise * x->feedbackNoiseLevel));
 		Lfloat inputSampleP = tFeedbackLeveler_tick(&x->feedbackP, tHighpass_tick(&x->dcBlockP, filterOutP + x->slideNoise + x->feedbackNoise * x->feedbackNoiseLevel));
         tLagrangeDelay_tickIn(&x->delay, inputSample);
         tLagrangeDelay_tickIn(&x->delayP, inputSampleP);
@@ -3157,9 +3223,14 @@ Lfloat   tTString_tick                  (tTString* const bw)
         //Lfloat outputPfilt = 0.0f;
         Lfloat outputPfilt = tSVF_tick(&x->lowpassP, x->pickupOutP);
         outputPfilt = tSVF_tick(&x->highpassP, outputPfilt);
-
+        Lfloat volumes[2];
+        LEAF_crossfade(x->pickupAmount * 2.0f - 1.0f,volumes);
         Lfloat prefilter = (x->pickupOut + (outputPfilt * x->phantomGain)) * 2.0f;
-        theOutput = tSVF_tick(&x->pickupFilter, prefilter);// + x->slideNoise;
+        Lfloat prefilter2 = tSVF_tick(&x->pickupFilter2, prefilter);// + x->slideNoise;
+        Lfloat prefilter3 = tSVF_tick(&x->pickupFilter, prefilter2);// + x->slideNoise;
+        Lfloat prefilter4 = tSVF_tick(&x->peakFilt, prefilter3);// + x->slideNoise;
+
+        theOutput = (prefilter4 * volumes[1]) + (prefilter2 * 1.5f * volumes[0]);
     }
     return theOutput;
 }
@@ -3179,7 +3250,9 @@ void    tTString_setFreq               (tTString* const bw, Lfloat freq)
 
     //tCycle_setFreq(&x->tensionModOsc, freq * x->invOversamplingTimesTwo);
 #ifdef ARM_MATH_CM7
-    x->phaseComp = atan2f(x->poleCoeff *  arm_sin_f32(Fc) , 1.0f - (x->poleCoeff *  arm_cos_f32(Fc)));
+    Lfloat result = 0.0f;
+    arm_atan2_f32(x->poleCoeff *  arm_sin_f32(Fc) , 1.0f - (x->poleCoeff *  arm_cos_f32(Fc)), &result);
+     x->phaseComp = result;
     //if I can figure out how to use a newer CMSIS DSP pack, the new version 1.15 has an atan2f approximation that's likely faster
 #else
     x->phaseComp = atan2f((x->poleCoeff * sinf(Fc)) , (1.0f - (x->poleCoeff * cosf(Fc))));
@@ -3203,10 +3276,33 @@ void    tTString_setDecay               (tTString* const bw, Lfloat decay)
 	 }
 }
 
+void    tTString_setDecayInSeconds               (tTString* const bw, Lfloat decay)
+{
+	 _tTString* x = *bw;
+	 x->decayInSeconds = decay;
+	 if (x->decayInSeconds > 20.0f)
+	 {
+		 x->decayCoeff = 1.0f;
+	 }
+	 else
+	 {
+		 decay = fastExp3(-1.0f / (x->freq * x->decayInSeconds));
+		 //decay = LEAF_map(decay, 0.0f, 1.0f, 0.99f, 1.01f);
+		 decay = LEAF_clip(0.1f, decay, 1.0f);
+		 x->decayCoeff = decay;
+	 }
+}
+
 void    tTString_setPickupPos               (tTString* const bw, Lfloat pos)
 {
 	_tTString* x = *bw;
 	x->pickupPos = pos;
+}
+
+void    tTString_setPickupAmount               (tTString* const bw, Lfloat amount)
+{
+	_tTString* x = *bw;
+	x->pickupAmount = amount;
 }
 
 void    tTString_setPickupModAmp               (tTString* const bw, Lfloat amp)
@@ -3236,6 +3332,7 @@ void    tTString_mute              (tTString* const bw)
 	 x->muted = 0.0f;
 }
 
+//0-1
 void    tTString_setFilter              (tTString* const bw, Lfloat filter)
 {
 	 _tTString* x = *bw;
@@ -3246,7 +3343,9 @@ void    tTString_setFilter              (tTString* const bw, Lfloat filter)
 	 Lfloat overtone = LEAF_mapFromZeroToOneInput(filter, 14.0f, 100.0f);
 
 	 Lfloat freqToUse = (overtone * x->freq);
+
 	freqToUse = LEAF_clip(10.0f, freqToUse, x->quarterSampleRate);
+	x->filterFreq = freqToUse;
 #ifdef ARM_MATH_CM7
 	filter = 1.0f - arm_sin_f32(freqToUse * x->twoPiTimesInvSampleRate);
 #else
@@ -3258,7 +3357,24 @@ void    tTString_setFilter              (tTString* const bw, Lfloat filter)
 	tCookOnePole_setPole(&x->reflFilt,filter);
 	tCookOnePole_setPole(&x->reflFiltP,filter);
 	x->poleCoeff = filter;
+}
 
+void    tTString_setFilterFreqDirectly              (tTString* const bw, Lfloat freq)
+{
+	 _tTString* x = *bw;
+	Lfloat freqToUse = LEAF_clip(10.0f, freq, x->quarterSampleRate);
+	x->filterFreq = freqToUse;
+#ifdef ARM_MATH_CM7
+	freq = 1.0f - arm_sin_f32(freqToUse * x->twoPiTimesInvSampleRate);
+#else
+	freq = 1.0f - sinf(freqToUse * x->twoPiTimesInvSampleRate);
+#endif
+	//volatile Lfloat normalizedFreq = (overtone * x->freq) * x->twoPiTimesInvSampleRate;
+	//filter = 1.0f - normalizedFreq;
+
+	tCookOnePole_setPole(&x->reflFilt,freq);
+	tCookOnePole_setPole(&x->reflFiltP,freq);
+	x->poleCoeff = freq;
 }
 
 void   tTString_setTensionGain                  (tTString* const bw, Lfloat tensionGain)
@@ -3278,10 +3394,6 @@ void   tTString_setBarPosition                  (tTString* const bw, Lfloat barP
 {
 	_tTString* x = *bw;
 	x->prevBarPosition = x->barPosition;
-	if (barPosition == 0)
-	{
-		x->barJumps++;
-	}
 	x->barPosition = barPosition;
 }
 
@@ -3390,7 +3502,7 @@ void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloa
         {
             val = (1.0f - (((Lfloat)i-(Lfloat)pluckPointInt)*invRemainder));
         }
-        val = tanhf(val*1.2f) * amplitude;
+        val = LEAF_tanh(val*val) * amplitude;
         tLagrangeDelay_tapIn(&x->delay, val, i);
         tLagrangeDelay_tapIn(&x->delay, -val, currentDelayInt-i);
         tLagrangeDelay_tapIn(&x->delayP, val, i);
@@ -3425,6 +3537,43 @@ void    tTString_setInharmonic         (tTString* const bw, uint32_t onOrOff)
     _tTString* x = *bw;
     x->inharmonic = onOrOff;
     x->inharmonicMult = (Lfloat)onOrOff;
+}
+void    tTString_setWoundOrUnwound         (tTString* const bw, uint32_t wound)
+{
+    _tTString* x = *bw;
+    x->wound = wound;
+    if (x->wound)
+	{
+
+    	tExpSmooth_setFactor(&x->barSmooth2, 0.0005f);
+    	tExpSmooth_setFactor(&x->barSmoothVol, 0.0008f);
+
+	}
+	else
+	{
+
+		tExpSmooth_setFactor(&x->barSmooth2, 0.005f);
+		tExpSmooth_setFactor(&x->barSmoothVol, 0.004f);
+
+	}
+}
+void    tTString_setWindingsPerInch         (tTString* const bw, uint32_t windings)
+{
+    _tTString* x = *bw;
+    x->windingsPerInch = windings;
+}
+
+void    tTString_setPickupFilterFreq         (tTString* const bw, Lfloat cutoff)
+{
+    _tTString* x = *bw;
+    tSVF_setFreq(&x->pickupFilter,cutoff);
+
+}
+void    tTString_setPickupFilterQ        (tTString* const bw, Lfloat Q)
+{
+    _tTString* x = *bw;
+    tSVF_setQ(&x->pickupFilter,Q);
+
 }
 
 

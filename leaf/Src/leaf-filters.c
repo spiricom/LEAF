@@ -21,7 +21,7 @@
 #endif
 
 #ifdef ARM_MATH_CM7
-#include "arm_math.h"
+#include <arm_math.h>
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ OnePole Filter ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
@@ -1293,6 +1293,20 @@ void    tSVF_setSampleRate  (tSVF* const svff, Lfloat sr)
     _tSVF* svf = *svff;
     svf->sampleRate = sr;
     svf->invSampleRate = 1.0f/svf->sampleRate;
+}
+
+//only works for lowpass right now
+//actually doesn't work at all yet!
+Lfloat    tSVF_getPhaseAtFrequency  (tSVF* const svff, Lfloat freq)
+{
+    _tSVF* svf = *svff;
+    Lfloat w = svf->invSampleRate *freq*TWO_PI;
+    Lfloat c = 0.0f;
+    Lfloat f = 0.0f;
+    Lfloat d = 0.0f;
+    Lfloat num = sinf(2.0f*w) * (c-f);
+    Lfloat den = (c + f) + (2.0f * d * cosf(w)) + ((c+f)*cosf(2.0f * w));
+    return atan2f(num, den);
 }
 
 #if LEAF_INCLUDE_FILTERTAN_TABLE

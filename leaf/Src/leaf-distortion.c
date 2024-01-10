@@ -20,7 +20,7 @@
 #include "../Inc/leaf-math.h"
 #include "../Inc/leaf-filters.h"
 #ifdef ARM_MATH_CM7
-#include "../../Drivers/CMSIS/DSP/Include/arm_math.h"
+#include "arm_math.h"
 #endif
 #endif
 

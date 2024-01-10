@@ -25,15 +25,21 @@ extern "C" {
 #include "leaf-oscillators.h"
 #include "leaf-envelopes.h"
 #include "leaf-dynamics.h"
-    
-    /*!
-     * @internal
-     * Header.
-     * @include basic-oscillators.h
-     * @example basic-oscillators.c
-     * An example.
-     */
-    
+
+
+typedef struct _tPickupNonLinearity
+{
+
+    tMempool mempool;
+    Lfloat prev;
+} _tPickupNonLinearity;
+
+typedef _tPickupNonLinearity* tPickupNonLinearity;
+
+void   tPickupNonLinearity_init          (tPickupNonLinearity* const p, LEAF* const leaf);
+void   tPickupNonLinearity_initToPool          (tPickupNonLinearity* const p, tMempool* const mp);
+void   tPickupNonLinearity_free          (tPickupNonLinearity* const p);
+Lfloat   tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat in);
     //==============================================================================
     
     /*!
@@ -410,6 +416,7 @@ typedef struct _tSimpleLivingString3
     Lfloat sampleRate;
     Lfloat rippleGain;
     Lfloat rippleDelay;
+    Lfloat invOnePlusr;
 } _tSimpleLivingString3;
 
 typedef _tSimpleLivingString3* tSimpleLivingString3;
@@ -1026,7 +1033,7 @@ typedef struct _tTString
     Lfloat freq;
     tSVF lowpassP;
     tSVF highpassP;
-
+    Lfloat filterFreq;
     Lfloat decayCoeff;
     Lfloat muteCoeff;
     Lfloat r;
@@ -1046,7 +1053,7 @@ typedef struct _tTString
     Lfloat pickupModOscFreq;
     Lfloat pickupModOscAmp;
     tSVF pickupFilter;
-
+    tSVF pickupFilter2;
     Lfloat slideAmount;
     Lfloat absSlideAmount;
     Lfloat smoothedSlideAmount;
@@ -1058,7 +1065,6 @@ typedef struct _tTString
     Lfloat barPulseInc;
     uint32_t barPulsePhasor;
     tSVF barResonator;
-    tSVF barLowpass;
     Lfloat barPosition;
     Lfloat prevBarPosition;
     Lfloat openStringLength;
@@ -1085,11 +1091,7 @@ typedef struct _tTString
     uint32_t inharmonic;
     Lfloat inharmonicMult;
     uint32_t maxDelay;
-    uint32_t barJumps;
-    uint32_t pitchJumps;
     uint32_t tensionJumps;
-    Lfloat prevBaseDelay;
-    Lfloat coupling;
     tFeedbackLeveler feedback;
     tFeedbackLeveler feedbackP;
     Lfloat feedbackNoise;
@@ -1102,6 +1104,9 @@ typedef struct _tTString
     tExpSmooth pickNoise;
     tNoise pickNoiseSource;
     Lfloat pluckPoint_forInput;
+    tSVF peakFilt;
+    Lfloat pickupAmount;
+    tPickupNonLinearity p;
 } _tTString;
 
 typedef _tTString* tTString;
@@ -1135,8 +1140,15 @@ void   tTString_setBarDrive                  (tTString* const bw, Lfloat drive);
 void   tTString_setFeedbackStrength                  (tTString* const bw, Lfloat strength);
 void   tTString_setFeedbackReactionSpeed                  (tTString* const bw, Lfloat speed);
 void    tTString_setInharmonic         (tTString* const bw, uint32_t onOrOff);
-
-    /*!
+void    tTString_setWoundOrUnwound         (tTString* const bw, uint32_t wound);
+void    tTString_setWindingsPerInch         (tTString* const bw, uint32_t windings);
+void    tTString_setPickupFilterFreq         (tTString* const bw, Lfloat cutoff);
+void    tTString_setPickupFilterQ        (tTString* const bw, Lfloat Q);
+void    tTString_setFilterFreqDirectly              (tTString* const bw, Lfloat freq);
+void    tTString_setDecayInSeconds               (tTString* const bw, Lfloat decay);
+void    tTString_setPickupAmount               (tTString* const bw, Lfloat amount);
+/*!
+ *   *
      @defgroup treedtable tReedTable
      @ingroup physical
      @brief Reed Table - borrowed from STK
