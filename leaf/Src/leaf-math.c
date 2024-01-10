@@ -246,7 +246,7 @@ inline Lfloat fastExp3(Lfloat x)  // cubic spline approximation
     return reinterpreter.f;
 }
 
-inline float fastExp4(Lfloat x)  // quartic spline approximation
+inline Lfloat fastExp4(Lfloat x)  // quartic spline approximation
 {
     union { Lfloat f; int32_t i; } reinterpreter;
 
@@ -401,7 +401,7 @@ inline Lfloat LEAF_frequencyToMidi(Lfloat f)
 }
 
 // Jones shaper
-inline Lfloat LEAF_shaper(Lfloat input, Lfloat m_drive)
+Lfloat LEAF_shaper(Lfloat input, Lfloat m_drive)
 {
     Lfloat fx = input * 2.0f;    // prescale
     Lfloat w, c, xc, xc2, xc4;
@@ -447,7 +447,7 @@ inline Lfloat LEAF_reedTable(Lfloat input, Lfloat offset, Lfloat slope)
     return output;
 }
 
-inline Lfloat   LEAF_softClip(Lfloat val, Lfloat thresh)
+Lfloat   LEAF_softClip(Lfloat val, Lfloat thresh)
 {
     Lfloat x;
     
@@ -577,7 +577,7 @@ inline Lfloat fast_tanh5(Lfloat x)
 	return a / sqrtf(1.0f + a * a);
 }
 
-inline Lfloat leaf_softClip(Lfloat sample)
+Lfloat leaf_softClip(Lfloat sample)
 {
     if (sample < -1.0f)
     {
@@ -591,7 +591,7 @@ inline Lfloat leaf_softClip(Lfloat sample)
 
 //from Olli Niemitalo
 //https://dsp.stackexchange.com/questions/46629/finding-polynomial-approximations-of-a-sine-wave
-inline Lfloat fastSine(Lfloat x)
+Lfloat fastSine(Lfloat x)
 {
 	Lfloat term1 = x * 1.570034357f;
 	Lfloat term2 = x * x * x * -0.6425216143f;

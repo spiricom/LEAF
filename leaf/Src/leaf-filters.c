@@ -443,12 +443,21 @@ void    tCookOnePole_setPole(tCookOnePole* const ft, Lfloat aValue)
     _tCookOnePole* onepole = *ft;
     
     onepole->poleCoeff = aValue;
-      if (onepole->poleCoeff > 0.0)                   // Normalize gain to 1.0 max
-        onepole->sgain = (1.0 - onepole->poleCoeff);
+      if (onepole->poleCoeff > 0.0f)                   // Normalize gain to 1.0 max
+        onepole->sgain = (1.0f - onepole->poleCoeff);
       else
-        onepole->sgain = (1.0 + onepole->poleCoeff);
+        onepole->sgain = (1.0f + onepole->poleCoeff);
 }
-
+void    tCookOnePole_setGain        (tCookOnePole* const ft, Lfloat gain)
+{
+    _tCookOnePole* onepole = *ft;
+    
+    onepole->gain = gain;
+      if (onepole->poleCoeff > 0.0f)                   // Normalize gain to 1.0 max
+        onepole->sgain = ((1.0f - onepole->poleCoeff) * gain);
+      else
+        onepole->sgain = ((1.0f + onepole->poleCoeff) * gain);
+}
 
 void    tCookOnePole_setGainAndPole(tCookOnePole* const ft, Lfloat gain, Lfloat pole)
 {
