@@ -3678,3 +3678,124 @@ void     tReedTable_setSlope   (tReedTable* const pm, Lfloat slope)
     _tReedTable* p = *pm;
     p->slope = slope;
 }
+
+/* ============================ */
+
+void    tStiffString_init      (tStiffString* const pm, int numModes, LEAF* const leaf)
+{
+    tStiffString_initToPool(pm, numModes, &leaf->mempool);
+}
+
+void tStiffString_updateOutputWeights(tStiffString const p);
+
+void    tStiffString_initToPool   (tStiffString* const pm, int numModes, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tStiffString* p = *pm = (_tStiffString*) mpool_alloc(sizeof(_tStiffString), m);
+    p->mempool = m;
+
+    // initialize variables
+    p->numModes = numModes;
+    p->freqHz = 440.0f;
+    p->stiffness = 0.001f;
+    p->pluckPos = 0.2f;
+    p->pickupPos = 0.3f;
+    p->decay = 0.0001f;
+    p->decayHighFreq = 0.0003f;
+    p->sampleRate = m->leaf->sampleRate;
+    p->twoPiTimesInvSampleRate = m->leaf->twoPiTimesInvSampleRate;
+
+    // allocate memory
+    p->osc = (tCycle *) mpool_alloc(numModes * sizeof(tCycle), m);
+    for (int i; i < numModes; ++i) {
+        tCycle_initToPool(&p->osc[i], &m);
+    }
+    p->amplitudes = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
+    p->outputWeights = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
+    tStiffString_updateOutputWeights(p);
+}
+
+void tStiffString_updateOutputWeights(tStiffString const p)
+{
+    Lfloat x0 = p->pickupPos * 0.5f * PI;
+    for (int i = 0; i < p->numModes; ++i) {
+        p->outputWeights[i] = sinf((i + 1) * x0);
+    }
+}
+
+void    tStiffString_free (tStiffString* const pm)
+{
+    _tStiffString* p = *pm;
+
+    for (int i; i < p->numModes; ++i) {
+        tCycle_free(&p->osc[i]);
+    }
+    mpool_free((char *) p->osc, p->mempool);
+    mpool_free((char *) p->amplitudes, p->mempool);
+    mpool_free((char *) p->outputWeights, p->mempool);
+    mpool_free((char *) p, p->mempool);
+}
+
+Lfloat   tStiffString_tick                  (tStiffString* const pm)
+{
+    _tStiffString *p = *pm;
+    Lfloat sample = 0.0f;
+    for (int i = 0; i < p->numModes; ++i) {
+        sample += tCycle_tick(&p->osc[i]) * p->amplitudes[i] * p->outputWeights[i];
+        int n = i + 1;
+        Lfloat sig = p->decay + p->decayHighFreq * (n * n);
+        //amplitudes[i] *= expf(-sig * freqHz * leaf->twoPiTimesInvSampleRate);
+        sig = LEAF_clip(0.f, sig, 1.f);
+        p->amplitudes[i] *= 1.0f -sig * p->freqHz * p->twoPiTimesInvSampleRate;
+    }
+    return sample;
+}
+
+void tStiffString_setStiffness(tStiffString* const pm, Lfloat newValue)
+{
+    tStiffString p = *pm;
+    p->stiffness = newValue;
+}
+
+void tStiffString_setFreq(tStiffString* const pm, Lfloat newFreq)
+{
+    _tStiffString *p = *pm;
+    p->freqHz = newFreq;
+    Lfloat kappa_sq = p->stiffness * p->stiffness;
+    for (int i = 0; i < p->numModes; ++i) {
+        int n = i + 1;
+        int n_sq = n * n;
+        Lfloat sig = p->decay + p->decayHighFreq * n_sq;
+        Lfloat w0 = n * sqrtf(1.0f + kappa_sq * n_sq);
+        Lfloat zeta = sig / w0;
+        Lfloat w = w0 * sqrtf(1.0f - zeta * zeta);
+        tCycle_setFreq(&p->osc[i], p->freqHz * w);
+    }
+}
+
+void tStiffString_setFreqFast(tStiffString* const pm, Lfloat newFreq)
+{
+    _tStiffString *p = *pm;
+    p->freqHz = newFreq;
+    Lfloat kappa_sq = p->stiffness * p->stiffness;
+    for (int i = 0; i < p->numModes; ++i) {
+        int n = i + 1;
+        int n_sq = n * n;
+        Lfloat sig = p->decay + p->decayHighFreq * n_sq;
+        Lfloat w0 = n * (1.0f + 0.5f * kappa_sq * n_sq);
+        Lfloat zeta = sig / w0;
+        Lfloat w = w0 * (1.0f - 0.5f * zeta * zeta);
+        tCycle_setFreq(&p->osc[i], p->freqHz * w);
+    }
+}
+
+void tStiffString_setInitialAmplitudes(tStiffString* const mp)
+{
+    _tStiffString* p = *mp;
+    Lfloat x0 = p->pluckPos * 0.5f * PI;
+    for (int i = 0; i < p->numModes; ++i) {
+        int n = i + 1;
+        float denom = n * n * x0 * (PI - x0);
+        p->amplitudes[i] = 2.0f * sinf(x0 * n) / denom;
+    }
+}

@@ -1203,9 +1203,39 @@ void    tTString_setPickupAmount               (tTString* const bw, Lfloat amoun
     Lfloat   tReedTable_tanh_tick    (tReedTable* const, Lfloat input); //tanh softclip version of reed table - replacing the hard clip in original stk code
     void    tReedTable_setOffset    (tReedTable* const, Lfloat offset);
     void    tReedTable_setSlope     (tReedTable* const, Lfloat slope);
-    
-    //==============================================================================
-    
+
+//==============================================================================
+
+typedef struct _tStiffString
+    {
+        tMempool mempool;
+        int numModes;
+        tCycle *osc; // array of oscillators
+        Lfloat *amplitudes;
+        Lfloat *outputWeights;
+        Lfloat freqHz;        // the frequency of the whole string, determining delay length
+
+        Lfloat stiffness;
+        Lfloat pluckPos;    // the pick position, dividing the string in two, in ratio
+        Lfloat pickupPos;    // the preparation position, dividing the string in two, in ratio
+        Lfloat decay;
+        Lfloat decayHighFreq;
+        Lfloat sampleRate;
+        Lfloat twoPiTimesInvSampleRate;
+    } _tStiffString;
+
+    typedef _tStiffString* tStiffString;
+
+    void tStiffString_init        (tStiffString* const, int numModes, LEAF* const leaf);
+    void tStiffString_initToPool  (tStiffString* const, int numModes, tMempool* const);
+    void tStiffString_free        (tStiffString* const);
+
+    Lfloat tStiffString_tick(tStiffString* const);
+    void tStiffString_setStiffness(tStiffString* const, Lfloat newValue);
+    void tStiffString_setFreq(tStiffString* const, Lfloat newFreq);
+    void tStiffString_setFreqFast(tStiffString* const, Lfloat newFreq);
+    void tStiffString_setInitialAmplitudes(tStiffString* const);
+
 #ifdef __cplusplus
 }
 #endif
@@ -1213,5 +1243,3 @@ void    tTString_setPickupAmount               (tTString* const bw, Lfloat amoun
 #endif // LEAF_PHYSICAL_H_INCLUDED
 
 //==============================================================================
-
-
