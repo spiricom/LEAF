@@ -1144,6 +1144,8 @@ void    tTString_setWoundOrUnwound         (tTString* const bw, uint32_t wound);
 void    tTString_setWindingsPerInch         (tTString* const bw, uint32_t windings);
 void    tTString_setPickupFilterFreq         (tTString* const bw, Lfloat cutoff);
 void    tTString_setPickupFilterQ        (tTString* const bw, Lfloat Q);
+void    tTString_setPeakFilterFreq        (tTString* const bw, Lfloat freq);
+void    tTString_setPeakFilterQ        (tTString* const bw, Lfloat Q);
 void    tTString_setFilterFreqDirectly              (tTString* const bw, Lfloat freq);
 void    tTString_setDecayInSeconds               (tTString* const bw, Lfloat decay);
 void    tTString_setPickupAmount               (tTString* const bw, Lfloat amount);

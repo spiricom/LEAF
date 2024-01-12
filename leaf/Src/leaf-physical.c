@@ -3228,9 +3228,9 @@ Lfloat   tTString_tick                  (tTString* const bw)
         Lfloat prefilter = (x->pickupOut + (outputPfilt * x->phantomGain)) * 2.0f;
         Lfloat prefilter2 = tSVF_tick(&x->pickupFilter2, prefilter);// + x->slideNoise;
         Lfloat prefilter3 = tSVF_tick(&x->pickupFilter, prefilter2);// + x->slideNoise;
-        //Lfloat prefilter4 = tSVF_tick(&x->peakFilt, prefilter3);// + x->slideNoise;
+        Lfloat prefilter4 = tSVF_tick(&x->peakFilt, prefilter3);// + x->slideNoise;
 
-        theOutput = (prefilter3 * volumes[1]) + (prefilter2 * 1.5f * volumes[0]);
+        theOutput = (prefilter4 * 1.3f* volumes[1]) + (prefilter * 1.3f * volumes[0]);
     }
     return theOutput;
 }
@@ -3469,7 +3469,8 @@ void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloa
     tExpSmooth_setVal(&x->tensionSmoother, amplitude);
     tFeedbackLeveler_setTargetLevel(&x->feedback, amplitude * 0.25f);
     tFeedbackLeveler_setTargetLevel(&x->feedbackP, amplitude * 0.25f);
-    x->baseDelay = tExpSmooth_tick(&x->pitchSmoother);
+    tExpSmooth_setValAndDest(&x->pitchSmoother, x->pitchSmoother->dest);
+    x->baseDelay = x->pitchSmoother->dest;
     Lfloat currentDelay = x->baseDelay;// - x->allpassDelay;
     x->muteCoeff = 1.0f;
     uint32_t halfCurrentDelay = currentDelay * 0.5f;
@@ -3502,7 +3503,7 @@ void    tTString_pluck               (tTString* const bw, Lfloat position, Lfloa
         {
             val = (1.0f - (((Lfloat)i-(Lfloat)pluckPointInt)*invRemainder));
         }
-        val = LEAF_tanh(val*val) * amplitude;
+        val = LEAF_tanh(val* 1.2f) * amplitude;
         tLagrangeDelay_tapIn(&x->delay, val, i);
         tLagrangeDelay_tapIn(&x->delay, -val, currentDelayInt-i);
         tLagrangeDelay_tapIn(&x->delayP, val, i);
@@ -3572,7 +3573,20 @@ void    tTString_setPickupFilterFreq         (tTString* const bw, Lfloat cutoff)
 void    tTString_setPickupFilterQ        (tTString* const bw, Lfloat Q)
 {
     _tTString* x = *bw;
-    tSVF_setQ(&x->pickupFilter,Q);
+    tSVF_setQ(&x->pickupFilter,Q+0.5f);
+
+}
+
+void    tTString_setPeakFilterFreq         (tTString* const bw, Lfloat cutoff)
+{
+    _tTString* x = *bw;
+    tSVF_setFreq(&x->peakFilt,cutoff);
+
+}
+void    tTString_setPeakFilterQ        (tTString* const bw, Lfloat Q)
+{
+    _tTString* x = *bw;
+    tSVF_setQ(&x->peakFilt,Q+0.5f);
 
 }
 
