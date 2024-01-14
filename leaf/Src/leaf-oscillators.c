@@ -16,6 +16,9 @@
 
 #endif
 
+#ifdef ARM_MATH_CM7
+#include "arm_math.h"
+#endif
 
 
 #if LEAF_INCLUDE_SINE_TABLE
@@ -4068,3 +4071,93 @@ void    tSineTriLFO_setPhase (tSineTriLFO* const cy, Lfloat phase)
     c->shape = shape;
 
  }
+
+
+
+
+ void    tDampedOscillator_init        (tDampedOscillator* const cy, LEAF* const leaf)
+ {
+	 tDampedOscillator_initToPool(cy, &leaf->mempool);
+ }
+
+ void    tDampedOscillator_initToPool  (tDampedOscillator* const cy, tMempool* const mp)
+ {
+     _tMempool* m = *mp;
+     _tDampedOscillator* c = *cy = (_tDampedOscillator*) mpool_alloc(sizeof(_tDampedOscillator), m);
+     c->mempool = m;
+     LEAF* leaf = c->mempool->leaf;
+
+
+     c->freq_ = 0.0f;
+     c->decay_ = 1.0f;
+
+     tDampedOscillator_setSampleRate(cy, leaf->sampleRate);
+     c->loop_gain_ = cosf(c->freq_ * c->two_pi_by_sample_rate_);
+     	  Lfloat g = sqrtf((1.0f - c->loop_gain_) / (1.0f + c->loop_gain_));
+    c->turns_ratio_ = g;
+    tDampedOscillator_reset(cy);
+
+ }
+ void    tDampedOscillator_free        (tDampedOscillator* const cy)
+ {
+	 _tDampedOscillator* c = *cy;
+
+     mpool_free((char*)c, c->mempool);
+ }
+
+ Lfloat   tDampedOscillator_tick        (tDampedOscillator* const cy)
+ {
+	 _tDampedOscillator* c = *cy;
+	   Lfloat w = c->decay_ * c->x_;
+	   Lfloat z = c->loop_gain_ * (c->y_ + w);
+	   c->x_ = z - c->y_;
+	   c->y_ = z + w;
+	   return c->y_;
+ }
+ void    tDampedOscillator_setFreq     (tDampedOscillator* const cy, Lfloat freq_hz)
+ {
+	 _tDampedOscillator* c = *cy;
+
+	  c->freq_ = freq_hz;
+
+#ifdef ARM_MATH_CM7
+	  c->loop_gain_ = arm_cos_f32(freq_hz * c->two_pi_by_sample_rate_);
+	  Lfloat g = 1.0f;
+	  arm_sqrt_f32((1.0f - c->loop_gain_) / (1.0f + c->loop_gain_), &g);
+#else
+	  c->loop_gain_ = cosf(freq_hz * c->two_pi_by_sample_rate_);
+	  Lfloat g = sqrtf((1.0f - c->loop_gain_) / (1.0f + c->loop_gain_));
+#endif
+	  // scale state variable in preparation for the next step
+	  c->x_ *= g / c->turns_ratio_;
+	  c->turns_ratio_ = g;
+
+ }
+
+ void    tDampedOscillator_setDecay    (tDampedOscillator* const cy, Lfloat decay)
+ {
+	 _tDampedOscillator* c = *cy;
+
+
+	 Lfloat r = fastExp4(-decay * c->two_pi_by_sample_rate_);
+
+
+	 c->decay_ = r * r;
+
+ }
+
+ void    tDampedOscillator_setSampleRate (tDampedOscillator* const cy, Lfloat sr)
+ {
+	 _tDampedOscillator* c = *cy;
+	 c->two_pi_by_sample_rate_ = TWO_PI / sr;
+ }
+
+
+  void    tDampedOscillator_reset (tDampedOscillator* const cy)
+  {
+	  _tDampedOscillator* c = *cy;
+	  c->x_ = c->turns_ratio_;
+	  c->y_ = 0.0f;
+
+  }
+

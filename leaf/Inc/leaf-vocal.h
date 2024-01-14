@@ -35,6 +35,7 @@ typedef struct _glottis
     Lfloat  delta;
     Lfloat  Te;
     Lfloat  omega;
+    Lfloat  Again;
 
     Lfloat  T;
 } _glottis;
@@ -77,6 +78,8 @@ typedef struct _tract
 {
 	tMempool mempool;
 	int n;
+	Lfloat invN;
+	int nMinusOne;
 	int maxNumTractSections;
 	    Lfloat*  diameter;
 	    Lfloat*  rest_diameter;
@@ -90,10 +93,13 @@ typedef struct _tract
 	    Lfloat*  junction_outR;
 	    Lfloat*  A;
 
+	    Lfloat TnoiseGain;
+	    Lfloat AnoiseGain;
 	    int nose_length;
 
 
 	    int nose_start;
+
 
 	    int tip_start;
 	    int blade_start;
@@ -128,6 +134,7 @@ typedef struct _tract
 	    Lfloat  lip_output;
 	    Lfloat  nose_output;
 	    Lfloat  block_time;
+	    Lfloat diameterScale;
 
 	    tSVF fricativeNoiseFilt[2];
 	    tSVF aspirationNoiseFilt;
@@ -199,6 +206,10 @@ void tVoc_set_velum(tVoc* const voc, Lfloat velum);
 Lfloat * tVoc_get_velum_ptr(tVoc* const voc);
 void    tVoc_setDoubleComputeFlag(tVoc* const voc, int doubleCompute);
 int tVoc_get_counter(tVoc* const voc);
-
+void tVoc_rescaleDiameter(tVoc* const voc, Lfloat scale);
+void tVoc_setTurbulenceNoiseGain(tVoc* const voc, Lfloat gain);
+void tVoc_setAspirationNoiseGain(tVoc* const voc, Lfloat gain);
+void tVoc_setAspirationNoiseFilterFreq(tVoc* const voc, Lfloat Q);
+void tVoc_setAspirationNoiseFilterQ(tVoc* const voc, Lfloat freq);
 
 #endif /* INC_LEAF_VOCAL_H_ */

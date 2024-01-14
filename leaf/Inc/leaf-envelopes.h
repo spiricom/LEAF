@@ -164,9 +164,9 @@ extern "C" {
     {
         
         tMempool mempool;
-        Lfloat baseFactor, factor, oneminusfactor;
+        Lfloat factor, oneminusfactor;
         Lfloat curr,dest;
-        Lfloat invSampleRate;
+        //Lfloat invSampleRate;
     } _tExpSmooth;
     
     typedef _tExpSmooth* tExpSmooth;

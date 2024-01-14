@@ -1373,10 +1373,10 @@ void    tExpSmooth_initToPool   (tExpSmooth* const expsmooth, Lfloat val, Lfloat
     smooth->dest = val;
     if (factor < 0.0f) factor = 0.0f;
     if (factor > 1.0f) factor = 1.0f;
-    smooth->baseFactor = factor;
+    //smooth->baseFactor = factor;
     smooth->factor = factor;
     smooth->oneminusfactor = 1.0f - factor;
-    smooth->invSampleRate = smooth->mempool->leaf->invSampleRate;
+    //smooth->invSampleRate = smooth->mempool->leaf->invSampleRate;
 }
 
 void    tExpSmooth_free (tExpSmooth* const expsmooth)
@@ -1392,9 +1392,10 @@ void     tExpSmooth_setFactor(tExpSmooth* const expsmooth, Lfloat factor)
     if (factor < 0.0f)
         factor = 0.0f;
     else if (factor > 1.0f) factor = 1.0f;
-    smooth->baseFactor = factor;
-    smooth->factor = powf(factor, 44100.f * smooth->invSampleRate);
-    smooth->oneminusfactor = 1.0f - factor;
+    //smooth->baseFactor = factor;
+    //smooth->factor = powf(factor, 44100.f * smooth->invSampleRate);
+    smooth->factor = factor;
+    smooth->oneminusfactor = 1.0f - smooth->factor;
 }
 
 #ifdef ITCMRAM
@@ -1438,10 +1439,10 @@ Lfloat   tExpSmooth_sample(tExpSmooth* const expsmooth)
 
 void    tExpSmooth_setSampleRate(tExpSmooth* const expsmooth, Lfloat sr)
 {
-    _tExpSmooth* smooth = *expsmooth;
-    smooth->invSampleRate = 1.0f/sr;
-    smooth->factor = powf(smooth->baseFactor, 44100.f * smooth->invSampleRate);
-    smooth->oneminusfactor = 1.0f - smooth->factor;
+   // _tExpSmooth* smooth = *expsmooth;
+    //smooth->invSampleRate = 1.0f/sr;
+    //smooth->factor = powf(smooth->baseFactor, 44100.f * smooth->invSampleRate);
+    //smooth->oneminusfactor = 1.0f - smooth->factor;
 }
 
 //tSlide is based on the max/msp slide~ object

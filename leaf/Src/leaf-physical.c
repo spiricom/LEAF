@@ -3700,8 +3700,6 @@ void    tStiffString_init      (tStiffString* const pm, int numModes, LEAF* cons
     tStiffString_initToPool(pm, numModes, &leaf->mempool);
 }
 
-void tStiffString_updateOutputWeights(tStiffString const p);
-
 void    tStiffString_initToPool   (tStiffString* const pm, int numModes, tMempool* const mp)
 {
     _tMempool* m = *mp;
@@ -3716,38 +3714,115 @@ void    tStiffString_initToPool   (tStiffString* const pm, int numModes, tMempoo
     p->pickupPos = 0.3f;
     p->decay = 0.0001f;
     p->decayHighFreq = 0.0003f;
+    p->muteDecay = 0.4f;
     p->sampleRate = m->leaf->sampleRate;
     p->twoPiTimesInvSampleRate = m->leaf->twoPiTimesInvSampleRate;
+    p->nyquist = p->sampleRate * 0.5f;
+    Lfloat lessThanNyquist = p->sampleRate * 0.4f;
+    p->nyquistScalingFactor = 1.0f / (lessThanNyquist - p->nyquist);
+    p->amp = 0.0f;
+    p->gainComp = 0.0f;
 
     // allocate memory
-    p->osc = (tCycle *) mpool_alloc(numModes * sizeof(tCycle), m);
-    for (int i; i < numModes; ++i) {
-        tCycle_initToPool(&p->osc[i], &m);
+    /*
+    p->osc = (tDampedOscillator *) mpool_alloc(numModes * sizeof(tDampedOscillator), m);
+    for (int i = 0; i < numModes; ++i) {
+    	tDampedOscillator_initToPool(&p->osc[i], &m);
     }
+    */
+    p->osc = (tCycle *) mpool_alloc(numModes * sizeof(tCycle), m);
+    for (int i = 0; i < numModes; ++i) {
+    	tCycle_initToPool(&p->osc[i], &m);
+    }
+    //
     p->amplitudes = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
     p->outputWeights = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
-    tStiffString_updateOutputWeights(p);
+    p->decayScalar = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
+    p->decayVal = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
+    p->nyquistCoeff = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
+    tStiffString_updateOutputWeights(pm);
 }
 
-void tStiffString_updateOutputWeights(tStiffString const p)
-{
-    Lfloat x0 = p->pickupPos * 0.5f * PI;
-    for (int i = 0; i < p->numModes; ++i) {
-        p->outputWeights[i] = sinf((i + 1) * x0);
-    }
-}
+
 
 void    tStiffString_free (tStiffString* const pm)
 {
     _tStiffString* p = *pm;
 
-    for (int i; i < p->numModes; ++i) {
-        tCycle_free(&p->osc[i]);
+    for (int i = 0; i < p->numModes; ++i) {
+        //tDampedOscillator_free(&p->osc[i]);
+    	tCycle_free(&p->osc[i]);
+    	//
     }
-    mpool_free((char *) p->osc, p->mempool);
+    mpool_free((char *) p->nyquistCoeff, p->mempool);
+    mpool_free((char *) p->decayScalar, p->mempool);
+    mpool_free((char *) p->decayVal, p->mempool);
     mpool_free((char *) p->amplitudes, p->mempool);
     mpool_free((char *) p->outputWeights, p->mempool);
     mpool_free((char *) p, p->mempool);
+}
+
+void tStiffString_updateOscillators(tStiffString* const pm)
+{
+	_tStiffString *p = *pm;
+	Lfloat kappa_sq = p->stiffness * p->stiffness;
+	Lfloat compensation = 0.0f;
+    for (int i = 0; i < p->numModes; ++i) {
+      int n = i + 1;
+      int n_sq = n * n;
+      Lfloat sig = p->decay + p->decayHighFreq * n_sq;
+      //Lfloat w0 = n * sqrtf(1.0f + kappa_sq * n_sq);
+       Lfloat w0 = n * (1.0f + 0.5f * kappa_sq * n_sq);
+      Lfloat zeta = sig / w0;
+      //Lfloat w = w0 * sqrtf(1.0f - zeta * zeta);
+       Lfloat w = w0 * (1.0f - 0.5f * zeta * zeta);
+      if (i == 0)
+      {
+    	  compensation = 1.0f / w;
+      }
+      /*
+      if ((p->freqHz * w) < (p->sampleRate * 0.4f))
+      {
+    	  tDampedOscillator_setFreq(&p->osc[i], p->freqHz * w * compensation);
+    	  tDampedOscillator_setDecay(&p->osc[i],p->freqHz * sig);
+      }
+      else
+      {
+    	  tDampedOscillator_setDecay(&p->osc[i],0.5f);
+      }
+      */
+      Lfloat	testFreq = (p->freqHz * w);
+      Lfloat nyquistTest = (testFreq - p->nyquist) * p->nyquistScalingFactor;
+      p->nyquistCoeff[i] = LEAF_clip(0.0f, nyquistTest, 1.0f);
+	  tCycle_setFreq(&p->osc[i], testFreq * compensation);
+	  //tDampedOscillator_setDecay(&p->osc[i],p->freqHz * sig);
+	  Lfloat val = p->freqHz * sig;
+	  Lfloat r = fastExp4(-val * p->twoPiTimesInvSampleRate);
+	  p->decayScalar[i] = r * r;
+    }
+}
+void tStiffString_updateOutputWeights(tStiffString* const pm)
+{
+	_tStiffString *p = *pm;
+		Lfloat x0 = p->pickupPos * PI;
+		Lfloat totalGain = 0.0f;
+	  for (int i = 0; i < p->numModes; ++i)
+	  {
+#ifdef ARM_MATH_CM7
+		  p->outputWeights[i] = arm_sin_f32((i + 1) * x0);
+		  totalGain += fabsf(p->outputWeights[i]) * p->amplitudes[i];;
+
+#else
+		  p->outputWeights[i] = sinf((i + 1) * x0);
+		  totalGain += p->outputWeights[i] * p->amplitudes[i];
+#endif
+	  }
+	  if (totalGain < 0.01f)
+	  {
+		  totalGain = 0.01f;
+	  }
+	  totalGain = LEAF_clip(0.01f, totalGain, 1.0f);
+	  p->gainComp = 1.0f / totalGain;
 }
 
 Lfloat   tStiffString_tick                  (tStiffString* const pm)
@@ -3755,61 +3830,158 @@ Lfloat   tStiffString_tick                  (tStiffString* const pm)
     _tStiffString *p = *pm;
     Lfloat sample = 0.0f;
     for (int i = 0; i < p->numModes; ++i) {
-        sample += tCycle_tick(&p->osc[i]) * p->amplitudes[i] * p->outputWeights[i];
-        int n = i + 1;
-        Lfloat sig = p->decay + p->decayHighFreq * (n * n);
-        //amplitudes[i] *= expf(-sig * freqHz * leaf->twoPiTimesInvSampleRate);
-        sig = LEAF_clip(0.f, sig, 1.f);
-        p->amplitudes[i] *= 1.0f -sig * p->freqHz * p->twoPiTimesInvSampleRate;
+      //sample += tDampedOscillator_tick(&p->osc[i]) * p->amplitudes[i] * p->outputWeights[i];
+      sample += tCycle_tick(&p->osc[i]) * p->amplitudes[i] * p->outputWeights[i] * p->decayVal[i] * p->nyquistCoeff[i];
+      p->decayVal[i] *= p->decayScalar[i] * p->muteDecay;
     }
-    return sample;
+    return sample * p->amp * p->gainComp;
 }
 
 void tStiffString_setStiffness(tStiffString* const pm, Lfloat newValue)
 {
     tStiffString p = *pm;
-    p->stiffness = newValue;
+
+    p->stiffness = LEAF_mapFromZeroToOneInput(newValue,0.00f, 0.2f);
 }
+
+void tStiffString_setPickupPos(tStiffString* const pm, Lfloat newValue)
+{
+    tStiffString p = *pm;
+
+    p->pickupPos = LEAF_clip(0.01f, newValue, 0.99f);
+    tStiffString_updateOutputWeights(pm);
+}
+
+void tStiffString_setPluckPos(tStiffString* const pm, Lfloat newValue)
+{
+    tStiffString p = *pm;
+
+    p->pluckPos = LEAF_clip(0.01f, newValue, 0.99f);
+    tStiffString_updateOutputWeights(pm);
+}
+
 
 void tStiffString_setFreq(tStiffString* const pm, Lfloat newFreq)
 {
     _tStiffString *p = *pm;
     p->freqHz = newFreq;
-    Lfloat kappa_sq = p->stiffness * p->stiffness;
-    for (int i = 0; i < p->numModes; ++i) {
-        int n = i + 1;
-        int n_sq = n * n;
-        Lfloat sig = p->decay + p->decayHighFreq * n_sq;
-        Lfloat w0 = n * sqrtf(1.0f + kappa_sq * n_sq);
-        Lfloat zeta = sig / w0;
-        Lfloat w = w0 * sqrtf(1.0f - zeta * zeta);
-        tCycle_setFreq(&p->osc[i], p->freqHz * w);
-    }
+    tStiffString_updateOscillators(pm);
 }
 
-void tStiffString_setFreqFast(tStiffString* const pm, Lfloat newFreq)
+void tStiffString_setDecay(tStiffString* const pm, Lfloat decay)
 {
     _tStiffString *p = *pm;
-    p->freqHz = newFreq;
-    Lfloat kappa_sq = p->stiffness * p->stiffness;
-    for (int i = 0; i < p->numModes; ++i) {
-        int n = i + 1;
-        int n_sq = n * n;
-        Lfloat sig = p->decay + p->decayHighFreq * n_sq;
-        Lfloat w0 = n * (1.0f + 0.5f * kappa_sq * n_sq);
-        Lfloat zeta = sig / w0;
-        Lfloat w = w0 * (1.0f - 0.5f * zeta * zeta);
-        tCycle_setFreq(&p->osc[i], p->freqHz * w);
-    }
+    p->decay = decay;
+    tStiffString_updateOscillators(pm);
 }
 
-void tStiffString_setInitialAmplitudes(tStiffString* const mp)
+void tStiffString_setDecayHighFreq(tStiffString* const pm, Lfloat decayHF)
+{
+    _tStiffString *p = *pm;
+    p->decayHighFreq = decayHF;
+    tStiffString_updateOscillators(pm);
+}
+
+void tStiffString_mute(tStiffString* const pm)
+{
+    _tStiffString *p = *pm;
+    p->muteDecay = 0.99f;
+}
+
+void tStiffString_pluck(tStiffString* const mp, Lfloat amp)
 {
     _tStiffString* p = *mp;
-    Lfloat x0 = p->pluckPos * 0.5f * PI;
+    Lfloat x0 = p->pluckPos * PI;
+    p->muteDecay = 1.0f;
     for (int i = 0; i < p->numModes; ++i) {
         int n = i + 1;
         float denom = n * n * x0 * (PI - x0);
-        p->amplitudes[i] = 2.0f * sinf(x0 * n) / denom;
+        if (denom < 0.001f)
+        {
+        	denom = 0.001f; // to avoid divide by zero
+        }
+#ifdef ARM_MATH_CM7
+		  p->amplitudes[i] = 2.0f * arm_sin_f32(x0 * n) / denom;
+#else
+	      p->amplitudes[i] = 2.0f * sinf(x0 * n) / denom;
+#endif
+        //tDampedOscillator_reset(&p->osc[i]);
+        p->decayVal[i] = 1.0f;
     }
+    p->amp = amp;
+    tStiffString_updateOutputWeights(mp);
 }
+
+void tStiffString_setSampleRate(tStiffString* const pm, Lfloat sr)
+{
+    tStiffString p = *pm;
+
+    p->sampleRate = sr;
+    p->twoPiTimesInvSampleRate = TWO_PI / sr;
+}
+
+void tStiffString_setStiffnessNoUpdate(tStiffString* const pm, Lfloat newValue)
+{
+    tStiffString p = *pm;
+
+    p->stiffness = LEAF_mapFromZeroToOneInput(newValue,0.00f, 0.2f);
+}
+
+void tStiffString_setPickupPosNoUpdate(tStiffString* const pm, Lfloat newValue)
+{
+    tStiffString p = *pm;
+
+    p->pickupPos = LEAF_clip(0.01f, newValue, 0.99f);
+}
+
+void tStiffString_setPluckPosNoUpdate(tStiffString* const pm, Lfloat newValue)
+{
+    tStiffString p = *pm;
+
+    p->pluckPos = LEAF_clip(0.01f, newValue, 0.99f);
+}
+
+
+void tStiffString_setFreqNoUpdate(tStiffString* const pm, Lfloat newFreq)
+{
+    _tStiffString *p = *pm;
+    p->freqHz = newFreq;
+}
+
+void tStiffString_setDecayNoUpdate(tStiffString* const pm, Lfloat decay)
+{
+    _tStiffString *p = *pm;
+    p->decay = decay;
+}
+
+void tStiffString_setDecayHighFreqNoUpdate(tStiffString* const pm, Lfloat decayHF)
+{
+    _tStiffString *p = *pm;
+    p->decayHighFreq = decayHF;
+}
+
+
+void tStiffString_pluckNoUpdate(tStiffString* const mp, Lfloat amp)
+{
+    _tStiffString* p = *mp;
+    Lfloat x0 = p->pluckPos * 0.5f * PI;
+    p->muteDecay = 1.0f;
+    for (int i = 0; i < p->numModes; ++i) {
+        int n = i + 1;
+        float denom = n * n * x0 * (PI - x0);
+        if (denom < 0.001f)
+        {
+        	denom = 0.001f; // to avoid divide by zero
+        }
+#ifdef ARM_MATH_CM7
+		  p->amplitudes[i] = 2.0f * arm_sin_f32(x0 * n) / denom;
+#else
+	      p->amplitudes[i] = 2.0f * sinf(x0 * n) / denom;
+#endif
+        //tDampedOscillator_reset(&p->osc[i]);
+        p->decayVal[i] = 1.0f;
+    }
+    p->amp = amp;
+}
+
+

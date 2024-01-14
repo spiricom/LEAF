@@ -1743,6 +1743,34 @@ void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, Lfloa
 }
 #endif
 
+
+typedef struct _tDampedOscillator
+	{
+		tMempool mempool;
+
+		Lfloat freq_;
+		Lfloat decay_;
+		Lfloat two_pi_by_sample_rate_;
+		Lfloat loop_gain_;
+		Lfloat turns_ratio_;
+		Lfloat x_;
+		Lfloat y_;
+	} _tDampedOscillator;
+
+	typedef _tDampedOscillator* tDampedOscillator;
+
+	void    tDampedOscillator_init(tDampedOscillator* const osc, LEAF* const leaf);
+	void    tDampedOscillator_initToPool(tDampedOscillator* const osc, tMempool* const mempool);
+	void    tDampedOscillator_free(tDampedOscillator* const osc);
+
+	Lfloat   tDampedOscillator_tick(tDampedOscillator* const osc);
+	void    tDampedOscillator_setFreq(tDampedOscillator* const osc, Lfloat freq);
+	void    tDampedOscillator_setSampleRate (tDampedOscillator* const osc, Lfloat sr);
+	void 	tDampedOscillator_setDecay(tDampedOscillator* const osc, Lfloat decay);
+	void 	tDampedOscillator_reset(tDampedOscillator* const osc);
+
+
+
 #endif  // LEAF_OSCILLATORS_H_INCLUDED
 
 //==============================================================================
