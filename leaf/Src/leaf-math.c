@@ -798,20 +798,25 @@ void LEAF_generate_ftom(Lfloat* buffer, Lfloat startFreq, Lfloat endFreq, int si
 // assumes discontinuity at 0, so offset inputs as needed
 inline Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
 {
-    
-    // 0 <= t < 1
-    if (t < dt) {
-        t /= dt;
-        return t+t - t*t - 1.0f;
+    dt = fabsf(dt);
+    if (dt >= 0.0f)
+    {
+        // 0 <= t < 1
+        if (t < dt)
+        {
+            t /= dt;
+            return t+t - t*t - 1.0f;
+        }
+        // -1 < t < 0
+        else if (t > 1.0f - dt)
+        {
+            t = (t - 1.0f) / dt;
+            return t*t + t+t + 1.0f;
+        }
+        // 0 otherwise
+        else return 0.0f;
     }
-    // -1 < t < 0
-    else if (t > 1.0f - dt) {
-        t = (t - 1.0f) / dt;
-        return t*t + t+t + 1.0f;
-    }
-    // 0 otherwise
-    else return 0.0f;
-    
+
 //this version is from this discussion: https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
 //    dt = -1.0f*dt;
 //    Lfloat y = 0.0f;
@@ -869,8 +874,8 @@ Lfloat LEAF_poly_blepInt(uint32_t t, uint32_t dt)
 inline Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt)
 {
 
-    Lfloat y = 0;
-    if ((0 <= t) && (t < (2.0f * dt)))
+    Lfloat y = 0.0f;
+    if ((0.0f <= t) && (t < (2.0f * dt)))
     {
         Lfloat x = (t / dt);
         Lfloat u = 2.0f - x;
@@ -885,7 +890,7 @@ inline Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt)
             y += 4.0f * v;
         }
     }
-    return y * dt / 0.066666666666667f; // divide by 15
+    return (y * dt) * 0.066666666666667f; // divide by 15
 
 }
 

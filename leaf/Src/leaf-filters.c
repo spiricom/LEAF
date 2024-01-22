@@ -1109,8 +1109,8 @@ void    tSVF_initToPool     (tSVF* const svff, SVFType type, Lfloat freq, Lfloat
     
     svf->type = type;
     
-    svf->ic1eq = 0;
-    svf->ic2eq = 0;
+    svf->ic1eq = 0.0f;
+    svf->ic2eq = 0.0f;
     svf->Q = Q;
     svf->cutoff = freq;
     svf->g = tanf(PI * freq * svf->invSampleRate);
@@ -1182,7 +1182,7 @@ Lfloat   tSVF_tick(tSVF* const svff, Lfloat v0)
 {
     _tSVF* svf = *svff;
 #ifdef SAFE_FILTER
-    if (isnan(v0))
+    if (!isfinite(v0))
     {
         v0 = 0.0f;
     }
@@ -2819,14 +2819,14 @@ Lfloat   tDiodeFilter_tick               (tDiodeFilter* const vf, Lfloat in)
     // This formula gives the result for y3 thanks to MATLAB
     Lfloat y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
 #ifdef SAFE_FILTER
-    if (isnan(y3))
+    if (!isfinite(y3))
     {
         errorCheck = 1;
     }
 #endif
     Lfloat tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
 #ifdef SAFE_FILTER
-    if (isnan(tempy3denom))
+    if (!isfinite(tempy3denom))
     {
         errorCheck = 2;
     }
@@ -2837,7 +2837,7 @@ Lfloat   tDiodeFilter_tick               (tDiodeFilter* const vf, Lfloat in)
     }
     y3 = y3 / tempy3denom;
 #ifdef SAFE_FILTER
-    if (isnan(y3))
+    if (!isfinite(y3))
     {
         errorCheck = 3;
     }
@@ -2863,7 +2863,7 @@ Lfloat   tDiodeFilter_tick               (tDiodeFilter* const vf, Lfloat in)
     // update state
     f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
 #ifdef SAFE_FILTER
-    if (isnan(f->s0))
+    if (!isfinite(f->s0))
     {
         errorCheck = 4;
     }
@@ -2911,14 +2911,14 @@ Lfloat   tDiodeFilter_tickEfficient               (tDiodeFilter* const vf, Lfloa
     // This formula gives the result for y3 thanks to MATLAB
     Lfloat y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
 #ifdef SAFE_FILTER
-    if (isnan(y3))
+    if (!isfinite(y3))
     {
         errorCheck = 1;
     }
 #endif
     Lfloat tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
 #ifdef SAFE_FILTER
-    if (isnan(tempy3denom))
+    if (!isfinite(tempy3denom))
     {
         errorCheck = 2;
     }
@@ -2931,7 +2931,7 @@ Lfloat   tDiodeFilter_tickEfficient               (tDiodeFilter* const vf, Lfloa
 
     y3 = y3 / tempy3denom;
 #ifdef SAFE_FILTER
-    if (isnan(y3))
+    if (!isfinite(y3))
     {
         errorCheck = 3;
     }
@@ -2958,7 +2958,7 @@ Lfloat   tDiodeFilter_tickEfficient               (tDiodeFilter* const vf, Lfloa
     // update state
     f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
 #ifdef SAFE_FILTER
-    if (isnan(f->s0))
+    if (!isfinite(f->s0))
     {
         errorCheck = 4;
     }

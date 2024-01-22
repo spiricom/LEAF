@@ -302,14 +302,14 @@ extern "C" {
     typedef struct _tPBSineTriangle
     {
         tMempool mempool;
-        Lfloat phase;
-        Lfloat inc,freq;
-        Lfloat shape;
-        Lfloat lastOut;
-        Lfloat invSampleRate;
+        uint32_t phase;
         tCycle sine;
+        int32_t inc;
+        Lfloat freq;
+        Lfloat shape;
         Lfloat oneMinusShape;
-        Lfloat skew;
+        Lfloat invSampleRate;
+        Lfloat invSampleRateTimesTwoTo32;
     } _tPBSineTriangle;
 
     typedef _tPBSineTriangle* tPBSineTriangle;
@@ -338,12 +338,14 @@ extern "C" {
     typedef struct _tPBTriangle
     {
         tMempool mempool;
-        Lfloat phase;
-        Lfloat inc,freq;
-        Lfloat skew;
-        Lfloat oneMinusSkew;
-        Lfloat lastOut;
+        uint32_t phase;
+        int32_t inc;
+        Lfloat freq;
+        uint32_t width;
+        uint32_t oneMinusWidth;
+        Lfloat lastOutput;
         Lfloat invSampleRate;
+        Lfloat invSampleRateTimesTwoTo32;
     } _tPBTriangle;
     
     typedef _tPBTriangle* tPBTriangle;

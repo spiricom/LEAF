@@ -263,8 +263,8 @@ void tCompressor_setParams(tCompressor* const comp, Lfloat thresh, Lfloat ratio,
     c->W = knee * 0.5f;
     c->inv4W = 1.0f / (2.0f * knee);
     c->M = makeup;
-    c->tauAttack = fasterexpf(-1.0f/(0.001f * attack * c->sampleRate));
-    c->tauRelease = fasterexpf(-1.0f/(0.001f * release * c->sampleRate));
+    c->tauAttack = fastExp4(-1.0f/(0.001f * attack * c->sampleRate));
+    c->tauRelease = fastExp4(-1.0f/(0.001f * release * c->sampleRate));
 }
 
 void tCompressor_setSampleRate(tCompressor* const comp, Lfloat sampleRate)
