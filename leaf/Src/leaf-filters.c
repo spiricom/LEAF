@@ -1085,6 +1085,7 @@ void    tBiQuad_setSampleRate(tBiQuad* const ft, Lfloat sr)
     }
 }
 
+
 // Less efficient, more accurate version of SVF, in which cutoff frequency is taken as Lfloating point Hz value and tanf
 // is calculated when frequency changes.
 void tSVF_init(tSVF* const svff, SVFType type, Lfloat freq, Lfloat Q, LEAF* const leaf)
@@ -1106,7 +1107,7 @@ void    tSVF_initToPool     (tSVF* const svff, SVFType type, Lfloat freq, Lfloat
     
     svf->sampleRate = leaf->sampleRate;
     svf->invSampleRate = leaf->invSampleRate;
-    
+    svf->sampleRatio = 48000.0f /svf->sampleRate;
     svf->type = type;
     
     svf->ic1eq = 0.0f;
@@ -1164,11 +1165,11 @@ void    tSVF_initToPool     (tSVF* const svff, SVFType type, Lfloat freq, Lfloat
     }
     if (leaf->sampleRate > 90000)
     {
-    	svf->table = __filterTanhTable_96000;
+        svf->table = __filterTanhTable_96000;
     }
     else
     {
-    	svf->table = __filterTanhTable_48000;
+        svf->table = __filterTanhTable_48000;
     }
 }
 
@@ -1181,12 +1182,7 @@ void    tSVF_free   (tSVF* const svff)
 Lfloat   tSVF_tick(tSVF* const svff, Lfloat v0)
 {
     _tSVF* svf = *svff;
-#ifdef SAFE_FILTER
-    if (!isfinite(v0))
-    {
-        v0 = 0.0f;
-    }
-#endif
+
     Lfloat v1,v2,v3;
     v3 = v0 - svf->ic2eq;
     v1 = (svf->a1 * svf->ic1eq) + (svf->a2 * v3);
@@ -1195,6 +1191,42 @@ Lfloat   tSVF_tick(tSVF* const svff, Lfloat v0)
     svf->ic2eq = (2.0f * v2) - svf->ic2eq;
     
     return (v0 * svf->cH) + (v1 * svf->cB) + (svf->k * v1 * svf->cBK) + (v2 * svf->cL);
+}
+
+Lfloat   tSVF_tickHP(tSVF* const svff, Lfloat v0)
+{
+    _tSVF* svf = *svff;
+
+    Lfloat v1,v2;
+    v1 = svf->a1 * svf->ic1eq + svf->a2 * (v0 - svf->ic2eq);
+    v2 = svf->ic2eq + svf->g * v1;
+    svf->ic1eq = (2.0f * v1) - svf->ic1eq;
+    svf->ic2eq = (2.0f * v2) - svf->ic2eq;
+    return v0  - (svf->k * v1) - (v2);
+}
+
+Lfloat   tSVF_tickBP(tSVF* const svff, Lfloat v0)
+{
+    _tSVF* svf = *svff;
+
+    Lfloat v1,v2;
+    v1 = svf->a1 * svf->ic1eq + svf->a2 * (v0 - svf->ic2eq);
+    v2 = svf->ic2eq + svf->g * v1;
+    svf->ic1eq = (2.0f * v1) - svf->ic1eq;
+    svf->ic2eq = (2.0f * v2) - svf->ic2eq;
+    
+    return v1;
+}
+
+Lfloat   tSVF_tickLP(tSVF* const svff, Lfloat v0)
+{
+    _tSVF* svf = *svff;
+    Lfloat v1,v2;
+    v1 = svf->a1 * svf->ic1eq + svf->a2 * (v0 - svf->ic2eq);
+    v2 = svf->ic2eq + svf->g * v1;
+    svf->ic1eq = (2.0f * v1) - svf->ic1eq;
+    svf->ic2eq = (2.0f * v2) - svf->ic2eq;
+    return v2;
 }
 
 void     tSVF_setFreq(tSVF* const svff, Lfloat freq)
@@ -1210,21 +1242,21 @@ void     tSVF_setFreq(tSVF* const svff, Lfloat freq)
 
 void    tSVF_setFreqFast     (tSVF* const vf, Lfloat cutoff)
 {
-	_tSVF* svf = *vf;
-	svf->cutoffMIDI = cutoff;
-	cutoff *= 30.567164179104478f; //get 0-134 midi range to 0-4095
+    _tSVF* svf = *vf;
+    svf->cutoffMIDI = cutoff;
+    cutoff *= 30.567164179104478f; //get 0-134 midi range to 0-4095
     int32_t intVer = (int32_t)cutoff;
     if (intVer > 4094)
     {
-    	intVer = 4094;
+        intVer = 4094;
     }
     if (intVer < 0)
     {
-    	intVer = 0;
+        intVer = 0;
     }
     Lfloat LfloatVer = cutoff - (Lfloat)intVer;
 
-    svf->g = (svf->table[intVer] * (1.0f - LfloatVer)) + (svf->table[intVer+1] * LfloatVer);
+    svf->g = ((svf->table[intVer] * (1.0f - LfloatVer)) + (svf->table[intVer+1] * LfloatVer)) * svf->sampleRatio;
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;
@@ -1248,6 +1280,30 @@ void    tSVF_setFreqAndQ(tSVF* const svff, Lfloat freq, Lfloat Q)
     svf->cutoff = LEAF_clip(0.0f, freq, svf->sampleRate * 0.5f);
     svf->k = 1.0f/Q;
     svf->g = tanf(PI * svf->cutoff * svf->invSampleRate);
+    svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
+    svf->a2 = svf->g * svf->a1;
+    svf->a3 = svf->g * svf->a2;
+}
+
+void    tSVF_setFreqAndQFast(tSVF* const svff, Lfloat cutoff, Lfloat Q)
+{
+    _tSVF* svf = *svff;
+    
+    svf->cutoffMIDI = cutoff;
+    cutoff *= 30.567164179104478f; //get 0-134 midi range to 0-4095
+    int32_t intVer = (int32_t)cutoff;
+    if (intVer > 4094)
+    {
+        intVer = 4094;
+    }
+    if (intVer < 0)
+    {
+        intVer = 0;
+    }
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    svf->Q = Q;
+    svf->k = 1.0f/Q;
+    svf->g = ((svf->table[intVer] * (1.0f - LfloatVer)) + (svf->table[intVer+1] * LfloatVer)) * svf->sampleRatio;
     svf->a1 = 1.0f/(1.0f + svf->g * (svf->g + svf->k));
     svf->a2 = svf->g * svf->a1;
     svf->a3 = svf->g * svf->a2;
@@ -1302,6 +1358,15 @@ void    tSVF_setSampleRate  (tSVF* const svff, Lfloat sr)
     _tSVF* svf = *svff;
     svf->sampleRate = sr;
     svf->invSampleRate = 1.0f/svf->sampleRate;
+    svf->sampleRatio = 48000.0f /svf->sampleRate;
+    if (sr > 80000)
+    {
+        svf->table = __filterTanhTable_96000;
+    }
+    else
+    {
+        svf->table = __filterTanhTable_48000;
+    }
 }
 
 //only works for lowpass right now
@@ -1309,6 +1374,211 @@ void    tSVF_setSampleRate  (tSVF* const svff, Lfloat sr)
 Lfloat    tSVF_getPhaseAtFrequency  (tSVF* const svff, Lfloat freq)
 {
     _tSVF* svf = *svff;
+    Lfloat w = svf->invSampleRate *freq*TWO_PI;
+    Lfloat c = 0.0f;
+    Lfloat f = 0.0f;
+    Lfloat d = 0.0f;
+    Lfloat num = sinf(2.0f*w) * (c-f);
+    Lfloat den = (c + f) + (2.0f * d * cosf(w)) + ((c+f)*cosf(2.0f * w));
+    return atan2f(num, den);
+}
+
+
+// Less efficient, more accurate version of SVF, in which cutoff frequency is taken as Lfloating point Hz value and tanf
+// is calculated when frequency changes.
+void tSVF_LP_init(tSVF_LP* const svff, Lfloat freq, Lfloat Q, LEAF* const leaf)
+{
+    tSVF_LP_initToPool     (svff, freq, Q, &leaf->mempool);
+}
+
+void    tSVF_LP_initToPool     (tSVF_LP* const svff, Lfloat freq, Lfloat Q, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tSVF_LP* svf = *svff = (_tSVF_LP*) mpool_alloc(sizeof(_tSVF_LP), m);
+    svf->mempool = m;
+    
+    LEAF* leaf = svf->mempool->leaf;
+    
+    svf->sampleRate = leaf->sampleRate;
+    svf->invSampleRate = leaf->invSampleRate;
+    svf->sampleRatio = svf->sampleRate/48000.0f;
+    
+    svf->ic1eq = 0.0f;
+    svf->ic2eq = 0.0f;
+    svf->g = tanf(PI * freq * svf->invSampleRate);
+    if (Q > 0.99f)
+    {
+    	Q = 0.99f;
+    }
+    svf->k = 2.0f *Q;
+    svf->onePlusg = 1.0f + svf->g;
+    svf->a0 = 1.0f / ((svf->onePlusg * svf->onePlusg) - (svf->g * svf->k));
+    svf->a1 = svf->k * svf->a0;
+    svf->a2 = svf->onePlusg*svf->a0;
+    svf->a3 = svf->g*svf->a2;
+    svf->a4 = 1.0f / svf->onePlusg;
+    svf->a5 = svf->g*svf->a4;
+    svf->nan = 0;
+    
+    if (leaf->sampleRate > 80000)
+    {
+        svf->table = __filterTanhTable_96000;
+    }
+    else
+    {
+        svf->table = __filterTanhTable_48000;
+    }
+}
+
+void    tSVF_LP_free   (tSVF_LP* const svff)
+{
+    _tSVF_LP* svf = *svff;
+    mpool_free((char*)svf, svf->mempool);
+}
+
+Lfloat   tSVF_LP_tick(tSVF_LP* const svff, Lfloat v0)
+{
+    _tSVF_LP* svf = *svff;
+    Lfloat v1,v2;
+    v1 = svf->a1*svf->ic2eq + svf->a2*svf->ic1eq + svf->a3*v0;
+    v2 = svf->a4*svf->ic2eq + svf->a5*v1;
+    svf->ic1eq = (2.0f*(v1 - svf->k*v2)) - svf->ic1eq;
+    svf->ic2eq = (2.0f*v2) - svf->ic2eq;
+    return v2;
+}
+
+void     tSVF_LP_setFreq(tSVF_LP* const svff, Lfloat freq)
+{
+    _tSVF_LP* svf = *svff;
+    
+    Lfloat cutoff = LEAF_clip(0.0f, freq, svf->sampleRate * 0.5f);
+    svf->g = tanf(PI * cutoff * svf->invSampleRate);
+    svf->onePlusg = 1.0f + svf->g;
+    svf->a0 = 1.0f / ((svf->onePlusg * svf->onePlusg) - (svf->g * svf->k));
+    svf->a1 = svf->k * svf->a0;
+    svf->a2 = svf->onePlusg*svf->a0;
+    svf->a3 = svf->g*svf->a2;
+    svf->a4 = 1.0f / svf->onePlusg;
+    svf->a5 = svf->g*svf->a4;
+    
+    
+}
+
+void    tSVF_LP_setFreqFast     (tSVF_LP* const vf, Lfloat cutoff)
+{
+    _tSVF_LP* svf = *vf;
+    //svf->cutoffMIDI = cutoff;
+    cutoff *= 30.567164179104478f; //get 0-134 midi range to 0-4095
+    int32_t intVer = (int32_t)cutoff;
+    if (intVer > 4094)
+    {
+        intVer = 4094;
+    }
+    if (intVer < 0)
+    {
+        intVer = 0;
+    }
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+
+    svf->g = ((svf->table[intVer] * (1.0f - LfloatVer)) + (svf->table[intVer+1] * LfloatVer)) * svf->sampleRatio;
+    svf->onePlusg = 1.0f + svf->g;
+    svf->a0 = 1.0f / ((svf->onePlusg * svf->onePlusg) - (svf->g * svf->k));
+    svf->a1 = svf->k * svf->a0;
+    svf->a2 = svf->onePlusg*svf->a0;
+    svf->a3 = svf->g*svf->a2;
+    svf->a4 = 1.0f / svf->onePlusg;
+    svf->a5 = svf->g*svf->a4;
+}
+
+void     tSVF_LP_setQ(tSVF_LP* const svff, Lfloat Q)
+{
+    _tSVF_LP* svf = *svff;
+    if (Q > 0.99f)
+    {
+    	Q = 0.99f;
+    }
+    svf->k = 2.0f *Q;
+    svf->a0 = 1.0f / ((svf->onePlusg * svf->onePlusg) - (svf->g * svf->k));
+    svf->a1 = svf->k * svf->a0;
+    svf->a2 = svf->onePlusg*svf->a0;
+    svf->a3 = svf->g*svf->a2;
+    svf->a4 = 1.0f / svf->onePlusg;
+    svf->a5 = svf->g*svf->a4;
+}
+
+void    tSVF_LP_setFreqAndQ(tSVF_LP* const svff, Lfloat freq, Lfloat Q)
+{
+    _tSVF_LP* svf = *svff;
+    
+    Lfloat cutoff = LEAF_clip(0.0f, freq, svf->sampleRate * 0.5f);
+    if (Q > 0.99f)
+    {
+    	Q = 0.99f;
+    }
+    svf->k = 2.0f * Q;
+    svf->g = tanf(PI * cutoff * svf->invSampleRate);
+    svf->onePlusg = 1.0f + svf->g;
+    svf->a0 = 1.0f / ((svf->onePlusg * svf->onePlusg) - (svf->g * svf->k));
+    svf->a1 = svf->k * svf->a0;
+    svf->a2 = svf->onePlusg*svf->a0;
+    svf->a3 = svf->g*svf->a2;
+    svf->a4 = 1.0f / svf->onePlusg;
+    svf->a5 = svf->g*svf->a4;
+}
+
+void    tSVF_LP_setFreqAndQFast(tSVF_LP* const svff, Lfloat cutoff, Lfloat Q)
+{
+    _tSVF_LP* svf = *svff;
+    
+  //  svf->cutoffMIDI = cutoff;
+    cutoff *= 30.567164179104478f; //get 0-134 midi range to 0-4095
+    int32_t intVer = (int32_t)cutoff;
+    if (intVer > 4094)
+    {
+        intVer = 4094;
+    }
+    if (intVer < 0)
+    {
+        intVer = 0;
+    }
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+
+    svf->g = ((svf->table[intVer] * (1.0f - LfloatVer)) + (svf->table[intVer+1] * LfloatVer)) * svf->sampleRatio;
+    if (Q > 0.99f)
+    {
+    	Q = 0.99f;
+    }
+    svf->k = 2.0f *Q;
+    svf->onePlusg = 1.0f + svf->g;
+    svf->a0 = 1.0f / ((svf->onePlusg * svf->onePlusg) - (svf->g * svf->k));
+    svf->a1 = svf->k * svf->a0;
+    svf->a2 = svf->onePlusg*svf->a0;
+    svf->a3 = svf->g*svf->a2;
+    svf->a4 = 1.0f / svf->onePlusg;
+    svf->a5 = svf->g*svf->a4;
+}
+
+void    tSVF_LP_setSampleRate  (tSVF_LP* const svff, Lfloat sr)
+{
+    _tSVF_LP* svf = *svff;
+    svf->sampleRate = sr;
+    svf->invSampleRate = 1.0f/svf->sampleRate;
+    svf->sampleRatio = 48000.0f/sr;
+    if (sr > 80000)
+    {
+        svf->table = __filterTanhTable_96000;
+    }
+    else
+    {
+        svf->table = __filterTanhTable_48000;
+    }
+}
+
+//only works for lowpass right now
+//actually doesn't work at all yet!
+Lfloat    tSVF_LP_getPhaseAtFrequency  (tSVF_LP* const svff, Lfloat freq)
+{
+    _tSVF_LP* svf = *svff;
     Lfloat w = svf->invSampleRate *freq*TWO_PI;
     Lfloat c = 0.0f;
     Lfloat f = 0.0f;
@@ -1336,7 +1606,7 @@ void    tEfficientSVF_initToPool    (tEfficientSVF* const svff, SVFType type, ui
     svf->ic1eq = 0.0f;
     svf->ic2eq = 0.0f;
     LEAF* leaf = svf->mempool->leaf;
-    if (leaf->sampleRate > 90000)
+    if (leaf->sampleRate > 80000)
     {
     	svf->table = __filterTanhTable_96000;
     }
@@ -1421,7 +1691,7 @@ void    tEfficientSVF_setFreqAndQ   (tEfficientSVF* const svff, uint16_t input, 
 void    tEfficientSVF_setSampleRate  (tEfficientSVF* const svff, Lfloat sampleRate)
 {
 	_tEfficientSVF* svf = *svff;
-	if (sampleRate > 90000)
+	if (sampleRate > 80000)
     {
     	svf->table = __filterTanhTable_96000;
     }
@@ -1708,6 +1978,7 @@ void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, Lfloat
     
     f->sampleRate = leaf->sampleRate;
     f->invSampleRate = leaf->invSampleRate;
+    f->sampRatio = 48000.0f / f->sampleRate;
     f->fc   = LEAF_clip(0.0f, freq, 0.5f * f->sampleRate);
     f->cutoffMIDI = ftom(f->fc);
     f->type = type;
@@ -1724,7 +1995,7 @@ void    tVZFilter_initToPool     (tVZFilter* const vf, VZFilterType type, Lfloat
     f->g = tanf(PI * f->fc * f->invSampleRate);  // embedded integrator gain (Fig 3.11)
     tVZFilter_setBandwidth(vf,f->B);
     tVZFilter_calcCoeffs(vf);
-    if (leaf->sampleRate > 90000)
+    if (leaf->sampleRate > 80000)
     {
     	f->table = __filterTanhTable_96000;
     }
@@ -1938,7 +2209,7 @@ void   tVZFilter_setFreq           (tVZFilter* const vf, Lfloat freq)
 {
     _tVZFilter* f = *vf;
     
-    f->fc = LEAF_clip(0.0f, freq, 0.5f * f->sampleRate);
+    f->fc = LEAF_clip(1.0f, freq, 0.5f * f->sampleRate);
     tVZFilter_calcCoeffs(vf);
 }
 
@@ -1957,7 +2228,7 @@ void    tVZFilter_setFreqFast     (tVZFilter* const vf, Lfloat cutoff)
 	    	intVer = 0;
 	    }
     Lfloat LfloatVer = cutoff - (Lfloat)intVer;
-    f->g = (f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer);
+    f->g = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
     
     switch( f->type )
     {
@@ -2135,7 +2406,6 @@ void tVZFilter_setFrequencyAndResonanceAndGain (tVZFilter* const vf, Lfloat freq
 void tVZFilter_setFastFrequencyAndResonanceAndGain (tVZFilter* const vf, Lfloat freq, Lfloat res, Lfloat gain)
 {
     _tVZFilter* f = *vf;
-    //f->fc = LEAF_clip(0.1f, freq, 0.4f * f->sampleRate);
     f->Q = LEAF_clip(0.01f, res, 100.0f);
     f->R2 = 1.0f / f->Q;
     f->G = LEAF_clip(0.000001f, gain, 4000.0f);
@@ -2214,7 +2484,8 @@ void    tVZFilter_setSampleRate  (tVZFilter* const vf, Lfloat sr)
     _tVZFilter* f = *vf;
     f->sampleRate = sr;
     f->invSampleRate = 1.0f/f->sampleRate;
-    if (sr > 90000)
+    f->sampRatio = 48000.0f / sr;
+    if (sr > 80000)
     {
     	f->table = __filterTanhTable_96000;
     }
@@ -2253,7 +2524,7 @@ void    tVZFilterLS_initToPool     (tVZFilterLS* const vf, Lfloat freq, Lfloat Q
     f->g = f->gPreDiv * f->invSqrtA;               // scale SVF-cutoff frequency for shelvers
     f->R2Plusg = f->R2+f->g;
     f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
-    if (leaf->sampleRate > 90000)
+    if (leaf->sampleRate > 80000)
     {
     	f->table = __filterTanhTable_96000;
     }
@@ -2275,7 +2546,7 @@ void    tVZFilterLS_setSampleRate  (tVZFilterLS* const vf, Lfloat sampleRate)
         f->sampleRate = sampleRate;
     f->invSampleRate = 1.0f / sampleRate;
     f->sampRatio = 48000.0f / f->sampleRate;
-    if (sampleRate > 90000)
+    if (sampleRate > 80000)
        {
        	f->table = __filterTanhTable_96000;
        }
@@ -2321,7 +2592,7 @@ void    tVZFilterLS_setFreqFast           (tVZFilterLS* const vf, Lfloat cutoff)
         	intVer = 0;
         }
     Lfloat LfloatVer = cutoff - (Lfloat)intVer;
-    f->gPreDiv = (f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer) * f->sampRatio;
+    f->gPreDiv = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
 
     f->g = f->gPreDiv * f->invSqrtA;               // scale SVF-cutoff frequency for shelvers
     f->R2Plusg = f->R2+f->g;
@@ -2364,16 +2635,31 @@ void    tVZFilterLS_setResonance                (tVZFilterLS* const vf, Lfloat r
 void    tVZFilterLS_setFreqFastAndResonanceAndGain           (tVZFilterLS* const vf, Lfloat cutoff, Lfloat res, Lfloat gain)
 {
     _tVZFilterLS* f = *vf;
-    int intVer = (int)cutoff;
-    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
-    f->gPreDiv = (f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer) * f->sampRatio;
-
-    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
-    f->invSqrtA = 1.0f / (fastsqrtf(fastsqrtf(f->G)));
-    f->g = f->gPreDiv * f->invSqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->cutoffMIDI = cutoff;
+    
     f->Q = res;
     f->R2 = 1.0f/res;
+    
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->invSqrtA = 1.0f / (fastsqrtf(fastsqrtf(f->G)));
+    
+    cutoff *= 30.567164179104478f;
+    int32_t intVer = (int32_t)cutoff;
+    if (intVer > 4094)
+    {
+        intVer = 4094;
+    }
+    if (intVer < 0)
+    {
+        intVer = 0;
+    }
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->gPreDiv = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
+
+    f->g = f->gPreDiv * f->invSqrtA;               // scale SVF-cutoff frequency for shelvers
+    
     f->R2Plusg = f->R2+f->g;
+    
     f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
 }
 
@@ -2406,7 +2692,7 @@ void    tVZFilterHS_initToPool     (tVZFilterHS* const vf, Lfloat freq, Lfloat Q
     f->g = f->gPreDiv * f->sqrtA;               // scale SVF-cutoff frequency for shelvers
     f->R2Plusg = f->R2+f->g;
     f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
-    if (leaf->sampleRate > 90000)
+    if (leaf->sampleRate > 80000)
     {
     	f->table = __filterTanhTable_96000;
     }
@@ -2428,7 +2714,7 @@ void    tVZFilterHS_setSampleRate  (tVZFilterHS* const vf, Lfloat sampleRate)
         f->sampleRate = sampleRate;
     f->invSampleRate = 1.0f / sampleRate;
     f->sampRatio = 48000.0f / f->sampleRate;
-    if (sampleRate > 90000)
+    if (sampleRate > 80000)
           {
           	f->table = __filterTanhTable_96000;
           }
@@ -2474,7 +2760,7 @@ void    tVZFilterHS_setFreqFast           (tVZFilterHS* const vf, Lfloat cutoff)
         	intVer = 0;
         }
     Lfloat LfloatVer = cutoff - (Lfloat)intVer;
-    f->gPreDiv = (f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer) * f->sampRatio;
+    f->gPreDiv = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
 
     f->g = f->gPreDiv * f->sqrtA;               // scale SVF-cutoff frequency for shelvers
     
@@ -2520,17 +2806,33 @@ void    tVZFilterHS_setResonance                (tVZFilterHS* const vf, Lfloat r
 void    tVZFilterHS_setFreqFastAndResonanceAndGain           (tVZFilterHS* const vf, Lfloat cutoff, Lfloat res, Lfloat gain)
 {
     _tVZFilterHS* f = *vf;
-    int intVer = (int)cutoff;
-    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
-    f->gPreDiv = (f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer) * f->sampRatio;
-
-    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
-    f->sqrtA = fastsqrtf(fastsqrtf(f->G));
-    f->g = f->gPreDiv * f->sqrtA;               // scale SVF-cutoff frequency for shelvers
+    f->cutoffMIDI = cutoff;
+    
     f->Q = res;
     f->R2 = 1.0f/res;
+    
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->sqrtA = fastsqrtf(fastsqrtf(f->G));
+    
+    cutoff *= 30.567164179104478f;
+    int32_t intVer = (int32_t)cutoff;
+    if (intVer > 4094)
+    {
+        intVer = 4094;
+    }
+    if (intVer < 0)
+    {
+        intVer = 0;
+    }
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->gPreDiv = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
+
+    f->g = f->gPreDiv * f->sqrtA;               // scale SVF-cutoff frequency for shelvers
+
     f->R2Plusg = f->R2+f->g;
     f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+    
+    
 }
 //Bell
 void    tVZFilterBell_init           (tVZFilterBell* const vf,Lfloat freq, Lfloat BW, Lfloat gain, LEAF* const leaf)
@@ -2565,7 +2867,7 @@ void    tVZFilterBell_initToPool     (tVZFilterBell* const vf, Lfloat freq, Lflo
     f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
     f->R2Plusg = f->R2+f->g;
     f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
-    if (leaf->sampleRate > 90000)
+    if (leaf->sampleRate > 80000)
     {
     	f->table = __filterTanhTable_96000;
     }
@@ -2587,7 +2889,7 @@ void    tVZFilterBell_setSampleRate  (tVZFilterBell* const vf, Lfloat sampleRate
         f->sampleRate = sampleRate;
     f->invSampleRate = 1.0f / sampleRate;
     f->sampRatio = 48000.0f / f->sampleRate;
-    if (sampleRate > 90000)
+    if (sampleRate > 80000)
           {
           	f->table = __filterTanhTable_96000;
           }
@@ -2619,24 +2921,23 @@ Lfloat   tVZFilterBell_tick               (tVZFilterBell* const vf, Lfloat input
 }
 
 
-               
+//relies on a call to set Freq after
 void    tVZFilterBell_setBandwidth           (tVZFilterBell* const vf, Lfloat bandWidth)
 {
-        _tVZFilterBell* f = *vf;
+    _tVZFilterBell* f = *vf;
     f->B = bandWidth;
-    Lfloat fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
-    Lfloat wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
-    Lfloat r  = f->g/wl;
-    r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+    //Lfloat fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
+    //Lfloat wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
+    //Lfloat r  = f->g/wl;
+    //r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
     // warped upper bandedge, wc the center
-    f->rToUse = r;
-    f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
+    //f->rToUse = r;
+    //f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
 }
 void    tVZFilterBell_setFreq           (tVZFilterBell* const vf, Lfloat freq)
 {
     _tVZFilterBell* f = *vf;
     f->fc = freq;
-    //TODO: need to make fast version that uses tables
     f->g = tanf(PI * freq * f->invSampleRate);
     Lfloat fl = f->fc*fastPowf(2.0f, (-f->B)*0.5f); // lower bandedge frequency (in Hz)
     Lfloat wl =  fastertanf(PI*fl*f->invSampleRate);   // warped radian lower bandedge frequency /(2*fs)
@@ -2664,7 +2965,7 @@ void    tVZFilterBell_setFreqFast           (tVZFilterBell* const vf, Lfloat cut
 		intVer = 0;
 	}
 	Lfloat LfloatVer = cutoff - (Lfloat)intVer;
-	f->g = (f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer) * f->sampRatio;
+	f->g = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
     Lfloat fl = cutoff + (12.0f * (-f->B)*0.5f); // lower bandedge frequency (in MIDI)
 	intVer = (int32_t)fl;
 	if (intVer > 4094)
@@ -2676,7 +2977,7 @@ void    tVZFilterBell_setFreqFast           (tVZFilterBell* const vf, Lfloat cut
 		intVer = 0;
 	}
 	LfloatVer = fl - (Lfloat)intVer;
-	Lfloat gLower = (f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer) * f->sampRatio;
+	Lfloat gLower = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
 
     Lfloat r  = f->g/gLower;
     r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
@@ -2685,6 +2986,46 @@ void    tVZFilterBell_setFreqFast           (tVZFilterBell* const vf, Lfloat cut
     f->R2 = 2.0f*fastsqrtf(((r*r+1.0f)/r-2.0f)/(4.0f*f->G));
     f->R2Plusg = f->R2+f->g;
     f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterBell_setFreqAndGainFast           (tVZFilterBell* const vf, Lfloat cutoff, Lfloat gain)
+{
+    _tVZFilterBell* f = *vf;
+    f->cutoffMIDI = cutoff;
+    cutoff *= 30.567164179104478f;
+	int32_t intVer = (int32_t)cutoff;
+	if (intVer > 4094)
+	{
+		intVer = 4094;
+	}
+	if (intVer < 0)
+	{
+		intVer = 0;
+	}
+	Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+	f->g = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
+    Lfloat fl = cutoff + (12.0f * (-f->B)*0.5f); // lower bandedge frequency (in MIDI)
+	intVer = (int32_t)fl;
+	if (intVer > 4094)
+	{
+		intVer = 4094;
+	}
+	if (intVer < 0)
+	{
+		intVer = 0;
+	}
+	LfloatVer = fl - (Lfloat)intVer;
+	Lfloat gLower = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
+
+    Lfloat r  = f->g/gLower;
+    r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+    // warped upper bandedge, wc the center
+    f->rToUse = r;
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+	f->R2 = 2.0f*fastsqrtf(((f->rToUse*f->rToUse+1.0f)/f->rToUse-2.0f)/(4.0f*f->G));
+	f->R2Plusg = f->R2+f->g;
+	f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+
 }
 
 void    tVZFilterBell_setGain                  (tVZFilterBell* const vf, Lfloat gain)
@@ -2731,6 +3072,195 @@ void    tVZFilterBell_setFrequencyAndBandwidthAndGain           (tVZFilterBell* 
     f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
 }
 
+void    tVZFilterBell_setFreqAndBWAndGainFast           (tVZFilterBell* const vf, Lfloat cutoff, Lfloat BW,Lfloat gain )
+{
+    _tVZFilterBell* f = *vf;
+    f->cutoffMIDI = cutoff;
+    f->B = BW;
+    cutoff *= 30.567164179104478f;
+    int32_t intVer = (int32_t)cutoff;
+    if (intVer > 4094)
+    {
+        intVer = 4094;
+    }
+    if (intVer < 0)
+    {
+        intVer = 0;
+    }
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->g = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
+    Lfloat fl = cutoff + (12.0f * (-f->B)*0.5f); // lower bandedge frequency (in MIDI)
+    intVer = (int32_t)fl;
+    if (intVer > 4094)
+    {
+        intVer = 4094;
+    }
+    if (intVer < 0)
+    {
+        intVer = 0;
+    }
+    LfloatVer = fl - (Lfloat)intVer;
+    Lfloat gLower = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
+
+    Lfloat r  = f->g/gLower;
+    r *= r;    // warped frequency ratio wu/wl == (wc/wl)^2 where wu is the
+    // warped upper bandedge, wc the center
+    f->rToUse = r;
+    f->G = LEAF_clip(0.000001f, gain, 4000.0f);
+    f->R2 = 2.0f*fastsqrtf(((f->rToUse*f->rToUse+1.0f)/f->rToUse-2.0f)/(4.0f*f->G));
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+
+}
+
+
+void    tVZFilterBR_init           (tVZFilterBR* const vf,Lfloat freq, Lfloat Q, LEAF* const leaf)
+{
+    tVZFilterBR_initToPool(vf, freq, Q, &leaf->mempool);
+}
+
+void    tVZFilterBR_initToPool     (tVZFilterBR* const vf, Lfloat freq, Lfloat Q, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tVZFilterBR* f = *vf = (_tVZFilterBR*) mpool_alloc(sizeof(_tVZFilterBR), m);
+    f->mempool = m;
+    
+    LEAF* leaf = f->mempool->leaf;
+    
+    f->sampleRate = leaf->sampleRate;
+    f->sampRatio = 48000.0f / f->sampleRate;
+    f->invSampleRate = leaf->invSampleRate;
+    Lfloat fc   = LEAF_clip(0.0f, freq, 0.5f * f->sampleRate);
+    f->cutoffMIDI = ftom(freq);
+    f->s1    = 0.0f;
+    f->s2   = 0.0f;
+    f->R2 = 1.0f / Q;
+    f->G = 1.0f;
+    f->g = tanf(PI * fc * f->invSampleRate);
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback precomputation
+    if (leaf->sampleRate > 80000)
+    {
+        f->table = __filterTanhTable_96000;
+    }
+    else
+    {
+        f->table = __filterTanhTable_48000;
+    }
+}
+
+void    tVZFilterBR_free   (tVZFilterBR* const vf)
+{
+    _tVZFilterBR* f = *vf;
+    mpool_free((char*)f, f->mempool);
+}
+
+void    tVZFilterBR_setSampleRate  (tVZFilterBR* const vf, Lfloat sampleRate)
+{
+        _tVZFilterBR* f = *vf;
+        f->sampleRate = sampleRate;
+    f->invSampleRate = 1.0f / sampleRate;
+    f->sampRatio = 48000.0f / f->sampleRate;
+    if (sampleRate > 80000)
+       {
+           f->table = __filterTanhTable_96000;
+       }
+       else
+       {
+           f->table = __filterTanhTable_48000;
+       }
+}
+Lfloat   tVZFilterBR_tick               (tVZFilterBR* const vf, Lfloat input)
+{
+        _tVZFilterBR* f = *vf;
+    
+    Lfloat yL, yB, yH, v1, v2;
+    
+    // compute highpass output via Eq. 5.1:
+    //yH = (in - f->R2*f->s1 - f->g*f->s1 - f->s2) * f->h;
+    yH = (input - (f->R2Plusg*f->s1) - f->s2) * f->h;
+    // compute bandpass output by applying 1st integrator to highpass output:
+    v1 = f->g*yH;
+    yB = v1 + f->s1;
+    f->s1 = v1 + yB; // state update in 1st integrator
+    
+    // compute lowpass output by applying 2nd integrator to bandpass output:
+    v2 = f->g*yB;
+    yL = v2 + f->s2;
+    f->s2 = v2 + yL; // state update in 2nd integrator
+    
+    return (yH + yL)*f->G;
+}
+
+void    tVZFilterBR_setFreqFast           (tVZFilterBR* const vf, Lfloat cutoff)
+{
+        _tVZFilterBR* f = *vf;
+        f->cutoffMIDI = cutoff;
+        cutoff *= 30.567164179104478f;
+        int32_t intVer = (int32_t)cutoff;
+        if (intVer > 4094)
+        {
+            intVer = 4094;
+        }
+        if (intVer < 0)
+        {
+            intVer = 0;
+        }
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->g = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback precomputation
+    
+}
+
+void    tVZFilterBR_setGain           (tVZFilterBR* const vf, Lfloat gain)
+{
+    _tVZFilterBR* f = *vf;
+    f->G = gain;
+}
+               
+void    tVZFilterBR_setFreq           (tVZFilterBR* const vf, Lfloat freq)
+{
+        _tVZFilterBR* f = *vf;
+    f->g = tanf(PI * freq * f->invSampleRate);
+    f->R2Plusg = f->R2+f->g;
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+
+void    tVZFilterBR_setResonance                (tVZFilterBR* const vf, Lfloat res)
+{
+        _tVZFilterBR* f = *vf;
+        f->R2 = 1.0f/res;
+        f->R2Plusg = f->R2+f->g;
+        f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+void    tVZFilterBR_setFreqAndResonanceFast          (tVZFilterBR* const vf, Lfloat cutoff, Lfloat res)
+{
+    _tVZFilterBR* f = *vf;
+    f->R2 = 1.0f/res;
+    f->cutoffMIDI = cutoff;
+    cutoff *= 30.567164179104478f;
+    int32_t intVer = (int32_t)cutoff;
+    if (intVer > 4094)
+    {
+        intVer = 4094;
+    }
+    if (intVer < 0)
+    {
+        intVer = 0;
+    }
+    Lfloat LfloatVer = cutoff - (Lfloat)intVer;
+    f->g = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampRatio;
+
+    f->R2Plusg = f->R2+f->g;
+    
+    f->h = 1.0f / (1.0f + (f->R2*f->g) + (f->g*f->g));  // factor for feedback
+}
+
+
+
 //taken from Ivan C's model of the EMS diode ladder, based on mystran's code from KVR forums
 //https://www.kvraudio.com/forum/viewtopic.php?f=33&t=349859&start=255
 
@@ -2764,7 +3294,8 @@ void    tDiodeFilter_initToPool     (tDiodeFilter* const vf, Lfloat cutoff, Lflo
     f->g0inv = 1.f/(2.f*f->Vt);
     f->g1inv = 1.f/(2.f*f->gamma);
     f->g2inv = 1.f/(6.f*f->gamma);
-    if (leaf->sampleRate > 90000)
+    f->sampRatio = 48000.0f / leaf->sampleRate;
+    if (leaf->sampleRate > 80000)
     {
     	f->table = __filterTanhTable_96000;
     }
@@ -2789,7 +3320,7 @@ Lfloat tanhXdX(Lfloat x)
 
     Lfloat output = 1.0f;
     
-    if (testVal!= 0.0f)
+    if (testVal > 0.000001f)
     {
         output = testVal;
         
@@ -2797,14 +3328,11 @@ Lfloat tanhXdX(Lfloat x)
     return ((a + 105.0f)*a + 945.0f) / output;
 }
 
-volatile int errorCheckCheck = 0;
-//#define SAFE_FILTER
+
 Lfloat   tDiodeFilter_tick               (tDiodeFilter* const vf, Lfloat in)
 {
     _tDiodeFilter* f = *vf;
-#ifdef SAFE_FILTER
-    int errorCheck = 0;
-#endif
+
     // the input x[n+1] is given by 'in', and x[n] by zi
     // input with half delay
     Lfloat ih = 0.5f * (in + f->zi);
@@ -2818,39 +3346,24 @@ Lfloat   tDiodeFilter_tick               (tDiodeFilter* const vf, Lfloat in)
     
     // This formula gives the result for y3 thanks to MATLAB
     Lfloat y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
-#ifdef SAFE_FILTER
-    if (!isfinite(y3))
-    {
-        errorCheck = 1;
-    }
-#endif
+
     Lfloat tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
-#ifdef SAFE_FILTER
-    if (!isfinite(tempy3denom))
-    {
-        errorCheck = 2;
-    }
-#endif
-    if (tempy3denom == 0.0f)
+
+    if (tempy3denom < 0.000001f)
     {
         tempy3denom = 0.000001f;
     }
     y3 = y3 / tempy3denom;
-#ifdef SAFE_FILTER
-    if (!isfinite(y3))
-    {
-        errorCheck = 3;
-    }
-#endif
-    if (t1 == 0.0f)
+
+    if (t1 < 0.000001f)
     {
         t1 = 0.000001f;
     }
-    if (t2 == 0.0f)
+    if (t2 < 0.000001f)
     {
         t2 = 0.000001f;
     }
-    if (t3 == 0.0f)
+    if (t3 < 0.000001f)
     {
         t3 = 0.000001f;
     }
@@ -2862,41 +3375,23 @@ Lfloat   tDiodeFilter_tick               (tDiodeFilter* const vf, Lfloat in)
     
     // update state
     f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
-#ifdef SAFE_FILTER
-    if (!isfinite(f->s0))
-    {
-        errorCheck = 4;
-    }
 
-    if (isinf(f->s0))
-    {
-        errorCheck = 5;
-    }
-
-    if (errorCheck != 0)
-    {
-        errorCheckCheck = errorCheck;
-    }
-#endif
     f->s1 += 2.0f * (t2*(y2-y1) - t1*(y1-y0));
     f->s2 += 2.0f * (t3*(y3-y2) - t2*(y2-y1));
     f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));
     
-    f->s0 = tanhf(f->s0);
-    f->s1 = tanhf(f->s1);
-    f->s2 = tanhf(f->s2);
-    f->s3 = tanhf(f->s3);
+    f->s0 = 1000.0f * tanhf(f->s0 * 0.001f);
+    f->s1 = 1000.0f * tanhf(f->s1 * 0.001f);
+    f->s2 = 1000.0f * tanhf(f->s2 * 0.001f);
+    f->s3 = 1000.0f * tanhf(f->s3 * 0.001f);
     f->zi = in;
     return tanhf(y3*f->r);
 }
 
-//#define SAFE_FILTER
 Lfloat   tDiodeFilter_tickEfficient               (tDiodeFilter* const vf, Lfloat in)
 {
     _tDiodeFilter* f = *vf;
-#ifdef SAFE_FILTER
-    int errorCheck = 0;
-#endif
+
     // the input x[n+1] is given by 'in', and x[n] by zi
     // input with half delay
     Lfloat ih = 0.5f * (in + f->zi);
@@ -2910,41 +3405,25 @@ Lfloat   tDiodeFilter_tickEfficient               (tDiodeFilter* const vf, Lfloa
 
     // This formula gives the result for y3 thanks to MATLAB
     Lfloat y3 = (f->s2 + f->s3 + t2*(f->s1 + f->s2 + f->s3 + t1*(f->s0 + f->s1 + f->s2 + f->s3 + t0*in)) + t1*(2.0f*f->s2 + 2.0f*f->s3))*t3 + f->s3 + 2.0f*f->s3*t1 + t2*(2.0f*f->s3 + 3.0f*f->s3*t1);
-#ifdef SAFE_FILTER
-    if (!isfinite(y3))
-    {
-        errorCheck = 1;
-    }
-#endif
-    Lfloat tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
-#ifdef SAFE_FILTER
-    if (!isfinite(tempy3denom))
-    {
-        errorCheck = 2;
-    }
 
-#endif
-    if (tempy3denom == 0.0f)
+    Lfloat tempy3denom = (t4 + t1*(2.0f*t4 + 4.0f) + t2*(t4 + t1*(t4 + f->r*t0 + 4.0f) + 3.0f) + 2.0f)*t3 + t4 + t1*(2.0f*t4 + 2.0f) + t2*(2.0f*t4 + t1*(3.0f*t4 + 3.0f) + 2.0f) + 1.0f;
+
+    if (tempy3denom < 0.000001f)
     {
         tempy3denom = 0.000001f;
     }
 
     y3 = y3 / tempy3denom;
-#ifdef SAFE_FILTER
-    if (!isfinite(y3))
-    {
-        errorCheck = 3;
-    }
-#endif
-    if (t1 == 0.0f)
+
+    if (t1 < 0.000001f)
     {
         t1 = 0.000001f;
     }
-    if (t2 == 0.0f)
+    if (t2 < 0.000001f)
     {
         t2 = 0.000001f;
     }
-    if (t3 == 0.0f)
+    if (t3 < 0.000001f)
     {
         t3 = 0.000001f;
     }
@@ -2957,31 +3436,17 @@ Lfloat   tDiodeFilter_tickEfficient               (tDiodeFilter* const vf, Lfloa
 
     // update state
     f->s0 += 2.0f * (t0*xx + t1*(y1-y0));
-#ifdef SAFE_FILTER
-    if (!isfinite(f->s0))
-    {
-        errorCheck = 4;
-    }
-
-    if (isinf(f->s0))
-    {
-        errorCheck = 5;
-    }
-
-    if (errorCheck != 0)
-    {
-        errorCheckCheck = errorCheck;
-    }
-#endif
     f->s1 += 2.0f * (t2*(y2-y1) - t1*(y1-y0));
     f->s2 += 2.0f * (t3*(y3-y2) - t2*(y2-y1));
     f->s3 += 2.0f * (-t4*(y3) - t3*(y3-y2));
-    f->s0 = fast_tanh4(f->s0);
-    f->s1 = fast_tanh4(f->s1);
-    f->s2 = fast_tanh4(f->s2);
-    f->s3 = fast_tanh4(f->s3);
+    
+    f->s0 = 1000.0f * fast_tanh(f->s0 * 0.001f);
+    f->s1 = 1000.0f * fast_tanh(f->s1 * 0.001f);
+    f->s2 = 1000.0f * fast_tanh(f->s2 * 0.001f);
+    f->s3 = 1000.0f * fast_tanh(f->s3 * 0.001f);
+    
     f->zi = in;
-    return fast_tanh4(y3*f->r);
+    return fast_tanh5(y3*f->r);
 }
 
 void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, Lfloat cutoff)
@@ -2989,12 +3454,13 @@ void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, Lfloat cutoff)
     _tDiodeFilter* f = *vf;
     
     f->cutoff = LEAF_clip(40.0f, cutoff, 18000.0f);
-    f->f = tanf(PI * f->cutoff * f->invSampleRate);
+    f->f = tanf(TWO_PI * f->cutoff * f->invSampleRate);
 }
 
 void    tDiodeFilter_setFreqFast     (tDiodeFilter* const vf, Lfloat cutoff)
 {
 	_tDiodeFilter* f = *vf;
+    cutoff = LEAF_clip(10.0f, cutoff+11.13f, 140.0f);//compensate for tuning error
 	f->cutoffMIDI = cutoff;
 	cutoff *= 30.567164179104478f; // span of midinotes 0-134.0f (frequency range up to around 19000.0f)
 
@@ -3008,13 +3474,14 @@ void    tDiodeFilter_setFreqFast     (tDiodeFilter* const vf, Lfloat cutoff)
     	intVer = 0;
     }
     Lfloat LfloatVer = cutoff - (Lfloat)intVer;
-    f->f = (f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer);
+    f->f = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer))  * f->sampRatio;
 }
 
 void    tDiodeFilter_setQ     (tDiodeFilter* const vf, Lfloat resonance)
 {
     _tDiodeFilter* f = *vf;
-    f->r = LEAF_clip(0.5f, (7.0f * resonance + 0.5f), 8.0f);
+    //f->r = LEAF_clip(0.5f, (7.0f * resonance + 0.5f), 20.0f);
+    f->r = LEAF_clip(0.5f, resonance*2.0f, 20.0f);
 }
 
 void    tDiodeFilter_setSampleRate(tDiodeFilter* const vf, Lfloat sr)
@@ -3022,7 +3489,8 @@ void    tDiodeFilter_setSampleRate(tDiodeFilter* const vf, Lfloat sr)
     _tDiodeFilter* f = *vf;
     
     f->invSampleRate = 1.0f/sr;
-    if (sr > 90000)
+    f->sampRatio = 48000.0f / sr;
+    if (sr > 80000)
     {
     	f->table = __filterTanhTable_96000;
     }
@@ -3047,9 +3515,11 @@ void    tLadderFilter_initToPool     (tLadderFilter* const vf, Lfloat cutoff, Lf
     LEAF* leaf = f->mempool->leaf;
     
     f->invSampleRate = leaf->invSampleRate;
+    f->sampleRatio = 48000.0f / leaf->sampleRate;
     f->cutoff = cutoff;
     f->cutoffMIDI = ftom(cutoff);
     f->oversampling = 1;
+    f->invOS = 1.0f;
     f->c = (Lfloat)tan((double)(PI * (cutoff/(Lfloat)f->oversampling)* f->invSampleRate));
     f->c2 = 2.0f * f->c;
     //resonance / feedback is from 0 to 4 for 100%, further "drives" feedback
@@ -3067,7 +3537,7 @@ void    tLadderFilter_initToPool     (tLadderFilter* const vf, Lfloat cutoff, Lf
     f->b[0] = 0.02f;
     f->b[0] = 0.03f;
     f->b[0] = 0.04f;
-    if (leaf->sampleRate > 90000)
+    if (leaf->sampleRate > 80000)
     {
     	f->table = __filterTanhTable_96000;
     }
@@ -3103,7 +3573,7 @@ Lfloat smoothclip (Lfloat x, const Lfloat a, const Lfloat b) // assuming symmetr
     Lfloat  x2 = smoothABS (x-b, 0.01f);
     x = x1 + (a+b);
     x = x - x2;
-    x = x * 0.5;
+    x = x * 0.5f;
     return (x);
 }
 
@@ -3125,15 +3595,19 @@ Lfloat   tLadderFilter_tick               (tLadderFilter* const vf, Lfloat in)
         Lfloat t2 = tanhd(f->b[2] + f->a, f->d, f->s);
         Lfloat t3 = tanhd(f->b[3] + f->a, f->d, f->s);
         
-        Lfloat g0 = 1.0f / (1.0f + f->c*t0);
-        Lfloat g1 = 1.0f / (1.0f + f->c*t1);
-        Lfloat g2 = 1.0f / (1.0f + f->c*t2);
-        Lfloat g3 = 1.0f / (1.0f + f->c*t3);
+        Lfloat den0 =1.0f / (1.0f + f->c*t0);
+        Lfloat den1 =1.0f / (1.0f + f->c*t1);
+        Lfloat den2 =1.0f / (1.0f + f->c*t2);
+        Lfloat den3 =1.0f / (1.0f + f->c*t3);
+        Lfloat g0 = 1.0f * den0;
+        Lfloat g1 = 1.0f * den1;
+        Lfloat g2 = 1.0f * den2;
+        Lfloat g3 = 1.0f * den3;
         
-        Lfloat z0 = f->c*t0 / (1.0f + f->c*t0);
-        Lfloat z1 = f->c*t1 / (1.0f + f->c*t1);
-        Lfloat z2 = f->c*t2 / (1.0f + f->c*t2);
-        Lfloat z3 = f->c*t3 / (1.0f + f->c*t3);
+        Lfloat z0 = f->c*t0 * den0;
+        Lfloat z1 = f->c*t1 * den1;
+        Lfloat z2 = f->c*t2 * den2;
+        Lfloat z3 = f->c*t3 * den3;
         
         Lfloat f3 = f->c       * t2*g3;
         Lfloat f2 = f->c*f->c     * t1*g2 * t2*g3;
@@ -3168,7 +3642,7 @@ Lfloat   tLadderFilter_tick               (tLadderFilter* const vf, Lfloat in)
     
     // you must limit the compensation if feedback is clamped
     Lfloat compensation = 1.0f + smoothclip(f->fb, 0.0f, 4.0f);
-    return y3 * compensation;
+    return fast_tanh5(y3 * compensation);
 }
 
 void    tLadderFilter_setFreq     (tLadderFilter* const vf, Lfloat cutoff)
@@ -3176,15 +3650,17 @@ void    tLadderFilter_setFreq     (tLadderFilter* const vf, Lfloat cutoff)
     _tLadderFilter* f = *vf;
     
     f->cutoff = LEAF_clip(40.0f, cutoff, 18000.0f);
-    f->c = tanf(PI * (f->cutoff / (Lfloat)f->oversampling) * f->invSampleRate);
+    f->c = tanf(PI * (f->cutoff * f->invOS) * f->invSampleRate);
     f->c2 = 2.0f * f->c;
 }
 
 void    tLadderFilter_setFreqFast     (tLadderFilter* const vf, Lfloat cutoff)
 {
     _tLadderFilter* f = *vf;
+    cutoff += 3.0f;
     f->cutoffMIDI = cutoff;
     cutoff *= 30.567164179104478f;
+
     int32_t intVer = (int32_t)cutoff;
     if (intVer > 4094)
     {
@@ -3196,7 +3672,7 @@ void    tLadderFilter_setFreqFast     (tLadderFilter* const vf, Lfloat cutoff)
     }
     Lfloat LfloatVer = cutoff - (Lfloat)intVer;
 
-    f->c = (f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer);
+    f->c = ((f->table[intVer] * (1.0f - LfloatVer)) + (f->table[intVer+1] * LfloatVer)) * f->sampleRatio;
     f->c2 = 2.0f * f->c;
 }
 
@@ -3211,7 +3687,8 @@ void    tLadderFilter_setSampleRate(tLadderFilter* const vf, Lfloat sr)
     _tLadderFilter* f = *vf;
     
     f->invSampleRate = 1.0f/sr;
-    if (sr > 90000)
+    f->sampleRatio = 48000.0f / sr * f->invOS;
+    if (sr > 80000)
     {
     	f->table = __filterTanhTable_96000;
     }
@@ -3220,4 +3697,96 @@ void    tLadderFilter_setSampleRate(tLadderFilter* const vf, Lfloat sr)
     	f->table = __filterTanhTable_48000;
     }
 }
+
+
+void    tLadderFilter_setOversampling(tLadderFilter* const vf, int os)
+{
+    _tLadderFilter* f = *vf;
+    
+    f->oversampling = os;
+    f->invOS = 1.0f / ((Lfloat) os);
+    Lfloat sr = f->oversampling / f->invSampleRate;
+    if (sr > 80000)
+    {
+        f->table = __filterTanhTable_96000;
+    }
+    else
+    {
+        f->table = __filterTanhTable_48000;
+    }
+
+}
+
+
+
+void    tTiltFilter_init           (tTiltFilter* const vf, Lfloat cutoff, LEAF* const leaf)
+{
+    tTiltFilter_initToPool(vf, cutoff, &leaf->mempool);
+}
+
+void    tTiltFilter_initToPool     (tTiltFilter* const vf, Lfloat cutoff, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tTiltFilter* f = *vf = (_tTiltFilter*) mpool_alloc(sizeof(_tTiltFilter), m);
+    f->mempool = m;
+    
+    LEAF* leaf = f->mempool->leaf;
+    f->cutoff = cutoff;
+    f->invAmp = 1.0f / (6.0f/logf(2.0f));
+    f->gfactor = 5.0f;
+    
+
+    f->sr3 = leaf->sampleRate*3.0f;
+    Lfloat omega = TWO_PI*cutoff;
+    Lfloat n = 1.0f/(f->sr3 + omega);
+    f->a0 = 2.0f*omega*n;
+    f->b1 = (f->sr3 - omega)*n;
+}
+
+void    tTiltFilter_free   (tTiltFilter* const vf)
+{
+    _tTiltFilter* f = *vf;
+    mpool_free((char*)f, f->mempool);
+}
+
+
+
+Lfloat   tTiltFilter_tick               (tTiltFilter* const vf, Lfloat in)
+{
+    _tTiltFilter* f = *vf;
+    f->lp_out = f->a0*in + f->b1 * f->lp_out;
+    return in + f->lgain*f->lp_out + f->hgain*(in - f->lp_out);
+}
+
+void    tTiltFilter_setTilt     (tTiltFilter* const vf, Lfloat tilt)
+{
+    _tTiltFilter* f = *vf;
+    Lfloat g1;
+    Lfloat g2;
+    if (tilt > 0.0f)
+    {
+        g1 = -f->gfactor*tilt;
+        g2 = tilt;
+    } else
+    {
+        g1 = -tilt;
+        g2 = f->gfactor*tilt;
+    }
+    
+    //two separate gains
+    f->lgain = fasterexpf(g1*f->invAmp)-1.0f;
+    f->hgain = fasterexpf(g2*f->invAmp)-1.0f;
+}
+
+void    tTiltFilter_setSampleRate(tTiltFilter* const vf, Lfloat sr)
+{
+    _tTiltFilter* f = *vf;
+    
+    f->sr3 = sr*3.0f;
+    Lfloat omega = TWO_PI*f->cutoff;
+    Lfloat n = 1.0f/(f->sr3 + omega);
+    f->a0 = 2.0f*omega*n;
+    f->b1 = (f->sr3 - omega)*n;
+}
+
 

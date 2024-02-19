@@ -823,6 +823,7 @@ void    tCookOnePole_setSampleRate  (tCookOnePole* const, Lfloat sr);
         Lfloat sampleRate;
         Lfloat invSampleRate;
         Lfloat phaseComp;
+        Lfloat sampleRatio;
         const Lfloat *table;
     } _tSVF;
     
@@ -833,14 +834,47 @@ void    tCookOnePole_setSampleRate  (tCookOnePole* const, Lfloat sr);
     void    tSVF_free           (tSVF* const);
     
     Lfloat   tSVF_tick           (tSVF* const, Lfloat v0);
+    Lfloat   tSVF_tickLP           (tSVF* const, Lfloat v0);
+    Lfloat   tSVF_tickHP           (tSVF* const, Lfloat v0);
+    Lfloat   tSVF_tickBP           (tSVF* const, Lfloat v0);
     void    tSVF_setFreq        (tSVF* const, Lfloat freq);
     void    tSVF_setFreqFast     (tSVF* const vf, Lfloat cutoff);
     void    tSVF_setQ           (tSVF* const, Lfloat Q);
     void    tSVF_setFreqAndQ    (tSVF* const svff, Lfloat freq, Lfloat Q);
+    void    tSVF_setFreqAndQFast(tSVF* const svff, Lfloat cutoff, Lfloat Q);
     void    tSVF_setFilterType  (tSVF* const svff, SVFType type);
     void    tSVF_setSampleRate  (tSVF* const svff, Lfloat sr);
     Lfloat    tSVF_getPhaseAtFrequency  (tSVF* const svff, Lfloat freq);
     
+//==============================================================================
+
+    typedef struct _tSVF_LP
+    {
+        tMempool mempool;
+        Lfloat ic1eq,ic2eq;
+        Lfloat g,onePlusg,k,a0,a1,a2,a3,a4,a5;
+        Lfloat sampleRate;
+        Lfloat invSampleRate;
+        Lfloat phaseComp;
+        Lfloat sampleRatio;
+        uint32_t nan;
+        const Lfloat *table;
+    } _tSVF_LP;
+
+    typedef _tSVF_LP* tSVF_LP;
+
+    void    tSVF_LP_init           (tSVF_LP* const, Lfloat freq, Lfloat Q, LEAF* const leaf);
+    void    tSVF_LP_initToPool     (tSVF_LP* const, Lfloat freq, Lfloat Q, tMempool* const);
+    void    tSVF_LP_free           (tSVF_LP* const);
+
+    Lfloat   tSVF_LP_tick           (tSVF_LP* const, Lfloat v0);
+    void    tSVF_LP_setFreq        (tSVF_LP* const, Lfloat freq);
+    void    tSVF_LP_setFreqFast     (tSVF_LP* const vf, Lfloat cutoff);
+    void    tSVF_LP_setQ           (tSVF_LP* const, Lfloat Q);
+    void    tSVF_LP_setFreqAndQ    (tSVF_LP* const svff, Lfloat freq, Lfloat Q);
+    void    tSVF_LP_setFreqAndQFast(tSVF_LP* const svff, Lfloat cutoff, Lfloat Q);
+    void    tSVF_LP_setSampleRate  (tSVF_LP* const svff, Lfloat sr);
+    Lfloat    tSVF_LP_getPhaseAtFrequency  (tSVF_LP* const svff, Lfloat freq);
     //==============================================================================
     
     /*!
@@ -1224,6 +1258,7 @@ void    tCookOnePole_setSampleRate  (tCookOnePole* const, Lfloat sr);
         Lfloat R2Plusg; //precomputed for the tick
         Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
         Lfloat invSampleRate;
+        Lfloat sampRatio;
         Lfloat cutoffMIDI;
         const Lfloat *table;
     } _tVZFilter;
@@ -1380,11 +1415,45 @@ Lfloat   tVZFilterBell_tick               (tVZFilterBell* const, Lfloat input);
 void    tVZFilterBell_setBandwidth            (tVZFilterBell* const, Lfloat bandWidth);
 void    tVZFilterBell_setFreq           (tVZFilterBell* const, Lfloat freq);
 void    tVZFilterBell_setFreqFast           (tVZFilterBell* const vf, Lfloat cutoff);
+void    tVZFilterBell_setFreqAndGainFast          (tVZFilterBell* const, Lfloat freq, Lfloat gain);
 void    tVZFilterBell_setFrequencyAndGain           (tVZFilterBell* const, Lfloat freq, Lfloat gain);
 void    tVZFilterBell_setFrequencyAndBandwidthAndGain           (tVZFilterBell* const vf, Lfloat freq, Lfloat bandwidth, Lfloat gain);
+void    tVZFilterBell_setFreqAndBWAndGainFast           (tVZFilterBell* const vf, Lfloat cutoff, Lfloat BW, Lfloat gain);
 void    tVZFilterBell_setGain                  (tVZFilterBell* const, Lfloat gain);
 
+typedef struct _tVZFilterBR
+{
+    tMempool mempool;
+    // state:
+    Lfloat s1, s2;
+    
+    // filter coefficients:
+    Lfloat g;          // embedded integrator gain
+    Lfloat R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+    Lfloat h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+    // parameters:
+    Lfloat R2Plusg; //precomputed for the tick
+    Lfloat cutoffMIDI;
+    Lfloat G;
+    Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+    Lfloat invSampleRate;
+    Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+    const Lfloat *table;
+} _tVZFilterBR;
 
+typedef _tVZFilterBR* tVZFilterBR;
+
+void    tVZFilterBR_init           (tVZFilterBR* const,Lfloat freq, Lfloat Q, LEAF* const leaf);
+void    tVZFilterBR_initToPool     (tVZFilterBR* const, Lfloat freq, Lfloat Q, tMempool* const);
+void    tVZFilterBR_free           (tVZFilterBR* const);
+
+void    tVZFilterBR_setSampleRate  (tVZFilterBR* const, Lfloat sampleRate);
+Lfloat   tVZFilterBR_tick               (tVZFilterBR* const, Lfloat input);
+void    tVZFilterBR_setGain           (tVZFilterBR* const, Lfloat gain);
+void    tVZFilterBR_setFreq           (tVZFilterBR* const, Lfloat freq);
+void    tVZFilterBR_setFreqFast     (tVZFilterBR* const vf, Lfloat cutoff);
+void    tVZFilterBR_setResonance                (tVZFilterBR* const vf, Lfloat res);
+void    tVZFilterBR_setFreqAndResonanceFast          (tVZFilterBR* const vf, Lfloat cutoff, Lfloat res);
     /*!
      @defgroup tdiodefilter tDiodeFilter
      @ingroup filters
@@ -1435,6 +1504,7 @@ void    tVZFilterBell_setGain                  (tVZFilterBell* const, Lfloat gai
         Lfloat g2inv;
         Lfloat s0, s1, s2, s3;
         Lfloat invSampleRate;
+        Lfloat sampRatio;
         const Lfloat *table;
         Lfloat cutoffMIDI;
     } _tDiodeFilter;
@@ -1462,7 +1532,9 @@ void    tVZFilterBell_setGain                  (tVZFilterBell* const, Lfloat gai
         tMempool mempool;
         Lfloat cutoff;
         Lfloat invSampleRate;
+        Lfloat sampleRatio;
         int oversampling;
+        Lfloat invOS;
         Lfloat c;
         Lfloat fb;
         Lfloat c2;
@@ -1485,7 +1557,35 @@ void    tVZFilterBell_setGain                  (tVZFilterBell* const, Lfloat gai
     void    tLadderFilter_setFreqFast     (tLadderFilter* const vf, Lfloat cutoff);
     void    tLadderFilter_setQ     (tLadderFilter* const vf, Lfloat resonance);
     void    tLadderFilter_setSampleRate(tLadderFilter* const vf, Lfloat sr);
-    
+    void    tLadderFilter_setOversampling(tLadderFilter* const vf, int os);
+
+
+//tilt filter
+typedef struct _tTiltFilter
+{
+    tMempool mempool;
+    Lfloat cutoff;
+    Lfloat sr3;
+    Lfloat gfactor;
+    Lfloat a0;
+    Lfloat b1;
+    Lfloat lp_out;
+    Lfloat lgain;
+    Lfloat hgain;
+    Lfloat invAmp;
+} _tTiltFilter;
+
+typedef _tTiltFilter* tTiltFilter;
+
+void    tTiltFilter_init           (tTiltFilter* const, Lfloat freq, LEAF* const leaf);
+void    tTiltFilter_initToPool     (tTiltFilter* const, Lfloat freq, tMempool* const);
+void    tTiltFilter_free           (tTiltFilter* const);
+
+Lfloat   tTiltFilter_tick               (tTiltFilter* const, Lfloat input);
+void    tTiltFilter_setTilt     (tTiltFilter* const vf, Lfloat tilt);
+void    tTiltFilter_setSampleRate(tTiltFilter* const vf, Lfloat sr);
+
+
 
 
 

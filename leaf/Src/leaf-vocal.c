@@ -41,7 +41,13 @@
 
 
 
+volatile uint32_t ERRcatch = 0;
 
+static inline int v_isnan(float f)
+{
+    union { float f; uint32_t x; } u = { f };
+    return (u.x << 1) > 0xff000000u;
+}
 
 void glottis_setup_waveform(glottis* const glo)
 {
@@ -335,19 +341,29 @@ void tract_calculate_reflections(tract* const t)
 	int i;
     Lfloat  sum;
 
-    for(i = 0; i < tr->n; i++) {
+    for(i = 0; i < tr->n; i++)
+    {
     	Lfloat scaledDiameter = tr->diameter[i] * tr->diameterScale;
         tr->A[i] = scaledDiameter * scaledDiameter;
         /* Calculate area from diameter squared*/
     }
 
-    for(i = 1; i < tr->n; i++) {
+    for(i = 1; i < tr->n; i++)
+    {
         tr->reflection[i] = tr->new_reflection[i];
-        if(tr->A[i] == 0) {
-            tr->new_reflection[i] = 0.999f; /* to prevent bad behavior if 0 */
-        } else {
-            tr->new_reflection[i] =
-                (tr->A[i - 1] - tr->A[i]) / (tr->A[i - 1] + tr->A[i]);
+
+        Lfloat divisorTest = (tr->A[i - 1] + tr->A[i]);
+
+        if(tr->A[i] <= 0.0000001f)
+        {
+            tr->new_reflection[i] = 0.99f; /* to prevent bad behavior if 0 */
+        }
+        else
+        {
+        	if ((divisorTest >= 0.0000001f)|| (divisorTest <= -0.0000001f))
+        	{
+        		tr->new_reflection[i] = (tr->A[i - 1] - tr->A[i]) / divisorTest;
+        	}
         }
     }
 
@@ -356,6 +372,10 @@ void tract_calculate_reflections(tract* const t)
     tr->reflection_nose = tr->new_reflection_nose;
 
     sum = tr->A[tr->nose_start] + tr->A[tr->nose_start + 1] + tr->noseA[0];
+    if ((sum  <= 0.001f) && (sum >= -0.001f))
+    {
+    	sum = 0.001f;
+    }
     Lfloat invSum = 1.0f / sum;
     tr->new_reflection_left = (Lfloat)(2.0f * tr->A[tr->nose_start] - sum) * invSum;
     tr->new_reflection_right = (Lfloat)(2.0f * tr->A[tr->nose_start + 1] - sum) * invSum;
@@ -431,6 +451,10 @@ void tract_newLength(tract* const t, int numTractSections)
         tr->junction_outL[i] = 0.0f;
     }
 
+    if (tr->nose_length < 0.01f)
+    {
+    	tr->nose_length = 0.01f;
+    }
     Lfloat invNoseLength = 1.0f / tr->nose_length;
 	for(i = 0; i < tr->nose_length; i++) {
 		d = 2.0f * ((Lfloat)i * invNoseLength);
@@ -470,9 +494,9 @@ void tract_reshape(tract* const t)
     Lfloat diameter;
     Lfloat target_diameter;
     int i;
-    int current_obstruction;
+    //int current_obstruction;
 
-    current_obstruction = -1;
+    //current_obstruction = -1;
 
 
     amount = tr->block_time * tr->movement_speed;
@@ -482,17 +506,19 @@ void tract_reshape(tract* const t)
         diameter = tr->diameter[i];
         target_diameter = tr->target_diameter[i];
 
-        if(diameter < 0.001f) current_obstruction = i;
+        //if(diameter < 0.001f) current_obstruction = i;
 
         if(i < tr->nose_start) slow_return = 0.6f;
         else if(i >= tr->tip_start) slow_return = 1.0f;
         else {
+        	Lfloat tempDiv= (tr->tip_start - tr->nose_start);
+
             slow_return =
-                0.6f+0.4f*(i - tr->nose_start)/(tr->tip_start - tr->nose_start);
+                0.6f+0.4f*(i - tr->nose_start)/tempDiv;
         }
 
         tr->diameter[i] = move_towards(diameter, target_diameter,
-                slow_return * amount, 2.0f * amount);
+                slow_return * amount, 0.1f * amount);
 
     }
 
@@ -529,6 +555,7 @@ void tract_addTurbulenceNoiseAtPosition(tract* const t, Lfloat turbulenceNoise, 
 	Lfloat openness = LEAF_clip(0.0f, 30.0f * (diameter), 1.0f);
 	Lfloat noise0 = turbulenceNoise * (1.0f - delta) * thinness0 * openness * 0.5f;
 	Lfloat noise1 = turbulenceNoise * delta * thinness0 * openness * 0.5f;
+
 	if ((i + 1) < tr->n) {
 		tr->R[i + 1] += noise0;
 		tr->L[i + 1] += noise0;
@@ -571,7 +598,7 @@ void tract_compute(tract* const t, Lfloat  in, Lfloat  lambda)
     Lfloat UVnoise = tNoise_tick(&tr->whiteNoise);
     UVnoise = tSVF_tick(&tr->aspirationNoiseFilt,UVnoise);
 
-    in = tanhf((UVnoise * tr->AnoiseGain) + (in * (1.0f - tr->AnoiseGain)));
+    in = fast_tanh5((UVnoise * tr->AnoiseGain) + (in * (1.0f - tr->AnoiseGain)));
 
 	tract_addTurbulenceNoise(&tr);
     tr->junction_outR[0] = tr->L[0] * tr->glottal_reflection + in;
@@ -595,9 +622,15 @@ void tract_compute(tract* const t, Lfloat  in, Lfloat  lambda)
 
 
     for(i = 0; i < tr->n; i++) {
-        tr->R[i] = tr->junction_outR[i]*0.999f;
-        tr->L[i] = tr->junction_outL[i + 1]*0.999f;
+        tr->R[i] = (tr->junction_outR[i]*0.999f);
+        tr->L[i] = (tr->junction_outL[i + 1]*0.999f);
+        //tr->R[i] = LEAF_clip(-1.5f, tr->R[i], 1.5f);
+
+
+
     }
+    tr->L[0] = LEAF_clip(-1.5f, tr->L[0], 1.5f);
+    tr->L[tr->n - 1] = LEAF_clip(-1.5f, tr->L[tr->n - 1], 1.5f);
     tr->lip_output = tr->R[tr->n - 1];
 
 
@@ -629,8 +662,12 @@ void tract_calculate_nose_reflections(tract* const t)
     }
 
     for(i = 1; i < tr->nose_length; i++) {
-        tr->nose_reflection[i] = (tr->noseA[i - 1] - tr->noseA[i]) /
-            (tr->noseA[i-1] + tr->noseA[i]);
+    	Lfloat tempDiv = (tr->noseA[i-1] + tr->noseA[i]);
+    	if ((tempDiv <= 0.001f) &&  (tempDiv >= -0.001f))
+    	{
+    		tempDiv = 0.01f;
+    	}
+        tr->nose_reflection[i] = (tr->noseA[i - 1] - tr->noseA[i]) / tempDiv;
     }
 }
 
@@ -989,6 +1026,10 @@ void tVoc_set_tongue_and_touch_diameters(tVoc* const voc, Lfloat tongue_index, L
 		if (touch_index< (twentyfivewidth)) width = tenwidth; //25 in original code
 		else if (touch_index>=v->tr->tip_start) width= fivewidth;
 		else width = tenwidth-fivewidth*(touch_index-twentyfivewidth)/(v->tr->tip_start-twentyfivewidth);
+		if ((width <= 0.01f) && (width >= -0.01f))
+		{
+			width = 1.0f;
+		}
 		Lfloat invWidth = 1.0f / width;
 	if ((touch_index < v->tr->n) && (touch_diameter < 3.0f))
 	{

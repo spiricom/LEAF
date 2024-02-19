@@ -85,7 +85,7 @@ Lfloat   tCycle_tick(tCycle* const cy)
     c->phase += c->inc;
     // Wavetable synthesis
     idx = c->phase >> 21; //11 bit table 
-    tempFrac = (c->phase & 2097151); //(2^21 - 1) all the lower bits i.e. the remainder of a division by 2^21  (2097151 is the 21 bits after the 11 bits that represent the main index) 
+    tempFrac = (c->phase & 2097151u); //(2^21 - 1) all the lower bits i.e. the remainder of a division by 2^21  (2097151 is the 21 bits after the 11 bits that represent the main index)
     
     samp0 = __leaf_table_sinewave[idx];
     idx = (idx + 1) & c->mask;
@@ -585,7 +585,7 @@ void    tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq)
 void    tPBSineTriangle_setShape       (tPBSineTriangle* const osc, Lfloat shape)
 {
     _tPBSineTriangle* c = *osc;
-    c->shape = -1.0f * shape; // inverted because triangle output is inverted
+    c->shape = 1.0f * shape;
     c->oneMinusShape = 1.0f - shape;
 }
 
