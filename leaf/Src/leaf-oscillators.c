@@ -20,11 +20,11 @@
 #include "arm_math.h"
 #endif
 
-inline float blamp0(float x) {
+static inline float blamp0(float x) {
   return 1.0f / 3.0f * x * x * x;
 }
 
-inline float blamp1(float x) {
+static inline float blamp1(float x) {
   x = x - 1.0f;
   return -1.0f / 3.0f * x * x * x;
 }
@@ -33,7 +33,7 @@ inline float blamp1(float x) {
 //http://www.taletn.com/reaper/mono_synth/
 //from Martin Finke's githubb polyblep project
 // Derived from blep().
-inline float blamp(float t, float dt) {
+static inline float blamp(float t, float dt) {
     if (t < dt) {
         t = (t / dt) - 1.0f;
         return -1.0f / 3.0f * t * t * t;

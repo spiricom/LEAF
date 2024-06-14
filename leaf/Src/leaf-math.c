@@ -216,7 +216,7 @@ void LEAF_generate_ftom(Lfloat* buffer, Lfloat startFreq, Lfloat endFreq, int si
 }
 
 //not sure that this works
-Lfloat fast_sinf2(Lfloat x)
+float fast_sinf2(Lfloat x)
 {
     Lfloat invert = 1.0f;
     Lfloat out;
@@ -267,7 +267,7 @@ void place_step_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat sca
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_slope_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat slope_delta)
 #else
-void place_slope_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat slope_delta)
+void place_slope_dd(Lfloat *buffer, int index, float phase, float w, Lfloat slope_delta)
 #endif
 {
     Lfloat r;
