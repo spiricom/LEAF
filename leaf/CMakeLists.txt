@@ -1,7 +1,7 @@
 ################################################################################
 ### Selecting CMake minimum version
 
-CMAKE_MINIMUM_REQUIRED (VERSION 3.4.0)
+cmake_minimum_required(VERSION 3.28)
 
 ################################################################################
 ### Setting Global Parameters
@@ -14,16 +14,16 @@ PROJECT("${PROJECT_NAME}")
 SET(LIBRARY_VERSION_MAJOR 0)
 SET(LIBRARY_VERSION_STRING 0.1)
 
-INCLUDE(GNUInstallDirs)
+#INCLUDE(GNUInstallDirs)
 
 SET(LIBRARY_BASE_PATH "${PROJECT_SOURCE_DIR}")
 
 ################################################################################
 ### Project definition
 
-INCLUDE_DIRECTORIES (
-        "${LIBRARY_BASE_PATH}"
-)
+#INCLUDE_DIRECTORIES (
+#        "${LIBRARY_BASE_PATH}"
+#)
 
 SET(PUBLIC_SOURCES_FILES
         "${LIBRARY_BASE_PATH}/Src/leaf.c"
@@ -37,7 +37,6 @@ SET(PUBLIC_SOURCES_FILES
         "${LIBRARY_BASE_PATH}/Src/leaf-electrical.c"
         "${LIBRARY_BASE_PATH}/Src/leaf-filters.c"
         "${LIBRARY_BASE_PATH}/Src/leaf-instruments.c"
-
         "${LIBRARY_BASE_PATH}/Src/leaf-mempool.c"
         "${LIBRARY_BASE_PATH}/Src/leaf-midi.c"
         "${LIBRARY_BASE_PATH}/Src/leaf-oscillators.c"
@@ -82,31 +81,33 @@ SET(PRIVATE_HEADERS_FILES
         "${LIBRARY_BASE_PATH}/Externals/trigtbl.h"
 )
 
-SET(CMAKE_C_VISIBILITY_PRESET hidden)
+#SET(CMAKE_C_VISIBILITY_PRESET hidden)
+#
+#ADD_LIBRARY (
+#        ${BINARY_NAME} SHARED ${PUBLIC_SOURCES_FILES} ${PRIVATE_SOURCES_FILES}
+#)
 
-ADD_LIBRARY (
-        ${BINARY_NAME} SHARED ${PUBLIC_SOURCES_FILES} ${PRIVATE_SOURCES_FILES}
-)
+TARGET_SOURCES(untitled PRIVATE  ${PRIVATE_SOURCES_FILES} ${PRIVATE_HEADERS_FILES}  PUBLIC ${PUBLIC_SOURCES_FILES})
 
-SET_TARGET_PROPERTIES (
-        ${BINARY_NAME} PROPERTIES
-        VERSION		${LIBRARY_VERSION_STRING}
-        SOVERSION	${LIBRARY_VERSION_MAJOR}
-        PUBLIC_HEADER  ${PUBLIC_HEADERS_FILES}
-)
+#SET_TARGET_PROPERTIES (
+#        ${BINARY_NAME} PROPERTIES
+#        VERSION		${LIBRARY_VERSION_STRING}
+#        SOVERSION	${LIBRARY_VERSION_MAJOR}
+#        PUBLIC_HEADER  ${PUBLIC_HEADERS_FILES}
+#)
 
 ################################################################################
 ### Adding compilator definitions, like debug symbols
 
-ADD_DEFINITIONS("-g")
+#ADD_DEFINITIONS("-g")
 
 ################################################################################
 ### Library installation directives
 
-INSTALL (
-        TARGETS ${BINARY_NAME}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+#INSTALL (
+#        TARGETS ${BINARY_NAME}
+#        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#        PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+#)
 
 ################################################################################
