@@ -18,6 +18,9 @@ SET(LIBRARY_VERSION_STRING 0.1)
 
 SET(LIBRARY_BASE_PATH "${PROJECT_SOURCE_DIR}")
 
+##############################################################################
+
+
 ################################################################################
 ### Project definition
 
@@ -83,18 +86,26 @@ SET(PRIVATE_HEADERS_FILES
 
 #SET(CMAKE_C_VISIBILITY_PRESET hidden)
 #
-#ADD_LIBRARY (
-#        ${BINARY_NAME} SHARED ${PUBLIC_SOURCES_FILES} ${PRIVATE_SOURCES_FILES}
-#)
+ADD_LIBRARY (
+        ${BINARY_NAME} SHARED ${PUBLIC_SOURCES_FILES} ${PRIVATE_SOURCES_FILES}
 
-TARGET_SOURCES(untitled PRIVATE  ${PRIVATE_SOURCES_FILES} ${PRIVATE_HEADERS_FILES}  PUBLIC ${PUBLIC_SOURCES_FILES})
+)
 
-#SET_TARGET_PROPERTIES (
-#        ${BINARY_NAME} PROPERTIES
-#        VERSION		${LIBRARY_VERSION_STRING}
-#        SOVERSION	${LIBRARY_VERSION_MAJOR}
-#        PUBLIC_HEADER  ${PUBLIC_HEADERS_FILES}
-#)
+TARGET_SOURCES( ${BINARY_NAME} PRIVATE  ${PRIVATE_SOURCES_FILES} ${PRIVATE_HEADERS_FILES}  PUBLIC ${PUBLIC_SOURCES_FILES})
+
+enable_testing()
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+
+add_subdirectory(test)
+
+#ENABLE_TESTING()
+SET_TARGET_PROPERTIES (
+        ${BINARY_NAME} PROPERTIES
+        VERSION		${LIBRARY_VERSION_STRING}
+        SOVERSION	${LIBRARY_VERSION_MAJOR}
+        PUBLIC_HEADER  ${PUBLIC_HEADERS_FILES}
+)
 
 ################################################################################
 ### Adding compilator definitions, like debug symbols
