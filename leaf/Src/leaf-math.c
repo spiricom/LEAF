@@ -20,8 +20,6 @@
 
 #define EXPONENTIAL_TABLE_SIZE 65536
 
-
-
 void LEAF_generate_sine(Lfloat* buffer, int size)
 {
     Lfloat phase;
@@ -117,8 +115,6 @@ void LEAF_generate_exp(Lfloat* buffer, Lfloat base, Lfloat start, Lfloat end, Lf
         x += increment;
     }
 }
-
-//
 
 
 void LEAF_generate_table_skew_non_sym_double(Lfloat* buffer, Lfloat start, Lfloat end, Lfloat center, int size)

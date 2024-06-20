@@ -2976,7 +2976,7 @@ void tWaveTable_initToPool(tWaveTable* const cy, Lfloat* table, int size, Lfloat
     }
     
     // Make bandlimited copies
-    f = c->sampleRate * 0.25; //start at half nyquist
+    f = c->sampleRate * 0.25f; //start at half nyquist
     // Not worth going over order 8 I think, and even 8 is only marginally better than 4.
     tButterworth_initToPool(&c->bl, 8, -1.0f, f, mp);
     for (int t = 1; t < c->numTables; ++t)
