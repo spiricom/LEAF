@@ -925,7 +925,7 @@ typedef struct _tPBSawSquare
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #else
-    void    tMBPulse_place_step_dd_noBuffer (tMBPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
+    void    tMBPulse_place_step_dd_noBuffer (tMBPulse const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #endif
     // Tick function for `tMBPulse`
     Lfloat  tMBPulse_tick                   (tMBPulse const osc);
@@ -1013,7 +1013,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPul
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w);
 #else
-    void    tMBTriangle_place_dd_noBuffer (tMBTriangle* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale,
+    void    tMBTriangle_place_dd_noBuffer (tMBTriangle const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale,
                                            Lfloat stepOrSlope, Lfloat w);
 #endif
 
