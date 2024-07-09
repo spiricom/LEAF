@@ -184,6 +184,7 @@ Lfloat   tExpSmooth_tick(tExpSmooth* const expsmooth);
 
     Lfloat   tExpSmooth_sample       (tExpSmooth* const);
     void    tExpSmooth_setFactor    (tExpSmooth* const, Lfloat factor);
+
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tExpSmooth_setDest      (tExpSmooth* const, Lfloat dest);
 #else

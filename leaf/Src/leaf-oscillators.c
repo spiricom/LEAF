@@ -3663,6 +3663,14 @@ Lfloat   tIntPhasor_tick(tIntPhasor const c)
     return c->phase * INV_TWO_TO_32; 
 }
 
+Lfloat   tIntPhasor_tickBiPolar(tIntPhasor const c)
+{
+    // Phasor increment
+    c->phase = (c->phase + c->inc);
+
+    return (c->phase * INV_TWO_TO_32 * 2.0f) - 1.0f;
+}
+
 void     tIntPhasor_setFreq(tIntPhasor const c, Lfloat freq)
 {
     c->freq  = freq;

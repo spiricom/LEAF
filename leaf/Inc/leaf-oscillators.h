@@ -1672,7 +1672,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
 
     // Tick function for `tIntPhasor`
     Lfloat  tIntPhasor_tick          (tIntPhasor const osc);
-
+    Lfloat  tIntPhasor_tickBiPolar          (tIntPhasor const osc);
     // Setter functions for `tIntPhasor`
     void    tIntPhasor_setFreq       (tIntPhasor const osc, Lfloat freq);
     void    tIntPhasor_setSampleRate (tIntPhasor const osc, Lfloat sr);
