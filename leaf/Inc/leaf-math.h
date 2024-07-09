@@ -684,6 +684,7 @@ static inline Lfloat fastSine(Lfloat x)
     //1000 gives a good curve from -1.0 to 0.0
     void LEAF_generate_exp(Lfloat* buffer, Lfloat base, Lfloat start, Lfloat end, Lfloat offset, int size);
     void LEAF_generate_table_skew_non_sym(Lfloat* buffer, Lfloat start, Lfloat end, Lfloat center, int size);
+    void LEAF_generate_sine(Lfloat* buffer, int size);
 
     void LEAF_generate_atodb(Lfloat* buffer, int size, Lfloat min, Lfloat max);
     void LEAF_generate_atodbPositiveClipped(Lfloat* buffer, Lfloat lowerThreshold, Lfloat range, int size);

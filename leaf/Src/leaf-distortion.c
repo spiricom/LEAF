@@ -51,9 +51,8 @@ void tSampleReducer_free (tSampleReducer* const sr)
     mpool_free((char*)s, s->mempool);
 }
 
-Lfloat tSampleReducer_tick(tSampleReducer* const sr, Lfloat input)
+Lfloat tSampleReducer_tick(tSampleReducer const s, Lfloat input)
 {
-    _tSampleReducer* s = *sr;
     if (s->count > s->invRatio)
     {
         s->hold = input;
@@ -65,9 +64,8 @@ Lfloat tSampleReducer_tick(tSampleReducer* const sr, Lfloat input)
 }
 
 
-void tSampleReducer_setRatio(tSampleReducer* const sr, Lfloat ratio)
+void tSampleReducer_setRatio(tSampleReducer const s, Lfloat ratio)
 {
-    _tSampleReducer* s = *sr;
     if ((ratio <= 1.0f) && (ratio >= 0.0f))
         s->invRatio = 1.0f / ratio;
     
@@ -116,28 +114,24 @@ void tOversampler_free (tOversampler* const osr)
     mpool_free((char*)os, os->mempool);
 }
 
-Lfloat tOversampler_tick(tOversampler* const osr, Lfloat input, Lfloat* oversample, Lfloat (*effectTick)(Lfloat))
+Lfloat tOversampler_tick(tOversampler const os, Lfloat input, Lfloat* oversample, Lfloat (*effectTick)(Lfloat))
 {
-    _tOversampler* os = *osr;
-    
-    tOversampler_upsample(osr, input, oversample);
+    tOversampler_upsample(os, input, oversample);
     
     for (int i = 0; i < os->ratio; i++) {
         oversample[i] = effectTick(oversample[i]);
     }
     
-    return tOversampler_downsample(osr, oversample);
+    return tOversampler_downsample(os, oversample);
 }
 
 // From CMSIS DSP Library
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tOversampler_upsample(tOversampler* const osr, Lfloat input, Lfloat* output)
 #else
-void tOversampler_upsample(tOversampler* const osr, Lfloat input, Lfloat* output)
+void tOversampler_upsample(tOversampler const os, Lfloat input, Lfloat* output)
 #endif
 {
-    _tOversampler* os = *osr;
-    
     if (os->ratio == 1)
     {
         output[0] = input;
@@ -236,11 +230,9 @@ void tOversampler_upsample(tOversampler* const osr, Lfloat input, Lfloat* output
 #ifdef ITCMRAM
 Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tOversampler_downsample(tOversampler *const osr, Lfloat* input)
 #else
-Lfloat tOversampler_downsample(tOversampler *const osr, Lfloat* input)
+Lfloat tOversampler_downsample(tOversampler const os, Lfloat* input)
 #endif
 {
-    _tOversampler* os = *osr;
-    
     if (os->ratio == 1) return input[0];
     
     Lfloat *pState = os->downState;                 /* State pointer */
@@ -323,10 +315,8 @@ Lfloat tOversampler_downsample(tOversampler *const osr, Lfloat* input)
     return output;
 }
 
-void    tOversampler_setRatio       (tOversampler* const osr, int ratio)
+void    tOversampler_setRatio       (tOversampler const os, int ratio)
 {
-    _tOversampler* os = *osr;
-    
     if (ratio == os->ratio) return;
     if (ratio > os->maxRatio) ratio = os->maxRatio;
     if (ratio == 1) os->ratio = ratio;
@@ -341,10 +331,8 @@ void    tOversampler_setRatio       (tOversampler* const osr, int ratio)
     }
 }
 
-void    tOversampler_setQuality     (tOversampler* const osr, int quality)
+void    tOversampler_setQuality     (tOversampler const os, int quality)
 {
-    _tOversampler* os = *osr;
-    
     if (!os->allowHighQuality) return;
     int offset = 0;
     if (quality > 0) offset = 6;
@@ -358,9 +346,8 @@ void    tOversampler_setQuality     (tOversampler* const osr, int quality)
     os->pCoeffs = (Lfloat*) __leaf_tableref_firCoeffs[idx];
 }
 
-int tOversampler_getLatency(tOversampler* const osr)
+int tOversampler_getLatency(tOversampler const os)
 {
-    _tOversampler* os = *osr;
     return os->phaseLength;
 }
 #endif // LEAF_INCLUDE_OVERSAMPLER_TABLES
@@ -396,41 +383,34 @@ void tWavefolder_free (tWavefolder* const wf)
     mpool_free((char*)w, w->mempool);
 }
 
-void tWavefolder_setFFAmount(tWavefolder* const wf, Lfloat ffAmount)
+void tWavefolder_setFFAmount(tWavefolder const w, Lfloat ffAmount)
 {
-    _tWavefolder* w = *wf;
     w->FFAmount = ffAmount;
 }
-void tWavefolder_setFBAmount(tWavefolder* const wf, Lfloat fbAmount)
+void tWavefolder_setFBAmount(tWavefolder const w, Lfloat fbAmount)
 {
-    _tWavefolder* w = *wf;
     w->FBAmount = fbAmount;
     
     w->invFBAmount = 1.0f / (1.0f + fbAmount);
 }
 
-void tWavefolder_setFoldDepth(tWavefolder* const wf, Lfloat foldDepth)
+void tWavefolder_setFoldDepth(tWavefolder const w, Lfloat foldDepth)
 {
-    _tWavefolder* w = *wf;
     w->foldDepth = foldDepth;
 }
 
-void tWavefolder_setOffset(tWavefolder* const wf, Lfloat offset)
+void tWavefolder_setOffset(tWavefolder const w, Lfloat offset)
 {
-    _tWavefolder* w = *wf;
     w->offset = offset;
 }
 
-void tWavefolder_setGain(tWavefolder* const wf, Lfloat gain)
+void tWavefolder_setGain(tWavefolder const w, Lfloat gain)
 {
-    _tWavefolder* w = *wf;
     w->gain = gain;
 }
 
-Lfloat tWavefolder_tick(tWavefolder* const wf, Lfloat in)
+Lfloat tWavefolder_tick(tWavefolder const w, Lfloat in)
 {
-    _tWavefolder* w = *wf;
-
     //Lfloat sample = in * w->offset + (w->gain * w->offset);
     Lfloat sample = in;
     float curFB = w->FBAmount;
@@ -470,7 +450,7 @@ Lfloat tWavefolder_tick(tWavefolder* const wf, Lfloat in)
 #endif
     w->FBsample = (ff + fb) - w->foldDepth * tempVal;
     sample = w->FBsample * w->invFBAmount;
-    sample = tHighpass_tick(&w->dcBlock, sample);
+    sample = tHighpass_tick(w->dcBlock, sample);
     return sample;
 }
 
@@ -541,11 +521,8 @@ void tLockhartWavefolder_free (tLockhartWavefolder* const wf)
 
 
 
-double tLockhartWavefolderLambert(tLockhartWavefolder* const wf, double x, double ln)
+double tLockhartWavefolderLambert(tLockhartWavefolder const mwf, double x, double ln)
 {
-	_tLockhartWavefolder* mwf = *wf;
-
-
     // Initial guess (use previous value)
 	mwf->w = ln;
     
@@ -624,10 +601,8 @@ double tLockhartWavefolderLambert(tLockhartWavefolder* const wf, double x, doubl
     return mwf->w;
 }
 
-Lfloat tLockhartWavefolder_tick(tLockhartWavefolder* const wf, Lfloat in)
+Lfloat tLockhartWavefolder_tick(tLockhartWavefolder const w, Lfloat in)
 {
-    _tLockhartWavefolder* w = *wf;
-
     Lfloat out = 0.0f;
     
     // Compute Antiderivative
@@ -650,7 +625,7 @@ Lfloat tLockhartWavefolder_tick(tLockhartWavefolder* const wf, Lfloat in)
     }
     
 
-    w->Ln = tLockhartWavefolderLambert(wf,w->u,w->Ln1);
+    w->Ln = tLockhartWavefolderLambert(w,w->u,w->Ln1);
     /*
     if ((w->Ln == 0.0) || isinf(w->Ln) || isnan(w->Ln))
 	{
@@ -691,7 +666,7 @@ Lfloat tLockhartWavefolder_tick(tLockhartWavefolder* const wf, Lfloat in)
 
         }
         
-    	w->Ln = tLockhartWavefolderLambert(wf,w->u,w->Ln1);
+    	w->Ln = tLockhartWavefolderLambert(w,w->u,w->Ln1);
     	/*
         if ((w->Ln == 0.0) || isinf(w->Ln) || isnan(w->Ln))
     	{
@@ -765,10 +740,8 @@ void tCrusher_free (tCrusher* const cr)
     mpool_free((char*)c, c->mempool);
 }
 
-Lfloat tCrusher_tick (tCrusher* const cr, Lfloat input)
+Lfloat tCrusher_tick (tCrusher const c, Lfloat input)
 {
-    _tCrusher* c = *cr;
-    
     Lfloat sample = input;
     
     sample *= SCALAR; // SCALAR is 5000 by default
@@ -789,17 +762,14 @@ Lfloat tCrusher_tick (tCrusher* const cr, Lfloat input)
     
 }
 
-void    tCrusher_setOperation (tCrusher* const cr, Lfloat op)
+void    tCrusher_setOperation (tCrusher const c, Lfloat op)
 {
-    _tCrusher* c = *cr;
     c->op = (uint32_t) (op * 8.0f);
 }
 
 // 0.0 - 1.0
-void    tCrusher_setQuality (tCrusher* const cr, Lfloat val)
+void    tCrusher_setQuality (tCrusher const c, Lfloat val)
 {
-    _tCrusher* c = *cr;
-    
     val = LEAF_clip(0.0f, val, 1.0f);
     
     c->div = 0.01f + val * SCALAR;
@@ -808,15 +778,13 @@ void    tCrusher_setQuality (tCrusher* const cr, Lfloat val)
 }
 
 // what decimal to round to
-void    tCrusher_setRound (tCrusher* const cr, Lfloat rnd)
+void    tCrusher_setRound (tCrusher const c, Lfloat rnd)
 {
-    _tCrusher* c = *cr;
     c->rnd = rnd;
 }
 
-void    tCrusher_setSamplingRatio (tCrusher* const cr, Lfloat ratio)
+void    tCrusher_setSamplingRatio (tCrusher const c, Lfloat ratio)
 {
-    _tCrusher* c = *cr;
     c->srr = ratio;
-    tSampleReducer_setRatio(&c->sReducer, ratio);
+    tSampleReducer_setRatio(c->sReducer, ratio);
 }

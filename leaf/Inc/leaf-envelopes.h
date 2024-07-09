@@ -105,11 +105,12 @@ extern "C" {
     void    tEnvelope_initToPool    (tEnvelope* const, Lfloat attack, Lfloat decay, int loop, tMempool* const);
     void    tEnvelope_free          (tEnvelope* const);
     
-    Lfloat   tEnvelope_tick          (tEnvelope* const);
-    void    tEnvelope_setAttack     (tEnvelope* const, Lfloat attack);
-    void    tEnvelope_setDecay      (tEnvelope* const, Lfloat decay);
-    void    tEnvelope_loop          (tEnvelope* const, int loop);
-    void    tEnvelope_on            (tEnvelope* const, Lfloat velocity);
+    Lfloat  tEnvelope_tick          (tEnvelope const);
+
+    void    tEnvelope_setAttack     (tEnvelope const, Lfloat attack);
+    void    tEnvelope_setDecay      (tEnvelope const, Lfloat decay);
+    void    tEnvelope_loop          (tEnvelope const, int loop);
+    void    tEnvelope_on            (tEnvelope const, Lfloat velocity);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -184,7 +185,6 @@ Lfloat   tExpSmooth_tick(tExpSmooth* const expsmooth);
 
     Lfloat   tExpSmooth_sample       (tExpSmooth* const);
     void    tExpSmooth_setFactor    (tExpSmooth* const, Lfloat factor);
-
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tExpSmooth_setDest      (tExpSmooth* const, Lfloat dest);
 #else

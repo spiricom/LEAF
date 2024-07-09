@@ -83,10 +83,8 @@ void tCompressor_free (tCompressor* const comp)
     mpool_free((char*)c, c->mempool);
 }
 
-Lfloat tCompressor_tick(tCompressor* const comp, Lfloat in)
+Lfloat tCompressor_tick(tCompressor const c, Lfloat in)
 {
-    _tCompressor* c = *comp;
-    
     Lfloat slope, overshoot;
     
     Lfloat in_db = LEAF_clip(-90.0f, fasteratodb(fastabsf(in)), 0.0f);
@@ -138,10 +136,8 @@ Lfloat tCompressor_tick(tCompressor* const comp, Lfloat in)
 
 //requires tables to be set with set function
 //more efficient without soft knee calculation
-Lfloat tCompressor_tickWithTable(tCompressor* const comp, Lfloat in)
+Lfloat tCompressor_tickWithTable(tCompressor const c, Lfloat in)
 {
-    _tCompressor* c = *comp;
-
     Lfloat slope, overshoot;
 
     in = fastabsf(in);
@@ -186,10 +182,8 @@ Lfloat tCompressor_tickWithTable(tCompressor* const comp, Lfloat in)
 }
 
 //requires tables to be set with set function
-Lfloat tCompressor_tickWithTableHardKnee(tCompressor* const comp, Lfloat in)
+Lfloat tCompressor_tickWithTableHardKnee(tCompressor const c, Lfloat in)
 {
-    _tCompressor* c = *comp;
-
     Lfloat slope, overshoot;
 
     in = fastabsf(in);
@@ -227,9 +221,8 @@ Lfloat tCompressor_tickWithTableHardKnee(tCompressor* const comp, Lfloat in)
     return attenuation * in;
 }
 
-void tCompressor_setTables(tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize)
+void tCompressor_setTables(tCompressor const c, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize)
 {
-    _tCompressor* c = *comp;
 	c->atodbTable = atodb;
 	c->dbtoaTable = dbtoa;
 
@@ -254,9 +247,8 @@ void tCompressor_setTables(tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa
 //c->R = 0.5f; // compression Ratio
 //c->W = 3.0f; // decibel Width of knee transition
 //c->M = 1.0f; // decibel Make-up gain
-void tCompressor_setParams(tCompressor* const comp, Lfloat thresh, Lfloat ratio, Lfloat knee, Lfloat makeup, Lfloat attack, Lfloat release)
+void tCompressor_setParams(tCompressor const c, Lfloat thresh, Lfloat ratio, Lfloat knee, Lfloat makeup, Lfloat attack, Lfloat release)
 {
-    _tCompressor* c = *comp;
     c->T = thresh;
     c->R = ratio;
     c->invR = 1.0f / ratio;
@@ -267,9 +259,8 @@ void tCompressor_setParams(tCompressor* const comp, Lfloat thresh, Lfloat ratio,
     c->tauRelease = fastExp4(-1.0f/(0.001f * release * c->sampleRate));
 }
 
-void tCompressor_setSampleRate(tCompressor* const comp, Lfloat sampleRate)
+void tCompressor_setSampleRate(tCompressor const c, Lfloat sampleRate)
 {
-    _tCompressor* c = *comp;
     c->sampleRate = sampleRate;
 }
 /* Feedback Leveler */
@@ -300,44 +291,38 @@ void tFeedbackLeveler_free (tFeedbackLeveler* const fb)
     mpool_free((char*)p, p->mempool);
 }
 
-void     tFeedbackLeveler_setStrength(tFeedbackLeveler* const fb, Lfloat strength)
+void     tFeedbackLeveler_setStrength(tFeedbackLeveler const p, Lfloat strength)
 {    // strength is how strongly level diff is affecting the amp ratio
     // try 0.125 for a start
-    _tFeedbackLeveler* p = *fb;
     p->strength=strength;
 }
 
-void     tFeedbackLeveler_setFactor(tFeedbackLeveler* const fb, Lfloat factor)
+void     tFeedbackLeveler_setFactor(tFeedbackLeveler const p, Lfloat factor)
 {
-    _tFeedbackLeveler* p = *fb;
-    tPowerFollower_setFactor(&p->pwrFlw,factor);
+    tPowerFollower_setFactor(p->pwrFlw,factor);
 }
 
-void     tFeedbackLeveler_setMode(tFeedbackLeveler* const fb, int mode)
+void     tFeedbackLeveler_setMode(tFeedbackLeveler const p, int mode)
 {    // 0 for decaying with upwards lev limiting, 1 for constrained absolute level (also downwards limiting)
-    _tFeedbackLeveler* p = *fb;
     p->mode=mode;
 }
 
-Lfloat   tFeedbackLeveler_tick(tFeedbackLeveler* const fb, Lfloat input)
+Lfloat   tFeedbackLeveler_tick(tFeedbackLeveler const p, Lfloat input)
 {
-    _tFeedbackLeveler* p = *fb;
-    Lfloat levdiff=(tPowerFollower_tick(&p->pwrFlw, input)-p->targetLevel);
+    Lfloat levdiff=(tPowerFollower_tick(p->pwrFlw, input)-p->targetLevel);
     if (p->mode==0 && levdiff<0.0f) levdiff=0.0f;
     p->curr=input*(1.0f-p->strength*levdiff);
     return p->curr;
 }
 
-Lfloat   tFeedbackLeveler_sample(tFeedbackLeveler* const fb)
+Lfloat   tFeedbackLeveler_sample(tFeedbackLeveler const p)
 {
-    _tFeedbackLeveler* p = *fb;
     return p->curr;
 }
 
 
-void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const fb, Lfloat TargetLevel)
+void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler const p, Lfloat TargetLevel)
 {
-    _tFeedbackLeveler* p = *fb;
     p->targetLevel=TargetLevel;
 }
 
@@ -366,10 +351,8 @@ void tThreshold_free (tThreshold* const th)
     mpool_free((char*)t, t->mempool);
 }
 
-int tThreshold_tick(tThreshold* const th, Lfloat in)
+int tThreshold_tick(tThreshold const t, Lfloat in)
 {
-    _tThreshold* t = *th;
-
     if (in >= t->highThresh)
     {
     	t->currentValue = 1;
@@ -382,16 +365,12 @@ int tThreshold_tick(tThreshold* const th, Lfloat in)
     return t->currentValue;
 }
 
-void tThreshold_setLow(tThreshold* const th, Lfloat low)
+void tThreshold_setLow(tThreshold const t, Lfloat low)
 {
-    _tThreshold* t = *th;
-
     t->lowThresh = low;
 }
 
-void tThreshold_setHigh(tThreshold* const th, Lfloat high)
+void tThreshold_setHigh(tThreshold const t, Lfloat high)
 {
-    _tThreshold* t = *th;
-
     t->highThresh = high;
 }

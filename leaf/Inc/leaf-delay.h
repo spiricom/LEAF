@@ -123,16 +123,17 @@ extern "C" {
     void        tDelay_init         (tDelay* const, uint32_t delay, uint32_t maxDelay, LEAF* const leaf);
     void        tDelay_initToPool   (tDelay* const, uint32_t delay, uint32_t maxDelay, tMempool* const);
     void        tDelay_free         (tDelay* const);
-    
-    void        tDelay_clear        (tDelay* const);
-    void        tDelay_setDelay     (tDelay* const, uint32_t delay);
-    uint32_t    tDelay_getDelay     (tDelay* const);
-    void        tDelay_tapIn        (tDelay* const, Lfloat in, uint32_t tapDelay);
-    Lfloat       tDelay_tapOut       (tDelay* const, uint32_t tapDelay);
-    Lfloat       tDelay_addTo        (tDelay* const, Lfloat value, uint32_t tapDelay);
-    Lfloat       tDelay_tick         (tDelay* const, Lfloat sample);
-    Lfloat       tDelay_getLastOut   (tDelay* const);
-    Lfloat       tDelay_getLastIn    (tDelay* const);
+
+    Lfloat      tDelay_tick         (tDelay const, Lfloat sample);
+
+    void        tDelay_clear        (tDelay const);
+    void        tDelay_setDelay     (tDelay const, uint32_t delay);
+    uint32_t    tDelay_getDelay     (tDelay const);
+    void        tDelay_tapIn        (tDelay const, Lfloat in, uint32_t tapDelay);
+    Lfloat      tDelay_tapOut       (tDelay const, uint32_t tapDelay);
+    Lfloat      tDelay_addTo        (tDelay const, Lfloat value, uint32_t tapDelay);
+    Lfloat      tDelay_getLastOut   (tDelay const);
+    Lfloat      tDelay_getLastIn    (tDelay const);
     
     //==============================================================================
     
@@ -242,22 +243,23 @@ extern "C" {
     
     typedef _tLinearDelay* tLinearDelay;
     
-    void    tLinearDelay_init        (tLinearDelay* const, Lfloat delay, uint32_t maxDelay, LEAF* const leaf);
-    void    tLinearDelay_initToPool  (tLinearDelay* const, Lfloat delay, uint32_t maxDelay, tMempool* const);
-    void    tLinearDelay_free        (tLinearDelay* const);
-    
-    void    tLinearDelay_clear         (tLinearDelay* const dl);
-    void    tLinearDelay_setDelay    (tLinearDelay* const, Lfloat delay);
-    Lfloat   tLinearDelay_getDelay    (tLinearDelay* const);
-    void    tLinearDelay_tapIn       (tLinearDelay* const, Lfloat in, uint32_t tapDelay);
-    Lfloat   tLinearDelay_tapOut      (tLinearDelay* const, uint32_t tapDelay);
-    Lfloat tLinearDelay_tapOutInterpolated (tLinearDelay* const dl, Lfloat tapDelay);
-    Lfloat   tLinearDelay_addTo       (tLinearDelay* const, Lfloat value, uint32_t tapDelay);
-    Lfloat   tLinearDelay_tick        (tLinearDelay* const, Lfloat sample);
-    void    tLinearDelay_tickIn      (tLinearDelay* const, Lfloat input);
-    Lfloat   tLinearDelay_tickOut     (tLinearDelay* const);
-    Lfloat   tLinearDelay_getLastOut  (tLinearDelay* const);
-    Lfloat   tLinearDelay_getLastIn   (tLinearDelay* const);
+    void    tLinearDelay_init               (tLinearDelay* const, Lfloat delay, uint32_t maxDelay, LEAF* const leaf);
+    void    tLinearDelay_initToPool         (tLinearDelay* const, Lfloat delay, uint32_t maxDelay, tMempool* const);
+    void    tLinearDelay_free               (tLinearDelay* const);
+
+    Lfloat  tLinearDelay_tick               (tLinearDelay const, Lfloat sample);
+    void    tLinearDelay_tickIn             (tLinearDelay const, Lfloat input);
+    Lfloat  tLinearDelay_tickOut            (tLinearDelay const);
+
+    void    tLinearDelay_clear              (tLinearDelay const dl);
+    void    tLinearDelay_setDelay           (tLinearDelay const, Lfloat delay);
+    Lfloat  tLinearDelay_getDelay           (tLinearDelay const);
+    void    tLinearDelay_tapIn              (tLinearDelay const, Lfloat in, uint32_t tapDelay);
+    Lfloat  tLinearDelay_tapOut             (tLinearDelay const, uint32_t tapDelay);
+    Lfloat  tLinearDelay_tapOutInterpolated (tLinearDelay const dl, Lfloat tapDelay);
+    Lfloat  tLinearDelay_addTo              (tLinearDelay const, Lfloat value, uint32_t tapDelay);
+    Lfloat  tLinearDelay_getLastOut         (tLinearDelay const);
+    Lfloat  tLinearDelay_getLastIn          (tLinearDelay const);
     
     
     
@@ -387,21 +389,22 @@ extern "C" {
     void    tHermiteDelay_init (tHermiteDelay* const dl, Lfloat delay, uint32_t maxDelay, LEAF* const leaf);
     void    tHermiteDelay_initToPool (tHermiteDelay* const dl, Lfloat delay, uint32_t maxDelay, tMempool* const mp);
     void    tHermiteDelay_free          (tHermiteDelay* const dl);
-    
-    void    tHermiteDelay_clear         (tHermiteDelay* const dl);
-    Lfloat   tHermiteDelay_tick          (tHermiteDelay* const dl, Lfloat input);
-    void    tHermiteDelay_tickIn        (tHermiteDelay* const dl, Lfloat input);
-    Lfloat   tHermiteDelay_tickOut       (tHermiteDelay* const dl);
-    void    tHermiteDelay_setDelay      (tHermiteDelay* const dl, Lfloat delay);
-    Lfloat   tHermiteDelay_tapOut        (tHermiteDelay* const dl, uint32_t tapDelay);
-    Lfloat   tHermiteDelay_tapOutInterpolated (tHermiteDelay* const dl, uint32_t tapDelay, Lfloat alpha);
-    void    tHermiteDelay_tapIn         (tHermiteDelay* const dl, Lfloat value, uint32_t tapDelay);
-    Lfloat   tHermiteDelay_addTo         (tHermiteDelay* const dl, Lfloat value, uint32_t tapDelay);
-    Lfloat   tHermiteDelay_getDelay      (tHermiteDelay* const dl);
-    Lfloat   tHermiteDelay_getLastOut    (tHermiteDelay* const dl);
-    Lfloat   tHermiteDelay_getLastIn     (tHermiteDelay* const dl);
-    void    tHermiteDelay_setGain       (tHermiteDelay* const dl, Lfloat gain);
-    Lfloat   tHermiteDelay_getGain       (tHermiteDelay* const dl);
+
+    Lfloat  tHermiteDelay_tick               (tHermiteDelay const dl, Lfloat input);
+    void    tHermiteDelay_tickIn             (tHermiteDelay const dl, Lfloat input);
+    Lfloat  tHermiteDelay_tickOut            (tHermiteDelay const dl);
+
+    void    tHermiteDelay_clear              (tHermiteDelay const dl);
+    void    tHermiteDelay_setDelay           (tHermiteDelay const dl, Lfloat delay);
+    Lfloat  tHermiteDelay_tapOut             (tHermiteDelay const dl, uint32_t tapDelay);
+    Lfloat  tHermiteDelay_tapOutInterpolated (tHermiteDelay const dl, uint32_t tapDelay, Lfloat alpha);
+    void    tHermiteDelay_tapIn              (tHermiteDelay const dl, Lfloat value, uint32_t tapDelay);
+    Lfloat  tHermiteDelay_addTo              (tHermiteDelay const dl, Lfloat value, uint32_t tapDelay);
+    Lfloat  tHermiteDelay_getDelay           (tHermiteDelay const dl);
+    Lfloat  tHermiteDelay_getLastOut         (tHermiteDelay const dl);
+    Lfloat  tHermiteDelay_getLastIn          (tHermiteDelay const dl);
+    void    tHermiteDelay_setGain            (tHermiteDelay const dl, Lfloat gain);
+    Lfloat  tHermiteDelay_getGain            (tHermiteDelay const dl);
     
     
     //==============================================================================
@@ -523,23 +526,24 @@ extern "C" {
 
     typedef _tLagrangeDelay* tLagrangeDelay;
 
-    void    tLagrangeDelay_init (tLagrangeDelay* const dl, Lfloat delay, uint32_t maxDelay, LEAF* const leaf);
-    void    tLagrangeDelay_initToPool (tLagrangeDelay* const dl, Lfloat delay, uint32_t maxDelay, tMempool* const mp);
-    void    tLagrangeDelay_free          (tLagrangeDelay* const dl);
+    void    tLagrangeDelay_init               (tLagrangeDelay* const dl, Lfloat delay, uint32_t maxDelay, LEAF* const leaf);
+    void    tLagrangeDelay_initToPool         (tLagrangeDelay* const dl, Lfloat delay, uint32_t maxDelay, tMempool* const mp);
+    void    tLagrangeDelay_free               (tLagrangeDelay* const dl);
 
-    void    tLagrangeDelay_clear         (tLagrangeDelay* const dl);
-    Lfloat   tLagrangeDelay_tick          (tLagrangeDelay* const dl, Lfloat input);
-    void    tLagrangeDelay_tickIn        (tLagrangeDelay* const dl, Lfloat input);
-    Lfloat   tLagrangeDelay_tickOut       (tLagrangeDelay* const dl);
-    void    tLagrangeDelay_setDelay      (tLagrangeDelay* const dl, Lfloat delay);
-    Lfloat   tLagrangeDelay_tapOut        (tLagrangeDelay* const dl, uint32_t tapDelay);
-    Lfloat   tLagrangeDelay_tapOutInterpolated (tLagrangeDelay* const dl, uint32_t tapDelay, Lfloat alpha);
-    void    tLagrangeDelay_tapIn         (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay);
-    Lfloat   tLagrangeDelay_addTo         (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay);
-    Lfloat   tLagrangeDelay_getDelay      (tLagrangeDelay* const dl);
-    Lfloat   tLagrangeDelay_getMaxDelay (tLagrangeDelay* const dl);
-    Lfloat   tLagrangeDelay_getLastOut    (tLagrangeDelay* const dl);
-    Lfloat   tLagrangeDelay_getLastIn     (tLagrangeDelay* const dl);
+    Lfloat  tLagrangeDelay_tick               (tLagrangeDelay const dl, Lfloat input);
+    void    tLagrangeDelay_tickIn             (tLagrangeDelay const dl, Lfloat input);
+    Lfloat  tLagrangeDelay_tickOut            (tLagrangeDelay const dl);
+
+    void    tLagrangeDelay_clear              (tLagrangeDelay const dl);
+    void    tLagrangeDelay_setDelay           (tLagrangeDelay const dl, Lfloat delay);
+    Lfloat  tLagrangeDelay_tapOut             (tLagrangeDelay const dl, uint32_t tapDelay);
+    Lfloat  tLagrangeDelay_tapOutInterpolated (tLagrangeDelay const dl, uint32_t tapDelay, Lfloat alpha);
+    void    tLagrangeDelay_tapIn              (tLagrangeDelay const dl, Lfloat value, uint32_t tapDelay);
+    Lfloat  tLagrangeDelay_addTo              (tLagrangeDelay const dl, Lfloat value, uint32_t tapDelay);
+    Lfloat  tLagrangeDelay_getDelay           (tLagrangeDelay const dl);
+    Lfloat  tLagrangeDelay_getMaxDelay        (tLagrangeDelay const dl);
+    Lfloat  tLagrangeDelay_getLastOut         (tLagrangeDelay const dl);
+    Lfloat  tLagrangeDelay_getLastIn          (tLagrangeDelay const dl);
 
     //==============================================================================
 
@@ -644,16 +648,17 @@ extern "C" {
     void    tAllpassDelay_init        (tAllpassDelay* const, Lfloat delay, uint32_t maxDelay, LEAF* const leaf);
     void    tAllpassDelay_initToPool  (tAllpassDelay* const, Lfloat delay, uint32_t maxDelay, tMempool* const);
     void    tAllpassDelay_free        (tAllpassDelay* const);
-    
-    void    tAllpassDelay_clear       (tAllpassDelay* const);
-    void    tAllpassDelay_setDelay    (tAllpassDelay* const, Lfloat delay);
-    Lfloat   tAllpassDelay_getDelay    (tAllpassDelay* const);
-    void    tAllpassDelay_tapIn       (tAllpassDelay* const, Lfloat in, uint32_t tapDelay);
-    Lfloat   tAllpassDelay_tapOut      (tAllpassDelay* const, uint32_t tapDelay);
-    Lfloat   tAllpassDelay_addTo       (tAllpassDelay* const, Lfloat value, uint32_t tapDelay);
-    Lfloat   tAllpassDelay_tick        (tAllpassDelay* const, Lfloat sample);
-    Lfloat   tAllpassDelay_getLastOut  (tAllpassDelay* const);
-    Lfloat   tAllpassDelay_getLastIn   (tAllpassDelay* const);
+
+    Lfloat  tAllpassDelay_tick        (tAllpassDelay const, Lfloat sample);
+
+    void    tAllpassDelay_clear       (tAllpassDelay const);
+    void    tAllpassDelay_setDelay    (tAllpassDelay const, Lfloat delay);
+    Lfloat  tAllpassDelay_getDelay    (tAllpassDelay const);
+    void    tAllpassDelay_tapIn       (tAllpassDelay const, Lfloat in, uint32_t tapDelay);
+    Lfloat  tAllpassDelay_tapOut      (tAllpassDelay const, uint32_t tapDelay);
+    Lfloat  tAllpassDelay_addTo       (tAllpassDelay const, Lfloat value, uint32_t tapDelay);
+    Lfloat  tAllpassDelay_getLastOut  (tAllpassDelay const);
+    Lfloat  tAllpassDelay_getLastIn   (tAllpassDelay const);
     
     //==============================================================================
     
@@ -757,20 +762,21 @@ extern "C" {
     
     typedef _tTapeDelay* tTapeDelay;
     
-    void    tTapeDelay_init        (tTapeDelay* const, Lfloat delay, uint32_t maxDelay, LEAF* const leaf);
-    void    tTapeDelay_initToPool  (tTapeDelay* const, Lfloat delay, uint32_t maxDelay, tMempool* const);
-    void    tTapeDelay_free        (tTapeDelay* const);
-    
-    void    tTapeDelay_clear       (tTapeDelay* const);
-    void    tTapeDelay_setDelay    (tTapeDelay* const, Lfloat delay);
-    Lfloat   tTapeDelay_getDelay    (tTapeDelay* const);
-    void    tTapeDelay_tapIn       (tTapeDelay* const, Lfloat in, uint32_t tapDelay);
-    Lfloat   tTapeDelay_tapOut      (tTapeDelay* const d, Lfloat tapDelay);
-    Lfloat   tTapeDelay_addTo       (tTapeDelay* const, Lfloat value, uint32_t tapDelay);
-    Lfloat   tTapeDelay_tick        (tTapeDelay* const, Lfloat sample);
-    void    tTapeDelay_incrementInPoint(tTapeDelay* const dl);
-    Lfloat   tTapeDelay_getLastOut  (tTapeDelay* const);
-    Lfloat   tTapeDelay_getLastIn   (tTapeDelay* const);
+    void    tTapeDelay_init             (tTapeDelay* const, Lfloat delay, uint32_t maxDelay, LEAF* const leaf);
+    void    tTapeDelay_initToPool       (tTapeDelay* const, Lfloat delay, uint32_t maxDelay, tMempool* const);
+    void    tTapeDelay_free             (tTapeDelay* const);
+
+    Lfloat  tTapeDelay_tick             (tTapeDelay const, Lfloat sample);
+
+    void    tTapeDelay_clear            (tTapeDelay const);
+    void    tTapeDelay_setDelay         (tTapeDelay const, Lfloat delay);
+    Lfloat  tTapeDelay_getDelay         (tTapeDelay const);
+    void    tTapeDelay_tapIn            (tTapeDelay const, Lfloat in, uint32_t tapDelay);
+    Lfloat  tTapeDelay_tapOut           (tTapeDelay const d, Lfloat tapDelay);
+    Lfloat  tTapeDelay_addTo            (tTapeDelay const, Lfloat value, uint32_t tapDelay);
+    void    tTapeDelay_incrementInPoint (tTapeDelay const dl);
+    Lfloat  tTapeDelay_getLastOut       (tTapeDelay const);
+    Lfloat  tTapeDelay_getLastIn        (tTapeDelay const);
     
     //==============================================================================
     
@@ -836,15 +842,15 @@ extern "C" {
     
     typedef _tRingBuffer* tRingBuffer;
     
-    void    tRingBuffer_init     (tRingBuffer* const ring, int size, LEAF* const leaf);
-    void    tRingBuffer_initToPool   (tRingBuffer* const ring, int size, tMempool* const mempool);
-    void    tRingBuffer_free     (tRingBuffer* const ring);
+    void    tRingBuffer_init       (tRingBuffer* const ring, int size, LEAF* const leaf);
+    void    tRingBuffer_initToPool (tRingBuffer* const ring, int size, tMempool* const mempool);
+    void    tRingBuffer_free       (tRingBuffer* const ring);
     
-    void    tRingBuffer_push     (tRingBuffer* const ring, Lfloat val);
-    Lfloat   tRingBuffer_getNewest    (tRingBuffer* const ring);
-    Lfloat   tRingBuffer_getOldest    (tRingBuffer* const ring);
-    Lfloat   tRingBuffer_get      (tRingBuffer* const ring, int index);
-    int     tRingBuffer_getSize  (tRingBuffer* const ring);
+    void    tRingBuffer_push       (tRingBuffer const ring, Lfloat val);
+    Lfloat  tRingBuffer_getNewest  (tRingBuffer const ring);
+    Lfloat  tRingBuffer_getOldest  (tRingBuffer const ring);
+    Lfloat  tRingBuffer_get        (tRingBuffer const ring, int index);
+    int     tRingBuffer_getSize    (tRingBuffer const ring);
     
 #ifdef __cplusplus
 }

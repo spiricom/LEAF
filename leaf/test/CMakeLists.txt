@@ -4,7 +4,7 @@ include(AddCatch2)
 add_executable(
         tests
         test.cpp
-        other_test.cpp
+        filters_test.cpp
         oscillators_test.cpp
         another_test.cpp
 )
