@@ -50,24 +50,20 @@ void    tDelay_initToPool   (tDelay* const dl, uint32_t delay, uint32_t maxDelay
 void tDelay_free (tDelay* const dl)
 {
     _tDelay* d = *dl;
-    
     mpool_free((char*)d->buff, d->mempool);
     mpool_free((char*)d, d->mempool);
 }
 
-void    tDelay_clear(tDelay* const dl)
+void    tDelay_clear(tDelay const d)
 {
-    _tDelay* d = *dl;
     for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
 }
 
-Lfloat   tDelay_tick (tDelay* const dl, Lfloat input)
+Lfloat   tDelay_tick (tDelay const d, Lfloat input)
 {
-    _tDelay* d = *dl;
-
     // Input
     d->lastIn = input;
     d->buff[d->inPoint] = input * d->gain;
@@ -80,10 +76,8 @@ Lfloat   tDelay_tick (tDelay* const dl, Lfloat input)
     return d->lastOut;
 }
 
-void     tDelay_setDelay (tDelay* const dl, uint32_t delay)
+void     tDelay_setDelay (tDelay const d, uint32_t delay)
 {
-    _tDelay* d = *dl;
-
     d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
 
     // read chases write
@@ -91,10 +85,8 @@ void     tDelay_setDelay (tDelay* const dl, uint32_t delay)
     else                        d->outPoint = d->maxDelay + d->inPoint - d->delay;
 }
 
-Lfloat tDelay_tapOut (tDelay* const dl, uint32_t tapDelay)
+Lfloat tDelay_tapOut (tDelay const d, uint32_t tapDelay)
 {
-    _tDelay* d = *dl;
-
     int32_t tap = d->inPoint - tapDelay - 1;
 
     // Check for wraparound.
@@ -104,10 +96,8 @@ Lfloat tDelay_tapOut (tDelay* const dl, uint32_t tapDelay)
 
 }
 
-void tDelay_tapIn (tDelay* const dl, Lfloat value, uint32_t tapDelay)
+void tDelay_tapIn (tDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tDelay* d = *dl;
-
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -116,10 +106,8 @@ void tDelay_tapIn (tDelay* const dl, Lfloat value, uint32_t tapDelay)
     d->buff[tap] = value;
 }
 
-Lfloat tDelay_addTo (tDelay* const dl, Lfloat value, uint32_t tapDelay)
+Lfloat tDelay_addTo (tDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tDelay* d = *dl;
-    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -128,34 +116,29 @@ Lfloat tDelay_addTo (tDelay* const dl, Lfloat value, uint32_t tapDelay)
     return (d->buff[tap] += value);
 }
 
-uint32_t   tDelay_getDelay (tDelay* const dl)
+uint32_t   tDelay_getDelay (tDelay const d)
 {
-    _tDelay* d = *dl;
     return d->delay;
 }
 
-Lfloat   tDelay_getLastOut (tDelay* const dl)
+Lfloat   tDelay_getLastOut (tDelay const d)
 {
-    _tDelay* d = *dl;
     return d->lastOut;
 }
 
-Lfloat   tDelay_getLastIn (tDelay* const dl)
+Lfloat   tDelay_getLastIn (tDelay const d)
 {
-    _tDelay* d = *dl;
     return d->lastIn;
 }
 
-void tDelay_setGain (tDelay* const dl, Lfloat gain)
+void tDelay_setGain (tDelay const d, Lfloat gain)
 {
-    _tDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-Lfloat tDelay_getGain (tDelay* const dl)
+Lfloat tDelay_getGain (tDelay const d)
 {
-    _tDelay* d = *dl;
     return d->gain;
 }
 
@@ -198,19 +181,16 @@ void tLinearDelay_free (tLinearDelay* const dl)
     mpool_free((char*)d, d->mempool);
 }
 
-void    tLinearDelay_clear(tLinearDelay* const dl)
+void    tLinearDelay_clear(tLinearDelay const d)
 {
-    _tLinearDelay* d = *dl;
     for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
 }
 
-Lfloat   tLinearDelay_tick (tLinearDelay* const dl, Lfloat input)
+Lfloat   tLinearDelay_tick (tLinearDelay const d, Lfloat input)
 {
-    _tLinearDelay* d = *dl;
-
     d->buff[d->inPoint] = input * d->gain;
 
     // Increment input pointer modulo length.
@@ -231,20 +211,16 @@ Lfloat   tLinearDelay_tick (tLinearDelay* const dl, Lfloat input)
     return d->lastOut;
 }
 
-void   tLinearDelay_tickIn (tLinearDelay* const dl, Lfloat input)
+void   tLinearDelay_tickIn (tLinearDelay const d, Lfloat input)
 {
-    _tLinearDelay* d = *dl;
-
     d->buff[d->inPoint] = input * d->gain;
 
     // Increment input pointer modulo length.
     if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
 }
 
-Lfloat   tLinearDelay_tickOut (tLinearDelay* const dl)
+Lfloat   tLinearDelay_tickOut (tLinearDelay const d)
 {
-    _tLinearDelay* d = *dl;
-
     uint32_t idx = (uint32_t) d->outPoint;
     // First 1/2 of interpolation
     d->lastOut = d->buff[idx] * d->omAlpha;
@@ -261,10 +237,8 @@ Lfloat   tLinearDelay_tickOut (tLinearDelay* const dl)
     return d->lastOut;
 }
 
-void     tLinearDelay_setDelay (tLinearDelay* const dl, Lfloat delay)
+void     tLinearDelay_setDelay (tLinearDelay const d, Lfloat delay)
 {
-    _tLinearDelay* d = *dl;
-
     d->delay = LEAF_clip(2.0f, delay,  d->maxDelay);
 
     Lfloat outPointer = d->inPoint - d->delay;
@@ -280,10 +254,8 @@ void     tLinearDelay_setDelay (tLinearDelay* const dl, Lfloat delay)
     if ( d->outPoint == d->maxDelay ) d->outPoint = 0;
 }
 
-Lfloat tLinearDelay_tapOut (tLinearDelay* const dl, uint32_t tapDelay)
+Lfloat tLinearDelay_tapOut (tLinearDelay const d, uint32_t tapDelay)
 {
-    _tLinearDelay* d = *dl;
-
     int32_t tap = d->inPoint - tapDelay - 1;
     // Check for wraparound.
     while ( tap < 0 )   tap += d->maxDelay;
@@ -291,10 +263,8 @@ Lfloat tLinearDelay_tapOut (tLinearDelay* const dl, uint32_t tapDelay)
     return d->buff[tap];
 }
 
-Lfloat tLinearDelay_tapOutInterpolated (tLinearDelay* const dl, Lfloat tapDelay)
+Lfloat tLinearDelay_tapOutInterpolated (tLinearDelay const d, Lfloat tapDelay)
 {
-    _tLinearDelay* d = *dl;
-   
     Lfloat tap = (float)d->inPoint - tapDelay - 1.0f;
     while ( tap < 0.0f )   tap += d->maxDelay;
     uint32_t tapInt = (uint32_t)tap;
@@ -314,10 +284,8 @@ Lfloat tLinearDelay_tapOutInterpolated (tLinearDelay* const dl, Lfloat tapDelay)
     return tapOut;
 }
 
-void tLinearDelay_tapIn (tLinearDelay* const dl, Lfloat value, uint32_t tapDelay)
+void tLinearDelay_tapIn (tLinearDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tLinearDelay* d = *dl;
-
     int32_t tap = d->inPoint - tapDelay - 1;
 
     // Check for wraparound.
@@ -326,10 +294,8 @@ void tLinearDelay_tapIn (tLinearDelay* const dl, Lfloat value, uint32_t tapDelay
     d->buff[tap] = value;
 }
 
-Lfloat tLinearDelay_addTo (tLinearDelay* const dl, Lfloat value, uint32_t tapDelay)
+Lfloat tLinearDelay_addTo (tLinearDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tLinearDelay* d = *dl;
-
     int32_t tap = d->inPoint - tapDelay - 1;
 
     // Check for wraparound.
@@ -338,34 +304,29 @@ Lfloat tLinearDelay_addTo (tLinearDelay* const dl, Lfloat value, uint32_t tapDel
     return (d->buff[tap] += value);
 }
 
-Lfloat   tLinearDelay_getDelay (tLinearDelay* const dl)
+Lfloat   tLinearDelay_getDelay (tLinearDelay const d)
 {
-    _tLinearDelay* d = *dl;
     return d->delay;
 }
 
-Lfloat   tLinearDelay_getLastOut (tLinearDelay* const dl)
+Lfloat   tLinearDelay_getLastOut (tLinearDelay const d)
 {
-    _tLinearDelay* d = *dl;
     return d->lastOut;
 }
 
-Lfloat   tLinearDelay_getLastIn (tLinearDelay* const dl)
+Lfloat   tLinearDelay_getLastIn (tLinearDelay const d)
 {
-    _tLinearDelay* d = *dl;
     return d->lastIn;
 }
 
-void tLinearDelay_setGain (tLinearDelay* const dl, Lfloat gain)
+void tLinearDelay_setGain (tLinearDelay const d, Lfloat gain)
 {
-    _tLinearDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-Lfloat tLinearDelay_getGain (tLinearDelay* const dl)
+Lfloat tLinearDelay_getGain (tLinearDelay const d)
 {
-    _tLinearDelay* d = *dl;
     return d->gain;
 }
 
@@ -430,19 +391,16 @@ void tHermiteDelay_free (tHermiteDelay* const dl)
 }
 
 
-void    tHermiteDelay_clear(tHermiteDelay* const dl)
+void    tHermiteDelay_clear(tHermiteDelay const d)
 {
-    _tHermiteDelay* d = *dl;
     for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
 }
 
-Lfloat   tHermiteDelay_tick (tHermiteDelay* const dl, Lfloat input)
+Lfloat   tHermiteDelay_tick (tHermiteDelay const d, Lfloat input)
 {
-    _tHermiteDelay* d = *dl;
-
     d->buff[d->inPoint] = input * d->gain;
 
     
@@ -463,20 +421,16 @@ Lfloat   tHermiteDelay_tick (tHermiteDelay* const dl, Lfloat input)
     return d->lastOut;
 }
 
-void   tHermiteDelay_tickIn (tHermiteDelay* const dl, Lfloat input)
+void   tHermiteDelay_tickIn (tHermiteDelay const d, Lfloat input)
 {
-    _tHermiteDelay* d = *dl;
-    
     d->buff[d->inPoint] = input;
     
     // Increment input pointer modulo length.
     d->inPoint = (d->inPoint + 1) & d->bufferMask;
 }
 
-Lfloat   tHermiteDelay_tickOut (tHermiteDelay* const dl)
+Lfloat   tHermiteDelay_tickOut (tHermiteDelay const d)
 {
-    _tHermiteDelay* d = *dl;
-    
     uint32_t idx = (uint32_t) d->outPoint;
     
     
@@ -493,9 +447,8 @@ Lfloat   tHermiteDelay_tickOut (tHermiteDelay* const dl)
     return d->lastOut;
 }
 
-void tHermiteDelay_setDelay (tHermiteDelay* const dl, Lfloat delay)
+void tHermiteDelay_setDelay (tHermiteDelay const d, Lfloat delay)
 {
-    _tHermiteDelay* d = *dl;
     //d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
     d->delay = delay; // not safe but faster
     Lfloat outPointer = d->inPoint - d->delay;
@@ -510,20 +463,15 @@ void tHermiteDelay_setDelay (tHermiteDelay* const dl, Lfloat delay)
     d->outPoint &= d->bufferMask;
 }
 
-Lfloat tHermiteDelay_tapOut (tHermiteDelay* const dl, uint32_t tapDelay)
+Lfloat tHermiteDelay_tapOut (tHermiteDelay const d, uint32_t tapDelay)
 {
-    _tHermiteDelay* d = *dl;
-    
     int32_t tap = (d->inPoint - tapDelay - 1) & d->bufferMask;
     
     return d->buff[tap];
-
 }
 
-Lfloat   tHermiteDelay_tapOutInterpolated (tHermiteDelay* const dl, uint32_t tapDelay, Lfloat alpha)
+Lfloat   tHermiteDelay_tapOutInterpolated (tHermiteDelay const d, uint32_t tapDelay, Lfloat alpha)
 {
-    _tHermiteDelay* d = *dl;
-    
     int32_t idx = (d->inPoint - tapDelay - 1) & d->bufferMask;
     
     return    LEAF_interpolate_hermite_x (d->buff[((idx - 1) + d->maxDelay) & d->bufferMask],
@@ -533,55 +481,45 @@ Lfloat   tHermiteDelay_tapOutInterpolated (tHermiteDelay* const dl, uint32_t tap
                                           alpha);
 }
 
-void tHermiteDelay_tapIn (tHermiteDelay* const dl, Lfloat value, uint32_t tapDelay)
+void tHermiteDelay_tapIn (tHermiteDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tHermiteDelay* d = *dl;
-    
     int32_t tap = (d->inPoint - tapDelay - 1)  & d->bufferMask;
     
     d->buff[tap] = value;
 }
 
-Lfloat tHermiteDelay_addTo (tHermiteDelay* const dl, Lfloat value, uint32_t tapDelay)
+Lfloat tHermiteDelay_addTo (tHermiteDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tHermiteDelay* d = *dl;
-    
     int32_t tap = (d->inPoint - tapDelay - 1)  & d->bufferMask;
     
     return (d->buff[tap] += value);
 }
 
-Lfloat   tHermiteDelay_getDelay (tHermiteDelay* const dl)
+Lfloat   tHermiteDelay_getDelay (tHermiteDelay const d)
 {
-    _tHermiteDelay* d = *dl;
     return d->delay;
 }
 
-Lfloat   tHermiteDelay_getLastOut (tHermiteDelay* const dl)
+Lfloat   tHermiteDelay_getLastOut (tHermiteDelay const d)
 {
-    _tHermiteDelay* d = *dl;
     return d->lastOut;
 }
 
-Lfloat   tHermiteDelay_getLastIn (tHermiteDelay* const dl)
+Lfloat   tHermiteDelay_getLastIn (tHermiteDelay const d)
 {
-    _tHermiteDelay* d = *dl;
     return d->lastIn;
 }
 
-void tHermiteDelay_setGain (tHermiteDelay* const dl, Lfloat gain)
+void tHermiteDelay_setGain (tHermiteDelay const d, Lfloat gain)
 {
-    _tHermiteDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-Lfloat tHermiteDelay_getGain (tHermiteDelay* const dl)
+Lfloat tHermiteDelay_getGain (tHermiteDelay const d)
 {
-    _tHermiteDelay* d = *dl;
     return d->gain;
 }
-
 
 
 /// Lagrange Interpolated Delay
@@ -643,19 +581,16 @@ void tLagrangeDelay_free (tLagrangeDelay* const dl)
 }
 
 
-void    tLagrangeDelay_clear(tLagrangeDelay* const dl)
+void    tLagrangeDelay_clear(tLagrangeDelay const d)
 {
-	_tLagrangeDelay* d = *dl;
     for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0.0f;
     }
 }
 
-Lfloat   tLagrangeDelay_tick (tLagrangeDelay* const dl, Lfloat input)
+Lfloat   tLagrangeDelay_tick (tLagrangeDelay const d, Lfloat input)
 {
-	_tLagrangeDelay* d = *dl;
-
     d->buff[d->inPoint] = input;
 
 
@@ -678,20 +613,16 @@ Lfloat   tLagrangeDelay_tick (tLagrangeDelay* const dl, Lfloat input)
     return d->lastOut;
 }
 
-void   tLagrangeDelay_tickIn (tLagrangeDelay* const dl, Lfloat input)
+void   tLagrangeDelay_tickIn (tLagrangeDelay const d, Lfloat input)
 {
-	_tLagrangeDelay* d = *dl;
-
     d->buff[d->inPoint] = input;
 
     // Increment input pointer modulo length.
     d->inPoint = (d->inPoint + 1) & d->bufferMask;
 }
 
-Lfloat   tLagrangeDelay_tickOut (tLagrangeDelay* const dl)
+Lfloat   tLagrangeDelay_tickOut (tLagrangeDelay const d)
 {
-	_tLagrangeDelay* d = *dl;
-
     uint32_t idx = (uint32_t) d->outPoint;
 
    uint32_t previdx =  ((idx - 1) + d->maxDelay) & d->bufferMask;
@@ -708,9 +639,8 @@ Lfloat   tLagrangeDelay_tickOut (tLagrangeDelay* const dl)
     return d->lastOut;
 }
 
-void tLagrangeDelay_setDelay (tLagrangeDelay* const dl, Lfloat delay)
+void tLagrangeDelay_setDelay (tLagrangeDelay const d, Lfloat delay)
 {
-	_tLagrangeDelay* d = *dl;
     //d->delay = LEAF_clip(0.0f, delay,  d->maxDelay);
     d->delay = delay; // not safe but faster
     Lfloat outPointer = d->inPoint - d->delay - 1.0f; // minus 1 because interpolation needs value from 1->2 so lagrange interp will add the 1 back
@@ -738,20 +668,16 @@ void tLagrangeDelay_setDelay (tLagrangeDelay* const dl, Lfloat delay)
     d->outPoint &= d->bufferMask;
 }
 
-Lfloat tLagrangeDelay_tapOut (tLagrangeDelay* const dl, uint32_t tapDelay)
+Lfloat tLagrangeDelay_tapOut (tLagrangeDelay const d, uint32_t tapDelay)
 {
-	_tLagrangeDelay* d = *dl;
-
     uint32_t tap = (d->inPoint - tapDelay - 1) & d->bufferMask;
 
     return d->buff[tap];
 
 }
 
-Lfloat   tLagrangeDelay_tapOutInterpolated (tLagrangeDelay* const dl, uint32_t tapDelay, Lfloat alpha)
+Lfloat   tLagrangeDelay_tapOutInterpolated (tLagrangeDelay const d, uint32_t tapDelay, Lfloat alpha)
 {
-	_tLagrangeDelay* d = *dl;
-
     uint32_t idx = ((d->inPoint - tapDelay - 2)) & d->bufferMask;
 
     alpha = 1.0f - alpha;
@@ -775,46 +701,38 @@ Lfloat   tLagrangeDelay_tapOutInterpolated (tLagrangeDelay* const dl, uint32_t t
 
 }
 
-void tLagrangeDelay_tapIn (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay)
+void tLagrangeDelay_tapIn (tLagrangeDelay const d, Lfloat value, uint32_t tapDelay)
 {
-	_tLagrangeDelay* d = *dl;
-
     int32_t tap = (d->inPoint - tapDelay - 1)  & d->bufferMask;
 
     d->buff[tap] = value;
 }
 
-Lfloat tLagrangeDelay_addTo (tLagrangeDelay* const dl, Lfloat value, uint32_t tapDelay)
+Lfloat tLagrangeDelay_addTo (tLagrangeDelay const d, Lfloat value, uint32_t tapDelay)
 {
-	_tLagrangeDelay* d = *dl;
-
     int32_t tap = (d->inPoint - tapDelay - 1)  & d->bufferMask;
 
     return (d->buff[tap] += value);
 }
 
-Lfloat   tLagrangeDelay_getDelay (tLagrangeDelay* const dl)
+Lfloat   tLagrangeDelay_getDelay (tLagrangeDelay const d)
 {
-	_tLagrangeDelay* d = *dl;
     return d->delay;
 }
 
 
-Lfloat   tLagrangeDelay_getMaxDelay (tLagrangeDelay* const dl)
+Lfloat   tLagrangeDelay_getMaxDelay (tLagrangeDelay const d)
 {
-	_tLagrangeDelay* d = *dl;
     return d->maxDelay;
 }
 
-Lfloat   tLagrangeDelay_getLastOut (tLagrangeDelay* const dl)
+Lfloat   tLagrangeDelay_getLastOut (tLagrangeDelay const d)
 {
-	_tLagrangeDelay* d = *dl;
     return d->lastOut;
 }
 
-Lfloat   tLagrangeDelay_getLastIn (tLagrangeDelay* const dl)
+Lfloat   tLagrangeDelay_getLastIn (tLagrangeDelay const d)
 {
-	_tLagrangeDelay* d = *dl;
     return d->lastIn;
 }
 
@@ -863,19 +781,16 @@ void tAllpassDelay_free (tAllpassDelay* const dl)
     mpool_free((char*)d, d->mempool);
 }
 
-void tAllpassDelay_clear(tAllpassDelay* const dl)
+void tAllpassDelay_clear(tAllpassDelay const d)
 {
-    _tAllpassDelay* d = *dl;
     for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
     }
 }
 
-Lfloat tAllpassDelay_tick (tAllpassDelay* const dl, Lfloat input)
+Lfloat tAllpassDelay_tick (tAllpassDelay const d, Lfloat input)
 {
-    _tAllpassDelay* d = *dl;
-
     d->buff[d->inPoint] = input * d->gain;
 
     // Increment input pointer modulo length.
@@ -895,10 +810,8 @@ Lfloat tAllpassDelay_tick (tAllpassDelay* const dl, Lfloat input)
     return d->lastOut;
 }
 
-void     tAllpassDelay_setDelay (tAllpassDelay* const dl, Lfloat delay)
+void     tAllpassDelay_setDelay (tAllpassDelay const d, Lfloat delay)
 {
-    _tAllpassDelay* d = *dl;
-
     d->delay = LEAF_clip(0.5f, delay,  d->maxDelay);
 
     // outPoint chases inPoint
@@ -927,10 +840,8 @@ void     tAllpassDelay_setDelay (tAllpassDelay* const dl, Lfloat delay)
     d->coeff = (1.0f - d->alpha) / (1.0f + d->alpha);  // coefficient for allpass
 }
 
-Lfloat tAllpassDelay_tapOut (tAllpassDelay* const dl, uint32_t tapDelay)
+Lfloat tAllpassDelay_tapOut (tAllpassDelay const d, uint32_t tapDelay)
 {
-    _tAllpassDelay* d = *dl;
-
     int32_t tap = d->inPoint - tapDelay - 1;
 
     // Check for wraparound.
@@ -940,10 +851,8 @@ Lfloat tAllpassDelay_tapOut (tAllpassDelay* const dl, uint32_t tapDelay)
 
 }
 
-void tAllpassDelay_tapIn (tAllpassDelay* const dl, Lfloat value, uint32_t tapDelay)
+void tAllpassDelay_tapIn (tAllpassDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tAllpassDelay* d = *dl;
-
     int32_t tap = d->inPoint - tapDelay - 1;
 
     // Check for wraparound.
@@ -952,10 +861,8 @@ void tAllpassDelay_tapIn (tAllpassDelay* const dl, Lfloat value, uint32_t tapDel
     d->buff[tap] = value;
 }
 
-Lfloat tAllpassDelay_addTo (tAllpassDelay* const dl, Lfloat value, uint32_t tapDelay)
+Lfloat tAllpassDelay_addTo (tAllpassDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tAllpassDelay* d = *dl;
-
     int32_t tap = d->inPoint - tapDelay - 1;
 
     // Check for wraparound.
@@ -964,34 +871,29 @@ Lfloat tAllpassDelay_addTo (tAllpassDelay* const dl, Lfloat value, uint32_t tapD
     return (d->buff[tap] += value);
 }
 
-Lfloat   tAllpassDelay_getDelay (tAllpassDelay* const dl)
+Lfloat   tAllpassDelay_getDelay (tAllpassDelay const d)
 {
-    _tAllpassDelay* d = *dl;
     return d->delay;
 }
 
-Lfloat   tAllpassDelay_getLastOut (tAllpassDelay* const dl)
+Lfloat   tAllpassDelay_getLastOut (tAllpassDelay const d)
 {
-    _tAllpassDelay* d = *dl;
     return d->lastOut;
 }
 
-Lfloat   tAllpassDelay_getLastIn (tAllpassDelay* const dl)
+Lfloat   tAllpassDelay_getLastIn (tAllpassDelay const d)
 {
-    _tAllpassDelay* d = *dl;
     return d->lastIn;
 }
 
-void tAllpassDelay_setGain (tAllpassDelay* const dl, Lfloat gain)
+void tAllpassDelay_setGain (tAllpassDelay const d, Lfloat gain)
 {
-    _tAllpassDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-Lfloat tAllpassDelay_getGain (tAllpassDelay* const dl)
+Lfloat tAllpassDelay_getGain (tAllpassDelay const d)
 {
-    _tAllpassDelay* d = *dl;
     return d->gain;
 }
 
@@ -1031,9 +933,8 @@ void tTapeDelay_free (tTapeDelay* const dl)
     mpool_free((char*)d, d->mempool);
 }
 
-void tTapeDelay_clear(tTapeDelay* const dl)
+void tTapeDelay_clear(tTapeDelay const d)
 {
-    _tTapeDelay* d = *dl;
     for (unsigned i = 0; i < d->maxDelay; i++)
     {
         d->buff[i] = 0;
@@ -1042,10 +943,8 @@ void tTapeDelay_clear(tTapeDelay* const dl)
 
 //#define SMOOTH_FACTOR 10.f
 
-Lfloat   tTapeDelay_tick (tTapeDelay* const dl, Lfloat input)
+Lfloat   tTapeDelay_tick (tTapeDelay const d, Lfloat input)
 {
-    _tTapeDelay* d = *dl;
-
     d->buff[d->inPoint] = input * d->gain;
 
     // Increment input pointer modulo length.
@@ -1074,30 +973,25 @@ Lfloat   tTapeDelay_tick (tTapeDelay* const dl, Lfloat input)
     return 0.0f;
 }
 
-void  tTapeDelay_incrementInPoint(tTapeDelay* const dl)
+void  tTapeDelay_incrementInPoint(tTapeDelay const d)
 {
-    _tTapeDelay* d = *dl;
     // Increment input pointer modulo length.
     if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
 }
 
 
-void tTapeDelay_setRate(tTapeDelay* const dl, Lfloat rate)
+void tTapeDelay_setRate(tTapeDelay const d, Lfloat rate)
 {
-    _tTapeDelay* d = *dl;
     d->inc = rate;
 }
 
-void     tTapeDelay_setDelay (tTapeDelay* const dl, Lfloat delay)
+void     tTapeDelay_setDelay (tTapeDelay const d, Lfloat delay)
 {
-    _tTapeDelay* d = *dl;
     d->delay = LEAF_clip(1.f, delay,  d->maxDelay);
 }
 
-Lfloat tTapeDelay_tapOut (tTapeDelay* const dl, Lfloat tapDelay)
+Lfloat tTapeDelay_tapOut (tTapeDelay const d, Lfloat tapDelay)
 {
-    _tTapeDelay* d = *dl;
-
     Lfloat tap = (Lfloat) d->inPoint - tapDelay - 1.f;
 
     // Check for wraparound.
@@ -1117,10 +1011,8 @@ Lfloat tTapeDelay_tapOut (tTapeDelay* const dl, Lfloat tapDelay)
 
 }
 
-void tTapeDelay_tapIn (tTapeDelay* const dl, Lfloat value, uint32_t tapDelay)
+void tTapeDelay_tapIn (tTapeDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tTapeDelay* d = *dl;
-
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -1129,10 +1021,8 @@ void tTapeDelay_tapIn (tTapeDelay* const dl, Lfloat value, uint32_t tapDelay)
     d->buff[tap] = value;
 }
 
-Lfloat tTapeDelay_addTo (tTapeDelay* const dl, Lfloat value, uint32_t tapDelay)
+Lfloat tTapeDelay_addTo (tTapeDelay const d, Lfloat value, uint32_t tapDelay)
 {
-    _tTapeDelay* d = *dl;
-    
     int32_t tap = d->inPoint - tapDelay - 1;
     
     // Check for wraparound.
@@ -1141,34 +1031,29 @@ Lfloat tTapeDelay_addTo (tTapeDelay* const dl, Lfloat value, uint32_t tapDelay)
     return (d->buff[tap] += value);
 }
 
-Lfloat   tTapeDelay_getDelay (tTapeDelay *dl)
+Lfloat   tTapeDelay_getDelay (tTapeDelay d)
 {
-    _tTapeDelay* d = *dl;
     return d->delay;
 }
 
-Lfloat   tTapeDelay_getLastOut (tTapeDelay* const dl)
+Lfloat   tTapeDelay_getLastOut (tTapeDelay const d)
 {
-    _tTapeDelay* d = *dl;
     return d->lastOut;
 }
 
-Lfloat   tTapeDelay_getLastIn (tTapeDelay* const dl)
+Lfloat   tTapeDelay_getLastIn (tTapeDelay const d)
 {
-    _tTapeDelay* d = *dl;
     return d->lastIn;
 }
 
-void tTapeDelay_setGain (tTapeDelay* const dl, Lfloat gain)
+void tTapeDelay_setGain (tTapeDelay const d, Lfloat gain)
 {
-    _tTapeDelay* d = *dl;
     if (gain < 0.0f)    d->gain = 0.0f;
     else                d->gain = gain;
 }
 
-Lfloat tTapeDelay_getGain (tTapeDelay* const dl)
+Lfloat tTapeDelay_getGain (tTapeDelay const d)
 {
-    _tTapeDelay* d = *dl;
     return d->gain;
 }
 
@@ -1203,39 +1088,29 @@ void    tRingBuffer_free     (tRingBuffer* const ring)
     mpool_free((char*) r, r->mempool);
 }
 
-void   tRingBuffer_push     (tRingBuffer* const ring, Lfloat val)
+void   tRingBuffer_push     (tRingBuffer const r, Lfloat val)
 {
-    _tRingBuffer* r = *ring;
-    
     --r->pos;
     r->pos &= r->mask;
     r->buffer[r->pos] = val;
 }
 
-Lfloat   tRingBuffer_getNewest    (tRingBuffer* const ring)
+Lfloat   tRingBuffer_getNewest    (tRingBuffer const r)
 {
-    _tRingBuffer* r = *ring;
-    
     return r->buffer[r->pos];
 }
 
-Lfloat   tRingBuffer_getOldest    (tRingBuffer* const ring)
+Lfloat   tRingBuffer_getOldest    (tRingBuffer const r)
 {
-    _tRingBuffer* r = *ring;
-    
     return r->buffer[(r->pos + r->size - 1) & r->mask];
 }
 
-Lfloat   tRingBuffer_get      (tRingBuffer* const ring, int index)
+Lfloat   tRingBuffer_get      (tRingBuffer const r, int index)
 {
-    _tRingBuffer* r = *ring;
-    
     return r->buffer[(r->pos + index) & r->mask];
 }
 
-int     tRingBuffer_getSize  (tRingBuffer* const ring)
+int     tRingBuffer_getSize  (tRingBuffer const r)
 {
-    _tRingBuffer* r = *ring;
-    
     return r->size;
 }

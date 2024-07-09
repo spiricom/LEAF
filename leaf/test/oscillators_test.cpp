@@ -3,7 +3,7 @@
 #include "../leaf.h"
 #include "../Inc/leaf-math.h"
 
-float myrand() {return (float)rand()/RAND_MAX;}
+static float myrand() {return (float)rand()/RAND_MAX;}
 
 TEST_CASE("Tests for `tCycle` object", "[tCycle]") {
 

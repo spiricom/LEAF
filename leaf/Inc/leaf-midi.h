@@ -123,16 +123,16 @@ extern "C" {
     void    tStack_initToPool           (tStack* const stack, tMempool* const pool);
     void    tStack_free                 (tStack* const stack);
     
-    void    tStack_setCapacity          (tStack* const stack, uint16_t cap);
-    int     tStack_addIfNotAlreadyThere (tStack* const stack, uint16_t item);
-    void    tStack_add                  (tStack* const stack, uint16_t item);
-    int     tStack_remove               (tStack* const stack, uint16_t item);
-    void    tStack_clear                (tStack* const stack);
-    int     tStack_first                (tStack* const stack);
-    int     tStack_getSize              (tStack* const stack);
-    int     tStack_contains             (tStack* const stack, uint16_t item);
-    int     tStack_next                 (tStack* const stack);
-    int     tStack_get                  (tStack* const stack, int index);
+    void    tStack_setCapacity          (tStack const stack, uint16_t cap);
+    int     tStack_addIfNotAlreadyThere (tStack const stack, uint16_t item);
+    void    tStack_add                  (tStack const stack, uint16_t item);
+    int     tStack_remove               (tStack const stack, uint16_t item);
+    void    tStack_clear                (tStack const stack);
+    int     tStack_first                (tStack const stack);
+    int     tStack_getSize              (tStack const stack);
+    int     tStack_contains             (tStack const stack, uint16_t item);
+    int     tStack_next                 (tStack const stack);
+    int     tStack_get                  (tStack const stack, int index);
     
     /*! @} 
      @defgroup tpoly tPoly
@@ -290,26 +290,27 @@ extern "C" {
     void    tPoly_init                  (tPoly* const poly, int maxNumVoices, LEAF* const leaf);
     void    tPoly_initToPool            (tPoly* const poly, int maxNumVoices, tMempool* const pool);
     void    tPoly_free                  (tPoly* const poly);
-    
-    int     tPoly_noteOn                (tPoly* const poly, int note, uint8_t vel);
-    int     tPoly_noteOff               (tPoly* const poly, uint8_t note);
-    void    tPoly_orderedAddToStack     (tPoly* const poly, uint8_t note);
-    void    tPoly_setNumVoices          (tPoly* const poly, uint8_t numVoices);
-    void    tPoly_setPitchGlideActive   (tPoly* const poly, int isActive);
-    void    tPoly_setPitchGlideTime     (tPoly* const poly, Lfloat t);
-    void    tPoly_setPitchBend          (tPoly* const poly, Lfloat pitchBend);
-    void 	tPoly_setBendGlideTime		(tPoly* const poly, Lfloat t);
-    void 	tPoly_setBendSamplesPerTick	(tPoly* const poly, Lfloat t);
-    void    tPoly_tickPitch             (tPoly* const poly);
-    void    tPoly_tickPitchGlide        (tPoly* const poly);
-    void    tPoly_tickPitchBend         (tPoly* const poly);
-    int     tPoly_getNumVoices          (tPoly* const poly);
-    int     tPoly_getNumActiveVoices    (tPoly* const poly);
-    Lfloat   tPoly_getPitch              (tPoly* const poly, uint8_t voice);
-    int     tPoly_getKey                (tPoly* const poly, uint8_t voice);
-    int     tPoly_getVelocity           (tPoly* const poly, uint8_t voice);
-    int     tPoly_isOn                  (tPoly* const poly, uint8_t voice);
-    void    tPoly_setSampleRate         (tPoly* const poly, Lfloat sr);
+
+    void    tPoly_tickPitch             (tPoly const poly);
+    void    tPoly_tickPitchGlide        (tPoly const poly);
+    void    tPoly_tickPitchBend         (tPoly const poly);
+
+    int     tPoly_noteOn                (tPoly const poly, int note, uint8_t vel);
+    int     tPoly_noteOff               (tPoly const poly, uint8_t note);
+    void    tPoly_orderedAddToStack     (tPoly const poly, uint8_t note);
+    void    tPoly_setNumVoices          (tPoly const poly, uint8_t numVoices);
+    void    tPoly_setPitchGlideActive   (tPoly const poly, int isActive);
+    void    tPoly_setPitchGlideTime     (tPoly const poly, Lfloat t);
+    void    tPoly_setPitchBend          (tPoly const poly, Lfloat pitchBend);
+    void 	tPoly_setBendGlideTime		(tPoly const poly, Lfloat t);
+    void 	tPoly_setBendSamplesPerTick	(tPoly const poly, Lfloat t);
+    int     tPoly_getNumVoices          (tPoly const poly);
+    int     tPoly_getNumActiveVoices    (tPoly const poly);
+    Lfloat  tPoly_getPitch              (tPoly const poly, uint8_t voice);
+    int     tPoly_getKey                (tPoly const poly, uint8_t voice);
+    int     tPoly_getVelocity           (tPoly const poly, uint8_t voice);
+    int     tPoly_isOn                  (tPoly const poly, uint8_t voice);
+    void    tPoly_setSampleRate         (tPoly const poly, Lfloat sr);
     
     //==============================================================================
 
@@ -413,22 +414,22 @@ extern "C" {
 
     typedef _tSimplePoly* tSimplePoly;
 
-    void    tSimplePoly_init                  (tSimplePoly* const poly, int maxNumVoices, LEAF* const leaf);
-    void    tSimplePoly_initToPool            (tSimplePoly* const poly, int maxNumVoices, tMempool* const pool);
-    void    tSimplePoly_free                  (tSimplePoly* const poly);
+    void    tSimplePoly_init                    (tSimplePoly* const poly, int maxNumVoices, LEAF* const leaf);
+    void    tSimplePoly_initToPool              (tSimplePoly* const poly, int maxNumVoices, tMempool* const pool);
+    void    tSimplePoly_free                    (tSimplePoly* const poly);
     
-    int     tSimplePoly_noteOn                (tSimplePoly* const poly, int note, uint8_t vel);
-    int     tSimplePoly_noteOff               (tSimplePoly* const poly, uint8_t note);
-    void    tSimplePoly_deactivateVoice         (tSimplePoly* const polyh, uint8_t voice);
-    int     tSimplePoly_markPendingNoteOff      (tSimplePoly* const polyh, uint8_t note);
-    int     tSimplePoly_findVoiceAssignedToNote (tSimplePoly* const polyh, uint8_t note);
-    void    tSimplePoly_setNumVoices          (tSimplePoly* const poly, uint8_t numVoices);
-    int     tSimplePoly_getNumVoices          (tSimplePoly* const poly);
-    int     tSimplePoly_getNumActiveVoices    (tSimplePoly* const poly);
-    int     tSimplePoly_getPitch              (tSimplePoly* const poly, uint8_t voice);
-    int     tSimplePoly_getPitchAndCheckActive(tSimplePoly* const polyh, uint8_t voice);
-    int     tSimplePoly_getVelocity           (tSimplePoly* const poly, uint8_t voice);
-    int     tSimplePoly_isOn                  (tSimplePoly* const poly, uint8_t voice);
+    int     tSimplePoly_noteOn                  (tSimplePoly const poly, int note, uint8_t vel);
+    int     tSimplePoly_noteOff                 (tSimplePoly const poly, uint8_t note);
+    void    tSimplePoly_deactivateVoice         (tSimplePoly const polyh, uint8_t voice);
+    int     tSimplePoly_markPendingNoteOff      (tSimplePoly const polyh, uint8_t note);
+    int     tSimplePoly_findVoiceAssignedToNote (tSimplePoly const polyh, uint8_t note);
+    void    tSimplePoly_setNumVoices            (tSimplePoly const poly, uint8_t numVoices);
+    int     tSimplePoly_getNumVoices            (tSimplePoly const poly);
+    int     tSimplePoly_getNumActiveVoices      (tSimplePoly const poly);
+    int     tSimplePoly_getPitch                (tSimplePoly const poly, uint8_t voice);
+    int     tSimplePoly_getPitchAndCheckActive  (tSimplePoly const polyh, uint8_t voice);
+    int     tSimplePoly_getVelocity             (tSimplePoly const poly, uint8_t voice);
+    int     tSimplePoly_isOn                    (tSimplePoly const poly, uint8_t voice);
 
     //==============================================================================
     

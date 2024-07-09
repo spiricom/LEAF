@@ -54,10 +54,8 @@ void  tBuffer_free (tBuffer* const sb)
     mpool_free((char*)s, s->mempool);
 }
 
-void tBuffer_tick (tBuffer* const sb, Lfloat sample)
+void tBuffer_tick (tBuffer const s, Lfloat sample)
 {
-    _tBuffer* s = *sb;
-    
     if (s->active == 1)
     {
         s->buff[s->idx] = sample;
@@ -68,7 +66,7 @@ void tBuffer_tick (tBuffer* const sb, Lfloat sample)
         {
             if (s->mode == RecordOneShot)
             {
-                tBuffer_stop(sb);
+                tBuffer_stop(s);
             }
             else if (s->mode == RecordLoop)
             {
@@ -79,9 +77,8 @@ void tBuffer_tick (tBuffer* const sb, Lfloat sample)
     }
 }
 
-void  tBuffer_read(tBuffer* const sb, Lfloat* buff, uint32_t len)
+void  tBuffer_read(tBuffer const s, Lfloat* buff, uint32_t len)
 {
-    _tBuffer* s = *sb;
     for (unsigned i = 0; i < s->bufferLength; i++)
     {
         if (i < len)    s->buff[i] = buff[i];
@@ -90,47 +87,40 @@ void  tBuffer_read(tBuffer* const sb, Lfloat* buff, uint32_t len)
     s->recordedLength = len;
 }
 
-Lfloat tBuffer_get (tBuffer* const sb, int idx)
+Lfloat tBuffer_get (tBuffer const s, int idx)
 {
-    _tBuffer* s = *sb;
     if ((idx < 0) || (idx >= (int) s->bufferLength)) return 0.f;
     return s->buff[idx];
 }
 
-void  tBuffer_record(tBuffer* const sb)
+void  tBuffer_record(tBuffer const s)
 {
-    _tBuffer* s = *sb;
     s->active = 1;
     s->idx = 0;
 }
 
-void  tBuffer_stop(tBuffer* const sb)
+void  tBuffer_stop(tBuffer const s)
 {
-    _tBuffer* s = *sb;
     s->active = 0;
 }
 
-int   tBuffer_getRecordPosition(tBuffer* const sb)
+int   tBuffer_getRecordPosition(tBuffer const s)
 {
-    _tBuffer* s = *sb;
     return s->idx;
 }
 
-void   tBuffer_setRecordPosition(tBuffer* const sb, int pos)
+void   tBuffer_setRecordPosition(tBuffer const s, int pos)
 {
-    _tBuffer* s = *sb;
     s->idx = pos;
 }
 
-void  tBuffer_setRecordMode (tBuffer* const sb, RecordMode mode)
+void  tBuffer_setRecordMode (tBuffer const s, RecordMode mode)
 {
-    _tBuffer* s = *sb;
     s->mode = mode;
 }
 
-void  tBuffer_clear (tBuffer* const sb)
+void  tBuffer_clear (tBuffer const s)
 {
-    _tBuffer* s = *sb;
     for (unsigned i = 0; i < s->bufferLength; i++)
     {
         s->buff[i] = 0.f;
@@ -138,10 +128,8 @@ void  tBuffer_clear (tBuffer* const sb)
 
 }
 
-void tBuffer_setBuffer(tBuffer* const sb, Lfloat* externalBuffer, int length, int channels, int sampleRate)
+void tBuffer_setBuffer(tBuffer const s, Lfloat* externalBuffer, int length, int channels, int sampleRate)
 {
-    _tBuffer* s = *sb;
-
     s->buff = externalBuffer;
     s->channels = channels;
     s->sampleRate = sampleRate;
@@ -149,35 +137,30 @@ void tBuffer_setBuffer(tBuffer* const sb, Lfloat* externalBuffer, int length, in
     s->bufferLength = s->recordedLength;
 }
 
-uint32_t tBuffer_getBufferLength(tBuffer* const sb)
+uint32_t tBuffer_getBufferLength(tBuffer const s)
 {
-    _tBuffer* s = *sb;
     return s->bufferLength;
 }
 
-uint32_t tBuffer_getRecordedLength(tBuffer* const sb)
+uint32_t tBuffer_getRecordedLength(tBuffer const s)
 {
-    _tBuffer* s = *sb;
     return s->recordedLength;
 }
 
-void tBuffer_setRecordedLength(tBuffer* const sb, int length)
+void tBuffer_setRecordedLength(tBuffer const s, int length)
 {
-    _tBuffer* s = *sb;
     s->recordedLength = length;
 }
 
-int tBuffer_isActive(tBuffer* const sb)
+int tBuffer_isActive(tBuffer const s)
 {
-    _tBuffer* s = *sb;
     return s->active;
 }
 
 //================================tSampler=====================================
 
-static void handleStartEndChange(tSampler* const sp);
-
-static void attemptStartEndChange(tSampler* const sp);
+static void handleStartEndChange(tSampler const sp);
+static void attemptStartEndChange(tSampler const sp);
 
 void tSampler_init(tSampler* const sp, tBuffer* const b, LEAF* const leaf)
 {
@@ -249,11 +232,8 @@ void tSampler_free (tSampler* const sp)
     mpool_free((char*)p, p->mempool);
 }
 
-void tSampler_setSample (tSampler* const sp, tBuffer* const b)
+void tSampler_setSample (tSampler const p, tBuffer const s)
 {
-    _tSampler* p = *sp;
-    _tBuffer* s = *b;
-    
     p->samp = s;
 
     p->rateFactor = s->sampleRate * p->invSampleRate;
@@ -267,11 +247,9 @@ void tSampler_setSample (tSampler* const sp, tBuffer* const b)
     p->idx = 0.f;
 }
 
-Lfloat tSampler_tick        (tSampler* const sp)
+Lfloat tSampler_tick        (tSampler const p)
 {
-    _tSampler* p = *sp;
-    
-    attemptStartEndChange(sp);
+    attemptStartEndChange(p);
     
     if (p->active == 0)         return 0.f;
     
@@ -439,7 +417,7 @@ Lfloat tSampler_tick        (tSampler* const sp)
     
 
 
-    attemptStartEndChange(sp);
+    attemptStartEndChange(p);
 
 
     if (p->mode == PlayLoop)
@@ -526,13 +504,11 @@ Lfloat tSampler_tick        (tSampler* const sp)
     return p->last;
 }
 
-Lfloat tSampler_tickStereo        (tSampler* const sp, Lfloat* outputArray)
+Lfloat tSampler_tickStereo        (tSampler const p, Lfloat* outputArray)
 {
-    _tSampler* p = *sp;
+    attemptStartEndChange(p);
 
-    attemptStartEndChange(sp);
-
-    if (p->active == 0)         return 0.f;
+    if (p->active == 0) return 0.f;
 
     if ((p->inc == 0.0f) || (p->len < 2))
     {
@@ -715,7 +691,7 @@ Lfloat tSampler_tickStereo        (tSampler* const sp, Lfloat* outputArray)
         }
     }
 
-    attemptStartEndChange(sp);
+    attemptStartEndChange(p);
 
     if (p->mode == PlayLoop)
     {
@@ -757,12 +733,12 @@ Lfloat tSampler_tickStereo        (tSampler* const sp, Lfloat* outputArray)
         Lfloat ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
         if ((ticksToEnd < p->ticksPerSevenMs) && (p->active == 1))
         {
-            tRamp_setDest(&p->gain, 0.f);
+            tRamp_setDest(p->gain, 0.f);
             p->active = -1;
         }
     }
 
-    Lfloat sampleGain = tRamp_tick(&p->gain);
+    Lfloat sampleGain = tRamp_tick(p->gain);
     for (int i = 0; i < p->channels; i++)
     {
         outputArray[i] = ((outputArray[i] * (1.0f - crossfadeMix)) + (cfxsample[i] * crossfadeMix)) * (1.0f - flipMix) + (flipsample[i] * flipMix);
@@ -772,13 +748,13 @@ Lfloat tSampler_tickStereo        (tSampler* const sp, Lfloat* outputArray)
     if (p->active < 0)
     {
         //if was fading out and reached silence
-    	if (tRamp_sample(&p->gain) <= 0.0001f)
+    	if (tRamp_sample(p->gain) <= 0.0001f)
         {
             if (p->retrigger == 1)
             {
                 p->active = 1;
                 p->retrigger = 0;
-                tRamp_setDest(&p->gain, 1.f);
+                tRamp_setDest(p->gain, 1.f);
 
                 if (p->dir > 0)
                 {
@@ -790,7 +766,7 @@ Lfloat tSampler_tickStereo        (tSampler* const sp, Lfloat* outputArray)
                     if (p->flip > 0)    p->idx = p->end;
                     else                p->idx = p->start;
                 }
-                handleStartEndChange(&p);
+                handleStartEndChange(p);
             }
             else
             {
@@ -806,31 +782,26 @@ Lfloat tSampler_tickStereo        (tSampler* const sp, Lfloat* outputArray)
 }
 
 
-void tSampler_setMode      (tSampler* const sp, PlayMode mode)
+void tSampler_setMode      (tSampler const p, PlayMode mode)
 {
-    _tSampler* p = *sp;
     p->mode = mode;
 }
 
-void tSampler_setCrossfadeLength  (tSampler* const sp, uint32_t length)
+void tSampler_setCrossfadeLength  (tSampler const p, uint32_t length)
 {
-    _tSampler* p = *sp;
-    
     uint32_t cfxlen = LEAF_clip(0, length, p->len * 0.25f);
     
     p->cfxlen = cfxlen;
 }
 
-void tSampler_play         (tSampler* const sp)
+void tSampler_play         (tSampler const p)
 {
-    _tSampler* p = *sp;
-
     if (p->active > 0)
     {
         p->active = -1;
         p->retrigger = 1;
         
-        tRamp_setDest(&p->gain, 0.f);
+        tRamp_setDest(p->gain, 0.f);
     }
 
     else if (p->active < 0)
@@ -846,7 +817,7 @@ void tSampler_play         (tSampler* const sp)
         p->active = 1;
         p->retrigger = 0;
         
-        tRamp_setDest(&p->gain, 1.f);
+        tRamp_setDest(p->gain, 1.f);
         
         if (p->dir > 0)
         {
@@ -858,23 +829,19 @@ void tSampler_play         (tSampler* const sp)
             if (p->flip > 0)    p->idx = p->end;
             else                p->idx = p->start;
         }
-        handleStartEndChange(&p);
+        handleStartEndChange(p);
     }
 }
 
-void tSampler_stop         (tSampler* const sp)
+void tSampler_stop         (tSampler const p)
 {
-    _tSampler* p = *sp;
-    
     p->active = -1;
     
-    tRamp_setDest(&p->gain, 0.f);
+    tRamp_setDest(p->gain, 0.f);
 }
 
-static void handleStartEndChange(tSampler* const sp)
+static void handleStartEndChange(tSampler const p)
 {
-    _tSampler* p = *sp;
-    
     p->len = abs(p->end - p->start);
     
     if (p->cfxlen > (p->len * 0.25f)) p->cfxlen = p->len * 0.25f;
@@ -889,25 +856,21 @@ static void handleStartEndChange(tSampler* const sp)
     }
 }
 
-static void attemptStartEndChange(tSampler* const sp)
+static void attemptStartEndChange(tSampler const p)
 {
-    _tSampler* p = *sp;
-    
     // Try to update start/end if needed
     if (p->targetstart >= 0)
     {
-        tSampler_setStart(sp, p->targetstart);
+        tSampler_setStart(p, p->targetstart);
     }
     if (p->targetend >= 0)
     {
-        tSampler_setEnd(sp, p->targetend);
+        tSampler_setEnd(p, p->targetend);
     }
 }
 
-void tSampler_setStart     (tSampler* const sp, int32_t start)
+void tSampler_setStart     (tSampler const p, int32_t start)
 {
-    _tSampler* p = *sp;
-    
     int tempflip;
     /*
     if (start == p->end)
@@ -969,15 +932,13 @@ void tSampler_setStart     (tSampler* const sp, int32_t start)
     }
     
     p->start = LEAF_clipInt(0, start, p->samp->recordedLength-1);
-    handleStartEndChange(sp);
+    handleStartEndChange(p);
     p->targetstart = -1;
     
 }
 
-void tSampler_setEnd       (tSampler* const sp, int32_t end)
+void tSampler_setEnd       (tSampler const p, int32_t end)
 {
-    _tSampler* p = *sp;
-    
     int tempflip;
     
     /*
@@ -1040,14 +1001,12 @@ void tSampler_setEnd       (tSampler* const sp, int32_t end)
     }
     
     p->end = LEAF_clipInt(0, end, p->samp->recordedLength-1);
-    handleStartEndChange(sp);
+    handleStartEndChange(p);
     p->targetend = -1;
 }
 
-void tSampler_setEndUnsafe     (tSampler* const sp, int32_t end)
+void tSampler_setEndUnsafe     (tSampler const p, int32_t end)
 {
-    _tSampler* p = *sp;
-    
     int tempflip;
     
     /*
@@ -1110,21 +1069,18 @@ void tSampler_setEndUnsafe     (tSampler* const sp, int32_t end)
     }
     
     p->end = LEAF_clipInt(0, end, end);
-    handleStartEndChange(sp);
+    handleStartEndChange(p);
     p->targetend = -1;
 }
 
-void    tSampler_setLength    (tSampler* const sp, int32_t length)
+void    tSampler_setLength    (tSampler const p, int32_t length)
 {
-    _tSampler* p = *sp;
     if (length == 0) length = 1;
-    tSampler_setEnd(sp, p->start + length);
+    tSampler_setEnd(p, p->start + length);
 }
 
-void tSampler_setRate      (tSampler* const sp, Lfloat rate)
+void tSampler_setRate      (tSampler const p, Lfloat rate)
 {
-    _tSampler* p = *sp;
-    
     rate = rate * p->rateFactor; //adjust for sampling rate of buffer (may be different from leaf.sampleRate if audio file was loaded form SD card)
     if (rate < 0.f)
     {
@@ -1141,15 +1097,14 @@ void tSampler_setRate      (tSampler* const sp, Lfloat rate)
 }
 
 
-void tSampler_setSampleRate(tSampler* const sp, Lfloat sr)
+void tSampler_setSampleRate(tSampler const p, Lfloat sr)
 {
-    _tSampler* p = *sp;
     _tBuffer* s = p->samp;
     p->sampleRate = sr;
     p->invSampleRate = 1.0f/p->sampleRate;
     p->ticksPerSevenMs = 0.007f * p->sampleRate;
     p->rateFactor = s->sampleRate * p->invSampleRate;
-    tRamp_setSampleRate(&p->gain, p->sampleRate);
+    tRamp_setSampleRate(p->gain, p->sampleRate);
 }
 
 //==============================================================================
@@ -1167,7 +1122,7 @@ void    tAutoSampler_initToPool (tAutoSampler* const as, tBuffer* const b, tMemp
     
     tBuffer_setRecordMode(b, RecordOneShot);
     tSampler_initToPool(&a->sampler, b, mp, leaf);
-    tSampler_setMode(&a->sampler, PlayLoop);
+    tSampler_setMode(a->sampler, PlayLoop);
     tEnvelopeFollower_initToPool(&a->ef, 0.05f, 0.9999f, mp);
 }
 
@@ -1181,10 +1136,9 @@ void    tAutoSampler_free (tAutoSampler* const as)
     mpool_free((char*)a, a->mempool);
 }
 
-Lfloat   tAutoSampler_tick               (tAutoSampler* const as, Lfloat input)
+Lfloat   tAutoSampler_tick               (tAutoSampler const a, Lfloat input)
 {
-    _tAutoSampler* a = *as;
-    Lfloat currentPower = tEnvelopeFollower_tick(&a->ef, input);
+    Lfloat currentPower = tEnvelopeFollower_tick(a->ef, input);
     
     if ((currentPower > (a->threshold)) &&
         (currentPower > a->previousPower + 0.001f) &&
@@ -1192,7 +1146,7 @@ Lfloat   tAutoSampler_tick               (tAutoSampler* const as, Lfloat input)
         (a->sampleCounter == 0))
     {
         a->sampleTriggered = 1;
-        tBuffer_record(&a->sampler->samp);
+        tBuffer_record(a->sampler->samp);
         a->sampler->samp->recordedLength = a->sampler->samp->bufferLength;
         a->sampleCounter = a->windowSize + 24;//arbitrary extra time to avoid resampling while playing previous sample - better solution would be alternating buffers and crossfading
         a->powerCounter = 1000;
@@ -1204,9 +1158,9 @@ Lfloat   tAutoSampler_tick               (tAutoSampler* const as, Lfloat input)
     }
     
     
-    tSampler_setEnd(&a->sampler, a->windowSize);
-    tBuffer_tick(&a->sampler->samp, input);
-    //on it's way down
+    tSampler_setEnd(a->sampler, a->windowSize);
+    tBuffer_tick(a->sampler->samp, input);
+    //on its way down
     if (currentPower <= a->previousPower)
     {
         if (a->powerCounter > 0)
@@ -1221,64 +1175,56 @@ Lfloat   tAutoSampler_tick               (tAutoSampler* const as, Lfloat input)
     
     a->previousPower = currentPower;
     
-    return tSampler_tick(&a->sampler);
+    return tSampler_tick(a->sampler);
 }
 
-void    tAutoSampler_setBuffer         (tAutoSampler* const as, tBuffer* const b)
+void    tAutoSampler_setBuffer         (tAutoSampler const a, tBuffer const b)
 {
-    _tAutoSampler* a = *as;
     tBuffer_setRecordMode(b, RecordOneShot);
     if (a->windowSize > tBuffer_getBufferLength(b))
         a->windowSize = tBuffer_getBufferLength(b);
-    tSampler_setSample(&a->sampler, b);
+    tSampler_setSample(a->sampler, b);
 }
 
-void    tAutoSampler_setMode            (tAutoSampler* const as, PlayMode mode)
+void    tAutoSampler_setMode            (tAutoSampler const a, PlayMode mode)
 {
-    _tAutoSampler* a = *as;
-    tSampler_setMode(&a->sampler, mode);
+    tSampler_setMode(a->sampler, mode);
 }
 
-void    tAutoSampler_play               (tAutoSampler* const as)
+void    tAutoSampler_play               (tAutoSampler const a)
 {
-    _tAutoSampler* a = *as;
-    tSampler_play(&a->sampler);
+    tSampler_play(a->sampler);
 }
-void    tAutoSampler_stop               (tAutoSampler* const as)
+void    tAutoSampler_stop               (tAutoSampler const a)
 {
-    _tAutoSampler* a = *as;
-    tSampler_stop(&a->sampler);
+    tSampler_stop(a->sampler);
 }
 
-void    tAutoSampler_setThreshold       (tAutoSampler* const as, Lfloat thresh)
+void    tAutoSampler_setThreshold       (tAutoSampler const a, Lfloat thresh)
 {
-    _tAutoSampler* a = *as;
     a->threshold = thresh;
 }
 
-void    tAutoSampler_setWindowSize      (tAutoSampler* const as, uint32_t size)
+void    tAutoSampler_setWindowSize      (tAutoSampler const a, uint32_t size)
 {
-    _tAutoSampler* a = *as;
-    if (size > tBuffer_getBufferLength(&a->sampler->samp))
-        a->windowSize = tBuffer_getBufferLength(&a->sampler->samp);
+    if (size > tBuffer_getBufferLength(a->sampler->samp))
+        a->windowSize = tBuffer_getBufferLength(a->sampler->samp);
     else a->windowSize = size;
 }
 
-void    tAutoSampler_setCrossfadeLength (tAutoSampler* const as, uint32_t length)
+void    tAutoSampler_setCrossfadeLength (tAutoSampler const a, uint32_t length)
 {
-    _tAutoSampler* a = *as;
-    tSampler_setCrossfadeLength(&a->sampler, length);
+    tSampler_setCrossfadeLength(a->sampler, length);
 }
 
-void    tAutoSampler_setRate    (tAutoSampler* const as, Lfloat rate)
+void    tAutoSampler_setRate    (tAutoSampler const a, Lfloat rate)
 {
-    ;
+
 }
 
-void    tAutoSampler_setSampleRate (tAutoSampler* const as, Lfloat sr)
+void    tAutoSampler_setSampleRate (tAutoSampler const a, Lfloat sr)
 {
-    _tAutoSampler* a = *as;
-    tSampler_setSampleRate(&a->sampler, sr);
+    tSampler_setSampleRate(a->sampler, sr);
 }
 
 
@@ -1324,22 +1270,18 @@ void tMBSampler_free (tMBSampler* const sp)
     mpool_free((char*)p, p->mempool);
 }
 
-void tMBSampler_setSample (tMBSampler* const sp, tBuffer* const b)
+void tMBSampler_setSample (tMBSampler const p, tBuffer* const b)
 {
-    _tMBSampler* p = *sp;
-    
     p->samp = *b;;
     
     p->start = 0;
-    tMBSampler_setEnd(sp, p->samp->bufferLength);
+    tMBSampler_setEnd(p, p->samp->bufferLength);
     
     p->_p = 0.0f;
 }
 
-Lfloat tMBSampler_tick        (tMBSampler* const sp)
+Lfloat tMBSampler_tick        (tMBSampler const c)
 {
-    _tMBSampler* c = *sp;
-    
     if ((c->gain->curr == 0.0f) && (!c->active)) return 0.0f;
     if (c->_w == 0.0f)
     {
@@ -1464,7 +1406,7 @@ Lfloat tMBSampler_tick        (tMBSampler* const sp)
             if ((end - p) < 480) // 480 samples should be enough to let the tExpSmooth go from 1 to 0 (10ms at 48k, 5ms at 192k)
             if (c->mode == PlayNormal)
             {
-            	tExpSmooth_setDest(&c->gain, 0.0f);
+            	tExpSmooth_setDest(c->gain, 0.0f);
             }
         }
 
@@ -1531,7 +1473,7 @@ Lfloat tMBSampler_tick        (tMBSampler* const sp)
             if ((p - start) < 480) // 480 samples should be enough to let the tExpSmooth go from 1 to 0 (10ms at 48k, 5ms at 192k)
             if (c->mode == PlayNormal)
             {
-            	tExpSmooth_setDest(&c->gain, 0.0f);
+            	tExpSmooth_setDest(c->gain, 0.0f);
             }
             Lfloat f = p;
             int i = (int) f;
@@ -1574,67 +1516,55 @@ Lfloat tMBSampler_tick        (tMBSampler* const sp)
     c->_z = z;
     c->_j = j;
     
-    return c->out * tExpSmooth_tick(&c->gain);
+    return c->out * tExpSmooth_tick(c->gain);
 }
 
-void tMBSampler_setMode      (tMBSampler* const sp, PlayMode mode)
+void tMBSampler_setMode      (tMBSampler const p, PlayMode mode)
 {
-    _tMBSampler* p = *sp;
     p->mode = mode;
 }
 
-void tMBSampler_play         (tMBSampler* const sp)
+void tMBSampler_play         (tMBSampler const p)
 {
-    _tMBSampler* p = *sp;
-    
     if (p->active > 0)
     {
         p->syncin = 1e-20f;
     }
-    tExpSmooth_setDest(&p->gain, 1.0f);
+    tExpSmooth_setDest(p->gain, 1.0f);
     p->active = 1;
     p->_p = p->start;
     p->_z = 0.0f;
     p->_j = 0;
 }
 
-void tMBSampler_stop         (tMBSampler* const sp)
+void tMBSampler_stop         (tMBSampler const p)
 {
-    _tMBSampler* p = *sp;
-    
-    tExpSmooth_setDest(&p->gain, 0.0f);
+    tExpSmooth_setDest(p->gain, 0.0f);
     p->active = 0;
 }
 
-void tMBSampler_setStart     (tMBSampler* const sp, int32_t start)
+void tMBSampler_setStart     (tMBSampler const p, int32_t start)
 {
-    _tMBSampler* p = *sp;
-    
     if (start > p->end - 1) p->start = p->end - 1;
     else if (start < 0) p->start = 0;
     else p->start = start;
 }
 
-void tMBSampler_setEnd       (tMBSampler* const sp, int32_t end)
+void tMBSampler_setEnd       (tMBSampler const p, int32_t end)
 {
-    _tMBSampler* p = *sp;
-    
     if (end < p->start + 1) p->end = p->start + 1;
     // always leave a trailing sample after the end
     else if (end >= p->samp->bufferLength) p->end = p->samp->bufferLength - 1;
     else p->end = end;
 }
 
-void    tMBSampler_setLength    (tMBSampler* const sp, int32_t length)
+void    tMBSampler_setLength    (tMBSampler const p, int32_t length)
 {
-    _tMBSampler* p = *sp;
-    tMBSampler_setEnd(sp, p->start + length);
+    tMBSampler_setEnd(p, p->start + length);
 }
 
-void tMBSampler_setRate      (tMBSampler* const sp, Lfloat rate)
+void tMBSampler_setRate      (tMBSampler const p, Lfloat rate)
 {
-    _tMBSampler* p = *sp;
-    
     p->_w = rate;
 }
 
