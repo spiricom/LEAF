@@ -317,7 +317,7 @@ static inline int fastabs_int(int in){
 
 // alternative implementation for abs()
 // REQUIRES: 32 bit Lfloats
-static inline  Lfloat fastabsf(Lfloat f)
+ inline  static Lfloat fastabsf(Lfloat f)
 {
     union
     {

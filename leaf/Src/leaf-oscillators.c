@@ -738,6 +738,8 @@ void    tPBSawSquare_initToPool    (tPBSawSquare* const osc, tMempool* const mp)
     c->inc      =  0;
     c->phase    =  0;
     c->freq = 0.0f;
+    c->shape = 0.0f;
+    c->oneMinusShape = 1.0f;
 
 }
 
@@ -3709,8 +3711,8 @@ void    tSquareLFO_initToPool   (tSquareLFO* const cy, tMempool* const mp)
 void    tSquareLFO_free (tSquareLFO* const cy)
 {
     _tSquareLFO* c = *cy;
-    tIntPhasor_free(&c->phasor);
-    tIntPhasor_free(&c->invPhasor);
+    tIntPhasor_free(c->phasor);
+    tIntPhasor_free(c->invPhasor);
     mpool_free((char*)c, c->mempool);
 }
 
@@ -3718,36 +3720,36 @@ void    tSquareLFO_free (tSquareLFO* const cy)
 Lfloat   tSquareLFO_tick(tSquareLFO const c)
 {
     // Phasor increment
-    Lfloat a = tIntPhasor_tick(&c->phasor);
-    Lfloat b = tIntPhasor_tick(&c->invPhasor);
+    Lfloat a = tIntPhasor_tick(c->phasor);
+    Lfloat b = tIntPhasor_tick(c->invPhasor);
     Lfloat tmp = ((a - b)) + c->pulsewidth - 0.5f;
     return 2 * tmp;
 }
 
 void     tSquareLFO_setFreq(tSquareLFO const c, Lfloat freq)
 {
-    tIntPhasor_setFreq(&c->phasor,freq);
-    tIntPhasor_setFreq(&c->invPhasor,freq);
+    tIntPhasor_setFreq(c->phasor,freq);
+    tIntPhasor_setFreq(c->invPhasor,freq);
 }
 
 
 
 void     tSquareLFO_setSampleRate (tSquareLFO const c, Lfloat sr)
 {
-    tIntPhasor_setSampleRate(&c->phasor, sr);
-    tIntPhasor_setSampleRate(&c->invPhasor, sr);
+    tIntPhasor_setSampleRate(c->phasor, sr);
+    tIntPhasor_setSampleRate(c->invPhasor, sr);
 }
 
 void tSquareLFO_setPulseWidth(tSquareLFO const c, Lfloat pw)
 {
     c->pulsewidth = pw;
-    tIntPhasor_setPhase(&c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
+    tIntPhasor_setPhase(c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
 }
 
 void tSquareLFO_setPhase(tSquareLFO const c, Lfloat phase)
 {
-    tIntPhasor_setPhase(&c->phasor, phase);
-    tIntPhasor_setPhase(&c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
+    tIntPhasor_setPhase(c->phasor, phase);
+    tIntPhasor_setPhase(c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
 }
 
 void    tSawSquareLFO_init        (tSawSquareLFO* const cy, LEAF* const leaf)
@@ -3774,24 +3776,24 @@ void    tSawSquareLFO_free        (tSawSquareLFO* const cy)
     
 Lfloat   tSawSquareLFO_tick        (tSawSquareLFO const c)
 {
-    Lfloat a = (tIntPhasor_tick(&c->saw) - 0.5f ) * 2.0f;
-    Lfloat b = tSquareLFO_tick(&c->square);
+    Lfloat a = (tIntPhasor_tick(c->saw) - 0.5f ) * 2.0f;
+    Lfloat b = tSquareLFO_tick(c->square);
     return  (1 - c->shape) * a + c->shape * b; 
 }
 void    tSawSquareLFO_setFreq     (tSawSquareLFO const c, Lfloat freq)
 {
-    tSquareLFO_setFreq(&c->square, freq);
-    tIntPhasor_setFreq(&c->saw, freq);
+    tSquareLFO_setFreq(c->square, freq);
+    tIntPhasor_setFreq(c->saw, freq);
 }
 void    tSawSquareLFO_setSampleRate (tSawSquareLFO const c, Lfloat sr)
 {
-    tSquareLFO_setSampleRate(&c->square, sr);
-    tIntPhasor_setSampleRate(&c->saw, sr);
+    tSquareLFO_setSampleRate(c->square, sr);
+    tIntPhasor_setSampleRate(c->saw, sr);
 }
 void    tSawSquareLFO_setPhase (tSawSquareLFO const c, Lfloat phase)
 {
-    tSquareLFO_setPhase(&c->square, phase);
-    tIntPhasor_setPhase(&c->saw, phase);
+    tSquareLFO_setPhase(c->square, phase);
+    tIntPhasor_setPhase(c->saw, phase);
 }
 
 
@@ -3888,24 +3890,24 @@ void    tSineTriLFO_free        (tSineTriLFO* const cy)
     
 Lfloat   tSineTriLFO_tick        (tSineTriLFO const c)
 {
-    Lfloat a = tCycle_tick(&c->sine);
-    Lfloat b = tTriLFO_tick(&c->tri);
+    Lfloat a = tCycle_tick(c->sine);
+    Lfloat b = tTriLFO_tick(c->tri);
     return  (1.0f - c->shape) * a + c->shape * b;
 }
 void    tSineTriLFO_setFreq     (tSineTriLFO const c, Lfloat freq)
 {
-    tTriLFO_setFreq(&c->tri, freq);
-    tCycle_setFreq(&c->sine, freq);
+    tTriLFO_setFreq(c->tri, freq);
+    tCycle_setFreq(c->sine, freq);
 }
 void    tSineTriLFO_setSampleRate (tSineTriLFO const c, Lfloat sr)
 {
-    tTriLFO_setSampleRate(&c->tri, sr);
-    tCycle_setSampleRate(&c->sine, sr);
+    tTriLFO_setSampleRate(c->tri, sr);
+    tCycle_setSampleRate(c->sine, sr);
 }
 void    tSineTriLFO_setPhase (tSineTriLFO const c, Lfloat phase)
 {
-    tTriLFO_setPhase(&c->tri, phase);
-    tCycle_setPhase(&c->sine, phase);
+    tTriLFO_setPhase(c->tri, phase);
+    tCycle_setPhase(c->sine, phase);
 }
 
  void    tSineTriLFO_setShape (tSineTriLFO const c, Lfloat shape)
