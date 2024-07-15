@@ -143,7 +143,7 @@ void glottis_initToPool(glottis* const glo, tMempool* const mp)
     glot->tenseness = 0.6f; /* value between 0 and 1 */
     glot->T = 1.0f/leaf->sampleRate; /* big T */
     glot->time_in_waveform = 0;
-    glottis_setup_waveform(&glot);
+    glottis_setup_waveform(glot);
 }
 
 void glottis_free(glottis* const glo)
@@ -305,8 +305,8 @@ void tract_initToPool(tract* const t,  int numTractSections, int maxNumTractSect
 	tSVF_initToPool(&tr->aspirationNoiseFilt, SVFTypeBandpass, 500.0f, 0.7f, &m);
 	tNoise_initToPool(&tr->whiteNoise, WhiteNoise, &m);
 
-    tract_calculate_reflections(&tr);
-    tract_calculate_nose_reflections(&tr);
+    tract_calculate_reflections(tr);
+    tract_calculate_nose_reflections(tr);
     tr->nose_diameter[0] = tr->velum_target;
 
     tr->block_time = 64.0f / leaf->sampleRate;
@@ -535,7 +535,7 @@ void tract_addTurbulenceNoise(tract const tr)
 	for (int i = 0; i < 2; i++)
 	{
 		Lfloat turbulenceNoise = tr->TnoiseGain * tSVF_tick(tr->fricativeNoiseFilt[i], tNoise_tick(tr->whiteNoise) * 0.20f);
-		tract_addTurbulenceNoiseAtPosition(&tr, turbulenceNoise, tr->turbuluencePointPosition[i], tr->turbuluencePointDiameter[i]);
+		tract_addTurbulenceNoiseAtPosition(tr, turbulenceNoise, tr->turbuluencePointPosition[i], tr->turbuluencePointDiameter[i]);
 	}
 }
 
@@ -592,7 +592,7 @@ void tract_compute(tract const tr, Lfloat  in, Lfloat  lambda)
 
     in = fast_tanh5((UVnoise * tr->AnoiseGain) + (in * (1.0f - tr->AnoiseGain)));
 
-	tract_addTurbulenceNoise(&tr);
+	tract_addTurbulenceNoise(tr);
     tr->junction_outR[0] = tr->L[0] * tr->glottal_reflection + in;
     tr->junction_outL[tr->n] = tr->R[tr->n - 1] * tr->lip_reflection;
 
@@ -874,7 +874,7 @@ int tVoc_get_nose_size(tVoc const v)
 void tVoc_set_tongue_shape_and_touch(tVoc const v, Lfloat tongue_index, Lfloat tongue_diameter, Lfloat touch_index, Lfloat touch_diameter)
 {
 	Lfloat *diameters;
-	diameters = tVoc_get_tract_diameters(&v);
+	diameters = tVoc_get_tract_diameters(v);
 	tongue_diameter *= 1.45f;
 	tongue_diameter += 2.05f;
 	tongue_index = (tongue_index * (v->tr->tongueUpperBound - v->tr->tongueLowerBound)) + v->tr->tongueLowerBound;
@@ -883,7 +883,7 @@ void tVoc_set_tongue_shape_and_touch(tVoc const v, Lfloat tongue_index, Lfloat t
 	touch_diameter *= 1.6f;
 	touch_index = ((v->tr->n - 3.0f)* touch_index) + 2.0f;
 
-	tVoc_set_tongue_and_touch_diameters(&v, tongue_index, tongue_diameter, touch_index, touch_diameter, diameters); //10 39, 32
+	tVoc_set_tongue_and_touch_diameters(v, tongue_index, tongue_diameter, touch_index, touch_diameter, diameters); //10 39, 32
 	v->tr->turbuluencePointPosition[0] = tongue_index;
 	v->tr->turbuluencePointDiameter[0] = tongue_diameter;
 	v->tr->turbuluencePointPosition[1] = touch_index;

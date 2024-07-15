@@ -58,7 +58,7 @@ void    tPRCReverb_initToPool   (tPRCReverb* const rev, Lfloat t60, tMempool* co
     tDelay_initToPool(&r->allpassDelays[1], lengths[1], lengths[1] * 2, mp);
     tDelay_initToPool(&r->combDelay, lengths[2], lengths[2] * 2, mp);
     
-    tPRCReverb_setT60(rev, t60);
+    tPRCReverb_setT60(*rev, t60);
     
     r->allpassCoeff = 0.7f;
     r->mix = 0.5f;
@@ -466,11 +466,11 @@ void    tDattorroReverb_initToPool        (tDattorroReverb* const rev, tMempool*
     tCycle_setFreq(r->f2_lfo, 0.07f);
     
     // PARAMETERS
-    tDattorroReverb_setMix(rev, 0.5f);
-    tDattorroReverb_setInputDelay(rev,  0.f);
-    tDattorroReverb_setInputFilter(rev, 10000.f);
-    tDattorroReverb_setFeedbackFilter(rev, 5000.f);
-    tDattorroReverb_setFeedbackGain(rev, 0.4f);
+    tDattorroReverb_setMix(*rev, 0.5f);
+    tDattorroReverb_setInputDelay(*rev,  0.f);
+    tDattorroReverb_setInputFilter(*rev, 10000.f);
+    tDattorroReverb_setFeedbackFilter(*rev, 5000.f);
+    tDattorroReverb_setFeedbackGain(*rev, 0.4f);
 }
 
 void    tDattorroReverb_free (tDattorroReverb* const rev)

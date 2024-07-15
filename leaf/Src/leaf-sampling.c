@@ -214,7 +214,7 @@ void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const m
     p->cfxlen = 500; // default 300 sample crossfade
     
     tRamp_initToPool(&p->gain, 5.0f, 1, mp);
-    tRamp_setVal(&p->gain, 0.f);
+    tRamp_setVal(p->gain, 0.f);
     
     p->targetstart = -1;
     p->targetend = -1;
@@ -416,7 +416,6 @@ Lfloat tSampler_tick        (tSampler const p)
     }
     
 
-
     attemptStartEndChange(p);
 
 
@@ -460,24 +459,24 @@ Lfloat tSampler_tick        (tSampler const p)
         Lfloat ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
         if ((ticksToEnd < p->ticksPerSevenMs) && (p->active == 1))
         {
-            tRamp_setDest(&p->gain, 0.f);
+            tRamp_setDest(p->gain, 0.f);
             p->active = -1;
         }
     }
     
     sample = ((sample * (1.0f - crossfadeMix)) + (cfxsample * crossfadeMix)) * (1.0f - flipMix) + (flipsample * flipMix);
     
-    sample = sample * tRamp_tick(&p->gain);
+    sample = sample * tRamp_tick(p->gain);
     
     if (p->active < 0)
     {
-        if (tRamp_sample(&p->gain) <= 0.00001f)
+        if (tRamp_sample(p->gain) <= 0.00001f)
         {
             if (p->retrigger == 1)
             {
                 p->active = 1;
                 p->retrigger = 0;
-                tRamp_setDest(&p->gain, 1.f);
+                tRamp_setDest(p->gain, 1.f);
                 
                 if (p->dir > 0)
                 {
@@ -1258,7 +1257,7 @@ void tMBSampler_initToPool(tMBSampler* const sp, tBuffer* const b, tMempool* con
     c->start = 0;
     c->end = 1;
     c->currentLoopLength = 1;
-    tMBSampler_setEnd(sp, c->samp->bufferLength);
+    tMBSampler_setEnd(*sp, c->samp->bufferLength);
 }
 
 void tMBSampler_free (tMBSampler* const sp)

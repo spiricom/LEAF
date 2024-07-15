@@ -225,7 +225,7 @@ void    tSquare_initToPool  (tSquare* const cy, tMempool* const mp)
     c->invSampleRate = leaf->invSampleRate;
     c->invSampleRateTimesTwoTo32 = (c->invSampleRate * TWO_TO_32);
     c->mask = SQR_TABLE_SIZE - 1;
-    tSquare_setFreq(cy, 220);
+    tSquare_setFreq(*cy, 220);
 }
 
 void    tSquare_free (tSquare* const cy)
@@ -315,7 +315,7 @@ void    tSawtooth_initToPool    (tSawtooth* const cy, tMempool* const mp)
     c->invSampleRate = leaf->invSampleRate;
     c->invSampleRateTimesTwoTo32 = (c->invSampleRate * TWO_TO_32);
     c->mask = SAW_TABLE_SIZE - 1;
-    tSawtooth_setFreq(cy, 220);
+    tSawtooth_setFreq(*cy, 220);
 }
 
 void    tSawtooth_free (tSawtooth* const cy)
@@ -539,7 +539,7 @@ Lfloat   tPBSineTriangle_tick          (tPBSineTriangle const  c)
     y += 4.0f * incFloat * (blamp(t1F, incFloat) - blamp(t2F, incFloat));
     y = y * c->shape; // shape handles the inversion so it's in phase with sine (already * -1.0f)
 
-    y = y + (tCycle_tick(&c->sine) * c->oneMinusShape);
+    y = y + (tCycle_tick(c->sine) * c->oneMinusShape);
     
     c->phase += c->inc;
     
@@ -554,7 +554,7 @@ void    tPBSineTriangle_setFreq       (tPBSineTriangle const  c, Lfloat freq)
 {
     c->freq  = freq;
     c->inc = freq * c->invSampleRateTimesTwoTo32;
-    tCycle_setFreq(&c->sine, freq);
+    tCycle_setFreq(c->sine, freq);
 }
 
 void    tPBSineTriangle_setShape       (tPBSineTriangle const  c, Lfloat shape)
@@ -852,7 +852,7 @@ Lfloat   tSawOS_tick          (tSawOS const c)
         tempFloat = (c->phase * INV_TWO_TO_16)- 1.0f; // inv 2 to 32, then multiplied by 2, same as inv 2 to 16
     	for (int k = 0; k < c->filterOrder; k++)
     	{
-    		tempFloat = tSVF_tick(&c->aaFilter[k], tempFloat);
+    		tempFloat = tSVF_tick(c->aaFilter[k], tempFloat);
     	}
     }
     return tempFloat;
@@ -979,7 +979,7 @@ void tNeuron_initToPool  (tNeuron* const nr, tMempool* const mp)
 
     tPoleZero_initToPool(&n->f, mp);
     
-    tPoleZero_setBlockZero(&n->f, 0.99f);
+    tPoleZero_setBlockZero(n->f, 0.99f);
     
     n->invSampleRate = leaf->invSampleRate;
     n->timeStep = (44100.0f * n->invSampleRate) / 50.0f;
@@ -1015,7 +1015,7 @@ void    tNeuron_free (tNeuron* const nr)
 
 void   tNeuron_reset(tNeuron const n)
 {
-    tPoleZero_setBlockZero(&n->f, 0.99f);
+    tPoleZero_setBlockZero(n->f, 0.99f);
     
     n->timeStep = (44100.0f * n->invSampleRate) / 50.0f;
     
@@ -1150,7 +1150,7 @@ Lfloat tNeuron_tick(tNeuron const n)
     //set the output voltage to the "step" ugen, which controls the DAC.
     output = n->voltage * 0.01f; // volts
     
-    output = tPoleZero_tick(&n->f, output);
+    output = tPoleZero_tick(n->f, output);
     
     return output;
     
@@ -2307,10 +2307,9 @@ void tMBSaw_free(tMBSaw* const osc)
 //#ifdef ITCMRAM
 //void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
 //#else
-void tMBSaw_place_step_dd_noBuffer(tMBSaw* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
+void tMBSaw_place_step_dd_noBuffer(tMBSaw const c, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
 //#endif
 {
-	_tMBSaw* c = *osc;
 	Lfloat r;
 	long i;
 
@@ -2522,11 +2521,9 @@ void tMBSawPulse_free(tMBSawPulse* const osc)
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
 #else
-void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
+void tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse const c, int index, Lfloat phase, Lfloat inv_w, Lfloat scale)
 #endif
 {
-    _tMBSawPulse* c = *osc;
-
     if (c->active)
     {
 		Lfloat r;
@@ -2981,7 +2978,7 @@ void tWaveTable_initToPool(tWaveTable* const cy, Lfloat* table, int size, Lfloat
     tButterworth_initToPool(&c->bl, 8, -1.0f, f, mp);
     for (int t = 1; t < c->numTables; ++t)
     {
-        tButterworth_setF2(&c->bl, f);
+        tButterworth_setF2(c->bl, f);
         // Do several passes here to prevent errors at the beginning of the waveform
         // Not sure how many passes to do, seem to need more as the filter cutoff goes down
         // 12 might be excessive but seems to work for now.
@@ -2989,7 +2986,7 @@ void tWaveTable_initToPool(tWaveTable* const cy, Lfloat* table, int size, Lfloat
         {
             for (int i = 0; i < c->size; ++i)
             {
-                c->tables[t][i] = tButterworth_tick(&c->bl, c->tables[t-1][i]);
+                c->tables[t][i] = tButterworth_tick(c->bl, c->tables[t-1][i]);
             }
         }
         f *= 0.5f; //halve the cutoff for next pass
@@ -3047,10 +3044,10 @@ void tWaveTable_setSampleRate(tWaveTable const c, Lfloat sr)
     f = c->sampleRate * 0.25f; //start at half nyquist
     // Not worth going over order 8 I think, and even 8 is only marginally better than 4.
     tButterworth_initToPool(&c->bl, 8, -1.0f, f, &c->mempool);
-    tButterworth_setSampleRate(&c->bl, c->sampleRate);
+    tButterworth_setSampleRate(c->bl, c->sampleRate);
     for (int t = 1; t < c->numTables; ++t)
     {
-        tButterworth_setF2(&c->bl, f);
+        tButterworth_setF2(c->bl, f);
         // Do several passes here to prevent errors at the beginning of the waveform
         // Not sure how many passes to do, seem to need more as the filter cutoff goes down
         // 12 might be excessive but seems to work for now.
@@ -3058,7 +3055,7 @@ void tWaveTable_setSampleRate(tWaveTable const c, Lfloat sr)
         {
             for (int i = 0; i < c->size; ++i)
             {
-                c->tables[t][i] = tButterworth_tick(&c->bl, c->tables[t-1][i]);
+                c->tables[t][i] = tButterworth_tick(c->bl, c->tables[t-1][i]);
             }
         }
         f *= 0.5f; //halve the cutoff for next pass
@@ -3322,20 +3319,20 @@ void tWaveTableS_initToPool(tWaveTableS* const cy, Lfloat* table, int size, Lflo
             {
                 for (int i = 0; i < c->sizes[t]; ++i)
                 {
-                    c->dsBuffer[0] = tButterworth_tick(&c->bl, c->tables[t-1][i*2]);
-                    c->dsBuffer[1] = tButterworth_tick(&c->bl, c->tables[t-1][(i*2)+1]);
-                    c->tables[t][i] = tOversampler_downsample(&c->ds, c->dsBuffer);
+                    c->dsBuffer[0] = tButterworth_tick(c->bl, c->tables[t-1][i*2]);
+                    c->dsBuffer[1] = tButterworth_tick(c->bl, c->tables[t-1][(i*2)+1]);
+                    c->tables[t][i] = tOversampler_downsample(c->ds, c->dsBuffer);
                 }
             }
         }
         else
         {
-            tButterworth_setF2(&c->bl, f);
+            tButterworth_setF2(c->bl, f);
             for (int p = 0; p < LEAF_NUM_WAVETABLE_FILTER_PASSES; ++p)
             {
                 for (int i = 0; i < c->sizes[t]; ++i)
                 {
-                    c->tables[t][i] = tButterworth_tick(&c->bl, c->tables[t-1][i]);
+                    c->tables[t][i] = tButterworth_tick(c->bl, c->tables[t-1][i]);
                 }
             }
             f *= 0.5f; //halve the cutoff for next pass
@@ -3416,20 +3413,20 @@ void    tWaveTableS_setSampleRate(tWaveTableS const c, Lfloat sr)
             {
                 for (int i = 0; i < c->sizes[t]; ++i)
                 {
-                    c->dsBuffer[0] = tButterworth_tick(&c->bl, c->tables[t-1][i*2]);
-                    c->dsBuffer[1] = tButterworth_tick(&c->bl, c->tables[t-1][(i*2)+1]);
-                    c->tables[t][i] = tOversampler_downsample(&c->ds, c->dsBuffer);
+                    c->dsBuffer[0] = tButterworth_tick(c->bl, c->tables[t-1][i*2]);
+                    c->dsBuffer[1] = tButterworth_tick(c->bl, c->tables[t-1][(i*2)+1]);
+                    c->tables[t][i] = tOversampler_downsample(c->ds, c->dsBuffer);
                 }
             }
         }
         else
         {
-            tButterworth_setF2(&c->bl, f);
+            tButterworth_setF2(c->bl, f);
             for (int p = 0; p < LEAF_NUM_WAVETABLE_FILTER_PASSES; ++p)
             {
                 for (int i = 0; i < c->sizes[t]; ++i)
                 {
-                    c->tables[t][i] = tButterworth_tick(&c->bl, c->tables[t-1][i]);
+                    c->tables[t][i] = tButterworth_tick(c->bl, c->tables[t-1][i]);
                 }
             }
             f *= 0.5f; //halve the cutoff for next pass
@@ -3703,7 +3700,7 @@ void    tSquareLFO_initToPool   (tSquareLFO* const cy, tMempool* const mp)
     c->mempool = m;
     tIntPhasor_initToPool(&c->phasor,mp);
     tIntPhasor_initToPool(&c->invPhasor,mp); 
-    tSquareLFO_setPulseWidth(cy, 0.5f);
+    tSquareLFO_setPulseWidth(c, 0.5f);
 }
 
 void    tSquareLFO_free (tSquareLFO* const cy)
@@ -3718,36 +3715,36 @@ void    tSquareLFO_free (tSquareLFO* const cy)
 Lfloat   tSquareLFO_tick(tSquareLFO const c)
 {
     // Phasor increment
-    Lfloat a = tIntPhasor_tick(&c->phasor);
-    Lfloat b = tIntPhasor_tick(&c->invPhasor);
+    Lfloat a = tIntPhasor_tick(c->phasor);
+    Lfloat b = tIntPhasor_tick(c->invPhasor);
     Lfloat tmp = ((a - b)) + c->pulsewidth - 0.5f;
     return 2 * tmp;
 }
 
 void     tSquareLFO_setFreq(tSquareLFO const c, Lfloat freq)
 {
-    tIntPhasor_setFreq(&c->phasor,freq);
-    tIntPhasor_setFreq(&c->invPhasor,freq);
+    tIntPhasor_setFreq(c->phasor,freq);
+    tIntPhasor_setFreq(c->invPhasor,freq);
 }
 
 
 
 void     tSquareLFO_setSampleRate (tSquareLFO const c, Lfloat sr)
 {
-    tIntPhasor_setSampleRate(&c->phasor, sr);
-    tIntPhasor_setSampleRate(&c->invPhasor, sr);
+    tIntPhasor_setSampleRate(c->phasor, sr);
+    tIntPhasor_setSampleRate(c->invPhasor, sr);
 }
 
 void tSquareLFO_setPulseWidth(tSquareLFO const c, Lfloat pw)
 {
     c->pulsewidth = pw;
-    tIntPhasor_setPhase(&c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
+    tIntPhasor_setPhase(c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
 }
 
 void tSquareLFO_setPhase(tSquareLFO const c, Lfloat phase)
 {
-    tIntPhasor_setPhase(&c->phasor, phase);
-    tIntPhasor_setPhase(&c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
+    tIntPhasor_setPhase(c->phasor, phase);
+    tIntPhasor_setPhase(c->invPhasor, c->pulsewidth + (c->phasor->phase * INV_TWO_TO_32));
 }
 
 void    tSawSquareLFO_init        (tSawSquareLFO* const cy, LEAF* const leaf)
@@ -3774,24 +3771,24 @@ void    tSawSquareLFO_free        (tSawSquareLFO* const cy)
     
 Lfloat   tSawSquareLFO_tick        (tSawSquareLFO const c)
 {
-    Lfloat a = (tIntPhasor_tick(&c->saw) - 0.5f ) * 2.0f;
-    Lfloat b = tSquareLFO_tick(&c->square);
+    Lfloat a = (tIntPhasor_tick(c->saw) - 0.5f ) * 2.0f;
+    Lfloat b = tSquareLFO_tick(c->square);
     return  (1 - c->shape) * a + c->shape * b; 
 }
 void    tSawSquareLFO_setFreq     (tSawSquareLFO const c, Lfloat freq)
 {
-    tSquareLFO_setFreq(&c->square, freq);
-    tIntPhasor_setFreq(&c->saw, freq);
+    tSquareLFO_setFreq(c->square, freq);
+    tIntPhasor_setFreq(c->saw, freq);
 }
 void    tSawSquareLFO_setSampleRate (tSawSquareLFO const c, Lfloat sr)
 {
-    tSquareLFO_setSampleRate(&c->square, sr);
-    tIntPhasor_setSampleRate(&c->saw, sr);
+    tSquareLFO_setSampleRate(c->square, sr);
+    tIntPhasor_setSampleRate(c->saw, sr);
 }
 void    tSawSquareLFO_setPhase (tSawSquareLFO const c, Lfloat phase)
 {
-    tSquareLFO_setPhase(&c->square, phase);
-    tIntPhasor_setPhase(&c->saw, phase);
+    tSquareLFO_setPhase(c->square, phase);
+    tIntPhasor_setPhase(c->saw, phase);
 }
 
 
@@ -3888,24 +3885,24 @@ void    tSineTriLFO_free        (tSineTriLFO* const cy)
     
 Lfloat   tSineTriLFO_tick        (tSineTriLFO const c)
 {
-    Lfloat a = tCycle_tick(&c->sine);
-    Lfloat b = tTriLFO_tick(&c->tri);
+    Lfloat a = tCycle_tick(c->sine);
+    Lfloat b = tTriLFO_tick(c->tri);
     return  (1.0f - c->shape) * a + c->shape * b;
 }
 void    tSineTriLFO_setFreq     (tSineTriLFO const c, Lfloat freq)
 {
-    tTriLFO_setFreq(&c->tri, freq);
-    tCycle_setFreq(&c->sine, freq);
+    tTriLFO_setFreq(c->tri, freq);
+    tCycle_setFreq(c->sine, freq);
 }
 void    tSineTriLFO_setSampleRate (tSineTriLFO const c, Lfloat sr)
 {
-    tTriLFO_setSampleRate(&c->tri, sr);
-    tCycle_setSampleRate(&c->sine, sr);
+    tTriLFO_setSampleRate(c->tri, sr);
+    tCycle_setSampleRate(c->sine, sr);
 }
 void    tSineTriLFO_setPhase (tSineTriLFO const c, Lfloat phase)
 {
-    tTriLFO_setPhase(&c->tri, phase);
-    tCycle_setPhase(&c->sine, phase);
+    tTriLFO_setPhase(c->tri, phase);
+    tCycle_setPhase(c->sine, phase);
 }
 
  void    tSineTriLFO_setShape (tSineTriLFO const c, Lfloat shape)
@@ -3933,11 +3930,11 @@ void    tSineTriLFO_setPhase (tSineTriLFO const c, Lfloat phase)
      c->freq_ = 0.0f;
      c->decay_ = 1.0f;
 
-     tDampedOscillator_setSampleRate(cy, leaf->sampleRate);
+     tDampedOscillator_setSampleRate(*cy, leaf->sampleRate);
      c->loop_gain_ = cosf(c->freq_ * c->two_pi_by_sample_rate_);
      	  Lfloat g = sqrtf((1.0f - c->loop_gain_) / (1.0f + c->loop_gain_));
     c->turns_ratio_ = g;
-    tDampedOscillator_reset(cy);
+    tDampedOscillator_reset(*cy);
 
  }
  void    tDampedOscillator_free        (tDampedOscillator* const cy)

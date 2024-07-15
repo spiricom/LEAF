@@ -30,10 +30,10 @@ void        t808Cowbell_initToPool      (t808Cowbell* const cowbellInst, int use
     cowbell->mempool = m;
     
     tSquare_initToPool(&cowbell->p[0], mp);
-    tSquare_setFreq(&cowbell->p[0], 540.0f);
+    tSquare_setFreq(cowbell->p[0], 540.0f);
     
     tSquare_initToPool(&cowbell->p[1], mp);
-    tSquare_setFreq(&cowbell->p[1], 1.48148f * 540.0f);
+    tSquare_setFreq(cowbell->p[1], 1.48148f * 540.0f);
     
     cowbell->oscMix = 0.5f;
     
@@ -174,12 +174,12 @@ void    t808Hihat_initToPool  (t808Hihat* const hihatInst, tMempool* const mp)
     hihat->freq = 40.0f;
     hihat->stretch = 0.0f;
     
-    tSquare_setFreq(&hihat->p[0], 2.0f * hihat->freq);
-    tSquare_setFreq(&hihat->p[1], 3.00f * hihat->freq);
-    tSquare_setFreq(&hihat->p[2], 4.16f * hihat->freq);
-    tSquare_setFreq(&hihat->p[3], 5.43f * hihat->freq);
-    tSquare_setFreq(&hihat->p[4], 6.79f * hihat->freq);
-    tSquare_setFreq(&hihat->p[5], 8.21f * hihat->freq);
+    tSquare_setFreq(hihat->p[0], 2.0f * hihat->freq);
+    tSquare_setFreq(hihat->p[1], 3.00f * hihat->freq);
+    tSquare_setFreq(hihat->p[2], 4.16f * hihat->freq);
+    tSquare_setFreq(hihat->p[3], 5.43f * hihat->freq);
+    tSquare_setFreq(hihat->p[4], 6.79f * hihat->freq);
+    tSquare_setFreq(hihat->p[5], 8.21f * hihat->freq);
 }
 
 void    t808Hihat_free  (t808Hihat* const hihatInst)
@@ -327,7 +327,7 @@ void    t808Snare_initToPool    (t808Snare* const snareInst, tMempool* const mp)
     {
         tTriangle_initToPool(&snare->tone[i], mp);
         
-        tTriangle_setFreq(&snare->tone[i], ratio[i] * 400.0f);
+        tTriangle_setFreq(snare->tone[i], ratio[i] * 400.0f);
         tSVF_initToPool(&snare->toneLowpass[i], SVFTypeLowpass, 4000, 1.0f, mp);
         tEnvelope_initToPool(&snare->toneEnvOsc[i], 0.0f, 50.0f, 0,  mp);
         tEnvelope_initToPool(&snare->toneEnvGain[i], 1.0f, 150.0f, 0, mp);
@@ -617,7 +617,7 @@ void t808Kick_initToPool (t808Kick* const kickInst, tMempool* const mp)
     kick->toneInitialFreq = 40.0f;
     kick->sighAmountInHz = 7.0f;
     kick->chirpRatioMinusOne = 3.3f;
-    tCycle_setFreq(&kick->tone, 50.0f);
+    tCycle_setFreq(kick->tone, 50.0f);
     tSVF_initToPool(&kick->toneLowpass, SVFTypeLowpass, 2000.0f, 0.5f, mp);
     tEnvelope_initToPool(&kick->toneEnvOscChirp, 0.0f, 20.0f, 0, mp);
     tEnvelope_initToPool(&kick->toneEnvOscSigh, 0.0f, 2500.0f, 0, mp);
@@ -677,8 +677,8 @@ void        t808Kick_setSampleRate  (t808Kick* const kickInst, Lfloat sr)
 {
     _t808Kick* kick = *kickInst;
     
-    tCycle_setSampleRate(&kick->tone, sr);
-    tSVF_setSampleRate(&kick->toneLowpass, sr);
+    tCycle_setSampleRate(kick->tone, sr);
+    tSVF_setSampleRate(kick->toneLowpass, sr);
 }
 
 
@@ -699,7 +699,7 @@ void t808KickSmall_initToPool (t808KickSmall* const kickInst, tMempool* const mp
     kick->toneInitialFreq = 40.0f;
     kick->sighAmountInHz = 7.0f;
     kick->chirpRatioMinusOne = 3.3f;
-    tCycle_setFreq(&kick->tone, 50.0f);
+    tCycle_setFreq(kick->tone, 50.0f);
     tSVF_initToPool(&kick->toneLowpass, SVFTypeLowpass, 2000.0f, 0.5f, mp);
     tADSRS_initToPool(&kick->toneEnvOscChirp, 0.0f, 20.0f, 0.0f, 0.0f, mp);
     tADSRS_initToPool(&kick->toneEnvOscSigh, 0.0f, 2500.0f, 0.0f, 0.0f, mp);

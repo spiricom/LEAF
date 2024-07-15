@@ -1153,7 +1153,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
     void    tMBSaw_initToPool             (tMBSaw* const osc, tMempool* const mempool);
     void    tMBSaw_free                   (tMBSaw* const osc);
 
-    void    tMBSaw_place_step_dd_noBuffer (tMBSaw* const osc, int index, Lfloat phase, Lfloat w, Lfloat scale);
+    void    tMBSaw_place_step_dd_noBuffer (tMBSaw const osc, int index, Lfloat phase, Lfloat w, Lfloat scale);
 
     // Tick function for `tMBSaw`
     Lfloat  tMBSaw_tick                   (tMBSaw const osc);
@@ -1242,7 +1242,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #else
-    void    tMBSawPulse_place_step_dd_noBuffer (tMBSawPulse* const osc, int index, Lfloat phase, Lfloat inv_w,
+    void    tMBSawPulse_place_step_dd_noBuffer (tMBSawPulse const osc, int index, Lfloat phase, Lfloat inv_w,
                                                 Lfloat scale);
 #endif
     // Tick function for `tMBSawPulse`

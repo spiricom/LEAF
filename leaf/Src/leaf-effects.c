@@ -389,8 +389,8 @@ void tTalkboxLfloat_initToPool (tTalkboxLfloat* const voc, int bufsize, tMempool
     
     v->sampleRate = leaf->sampleRate;
 
-    tTalkboxLfloat_update(voc);
-    tTalkboxLfloat_suspend(voc);
+    tTalkboxLfloat_update(*voc);
+    tTalkboxLfloat_suspend(*voc);
 }
 
 void tTalkboxLfloat_free (tTalkboxLfloat* const voc)
@@ -698,7 +698,7 @@ void tVocoder_initToPool (tVocoder* const voc, tMempool* const mp)
     v->param[6] = 0.6667f;//freq range
     v->param[7] = 0.33f;  //num bands
     
-    tVocoder_update(voc);
+    tVocoder_update(*voc);
 }
 
 void tVocoder_free (tVocoder* const voc)
@@ -1367,7 +1367,7 @@ void tPitchShift_initToPool (tPitchShift* const psr, tDualPitchDetector* const d
     ps->sampleRate = leaf->sampleRate;
     
     tSOLAD_initToPool(&ps->sola, pow(2.0, ceil(log2(ps->bufSize * 2.0))), mp);
-    tSOLAD_setPitchFactor(&ps->sola, DEFPITCHRATIO);
+    tSOLAD_setPitchFactor(ps->sola, DEFPITCHRATIO);
 }
 
 void tPitchShift_free (tPitchShift* const psr)
@@ -1487,7 +1487,7 @@ Lfloat tSimpleRetune_tick(tSimpleRetune const r, Lfloat sample)
     {
         for (int i = 0; i < r->numVoices; ++i)
         {
-            r->shiftFunction(&r->ps[i], r->shiftValues[i], r->inBuffer, r->outBuffer);
+            r->shiftFunction(r->ps[i], r->shiftValues[i], r->inBuffer, r->outBuffer);
         }
         r->index = 0;
     }
@@ -1507,7 +1507,8 @@ void tSimpleRetune_setNumVoices(tSimpleRetune const r, int numVoices)
     Lfloat minInputFreq = r->minInputFreq;
     Lfloat maxInputFreq = r->maxInputFreq;
     tMempool mempool = r->mempool;
-    
+
+    /************ FIX HERE *************/
     tSimpleRetune_free(r);
     tSimpleRetune_initToPool(r, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
 }
@@ -1535,15 +1536,15 @@ void tSimpleRetune_tuneVoice(tSimpleRetune const r,  int voice, Lfloat t)
 
 Lfloat tSimpleRetune_getInputFrequency (tSimpleRetune const r)
 {
-    return tDualPitchDetector_getFrequency(&r->dp);
+    return tDualPitchDetector_getFrequency(r->dp);
 }
 
 void tSimpleRetune_setSampleRate (tSimpleRetune const r, Lfloat sr)
 {
-    tDualPitchDetector_setSampleRate(&r->dp, sr);
+    tDualPitchDetector_setSampleRate(r->dp, sr);
     for (int i = 0; i < r->numVoices; ++i)
     {
-        tPitchShift_setSampleRate(&r->ps[i], sr);
+        tPitchShift_setSampleRate(r->ps[i], sr);
     }
 }
 
@@ -1577,11 +1578,11 @@ void tRetune_initToPool (tRetune* const rt, int numVoices, Lfloat minInputFreq, 
     
     r->minInputFreq = minInputFreq;
     r->maxInputFreq = maxInputFreq;
-    tDualPitchDetector_initToPool(&r->dp, r->minInputFreq, r->maxInputFreq, r->pdBuffer, 2048, mp);
+    tDualPitchDetector_initToPool(r->dp, r->minInputFreq, r->maxInputFreq, r->pdBuffer, 2048, mp);
 
     for (int i = 0; i < r->numVoices; ++i)
     {
-        tPitchShift_initToPool(&r->ps[i], &r->dp, r->bufSize, mp);
+        tPitchShift_initToPool(&r->ps[i], r->dp, r->bufSize, mp);
         r->outBuffers[i] = (Lfloat*) mpool_calloc(sizeof(Lfloat) * r->bufSize, m);
     }
     
@@ -1592,7 +1593,7 @@ void tRetune_free (tRetune* const rt)
 {
     _tRetune* r = *rt;
     
-    tDualPitchDetector_free(&r->dp);
+    tDualPitchDetector_free(r->dp);
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_free(&r->ps[i]);
@@ -1609,7 +1610,7 @@ void tRetune_free (tRetune* const rt)
 
 Lfloat* tRetune_tick(tRetune const r, Lfloat sample)
 {
-    tDualPitchDetector_tick(r->dp, sample);
+    tDualPitchDetector_tick(*r->dp, sample);
     
     r->inBuffer[r->index] = sample;
     for (int i = 0; i < r->numVoices; ++i)
@@ -1623,7 +1624,7 @@ Lfloat* tRetune_tick(tRetune const r, Lfloat sample)
     {
         for (int i = 0; i < r->numVoices; ++i)
         {
-            r->shiftFunction(&r->ps[i], r->shiftValues[i], r->inBuffer, r->outBuffers[i]);
+            r->shiftFunction(r->ps[i], r->shiftValues[i], r->inBuffer, r->outBuffers[i]);
         }
         r->index = 0;
     }
@@ -1639,7 +1640,7 @@ void tRetune_setMode (tRetune const r, int mode)
 
 void tRetune_setPickiness (tRetune const r, Lfloat p)
 {
-    tDualPitchDetector_setPeriodicityThreshold(r->dp, p);
+    tDualPitchDetector_setPeriodicityThreshold(*r->dp, p);
 }
 
 void tRetune_setNumVoices(tRetune const r, int numVoices)
@@ -1648,7 +1649,8 @@ void tRetune_setNumVoices(tRetune const r, int numVoices)
     Lfloat minInputFreq = r->minInputFreq;
     Lfloat maxInputFreq = r->maxInputFreq;
     tMempool mempool = r->mempool;
-    
+
+    /******* FIX HERE ********/
     tRetune_free(r);
     tRetune_initToPool(r, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
 }
@@ -1668,12 +1670,12 @@ void tRetune_tuneVoice(tRetune const r, int voice, Lfloat t)
 
 Lfloat tRetune_getInputFrequency (tRetune const r)
 {
-    return tDualPitchDetector_getFrequency(r->dp);
+    return tDualPitchDetector_getFrequency(*r->dp);
 }
 
 void tRetune_setSampleRate(tRetune const r, Lfloat sr)
 {
-    tDualPitchDetector_setSampleRate(r->dp, sr);
+    tDualPitchDetector_setSampleRate(*r->dp, sr);
     for (int i = 0; i < r->numVoices; ++i)
     {
         tPitchShift_setSampleRate(r->ps[i], sr);
@@ -1756,8 +1758,8 @@ Lfloat tFormantShifter_tick(tFormantShifter const fsr, Lfloat in)
 
 Lfloat tFormantShifter_remove(tFormantShifter const fs, Lfloat in)
 {
-    in = tFeedbackLeveler_tick(&fs->fbl1, in);
-    in = tHighpass_tick(&fs->hp, in * fs->intensity);
+    in = tFeedbackLeveler_tick(fs->fbl1, in);
+    in = tHighpass_tick(fs->hp, in * fs->intensity);
     
 
     Lfloat fa, fb, fc, foma, falph, ford, flamb, tf, fk;
@@ -1882,7 +1884,7 @@ Lfloat tFormantShifter_add(tFormantShifter const fs, Lfloat in)
     // now tf is signal output
     // ...and we're done messing with formants
     //tf = tFeedbackLeveler_tick(&fs->fbl2, tf);
-    tf = tHighpass_tick(&fs->hp2, tanhf(tf));
+    tf = tHighpass_tick(fs->hp2, tanhf(tf));
 
     return tf * fs->invIntensity;
 }
@@ -1918,6 +1920,6 @@ void tFormantShifter_setSampleRate(tFormantShifter const fs, Lfloat sr)
     fs->flamb = -(0.8517f*sqrtf(atanf(0.06583f * fs->sampleRate)) - 0.1916f);
     fs->flpa = powf(0.001f, 10.0f * fs->invSampleRate);
     fs->fmutealph = powf(0.001f, 1.0f * fs->invSampleRate);
-    tHighpass_setSampleRate(&fs->hp, fs->sampleRate);
-    tHighpass_setSampleRate(&fs->hp2, fs->sampleRate);
+    tHighpass_setSampleRate(fs->hp, fs->sampleRate);
+    tHighpass_setSampleRate(fs->hp2, fs->sampleRate);
 }

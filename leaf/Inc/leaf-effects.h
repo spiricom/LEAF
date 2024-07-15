@@ -541,7 +541,7 @@ extern "C" {
     {
         tMempool mempool;
         
-        _tDualPitchDetector* pd;
+        tDualPitchDetector pd;
         tSOLAD sola;
         
         Lfloat* outBuffer;
@@ -682,7 +682,7 @@ extern "C" {
     {
         tMempool mempool;
         
-        tDualPitchDetector dp;
+        tDualPitchDetector* dp;
         Lfloat minInputFreq, maxInputFreq;
         
         tPitchShift* ps;
@@ -695,7 +695,7 @@ extern "C" {
         
         Lfloat* output;
         
-        void (*shiftFunction)(tPitchShift* const, Lfloat, Lfloat*, Lfloat*);
+        void (*shiftFunction)(tPitchShift const, Lfloat, Lfloat*, Lfloat*);
         
         Lfloat* shiftValues;
         int numVoices;

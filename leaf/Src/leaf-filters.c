@@ -60,7 +60,7 @@ void tAllpass_free (tAllpass *const ft)
 
 void tAllpass_setDelay (tAllpass const f, Lfloat delay)
 {
-    tLinearDelay_setDelay(&f->delay, delay);
+    tLinearDelay_setDelay(f->delay, delay);
 }
 
 void tAllpass_setGain (tAllpass const f, Lfloat gain)
@@ -71,7 +71,7 @@ void tAllpass_setGain (tAllpass const f, Lfloat gain)
 Lfloat tAllpass_tick (tAllpass const f, Lfloat input)
 {
     Lfloat s1 = (-f->gain) * f->lastOut + input;
-    Lfloat s2 = tLinearDelay_tick(&f->delay, s1) + (f->gain) * input;
+    Lfloat s2 = tLinearDelay_tick(f->delay, s1) + (f->gain) * input;
 
     f->lastOut = s2;
 
@@ -274,7 +274,7 @@ float tThiranAllpassSOCascade_setCoeff (tThiranAllpassSOCascade const f,
     //f->a[1] = LEAF_clip(-1.999999f, f->a[1], 2.0f);
 
     for (int i = 0; i < f->numActiveFilters; i++) {
-        tAllpassSO_setCoeff(&f->filters[i], f->a[0], f->a[1]);
+        tAllpassSO_setCoeff(f->filters[i], f->a[0], f->a[1]);
         //f->filters[i]->prevSamp = 0.0f;
         //f->filters[i]->prevPrevSamp = 0.0f;
         //probably should adjust the gain of the internal state variables
@@ -290,7 +290,7 @@ Lfloat tThiranAllpassSOCascade_tick (tThiranAllpassSOCascade const f, Lfloat inp
 {
     Lfloat sample = input;
     for (int i = 0; i < f->numActiveFilters; i++) {
-        sample = tAllpassSO_tick(&f->filters[i], sample);
+        sample = tAllpassSO_tick(f->filters[i], sample);
     }
     return sample;
 }
@@ -331,7 +331,7 @@ void tOnePole_initToPool (tOnePole *const ft, Lfloat freq, tMempool *const mp)
 
     f->twoPiTimesInvSampleRate = leaf->twoPiTimesInvSampleRate;
 
-    tOnePole_setFreq(ft, freq);
+    tOnePole_setFreq(*ft, freq);
 }
 
 void tOnePole_free (tOnePole *const ft)
@@ -606,7 +606,7 @@ void tOneZero_initToPool (tOneZero *const ft, Lfloat theZero, tMempool *const mp
     f->lastIn = 0.0f;
     f->lastOut = 0.0f;
     f->invSampleRate = leaf->invSampleRate;
-    tOneZero_setZero(ft, theZero);
+    tOneZero_setZero(*ft, theZero);
 }
 
 void tOneZero_free (tOneZero *const ft)
@@ -1687,7 +1687,7 @@ void tButterworth_free (tButterworth *const ft)
 Lfloat tButterworth_tick (tButterworth const f, Lfloat samp)
 {
     for (int i = 0; i < f->numSVF; ++i)
-        samp = tSVF_tick(&f->svf[i], samp);
+        samp = tSVF_tick(f->svf[i], samp);
 
     return samp;
 }
@@ -1697,7 +1697,7 @@ void tButterworth_setF1 (tButterworth const f, Lfloat f1)
     if (f->f1 < 0.0f || f1 < 0.0f) return;
 
     f->f1 = f1;
-    for (int i = 0; i < f->order; ++i) tSVF_setFreq(&f->svf[i], f1);
+    for (int i = 0; i < f->order; ++i) tSVF_setFreq(f->svf[i], f1);
 }
 
 void tButterworth_setF2 (tButterworth const f, Lfloat f2)
@@ -1707,7 +1707,7 @@ void tButterworth_setF2 (tButterworth const f, Lfloat f2)
     int o = 0;
     if (f->f1 >= 0.0f) o = f->order;
     f->f2 = f2;
-    for (int i = 0; i < f->order; ++i) tSVF_setFreq(&f->svf[i + o], f2);
+    for (int i = 0; i < f->order; ++i) tSVF_setFreq(f->svf[i + o], f2);
 }
 
 void tButterworth_setFreqs (tButterworth const f, Lfloat f1, Lfloat f2)
@@ -1718,7 +1718,7 @@ void tButterworth_setFreqs (tButterworth const f, Lfloat f1, Lfloat f2)
 
 void tButterworth_setSampleRate (tButterworth const f, Lfloat sr)
 {
-    for (int i = 0; i < f->numSVF; ++i) tSVF_setSampleRate(&f->svf[i], sr);
+    for (int i = 0; i < f->numSVF; ++i) tSVF_setSampleRate(f->svf[i], sr);
 }
 
 
@@ -1880,8 +1880,8 @@ void tVZFilter_initToPool (tVZFilter *const vf, VZFilterType type, Lfloat freq,
     f->R2 = f->invG;
     f->R2Plusg = f->R2 + f->g;
     f->g = tanf(PI * f->fc * f->invSampleRate);  // embedded integrator gain (Fig 3.11)
-    tVZFilter_setBandwidth(vf, f->B);
-    tVZFilter_calcCoeffs(vf);
+    tVZFilter_setBandwidth(*vf, f->B);
+    tVZFilter_calcCoeffs(*vf);
     if (leaf->sampleRate > 80000) {
         f->table = __filterTanhTable_96000;
     } else {

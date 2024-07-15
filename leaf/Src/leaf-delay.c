@@ -44,7 +44,7 @@ void    tDelay_initToPool   (tDelay* const dl, uint32_t delay, uint32_t maxDelay
     
     d->gain = 1.0f;
     
-    tDelay_setDelay(dl, d->delay);
+    tDelay_setDelay(*dl, d->delay);
 }
 
 void tDelay_free (tDelay* const dl)
@@ -170,7 +170,7 @@ void tLinearDelay_initToPool  (tLinearDelay* const dl, Lfloat delay, uint32_t ma
     d->inPoint = 0;
     d->outPoint = 0;
     
-    tLinearDelay_setDelay(dl, d->delay);
+    tLinearDelay_setDelay(*dl, d->delay);
 }
 
 void tLinearDelay_free (tLinearDelay* const dl)
@@ -379,7 +379,7 @@ void tHermiteDelay_initToPool  (tHermiteDelay* const dl, Lfloat delay, uint32_t 
     d->inPoint = 0;
     d->outPoint = 0;
 
-    tHermiteDelay_setDelay(dl, d->delay);
+    tHermiteDelay_setDelay(*dl, d->delay);
 }
 
 void tHermiteDelay_free (tHermiteDelay* const dl)
@@ -569,7 +569,7 @@ void tLagrangeDelay_initToPool  (tLagrangeDelay* const dl, Lfloat delay, uint32_
     d->inPoint = 0;
     d->outPoint = 0;
 
-    tLagrangeDelay_setDelay(dl, d->delay);
+    tLagrangeDelay_setDelay(*dl, d->delay);
 }
 
 void tLagrangeDelay_free (tLagrangeDelay* const dl)
@@ -768,7 +768,7 @@ void tAllpassDelay_initToPool  (tAllpassDelay* const dl, Lfloat delay, uint32_t 
     d->inPoint = 0;
     d->outPoint = 0;
     
-    tAllpassDelay_setDelay(dl, d->delay);
+    tAllpassDelay_setDelay(*dl, d->delay);
     
     d->apInput = 0.0f;
 }
@@ -922,7 +922,7 @@ void tTapeDelay_initToPool (tTapeDelay* const dl, Lfloat delay, uint32_t maxDela
     d->inc = 1.0f;
     d->inPoint = 0;
 
-    tTapeDelay_setDelay(dl, delay);
+    tTapeDelay_setDelay(*dl, delay);
 }
 
 void tTapeDelay_free (tTapeDelay* const dl)

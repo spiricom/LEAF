@@ -1116,7 +1116,7 @@ static inline void update_state(tZeroCrossingCollector const z, Lfloat s)
         }
         else
         {
-            tZeroCrossingInfo_updatePeak(&z->_info[z->_pos & z->_mask], s, z->_frame);
+            tZeroCrossingInfo_updatePeak(z->_info[z->_pos & z->_mask], s, z->_frame);
         }
         if (s > z->_peak_update)
         {
@@ -1409,7 +1409,7 @@ void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, Lfloat low
     p->_min_period = (1.0f / highestFreq) * p->sampleRate;
     p->_range = highestFreq / lowestFreq;
     
-    int windowSize = tZeroCrossingCollector_getWindowSize(&p->_zc);
+    int windowSize = tZeroCrossingCollector_getWindowSize(p->_zc);
     tBitset_initToPool(&p->_bits, windowSize, mempool);
     p->_weight = 2.0f / windowSize;
     p->_mid_point = windowSize / 2;
@@ -1873,13 +1873,13 @@ int     tPitchDetector_indeterminate    (tPitchDetector const p)
 
 void    tPitchDetector_setHysteresis    (tPitchDetector const p, Lfloat hysteresis)
 {
-    tPeriodDetector_setHysteresis(&p->_pd, hysteresis);
+    tPeriodDetector_setHysteresis(p->_pd, hysteresis);
 }
 
 void    tPitchDetector_setSampleRate    (tPitchDetector const p, Lfloat sr)
 {
     p->sampleRate = sr;
-    tPeriodDetector_setSampleRate(&p->_pd, p->sampleRate);
+    tPeriodDetector_setSampleRate(p->_pd, p->sampleRate);
 }
 
 static inline Lfloat calculate_frequency(tPitchDetector const p)
@@ -2139,8 +2139,8 @@ void    tDualPitchDetector_setSampleRate (tDualPitchDetector const p, Lfloat sr)
 
 static inline void compute_predicted_frequency(tDualPitchDetector const p)
 {
-    Lfloat f1 = 1.0f / tPeriodDetection_getPeriod(&p->_pd1);
-    Lfloat f2 = tPitchDetector_predictFrequency(&p->_pd2);
+    Lfloat f1 = 1.0f / tPeriodDetection_getPeriod(p->_pd1);
+    Lfloat f2 = tPitchDetector_predictFrequency(p->_pd2);
     if (f2 > 0.0f)
     {
         Lfloat error = f1 * 0.1f;

@@ -756,7 +756,7 @@ Lfloat tCrusher_tick (tCrusher const c, Lfloat input)
     
     sample = LEAF_round(sample, c->rnd);
     
-    sample = tSampleReducer_tick(&c->sReducer, sample);
+    sample = tSampleReducer_tick(c->sReducer, sample);
     
     return sample * c->gain;
     
