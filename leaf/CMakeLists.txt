@@ -1,7 +1,7 @@
 ################################################################################
 ### Selecting CMake minimum version
 
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.26)
 
 ################################################################################
 ### Setting Global Parameters
@@ -56,6 +56,7 @@ SET(PRIVATE_SOURCES_FILES
 )
 
 SET(PUBLIC_HEADERS_FILES
+        "${LIBRARY_BASE_PATH}/leaf-config.h"
         "${LIBRARY_BASE_PATH}/Src/leaf.h"
         "${LIBRARY_BASE_PATH}/Src/leaf-math.h"
         "${LIBRARY_BASE_PATH}/Src/leaf-analysis.h"
@@ -76,13 +77,14 @@ SET(PUBLIC_HEADERS_FILES
         "${LIBRARY_BASE_PATH}/Src/leaf-tables.h"
         "${LIBRARY_BASE_PATH}/Src/leaf-vocal.h"
         "${LIBRARY_BASE_PATH}/leaf.h"
-        "${LIBRARY_BASE_PATH}/leaf-config.h"
+
 )
 
 SET(PRIVATE_HEADERS_FILES
         "${LIBRARY_BASE_PATH}/Externals/d_fft_mayer.h"
         "${LIBRARY_BASE_PATH}/Externals/trigtbl.h"
 )
+
 
 #SET(CMAKE_C_VISIBILITY_PRESET hidden)
 #
