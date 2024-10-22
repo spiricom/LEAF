@@ -24,7 +24,7 @@
 
 #ifndef LEAF_H_INCLUDED
 #define LEAF_H_INCLUDED
-
+#include "leaf-config.h"
 #define LEAF_DEBUG 0
 
 //#if LEAF_DEBUG
@@ -170,7 +170,9 @@ extern "C" {
     void        LEAF_defaultErrorCallback(LEAF* const leaf, LEAFErrorType errorType);
     
     void        LEAF_internalErrorCallback(LEAF* const leaf, LEAFErrorType whichone);
-    
+
+    unsigned int getNextUuid(LEAF*  leaf);
+
     //! Set the callback function for LEAF errors.
     /*!
      @param callback A pointer to the callback function.

@@ -71,3 +71,8 @@ void LEAF_setErrorCallback(LEAF* const leaf, void (*callback)(LEAF* const, LEAFE
 {
     leaf->errorCallback = callback;
 }
+
+unsigned int getNextUuid(LEAF* leaf)
+{
+    return ++leaf->uuid;
+}

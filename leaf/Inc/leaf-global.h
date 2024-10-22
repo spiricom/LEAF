@@ -44,9 +44,9 @@ extern "C" {
         int     errorState[LEAFErrorNil]; //!< An array of flags that indicate which errors have occurred.
         unsigned int allocCount; //!< A count of LEAF memory allocations.
         unsigned int freeCount; //!< A count of LEAF memory frees.
+        unsigned int uuid;
         ///@}
     };
-    
     //==============================================================================
     
 #ifdef __cplusplus
