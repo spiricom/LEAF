@@ -3815,7 +3815,7 @@ void    tTriLFO_initToPool   (tTriLFO* const cy, tMempool* const mp)
     c->phase    =  0;
     c->invSampleRate = leaf->invSampleRate;
     c->invSampleRateTimesTwoTo32 = (c->invSampleRate * TWO_TO_32);
-    tTriLFO_setFreq(cy, 220.0f);
+    tTriLFO_setFreq(c, 220.0f);
 }
 
 void    tTriLFO_free (tTriLFO* const cy)
@@ -4022,7 +4022,7 @@ void    tPlutaQuadOsc_initToPool   (tPlutaQuadOsc* const cy, uint32_t const over
     }
     Lfloat oversampledSamplingRate = (leaf->sampleRate * c->oversamplingRatio);
 
-    Lfloat nyquistFreq = leaf->sampleRate * 0.5f; //nyquist of main leaf sample rate (filter will drop it down to this)
+    Lfloat nyquistFreq = leaf->sampleRate * 0.47f; //nyquist of main leaf sample rate (filter will drop it down to this)
 
     //set up the lowpass for the decimation.
     //butterworth lowpass - would be better to create a butterworth object that is lowpass only and uses tSVFtickLP for efficiency
