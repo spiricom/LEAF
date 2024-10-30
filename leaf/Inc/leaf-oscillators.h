@@ -1839,9 +1839,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     void    tSineTriLFO_setSampleRate (tSineTriLFO const osc, Lfloat sr);
     void    tSineTriLFO_setPhase      (tSineTriLFO const cy, Lfloat phase);
     void    tSineTriLFO_setShape      (tSineTriLFO const cy, Lfloat shape);
-#ifdef __cplusplus
-}
-#endif
+
 
 
 typedef struct _tDampedOscillator
@@ -1874,6 +1872,36 @@ typedef struct _tDampedOscillator
 	void 	tDampedOscillator_reset         (tDampedOscillator const osc);
 
 
+    typedef struct _tPlutaQuadOsc
+    {
+        tMempool mempool;
+        uint32_t oversamplingRatio;
+        uint32_t phase[4];
+        Lfloat biPolarOutputs[4];
+        uint32_t inc[4];
+        Lfloat freq[4];
+        Lfloat fmMatrix[4][4];
+        Lfloat outputAmplitudes[4];
+        tButterworth lowpass;
+        int32_t mask;
+        Lfloat invSampleRateTimesTwoTo32;
+    } _tPlutaQuadOsc;
+
+    typedef _tPlutaQuadOsc* tPlutaQuadOsc;
+
+    // Memory handlers for `tDampedOscillator`
+    void    tPlutaQuadOsc_init          (tPlutaQuadOsc* const osc,  uint32_t oversamplingRatio, LEAF* const leaf);
+    void    tPlutaQuadOsc_initToPool   (tPlutaQuadOsc* const cy, uint32_t oversamplingRatio, tMempool* const mp);
+    void    tPlutaQuadOsc_free          (tPlutaQuadOsc* const osc);
+
+    // Tick function for `tDampedOscillator`
+    Lfloat  tPlutaQuadOsc_tick          (tPlutaQuadOsc const osc);
+    void   tPlutaQuadOsc_setFreq        (tPlutaQuadOsc const c, uint32_t whichOsc, Lfloat freq);
+    void   tPlutaQuadOsc_setFmAmount        (tPlutaQuadOsc const c, uint32_t const whichCarrier, uint32_t const whichModulator, Lfloat const amount);
+    void   tPlutaQuadOsc_setOutputAmplitude        (tPlutaQuadOsc const c, uint32_t const whichOsc, Lfloat const amplitude);
+#ifdef __cplusplus
+}
+#endif
 #endif  // LEAF_OSCILLATORS_H_INCLUDED
 
 //==============================================================================

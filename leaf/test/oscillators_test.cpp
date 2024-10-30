@@ -396,15 +396,15 @@ TEST_CASE("Tests for `tSineTriLFO` object", "[tSineTriLFO]") {
     REQUIRE_NOTHROW(tSineTriLFO_free(&osc));
 }
 
-// TEST_CASE("Tests for `tDampedOscillator` object", "[tDampedOscillator]") {
-//
-//    LEAF leaf;
-//    char leafMemory[65535];
-//    LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
-//
-//    tDampedOscillator osc;
-//    tDampedOscillator_init(&osc, &leaf);
-//
-//    REQUIRE(osc != nullptr);
-//    REQUIRE_NOTHROW(tDampedOscillator_free(&osc));
-//}
+ TEST_CASE("Tests for `tDampedOscillator` object", "[tDampedOscillator]") {
+
+    LEAF leaf;
+    char leafMemory[65535];
+    LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
+
+    tDampedOscillator osc;
+    tDampedOscillator_init(&osc, &leaf);
+
+    REQUIRE(osc != nullptr);
+    REQUIRE_NOTHROW(tDampedOscillator_free(&osc));
+}

@@ -3919,6 +3919,9 @@ void    tSineTriLFO_setPhase (tSineTriLFO const c, Lfloat phase)
 	 tDampedOscillator_initToPool(cy, &leaf->mempool);
  }
 
+
+
+
  void    tDampedOscillator_initToPool  (tDampedOscillator* const cy, tMempool* const mp)
  {
      _tMempool* m = *mp;
@@ -3990,6 +3993,92 @@ void    tSineTriLFO_setPhase (tSineTriLFO const c, Lfloat phase)
   {
 	  c->x_ = c->turns_ratio_;
 	  c->y_ = 0.0f;
-
   }
 
+
+void    tPlutaQuadOsc_init(tPlutaQuadOsc* const cy, uint32_t const oversamplingRatio, LEAF* const leaf)
+{
+    tPlutaQuadOsc_initToPool(cy, oversamplingRatio, &leaf->mempool);
+}
+
+void    tPlutaQuadOsc_initToPool   (tPlutaQuadOsc* const cy, uint32_t const oversamplingRatio, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tPlutaQuadOsc* c = *cy = (_tPlutaQuadOsc*) mpool_alloc(sizeof(_tPlutaQuadOsc), m);
+    c->mempool = m;
+    LEAF* leaf = c->mempool->leaf;
+    c->oversamplingRatio = oversamplingRatio;
+    for (int i = 0; i < 4; i++)
+    {
+        c->inc[i]      =  0;
+        c->phase[i]    =  0;
+        c->biPolarOutputs[i] = 0.0f;
+        c->freq[i] = 0.0f;
+        for (int j = 0; j < 4; j++)
+        {
+            c->fmMatrix[i][j] = 0.0f;
+        }
+        c->outputAmplitudes[i] = 1.0f;
+    }
+    Lfloat oversampledSamplingRate = (leaf->sampleRate * c->oversamplingRatio);
+
+    Lfloat nyquistFreq = leaf->sampleRate * 0.5f; //nyquist of main leaf sample rate (filter will drop it down to this)
+
+    //set up the lowpass for the decimation.
+    //butterworth lowpass - would be better to create a butterworth object that is lowpass only and uses tSVFtickLP for efficiency
+    tButterworth_initToPool(&c->lowpass, 8, 0.0f, nyquistFreq, mp);
+    //correct samplerate to take into account oversampling
+    tButterworth_setSampleRate (c->lowpass, oversampledSamplingRate);
+    //now reset the frequencies with new samplerate
+    tButterworth_setF2 (c->lowpass, nyquistFreq);
+
+    Lfloat invSampleRate = 1.0 / oversampledSamplingRate;
+    c->invSampleRateTimesTwoTo32 = (invSampleRate * TWO_TO_32);
+    for (int i = 0; i < 4; i++)
+    {
+        tPlutaQuadOsc_setFreq(*cy, i, 220.0f);
+    }
+}
+
+Lfloat   tPlutaQuadOsc_tick        (tPlutaQuadOsc const c)
+{
+    Lfloat outputSample = 0.0f;
+    for (int i = 0; i < c->oversamplingRatio; i++)
+    {
+        Lfloat currentSample = 0.0f;
+        for (int j =0; j < 4; j++)
+        {
+            //apply freq modulation
+            Lfloat freqModSum = c->biPolarOutputs[0] * c->fmMatrix[i][0] + c->biPolarOutputs[1] * c->fmMatrix[i][1]+ c->biPolarOutputs[2] * c->fmMatrix[i][2] + c->biPolarOutputs[3] * c->fmMatrix[i][3];
+
+            uint32_t tempInc = c->inc[i] + (uint32_t)(freqModSum * c->invSampleRateTimesTwoTo32);
+            //increment oscillator
+            c->phase[j] += tempInc;
+
+            //get output and add to mix
+            // this version is sawtooth, could be sine or triangle or square too
+            Lfloat out = (c->phase[j] * INV_TWO_TO_32 * 2.0f) - 1.0f;
+            c->biPolarOutputs[i] = out;
+            currentSample += out * c->outputAmplitudes[i];
+        }
+        outputSample = tButterworth_tick(c->lowpass, currentSample); //lowpass before decimation
+    }
+    //only last sample of the oversampled buffer gets used (decimation step)
+    return outputSample * 0.249f;
+}
+
+void   tPlutaQuadOsc_setFreq        (tPlutaQuadOsc const c, uint32_t const whichOsc, Lfloat const freq)
+{
+    c->freq[whichOsc]  = freq;
+    c->inc[whichOsc] = (uint32_t)(freq * c->invSampleRateTimesTwoTo32);
+}
+
+void   tPlutaQuadOsc_setFmAmount        (tPlutaQuadOsc const c, uint32_t const whichCarrier, uint32_t const whichModulator, Lfloat const amount)
+{
+    c->fmMatrix[whichCarrier][whichModulator] = amount;
+}
+
+void   tPlutaQuadOsc_setOutputAmplitude        (tPlutaQuadOsc const c, uint32_t const whichOsc, Lfloat const amplitude)
+{
+    c->outputAmplitudes[whichOsc] = amplitude;
+}

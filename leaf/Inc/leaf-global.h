@@ -33,7 +33,6 @@ extern "C" {
         ///@{ 
         Lfloat   sampleRate; //!< The current audio sample rate. Set with LEAF_setSampleRate().
         Lfloat   invSampleRate; //!< The inverse of the current sample rate.
-        int     blockSize; //!< The audio block size.
         Lfloat   twoPiTimesInvSampleRate; //!<  Two-pi times the inverse of the current sample rate.
         Lfloat   (*random)(void); //!< A pointer to the random() function provided on initialization.
         int     clearOnAllocation; //!< A flag that determines whether memory allocated from the LEAF memory pool will be cleared.
