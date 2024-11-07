@@ -41,6 +41,7 @@ void LEAF_init(LEAF* const leaf, Lfloat sr, char* memory, size_t memorysize, Lfl
     leaf->allocCount = 0;
     
     leaf->freeCount = 0;
+    leaf->uuid = 0;
 }
 
 void LEAF_setSampleRate(LEAF* const leaf, Lfloat sampleRate)

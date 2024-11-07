@@ -539,7 +539,7 @@ Lfloat   tPBSineTriangle_tick          (tPBSineTriangle const  c)
     y += 4.0f * incFloat * (blamp(t1F, incFloat) - blamp(t2F, incFloat));
     y = y * c->shape; // shape handles the inversion so it's in phase with sine (already * -1.0f)
 
-    y = y + (tCycle_tick(&c->sine) * c->oneMinusShape);
+    y = y + (tCycle_tick(c->sine) * c->oneMinusShape);
     
     c->phase += c->inc;
     
@@ -554,7 +554,7 @@ void    tPBSineTriangle_setFreq       (tPBSineTriangle const  c, Lfloat freq)
 {
     c->freq  = freq;
     c->inc = freq * c->invSampleRateTimesTwoTo32;
-    tCycle_setFreq(&c->sine, freq);
+    tCycle_setFreq(c->sine, freq);
 }
 
 void    tPBSineTriangle_setShape       (tPBSineTriangle const  c, Lfloat shape)
