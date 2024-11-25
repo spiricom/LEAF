@@ -3754,3 +3754,96 @@ void tStiffString_pluckNoUpdate(tStiffString const p, Lfloat amp)
 }
 
 
+
+/// Shaker model
+
+void    tShaker_init(tShaker* const pm, LEAF* const leaf)
+{
+    tShaker_initToPool(pm, &leaf->mempool);
+}
+
+void    tShaker_initToPool(tShaker* const pm, tMempool* const mp)
+{
+    _tMempool* m = *mp;
+    _tShaker* p = *pm = (_tShaker*) mpool_alloc(sizeof(_tShaker), m);
+    p->mempool = m;
+
+    LEAF* leaf = p->mempool->leaf;
+    p->rand = leaf->random;
+
+    tBiQuad_initToPool(&p->resonator, mp);
+    tBiQuad_setResonance(&p->resonator, 4500., 0.99, false);
+    tNoise_initToPool(&p->noise, WhiteNoise, mp);
+
+    p->energy = 0.0;
+    p->level = 0.0;
+    p->energyDecay = 0.98;
+    p->soundDecay = 0.95;
+    p->probability = 0.10;
+}
+
+void    tShaker_free(tShaker* const pm)
+{
+    _tShaker* p = *pm;
+    
+    mpool_free((char*)p, p->mempool);
+}
+
+Lfloat   tShaker_tick(tShaker* const pm)
+{
+    _tShaker* p = *pm;
+
+    // exponential decay for system energy
+    p->energy *= p->energyDecay;
+
+    // stochastic particle collision event
+    if(p->rand() < p->probability)
+        p->level += p->energy * p->gain;
+
+    // exponential decay for sound
+    p->level *= p->soundDecay;
+
+    // add noise, filter
+    Lfloat sample    = p->level * tNoise_tick(&p->noise);
+    Lfloat output    = tBiQuad_tick(&p->resonator, sample);
+    
+    return output;
+}
+
+Lfloat     tShaker_excite   (tShaker* const pm, Lfloat energy)
+{ 
+    _tShaker* p = *pm;
+
+     // excite the system
+    p->energy += energy;
+    return p->energy;
+}
+
+void        tShaker_setEnergyDecay   (tShaker *const pm, Lfloat decay) 
+{
+    _tShaker* p = *pm;
+    p->energyDecay = decay;
+}
+
+void        tShaker_setSoundDecay   (tShaker *const pm, Lfloat decay) 
+{
+    _tShaker* p = *pm;
+    p->soundDecay = decay;
+}
+
+void        tShaker_setProbability (tShaker *const pm, Lfloat prob) 
+{
+    _tShaker* p = *pm;
+
+    // set gain correction for number of particles
+    float nBeans = 1024.0 * prob;
+    float gain = (log(nBeans)  / log(4.)) * (40/nBeans);
+
+    p->probability = prob;
+    p->gain = gain;
+}
+
+void        tShaker_setResonance (tShaker *const pm, Lfloat freq, Lfloat radius) {
+   _tShaker* p = *pm;
+    tBiQuad_setResonance(&p->resonator, freq, radius, false);
+}
