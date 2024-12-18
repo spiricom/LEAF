@@ -695,7 +695,7 @@ extern "C" {
         
         Lfloat* output;
         
-        void (*shiftFunction)(tPitchShift* const, Lfloat, Lfloat*, Lfloat*);
+        void (*shiftFunction)(tPitchShift const, Lfloat, Lfloat*, Lfloat*);
         
         Lfloat* shiftValues;
         int numVoices;
