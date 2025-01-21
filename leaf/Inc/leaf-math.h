@@ -751,6 +751,7 @@ static inline Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
 //        }
 //    }
 //    return y * 0.083333333333333f; // divide by 12
+    return 0.0f;
 }
 
 //this is messed up right now, don't use -- JS

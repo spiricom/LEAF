@@ -17,6 +17,8 @@
 
 #endif
 
+
+//this got messed up in the switch of the pointer styles. Likely not working at all right now. -JS
 //==============================================================================
 
 static Lfloat get_port_resistance_for_resistor  (tWDF const r);
@@ -51,8 +53,8 @@ static void wdf_init(tWDF* const wdf, WDFComponentType type, Lfloat value, tWDF*
     LEAF* leaf = r->mempool->leaf;
     
     r->type = type;
-    r->child_left = rL;
-    r->child_right = rR;
+    r->child_left = *rL;
+    r->child_right = *rR;
     r->incident_wave_up = 0.0f;
     r->incident_wave_left = 0.0f;
     r->incident_wave_right = 0.0f;
@@ -63,8 +65,8 @@ static void wdf_init(tWDF* const wdf, WDFComponentType type, Lfloat value, tWDF*
     r->value = value;
     
     tWDF* child;
-    if (r->child_left != NULL) child = r->child_left;
-    else child = r->child_right;
+    if (&r->child_left != NULL) child = &r->child_left;
+    else child = &r->child_right;
     
     if (r->type == Resistor)
     {
@@ -141,7 +143,7 @@ static void wdf_init(tWDF* const wdf, WDFComponentType type, Lfloat value, tWDF*
     }
     else if (r->type == IdealSource)
     {
-        r->port_resistance_up = tWDF_getPortResistance(child);
+        r->port_resistance_up = tWDF_getPortResistance(*child);
         r->port_conductance_up = 1.0f / r->port_resistance_up;
         
         r->get_reflected_wave_down = &get_reflected_wave_for_ideal;
@@ -149,7 +151,7 @@ static void wdf_init(tWDF* const wdf, WDFComponentType type, Lfloat value, tWDF*
     }
     else if (r->type == Diode)
     {
-        r->port_resistance_up = tWDF_getPortResistance(child);
+        r->port_resistance_up = tWDF_getPortResistance(*child);
         r->port_conductance_up = 1.0f / r->port_resistance_up;
         
         r->get_reflected_wave_down = &get_reflected_wave_for_diode;
@@ -157,7 +159,7 @@ static void wdf_init(tWDF* const wdf, WDFComponentType type, Lfloat value, tWDF*
     }
     else if (r->type == DiodePair)
     {
-        r->port_resistance_up = tWDF_getPortResistance(child);
+        r->port_resistance_up = tWDF_getPortResistance(*child);
         r->port_conductance_up = 1.0f / r->port_resistance_up;
         
         r->get_reflected_wave_down = &get_reflected_wave_for_diode_pair;
@@ -188,8 +190,8 @@ void    tWDF_free (tWDF* const wdf)
 Lfloat tWDF_tick(tWDF const r, Lfloat sample, tWDF* const outputPoint, uint8_t paramsChanged)
 {
     tWDF* child;
-    if (r->child_left != NULL) child = r->child_left;
-    else child = r->child_right;
+    if (r->child_left != NULL) child = &r->child_left;
+    else child = &r->child_right;
     
     //step 0 : update port resistances if something changed
     if (paramsChanged) tWDF_getPortResistance(r);
@@ -198,16 +200,16 @@ Lfloat tWDF_tick(tWDF const r, Lfloat sample, tWDF* const outputPoint, uint8_t p
     Lfloat input = sample;
 
     //step 2 : scan the waves up the tree
-    r->incident_wave_up = tWDF_getReflectedWaveUp(child, input);
+    r->incident_wave_up = tWDF_getReflectedWaveUp(*child, input);
 
     //step 3 : do root scattering computation
     r->reflected_wave_up = tWDF_getReflectedWaveDown(r, input, r->incident_wave_up);
 
     //step 4 : propogate waves down the tree
-    tWDF_setIncidentWave(child, r->reflected_wave_up, input);
+    tWDF_setIncidentWave(*child, r->reflected_wave_up, input);
 
     //step 5 : grab whatever voltages or currents we want as outputs
-    return tWDF_getVoltage(outputPoint);
+    return tWDF_getVoltage(*outputPoint);
 }
 
 void tWDF_setValue(tWDF const r, Lfloat value)

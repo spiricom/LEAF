@@ -81,7 +81,7 @@ void    tPluck_initToPool    (tPluck* const pl, Lfloat lowestFrequency, tMempool
     tAllpassDelay_initToPool(&p->delayLine, 0.0f, p->sampleRate * 2, mp);
     tAllpassDelay_clear(p->delayLine);
     
-    tPluck_setFrequency(pl, 220.0f);
+    tPluck_setFrequency(p, 220.0f);
 }
 
 void    tPluck_free (tPluck* const pl)
@@ -641,7 +641,7 @@ void    tLivingString_initToPool    (tLivingString* const pl, Lfloat freq, Lfloa
     tLivingString_setFreq(*pl, freq);
     p->freq = freq;
     tExpSmooth_initToPool(&p->ppSmooth, pickPos, 0.01f, mp); // smoother for pick position
-    tLivingString_setPickPos(pl, pickPos);
+    tLivingString_setPickPos(p, pickPos);
     p->prepIndex=prepIndex;
     tLinearDelay_initToPool(&p->delLF,p->waveLengthInSamples, 2400, mp);
     tLinearDelay_initToPool(&p->delUF,p->waveLengthInSamples, 2400, mp);
@@ -1893,7 +1893,7 @@ void    tLivingString2_initToPool    (tLivingString2* const pl, Lfloat freq, Lfl
     tTwoZero_initToPool(&p->nutFilter, mp);
     tTwoZero_initToPool(&p->prepFilterU, mp);
     tTwoZero_initToPool(&p->prepFilterL, mp);
-    tLivingString2_setBrightness(pl, brightness);
+    tLivingString2_setBrightness(p, brightness);
     tHighpass_initToPool(&p->DCblockerU,8, mp);
     tHighpass_initToPool(&p->DCblockerL,8, mp);
     p->decay=decay;
@@ -2095,7 +2095,7 @@ Lfloat   tLivingString2_tick(tLivingString2 const p, Lfloat input)
     intoLower = LEAF_clip(-1.0f, intoLower, 1.0f);
     tHermiteDelay_tickIn(p->delLB, intoLower);
     // into lower half of string, from nut
-    Lfloat fromNut=-tFeedbackLeveler_tick(p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(p->DCblockerL, tTwoZero_tick(&p->nutFilter, fromLB)));
+    Lfloat fromNut=-tFeedbackLeveler_tick(p->fbLevL, (p->levMode==0?p->decay:1.0f)*tHighpass_tick(p->DCblockerL, tTwoZero_tick(p->nutFilter, fromLB)));
     fromNut = LEAF_clip(-1.0f, fromNut, 1.0f);
     tHermiteDelay_tickIn(p->delLF, fromNut);
     // into upper half of string, from prepPoint, going forwards/upwards
@@ -3532,7 +3532,7 @@ void    tStiffString_initToPool   (tStiffString* const pm, int numModes, tMempoo
     p->decayScalar = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
     p->decayVal = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
     p->nyquistCoeff = (Lfloat *) mpool_alloc(numModes * sizeof(Lfloat), m);
-    tStiffString_updateOutputWeights(pm);
+    tStiffString_updateOutputWeights(p);
 }
 
 

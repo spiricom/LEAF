@@ -207,7 +207,7 @@ void    tNReverb_initToPool     (tNReverb* const rev, Lfloat t60, tMempool* cons
         tLinearDelay_clear(r->allpassDelays[i]);
     }
     
-    tNReverb_setT60(rev, t60);
+    tNReverb_setT60(r, t60);
     r->allpassCoeff = 0.7f;
     r->mix = 0.3f;
 }

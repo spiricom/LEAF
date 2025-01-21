@@ -138,7 +138,7 @@ void    tTriangle_initToPool    (tTriangle* const cy, tMempool* const mp)
     c->invSampleRate = leaf->invSampleRate;
     c->invSampleRateTimesTwoTo32 = (c->invSampleRate * TWO_TO_32);
     c->mask = TRI_TABLE_SIZE - 1;
-    tTriangle_setFreq(cy, 220);
+    tTriangle_setFreq(c, 220);
 }
 
 void    tTriangle_free  (tTriangle* const cy)
@@ -832,7 +832,7 @@ void    tSawOS_initToPool    (tSawOS* const osc, uint8_t OS_ratio, uint8_t filte
 
 		tSVF_initToPool(&c->aaFilter[i], SVFTypeLowpass, (19000.0f / OS_ratio), Qval, mp);
     }
-    tSawOS_setFreq(osc, 220.0f);
+    tSawOS_setFreq(c, 220.0f);
 }
 
 void    tSawOS_free  (tSawOS* const osc)
@@ -1911,10 +1911,9 @@ void tMBSineTri_free(tMBSineTri* const osc)
 //#ifdef ITCMRAM
 //void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
 //#else
-void tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
+static void tMBSineTri_place_dd_noBuffer(tMBSineTri c, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
 //#endif
 {
-	_tMBSineTri* c = *osc;
 	Lfloat r;
 	long i;
 

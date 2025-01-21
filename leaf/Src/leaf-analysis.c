@@ -334,7 +334,7 @@ void tAttackDetection_initToPool (tAttackDetection* const ad, int blocksize, int
     _tAttackDetection* a = *ad = (_tAttackDetection*) mpool_alloc(sizeof(_tAttackDetection), m);
     a->mempool = m;
     
-    atkdtk_init(ad, blocksize, atk, rel);
+    atkdtk_init(a, blocksize, atk, rel);
 }
 
 void tAttackDetection_free (tAttackDetection* const ad)
@@ -467,8 +467,8 @@ void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const 
     s->spectrumbuf = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (SNAC_FRAME_SIZE / 2), m);
     s->biasbuf = (Lfloat*) mpool_calloc(sizeof(Lfloat) * SNAC_FRAME_SIZE, m);
     
-    snac_biasbuf(snac);
-    tSNAC_setOverlap(snac, overlaparg);
+    snac_biasbuf(s);
+    tSNAC_setOverlap(s, overlaparg);
 }
 
 void tSNAC_free (tSNAC* const snac)

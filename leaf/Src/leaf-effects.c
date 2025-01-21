@@ -66,8 +66,8 @@ void tTalkbox_initToPool (tTalkbox* const voc, int bufsize, tMempool* const mp)
     
     v->sampleRate = leaf->sampleRate;
 
-    tTalkbox_update(voc);
-    tTalkbox_suspend(voc);
+    tTalkbox_update(v);
+    tTalkbox_suspend(v);
 }
 
 void tTalkbox_free (tTalkbox* const voc)
@@ -1501,6 +1501,7 @@ void tSimpleRetune_setMode (tSimpleRetune const r, int mode)
     else r->shiftFunction = &tPitchShift_shiftBy;
 }
 
+//currently broken
 void tSimpleRetune_setNumVoices(tSimpleRetune const r, int numVoices)
 {
     int bufSize = r->bufSize;
@@ -1509,8 +1510,8 @@ void tSimpleRetune_setNumVoices(tSimpleRetune const r, int numVoices)
     tMempool mempool = r->mempool;
 
     /************ FIX HERE *************/
-    tSimpleRetune_free(r);
-    tSimpleRetune_initToPool(r, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
+    //tSimpleRetune_free(r);
+    //tSimpleRetune_initToPool(r, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
 }
 
 void tSimpleRetune_setPickiness (tSimpleRetune const r, Lfloat p)
@@ -1642,7 +1643,7 @@ void tRetune_setPickiness (tRetune const r, Lfloat p)
 {
     tDualPitchDetector_setPeriodicityThreshold(*r->dp, p);
 }
-
+//currently broken
 void tRetune_setNumVoices(tRetune const r, int numVoices)
 {
     int bufSize = r->bufSize;
@@ -1651,8 +1652,8 @@ void tRetune_setNumVoices(tRetune const r, int numVoices)
     tMempool mempool = r->mempool;
 
     /******* FIX HERE ********/
-    tRetune_free(r);
-    tRetune_initToPool(r, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
+    //tRetune_free(r);
+    //tRetune_initToPool(r, minInputFreq, maxInputFreq, numVoices, bufSize, &mempool);
 }
 
 void tRetune_tuneVoices(tRetune const r, Lfloat* t)

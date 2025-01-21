@@ -1119,7 +1119,7 @@ void    tAutoSampler_initToPool (tAutoSampler* const as, tBuffer* const b, tMemp
     _tAutoSampler* a = *as = (_tAutoSampler*) mpool_alloc(sizeof(_tAutoSampler), m);
     a->mempool = m;
     
-    tBuffer_setRecordMode(b, RecordOneShot);
+    tBuffer_setRecordMode(*b, RecordOneShot);
     tSampler_initToPool(&a->sampler, b, mp, leaf);
     tSampler_setMode(a->sampler, PlayLoop);
     tEnvelopeFollower_initToPool(&a->ef, 0.05f, 0.9999f, mp);
