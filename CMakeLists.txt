@@ -104,7 +104,7 @@ enable_testing()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 add_subdirectory(test)
-
+add_compile_options( -w )
 #ENABLE_TESTING()
 SET_TARGET_PROPERTIES (
         ${BINARY_NAME} PROPERTIES
