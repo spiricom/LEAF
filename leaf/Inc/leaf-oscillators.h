@@ -1068,7 +1068,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTri
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w);
 #else
-    void    tMBSineTri_place_dd_noBuffer (tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale,
+    void    tMBSineTri_place_dd_noBuffer (tMBSineTri const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale,
                                           Lfloat stepOrSlope, Lfloat w);
 #endif
     // Tick function for `tMBSineTri`

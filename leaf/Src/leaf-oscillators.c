@@ -1911,7 +1911,7 @@ void tMBSineTri_free(tMBSineTri* const osc)
 //#ifdef ITCMRAM
 //void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
 //#else
-static void tMBSineTri_place_dd_noBuffer(tMBSineTri c, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
+void tMBSineTri_place_dd_noBuffer(tMBSineTri c, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w)
 //#endif
 {
 	Lfloat r;
