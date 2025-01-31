@@ -1272,7 +1272,71 @@ typedef struct _tStiffString
     void    tStiffString_setDecayNoUpdate         (tStiffString const, Lfloat decay);
     void    tStiffString_setDecayHighFreqNoUpdate (tStiffString const, Lfloat decayHF);
 
+    //==============================================================================
+    /*!
+    @defgroup tshader tShaker
+    @ingroup physical
+    @brief PhISEM class - borrowed from STK
+    @{
 
+    @fn void    tShaker_init         (tShaker* const, Lfloat offset, Lfloat slope, LEAF* const leaf)
+    @brief Initialize a tShaker to the default mempool of a LEAF instance.
+    @param shaker A pointer to the tShaker to initialize.
+    @param leaf A pointer to the leaf instance.
+
+    @fn void    tShaker_initToPool   (tShaker* const, Lfloat offset, Lfloat slope, tMempool* const)
+    @brief Initialize a tShaker to a specified mempool.
+    @param shaker A pointer to the tShaker to initialize.
+    @param mempool A pointer to the tMempool to use.
+
+    @fn void    tShaker_free         (tShaker* const)
+    @brief Free a tShaker from its mempool.
+    @param shaker A pointer to the tShaker to free.
+
+    @fn Lfloat   tShaker_tick         (tShaker* const, Lfloat input)
+    @brief
+    @param shaker A pointer to the relevant tShaker.
+
+    @fn Lfloat   tShaker_excite        (tShaker* const, Lfloat energy)
+    @brief Excite the system with the given energy.
+    @param shaker A pointer to the relevant tShaker. 
+
+    @} */
+
+    typedef struct _tShaker
+    {
+        tMempool mempool;
+        Lfloat(*rand)(void);
+
+        tNoise noise;
+        tBiQuad resonator;
+
+        Lfloat energyDecay;
+        Lfloat soundDecay;
+        Lfloat probability;
+        Lfloat gain;
+
+        Lfloat energy;
+        Lfloat level;
+  
+    } _tShaker;
+
+    typedef _tShaker *tShaker;
+
+    void tShaker_init(tShaker *const, LEAF *const leaf);
+    void tShaker_initToPool(tShaker *const, tMempool *const);
+    void tShaker_free(tShaker *const);
+
+    Lfloat tShaker_tick(tShaker *const);
+    Lfloat tShaker_excite(tShaker *const, Lfloat energy);
+
+    void tShaker_setEnergyDecay(tShaker *const, Lfloat decay);
+    void tShaker_setSoundDecay(tShaker *const, Lfloat decay);
+    void tShaker_setProbability(tShaker *const, Lfloat prob);
+    void tShaker_setResonance (tShaker *const pm, Lfloat freq, Lfloat radius);
+
+    //==============================================================================
+    
 #ifdef __cplusplus
 }
 #endif
