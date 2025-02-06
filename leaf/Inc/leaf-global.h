@@ -22,7 +22,9 @@ extern "C" {
 #else
 #include "../leaf-config.h"
 #endif
-    
+
+
+ typedef struct _tlookuptable* tlookuptable;
     /*!
      * @ingroup leaf
      * @brief Struct for an instance of LEAF.
@@ -45,6 +47,7 @@ extern "C" {
         unsigned int allocCount; //!< A count of LEAF memory allocations.
         unsigned int freeCount; //!< A count of LEAF memory frees.
         unsigned int uuid;
+        tlookuptable lfoRateTable;
         ///@}
     };
     //==============================================================================

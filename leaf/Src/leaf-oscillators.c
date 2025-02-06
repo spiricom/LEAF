@@ -3705,7 +3705,7 @@ void    tSquareLFO_initToPool   (tSquareLFO* const cy, tMempool* const mp)
     c->mempool = m;
     tIntPhasor_initToPool(&c->phasor,mp);
     tIntPhasor_initToPool(&c->invPhasor,mp); 
-    tSquareLFO_setPulseWidth(cy, 0.5f);
+    tSquareLFO_setPulseWidth(c, 0.5f);
 }
 
 void    tSquareLFO_free (tSquareLFO* const cy)
