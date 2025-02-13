@@ -19,17 +19,17 @@ extern "C" {
     //==============================================================================
 
 
-typedef struct _tlookuptable
+typedef struct _tLookupTable
 {
     uint32_t tableSize;
     float* table;
     tMempool mempool;
-} _tlookuptable;
-typedef _tlookuptable* tlookuptable;
+} _tLookupTable;
+typedef _tLookupTable* tLookupTable;
 
-void tLookupTable_init(tlookuptable*  const tlookuptable, float start, float end, float center, int size, LEAF* const leaf);
+void tLookupTable_init(tLookupTable*  const tlookuptable, float start, float end, float center, int size, LEAF* const leaf);
 
-void tLookupTable_initToPool(tlookuptable*  const tlookuptable, float start, float end, float center, int size, tMempool* const mempool);
+void tLookupTable_initToPool(tLookupTable*  const tlookuptable, float start, float end, float center, int size, tMempool* const mempool);
 
     /*!
      @ingroup tables
