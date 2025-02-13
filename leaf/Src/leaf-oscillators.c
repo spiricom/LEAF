@@ -738,6 +738,8 @@ void    tPBSawSquare_initToPool    (tPBSawSquare* const osc, tMempool* const mp)
     c->inc      =  0;
     c->phase    =  0;
     c->freq = 0.0f;
+    c->shape = 0.0f;
+    c->oneMinusShape = 1.0f;
 
 }
 
@@ -3705,8 +3707,8 @@ void    tSquareLFO_initToPool   (tSquareLFO* const cy, tMempool* const mp)
 void    tSquareLFO_free (tSquareLFO* const cy)
 {
     _tSquareLFO* c = *cy;
-    tIntPhasor_free(&c->phasor);
-    tIntPhasor_free(&c->invPhasor);
+    tIntPhasor_free(c->phasor);
+    tIntPhasor_free(c->invPhasor);
     mpool_free((char*)c, c->mempool);
 }
 

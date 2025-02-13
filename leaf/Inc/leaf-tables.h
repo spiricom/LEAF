@@ -12,13 +12,25 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
-    //==============================================================================
-    
+
+//==============================================================================
 #include "leaf-math.h"
-    
+
     //==============================================================================
-    
+
+
+typedef struct _tlookuptable
+{
+    uint32_t tableSize;
+    float* table;
+    tMempool mempool;
+} _tlookuptable;
+typedef _tlookuptable* tlookuptable;
+
+void tLookupTable_init(tlookuptable*  const tlookuptable, float start, float end, float center, int size, LEAF* const leaf);
+
+void tLookupTable_initToPool(tlookuptable*  const tlookuptable, float start, float end, float center, int size, tMempool* const mempool);
+
     /*!
      @ingroup tables
      @{
