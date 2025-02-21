@@ -22,7 +22,9 @@ extern "C" {
 #else
 #include "../leaf-config.h"
 #endif
-    
+
+
+ typedef struct _tLookupTable* tLookupTable;
     /*!
      * @ingroup leaf
      * @brief Struct for an instance of LEAF.
@@ -43,9 +45,13 @@ extern "C" {
         int     errorState[LEAFErrorNil]; //!< An array of flags that indicate which errors have occurred.
         unsigned int allocCount; //!< A count of LEAF memory allocations.
         unsigned int freeCount; //!< A count of LEAF memory frees.
+        unsigned int uuid;
+        tLookupTable lfoRateTable;
+        tLookupTable envTimeTable;
+        tLookupTable resTable;
+
         ///@}
     };
-    
     //==============================================================================
     
 #ifdef __cplusplus

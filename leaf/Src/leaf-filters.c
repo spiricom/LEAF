@@ -1332,7 +1332,7 @@ void tSVF_LP_initToPool (tSVF_LP *const svff, Lfloat freq, Lfloat Q, tMempool *c
     }
 }
 
-void tSVF_LP_free (tSVF_LP *const svff)
+void tSVF_LP_free (tSVF_LP* const svff)
 {
     _tSVF_LP *svf = *svff;
     mpool_free((char *) svf, svf->mempool);
