@@ -666,7 +666,7 @@ extern "C" {
         tMempool mempool;
         
         Lfloat gain;
-        Lfloat a0,a1;
+        Lfloat a1;
         Lfloat b0,b1;
         
         Lfloat lastIn, lastOut;

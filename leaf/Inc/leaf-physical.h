@@ -1273,6 +1273,44 @@ typedef struct _tStiffString
     void    tStiffString_setDecayHighFreqNoUpdate (tStiffString const, Lfloat decayHF);
 
 
+
+
+
+    typedef struct _tStereoRotation
+    {
+        tMempool mempool;
+        Lfloat angle;
+        Lfloat vcaoutx;
+        Lfloat vcaouty;
+        tHighpass hip1;
+        tHighpass hip2;
+        Lfloat rotGain;
+        tLagrangeDelay rotDelayx;
+        tLagrangeDelay rotDelayy;
+        Lfloat feedbackFactorx;
+        Lfloat feedbackFactory;
+    } _tStereoRotation;
+
+    typedef _tStereoRotation* tStereoRotation;
+
+    void    tStereoRotation_init                     (tStereoRotation* const, LEAF* const leaf);
+
+    void    tStereoRotation_initToPool                     (tStereoRotation* const rr, tMempool* const mp);
+
+    void    tStereoRotation_tick                    (tStereoRotation const r, float* input, float* output);
+
+    void    tStereoRotation_setAngle                    (tStereoRotation const r, float input);
+
+
+    void    tStereoRotation_setDelayX                    (tStereoRotation const r, float time);
+
+
+    void    tStereoRotation_setDelayY                    (tStereoRotation const r, float time);
+
+
+    void    tStereoRotation_setGain                   (tStereoRotation const r, float gain);
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -3754,3 +3754,79 @@ void tStiffString_pluckNoUpdate(tStiffString const p, Lfloat amp)
 }
 
 
+void    tStereoRotation_init                     (tStereoRotation* const r, LEAF* const leaf)
+{
+    tStereoRotation_initToPool                     (r, &leaf->mempool);
+}
+
+
+void    tStereoRotation_initToPool                     (tStereoRotation* const rr, tMempool* const mp)
+{
+    _tMempool *m = *mp;
+    _tStereoRotation *r = *rr = (_tStereoRotation *) mpool_alloc(sizeof(_tStereoRotation), m);
+    r->mempool = m;
+    LEAF *leaf = r->mempool->leaf;
+
+
+    r->angle = 0.0f;
+    r->vcaoutx = 0.0f;
+    r->vcaouty = 0.0f;
+
+    tHighpass_initToPool(&r->hip1, 10.0f, mp);
+    tHighpass_initToPool(&r->hip2, 10.0f, mp);
+    r->rotGain = 0.9995;
+    tLagrangeDelay_initToPool(&r->rotDelayx, 50.0f, 2000.0f, mp);
+    tLagrangeDelay_initToPool(&r->rotDelayy, 50.0f, 2000.0f, mp);
+    r->feedbackFactorx * 0.9995f;
+    r->feedbackFactory * 0.9995f;
+
+}
+
+void    tStereoRotation_tick                    (tStereoRotation const r, float* input, float* output)
+{
+
+
+    float samplex = (input[0] + r->vcaoutx);
+    float sampley = (input[1] + r->vcaouty);
+
+    samplex = tHighpass_tick(r->hip1, samplex * r->rotGain);
+    sampley = tHighpass_tick(r->hip2, sampley * r->rotGain);
+    //    float samplex = (input[0] + vcaoutx);
+    //    float sampley = (input[1] + vcaouty);
+
+    float rotOutx = (samplex * cosf(r->angle)) - (sampley * sinf(r->angle));
+    float rotOuty = (samplex * sinf(r->angle)) + (sampley * cosf(r->angle));
+
+    float delayoutx = tLagrangeDelay_tick(r->rotDelayx, rotOutx);
+    float delayouty = tLagrangeDelay_tick(r->rotDelayy, rotOuty);
+
+
+    float filteroutx = delayoutx;
+     float filterouty = delayouty;
+    r->vcaoutx = filteroutx * r->feedbackFactorx;
+    r->vcaouty = filterouty * r->feedbackFactory;
+
+    output[0] = r->vcaoutx;
+    output[1] = r->vcaouty;
+    return;
+}
+
+void    tStereoRotation_setAngle                    (tStereoRotation const r, float input)
+{
+    r->angle = input * TWO_PI;
+}
+
+void    tStereoRotation_setDelayX                    (tStereoRotation const r, float time)
+{
+    tLagrangeDelay_tick(r->rotDelayx, time);
+}
+
+void    tStereoRotation_setDelayY                    (tStereoRotation const r, float time)
+{
+    tLagrangeDelay_tick(r->rotDelayy, time);
+}
+
+void    tStereoRotation_setGain                   (tStereoRotation const r, float gain)
+{
+    r->rotGain = gain;
+}

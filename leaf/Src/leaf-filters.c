@@ -797,8 +797,7 @@ void tPoleZero_initToPool (tPoleZero *const pzf, tMempool *const mp)
     f->mempool = m;
 
     f->gain = 1.0f;
-    f->b0 = 1.0;
-    f->a0 = 1.0;
+    f->b0 = 1.0f;
 
     f->lastIn = 0.0f;
     f->lastOut = 0.0f;
@@ -851,7 +850,6 @@ void tPoleZero_setThiranAllpassSOCascade (tPoleZero const f, Lfloat coeff)
 
     f->b0 = coeff;
     f->b1 = 1.0f;
-    f->a0 = 1.0f;
     f->a1 = coeff;
 }
 
@@ -864,7 +862,6 @@ void tPoleZero_setBlockZero (tPoleZero const f, Lfloat thePole)
 
     f->b0 = 1.0f;
     f->b1 = -1.0f;
-    f->a0 = 1.0f;
     f->a1 = -thePole;
 }
 

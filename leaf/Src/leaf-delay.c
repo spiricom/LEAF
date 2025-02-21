@@ -214,7 +214,7 @@ Lfloat   tLinearDelay_tick (tLinearDelay const d, Lfloat input)
 void   tLinearDelay_tickIn (tLinearDelay const d, Lfloat input)
 {
     d->buff[d->inPoint] = input * d->gain;
-
+    d->lastIn = input;
     // Increment input pointer modulo length.
     if (++(d->inPoint) == d->maxDelay )    d->inPoint = 0;
 }
