@@ -257,8 +257,8 @@ extern "C" {
     typedef _tOnePole* tOnePole;
 
     // Memory handlers for `tOnePole`
-    void    tOnePole_init            (tOnePole* const, Lfloat thePole, LEAF* const leaf);
-    void    tOnePole_initToPool      (tOnePole* const, Lfloat thePole, tMempool* const);
+    void    tOnePole_init            (tOnePole* const, Lfloat freq, LEAF* const leaf);
+    void    tOnePole_initToPool      (tOnePole* const, Lfloat freq, tMempool* const);
     void    tOnePole_free            (tOnePole* const);
 
     // Tick function for `tOnePole`

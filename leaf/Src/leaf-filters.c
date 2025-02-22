@@ -366,14 +366,14 @@ void tOnePole_setPole (tOnePole const f, Lfloat thePole)
 void tOnePole_setFreq (tOnePole const f, Lfloat freq)
 {
     f->freq = freq;
-    f->a1 = f->freq * f->twoPiTimesInvSampleRate;
-    f->a1 = LEAF_clip(0.0f, f->a1, 1.0f);
-    f->b0 = 1.0f - f->a1;
+    f->b0 = f->freq * f->twoPiTimesInvSampleRate;
+    f->b0 = LEAF_clip(0.0f, f->b0, 1.0f);
+    f->a1 = 1.0f - f->b0;
 }
 
 void tOnePole_setCoefficients (tOnePole const f, Lfloat b0, Lfloat a1)
 {
-    if (a1 >= 1.0f) a1 = 0.999999f;
+    if (b0 >= 1.0f) b0 = 0.999999f;
     f->b0 = b0;
     f->a1 = a1;
 }

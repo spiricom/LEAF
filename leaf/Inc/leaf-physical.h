@@ -1287,6 +1287,8 @@ typedef struct _tStiffString
         Lfloat rotGain;
         tLagrangeDelay rotDelayx;
         tLagrangeDelay rotDelayy;
+        tOnePole filtx;
+        tOnePole filty;
         Lfloat feedbackFactorx;
         Lfloat feedbackFactory;
     } _tStereoRotation;
@@ -1294,20 +1296,15 @@ typedef struct _tStiffString
     typedef _tStereoRotation* tStereoRotation;
 
     void    tStereoRotation_init                     (tStereoRotation* const, LEAF* const leaf);
-
     void    tStereoRotation_initToPool                     (tStereoRotation* const rr, tMempool* const mp);
-
-    void    tStereoRotation_tick                    (tStereoRotation const r, float* input, float* output);
-
+    void    tStereoRotation_tick                    (tStereoRotation const r, float* samples);
     void    tStereoRotation_setAngle                    (tStereoRotation const r, float input);
-
-
     void    tStereoRotation_setDelayX                    (tStereoRotation const r, float time);
-
-
     void    tStereoRotation_setDelayY                    (tStereoRotation const r, float time);
-
-
+    void    tStereoRotation_setFeedbackX                (tStereoRotation const r, float feedbackx);
+    void    tStereoRotation_setFeedbackY                    (tStereoRotation const r, float feedbacky);
+    void    tStereoRotation_setFilterX                    (tStereoRotation const r, float freq);
+    void    tStereoRotation_setFilterY                    (tStereoRotation const r, float freq);
     void    tStereoRotation_setGain                   (tStereoRotation const r, float gain);
 
 

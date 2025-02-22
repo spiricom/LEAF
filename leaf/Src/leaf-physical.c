@@ -3774,6 +3774,8 @@ void    tStereoRotation_initToPool                     (tStereoRotation* const r
 
     tHighpass_initToPool(&r->hip1, 10.0f, mp);
     tHighpass_initToPool(&r->hip2, 10.0f, mp);
+    tOnePole_initToPool(&r->filtx, 8000.0f, mp);
+    tOnePole_initToPool(&r->filty, 8000.0f, mp);
     r->rotGain = 0.9999f;
     tLagrangeDelay_initToPool(&r->rotDelayx, 100.0f, 2000, mp);
     tLagrangeDelay_initToPool(&r->rotDelayy, 100.0f, 2000, mp);
@@ -3782,12 +3784,12 @@ void    tStereoRotation_initToPool                     (tStereoRotation* const r
 
 }
 
-void    tStereoRotation_tick                    (tStereoRotation const r, float* input, float* output)
+void    tStereoRotation_tick                    (tStereoRotation const r, float* samples)
 {
 
 
-    float samplex = (input[0] + r->vcaoutx);
-    float sampley = (input[1] + r->vcaouty);
+    float samplex = (samples[0] + r->vcaoutx);
+    float sampley = (samples[1] + r->vcaouty);
 
     samplex = tHighpass_tick(r->hip1, samplex * r->rotGain);
     sampley = tHighpass_tick(r->hip2, sampley * r->rotGain);
@@ -3801,13 +3803,13 @@ void    tStereoRotation_tick                    (tStereoRotation const r, float*
     float delayouty = tLagrangeDelay_tick(r->rotDelayy,tanhf( rotOuty));
 
 
-    float filteroutx = delayoutx;
-     float filterouty = delayouty;
+    float filteroutx = tOnePole_tick(r->filtx, delayoutx);
+    float filterouty = tOnePole_tick(r->filty, delayouty);
     r->vcaoutx = filteroutx * r->feedbackFactorx;
     r->vcaouty = filterouty * r->feedbackFactory;
 
-    output[0] = r->vcaoutx;
-    output[1] = r->vcaouty;
+    samples[0] = r->vcaoutx;
+    samples[1] = r->vcaouty;
     return;
 }
 
@@ -3820,13 +3822,34 @@ void    tStereoRotation_setAngle                    (tStereoRotation const r, fl
 
 void    tStereoRotation_setDelayX                    (tStereoRotation const r, float time)
 {
-    tLagrangeDelay_tick(r->rotDelayx, time);
+    tLagrangeDelay_setDelay(r->rotDelayx, time);
 }
 
 void    tStereoRotation_setDelayY                    (tStereoRotation const r, float time)
 {
-    tLagrangeDelay_tick(r->rotDelayy, time);
+    tLagrangeDelay_setDelay(r->rotDelayy, time);
 }
+
+
+void    tStereoRotation_setFeedbackX                (tStereoRotation const r, float feedbackx)
+{
+    r->feedbackFactorx = feedbackx;
+}
+void    tStereoRotation_setFeedbackY                    (tStereoRotation const r, float feedbacky)
+{
+    r->feedbackFactory = feedbacky;
+}
+
+void    tStereoRotation_setFilterX                    (tStereoRotation const r, float freq)
+{
+    tOnePole_setFreq(r->filtx, freq);
+}
+
+void    tStereoRotation_setFilterY                    (tStereoRotation const r, float freq)
+{
+    tOnePole_setFreq(r->filty, freq);
+}
+
 
 void    tStereoRotation_setGain                   (tStereoRotation const r, float gain)
 {
