@@ -3774,11 +3774,11 @@ void    tStereoRotation_initToPool                     (tStereoRotation* const r
 
     tHighpass_initToPool(&r->hip1, 10.0f, mp);
     tHighpass_initToPool(&r->hip2, 10.0f, mp);
-    r->rotGain = 0.9995;
-    tLagrangeDelay_initToPool(&r->rotDelayx, 50.0f, 2000.0f, mp);
-    tLagrangeDelay_initToPool(&r->rotDelayy, 50.0f, 2000.0f, mp);
-    r->feedbackFactorx * 0.9995f;
-    r->feedbackFactory * 0.9995f;
+    r->rotGain = 0.9999f;
+    tLagrangeDelay_initToPool(&r->rotDelayx, 100.0f, 2000, mp);
+    tLagrangeDelay_initToPool(&r->rotDelayy, 100.0f, 2000, mp);
+    r->feedbackFactorx  = 0.9995f;
+    r->feedbackFactory  =  0.9995f;
 
 }
 
@@ -3797,8 +3797,8 @@ void    tStereoRotation_tick                    (tStereoRotation const r, float*
     float rotOutx = (samplex * cosf(r->angle)) - (sampley * sinf(r->angle));
     float rotOuty = (samplex * sinf(r->angle)) + (sampley * cosf(r->angle));
 
-    float delayoutx = tLagrangeDelay_tick(r->rotDelayx, rotOutx);
-    float delayouty = tLagrangeDelay_tick(r->rotDelayy, rotOuty);
+    float delayoutx = tLagrangeDelay_tick(r->rotDelayx, tanhf(rotOutx));
+    float delayouty = tLagrangeDelay_tick(r->rotDelayy,tanhf( rotOuty));
 
 
     float filteroutx = delayoutx;
@@ -3810,6 +3810,8 @@ void    tStereoRotation_tick                    (tStereoRotation const r, float*
     output[1] = r->vcaouty;
     return;
 }
+
+
 
 void    tStereoRotation_setAngle                    (tStereoRotation const r, float input)
 {
