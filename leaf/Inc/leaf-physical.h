@@ -1298,6 +1298,8 @@ typedef struct _tStiffString
     void    tStereoRotation_init                     (tStereoRotation* const, LEAF* const leaf);
     void    tStereoRotation_initToPool                     (tStereoRotation* const rr, tMempool* const mp);
     void    tStereoRotation_tick                    (tStereoRotation const r, float* samples);
+    void    tStereoRotation_tickIn                    (tStereoRotation const r, float* samples);
+    void    tStereoRotation_tickOut                    (tStereoRotation const r, float* samples);
     void    tStereoRotation_setAngle                    (tStereoRotation const r, float input);
     void    tStereoRotation_setDelayX                    (tStereoRotation const r, float time);
     void    tStereoRotation_setDelayY                    (tStereoRotation const r, float time);
