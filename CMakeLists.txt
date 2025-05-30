@@ -98,7 +98,7 @@ TARGET_SOURCES( ${BINARY_NAME} PRIVATE  ${PRIVATE_SOURCES_FILES} ${PRIVATE_HEADE
 target_include_directories(${BINARY_NAME} PUBLIC  "${LIBRARY_BASE_PATH}/leaf"
         "${LIBRARY_BASE_PATH}/leaf/Inc"
         "${LIBRARY_BASE_PATH}/leaf/Externals")
-
+target_compile_options(${BINARY_NAME} PRIVATE "-Wno-narrowing")
 enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")

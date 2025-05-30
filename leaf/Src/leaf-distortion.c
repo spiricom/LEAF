@@ -28,14 +28,14 @@
 // Sample-Rate reducer
 //============================================================================================================
 
-void tSampleReducer_init (tSampleReducer* const sr, LEAF* const leaf)
+void tSampleReducer_init (tSampleReducer** const sr, LEAF* const leaf)
 {
     tSampleReducer_initToPool(sr, &leaf->mempool);
 }
 
-void tSampleReducer_initToPool (tSampleReducer** const sr, tMempool** const mp)
+void  tSampleReducer_initToPool (tSampleReducer** const sr, tMempool** const mp)
 {
-    _tMempool* m = *mp;
+    tMempool* m = *mp;
     tSampleReducer* s = *sr = (tSampleReducer*) mpool_alloc(sizeof(tSampleReducer), m);
     s->mempool = m;
     
@@ -76,14 +76,14 @@ void tSampleReducer_setRatio(tSampleReducer* const s, Lfloat ratio)
 // Oversampler
 //============================================================================================================
 // Latency is equal to the phase length (numTaps / ratio)
-void tOversampler_init (tOversampler* const osr, int ratio, int extraQuality, LEAF* const leaf)
+void tOversampler_init(tOversampler** const osr, int ratio, int extraQuality, LEAF* const leaf)
 {
     tOversampler_initToPool(osr, ratio, extraQuality, &leaf->mempool);
 }
 
-void tOversampler_initToPool (tOversampler** const osr, int maxRatio, int extraQuality, tMempool* const mp)
+void tOversampler_initToPool (tOversampler** const osr, int maxRatio, int extraQuality, tMempool** const mp)
 {
-    _tMempool* m = *mp;
+    tMempool* m = *mp;
     int offset = 0;
     if (extraQuality) offset = 6;
     if (maxRatio == 2 || maxRatio == 4  || maxRatio == 8 ||
@@ -356,14 +356,14 @@ int tOversampler_getLatency(tOversampler* const os)
 // SIMPLER WAVEFOLDER
 //============================================================================================================
 
-void tWavefolder_init (tWavefolder* const wf, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, LEAF* const leaf)
+void tWavefolder_init(tWavefolder** const wf, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, LEAF* const leaf)
 {
     tWavefolder_initToPool   (wf, ffAmount, fbAmount, foldDepth, &leaf->mempool);
 }
 
-void tWavefolder_initToPool (tWavefolder** const wf, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, tMempool* const mp)
+void tWavefolder_initToPool (tWavefolder** const wf, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, tMempool** const mp)
 {
-    _tMempool* m = *mp;
+    tMempool* m = *mp;
     tWavefolder* w = *wf = (tWavefolder*) mpool_alloc(sizeof(tWavefolder), m);
     w->mempool = m;
     tHighpass_initToPool(&w->dcBlock, 1.0f, mp);
@@ -450,7 +450,7 @@ Lfloat tWavefolder_tick(tWavefolder* const w, Lfloat in)
 #endif
     w->FBsample = (ff + fb) - w->foldDepth * tempVal;
     sample = w->FBsample * w->invFBAmount;
-    sample = tHighpass_tick(&w->dcBlock, sample);
+    sample = tHighpass_tick(w->dcBlock, sample);
     return sample;
 }
 
@@ -462,14 +462,14 @@ Lfloat tWavefolder_tick(tWavefolder* const w, Lfloat in)
 //from the paper: Virtual Analog Model of the Lockhart Wavefolder
 //by Fabián Esqueda, Henri Pöntynen, Julian D. Parker and Stefan Bilbao
 
-void tLockhartWavefolder_init (tLockhartWavefolder* const wf, LEAF* const leaf)
+void tLockhartWavefolder_init(tLockhartWavefolder** const wf, LEAF* const leaf)
 {
 	tLockhartWavefolder_initToPool   (wf, &leaf->mempool);
 }
 
-void tLockhartWavefolder_initToPool (tLockhartWavefolder** const wf, tMempool* const mp)
+void tLockhartWavefolder_initToPool (tLockhartWavefolder** const wf, tMempool** const mp)
 {
-    _tMempool* m = *mp;
+    tMempool* m = *mp;
     tLockhartWavefolder* w = *wf = (tLockhartWavefolder*) mpool_alloc(sizeof(tLockhartWavefolder), m);
     w->mempool = m;
     
@@ -713,14 +713,14 @@ Lfloat tLockhartWavefolder_tick(tLockhartWavefolder* const w, Lfloat in)
 #define SCALAR 5000.f
 #define INV_SCALAR 0.0002f
 
-void tCrusher_init (tCrusher* const cr, LEAF* const leaf)
+void tCrusher_init(tCrusher** const cr, LEAF* const leaf)
 {
     tCrusher_initToPool(cr, &leaf->mempool);
 }
 
-void tCrusher_initToPool (tCrusher** const cr, tMempool* const mp)
+void tCrusher_initToPool (tCrusher** const cr, tMempool** const mp)
 {
-    _tMempool* m = *mp;
+    tMempool* m = *mp;
     tCrusher* c = *cr = (tCrusher*) mpool_alloc(sizeof(tCrusher), m);
     c->mempool = m;
     
@@ -756,7 +756,7 @@ Lfloat tCrusher_tick (tCrusher* const c, Lfloat input)
     
     sample = LEAF_round(sample, c->rnd);
     
-    sample = tSampleReducer_tick(&c->sReducer, sample);
+    sample = tSampleReducer_tick(c->sReducer, sample);
     
     return sample * c->gain;
     
@@ -786,5 +786,5 @@ void    tCrusher_setRound (tCrusher* const c, Lfloat rnd)
 void    tCrusher_setSamplingRatio (tCrusher* const c, Lfloat ratio)
 {
     c->srr = ratio;
-    tSampleReducer_setRatio(&c->sReducer, ratio);
+    tSampleReducer_setRatio(c->sReducer, ratio);
 }

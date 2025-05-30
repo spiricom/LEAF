@@ -23,12 +23,12 @@ typedef struct tLookupTable
 {
     uint32_t tableSize;
     float* table;
-    tMempool mempool;
+    tMempool* mempool;
 } tLookupTable;
 
 void tLookupTable_init(tLookupTable**  const tLookupTable, float start, float end, float center, int size, LEAF* const leaf);
 
-void tLookupTable_initToPool(tLookupTable**  const tLookupTable, float start, float end, float center, int size, tMempool* const mempool);
+void tLookupTable_initToPool(tLookupTable**  const tLookupTable, float start, float end, float center, int size, tMempool** const mempool);
 
     /*!
      @ingroup tables

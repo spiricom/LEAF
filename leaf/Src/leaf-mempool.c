@@ -64,7 +64,7 @@ static inline void delink_node(mpool_node_t* node);
 /**
  * create memory pool
  */
-void mpool_create (char* memory, size_t size, _tMempool* pool)
+void mpool_create (char* memory, size_t size, tMempool* pool)
 {
     pool->leaf->header_size = mpool_align(sizeof(mpool_node_t));
     
@@ -90,7 +90,7 @@ void leaf_pool_init(LEAF* const leaf, char* memory, size_t size)
 /**
  * allocate memory from memory pool
  */
-char* mpool_alloc(size_t asize, _tMempool* pool)
+char* mpool_alloc(size_t asize, tMempool* pool)
 {
     pool->leaf->allocCount++;
 #if LEAF_DEBUG
@@ -197,7 +197,7 @@ char* mpool_alloc(size_t asize, _tMempool* pool)
 /**
  * allocate memory from memory pool and also clear that memory to be blank
  */
-char* mpool_calloc(size_t asize, _tMempool* pool)
+char* mpool_calloc(size_t asize, tMempool* pool)
 {
     pool->leaf->allocCount++;
 #if LEAF_DEBUG
@@ -304,7 +304,7 @@ char* leaf_calloc(LEAF* const leaf, size_t size)
     return mpool_calloc(size, &leaf->_internal_mempool);
 }
 
-void mpool_free(char* ptr, _tMempool* pool)
+void mpool_free(char* ptr, tMempool* pool)
 {
     pool->leaf->freeCount++;
 #if LEAF_DEBUG
@@ -385,12 +385,12 @@ void leaf_free(LEAF* const leaf, char* ptr)
     mpool_free(ptr, &leaf->_internal_mempool);
 }
 
-size_t mpool_get_size(_tMempool* pool)
+size_t mpool_get_size(tMempool* pool)
 {
     return pool->msize;
 }
 
-size_t mpool_get_used(_tMempool* pool)
+size_t mpool_get_used(tMempool* pool)
 {
     return pool->usize;
 }
@@ -448,22 +448,22 @@ static inline void delink_node(mpool_node_t* node)
     node->prev = NULL;
 }
 
-void tMempool_init(tMempool* const mp, char* memory, size_t size, LEAF* const leaf)
+void tMempool_init(tMempool** const mp, char* memory, size_t size, LEAF* const leaf)
 {
     tMempool_initToPool(mp, memory, size, &leaf->mempool);
 }
 
-void tMempool_free(tMempool* const mp)
+void tMempool_free(tMempool** const mp)
 {
-    _tMempool* m = *mp;
+    tMempool* m = *mp;
 
     mpool_free((char*)m, m->mempool);
 }
 
-void    tMempool_initToPool     (tMempool* const mp, char* memory, size_t size, tMempool* const mem)
+void    tMempool_initToPool     (tMempool** const mp, char* memory, size_t size, tMempool** const mem)
 {
-    _tMempool* mm = *mem;
-    _tMempool* m = *mp = (_tMempool*) mpool_alloc(sizeof(_tMempool), mm);
+    tMempool* mm = *mem;
+    tMempool* m = *mp = (tMempool*) mpool_alloc(sizeof(tMempool), mm);
     m->leaf = mm->leaf;
     
     mpool_create (memory, size, m);

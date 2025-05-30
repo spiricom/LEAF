@@ -11,7 +11,7 @@ TEST_CASE("Tests for `tCycle` object", "[tCycle]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tCycle osc;
+tCycle* osc;
     tCycle_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -24,7 +24,7 @@ TEST_CASE("Tests for `tTriangle` object", "[tTriangle]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tTriangle osc;
+tTriangle* osc;
     tTriangle_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -37,7 +37,7 @@ TEST_CASE("Tests for `tSquare` object", "[tSquare]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tSquare osc;
+tSquare* osc;
     tSquare_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -50,7 +50,7 @@ TEST_CASE("Tests for `tSawtooth` object", "[tSawtooth]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tSawtooth osc;
+tSawtooth* osc;
     tSawtooth_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -63,7 +63,7 @@ TEST_CASE("Tests for `tPBSineTriangle` object", "[tPBSineTriangle]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tPBSineTriangle osc;
+tPBSineTriangle* osc;
     tPBSineTriangle_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -76,7 +76,7 @@ TEST_CASE("Tests for `tPBTriangle` object", "[tPBTriangle]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tPBTriangle osc;
+tPBTriangle* osc;
     tPBTriangle_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -89,7 +89,7 @@ TEST_CASE("Tests for `tPBPulse` object", "[tPBPulse]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tPBPulse osc;
+tPBPulse* osc;
     tPBPulse_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -102,7 +102,7 @@ TEST_CASE("Tests for `tPBSaw` object", "[tPBSaw]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tPBSaw osc;
+tPBSaw* osc;
     tPBSaw_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -115,7 +115,7 @@ TEST_CASE("Tests for `tPBSawSquare` object", "[tPBSawSquare]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tPBSawSquare osc;
+tPBSawSquare* osc;
     tPBSawSquare_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -128,7 +128,7 @@ TEST_CASE("Tests for `tSawOS` object", "[tSawOS]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tSawOS osc;
+tSawOS* osc;
     tSawOS_init(&osc, 2, 2, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -141,7 +141,7 @@ TEST_CASE("Tests for `tPhasor` object", "[tPhasor]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tPhasor osc;
+tPhasor* osc;
     tPhasor_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -154,13 +154,13 @@ TEST_CASE("Tests for `tNoise` object", "[tNoise]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tNoise osc;
+tNoise* osc;
     tNoise_init(&osc, WhiteNoise, &leaf);
 
     REQUIRE(osc != nullptr);
     REQUIRE_NOTHROW(tNoise_free(&osc));
 
-    tNoise osc2;
+tNoise* osc2;
     tNoise_init(&osc2, PinkNoise, &leaf);
 
     REQUIRE(osc2 != nullptr);
@@ -173,7 +173,7 @@ TEST_CASE("Tests for `tNeuron` object", "[tNeuron]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tNeuron osc;
+tNeuron* osc;
     tNeuron_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -186,7 +186,7 @@ TEST_CASE("Tests for `tMBPulse` object", "[tMBPulse]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tMBPulse osc;
+tMBPulse* osc;
     tMBPulse_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -199,7 +199,7 @@ TEST_CASE("Tests for `tMBTriangle` object", "[tMBTriangle]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tMBTriangle osc;
+tMBTriangle* osc;
     tMBTriangle_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -212,7 +212,7 @@ TEST_CASE("Tests for `tMBSineTri` object", "[tMBSineTri]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tMBSineTri osc;
+tMBSineTri* osc;
     tMBSineTri_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -225,7 +225,7 @@ TEST_CASE("Tests for `tMBSaw` object", "[tMBSaw]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tMBSaw osc;
+tMBSaw* osc;
     tMBSaw_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -238,7 +238,7 @@ TEST_CASE("Tests for `tMBSawPulse` object", "[tMBSawPulse]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tMBSawPulse osc;
+tMBSawPulse* osc;
     tMBSawPulse_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -251,7 +251,7 @@ TEST_CASE("Tests for `tTable` object", "[tTable]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tTable osc;
+tTable* osc;
     Lfloat num[512];
 
     LEAF_generate_sine(num, 512);
@@ -270,7 +270,7 @@ TEST_CASE("Tests for `tWaveTable` object", "[tWaveTable]") {
     Lfloat num[512];
     LEAF_generate_sine(num, 512);
 
-    tWaveTable osc;
+tWaveTable* osc;
     tWaveTable_init(&osc, num, 512, 22050, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -283,13 +283,13 @@ TEST_CASE("Tests for `tWaveOsc` object", "[tWaveOsc]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tWaveTable waveTable;
+tWaveTable* waveTable;
     Lfloat num[512];
     LEAF_generate_sine(num, 512);
 
     tWaveTable_init(&waveTable, num, 512, 22050, &leaf);
 
-    tWaveOsc osc;
+tWaveOsc* osc;
     tWaveOsc_init(&osc, &waveTable, waveTable->numTables, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -305,7 +305,7 @@ TEST_CASE("Tests for `tWaveTableS` object", "[tWaveTableS]") {
     Lfloat num[512];
     LEAF_generate_sine(num, 512);
 
-    tWaveTableS osc;
+tWaveTableS* osc;
     tWaveTableS_init(&osc, num, 512, 22050, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -318,13 +318,13 @@ TEST_CASE("Tests for `tWaveOscS` object", "[tWaveOscS]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tWaveTableS waveTable;
+tWaveTableS* waveTable;
     Lfloat num[512];
     LEAF_generate_sine(num, 512);
 
     tWaveTableS_init(&waveTable, num, 512, 22050, &leaf);
 
-    tWaveOscS osc;
+tWaveOscS* osc;
     tWaveOscS_init(&osc, &waveTable, waveTable->numTables, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -337,7 +337,7 @@ TEST_CASE("Tests for `tIntPhasor` object", "[tIntPhasor]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tIntPhasor osc;
+tIntPhasor* osc;
     tIntPhasor_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -350,7 +350,7 @@ TEST_CASE("Tests for `tSquareLFO` object", "[tSquareLFO]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tSquareLFO osc;
+tSquareLFO* osc;
     tSquareLFO_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -363,7 +363,7 @@ TEST_CASE("Tests for `tSawSquareLFO` object", "[tSawSquareLFO]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tSawSquareLFO osc;
+tSawSquareLFO* osc;
     tSawSquareLFO_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -376,7 +376,7 @@ TEST_CASE("Tests for `tTriLFO` object", "[tTriLFO]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tTriLFO osc;
+tTriLFO* osc;
     tTriLFO_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);
@@ -389,7 +389,7 @@ TEST_CASE("Tests for `tSineTriLFO` object", "[tSineTriLFO]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    tSineTriLFO osc;
+tSineTriLFO* osc;
     tSineTriLFO_init(&osc, &leaf);
 
     REQUIRE(osc != nullptr);

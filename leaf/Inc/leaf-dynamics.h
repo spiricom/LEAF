@@ -37,17 +37,17 @@ extern "C" {
      @brief Standard compressor.
      @{
      
-     @fn void    tCompressor_init        (tCompressor* const, LEAF* const leaf)
+     @fn void    tCompressor_init(tCompressor** const, LEAF* const leaf)
      @brief Initialize a tCompressor to the default mempool of a LEAF instance.
      @param compressor A pointer to the tCompressor to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tCompressor_initToPool  (tCompressor* const, tMempool* const)
+     @fn void    tCompressor_initToPool(tCompressor** const, tMempool** const)
      @brief Initialize a tCompressor to a specified mempool.
      @param compressor A pointer to the tCompressor to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tCompressor_free        (tCompressor* const)
+     @fn void    tCompressor_free(tCompressor** const)
      @brief Free a tCompressor from its mempool.
      @param compressor A pointer to the tCompressor to free.
      
@@ -60,7 +60,7 @@ extern "C" {
     typedef struct tCompressor
     {
         
-        tMempool mempool;
+        tMempool* mempool;
         
         Lfloat tauAttack, tauRelease;
         Lfloat T, R, W, M; // Threshold, compression Ratio, decibel Width of knee transition, decibel Make-up gain
@@ -83,7 +83,7 @@ extern "C" {
     } tCompressor;
 
     void    tCompressor_init                  (tCompressor** const, LEAF* const leaf);
-    void    tCompressor_initToPool            (tCompressor** const, tMempool* const);
+    void    tCompressor_initToPool            (tCompressor** const, tMempool** const);
     void    tCompressor_free                  (tCompressor** const);
     
     Lfloat  tCompressor_tick                  (tCompressor* const, Lfloat input);
@@ -101,17 +101,17 @@ extern "C" {
      @details An auto VCA that you put into a feedback circuit to make it stay at the same level. It can enforce level bidirectionally (amplifying and attenuating as needed) or just attenutating. The former option allows for infinite sustain strings, for example, while the latter option allows for decaying strings, which can never exceed a specific level.
      @{
      
-     @fn void tFeedbackLeveler_init (tFeedbackLeveler* const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf)
+     @fn void tFeedbackLeveler_init(tFeedbackLeveler** const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf)
      @brief Initialize a tFeedbackLeveler to the default mempool of a LEAF instance.
      @param leveler A pointer to the tFeedbackLeveler to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void tFeedbackLeveler_initToPool (tFeedbackLeveler* const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool* const)
+     @fn void tFeedbackLeveler_initToPool(tFeedbackLeveler** const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool** const)
      @brief Initialize a tFeedbackLeveler to a specified mempool.
      @param leveler A pointer to the tFeedbackLeveler to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tFeedbackLeveler_free           (tFeedbackLeveler* const)
+     @fn void    tFeedbackLeveler_free(tFeedbackLeveler** const)
      @brief Free a tFeedbackLeveler from its mempool.
      @param leveler A pointer to the tFeedbackLeveler to free.
      
@@ -144,18 +144,18 @@ extern "C" {
     
     typedef struct tFeedbackLeveler
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         Lfloat targetLevel;    // target power level
         Lfloat strength;        // how strongly level difference affects the VCA
         int      mode;            // 0 for upwards limiting only, 1 for biderctional limiting
         Lfloat curr;
-        tPowerFollower pwrFlw;    // internal power follower needed for level tracking
+        tPowerFollower* pwrFlw;    // internal power follower needed for level tracking
         
     } tFeedbackLeveler;
 
     void    tFeedbackLeveler_init           (tFeedbackLeveler** const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf);
-    void    tFeedbackLeveler_initToPool     (tFeedbackLeveler** const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool* const);
+    void    tFeedbackLeveler_initToPool     (tFeedbackLeveler** const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool** const);
     void    tFeedbackLeveler_free           (tFeedbackLeveler** const);
     
     Lfloat  tFeedbackLeveler_tick           (tFeedbackLeveler* const, Lfloat input);
@@ -175,17 +175,17 @@ extern "C" {
      @brief Threshold with hysteresis (like Max/MSP thresh~ object)
      @{
      
-     @fn void    tThreshold_init        (tThreshold* const, Lfloat low, Lfloat high, LEAF* const leaf)
+     @fn void    tThreshold_init(tThreshold** const, Lfloat low, Lfloat high, LEAF* const leaf)
      @brief Initialize a tThreshold to the default mempool of a LEAF instance.
      @param threshold A pointer to the tThreshold to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tThreshold_initToPool  (tThreshold* const, Lfloat low, Lfloat high, tMempool* const)
+     @fn void    tThreshold_initToPool(tThreshold** const, Lfloat low, Lfloat high, tMempool** const)
      @brief Initialize a tThreshold to a specified mempool.
      @param threshold A pointer to the tThreshold to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tThreshold_free        (tThreshold* const)
+     @fn void    tThreshold_free(tThreshold** const)
      @brief Free a tThreshold from its mempool.
      @param threshold A pointer to the tThreshold to free.
      
@@ -205,14 +205,14 @@ extern "C" {
 
     typedef struct tThreshold
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         Lfloat highThresh, lowThresh;
 		int currentValue;
     } tThreshold;
 
     void    tThreshold_init        (tThreshold** const, Lfloat low, Lfloat high, LEAF* const leaf);
-    void    tThreshold_initToPool  (tThreshold** const, Lfloat low, Lfloat high, tMempool* const);
+    void    tThreshold_initToPool  (tThreshold** const, Lfloat low, Lfloat high, tMempool** const);
     void    tThreshold_free        (tThreshold** const);
 
     int    tThreshold_tick         (tThreshold* const, Lfloat input);

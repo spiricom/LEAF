@@ -149,7 +149,7 @@ extern "C" {
      @param memorySize The size of the memory that will make up the default mempool of a LEAF instance.
      @param random A pointer to a random number function. Should return a Lfloat >= 0 and < 1.
      */
-    void        LEAF_init            (LEAF* const leaf, Lfloat sampleRate, char* memory, size_t memorySize, Lfloat(*random)(void));
+    void        LEAF_init(LEAF* const leaf, Lfloat sampleRate, char* memory, size_t memorySize, Lfloat(*random)(void));
     
     //! Set the sample rate of LEAF.
     /*!

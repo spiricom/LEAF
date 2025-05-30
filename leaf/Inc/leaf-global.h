@@ -37,8 +37,8 @@ extern "C" {
         Lfloat   twoPiTimesInvSampleRate; //!<  Two-pi times the inverse of the current sample rate.
         Lfloat   (*random)(void); //!< A pointer to the random() function provided on initialization.
         int     clearOnAllocation; //!< A flag that determines whether memory allocated from the LEAF memory pool will be cleared.
-        tMempool mempool; //!< The default LEAF mempool object.
-        _tMempool _internal_mempool;
+        tMempool* mempool; //!< The default LEAF mempool object.
+        tMempool _internal_mempool;
         size_t header_size; //!< The size in bytes of memory region headers within mempools.
         void (*errorCallback)(LEAF* const, LEAFErrorType); //!< A pointer to the callback function for LEAF errors. Can be set by the user.
         int     errorState[LEAFErrorNil]; //!< An array of flags that indicate which errors have occurred.

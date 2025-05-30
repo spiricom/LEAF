@@ -30,12 +30,12 @@ extern "C" {
 typedef struct tPickupNonLinearity
 {
 
-    tMempool mempool;
+    tMempool* mempool;
     Lfloat prev;
 } tPickupNonLinearity;
 
 void   tPickupNonLinearity_init          (tPickupNonLinearity** const p, LEAF* const leaf);
-void   tPickupNonLinearity_initToPool    (tPickupNonLinearity** const p, tMempool* const mp);
+void   tPickupNonLinearity_initToPool    (tPickupNonLinearity** const p, tMempool** const mp);
 void   tPickupNonLinearity_free          (tPickupNonLinearity** const p);
 
 Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat in);
@@ -48,17 +48,17 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
      @brief Karplus-Strong model
      @{
      
-     @fn void    tPluck_init          (tPluck* const, Lfloat lowestFrequency, LEAF* const leaf)
+     @fn void    tPluck_init(tPluck** const, Lfloat lowestFrequency, LEAF* const leaf)
      @brief Initialize a tPluck to the default mempool of a LEAF instance.
      @param string A pointer to the tPluck to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPluck_initToPool    (tPluck* const, Lfloat lowestFrequency, tMempool* const)
+     @fn void    tPluck_initToPool(tPluck** const, Lfloat lowestFrequency, tMempool** const)
      @brief Initialize a tPluck to a specified mempool.
      @param string A pointer to the tPluck to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tPluck_free          (tPluck* const)
+     @fn void    tPluck_free(tPluck** const)
      @brief Free a tPluck from its mempool.
      @param string A pointer to the tPluck to free.
      
@@ -94,13 +94,13 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
     
     typedef struct tPluck
     {
+
+        tMempool* mempool;
         
-        tMempool mempool;
-        
-        tAllpassDelay     delayLine; // Allpass or Linear??  big difference...
-        tOneZero    loopFilter;
-        tOnePole    pickFilter;
-        tNoise      noise;
+        tAllpassDelay*     delayLine; // Allpass or Linear??  big difference...
+        tOneZero*    loopFilter;
+        tOnePole*    pickFilter;
+        tNoise*      noise;
         
         Lfloat lastOut;
         Lfloat loopGain;
@@ -110,7 +110,7 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
     } tPluck;
 
     void    tPluck_init          (tPluck** const, Lfloat lowestFrequency, LEAF* const leaf); //Lfloat delayBuff[DELAY_LENGTH]);
-    void    tPluck_initToPool    (tPluck** const, Lfloat lowestFrequency, tMempool* const);
+    void    tPluck_initToPool    (tPluck** const, Lfloat lowestFrequency, tMempool** const);
     void    tPluck_free          (tPluck** const);
     
     Lfloat  tPluck_tick          (tPluck* const);
@@ -131,17 +131,17 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
      @brief Stiff Karplus-Strong model
      @{
      
-     @fn void    tKarplusStrong_init               (tKarplusStrong* const, Lfloat lowestFrequency, LEAF* const leaf)
+     @fn void    tKarplusStrong_init(tKarplusStrong** const, Lfloat lowestFrequency, LEAF* const leaf)
      @brief Initialize a tKarplusStrong to the default mempool of a LEAF instance.
      @param string A pointer to the tKarplusStrong to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tKarplusStrong_initToPool         (tKarplusStrong* const, Lfloat lowestFrequency, tMempool* const)
+     @fn void    tKarplusStrong_initToPool(tKarplusStrong** const, Lfloat lowestFrequency, tMempool** const)
      @brief Initialize a tKarplusStrong to a specified mempool.
      @param string A pointer to the tKarplusStrong to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tKarplusStrong_free               (tKarplusStrong* const)
+     @fn void    tKarplusStrong_free(tKarplusStrong** const)
      @brief Free a tKarplusStrong from its mempool.
      @param string A pointer to the tKarplusStrong to free.
      
@@ -197,14 +197,14 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
     
     typedef struct tKarplusStrong
     {
+
+        tMempool* mempool;
         
-        tMempool mempool;
-        
-        tAllpassDelay  delayLine;
-        tLinearDelay combDelay;
-        tOneZero filter;
-        tNoise   noise;
-        tBiQuad  biquad[4];
+        tAllpassDelay*  delayLine;
+        tLinearDelay* combDelay;
+        tOneZero* filter;
+        tNoise*   noise;
+        tBiQuad*  biquad[4];
         
         uint32_t length;
         Lfloat loopGain;
@@ -221,7 +221,7 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
     } tKarplusStrong;
 
     void    tKarplusStrong_init               (tKarplusStrong** const, Lfloat lowestFrequency, LEAF* const leaf); // Lfloat delayBuff[2][DELAY_LENGTH]);
-    void    tKarplusStrong_initToPool         (tKarplusStrong** const, Lfloat lowestFrequency, tMempool* const);
+    void    tKarplusStrong_initToPool         (tKarplusStrong** const, Lfloat lowestFrequency, tMempool** const);
     void    tKarplusStrong_free               (tKarplusStrong** const);
     
     Lfloat  tKarplusStrong_tick               (tKarplusStrong* const);
@@ -244,17 +244,17 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
      @brief Simplified string model.
      @{
      
-     @fn void    tSimpleLivingString_init   (tSimpleLivingString* const, Lfloat freq, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf)
+     @fn void    tSimpleLivingString_init(tSimpleLivingString** const, Lfloat freq, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf)
      @brief Initialize a tSimpleLivingString to the default mempool of a LEAF instance.
      @param string A pointer to the tSimpleLivingString to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSimpleLivingString_initToPool     (tSimpleLivingString* const, Lfloat freq, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool* const)
+     @fn void    tSimpleLivingString_initToPool(tSimpleLivingString** const, Lfloat freq, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool** const)
      @brief Initialize a tSimpleLivingString to a specified mempool.
      @param string A pointer to the tSimpleLivingString to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tSimpleLivingString_free                (tSimpleLivingString* const)
+     @fn void    tSimpleLivingString_free(tSimpleLivingString** const)
      @brief Free a tSimpleLivingString from its mempool.
      @param string A pointer to the tSimpleLivingString to free.
      
@@ -302,18 +302,18 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
     
     typedef struct tSimpleLivingString
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         Lfloat freq, waveLengthInSamples;        // the frequency of the string, determining delay length
         Lfloat dampFreq;    // frequency for the bridge LP filter, in Hz
         Lfloat decay; // amplitude damping factor for the string (only active in mode 0)
         int levMode;
         Lfloat curr;
-        tLinearDelay delayLine;
-        tOnePole bridgeFilter;
-        tHighpass DCblocker;
-        tFeedbackLeveler fbLev;
-        tExpSmooth wlSmooth;
+        tLinearDelay* delayLine;
+        tOnePole* bridgeFilter;
+        tHighpass* DCblocker;
+        tFeedbackLeveler* fbLev;
+        tExpSmooth* wlSmooth;
         Lfloat sampleRate;
     } tSimpleLivingString;
 
@@ -322,7 +322,7 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
                                                      Lfloat levStrength, int levMode, LEAF* const leaf);
     void    tSimpleLivingString_initToPool          (tSimpleLivingString** const, Lfloat freq, Lfloat dampFreq,
                                                      Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
-                                                     Lfloat levStrength, int levMode, tMempool* const);
+                                                     Lfloat levStrength, int levMode, tMempool** const);
     void    tSimpleLivingString_free                (tSimpleLivingString** const);
     
     Lfloat  tSimpleLivingString_tick                (tSimpleLivingString* const, Lfloat input);
@@ -346,17 +346,17 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
     typedef struct tSimpleLivingString2
     {
 
-        tMempool mempool;
+        tMempool* mempool;
         Lfloat freq, waveLengthInSamples;        // the frequency of the string, determining delay length
         Lfloat brightness;    // frequency for the bridge LP filter, in Hz
         Lfloat decay; // amplitude damping factor for the string (only active in mode 0)
         int levMode;
         Lfloat curr;
-        tHermiteDelay delayLine;
-        tTwoZero bridgeFilter;
-        tHighpass DCblocker;
-        tFeedbackLeveler fbLev;
-        tExpSmooth wlSmooth;
+        tHermiteDelay*  delayLine;
+        tTwoZero*  bridgeFilter;
+        tHighpass*  DCblocker;
+        tFeedbackLeveler*  fbLev;
+        tExpSmooth*  wlSmooth;
         Lfloat sampleRate;
     } tSimpleLivingString2;
 
@@ -365,7 +365,7 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
                                                      Lfloat levStrength, int levMode, LEAF* const leaf);
     void    tSimpleLivingString2_initToPool          (tSimpleLivingString2** const, Lfloat freq, Lfloat brightness,
                                                      Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
-                                                     Lfloat levStrength, int levMode, tMempool* const);
+                                                     Lfloat levStrength, int levMode, tMempool** const);
     void    tSimpleLivingString2_free                (tSimpleLivingString2** const);
 
     Lfloat  tSimpleLivingString2_tick                (tSimpleLivingString2* const, Lfloat input);
@@ -386,8 +386,8 @@ Lfloat tPickupNonLinearity_tick          (tPickupNonLinearity* const p, Lfloat i
 
 typedef struct tSimpleLivingString3
 {
-    
-    tMempool mempool;
+
+    tMempool* mempool;
     Lfloat freq, waveLengthInSamples;        // the frequency of the string, determining delay length
     Lfloat dampFreq;    // frequency for the bridge LP filter, in Hz
     Lfloat decay, userDecay; // amplitude damping factor for the string (only active in mode 0)
@@ -398,16 +398,16 @@ typedef struct tSimpleLivingString3
     Lfloat Uout;
     Lfloat Lout;
     int maxLength;
-    tLinearDelay delayLineU;
-    tLinearDelay delayLineL;
-    tOnePole bridgeFilter;
-    tBiQuad bridgeFilter2;
+    tLinearDelay*  delayLineU;
+    tLinearDelay*  delayLineL;
+    tOnePole*  bridgeFilter;
+    tBiQuad*  bridgeFilter2;
     Lfloat temp1;
     Lfloat temp2;
     Lfloat pickupPoint;
-    tHighpass DCblocker;
-    tFeedbackLeveler fbLev;
-    tExpSmooth wlSmooth;
+    tHighpass*  DCblocker;
+    tFeedbackLeveler*  fbLev;
+    tExpSmooth*  wlSmooth;
     int oversampling;
     Lfloat sampleRate;
     Lfloat rippleGain;
@@ -420,7 +420,7 @@ void    tSimpleLivingString3_init               (tSimpleLivingString3** const, i
                                                  int levMode, LEAF* const leaf);
 void    tSimpleLivingString3_initToPool         (tSimpleLivingString3** const pl, int oversampling, Lfloat freq, Lfloat dam,
                                                  Lfloat decay, Lfloat targetLev, Lfloat levSmoothF, Lfloat levStrength,
-                                                 int levMode, tMempool* const mp);
+                                                 int levMode, tMempool** const mp);
 void    tSimpleLivingString3_free               (tSimpleLivingString3** const);
 
 Lfloat  tSimpleLivingString3_tick               (tSimpleLivingString3* const, Lfloat input);
@@ -441,8 +441,8 @@ void    tSimpleLivingString3_setSampleRate      (tSimpleLivingString3* const, Lf
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 typedef struct tSimpleLivingString4
 {
-    
-    tMempool mempool;
+
+    tMempool* mempool;
     Lfloat freq, waveLengthInSamples;        // the frequency of the string, determining delay length
     Lfloat dampFreq;    // frequency for the bridge LP filter, in Hz
     Lfloat decay, userDecay; // amplitude damping factor for the string (only active in mode 0)
@@ -453,17 +453,17 @@ typedef struct tSimpleLivingString4
     Lfloat Uout;
     Lfloat Lout;
     int maxLength;
-    tLinearDelay delayLineU;
-    tLinearDelay delayLineL;
-    tOnePole bridgeFilter;
-    tBiQuad bridgeFilter2;
+    tLinearDelay*  delayLineU;
+    tLinearDelay*  delayLineL;
+    tOnePole*  bridgeFilter;
+    tBiQuad*  bridgeFilter2;
     Lfloat temp1;
     Lfloat temp2;
     Lfloat pickupPoint;
     Lfloat pluckPosition;
-    tHighpass DCblocker;
-    tFeedbackLeveler fbLev;
-    tExpSmooth wlSmooth;
+    tHighpass*  DCblocker;
+    tFeedbackLeveler*  fbLev;
+    tExpSmooth*  wlSmooth;
     int oversampling;
     Lfloat sampleRate;
     Lfloat rippleGain;
@@ -475,7 +475,7 @@ void    tSimpleLivingString4_init               (tSimpleLivingString4** const, i
                                                  int levMode, LEAF* const leaf);
 void    tSimpleLivingString4_initToPool         (tSimpleLivingString4** const pl, int oversampling, Lfloat freq, Lfloat dampFreq,
                                                  Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength,
-                                                 int levMode, tMempool* const mp);
+                                                 int levMode, tMempool** const mp);
 void    tSimpleLivingString4_free               (tSimpleLivingString4** const);
 
 Lfloat  tSimpleLivingString4_tick               (tSimpleLivingString4* const, Lfloat input);
@@ -499,8 +499,8 @@ void    tSimpleLivingString4_setSampleRate      (tSimpleLivingString4* const, Lf
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 typedef struct tSimpleLivingString5
 {
-    
-    tMempool mempool;
+
+    tMempool* mempool;
     Lfloat freq, waveLengthInSamples;        // the frequency of the string, determining delay length
     Lfloat dampFreq;    // frequency for the bridge LP filter, in Hz
     Lfloat decay, userDecay; // amplitude damping factor for the string (only active in mode 0)
@@ -513,18 +513,18 @@ typedef struct tSimpleLivingString5
     int maxLength;
     Lfloat prepIndex;
     Lfloat prepPos;
-    tLagrangeDelay delLF,delUF,delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
-    tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
+    tLagrangeDelay* delLF,*delUF,*delUB,*delLB;    // delay for lower/upper/forward/backward part of the waveguide model
+    tOnePole* bridgeFilter, *nutFilter, *prepFilterU, *prepFilterL;
     Lfloat temp1;
     Lfloat temp2;
     Lfloat pickupPoint;
     Lfloat pluckPosition;
-    tHighpass DCblocker;
-    tHighpass DCblocker2;
-    tFeedbackLeveler fbLev;
-    tFeedbackLeveler fbLev2;
+    tHighpass*  DCblocker;
+    tHighpass*  DCblocker2;
+    tFeedbackLeveler*  fbLev;
+    tFeedbackLeveler*  fbLev2;
 
-    tExpSmooth wlSmooth, prepPosSmooth, prepIndexSmooth, pluckPosSmooth, pickupPointSmooth;
+    tExpSmooth *wlSmooth, *prepPosSmooth, *prepIndexSmooth, *pluckPosSmooth, *pickupPointSmooth;
     int oversampling;
     Lfloat sampleRate;
     Lfloat rippleGain;
@@ -538,7 +538,7 @@ void    tSimpleLivingString5_init               (tSimpleLivingString5** const, i
                                                  Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf);
 void    tSimpleLivingString5_initToPool         (tSimpleLivingString5** const pl, int oversampling, Lfloat freq, Lfloat dampFreq,
                                                  Lfloat decay, Lfloat prepPos, Lfloat prepIndex, Lfloat pluckPos, Lfloat targetLev,
-                                                 Lfloat levSmoothFactor,Lfloat levStrength, int levMode, tMempool* const mp);
+                                                 Lfloat levSmoothFactor,Lfloat levStrength, int levMode, tMempool** const mp);
 void    tSimpleLivingString5_free               (tSimpleLivingString5** const);
 
 Lfloat  tSimpleLivingString5_tick               (tSimpleLivingString5* const, Lfloat input);
@@ -573,17 +573,17 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
      @brief String model.
      @{
      
-     @fn void    tLivingString_init                  (tLivingString* const, Lfloat freq, Lfloat pickPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf)
+     @fn void    tLivingString_init(tLivingString** const, Lfloat freq, Lfloat pickPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf)
      @brief Initialize a tLivingString to the default mempool of a LEAF instance.
      @param string A pointer to the tLivingString to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tLivingString_initToPool            (tLivingString* const, Lfloat freq, Lfloat pickPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool* const)
+     @fn void    tLivingString_initToPool(tLivingString** const, Lfloat freq, Lfloat pickPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool** const)
      @brief Initialize a tLivingString to a specified mempool.
      @param string A pointer to the tLivingString to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tLivingString_free                  (tLivingString* const)
+     @fn void    tLivingString_free(tLivingString** const)
      @brief Free a tLivingString from its mempool.
      @param string A pointer to the tLivingString to free.
      
@@ -639,7 +639,7 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
     
     typedef struct tLivingString
     {
-        tMempool mempool;
+        tMempool* mempool;
         Lfloat freq, waveLengthInSamples;        // the frequency of the whole string, determining delay length
         Lfloat pickPos;    // the pick position, dividing the string in two, in ratio
         Lfloat prepIndex;    // the amount of pressure on the pickpoint of the string (near 0=soft obj, near 1=hard obj)
@@ -647,11 +647,11 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
         Lfloat decay; // amplitude damping factor for the string (only active in mode 0)
         int levMode;
         Lfloat curr;
-        tLinearDelay delLF,delUF,delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
-        tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
-        tHighpass DCblockerL, DCblockerU;
-        tFeedbackLeveler fbLevU, fbLevL;
-        tExpSmooth wlSmooth, ppSmooth;
+        tLinearDelay* delLF,*delUF,*delUB,*delLB;    // delay for lower/upper/forward/backward part of the waveguide model
+        tOnePole* bridgeFilter, *nutFilter,* prepFilterU, *prepFilterL;
+        tHighpass* DCblockerL, *DCblockerU;
+        tFeedbackLeveler* fbLevU, *fbLevL;
+        tExpSmooth* wlSmooth, *ppSmooth;
         Lfloat sampleRate;
     } tLivingString;
 
@@ -660,7 +660,7 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
                                                  Lfloat levStrength, int levMode, LEAF* const leaf);
     void    tLivingString_initToPool            (tLivingString** const, Lfloat freq, Lfloat pickPos, Lfloat prepIndex,
                                                  Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
-                                                 Lfloat levStrength, int levMode, tMempool* const);
+                                                 Lfloat levStrength, int levMode, tMempool** const);
     void    tLivingString_free                  (tLivingString** const);
     
     Lfloat  tLivingString_tick                  (tLivingString* const, Lfloat input);
@@ -687,17 +687,17 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
      @brief String model with preparation and pick position separated.
      @{
      
-     @fn void    tLivingString2_init                  (tLivingString2* const, Lfloat freq, Lfloat pickPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf)
+     @fn void    tLivingString2_init(tLivingString2** const, Lfloat freq, Lfloat pickPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf)
      @brief Initialize a tLivingString to the default mempool of a LEAF instance.
      @param string A pointer to the tLivingString2 to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tLivingString2_initToPool            (tLivingString2* const, Lfloat freq, Lfloat pickPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool* const)
+     @fn void    tLivingString2_initToPool(tLivingString2** const, Lfloat freq, Lfloat pickPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool** const)
      @brief Initialize a tLivingString2 to a specified mempool.
      @param string A pointer to the tLivingString2 to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tLivingString2_free                  (tLivingString2* const)
+     @fn void    tLivingString2_free(tLivingString2** const)
      @brief Free a tLivingString2 from its mempool.
      @param string A pointer to the tLivingString2 to free.
      
@@ -759,7 +759,7 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
      @} */
     typedef struct tLivingString2
     {
-        tMempool mempool;
+        tMempool* mempool;
         Lfloat freq, waveLengthInSamples;        // the frequency of the whole string, determining delay length
         Lfloat pickPos;    // the pick position, dividing the string in two, in ratio
         Lfloat prepPos;    // the preparation position, dividing the string in two, in ratio
@@ -769,11 +769,11 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
         int levMode;
         Lfloat brightness;
         Lfloat curr;
-        tHermiteDelay delLF,delUF,delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
-        tTwoZero bridgeFilter, nutFilter, prepFilterU, prepFilterL;
-        tHighpass DCblockerL, DCblockerU;
-        tFeedbackLeveler fbLevU, fbLevL;
-        tExpSmooth wlSmooth, ppSmooth, prpSmooth, puSmooth;
+        tHermiteDelay* delLF,*delUF,*delUB,*delLB;    // delay for lower/upper/forward/backward part of the waveguide model
+        tTwoZero* bridgeFilter, *nutFilter, *prepFilterU, *prepFilterL;
+        tHighpass* DCblockerL, *DCblockerU;
+        tFeedbackLeveler* fbLevU, *fbLevL;
+        tExpSmooth* wlSmooth, *ppSmooth, *prpSmooth, *puSmooth;
         Lfloat sampleRate;
     } tLivingString2;
 
@@ -782,7 +782,7 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
                                                Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf);
     void    tLivingString2_initToPool         (tLivingString2** const, Lfloat freq, Lfloat pickPos, Lfloat prepPos, Lfloat pickupPos,
                                                Lfloat prepIndex, Lfloat brightness, Lfloat decay, Lfloat targetLev,
-                                               Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool* const);
+                                               Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool** const);
     void    tLivingString2_free               (tLivingString2** const);
     
     Lfloat  tLivingString2_tick               (tLivingString2* const, Lfloat input);
@@ -813,17 +813,17 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
      @brief Complex string model.
      @{
      
-     @fn void    tComplexLivingString_init  (tComplexLivingString* const, Lfloat freq, Lfloat pickPos, Lfloat prepPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf)
+     @fn void    tComplexLivingString_init(tComplexLivingString** const, Lfloat freq, Lfloat pickPos, Lfloat prepPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, LEAF* const leaf)
      @brief Initialize a tComplexLivingString to the default mempool of a LEAF instance.
      @param string A pointer to the tComplexLivingString to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tComplexLivingString_initToPool    (tComplexLivingString* const, Lfloat freq, Lfloat pickPos, Lfloat prepPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool* const)
+     @fn void    tComplexLivingString_initToPool(tComplexLivingString** const, Lfloat freq, Lfloat pickPos, Lfloat prepPos, Lfloat prepIndex, Lfloat dampFreq, Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor, Lfloat levStrength, int levMode, tMempool** const)
      @brief Initialize a tComplexLivingString to a specified mempool.
      @param string A pointer to the tComplexLivingString to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tComplexLivingString_free                  (tComplexLivingString* const)
+     @fn void    tComplexLivingString_free(tComplexLivingString** const)
      @brief Free a tComplexLivingString from its mempool.
      @param string A pointer to the tComplexLivingString to free.
      
@@ -883,7 +883,7 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
     
     typedef struct tComplexLivingString
     {
-        tMempool mempool;
+        tMempool* mempool;
         Lfloat freq, waveLengthInSamples;        // the frequency of the whole string, determining delay length
         Lfloat pickPos;    // the pick position, dividing the string, in ratio
         Lfloat prepPos;    // preparation position, in ratio
@@ -893,11 +893,11 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
         Lfloat decay; // amplitude damping factor for the string (only active in mode 0)
         int levMode;
         Lfloat curr;
-        tLinearDelay delLF,delUF, delMF, delMB, delUB,delLB;    // delay for lower/upper/forward/backward part of the waveguide model
-        tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
-        tHighpass DCblockerL, DCblockerU;
-        tFeedbackLeveler fbLevU, fbLevL;
-        tExpSmooth wlSmooth, pickPosSmooth, prepPosSmooth;
+        tLinearDelay* delLF,*delUF, *delMF, *delMB, *delUB,*delLB;    // delay for lower/upper/forward/backward part of the waveguide model
+        tOnePole* bridgeFilter, *nutFilter, *prepFilterU, *prepFilterL;
+        tHighpass* DCblockerL, *DCblockerU;
+        tFeedbackLeveler* fbLevU, *fbLevL;
+        tExpSmooth* wlSmooth,* pickPosSmooth, *prepPosSmooth;
         Lfloat sampleRate;
     } tComplexLivingString;
 
@@ -908,7 +908,7 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
     void    tComplexLivingString_initToPool            (tComplexLivingString** const, Lfloat freq, Lfloat pickPos,
                                                         Lfloat prepPos, Lfloat prepIndex, Lfloat dampFreq,
                                                         Lfloat decay, Lfloat targetLev, Lfloat levSmoothFactor,
-                                                        Lfloat levStrength, int levMode, tMempool* const);
+                                                        Lfloat levStrength, int levMode, tMempool** const);
     void    tComplexLivingString_free                  (tComplexLivingString** const);
     
     Lfloat  tComplexLivingString_tick                  (tComplexLivingString* const, Lfloat input);
@@ -931,21 +931,21 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 //Bow Table
 typedef struct tBowTable {
-    tMempool mempool;
+    tMempool* mempool;
     Lfloat offSet;
     Lfloat slope;
     Lfloat lastOutput;
 } tBowTable;
 
 void    tBowTable_init                 (tBowTable** const bt, LEAF* const leaf);
-void    tBowTable_initToPool           (tBowTable** const bt, tMempool* const mp);
+void    tBowTable_initToPool           (tBowTable** const bt, tMempool** const mp);
 void    tBowTable_free                 (tBowTable** const bt);
 
 Lfloat  tBowTable_lookup               (tBowTable* const bt, Lfloat sample);
 
 typedef struct tBowed
 {
-    tMempool mempool;
+    tMempool* mempool;
     int oversampling;
     // user controlled vars
     Lfloat x_bp;      // bow pressure
@@ -956,24 +956,24 @@ typedef struct tBowed
     Lfloat fr_save;
 
     // delay lines
-    tLinearDelay neckDelay;
-    tLinearDelay bridgeDelay;
+    tLinearDelay*  neckDelay;
+    tLinearDelay*  bridgeDelay;
 
     // one pole filter
-    tCookOnePole reflFilt;
+    tCookOnePole*  reflFilt;
 
-    tBowTable bowTabl;
+    tBowTable*  bowTabl;
 
     // stuff
     Lfloat maxVelocity, baseDelay, betaRatio;
     Lfloat sampleRate;
     Lfloat invSampleRate;
-    tSVF lowpass;
+    tSVF*  lowpass;
     Lfloat output;
 } tBowed;
 
 void    tBowed_init                  (tBowed** const, int oversampling, LEAF* const leaf);
-void    tBowed_initToPool            (tBowed** const, int oversampling, tMempool* const);
+void    tBowed_initToPool            (tBowed** const, int oversampling, tMempool** const);
 void    tBowed_free                  (tBowed** const);
 
 Lfloat  tBowed_tick                  (tBowed* const);
@@ -988,19 +988,19 @@ void    tBowed_setSampleRate         (tBowed* const, Lfloat sr);
 //by Vesa Valimaki
 typedef struct tTString
 {
-    tMempool mempool;
+    tMempool* mempool;
     int oversampling;
     Lfloat invOversampling;
     Lfloat invOversamplingTimesTwo;
     Lfloat twoPiTimesInvSampleRate;
     // delay lines
-    tLagrangeDelay delay;
-    tLagrangeDelay delayP;
-    tHighpass dcBlock;
-    tHighpass dcBlockP;
+    tLagrangeDelay*  delay;
+    tLagrangeDelay*  delayP;
+    tHighpass*  dcBlock;
+    tHighpass*  dcBlockP;
     // one pole filter
-    tCookOnePole reflFilt;
-    tCookOnePole reflFiltP;
+    tCookOnePole*  reflFilt;
+    tCookOnePole*  reflFiltP;
     Lfloat baseDelay;
     Lfloat sampleRate;
     Lfloat invSampleRate;
@@ -1008,16 +1008,16 @@ typedef struct tTString
     Lfloat output;
     Lfloat outputP;
     Lfloat tensionGain;
-    tSlide slide;
-    tExpSmooth tensionSmoother;
-    tExpSmooth pitchSmoother;
-    tThiranAllpassSOCascade allpass;
-    tThiranAllpassSOCascade allpassP;
+    tSlide*  slide;
+    tExpSmooth*  tensionSmoother;
+    tExpSmooth*  pitchSmoother;
+    tThiranAllpassSOCascade*  allpass;
+    tThiranAllpassSOCascade*  allpassP;
     Lfloat allpassDelay;
     Lfloat allpassDelayP;
     Lfloat freq;
-    tSVF lowpassP;
-    tSVF highpassP;
+    tSVF*  lowpassP;
+    tSVF*  highpassP;
     Lfloat filterFreq;
     Lfloat decayCoeff;
     Lfloat muteCoeff;
@@ -1032,24 +1032,24 @@ typedef struct tTString
     Lfloat pickupPos;
 
     Lfloat tensionAmount;
-    tCycle tensionModOsc;
+    tCycle*  tensionModOsc;
     Lfloat phantomGain;
-    tCycle pickupModOsc;
+    tCycle*  pickupModOsc;
     Lfloat pickupModOscFreq;
     Lfloat pickupModOscAmp;
-    tSVF pickupFilter;
-    tSVF pickupFilter2;
+    tSVF*  pickupFilter;
+    tSVF*  pickupFilter2;
     Lfloat slideAmount;
     Lfloat absSlideAmount;
     Lfloat smoothedSlideAmount;
-    tNoise noise;
+    tNoise*  noise;
     Lfloat slideNoise;
     Lfloat slideGain;
     uint32_t wound;
-    tExpSmooth barPulse;
+    tExpSmooth*  barPulse;
     Lfloat barPulseInc;
     uint32_t barPulsePhasor;
-    tSVF barResonator;
+    tSVF*  barResonator;
     Lfloat barPosition;
     Lfloat prevBarPosition;
     Lfloat openStringLength;
@@ -1057,12 +1057,12 @@ typedef struct tTString
     Lfloat lastBump;
     Lfloat timeSinceLastBump;
     uint32_t sampleCount;
-    tSlide barSmooth;
-    tHighpass barHP;
-    tSVF barLP;
-    tSlide barPulseSlide;
-    tExpSmooth barSmooth2;
-    tExpSmooth barSmoothVol;
+    tSlide*  barSmooth;
+    tHighpass*  barHP;
+    tSVF* barLP;
+    tSlide* barPulseSlide;
+    tExpSmooth* barSmooth2;
+    tExpSmooth* barSmoothVol;
     Lfloat prevBarPosSmoothVol;
     Lfloat prevBumpSmoothed;
     Lfloat prevBarPosSmoothed;
@@ -1077,8 +1077,8 @@ typedef struct tTString
     Lfloat inharmonicMult;
     uint32_t maxDelay;
     uint32_t tensionJumps;
-    tFeedbackLeveler feedback;
-    tFeedbackLeveler feedbackP;
+    tFeedbackLeveler* feedback;
+    tFeedbackLeveler* feedbackP;
     Lfloat feedbackNoise;
     Lfloat feedbackNoiseLevel;
     Lfloat quarterSampleRate;
@@ -1086,16 +1086,16 @@ typedef struct tTString
     uint32_t wavelength;
     Lfloat pluckRatio;
     Lfloat pickup_Ratio;
-    tExpSmooth pickNoise;
-    tNoise pickNoiseSource;
+    tExpSmooth* pickNoise;
+    tNoise* pickNoiseSource;
     Lfloat pluckPoint_forInput;
-    tSVF peakFilt;
+    tSVF* peakFilt;
     Lfloat pickupAmount;
-    tPickupNonLinearity p;
+    tPickupNonLinearity* p;
 } tTString;
 
 void    tTString_init                     (tTString** const, int oversampling, Lfloat lowestFreq, LEAF* const leaf);
-void    tTString_initToPool               (tTString** const, int oversampling, Lfloat lowestFreq, tMempool* const);
+void    tTString_initToPool               (tTString** const, int oversampling, Lfloat lowestFreq, tMempool** const);
 void    tTString_free                     (tTString** const);
 
 Lfloat  tTString_tick                     (tTString* const);
@@ -1140,17 +1140,17 @@ void    tTString_setPickupAmount          (tTString* const bw, Lfloat amount);
      @brief Reed Table - borrowed from STK
      @{
      
-     @fn void    tReedTable_init         (tReedTable* const, Lfloat offset, Lfloat slope, LEAF* const leaf)
+     @fn void    tReedTable_init(tReedTable** const, Lfloat offset, Lfloat slope, LEAF* const leaf)
      @brief Initialize a tReedTable to the default mempool of a LEAF instance.
      @param reed A pointer to the tReedTable to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tReedTable_initToPool   (tReedTable* const, Lfloat offset, Lfloat slope, tMempool* const)
+     @fn void    tReedTable_initToPool(tReedTable** const, Lfloat offset, Lfloat slope, tMempool** const)
      @brief Initialize a tReedTable to a specified mempool.
      @param reed A pointer to the tReedTable to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tReedTable_free         (tReedTable* const)
+     @fn void    tReedTable_free(tReedTable** const)
      @brief Free a tReedTable from its mempool.
      @param reed A pointer to the tReedTable to free.
      
@@ -1174,13 +1174,13 @@ void    tTString_setPickupAmount          (tTString* const bw, Lfloat amount);
     
     typedef struct tReedTable
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         Lfloat offset, slope;
     } tReedTable;
 
     void    tReedTable_init         (tReedTable** const, Lfloat offset, Lfloat slope, LEAF* const leaf);
-    void    tReedTable_initToPool   (tReedTable** const, Lfloat offset, Lfloat slope, tMempool* const);
+    void    tReedTable_initToPool   (tReedTable** const, Lfloat offset, Lfloat slope, tMempool** const);
     void    tReedTable_free         (tReedTable** const);
     
     Lfloat  tReedTable_tick         (tReedTable* const, Lfloat input);
@@ -1193,9 +1193,9 @@ void    tTString_setPickupAmount          (tTString* const bw, Lfloat amount);
 
 typedef struct tStiffString
     {
-        tMempool mempool;
+        tMempool* mempool;
         int numModes;
-        tCycle *osc; // array of oscillators
+        tCycle **oscs; // array of oscillators
         Lfloat *amplitudes;
         Lfloat *outputWeights;
         Lfloat freqHz;        // the frequency of the whole string, determining delay length
@@ -1218,7 +1218,7 @@ typedef struct tStiffString
     } tStiffString;
 
     void    tStiffString_init                     (tStiffString** const, int numModes, LEAF* const leaf);
-    void    tStiffString_initToPool               (tStiffString** const, int numModes, tMempool* const);
+    void    tStiffString_initToPool               (tStiffString** const, int numModes, tMempool** const);
     void    tStiffString_free                     (tStiffString** const);
 
     Lfloat  tStiffString_tick                     (tStiffString* const);
@@ -1246,23 +1246,23 @@ typedef struct tStiffString
 
     typedef struct tStereoRotation
     {
-        tMempool mempool;
+        tMempool* mempool;
         Lfloat angle;
         Lfloat vcaoutx;
         Lfloat vcaouty;
-        tHighpass hip1;
-        tHighpass hip2;
+        tHighpass* hip1;
+        tHighpass* hip2;
         Lfloat rotGain;
-        tLagrangeDelay rotDelayx;
-        tLagrangeDelay rotDelayy;
-        tOnePole filtx;
-        tOnePole filty;
+        tLagrangeDelay* rotDelayx;
+        tLagrangeDelay* rotDelayy;
+        tOnePole* filtx;
+        tOnePole* filty;
         Lfloat feedbackFactorx;
         Lfloat feedbackFactory;
     } tStereoRotation;
 
     void    tStereoRotation_init                    (tStereoRotation** const, LEAF* const leaf);
-    void    tStereoRotation_initToPool              (tStereoRotation** const rr, tMempool* const mp);
+    void    tStereoRotation_initToPool              (tStereoRotation** const rr, tMempool** const mp);
 
     void    tStereoRotation_tick                    (tStereoRotation* const r, float* samples);
     void    tStereoRotation_tickIn                  (tStereoRotation* const r, float* samples);

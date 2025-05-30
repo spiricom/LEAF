@@ -38,17 +38,17 @@ extern "C" {
      @brief Reverb, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tPRCReverb_init         (tPRCReverb* const, Lfloat t60, LEAF* const leaf)
+     @fn void    tPRCReverb_init(tPRCReverb** const, Lfloat t60, LEAF* const leaf)
      @brief Initialize a tPRCReverb to the default mempool of a LEAF instance.
      @param reverb A pointer to the tPRCReverb to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPRCReverb_initToPool   (tPRCReverb* const, Lfloat t60, tMempool* const)
+     @fn void    tPRCReverb_initToPool(tPRCReverb** const, Lfloat t60, tMempool** const)
      @brief Initialize a tPRCReverb to a specified mempool.
      @param reverb A pointer to the tPRCReverb to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tPRCReverb_free         (tPRCReverb* const)
+     @fn void    tPRCReverb_free(tPRCReverb** const)
      @brief Free a tPRCReverb from its mempool.
      @param reverb A pointer to the tPRCReverb to free.
      
@@ -72,16 +72,16 @@ extern "C" {
     
     typedef struct tPRCReverb
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         
         Lfloat mix, t60;
         
         Lfloat sampleRate;
         Lfloat invSampleRate;
         
-        tDelay allpassDelays[2];
-        tDelay combDelay;
+        tDelay*  allpassDelays[2];
+        tDelay*  combDelay;
         Lfloat allpassCoeff;
         Lfloat combCoeff;
         
@@ -89,7 +89,7 @@ extern "C" {
     } tPRCReverb;
 
     void    tPRCReverb_init          (tPRCReverb** const, Lfloat t60, LEAF* const leaf);
-    void    tPRCReverb_initToPool    (tPRCReverb** const, Lfloat t60, tMempool* const);
+    void    tPRCReverb_initToPool    (tPRCReverb** const, Lfloat t60, tMempool** const);
     void    tPRCReverb_free          (tPRCReverb** const);
 
     Lfloat  tPRCReverb_tick          (tPRCReverb* const, Lfloat input);
@@ -107,17 +107,17 @@ extern "C" {
      @brief Reverb, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tNReverb_init           (tNReverb* const, Lfloat t60, LEAF* const leaf)
+     @fn void    tNReverb_init(tNReverb** const, Lfloat t60, LEAF* const leaf)
      @brief Initialize a tNReverb to the default mempool of a LEAF instance.
      @param reverb A pointer to the tNReverb to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tNReverb_initToPool     (tNReverb* const, Lfloat t60, tMempool* const)
+     @fn void    tNReverb_initToPool(tNReverb** const, Lfloat t60, tMempool** const)
      @brief Initialize a tNReverb to a specified mempool.
      @param reverb A pointer to the tNReverb to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tNReverb_free           (tNReverb* const)
+     @fn void    tNReverb_free(tNReverb** const)
      @brief Free a tNReverb from its mempool.
      @param reverb A pointer to the tNReverb to free.
      
@@ -145,16 +145,16 @@ extern "C" {
     
     typedef struct tNReverb
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         
         Lfloat mix, t60;
         
         Lfloat sampleRate;
         Lfloat invSampleRate;
         
-        tLinearDelay allpassDelays[8];
-        tLinearDelay combDelays[6];
+        tLinearDelay* allpassDelays[8];
+        tLinearDelay*  combDelays[6];
         Lfloat allpassCoeff;
         Lfloat combCoeffs[6];
         Lfloat lowpassState;
@@ -163,7 +163,7 @@ extern "C" {
     } tNReverb;
 
     void    tNReverb_init           (tNReverb** const, Lfloat t60, LEAF* const leaf);
-    void    tNReverb_initToPool     (tNReverb** const, Lfloat t60, tMempool* const);
+    void    tNReverb_initToPool     (tNReverb** const, Lfloat t60, tMempool** const);
     void    tNReverb_free           (tNReverb** const);
 
     Lfloat  tNReverb_tick           (tNReverb* const, Lfloat input);
@@ -182,17 +182,17 @@ extern "C" {
      @brief Dattorro plate reverb.
      @{
      
-     @fn void    tDattorroReverb_init              (tDattorroReverb* const, LEAF* const leaf)
+     @fn void    tDattorroReverb_init(tDattorroReverb** const, LEAF* const leaf)
      @brief Initialize a tDattorroReverb to the default mempool of a LEAF instance.
      @param reverb A pointer to the tDattorroReverb to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tDattorroReverb_initToPool        (tDattorroReverb* const, tMempool* const)
+     @fn void    tDattorroReverb_initToPool(tDattorroReverb** const, tMempool** const)
      @brief Initialize a tDattorroReverb to a specified mempool.
      @param reverb A pointer to the tDattorroReverb to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    tDattorroReverb_free              (tDattorroReverb* const)
+     @fn void    tDattorroReverb_free(tDattorroReverb** const)
      @brief Free a tDattorroReverb from its mempool.
      @param reverb A pointer to the tDattorroReverb to free.
      
@@ -244,8 +244,8 @@ extern "C" {
     
     typedef struct tDattorroReverb
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         
         Lfloat   sampleRate;
         Lfloat   predelay;
@@ -264,33 +264,32 @@ extern "C" {
         f2_last;
         
         // INPUT
-        tTapeDelay  in_delay;
-        tOnePole    in_filter;
-        tAllpass    in_allpass[4];
-        
+        tTapeDelay*   in_delay;
+        tOnePole*     in_filter;
+        tAllpass*     in_allpass[4];
         // FEEDBACK 1
-        tAllpass    f1_allpass;
-        tTapeDelay  f1_delay_1;
-        tOnePole    f1_filter;
-        tTapeDelay  f1_delay_2;
-        tTapeDelay  f1_delay_3;
-        tHighpass   f1_hp;
+        tAllpass*     f1_allpass;
+        tTapeDelay*   f1_delay_1;
+        tOnePole*     f1_filter;
+        tTapeDelay*   f1_delay_2;
+        tTapeDelay*   f1_delay_3;
+        tHighpass*    f1_hp;
         
-        tCycle      f1_lfo;
+        tCycle*       f1_lfo;
         
         // FEEDBACK 2
-        tAllpass    f2_allpass;
-        tTapeDelay  f2_delay_1;
-        tOnePole    f2_filter;
-        tTapeDelay  f2_delay_2;
-        tTapeDelay  f2_delay_3;
-        tHighpass   f2_hp;
+        tAllpass*     f2_allpass;
+        tTapeDelay*   f2_delay_1;
+        tOnePole*     f2_filter;
+        tTapeDelay*   f2_delay_2;
+        tTapeDelay*   f2_delay_3;
+        tHighpass*    f2_hp;
         
-        tCycle      f2_lfo;
+        tCycle*       f2_lfo;
     } tDattorroReverb;
 
     void    tDattorroReverb_init              (tDattorroReverb** const, LEAF* const leaf);
-    void    tDattorroReverb_initToPool        (tDattorroReverb** const, tMempool* const);
+    void    tDattorroReverb_initToPool        (tDattorroReverb** const, tMempool** const);
     void    tDattorroReverb_free              (tDattorroReverb** const);
 
     Lfloat  tDattorroReverb_tick              (tDattorroReverb* const, Lfloat input);

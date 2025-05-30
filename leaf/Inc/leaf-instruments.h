@@ -37,17 +37,17 @@ extern "C" {
      @brief 808 drum machine cowbell.
      @{
      
-     @fn void    t808Cowbell_init            (t808Cowbell* const, int useStick, LEAF* const leaf)
+     @fn void    t808Cowbell_init(t808Cowbell** const, int useStick, LEAF* const leaf)
      @brief Initialize a t808Cowbell to the default mempool of a LEAF instance.
      @param cowbell A pointer to the t808Cowbell to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808Cowbell_initToPool      (t808Cowbell* const, int useStick, tMempool* const)
+     @fn void    t808Cowbell_initToPool(t808Cowbell** const, int useStick, tMempool** const)
      @brief Initialize a t808Cowbell to a specified mempool.
      @param cowbell A pointer to the t808Cowbell to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    t808Cowbell_free            (t808Cowbell* const)
+     @fn void    t808Cowbell_free(t808Cowbell** const)
      @brief Free a t808Cowbell from its mempool.
      @param cowbell A pointer to the t808Cowbell to free.
      
@@ -87,22 +87,22 @@ extern "C" {
     
     typedef struct t808Cowbell
     {
-        tMempool mempool;
-        tSquare p[2];
-        tNoise stick;
-        tSVF bandpassOsc;
-        tSVF bandpassStick;
-        tEnvelope envGain;
-        tEnvelope envStick;
-        tEnvelope envFilter;
-        tHighpass highpass;
+        tMempool* mempool;
+        tSquare* p[2];
+        tNoise*  stick;
+        tSVF*  bandpassOsc;
+        tSVF*  bandpassStick;
+        tEnvelope*  envGain;
+        tEnvelope*  envStick;
+        tEnvelope*  envFilter;
+        tHighpass*  highpass;
         Lfloat oscMix;
         Lfloat filterCutoff;
         uint8_t useStick;
     } t808Cowbell;
 
     void    t808Cowbell_init            (t808Cowbell** const, int useStick, LEAF* const leaf);
-    void    t808Cowbell_initToPool      (t808Cowbell** const, int useStick, tMempool* const);
+    void    t808Cowbell_initToPool      (t808Cowbell** const, int useStick, tMempool** const);
     void    t808Cowbell_free            (t808Cowbell** const);
     
     Lfloat  t808Cowbell_tick            (t808Cowbell* const);
@@ -124,17 +124,17 @@ extern "C" {
      @brief 808 drum machine hihat.
      @{
      
-     @fn void    t808Hihat_init                  (t808Hihat* const, LEAF* const leaf)
+     @fn void    t808Hihat_init(t808Hihat** const, LEAF* const leaf)
      @brief Initialize a t808Hihat to the default mempool of a LEAF instance.
      @param hihat A pointer to the t808Hihat to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808Hihat_initToPool            (t808Hihat* const, tMempool* const)
+     @fn void    t808Hihat_initToPool(t808Hihat** const, tMempool** const)
      @brief Initialize a t808Hihat to a specified mempool.
      @param hihat A pointer to the t808Hihat to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    t808Hihat_free                  (t808Hihat* const)
+     @fn void    t808Hihat_free(t808Hihat** const)
      @brief Free a t808Hihat from its mempool.
      @param hihat A pointer to the t808Hihat to free.
      
@@ -190,18 +190,18 @@ extern "C" {
     
     typedef struct t808Hihat
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         // 6 Square waves
-        tSquare p[6];
-        tNoise n;
-        tSVF bandpassOsc;
-        tSVF bandpassStick;
-        tEnvelope envGain;
-        tEnvelope envStick;
-        tEnvelope noiseFMGain;
-        tHighpass highpass;
-        tNoise stick;
+        tSquare* p[6];
+        tNoise*  n;
+        tSVF*  bandpassOsc;
+        tSVF*  bandpassStick;
+        tEnvelope*  envGain;
+        tEnvelope*  envStick;
+        tEnvelope*  noiseFMGain;
+        tHighpass*  highpass;
+        tNoise*  stick;
         
         Lfloat freq;
         Lfloat stretch;
@@ -210,7 +210,7 @@ extern "C" {
     } t808Hihat;
 
     void    t808Hihat_init                  (t808Hihat** const, LEAF* const leaf);
-    void    t808Hihat_initToPool            (t808Hihat** const, tMempool* const);
+    void    t808Hihat_initToPool            (t808Hihat** const, tMempool** const);
     void    t808Hihat_free                  (t808Hihat** const);
     
     Lfloat  t808Hihat_tick                  (t808Hihat* const);
@@ -236,17 +236,17 @@ extern "C" {
      @brief 808 drum machine snare.
      @{
      
-     @fn void    t808Snare_init                  (t808Snare* const, LEAF* const leaf)
+     @fn void    t808Snare_init(t808Snare** const, LEAF* const leaf)
      @brief Initialize a t808Snare to the default mempool of a LEAF instance.
      @param snare A pointer to the t808Snare to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808Snare_initToPool            (t808Snare* const, tMempool* const)
+     @fn void    t808Snare_initToPool(t808Snare** const, tMempool** const)
      @brief Initialize a t808Snare to a specified mempool.
      @param snare A pointer to the t808Snare to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    t808Snare_free                  (t808Snare* const)
+     @fn void    t808Snare_free(t808Snare** const)
      @brief Free a t808Snare from its mempool.
      @param snare A pointer to the t808Snare to free.
      
@@ -294,18 +294,18 @@ extern "C" {
     
     typedef struct t808Snare
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         // Tone 1, Tone 2, Noise
-        tTriangle tone[2]; // Tri (not yet antialiased or wavetabled)
-        tNoise noiseOsc;
-        tSVF toneLowpass[2];
-        tSVF noiseLowpass; // Lowpass from SVF filter
-        tEnvelope toneEnvOsc[2];
-        tEnvelope toneEnvGain[2];
-        tEnvelope noiseEnvGain;
-        tEnvelope toneEnvFilter[2];
-        tEnvelope noiseEnvFilter;
+        tTriangle* tone[2]; // Tri (not yet antialiased or wavetabled)
+        tNoise*  noiseOsc;
+        tSVF* toneLowpass[2];
+        tSVF*  noiseLowpass; // Lowpass from SVF filter
+        tEnvelope*  toneEnvOsc[2];
+        tEnvelope*  toneEnvGain[2];
+        tEnvelope*  noiseEnvGain;
+        tEnvelope*  toneEnvFilter[2];
+        tEnvelope*  noiseEnvFilter;
         
         Lfloat toneGain[2];
         Lfloat noiseGain;
@@ -318,7 +318,7 @@ extern "C" {
     } t808Snare;
 
     void    t808Snare_init                  (t808Snare** const, LEAF* const leaf);
-    void    t808Snare_initToPool            (t808Snare** const, tMempool* const);
+    void    t808Snare_initToPool            (t808Snare** const, tMempool** const);
     void    t808Snare_free                  (t808Snare** const);
     
     Lfloat  t808Snare_tick                  (t808Snare* const);
@@ -343,17 +343,17 @@ extern "C" {
      @brief 808 drum machine snare.
      @{
      
-     @fn void    t808SnareSmall_init                  (t808SnareSmall* const, LEAF* const leaf)
+     @fn void    t808SnareSmall_init(t808SnareSmall** const, LEAF* const leaf)
      @brief Initialize a t808SnareSmall to the default mempool of a LEAF instance.
      @param snare A pointer to the t808SnareSmall to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808SnareSmall_initToPool            (t808SnareSmall* const, tMempool* const)
+     @fn void    t808SnareSmall_initToPool(t808SnareSmall** const, tMempool** const)
      @brief Initialize a t808SnareSmall to a specified mempool.
      @param snare A pointer to the t808SnareSmall to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    t808SnareSmall_free                  (t808SnareSmall* const)
+     @fn void    t808SnareSmall_free(t808SnareSmall** const)
      @brief Free a t808SnareSmall from its mempool.
      @param snare A pointer to the t808SnareSmall to free.
      
@@ -401,18 +401,18 @@ extern "C" {
     
     typedef struct t808SnareSmall
     {
-        
-        tMempool mempool;
+
+        tMempool* mempool;
         // Tone 1, Tone 2, Noise
-        tPBTriangle tone[2]; // Tri 
-        tNoise noiseOsc;
-        tSVF toneLowpass[2];
-        tSVF noiseLowpass; // Lowpass from SVF filter
-        tADSRS toneEnvOsc[2];
-        tADSRS toneEnvGain[2];
-        tADSRS noiseEnvGain;
-        tADSRS toneEnvFilter[2];
-        tADSRS noiseEnvFilter;
+        tPBTriangle*  tone[2]; // Tri
+        tNoise*  noiseOsc;
+        tSVF*  toneLowpass[2];
+        tSVF*  noiseLowpass; // Lowpass from SVF filter
+        tADSRS*  toneEnvOsc[2];
+        tADSRS*  toneEnvGain[2];
+        tADSRS*  noiseEnvGain;
+        tADSRS*  toneEnvFilter[2];
+        tADSRS*  noiseEnvFilter;
         
         Lfloat toneGain[2];
         Lfloat noiseGain;
@@ -425,7 +425,7 @@ extern "C" {
     } t808SnareSmall;
 
     void    t808SnareSmall_init                  (t808SnareSmall** const, LEAF* const leaf);
-    void    t808SnareSmall_initToPool            (t808SnareSmall** const, tMempool* const);
+    void    t808SnareSmall_initToPool            (t808SnareSmall** const, tMempool** const);
     void    t808SnareSmall_free                  (t808SnareSmall** const);
     
     Lfloat  t808SnareSmall_tick                  (t808SnareSmall* const);
@@ -448,17 +448,17 @@ extern "C" {
      @brief 808 drum machine kick.
      @{
      
-     @fn void    t808Kick_init               (t808Kick* const, LEAF* const leaf)
+     @fn void    t808Kick_init(t808Kick** const, LEAF* const leaf)
      @brief Initialize a t808Kick to the default mempool of a LEAF instance.
      @param kick A pointer to the t808Kick to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808Kick_initToPool         (t808Kick* const, tMempool* const)
+     @fn void    t808Kick_initToPool(t808Kick** const, tMempool** const)
      @brief Initialize a t808Kick to a specified mempool.
      @param kick A pointer to the t808Kick to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    t808Kick_free               (t808Kick* const)
+     @fn void    t808Kick_free(t808Kick** const)
      @brief Free a t808Kick from its mempool.
      @param kick A pointer to the t808Kick to free.
      
@@ -506,17 +506,17 @@ extern "C" {
     
     typedef struct t808Kick
     {
+
+        tMempool* mempool;
         
-        tMempool mempool;
-        
-        tCycle tone; // Tri
-        tNoise noiseOsc;
-        tSVF toneLowpass;
-        tEnvelope toneEnvOscChirp;
-        tEnvelope toneEnvOscSigh;
-        tEnvelope toneEnvGain;
-        tEnvelope noiseEnvGain;
-        tEnvelope toneEnvFilter;
+        tCycle*  tone; // Tri
+        tNoise*  noiseOsc;
+        tSVF*  toneLowpass;
+        tEnvelope*  toneEnvOscChirp;
+        tEnvelope*  toneEnvOscSigh;
+        tEnvelope*  toneEnvGain;
+        tEnvelope*  noiseEnvGain;
+        tEnvelope*  toneEnvFilter;
         
         Lfloat toneGain;
         Lfloat noiseGain;
@@ -528,7 +528,7 @@ extern "C" {
     } t808Kick;
 
     void    t808Kick_init               (t808Kick** const, LEAF* const leaf);
-    void    t808Kick_initToPool         (t808Kick** const, tMempool* const);
+    void    t808Kick_initToPool         (t808Kick** const, tMempool** const);
     void    t808Kick_free               (t808Kick** const);
     
     Lfloat  t808Kick_tick               (t808Kick* const);
@@ -553,17 +553,17 @@ extern "C" {
      @brief 808 drum machine kick.
      @{
      
-     @fn void    t808KickSmall_init               (t808KickSmall* const, LEAF* const leaf)
+     @fn void    t808KickSmall_init(t808KickSmall** const, LEAF* const leaf)
      @brief Initialize a t808KickSmall to the default mempool of a LEAF instance.
      @param kick A pointer to the t808KickSmall to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808KickSmall_initToPool         (t808KickSmall* const, tMempool* const)
+     @fn void    t808KickSmall_initToPool(t808KickSmall** const, tMempool** const)
      @brief Initialize a t808KickSmall to a specified mempool.
      @param kick A pointer to the t808KickSmall to initialize.
      @param mempool A pointer to the tMempool to use.
      
-     @fn void    t808KickSmall_free               (t808KickSmall* const)
+     @fn void    t808KickSmall_free(t808KickSmall** const)
      @brief Free a t808KickSmall from its mempool.
      @param kick A pointer to the t808KickSmall to free.
      
@@ -611,17 +611,17 @@ extern "C" {
     
     typedef struct t808KickSmall
     {
+
+        tMempool* mempool;
         
-        tMempool mempool;
-        
-        tCycle tone; // Tri
-        tNoise noiseOsc;
-        tSVF toneLowpass;
-        tADSRS toneEnvOscChirp;
-        tADSRS toneEnvOscSigh;
-        tADSRS toneEnvGain;
-        tADSRS noiseEnvGain;
-        tADSRS toneEnvFilter;
+        tCycle*  tone; // Tri
+        tNoise*  noiseOsc;
+        tSVF*  toneLowpass;
+        tADSRS*  toneEnvOscChirp;
+        tADSRS*  toneEnvOscSigh;
+        tADSRS*  toneEnvGain;
+        tADSRS*  noiseEnvGain;
+        tADSRS*  toneEnvFilter;
         
         Lfloat toneGain;
         Lfloat noiseGain;
@@ -633,7 +633,7 @@ extern "C" {
     } t808KickSmall;
 
     void    t808KickSmall_init               (t808KickSmall** const, LEAF* const leaf);
-    void    t808KickSmall_initToPool         (t808KickSmall** const, tMempool* const);
+    void    t808KickSmall_initToPool         (t808KickSmall** const, tMempool** const);
     void    t808KickSmall_free               (t808KickSmall** const);
     
     Lfloat  t808KickSmall_tick               (t808KickSmall* const);

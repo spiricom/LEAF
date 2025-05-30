@@ -46,9 +46,9 @@ void tCompressor_init (tCompressor** const comp, LEAF* const leaf)
     tCompressor_initToPool(comp, &leaf->mempool);
 }
 
-void tCompressor_initToPool (tCompressor** const comp, tMempool* const mp)
+void tCompressor_initToPool (tCompressor** const comp, tMempool** const mp)
 {
-    _tMempool* m = *mp;
+    tMempool* m = *mp;
     tCompressor* c = *comp = (tCompressor*) mpool_alloc(sizeof(tCompressor), m);
     c->mempool = m;
     LEAF* leaf = c->mempool->leaf;
@@ -76,9 +76,9 @@ void tCompressor_initToPool (tCompressor** const comp, tMempool* const mp)
 
 }
 
-void tCompressor_free (tCompressor* const comp)
+void tCompressor_free (tCompressor** const comp)
 {
-    tCompressor* c = &*comp;
+    tCompressor* c = *comp;
     
     mpool_free((char*)c, c->mempool);
 }
@@ -265,14 +265,14 @@ void tCompressor_setSampleRate(tCompressor* const c, Lfloat sampleRate)
 }
 /* Feedback Leveler */
 
-void tFeedbackLeveler_init (tFeedbackLeveler* const fb, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf)
+void tFeedbackLeveler_init (tFeedbackLeveler** const fb, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf)
 {
     tFeedbackLeveler_initToPool(fb, targetLevel, factor, strength, mode, &leaf->mempool);
 }
 
-void tFeedbackLeveler_initToPool (tFeedbackLeveler** const fb, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool* const mp)
+void tFeedbackLeveler_initToPool (tFeedbackLeveler** const fb, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool** const mp)
 {
-    _tMempool* m = *mp;
+    tMempool* m = *mp;
     tFeedbackLeveler* p = *fb = (tFeedbackLeveler*) mpool_alloc(sizeof(tFeedbackLeveler), m);
     p->mempool = m;
     
@@ -299,7 +299,7 @@ void     tFeedbackLeveler_setStrength(tFeedbackLeveler* const p, Lfloat strength
 
 void     tFeedbackLeveler_setFactor(tFeedbackLeveler* const p, Lfloat factor)
 {
-    tPowerFollower_setFactor(&p->pwrFlw,factor);
+    tPowerFollower_setFactor(p->pwrFlw,factor);
 }
 
 void     tFeedbackLeveler_setMode(tFeedbackLeveler* const p, int mode)
@@ -309,7 +309,7 @@ void     tFeedbackLeveler_setMode(tFeedbackLeveler* const p, int mode)
 
 Lfloat   tFeedbackLeveler_tick(tFeedbackLeveler* const p, Lfloat input)
 {
-    Lfloat levdiff=(tPowerFollower_tick(&p->pwrFlw, input)-p->targetLevel);
+    Lfloat levdiff=(tPowerFollower_tick(p->pwrFlw, input)-p->targetLevel);
     if (p->mode==0 && levdiff<0.0f) levdiff=0.0f;
     p->curr=input*(1.0f-p->strength*levdiff);
     return p->curr;
@@ -327,14 +327,14 @@ void     tFeedbackLeveler_setTargetLevel   (tFeedbackLeveler* const p, Lfloat Ta
 }
 
 
-void tThreshold_init (tThreshold* const th, Lfloat low, Lfloat high, LEAF* const leaf)
+void tThreshold_init (tThreshold** const th, Lfloat low, Lfloat high, LEAF* const leaf)
 {
 	tThreshold_initToPool(th, low, high, &leaf->mempool);
 }
 
-void tThreshold_initToPool (tThreshold** const th, Lfloat low, Lfloat high, tMempool* const mp)
+void tThreshold_initToPool (tThreshold** const th, Lfloat low, Lfloat high, tMempool** const mp)
 {
-    _tMempool* m = *mp;
+    tMempool* m = *mp;
     tThreshold* t = *th = (tThreshold*) mpool_alloc(sizeof(tThreshold), m);
     t->mempool = m;
     
