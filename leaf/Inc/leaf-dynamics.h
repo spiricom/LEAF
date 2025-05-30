@@ -57,7 +57,7 @@ extern "C" {
      
      @} */
    
-    typedef struct _tCompressor
+    typedef struct tCompressor
     {
         
         tMempool mempool;
@@ -80,21 +80,19 @@ extern "C" {
         int atodbTableSizeMinus1;
         int dbtoaTableSizeMinus1;
         
-    } _tCompressor;
-    
-    typedef _tCompressor* tCompressor;
-    
-    void    tCompressor_init                  (tCompressor* const, LEAF* const leaf);
-    void    tCompressor_initToPool            (tCompressor* const, tMempool* const);
-    void    tCompressor_free                  (tCompressor* const);
-    
-    Lfloat  tCompressor_tick                  (tCompressor const, Lfloat input);
-    Lfloat  tCompressor_tickWithTable         (tCompressor const comp, Lfloat in);
-    Lfloat  tCompressor_tickWithTableHardKnee (tCompressor const comp, Lfloat in);
+    } tCompressor;
 
-    void    tCompressor_setTables             (tCompressor const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize);
-    void    tCompressor_setParams             (tCompressor const comp, Lfloat thresh, Lfloat ratio, Lfloat knee, Lfloat makeup, Lfloat attack, Lfloat release);
-    void    tCompressor_setSampleRate         (tCompressor const comp, Lfloat sampleRate);
+    void    tCompressor_init                  (tCompressor** const, LEAF* const leaf);
+    void    tCompressor_initToPool            (tCompressor** const, tMempool* const);
+    void    tCompressor_free                  (tCompressor** const);
+    
+    Lfloat  tCompressor_tick                  (tCompressor* const, Lfloat input);
+    Lfloat  tCompressor_tickWithTable         (tCompressor* const comp, Lfloat in);
+    Lfloat  tCompressor_tickWithTableHardKnee (tCompressor* const comp, Lfloat in);
+
+    void    tCompressor_setTables             (tCompressor* const comp, Lfloat* atodb, Lfloat* dbtoa, Lfloat atodbMinIn, Lfloat atodbMaxIn, Lfloat dbtoaMinIn, Lfloat dbtoaMaxIn, int atodbTableSize, int dbtoaTableSize);
+    void    tCompressor_setParams             (tCompressor* const comp, Lfloat thresh, Lfloat ratio, Lfloat knee, Lfloat makeup, Lfloat attack, Lfloat release);
+    void    tCompressor_setSampleRate         (tCompressor* const comp, Lfloat sampleRate);
     
     /*!
      @defgroup tfeedbackleveler tFeedbackLeveler
@@ -144,7 +142,7 @@ extern "C" {
      
      @} */
     
-    typedef struct _tFeedbackLeveler
+    typedef struct tFeedbackLeveler
     {
         
         tMempool mempool;
@@ -154,21 +152,19 @@ extern "C" {
         Lfloat curr;
         tPowerFollower pwrFlw;    // internal power follower needed for level tracking
         
-    } _tFeedbackLeveler;
-    
-    typedef _tFeedbackLeveler* tFeedbackLeveler;
-    
-    void    tFeedbackLeveler_init           (tFeedbackLeveler* const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf);
-    void    tFeedbackLeveler_initToPool     (tFeedbackLeveler* const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool* const);
-    void    tFeedbackLeveler_free           (tFeedbackLeveler* const);
-    
-    Lfloat  tFeedbackLeveler_tick           (tFeedbackLeveler const, Lfloat input);
+    } tFeedbackLeveler;
 
-    Lfloat  tFeedbackLeveler_sample         (tFeedbackLeveler const);
-    void    tFeedbackLeveler_setTargetLevel (tFeedbackLeveler const, Lfloat TargetLevel);
-    void    tFeedbackLeveler_setFactor      (tFeedbackLeveler const, Lfloat factor);
-    void    tFeedbackLeveler_setMode        (tFeedbackLeveler const, int mode); // 0 for upwards limiting only, 1 for biderctional limiting
-    void    tFeedbackLeveler_setStrength    (tFeedbackLeveler const, Lfloat strength);
+    void    tFeedbackLeveler_init           (tFeedbackLeveler** const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, LEAF* const leaf);
+    void    tFeedbackLeveler_initToPool     (tFeedbackLeveler** const, Lfloat targetLevel, Lfloat factor, Lfloat strength, int mode, tMempool* const);
+    void    tFeedbackLeveler_free           (tFeedbackLeveler** const);
+    
+    Lfloat  tFeedbackLeveler_tick           (tFeedbackLeveler* const, Lfloat input);
+
+    Lfloat  tFeedbackLeveler_sample         (tFeedbackLeveler* const);
+    void    tFeedbackLeveler_setTargetLevel (tFeedbackLeveler* const, Lfloat TargetLevel);
+    void    tFeedbackLeveler_setFactor      (tFeedbackLeveler* const, Lfloat factor);
+    void    tFeedbackLeveler_setMode        (tFeedbackLeveler* const, int mode); // 0 for upwards limiting only, 1 for biderctional limiting
+    void    tFeedbackLeveler_setStrength    (tFeedbackLeveler* const, Lfloat strength);
     
     //==============================================================================
     
@@ -207,25 +203,22 @@ extern "C" {
      
      @} */
 
-    typedef struct _tThreshold
+    typedef struct tThreshold
     {
         
         tMempool mempool;
         Lfloat highThresh, lowThresh;
 		int currentValue;
-    } _tThreshold;
+    } tThreshold;
 
-    typedef _tThreshold* tThreshold;
+    void    tThreshold_init        (tThreshold** const, Lfloat low, Lfloat high, LEAF* const leaf);
+    void    tThreshold_initToPool  (tThreshold** const, Lfloat low, Lfloat high, tMempool* const);
+    void    tThreshold_free        (tThreshold** const);
 
-    void    tThreshold_init        (tThreshold* const, Lfloat low, Lfloat high, LEAF* const leaf);
-    void    tThreshold_initToPool  (tThreshold* const, Lfloat low, Lfloat high, tMempool* const);
-    void    tThreshold_free        (tThreshold* const);
+    int    tThreshold_tick         (tThreshold* const, Lfloat input);
 
-    int    tThreshold_tick         (tThreshold const, Lfloat input);
-
-    void   tThreshold_setLow       (tThreshold const, Lfloat low);
-    void   tThreshold_setHigh      (tThreshold const, Lfloat high);
-
+    void   tThreshold_setLow       (tThreshold* const, Lfloat low);
+    void   tThreshold_setHigh      (tThreshold* const, Lfloat high);
 
 
     //////======================================================================

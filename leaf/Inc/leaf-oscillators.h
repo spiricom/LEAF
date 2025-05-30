@@ -61,7 +61,7 @@ extern "C" {
     ￼￼￼
      @} */
     
-    typedef struct _tCycle
+    typedef struct tCycle
     {
         tMempool mempool;
         // Underlying phasor
@@ -70,22 +70,20 @@ extern "C" {
 		Lfloat freq;
         Lfloat invSampleRateTimesTwoTo32;
         uint32_t mask;
-    } _tCycle;
-    
-    typedef _tCycle* tCycle;
+    } tCycle;
 
     // Memory handlers for `tCycle`
-    void    tCycle_init          (tCycle* const osc, LEAF* const leaf);
-    void    tCycle_initToPool    (tCycle* const osc, tMempool* const mempool);
-    void    tCycle_free          (tCycle* const osc);
+    void    tCycle_init          (tCycle** const osc, LEAF* const leaf);
+    void    tCycle_initToPool    (tCycle** const osc, tMempool* const mempool);
+    void    tCycle_free          (tCycle** const osc);
 
     // Tick function for `tCycle`
-    Lfloat  tCycle_tick          (tCycle const osc);
+    Lfloat  tCycle_tick          (tCycle* const osc);
 
     // Setter functions for `tCycle`
-    void    tCycle_setFreq       (tCycle const osc, Lfloat freq);
-    void    tCycle_setPhase      (tCycle const osc, Lfloat phase);
-    void    tCycle_setSampleRate (tCycle const osc, Lfloat sr);
+    void    tCycle_setFreq       (tCycle* const osc, Lfloat freq);
+    void    tCycle_setPhase      (tCycle* const osc, Lfloat phase);
+    void    tCycle_setSampleRate (tCycle* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -121,7 +119,7 @@ extern "C" {
      
      @} */
 
-    typedef struct _tTriangle
+    typedef struct tTriangle
     {
         tMempool mempool;
         // Underlying phasor
@@ -133,22 +131,20 @@ extern "C" {
         Lfloat invSampleRate;
         Lfloat invSampleRateTimesTwoTo32;
         uint32_t mask;
-    } _tTriangle;
-    
-    typedef _tTriangle* tTriangle;
+    } tTriangle;
 
     // Memory handlers for `tTriangle`
-    void    tTriangle_init          (tTriangle* const osc, LEAF* const leaf);
-    void    tTriangle_initToPool    (tTriangle* const osc, tMempool* const mempool);
-    void    tTriangle_free          (tTriangle* const osc);
+    void    tTriangle_init          (tTriangle** const osc, LEAF* const leaf);
+    void    tTriangle_initToPool    (tTriangle** const osc, tMempool* const mempool);
+    void    tTriangle_free          (tTriangle** const osc);
 
     // Tick function for `tTriangle`
-    Lfloat  tTriangle_tick          (tTriangle const osc);
+    Lfloat  tTriangle_tick          (tTriangle* const osc);
 
     // Setter functions for `tTriangle`
-    void    tTriangle_setFreq       (tTriangle const osc, Lfloat freq);
-    void    tTriangle_setPhase      (tTriangle const osc, Lfloat phase);
-    void    tTriangle_setSampleRate (tTriangle const osc, Lfloat sr);
+    void    tTriangle_setFreq       (tTriangle* const osc, Lfloat freq);
+    void    tTriangle_setPhase      (tTriangle* const osc, Lfloat phase);
+    void    tTriangle_setSampleRate (tTriangle* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -184,7 +180,7 @@ extern "C" {
      ￼￼￼
      @} */
     
-    typedef struct _tSquare
+    typedef struct tSquare
     {
         tMempool mempool;
         // Underlying phasor
@@ -196,22 +192,20 @@ extern "C" {
         Lfloat invSampleRate;
         Lfloat invSampleRateTimesTwoTo32;
         uint32_t mask;
-    } _tSquare;
-    
-    typedef _tSquare* tSquare;
+    } tSquare;
 
     // Memory handlers for `tSquare`
-    void    tSquare_init          (tSquare* const osc, LEAF* const leaf);
-    void    tSquare_initToPool    (tSquare* const osc, tMempool* const mempool);
-    void    tSquare_free          (tSquare* const osc);
+    void    tSquare_init          (tSquare** const osc, LEAF* const leaf);
+    void    tSquare_initToPool    (tSquare** const osc, tMempool* const mempool);
+    void    tSquare_free          (tSquare** const osc);
 
     // Tick function for `tSquare`
-    Lfloat  tSquare_tick          (tSquare const osc);
+    Lfloat  tSquare_tick          (tSquare* const osc);
 
     // Setter functions for `tSquare`
-    void    tSquare_setFreq       (tSquare const osc, Lfloat freq);
-    void    tSquare_setPhase      (tSquare const osc, Lfloat phase);
-    void    tSquare_setSampleRate (tSquare const osc, Lfloat sr);
+    void    tSquare_setFreq       (tSquare* const osc, Lfloat freq);
+    void    tSquare_setPhase      (tSquare* const osc, Lfloat phase);
+    void    tSquare_setSampleRate (tSquare* const osc, Lfloat sr);
     
     /*!￼￼￼
      @} */
@@ -250,7 +244,7 @@ extern "C" {
      ￼￼￼
      @} */
     
-    typedef struct _tSawtooth
+    typedef struct tSawtooth
     {
         tMempool mempool;
         // Underlying phasor
@@ -262,22 +256,20 @@ extern "C" {
         Lfloat invSampleRate;
         Lfloat invSampleRateTimesTwoTo32;
         uint32_t mask;
-    } _tSawtooth;
-    
-    typedef _tSawtooth* tSawtooth;
+    } tSawtooth;
 
     // Memory handlers for `tSawtooth`
-    void    tSawtooth_init          (tSawtooth* const osc, LEAF* const leaf);
-    void    tSawtooth_initToPool    (tSawtooth* const osc, tMempool* const mempool);
-    void    tSawtooth_free          (tSawtooth* const osc);
+    void    tSawtooth_init          (tSawtooth** const osc, LEAF* const leaf);
+    void    tSawtooth_initToPool    (tSawtooth** const osc, tMempool* const mempool);
+    void    tSawtooth_free          (tSawtooth** const osc);
 
     // Tick function for `tSawtooth`
-    Lfloat  tSawtooth_tick          (tSawtooth const osc);
+    Lfloat  tSawtooth_tick          (tSawtooth* const osc);
 
     // Setter functions for `tSawtooth`
-    void    tSawtooth_setFreq       (tSawtooth const osc, Lfloat freq);
-    void    tSawtooth_setPhase      (tSawtooth const osc, Lfloat phase);
-    void    tSawtooth_setSampleRate (tSawtooth const osc, Lfloat sr);
+    void    tSawtooth_setFreq       (tSawtooth* const osc, Lfloat freq);
+    void    tSawtooth_setPhase      (tSawtooth* const osc, Lfloat phase);
+    void    tSawtooth_setSampleRate (tSawtooth* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -315,7 +307,7 @@ extern "C" {
      ￼￼￼
      @} */
 
-    typedef struct _tPBSineTriangle
+    typedef struct tPBSineTriangle
     {
         tMempool mempool;
         uint32_t phase;
@@ -326,35 +318,33 @@ extern "C" {
         Lfloat oneMinusShape;
         Lfloat invSampleRate;
         Lfloat invSampleRateTimesTwoTo32;
-    } _tPBSineTriangle;
-
-    typedef _tPBSineTriangle* tPBSineTriangle;
+    } tPBSineTriangle;
 
     // Memory handlers for `tPBSineTriangle`
-    void    tPBSineTriangle_init          (tPBSineTriangle* const osc, LEAF* const leaf);
-    void    tPBSineTriangle_initToPool    (tPBSineTriangle* const osc, tMempool* const mempool);
-    void    tPBSineTriangle_free          (tPBSineTriangle* const osc);
+    void    tPBSineTriangle_init          (tPBSineTriangle** const osc, LEAF* const leaf);
+    void    tPBSineTriangle_initToPool    (tPBSineTriangle** const osc, tMempool* const mempool);
+    void    tPBSineTriangle_free          (tPBSineTriangle** const osc);
 
 
 #ifdef ITCMRAM
     Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSineTriangle_tick          (tPBSineTriangle* const osc);
 #else
     // Tick function for `tPBSineTriangle`
-    Lfloat  tPBSineTriangle_tick          (tPBSineTriangle const osc);
+    Lfloat  tPBSineTriangle_tick          (tPBSineTriangle* const osc);
 #endif
 #ifdef ITCMRAM
     void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq);
 #else
     // Setter functions for `tPBSineTriangle`
-    void    tPBSineTriangle_setFreq       (tPBSineTriangle const osc, Lfloat freq);
+    void    tPBSineTriangle_setFreq       (tPBSineTriangle* const osc, Lfloat freq);
 #endif
-    void    tPBSineTriangle_setShape      (tPBSineTriangle const osc, Lfloat shape);
-    void    tPBSineTriangle_setSampleRate (tPBSineTriangle const osc, Lfloat sr);
+    void    tPBSineTriangle_setShape      (tPBSineTriangle* const osc, Lfloat shape);
+    void    tPBSineTriangle_setSampleRate (tPBSineTriangle* const osc, Lfloat sr);
 
     //==============================================================================
 
 
-    typedef struct _tPBTriangle
+    typedef struct tPBTriangle
     {
         tMempool mempool;
         uint32_t phase;
@@ -365,29 +355,27 @@ extern "C" {
         Lfloat lastOutput;
         Lfloat invSampleRate;
         Lfloat invSampleRateTimesTwoTo32;
-    } _tPBTriangle;
-    
-    typedef _tPBTriangle* tPBTriangle;
+    } tPBTriangle;
 
     // Memory handlers for `tPBTriangle`
-    void    tPBTriangle_init          (tPBTriangle* const osc, LEAF* const leaf);
-    void    tPBTriangle_initToPool    (tPBTriangle* const osc, tMempool* const mempool);
-    void    tPBTriangle_free          (tPBTriangle* const osc);
+    void    tPBTriangle_init          (tPBTriangle** const osc, LEAF* const leaf);
+    void    tPBTriangle_initToPool    (tPBTriangle** const osc, tMempool* const mempool);
+    void    tPBTriangle_free          (tPBTriangle** const osc);
     
 #ifdef ITCMRAM
     Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBTriangle_tick          (tPBTriangle* const osc);
 #else
     // Tick function for `tPBTriangle`
-    Lfloat  tPBTriangle_tick          (tPBTriangle const osc);
+    Lfloat  tPBTriangle_tick          (tPBTriangle* const osc);
 #endif
 #ifdef ITCMRAM
     void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq);
 #else
     // Setter functions for `tPBTriangle`
-    void    tPBTriangle_setFreq       (tPBTriangle const osc, Lfloat freq);
+    void    tPBTriangle_setFreq       (tPBTriangle* const osc, Lfloat freq);
 #endif
-    void    tPBTriangle_setSkew       (tPBTriangle const osc, Lfloat skew);
-    void    tPBTriangle_setSampleRate (tPBTriangle const osc, Lfloat sr);
+    void    tPBTriangle_setSkew       (tPBTriangle* const osc, Lfloat skew);
+    void    tPBTriangle_setSampleRate (tPBTriangle* const osc, Lfloat sr);
     
     //==============================================================================
     /*!
@@ -424,7 +412,7 @@ extern "C" {
      ￼￼￼
      @} */
     
-    typedef struct _tPBPulse
+    typedef struct tPBPulse
     {
         tMempool mempool;
         uint32_t phase;
@@ -434,29 +422,27 @@ extern "C" {
         uint32_t oneMinusWidth;
         Lfloat invSampleRate;
         Lfloat invSampleRateTimesTwoTo32;
-    } _tPBPulse;
-    
-    typedef _tPBPulse* tPBPulse;
+    } tPBPulse;
 
     // Memory handlers for `tPBPulse`
-    void    tPBPulse_init          (tPBPulse* const osc, LEAF* const leaf);
-    void    tPBPulse_initToPool    (tPBPulse* const osc, tMempool* const);
-    void    tPBPulse_free          (tPBPulse* const osc);
+    void    tPBPulse_init          (tPBPulse** const osc, LEAF* const leaf);
+    void    tPBPulse_initToPool    (tPBPulse** const osc, tMempool* const);
+    void    tPBPulse_free          (tPBPulse** const osc);
     
 #ifdef ITCMRAM
     Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBPulse_tick        (tPBPulse* const osc);
 #else
     // Tick function for `tPBPulse`
-    Lfloat  tPBPulse_tick          (tPBPulse const osc);
+    Lfloat  tPBPulse_tick          (tPBPulse* const osc);
 #endif
 #ifdef ITCMRAM
     void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBPulse_setFreq     (tPBPulse* const osc, Lfloat freq);
 #else
     // Setter functions for `tPBPulse`
-    void    tPBPulse_setFreq       (tPBPulse const osc, Lfloat freq);
+    void    tPBPulse_setFreq       (tPBPulse* const osc, Lfloat freq);
 #endif
-    void    tPBPulse_setWidth      (tPBPulse const osc, Lfloat width);
-    void    tPBPulse_setSampleRate (tPBPulse const osc, Lfloat sr);
+    void    tPBPulse_setWidth      (tPBPulse* const osc, Lfloat width);
+    void    tPBPulse_setSampleRate (tPBPulse* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -490,7 +476,7 @@ extern "C" {
      ￼￼￼
      @} */
     
-    typedef struct _tPBSaw
+    typedef struct tPBSaw
     {
         tMempool mempool;
         uint32_t phase;
@@ -500,32 +486,30 @@ extern "C" {
         Lfloat invSampleRateTimesTwoTo32;
         Lfloat lastsyncin;
         Lfloat sync;
-    } _tPBSaw;
-    
-    typedef _tPBSaw* tPBSaw;
+    } tPBSaw;
 
     // Memory handlers for `tPBSaw`
-    void    tPBSaw_init          (tPBSaw* const osc, LEAF* const leaf);
-    void    tPBSaw_initToPool    (tPBSaw* const osc, tMempool* const mempool);
-    void    tPBSaw_free          (tPBSaw* const osc);
+    void    tPBSaw_init          (tPBSaw** const osc, LEAF* const leaf);
+    void    tPBSaw_initToPool    (tPBSaw** const osc, tMempool* const mempool);
+    void    tPBSaw_free          (tPBSaw** const osc);
     
 #ifdef ITCMRAM
     Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSaw_tick          (tPBSaw* const osc);
 #else
     // Tick function for `tPBSaw`
-    Lfloat  tPBSaw_tick          (tPBSaw const osc);
+    Lfloat  tPBSaw_tick          (tPBSaw* const osc);
 #endif
 #ifdef ITCMRAM
     void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq);
 #else
     // Setter functions for `tPBSaw`
-    void    tPBSaw_setFreq       (tPBSaw const osc, Lfloat freq);
+    void    tPBSaw_setFreq       (tPBSaw* const osc, Lfloat freq);
 #endif
-    void    tPBSaw_setSampleRate (tPBSaw const osc, Lfloat sr);
+    void    tPBSaw_setSampleRate (tPBSaw* const osc, Lfloat sr);
     
     //==============================================================================
     
-typedef struct _tPBSawSquare
+typedef struct tPBSawSquare
 {
     tMempool mempool;
     uint32_t phase;
@@ -538,32 +522,30 @@ typedef struct _tPBSawSquare
     Lfloat shape;
     Lfloat oneMinusShape;
 
-} _tPBSawSquare;
-
-    typedef _tPBSawSquare* tPBSawSquare;
+} tPBSawSquare;
 
     // Memory handlers for `tPBSawSquare`
-    void    tPBSawSquare_init          (tPBSawSquare* const osc, LEAF* const leaf);
-    void    tPBSawSquare_initToPool    (tPBSawSquare* const osc, tMempool* const mempool);
-    void    tPBSawSquare_free          (tPBSawSquare* const osc);
+    void    tPBSawSquare_init          (tPBSawSquare** const osc, LEAF* const leaf);
+    void    tPBSawSquare_initToPool    (tPBSawSquare** const osc, tMempool* const mempool);
+    void    tPBSawSquare_free          (tPBSawSquare** const osc);
 
 #ifdef ITCMRAM
     Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSawSquare_tick          (tPBSawSquare* const osc);
 #else
     // Tick function for `tPBSawSquare`
-    Lfloat  tPBSawSquare_tick          (tPBSawSquare const osc);
+    Lfloat  tPBSawSquare_tick          (tPBSawSquare* const osc);
 #endif
 #ifdef ITCMRAM
     void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq);
 #else
     // Setter functions for `tPBSawSquare`
-    void    tPBSawSquare_setFreq       (tPBSawSquare const osc, Lfloat freq);
+    void    tPBSawSquare_setFreq       (tPBSawSquare* const osc, Lfloat freq);
 #endif
-    void    tPBSawSquare_setShape      (tPBSawSquare const osc, Lfloat shape);
-    void    tPBSawSquare_setSampleRate (tPBSawSquare const osc, Lfloat sr);
+    void    tPBSawSquare_setShape      (tPBSawSquare* const osc, Lfloat shape);
+    void    tPBSawSquare_setSampleRate (tPBSawSquare* const osc, Lfloat sr);
 
 //==============================================================================
-    typedef struct _tSawOS
+    typedef struct tSawOS
     {
         tMempool mempool;
         uint32_t phase;
@@ -576,21 +558,19 @@ typedef struct _tPBSawSquare
         uint32_t invSampleRateTimesTwoTo32OS;
         tSVF* aaFilter;
         uint8_t filterOrder;
-    } _tSawOS;
-
-    typedef _tSawOS* tSawOS;
+    } tSawOS;
 
     // Memory handlers for `tSawOS`
-    void    tSawOS_init          (tSawOS* const osc, uint8_t OS_ratio, uint8_t filterOrder, LEAF* const leaf);
-    void    tSawOS_initToPool    (tSawOS* const osc, uint8_t OS_ratio, uint8_t filterOrder, tMempool* const mp);
-    void    tSawOS_free          (tSawOS* const osc);
+    void    tSawOS_init          (tSawOS** const osc, uint8_t OS_ratio, uint8_t filterOrder, LEAF* const leaf);
+    void    tSawOS_initToPool    (tSawOS** const osc, uint8_t OS_ratio, uint8_t filterOrder, tMempool* const mp);
+    void    tSawOS_free          (tSawOS** const osc);
 
     // Tick function for `tSawOS`
-    Lfloat  tSawOS_tick          (tSawOS const osc);
+    Lfloat  tSawOS_tick          (tSawOS* const osc);
 
     // Setter functions for `tSawOS`
-    void    tSawOS_setFreq       (tSawOS const osc, Lfloat freq);
-    void    tSawOS_setSampleRate (tSawOS const osc, Lfloat sr);
+    void    tSawOS_setFreq       (tSawOS* const osc, Lfloat freq);
+    void    tSawOS_setSampleRate (tSawOS* const osc, Lfloat sr);
 
     //==============================================================================
 
@@ -625,7 +605,7 @@ typedef struct _tPBSawSquare
      ￼￼￼
      @} */
     
-    typedef struct _tPhasor
+    typedef struct tPhasor
     {
         
         tMempool mempool;
@@ -634,21 +614,19 @@ typedef struct _tPBSawSquare
         Lfloat freq;
         Lfloat invSampleRate;
         Lfloat invSampleRateTimesTwoTo32;
-    } _tPhasor;
-    
-    typedef _tPhasor* tPhasor;
+    } tPhasor;
 
     // Memory handlers for `tPhasor`
-    void    tPhasor_init          (tPhasor* const osc, LEAF* const leaf);
-    void    tPhasor_initToPool    (tPhasor* const osc, tMempool* const);
-    void    tPhasor_free          (tPhasor* const osc);
+    void    tPhasor_init          (tPhasor** const osc, LEAF* const leaf);
+    void    tPhasor_initToPool    (tPhasor** const osc, tMempool* const);
+    void    tPhasor_free          (tPhasor** const osc);
 
     // Tick function for `tPhasor`
-    Lfloat  tPhasor_tick          (tPhasor const osc);
+    Lfloat  tPhasor_tick          (tPhasor* const osc);
 
     // Setter functions for `tPhasor`
-    void    tPhasor_setFreq       (tPhasor const osc, Lfloat freq);
-    void    tPhasor_setSampleRate (tPhasor const osc, Lfloat sr);
+    void    tPhasor_setFreq       (tPhasor* const osc, Lfloat freq);
+    void    tPhasor_setSampleRate (tPhasor* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -691,23 +669,21 @@ typedef struct _tPBSawSquare
      /*!￼￼￼ @} */
 
     
-    typedef struct _tNoise
+    typedef struct tNoise
     {
         tMempool mempool;
         NoiseType type;
         Lfloat pinkb0, pinkb1, pinkb2;
         Lfloat(*rand)(void);
-    } _tNoise;
-    
-    typedef _tNoise* tNoise;
+    } tNoise;
 
     // Memory handlers for `tNoise`
-    void    tNoise_init         (tNoise* const noise, NoiseType type, LEAF* const leaf);
-    void    tNoise_initToPool   (tNoise* const noise, NoiseType type, tMempool* const);
-    void    tNoise_free         (tNoise* const noise);
+    void    tNoise_init         (tNoise** const noise, NoiseType type, LEAF* const leaf);
+    void    tNoise_initToPool   (tNoise** const noise, NoiseType type, tMempool* const);
+    void    tNoise_free         (tNoise** const noise);
 
     // Tick function for `tNoise`
-    Lfloat  tNoise_tick         (tNoise const noise);
+    Lfloat  tNoise_tick         (tNoise* const noise);
     
     //==============================================================================
     
@@ -802,7 +778,7 @@ typedef struct _tPBSawSquare
     
     /*!￼￼￼ @} */
     
-    typedef struct _tNeuron
+    typedef struct tNeuron
     {
         tMempool mempool;
         
@@ -819,31 +795,29 @@ typedef struct _tPBSawSquare
         Lfloat V[3];
         Lfloat P[3];
         Lfloat gK, gN, gL, C;
-    } _tNeuron;
-    
-    typedef _tNeuron* tNeuron;
+    } tNeuron;
 
     // Memory handlers for `tNeuron`
-    void    tNeuron_init          (tNeuron* const neuron, LEAF* const leaf);
-    void    tNeuron_initToPool    (tNeuron* const neuron, tMempool* const mempool);
-    void    tNeuron_free          (tNeuron* const neuron);
+    void    tNeuron_init          (tNeuron** const neuron, LEAF* const leaf);
+    void    tNeuron_initToPool    (tNeuron** const neuron, tMempool* const mempool);
+    void    tNeuron_free          (tNeuron** const neuron);
 
     // Tick function for `tNeuron`
-    Lfloat   tNeuron_tick         (tNeuron const neuron);
+    Lfloat   tNeuron_tick         (tNeuron* const neuron);
 
     // Setter functions for `tNeuron`
-    void    tNeuron_reset         (tNeuron const neuron);
-    void    tNeuron_setMode       (tNeuron const neuron, NeuronMode mode);
-    void    tNeuron_setCurrent    (tNeuron const neuron, Lfloat current);
-    void    tNeuron_setK          (tNeuron const neuron, Lfloat K);
-    void    tNeuron_setL          (tNeuron const neuron, Lfloat L);
-    void    tNeuron_setN          (tNeuron const neuron, Lfloat N);
-    void    tNeuron_setC          (tNeuron const neuron, Lfloat C);
-    void    tNeuron_setV1         (tNeuron const neuron, Lfloat V1);
-    void    tNeuron_setV2         (tNeuron const neuron, Lfloat V2);
-    void    tNeuron_setV3         (tNeuron const neuron, Lfloat V3);
-    void    tNeuron_setTimeStep   (tNeuron const neuron, Lfloat timestep);
-    void    tNeuron_setSampleRate (tNeuron const neuron, Lfloat sr);
+    void    tNeuron_reset         (tNeuron* const neuron);
+    void    tNeuron_setMode       (tNeuron* const neuron, NeuronMode mode);
+    void    tNeuron_setCurrent    (tNeuron* const neuron, Lfloat current);
+    void    tNeuron_setK          (tNeuron* const neuron, Lfloat K);
+    void    tNeuron_setL          (tNeuron* const neuron, Lfloat L);
+    void    tNeuron_setN          (tNeuron* const neuron, Lfloat N);
+    void    tNeuron_setC          (tNeuron* const neuron, Lfloat C);
+    void    tNeuron_setV1         (tNeuron* const neuron, Lfloat V1);
+    void    tNeuron_setV2         (tNeuron* const neuron, Lfloat V2);
+    void    tNeuron_setV3         (tNeuron* const neuron, Lfloat V3);
+    void    tNeuron_setTimeStep   (tNeuron* const neuron, Lfloat timestep);
+    void    tNeuron_setSampleRate (tNeuron* const neuron, Lfloat sr);
 
     //==============================================================================
     
@@ -892,7 +866,7 @@ typedef struct _tPBSawSquare
      ￼￼￼
      @} */
     
-    typedef struct _tMBPulse
+    typedef struct tMBPulse
     {
         
         tMempool mempool;
@@ -914,30 +888,28 @@ typedef struct _tPBSawSquare
         Lfloat 	BLEPproperties[64][2];
         Lfloat invSampleRate;
 
-    } _tMBPulse;
-    
-    typedef _tMBPulse* tMBPulse;
+    } tMBPulse;
 
     // Memory handlers for `tMBPulse`
-    void    tMBPulse_init                   (tMBPulse* const osc, LEAF* const leaf);
-    void    tMBPulse_initToPool             (tMBPulse* const osc, tMempool* const mempool);
-    void    tMBPulse_free                   (tMBPulse* const osc);
+    void    tMBPulse_init                   (tMBPulse** const osc, LEAF* const leaf);
+    void    tMBPulse_initToPool             (tMBPulse** const osc, tMempool* const mempool);
+    void    tMBPulse_free                   (tMBPulse** const osc);
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #else
     void    tMBPulse_place_step_dd_noBuffer (tMBPulse const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #endif
     // Tick function for `tMBPulse`
-    Lfloat  tMBPulse_tick                   (tMBPulse const osc);
+    Lfloat  tMBPulse_tick                   (tMBPulse* const osc);
 
     // Setter functions for `tMBPulse`
-    Lfloat  tMBPulse_sync                   (tMBPulse const osc, Lfloat sync);
-    void    tMBPulse_setFreq                (tMBPulse const osc, Lfloat f);
-    void    tMBPulse_setWidth               (tMBPulse const osc, Lfloat w);
-    void    tMBPulse_setPhase               (tMBPulse const osc, Lfloat phase);
-    void    tMBPulse_setSyncMode            (tMBPulse const osc, int hardOrSoft);
-    void    tMBPulse_setBufferOffset        (tMBPulse const osc, uint32_t offset);
-    void    tMBPulse_setSampleRate          (tMBPulse const osc, Lfloat sr);
+    Lfloat  tMBPulse_sync                   (tMBPulse* const osc, Lfloat sync);
+    void    tMBPulse_setFreq                (tMBPulse* const osc, Lfloat f);
+    void    tMBPulse_setWidth               (tMBPulse* const osc, Lfloat w);
+    void    tMBPulse_setPhase               (tMBPulse* const osc, Lfloat phase);
+    void    tMBPulse_setSyncMode            (tMBPulse* const osc, int hardOrSoft);
+    void    tMBPulse_setBufferOffset        (tMBPulse* const osc, uint32_t offset);
+    void    tMBPulse_setSampleRate          (tMBPulse* const osc, Lfloat sr);
     
     /*!
      @defgroup tmbtriangle tMBTriangle
@@ -979,7 +951,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPul
 
      @} */
     
-    typedef struct _tMBTriangle
+    typedef struct tMBTriangle
     {
         
         tMempool mempool;
@@ -1002,38 +974,36 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPul
         uint16_t BLEPindices[64];
         Lfloat 	BLEPproperties[64][3];
         Lfloat invSampleRate;
-    } _tMBTriangle;
-    
-    typedef _tMBTriangle* tMBTriangle;
+    } tMBTriangle;
 
     // Memory handlers for `tMBTriangle`
-    void    tMBTriangle_init              (tMBTriangle* const osc, LEAF* const leaf);
-    void    tMBTriangle_initToPool        (tMBTriangle* const osc, tMempool* const mempool);
-    void    tMBTriangle_free              (tMBTriangle* const osc);
+    void    tMBTriangle_init              (tMBTriangle** const osc, LEAF* const leaf);
+    void    tMBTriangle_initToPool        (tMBTriangle** const osc, tMempool* const mempool);
+    void    tMBTriangle_free              (tMBTriangle** const osc);
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w);
 #else
-    void    tMBTriangle_place_dd_noBuffer (tMBTriangle const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale,
+    void    tMBTriangle_place_dd_noBuffer (tMBTriangle* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale,
                                            Lfloat stepOrSlope, Lfloat w);
 #endif
 
     // Tick function for `tMBTriangle`
-    Lfloat  tMBTriangle_tick              (tMBTriangle const osc);
+    Lfloat  tMBTriangle_tick              (tMBTriangle* const osc);
 
     // Setter functions for `tMBTriangle`
-    Lfloat  tMBTriangle_sync              (tMBTriangle const osc, Lfloat sync);
-    void    tMBTriangle_setFreq           (tMBTriangle const osc, Lfloat f);
-    void    tMBTriangle_setWidth          (tMBTriangle const osc, Lfloat w);
-    void    tMBTriangle_setPhase          (tMBTriangle const osc, Lfloat phase);
-    void    tMBTriangle_setSyncMode       (tMBTriangle const osc, int hardOrSoft);
-    void    tMBTriangle_setBufferOffset   (tMBTriangle const osc, uint32_t offset);
-    void    tMBTriangle_setSampleRate     (tMBTriangle const osc, Lfloat sr);
+    Lfloat  tMBTriangle_sync              (tMBTriangle* const osc, Lfloat sync);
+    void    tMBTriangle_setFreq           (tMBTriangle* const osc, Lfloat f);
+    void    tMBTriangle_setWidth          (tMBTriangle* const osc, Lfloat w);
+    void    tMBTriangle_setPhase          (tMBTriangle* const osc, Lfloat phase);
+    void    tMBTriangle_setSyncMode       (tMBTriangle* const osc, int hardOrSoft);
+    void    tMBTriangle_setBufferOffset   (tMBTriangle* const osc, uint32_t offset);
+    void    tMBTriangle_setSampleRate     (tMBTriangle* const osc, Lfloat sr);
     
     
 
 
 
-    typedef struct _tMBSineTri
+    typedef struct tMBSineTri
     {
         tMempool mempool;
         Lfloat    out;
@@ -1057,32 +1027,30 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTri
         Lfloat 	BLEPproperties[64][3];
         Lfloat invSampleRate;
         uint32_t sineMask;
-    } _tMBSineTri;
-
-    typedef _tMBSineTri* tMBSineTri;
+    } tMBSineTri;
 
     // Memory handlers for `tMBSineTri`
-    void    tMBSineTri_init              (tMBSineTri* const osc, LEAF* const leaf);
-    void    tMBSineTri_initToPool        (tMBSineTri* const osc, tMempool* const mempool);
-    void    tMBSineTri_free              (tMBSineTri* const osc);
+    void    tMBSineTri_init              (tMBSineTri** const osc, LEAF* const leaf);
+    void    tMBSineTri_initToPool        (tMBSineTri** const osc, tMempool* const mempool);
+    void    tMBSineTri_free              (tMBSineTri** const osc);
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale, Lfloat stepOrSlope, Lfloat w);
 #else
-    void    tMBSineTri_place_dd_noBuffer (tMBSineTri const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale,
+    void    tMBSineTri_place_dd_noBuffer (tMBSineTri* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale,
                                           Lfloat stepOrSlope, Lfloat w);
 #endif
     // Tick function for `tMBSineTri`
-    Lfloat  tMBSineTri_tick              (tMBSineTri const osc);
+    Lfloat  tMBSineTri_tick              (tMBSineTri* const osc);
 
     // Setter functions for `tMBSineTri`
-    Lfloat  tMBSineTri_sync              (tMBSineTri const osc, Lfloat sync);
-    void    tMBSineTri_setFreq           (tMBSineTri const osc, Lfloat f);
-    void    tMBSineTri_setWidth          (tMBSineTri const osc, Lfloat w);
-    void    tMBSineTri_setPhase          (tMBSineTri const osc, Lfloat phase);
-    void    tMBSineTri_setShape          (tMBSineTri const osc, Lfloat shape);
-    void    tMBSineTri_setSyncMode       (tMBSineTri const osc, int hardOrSoft);
-    void    tMBSineTri_setBufferOffset   (tMBSineTri const osc, uint32_t offset);
-    void    tMBSineTri_setSampleRate     (tMBSineTri const osc, Lfloat sr);
+    Lfloat  tMBSineTri_sync              (tMBSineTri* const osc, Lfloat sync);
+    void    tMBSineTri_setFreq           (tMBSineTri* const osc, Lfloat f);
+    void    tMBSineTri_setWidth          (tMBSineTri* const osc, Lfloat w);
+    void    tMBSineTri_setPhase          (tMBSineTri* const osc, Lfloat phase);
+    void    tMBSineTri_setShape          (tMBSineTri* const osc, Lfloat shape);
+    void    tMBSineTri_setSyncMode       (tMBSineTri* const osc, int hardOrSoft);
+    void    tMBSineTri_setBufferOffset   (tMBSineTri* const osc, uint32_t offset);
+    void    tMBSineTri_setSampleRate     (tMBSineTri* const osc, Lfloat sr);
 
 
     /*!
@@ -1125,7 +1093,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
      ￼￼￼
      @} */
     
-    typedef struct _tMBSaw
+    typedef struct tMBSaw
     {
         tMempool mempool;
         Lfloat    out;
@@ -1144,27 +1112,25 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
         uint16_t 	BLEPindices[64];
         Lfloat 	BLEPproperties[64][2];
         Lfloat invSampleRate;
-    } _tMBSaw;
-    
-    typedef _tMBSaw* tMBSaw;
+    } tMBSaw;
 
     // Memory handlers for `tMBSaw`
-    void    tMBSaw_init                   (tMBSaw* const osc, LEAF* const leaf);
-    void    tMBSaw_initToPool             (tMBSaw* const osc, tMempool* const mempool);
-    void    tMBSaw_free                   (tMBSaw* const osc);
+    void    tMBSaw_init                   (tMBSaw** const osc, LEAF* const leaf);
+    void    tMBSaw_initToPool             (tMBSaw** const osc, tMempool* const mempool);
+    void    tMBSaw_free                   (tMBSaw** const osc);
 
-    void    tMBSaw_place_step_dd_noBuffer (tMBSaw const osc, int index, Lfloat phase, Lfloat w, Lfloat scale);
+    void    tMBSaw_place_step_dd_noBuffer (tMBSaw* const osc, int index, Lfloat phase, Lfloat w, Lfloat scale);
 
     // Tick function for `tMBSaw`
-    Lfloat  tMBSaw_tick                   (tMBSaw const osc);
+    Lfloat  tMBSaw_tick                   (tMBSaw* const osc);
 
     // Setter functions for `tMBSaw`
-    Lfloat  tMBSaw_sync                   (tMBSaw const osc, Lfloat sync);
-    void    tMBSaw_setFreq                (tMBSaw const osc, Lfloat f);
-    void    tMBSaw_setPhase               (tMBSaw const osc, Lfloat phase);
-    void    tMBSaw_setSyncMode            (tMBSaw const osc, int hardOrSoft);
-    void    tMBSaw_setBufferOffset        (tMBSaw const osc, uint32_t offset);
-    void    tMBSaw_setSampleRate          (tMBSaw const osc, Lfloat sr);
+    Lfloat  tMBSaw_sync                   (tMBSaw* const osc, Lfloat sync);
+    void    tMBSaw_setFreq                (tMBSaw* const osc, Lfloat f);
+    void    tMBSaw_setPhase               (tMBSaw* const osc, Lfloat phase);
+    void    tMBSaw_setSyncMode            (tMBSaw* const osc, int hardOrSoft);
+    void    tMBSaw_setBufferOffset        (tMBSaw* const osc, uint32_t offset);
+    void    tMBSaw_setSampleRate          (tMBSaw* const osc, Lfloat sr);
 
     //==============================================================================
     /*!
@@ -1207,7 +1173,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
      ￼￼￼
      @} */
 
-    typedef struct _tMBSawPulse
+    typedef struct tMBSawPulse
     {
         tMempool mempool;
         Lfloat    out;
@@ -1231,31 +1197,29 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
         Lfloat gain;
         int active;
 
-    } _tMBSawPulse;
-    
-    typedef _tMBSawPulse* tMBSawPulse;
+    } tMBSawPulse;
 
     // Memory handlers for `tMBSawPulse`
-    void    tMBSawPulse_init                   (tMBSawPulse* const osc, LEAF* const leaf);
-    void    tMBSawPulse_initToPool             (tMBSawPulse* const osc, tMempool* const mempool);
-    void    tMBSawPulse_free                   (tMBSawPulse* const osc);
+    void    tMBSawPulse_init                   (tMBSawPulse** const osc, LEAF* const leaf);
+    void    tMBSawPulse_initToPool             (tMBSawPulse** const osc, tMempool* const mempool);
+    void    tMBSawPulse_free                   (tMBSawPulse** const osc);
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, Lfloat phase, Lfloat inv_w, Lfloat scale);
 #else
-    void    tMBSawPulse_place_step_dd_noBuffer (tMBSawPulse const osc, int index, Lfloat phase, Lfloat inv_w,
+    void    tMBSawPulse_place_step_dd_noBuffer (tMBSawPulse* const osc, int index, Lfloat phase, Lfloat inv_w,
                                                 Lfloat scale);
 #endif
     // Tick function for `tMBSawPulse`
-    Lfloat  tMBSawPulse_tick                   (tMBSawPulse const osc);
+    Lfloat  tMBSawPulse_tick                   (tMBSawPulse* const osc);
 
     // Setter functions for `tMBSawPulse`
-    Lfloat  tMBSawPulse_sync                   (tMBSawPulse const osc, Lfloat sync);
-    void    tMBSawPulse_setFreq                (tMBSawPulse const osc, Lfloat f);
-    void    tMBSawPulse_setPhase               (tMBSawPulse const osc, Lfloat phase);
-    void    tMBSawPulse_setShape               (tMBSawPulse const osc, Lfloat shape);
-    void    tMBSawPulse_setSyncMode            (tMBSawPulse const osc, int hardOrSoft);
-    void    tMBSawPulse_setBufferOffset        (tMBSawPulse const osc, uint32_t offset);
-    void    tMBSawPulse_setSampleRate          (tMBSawPulse const osc, Lfloat sr);
+    Lfloat  tMBSawPulse_sync                   (tMBSawPulse* const osc, Lfloat sync);
+    void    tMBSawPulse_setFreq                (tMBSawPulse* const osc, Lfloat f);
+    void    tMBSawPulse_setPhase               (tMBSawPulse* const osc, Lfloat phase);
+    void    tMBSawPulse_setShape               (tMBSawPulse* const osc, Lfloat shape);
+    void    tMBSawPulse_setSyncMode            (tMBSawPulse* const osc, int hardOrSoft);
+    void    tMBSawPulse_setBufferOffset        (tMBSawPulse* const osc, uint32_t offset);
+    void    tMBSawPulse_setSampleRate          (tMBSawPulse* const osc, Lfloat sr);
 
     //==============================================================================
     /*!
@@ -1294,7 +1258,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      
      @} */
     
-    typedef struct _tTable
+    typedef struct tTable
     {
         tMempool mempool;
         
@@ -1303,21 +1267,19 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
         Lfloat inc, freq;
         Lfloat phase;
         Lfloat invSampleRate;
-    } _tTable;
-    
-    typedef _tTable* tTable;
+    } tTable;
 
     // Memory handlers for `tTable`
-    void    tTable_init          (tTable* const osc, Lfloat* table, int size, LEAF* const leaf);
-    void    tTable_initToPool    (tTable* const osc, Lfloat* table, int size, tMempool* const mempool);
-    void    tTable_free          (tTable* const osc);
+    void    tTable_init          (tTable** const osc, Lfloat* table, int size, LEAF* const leaf);
+    void    tTable_initToPool    (tTable** const osc, Lfloat* table, int size, tMempool* const mempool);
+    void    tTable_free          (tTable** const osc);
 
     // Tick function for `tTable`
-    Lfloat  tTable_tick          (tTable const osc);
+    Lfloat  tTable_tick          (tTable* const osc);
 
     // Setter functions for `tTable`
-    void    tTable_setFreq       (tTable const osc, Lfloat freq);
-    void    tTable_setSampleRate (tTable const osc, Lfloat sr);
+    void    tTable_setFreq       (tTable* const osc, Lfloat freq);
+    void    tTable_setSampleRate (tTable* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -1351,7 +1313,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     
 #define LEAF_NUM_WAVETABLE_FILTER_PASSES 5
     
-    typedef struct _tWaveTable
+    typedef struct tWaveTable
     {
         tMempool mempool;
         
@@ -1364,18 +1326,16 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
         Lfloat baseFreq, invBaseFreq;
         tButterworth bl;
         Lfloat sampleRate;
-    } _tWaveTable;
-    
-    typedef _tWaveTable* tWaveTable;
+    } tWaveTable;
 
     // Memory handlers for `tWaveTable`
-    void    tWaveTable_init          (tWaveTable* const osc, Lfloat* table, int size, Lfloat maxFreq, LEAF* const leaf);
-    void    tWaveTable_initToPool    (tWaveTable* const osc, Lfloat* table, int size, Lfloat maxFreq,
+    void    tWaveTable_init          (tWaveTable** const osc, Lfloat* table, int size, Lfloat maxFreq, LEAF* const leaf);
+    void    tWaveTable_initToPool    (tWaveTable** const osc, Lfloat* table, int size, Lfloat maxFreq,
                                       tMempool* const mempool);
-    void    tWaveTable_free          (tWaveTable* const osc);
+    void    tWaveTable_free          (tWaveTable** const osc);
 
     // Setter functions for `tWaveTable`
-    void    tWaveTable_setSampleRate (tWaveTable const osc, Lfloat sr);
+    void    tWaveTable_setSampleRate (tWaveTable* const osc, Lfloat sr);
     
     //==============================================================================
     
@@ -1421,10 +1381,10 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      
      @} */
     
-    typedef struct _tWaveOsc
+    typedef struct tWaveOsc
        {
            tMempool mempool;
-           tWaveTable* tables;
+           tWaveTable** tables;
            int numTables;
            Lfloat index;
            Lfloat maxFreq;
@@ -1446,24 +1406,22 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
            Lfloat aa;
            int numSubTables;
 
-       } _tWaveOsc;
-    
-    typedef _tWaveOsc* tWaveOsc;
+       } tWaveOsc;
 
     // Memory handlers for `tWaveOsc`
-    void    tWaveOsc_init            (tWaveOsc* const cy, tWaveTable* tables, int numTables, LEAF* const leaf);
-    void    tWaveOsc_initToPool      (tWaveOsc* const cy, tWaveTable* tables, int numTables, tMempool* const mp);
-    void    tWaveOsc_free            (tWaveOsc* const osc);
+    void    tWaveOsc_init            (tWaveOsc** const cy, tWaveTable* tables, int numTables, LEAF* const leaf);
+    void    tWaveOsc_initToPool      (tWaveOsc** const cy, tWaveTable* tables, int numTables, tMempool* const mp);
+    void    tWaveOsc_free            (tWaveOsc** const osc);
 
     // Tick function for `tWaveOsc`
-    Lfloat  tWaveOsc_tick            (tWaveOsc const osc);
+    Lfloat  tWaveOsc_tick            (tWaveOsc* const osc);
 
     // Setter functions for `tWaveOsc`
-    void 	tWaveOsc_setFreq         (tWaveOsc const cy, Lfloat freq);
-    void    tWaveOsc_setAntiAliasing (tWaveOsc const osc, Lfloat aa);
-    void    tWaveOsc_setIndex        (tWaveOsc const osc, Lfloat index);
-    void 	tWaveOsc_setTables       (tWaveOsc const cy, tWaveTable* tables, int numTables);
-    void    tWaveOsc_setSampleRate   (tWaveOsc const osc, Lfloat sr);
+    void 	tWaveOsc_setFreq         (tWaveOsc* const cy, Lfloat freq);
+    void    tWaveOsc_setAntiAliasing (tWaveOsc* const osc, Lfloat aa);
+    void    tWaveOsc_setIndex        (tWaveOsc* const osc, Lfloat index);
+    void 	tWaveOsc_setTables       (tWaveOsc* const cy, tWaveTable* tables, int numTables);
+    void    tWaveOsc_setSampleRate   (tWaveOsc* const osc, Lfloat sr);
 
     //==============================================================================
     
@@ -1495,7 +1453,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      
      @} */
     
-    typedef struct _tWaveTableS
+    typedef struct tWaveTableS
     {
         tMempool mempool;
         
@@ -1510,19 +1468,17 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
         Lfloat dsBuffer[2];
         tOversampler ds;
         Lfloat sampleRate;
-    } _tWaveTableS;
-    
-    typedef _tWaveTableS* tWaveTableS;
+    } tWaveTableS;
 
     // Memory handlers for `tWaveTableS`
-    void    tWaveTableS_init          (tWaveTableS* const osc, Lfloat* table, int size, Lfloat maxFreq,
+    void    tWaveTableS_init          (tWaveTableS** const osc, Lfloat* table, int size, Lfloat maxFreq,
                                        LEAF* const leaf);
-    void    tWaveTableS_initToPool    (tWaveTableS* const osc, Lfloat* table, int size, Lfloat maxFreq,
+    void    tWaveTableS_initToPool    (tWaveTableS** const osc, Lfloat* table, int size, Lfloat maxFreq,
                                        tMempool* const mempool);
-    void    tWaveTableS_free          (tWaveTableS* const osc);
+    void    tWaveTableS_free          (tWaveTableS** const osc);
 
     // Setter functions for `tWaveTableS`
-    void    tWaveTableS_setSampleRate (tWaveTableS const osc, Lfloat sr);
+    void    tWaveTableS_setSampleRate (tWaveTableS* const osc, Lfloat sr);
     
 
     //==============================================================================
@@ -1568,7 +1524,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      
      @} */
     
-    typedef struct _tWaveOscS
+    typedef struct tWaveOscS
     {
         tMempool mempool;
         
@@ -1597,24 +1553,22 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
         Lfloat aa;
         int numSubTables;
 
-    } _tWaveOscS;
-    
-    typedef _tWaveOscS* tWaveOscS;
+    } tWaveOscS;
 
     // Memory handlers for `tWaveOscS`
-    void 	tWaveOscS_init            (tWaveOscS* const cy, tWaveTableS* tables, int numTables, LEAF* const leaf);
-    void    tWaveOscS_initToPool      (tWaveOscS* const osc, tWaveTableS* tables, int numTables,
+    void 	tWaveOscS_init            (tWaveOscS** const cy, tWaveTableS* tables, int numTables, LEAF* const leaf);
+    void    tWaveOscS_initToPool      (tWaveOscS** const osc, tWaveTableS* tables, int numTables,
                                        tMempool* const mempool);
-    void    tWaveOscS_free            (tWaveOscS* const osc);
+    void    tWaveOscS_free            (tWaveOscS** const osc);
 
     // Tick function for `tWaveOscS`
-    Lfloat  tWaveOscS_tick            (tWaveOscS const osc);
+    Lfloat  tWaveOscS_tick            (tWaveOscS* const osc);
 
     // Setter functions for `tWaveOscS`
-    void    tWaveOscS_setFreq         (tWaveOscS const osc, Lfloat freq);
-    void    tWaveOscS_setAntiAliasing (tWaveOscS const osc, Lfloat aa);
-    void    tWaveOscS_setIndex        (tWaveOscS const osc, Lfloat index);
-    void    tWaveOscS_setSampleRate   (tWaveOscS const osc, Lfloat sr);
+    void    tWaveOscS_setFreq         (tWaveOscS* const osc, Lfloat freq);
+    void    tWaveOscS_setAntiAliasing (tWaveOscS* const osc, Lfloat aa);
+    void    tWaveOscS_setIndex        (tWaveOscS* const osc, Lfloat index);
+    void    tWaveOscS_setSampleRate   (tWaveOscS* const osc, Lfloat sr);
     
 
 
@@ -1651,7 +1605,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      ￼￼￼
      @} */
     
-    typedef struct _tIntPhasor
+    typedef struct tIntPhasor
     {
         
         tMempool mempool;
@@ -1661,22 +1615,20 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
         int32_t mask;
         uint8_t phaseDidReset;
         Lfloat invSampleRateTimesTwoTo32;
-    } _tIntPhasor;
-    
-    typedef _tIntPhasor* tIntPhasor;
+    } tIntPhasor;
 
     // Memory handlers for `tIntPhasor`
-    void    tIntPhasor_init          (tIntPhasor* const osc, LEAF* const leaf);
-    void    tIntPhasor_initToPool    (tIntPhasor* const osc, tMempool* const);
-    void    tIntPhasor_free          (tIntPhasor* const osc);
+    void    tIntPhasor_init          (tIntPhasor** const osc, LEAF* const leaf);
+    void    tIntPhasor_initToPool    (tIntPhasor** const osc, tMempool* const);
+    void    tIntPhasor_free          (tIntPhasor** const osc);
 
     // Tick function for `tIntPhasor`
-    Lfloat  tIntPhasor_tick          (tIntPhasor const osc);
-    Lfloat  tIntPhasor_tickBiPolar          (tIntPhasor const osc);
+    Lfloat  tIntPhasor_tick          (tIntPhasor* const osc);
+    Lfloat  tIntPhasor_tickBiPolar   (tIntPhasor* const osc);
     // Setter functions for `tIntPhasor`
-    void    tIntPhasor_setFreq       (tIntPhasor const osc, Lfloat freq);
-    void    tIntPhasor_setSampleRate (tIntPhasor const osc, Lfloat sr);
-    void    tIntPhasor_setPhase      (tIntPhasor const cy, Lfloat phase);
+    void    tIntPhasor_setFreq       (tIntPhasor* const osc, Lfloat freq);
+    void    tIntPhasor_setSampleRate (tIntPhasor* const osc, Lfloat sr);
+    void    tIntPhasor_setPhase      (tIntPhasor* const cy, Lfloat phase);
     
          //==============================================================================
     
@@ -1710,54 +1662,50 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      ￼￼￼
      @} */
     
-    typedef struct _tSquareLFO
+    typedef struct tSquareLFO
     {
         
         tMempool mempool;
         Lfloat pulsewidth;
         tIntPhasor phasor;
         tIntPhasor invPhasor;
-    } _tSquareLFO;
-    
-    typedef _tSquareLFO* tSquareLFO;
+    } tSquareLFO;
 
     // Memory handlers for `tSquareLFO`
-    void    tSquareLFO_init          (tSquareLFO* const osc, LEAF* const leaf);
-    void    tSquareLFO_initToPool    (tSquareLFO* const osc, tMempool* const);
-    void    tSquareLFO_free          (tSquareLFO* const osc);
+    void    tSquareLFO_init          (tSquareLFO** const osc, LEAF* const leaf);
+    void    tSquareLFO_initToPool    (tSquareLFO** const osc, tMempool* const);
+    void    tSquareLFO_free          (tSquareLFO** const osc);
 
     // Tick function for `tSquareLFO`
-    Lfloat  tSquareLFO_tick          (tSquareLFO const osc);
+    Lfloat  tSquareLFO_tick          (tSquareLFO* const osc);
 
     // Setter functions for `tSquareLFO`
-    void    tSquareLFO_setFreq       (tSquareLFO const osc, Lfloat freq);
-    void    tSquareLFO_setSampleRate (tSquareLFO const osc, Lfloat sr);
-    void    tSquareLFO_setPulseWidth (tSquareLFO const cy, Lfloat pw);
-    void    tSquareLFO_setPhase      (tSquareLFO const cy, Lfloat phase);
+    void    tSquareLFO_setFreq       (tSquareLFO* const osc, Lfloat freq);
+    void    tSquareLFO_setSampleRate (tSquareLFO* const osc, Lfloat sr);
+    void    tSquareLFO_setPulseWidth (tSquareLFO* const cy, Lfloat pw);
+    void    tSquareLFO_setPhase      (tSquareLFO* const cy, Lfloat phase);
 
-    typedef struct _tSawSquareLFO
+    typedef struct tSawSquareLFO
     {
         tMempool mempool;
         Lfloat shape;
         tIntPhasor saw;
         tSquareLFO square;
-    } _tSawSquareLFO;
-
-    typedef _tSawSquareLFO* tSawSquareLFO;
+    } tSawSquareLFO;
 
     // Memory handlers for `tSawSquareLFO`
-    void    tSawSquareLFO_init          (tSawSquareLFO* const osc, LEAF* const leaf);
-    void    tSawSquareLFO_initToPool    (tSawSquareLFO* const osc, tMempool* const);
-    void    tSawSquareLFO_free          (tSawSquareLFO* const osc);
+    void    tSawSquareLFO_init          (tSawSquareLFO** const osc, LEAF* const leaf);
+    void    tSawSquareLFO_initToPool    (tSawSquareLFO** const osc, tMempool* const);
+    void    tSawSquareLFO_free          (tSawSquareLFO** const osc);
 
     // Tick function for `tSawSquareLFO`
-    Lfloat  tSawSquareLFO_tick          (tSawSquareLFO const osc);
+    Lfloat  tSawSquareLFO_tick          (tSawSquareLFO* const osc);
 
     // Setter functions for `tSawSquareLFO`
-    void    tSawSquareLFO_setFreq       (tSawSquareLFO const osc, Lfloat freq);
-    void    tSawSquareLFO_setSampleRate (tSawSquareLFO const osc, Lfloat sr);
-    void    tSawSquareLFO_setPhase      (tSawSquareLFO const cy, Lfloat phase);
-    void    tSawSquareLFO_setShape      (tSawSquareLFO const cy, Lfloat shape);
+    void    tSawSquareLFO_setFreq       (tSawSquareLFO* const osc, Lfloat freq);
+    void    tSawSquareLFO_setSampleRate (tSawSquareLFO* const osc, Lfloat sr);
+    void    tSawSquareLFO_setPhase      (tSawSquareLFO* const cy, Lfloat phase);
+    void    tSawSquareLFO_setShape      (tSawSquareLFO* const cy, Lfloat shape);
 
         //==============================================================================
  /*!
@@ -1790,7 +1738,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      ￼￼￼
      @} */
     
-    typedef struct _tTriLFO
+    typedef struct tTriLFO
     {
         
         tMempool mempool;
@@ -1799,50 +1747,46 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
         Lfloat freq;
         Lfloat invSampleRate;
         Lfloat invSampleRateTimesTwoTo32;
-    } _tTriLFO;
-    
-    typedef _tTriLFO* tTriLFO;
+    } tTriLFO;
 
     // Memory handlers for `tTriLFO`
-    void    tTriLFO_init          (tTriLFO* const osc, LEAF* const leaf);
-    void    tTriLFO_initToPool    (tTriLFO* const osc, tMempool* const);
-    void    tTriLFO_free          (tTriLFO* const osc);
+    void    tTriLFO_init          (tTriLFO** const osc, LEAF* const leaf);
+    void    tTriLFO_initToPool    (tTriLFO** const osc, tMempool* const);
+    void    tTriLFO_free          (tTriLFO** const osc);
 
     // Tick function for `tTriLFO`
-    Lfloat  tTriLFO_tick          (tTriLFO const osc);
+    Lfloat  tTriLFO_tick          (tTriLFO* const osc);
 
     // Setter functions for `tTriLFO`
-    void    tTriLFO_setFreq       (tTriLFO const osc, Lfloat freq);
-    void    tTriLFO_setSampleRate (tTriLFO const osc, Lfloat sr);
-    void    tTriLFO_setPhase      (tTriLFO const cy, Lfloat phase);
+    void    tTriLFO_setFreq       (tTriLFO* const osc, Lfloat freq);
+    void    tTriLFO_setSampleRate (tTriLFO* const osc, Lfloat sr);
+    void    tTriLFO_setPhase      (tTriLFO* const cy, Lfloat phase);
 
-    typedef struct _tSineTriLFO
+    typedef struct tSineTriLFO
     {
         tMempool mempool;
         Lfloat shape;
         tTriLFO tri;
         tCycle sine;
-    } _tSineTriLFO;
-
-    typedef _tSineTriLFO* tSineTriLFO;
+    } tSineTriLFO;
 
     // Memory handlers for `tSineTriLFO`
-    void    tSineTriLFO_init          (tSineTriLFO* const osc, LEAF* const leaf);
-    void    tSineTriLFO_initToPool    (tSineTriLFO* const osc, tMempool* const);
-    void    tSineTriLFO_free          (tSineTriLFO* const osc);
+    void    tSineTriLFO_init          (tSineTriLFO** const osc, LEAF* const leaf);
+    void    tSineTriLFO_initToPool    (tSineTriLFO** const osc, tMempool* const);
+    void    tSineTriLFO_free          (tSineTriLFO** const osc);
 
     // Tick function for `tSineTriLFO`
-    Lfloat  tSineTriLFO_tick          (tSineTriLFO const osc);
+    Lfloat  tSineTriLFO_tick          (tSineTriLFO* const osc);
 
     // Setter functions for `tSineTriLFO`
-    void    tSineTriLFO_setFreq       (tSineTriLFO const osc, Lfloat freq);
-    void    tSineTriLFO_setSampleRate (tSineTriLFO const osc, Lfloat sr);
-    void    tSineTriLFO_setPhase      (tSineTriLFO const cy, Lfloat phase);
-    void    tSineTriLFO_setShape      (tSineTriLFO const cy, Lfloat shape);
+    void    tSineTriLFO_setFreq       (tSineTriLFO* const osc, Lfloat freq);
+    void    tSineTriLFO_setSampleRate (tSineTriLFO* const osc, Lfloat sr);
+    void    tSineTriLFO_setPhase      (tSineTriLFO* const cy, Lfloat phase);
+    void    tSineTriLFO_setShape      (tSineTriLFO* const cy, Lfloat shape);
 
 
 
-typedef struct _tDampedOscillator
+typedef struct tDampedOscillator
 	{
 		tMempool mempool;
 
@@ -1853,26 +1797,24 @@ typedef struct _tDampedOscillator
 		Lfloat turns_ratio_;
 		Lfloat x_;
 		Lfloat y_;
-	} _tDampedOscillator;
-
-	typedef _tDampedOscillator* tDampedOscillator;
+	} tDampedOscillator;
 
     // Memory handlers for `tDampedOscillator`
-	void    tDampedOscillator_init          (tDampedOscillator* const osc, LEAF* const leaf);
-	void    tDampedOscillator_initToPool    (tDampedOscillator* const osc, tMempool* const mempool);
-	void    tDampedOscillator_free          (tDampedOscillator* const osc);
+	void    tDampedOscillator_init          (tDampedOscillator** const osc, LEAF* const leaf);
+	void    tDampedOscillator_initToPool    (tDampedOscillator** const osc, tMempool* const mempool);
+	void    tDampedOscillator_free          (tDampedOscillator** const osc);
 
     // Tick function for `tDampedOscillator`
-	Lfloat  tDampedOscillator_tick          (tDampedOscillator const osc);
+	Lfloat  tDampedOscillator_tick          (tDampedOscillator* const osc);
 
     // Setter functions for `tDampedOscillator`
-	void    tDampedOscillator_setFreq       (tDampedOscillator const osc, Lfloat freq);
-	void    tDampedOscillator_setSampleRate (tDampedOscillator const osc, Lfloat sr);
-	void 	tDampedOscillator_setDecay      (tDampedOscillator const osc, Lfloat decay);
-	void 	tDampedOscillator_reset         (tDampedOscillator const osc);
+	void    tDampedOscillator_setFreq       (tDampedOscillator* const osc, Lfloat freq);
+	void    tDampedOscillator_setSampleRate (tDampedOscillator* const osc, Lfloat sr);
+	void 	tDampedOscillator_setDecay      (tDampedOscillator* const osc, Lfloat decay);
+	void 	tDampedOscillator_reset         (tDampedOscillator* const osc);
 
 
-    typedef struct _tPlutaQuadOsc
+    typedef struct tPlutaQuadOsc
     {
         tMempool mempool;
         uint32_t oversamplingRatio;
@@ -1885,20 +1827,18 @@ typedef struct _tDampedOscillator
         tButterworth lowpass;
         int32_t mask;
         Lfloat invSampleRateTimesTwoTo32;
-    } _tPlutaQuadOsc;
-
-    typedef _tPlutaQuadOsc* tPlutaQuadOsc;
+    } tPlutaQuadOsc;
 
     // Memory handlers for `tDampedOscillator`
-    void    tPlutaQuadOsc_init          (tPlutaQuadOsc* const osc,  uint32_t oversamplingRatio, LEAF* const leaf);
-    void    tPlutaQuadOsc_initToPool   (tPlutaQuadOsc* const cy, uint32_t oversamplingRatio, tMempool* const mp);
-    void    tPlutaQuadOsc_free          (tPlutaQuadOsc* const osc);
+    void    tPlutaQuadOsc_init          (tPlutaQuadOsc** const osc,  uint32_t oversamplingRatio, LEAF* const leaf);
+    void    tPlutaQuadOsc_initToPool    (tPlutaQuadOsc** const cy, uint32_t oversamplingRatio, tMempool* const mp);
+    void    tPlutaQuadOsc_free          (tPlutaQuadOsc** const osc);
 
     // Tick function for `tDampedOscillator`
-    Lfloat  tPlutaQuadOsc_tick          (tPlutaQuadOsc const osc);
-    void   tPlutaQuadOsc_setFreq        (tPlutaQuadOsc const c, uint32_t whichOsc, Lfloat freq);
-    void   tPlutaQuadOsc_setFmAmount        (tPlutaQuadOsc const c, uint32_t const whichCarrier, uint32_t const whichModulator, Lfloat const amount);
-    void   tPlutaQuadOsc_setOutputAmplitude        (tPlutaQuadOsc const c, uint32_t const whichOsc, Lfloat const amplitude);
+    Lfloat  tPlutaQuadOsc_tick          (tPlutaQuadOsc* const osc);
+    void   tPlutaQuadOsc_setFreq        (tPlutaQuadOsc* const c, uint32_t whichOsc, Lfloat freq);
+    void   tPlutaQuadOsc_setFmAmount        (tPlutaQuadOsc* const c, uint32_t const whichCarrier, uint32_t const whichModulator, Lfloat const amount);
+    void   tPlutaQuadOsc_setOutputAmplitude        (tPlutaQuadOsc* const c, uint32_t const whichOsc, Lfloat const amplitude);
 #ifdef __cplusplus
 }
 #endif

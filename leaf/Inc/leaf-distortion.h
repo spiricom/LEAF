@@ -60,22 +60,20 @@ extern "C" {
      ￼￼￼
      @} */
     
-    typedef struct _tSampleReducer
+    typedef struct tSampleReducer
     {
         tMempool mempool;
         Lfloat invRatio;
         Lfloat hold;
         uint32_t count;
-    } _tSampleReducer;
+    } tSampleReducer;
+
+    void    tSampleReducer_init       (tSampleReducer** const, LEAF* const leaf);
+    void    tSampleReducer_initToPool (tSampleReducer** const, tMempool* const);
+    void    tSampleReducer_free       (tSampleReducer** const);
     
-    typedef _tSampleReducer* tSampleReducer;
-    
-    void    tSampleReducer_init       (tSampleReducer* const, LEAF* const leaf);
-    void    tSampleReducer_initToPool (tSampleReducer* const, tMempool* const);
-    void    tSampleReducer_free       (tSampleReducer* const);
-    
-    Lfloat  tSampleReducer_tick       (tSampleReducer const, Lfloat input);
-    void    tSampleReducer_setRatio   (tSampleReducer const, Lfloat ratio);
+    Lfloat  tSampleReducer_tick       (tSampleReducer* const, Lfloat input);
+    void    tSampleReducer_setRatio   (tSampleReducer* const, Lfloat ratio);
     
     //==============================================================================
     
@@ -122,7 +120,7 @@ extern "C" {
      ￼￼￼
      @} */
     
-    typedef struct _tOversampler
+    typedef struct tOversampler
     {
         tMempool mempool;
         uint32_t maxRatio;
@@ -134,21 +132,19 @@ extern "C" {
         Lfloat* downState;
         uint32_t numTaps;
         uint32_t phaseLength;
-    } _tOversampler;
-    
-    typedef _tOversampler* tOversampler;
-    
-    void    tOversampler_init           (tOversampler* const, int order, int extraQuality, LEAF* const leaf);
-    void    tOversampler_initToPool     (tOversampler* const, int order, int extraQuality, tMempool* const);
-    void    tOversampler_free           (tOversampler* const);
+    } tOversampler;
 
-    Lfloat  tOversampler_tick           (tOversampler const, Lfloat input, Lfloat* oversample, Lfloat (*effectTick)(Lfloat));
+    void    tOversampler_init           (tOversampler** const, int order, int extraQuality, LEAF* const leaf);
+    void    tOversampler_initToPool     (tOversampler** const, int order, int extraQuality, tMempool* const);
+    void    tOversampler_free           (tOversampler** const);
 
-    void    tOversampler_upsample       (tOversampler const, Lfloat input, Lfloat* output);
-    Lfloat  tOversampler_downsample     (tOversampler const, Lfloat* input);
-    void    tOversampler_setRatio       (tOversampler const, int ratio);
-    void    tOversampler_setQuality     (tOversampler const, int quality);
-    int     tOversampler_getLatency     (tOversampler const);
+    Lfloat  tOversampler_tick           (tOversampler* const, Lfloat input, Lfloat* oversample, Lfloat (*effectTick)(Lfloat));
+
+    void    tOversampler_upsample       (tOversampler* const, Lfloat input, Lfloat* output);
+    Lfloat  tOversampler_downsample     (tOversampler* const, Lfloat* input);
+    void    tOversampler_setRatio       (tOversampler* const, int ratio);
+    void    tOversampler_setQuality     (tOversampler* const, int quality);
+    int     tOversampler_getLatency     (tOversampler* const);
     
     //==============================================================================
 /*!
@@ -177,7 +173,7 @@ extern "C" {
  ￼￼￼
  @} */
 
-typedef struct _tWavefolder
+typedef struct tWavefolder
 {
     
     tMempool mempool;
@@ -190,21 +186,19 @@ typedef struct _tWavefolder
     Lfloat invFBAmount;
     Lfloat FFAmount;
     tHighpass dcBlock;
-} _tWavefolder;
+} tWavefolder;
 
-typedef _tWavefolder* tWavefolder;
+void    tWavefolder_init         (tWavefolder** const, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, LEAF* const leaf);
+void    tWavefolder_initToPool   (tWavefolder** const, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, tMempool* const);
+void    tWavefolder_free         (tWavefolder** const);
 
-void    tWavefolder_init         (tWavefolder* const, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, LEAF* const leaf);
-void    tWavefolder_initToPool   (tWavefolder* const, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, tMempool* const);
-void    tWavefolder_free         (tWavefolder* const);
+Lfloat  tWavefolder_tick         (tWavefolder* const, Lfloat samp);
 
-Lfloat  tWavefolder_tick         (tWavefolder const, Lfloat samp);
-
-void    tWavefolder_setFFAmount  (tWavefolder const wf, Lfloat ffAmount);
-void    tWavefolder_setFBAmount  (tWavefolder const wf, Lfloat fbAmount);
-void    tWavefolder_setFoldDepth (tWavefolder const wf, Lfloat foldDepth);
-void    tWavefolder_setOffset    (tWavefolder const wf, Lfloat offset);
-void    tWavefolder_setGain      (tWavefolder const wf, Lfloat gain);
+void    tWavefolder_setFFAmount  (tWavefolder* const wf, Lfloat ffAmount);
+void    tWavefolder_setFBAmount  (tWavefolder* const wf, Lfloat fbAmount);
+void    tWavefolder_setFoldDepth (tWavefolder* const wf, Lfloat foldDepth);
+void    tWavefolder_setOffset    (tWavefolder* const wf, Lfloat offset);
+void    tWavefolder_setGain      (tWavefolder* const wf, Lfloat gain);
 
 
 //==============================================================================
@@ -235,7 +229,7 @@ void    tWavefolder_setGain      (tWavefolder const wf, Lfloat gain);
      ￼￼￼
      @} */
     
-    typedef struct _tLockhartWavefolder
+    typedef struct tLockhartWavefolder
     {
         
         tMempool mempool;
@@ -265,15 +259,13 @@ void    tWavefolder_setGain      (tWavefolder const wf, Lfloat gain);
         double tempErrDenom;
         double tempOutDenom;
 
-    } _tLockhartWavefolder;
+    } tLockhartWavefolder;
+
+    void    tLockhartWavefolder_init       (tLockhartWavefolder** const, LEAF* const leaf);
+    void    tLockhartWavefolder_initToPool (tLockhartWavefolder** const, tMempool* const);
+    void    tLockhartWavefolder_free       (tLockhartWavefolder** const);
     
-    typedef _tLockhartWavefolder* tLockhartWavefolder;
-    
-    void    tLockhartWavefolder_init       (tLockhartWavefolder* const, LEAF* const leaf);
-    void    tLockhartWavefolder_initToPool (tLockhartWavefolder* const, tMempool* const);
-    void    tLockhartWavefolder_free       (tLockhartWavefolder* const);
-    
-    Lfloat  tLockhartWavefolder_tick       (tLockhartWavefolder const, Lfloat samp);
+    Lfloat  tLockhartWavefolder_tick       (tLockhartWavefolder* const, Lfloat samp);
 
     //==============================================================================
 
@@ -323,7 +315,7 @@ void    tWavefolder_setGain      (tWavefolder const wf, Lfloat gain);
      ￼￼￼
      @} */
     
-    typedef struct _tCrusher
+    typedef struct tCrusher
     {
         
         tMempool mempool;
@@ -337,20 +329,18 @@ void    tWavefolder_setGain      (tWavefolder const wf, Lfloat gain);
         Lfloat gain;
         tSampleReducer sReducer;
         
-    } _tCrusher;
-    
-    typedef _tCrusher* tCrusher;
-    
-    void    tCrusher_init             (tCrusher* const, LEAF* const leaf);
-    void    tCrusher_initToPool       (tCrusher* const, tMempool* const);
-    void    tCrusher_free             (tCrusher* const);
-    
-    Lfloat  tCrusher_tick             (tCrusher const, Lfloat input);
+    } tCrusher;
 
-    void    tCrusher_setOperation     (tCrusher const, Lfloat op);
-    void    tCrusher_setQuality       (tCrusher const, Lfloat val);
-    void    tCrusher_setRound         (tCrusher const, Lfloat rnd);
-    void    tCrusher_setSamplingRatio (tCrusher const, Lfloat ratio);
+    void    tCrusher_init             (tCrusher** const, LEAF* const leaf);
+    void    tCrusher_initToPool       (tCrusher** const, tMempool* const);
+    void    tCrusher_free             (tCrusher** const);
+    
+    Lfloat  tCrusher_tick             (tCrusher* const, Lfloat input);
+
+    void    tCrusher_setOperation     (tCrusher* const, Lfloat op);
+    void    tCrusher_setQuality       (tCrusher* const, Lfloat val);
+    void    tCrusher_setRound         (tCrusher* const, Lfloat rnd);
+    void    tCrusher_setSamplingRatio (tCrusher* const, Lfloat ratio);
     
     //==============================================================================
     

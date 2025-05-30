@@ -106,9 +106,8 @@ extern "C" {
         WDFComponentNil
     } WDFComponentType;
     
-    typedef struct _tWDF _tWDF; // needed to allow tWDF pointers in struct
-    typedef _tWDF* tWDF;
-    struct _tWDF
+    typedef struct tWDF tWDF; // needed to allow tWDF pointers in struct
+    struct tWDF
     {
         
         tMempool mempool;

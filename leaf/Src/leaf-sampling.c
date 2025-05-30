@@ -29,10 +29,10 @@ void  tBuffer_init (tBuffer* const sb, uint32_t length, LEAF* const leaf)
     tBuffer_initToPool(sb, length, &leaf->mempool);
 }
 
-void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp)
+void  tBuffer_initToPool (tBuffer** const sb, uint32_t length, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tBuffer* s = *sb = (_tBuffer*) mpool_alloc(sizeof(_tBuffer), m);
+    tBuffer* s = *sb = (tBuffer*) mpool_alloc(sizeof(tBuffer), m);
     s->mempool = m;
     LEAF* leaf = s->mempool->leaf;
     
@@ -46,15 +46,15 @@ void  tBuffer_initToPool (tBuffer* const sb, uint32_t length, tMempool* const mp
     s->mode = RecordOneShot;
 }
 
-void  tBuffer_free (tBuffer* const sb)
+void  tBuffer_free (tBuffer** const sb)
 {
-    _tBuffer* s = *sb;
+    tBuffer* s = *sb;
     
     mpool_free((char*)s->buff, s->mempool);
     mpool_free((char*)s, s->mempool);
 }
 
-void tBuffer_tick (tBuffer const s, Lfloat sample)
+void tBuffer_tick (tBuffer* const s, Lfloat sample)
 {
     if (s->active == 1)
     {
@@ -77,7 +77,7 @@ void tBuffer_tick (tBuffer const s, Lfloat sample)
     }
 }
 
-void  tBuffer_read(tBuffer const s, Lfloat* buff, uint32_t len)
+void  tBuffer_read(tBuffer* const s, Lfloat* buff, uint32_t len)
 {
     for (unsigned i = 0; i < s->bufferLength; i++)
     {
@@ -87,34 +87,34 @@ void  tBuffer_read(tBuffer const s, Lfloat* buff, uint32_t len)
     s->recordedLength = len;
 }
 
-Lfloat tBuffer_get (tBuffer const s, int idx)
+Lfloat tBuffer_get (tBuffer* const s, int idx)
 {
     if ((idx < 0) || (idx >= (int) s->bufferLength)) return 0.f;
     return s->buff[idx];
 }
 
-void  tBuffer_record(tBuffer const s)
+void  tBuffer_record(tBuffer* const s)
 {
     s->active = 1;
     s->idx = 0;
 }
 
-void  tBuffer_stop(tBuffer const s)
+void  tBuffer_stop(tBuffer* const s)
 {
     s->active = 0;
 }
 
-int   tBuffer_getRecordPosition(tBuffer const s)
+int   tBuffer_getRecordPosition(tBuffer* const s)
 {
     return s->idx;
 }
 
-void   tBuffer_setRecordPosition(tBuffer const s, int pos)
+void   tBuffer_setRecordPosition(tBuffer* const s, int pos)
 {
     s->idx = pos;
 }
 
-void  tBuffer_setRecordMode (tBuffer const s, RecordMode mode)
+void  tBuffer_setRecordMode (tBuffer* const s, RecordMode mode)
 {
     s->mode = mode;
 }
@@ -224,15 +224,15 @@ void tSampler_initToPool(tSampler* const sp, tBuffer* const b, tMempool* const m
     p->flipIdx = -1;
 }
 
-void tSampler_free (tSampler* const sp)
+void tSampler_free (tSampler** const sp)
 {
-    _tSampler* p = *sp;
+    tSampler* p = *sp;
     tRamp_free(&p->gain);
     
     mpool_free((char*)p, p->mempool);
 }
 
-void tSampler_setSample (tSampler const p, tBuffer const s)
+void tSampler_setSample (tSampler* const p, tBuffer const s)
 {
     p->samp = s;
 
@@ -247,7 +247,7 @@ void tSampler_setSample (tSampler const p, tBuffer const s)
     p->idx = 0.f;
 }
 
-Lfloat tSampler_tick        (tSampler const p)
+Lfloat tSampler_tick        (tSampler* const p)
 {
     attemptStartEndChange(p);
     

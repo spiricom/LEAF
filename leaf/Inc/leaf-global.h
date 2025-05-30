@@ -22,9 +22,8 @@ extern "C" {
 #else
 #include "../leaf-config.h"
 #endif
+    typedef struct tLookupTable tLookupTable;
 
-
- typedef struct _tLookupTable* tLookupTable;
     /*!
      * @ingroup leaf
      * @brief Struct for an instance of LEAF.
@@ -32,7 +31,7 @@ extern "C" {
     
     struct LEAF
     {
-        ///@{ 
+        ///@{
         Lfloat   sampleRate; //!< The current audio sample rate. Set with LEAF_setSampleRate().
         Lfloat   invSampleRate; //!< The inverse of the current sample rate.
         Lfloat   twoPiTimesInvSampleRate; //!<  Two-pi times the inverse of the current sample rate.
@@ -46,9 +45,9 @@ extern "C" {
         unsigned int allocCount; //!< A count of LEAF memory allocations.
         unsigned int freeCount; //!< A count of LEAF memory frees.
         unsigned int uuid;
-        tLookupTable lfoRateTable;
-        tLookupTable envTimeTable;
-        tLookupTable resTable;
+        tLookupTable* lfoRateTable;
+        tLookupTable* envTimeTable;
+        tLookupTable* resTable;
 
         ///@}
     };

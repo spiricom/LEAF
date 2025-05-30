@@ -129,7 +129,7 @@ extern "C"
         RecordModeNil
     } RecordMode;
 
-    typedef struct _tBuffer
+    typedef struct tBuffer
     {
 
         tMempool mempool;
@@ -144,29 +144,27 @@ extern "C"
         RecordMode mode;
 
         int active;
-    } _tBuffer;
+    } tBuffer;
 
-    typedef _tBuffer *tBuffer;
+    void     tBuffer_init              (tBuffer**const, uint32_t length, LEAF *const leaf);
+    void     tBuffer_initToPool        (tBuffer**const sb, uint32_t length, tMempool *const mp);
+    void     tBuffer_free              (tBuffer**const);
 
-    void     tBuffer_init              (tBuffer *const, uint32_t length, LEAF *const leaf);
-    void     tBuffer_initToPool        (tBuffer *const sb, uint32_t length, tMempool *const mp);
-    void     tBuffer_free              (tBuffer *const);
+    void     tBuffer_tick              (tBuffer* const, Lfloat sample);
 
-    void     tBuffer_tick              (tBuffer const, Lfloat sample);
-
-    void     tBuffer_read              (tBuffer const, Lfloat *buff, uint32_t len);
-    Lfloat   tBuffer_get               (tBuffer const, int idx);
-    void     tBuffer_record            (tBuffer const);
-    void     tBuffer_stop              (tBuffer const);
-    void     tBuffer_setBuffer         (tBuffer const sb, Lfloat *externalBuffer, int length, int channels, int sampleRate);
-    int      tBuffer_getRecordPosition (tBuffer const);
-    void     tBuffer_setRecordPosition (tBuffer const, int pos);
-    void     tBuffer_setRecordMode     (tBuffer const, RecordMode mode);
-    void     tBuffer_clear             (tBuffer const);
-    uint32_t tBuffer_getBufferLength   (tBuffer const);
-    uint32_t tBuffer_getRecordedLength (tBuffer const sb);
-    void     tBuffer_setRecordedLength (tBuffer const sb, int length);
-    int      tBuffer_isActive          (tBuffer const sb);
+    void     tBuffer_read              (tBuffer* const, Lfloat *buff, uint32_t len);
+    Lfloat   tBuffer_get               (tBuffer* const, int idx);
+    void     tBuffer_record            (tBuffer* const);
+    void     tBuffer_stop              (tBuffer* const);
+    void     tBuffer_setBuffer         (tBuffer* const sb, Lfloat *externalBuffer, int length, int channels, int sampleRate);
+    int      tBuffer_getRecordPosition (tBuffer* const);
+    void     tBuffer_setRecordPosition (tBuffer* const, int pos);
+    void     tBuffer_setRecordMode     (tBuffer* const, RecordMode mode);
+    void     tBuffer_clear             (tBuffer* const);
+    uint32_t tBuffer_getBufferLength   (tBuffer* const);
+    uint32_t tBuffer_getRecordedLength (tBuffer* const sb);
+    void     tBuffer_setRecordedLength (tBuffer* const sb, int length);
+    int      tBuffer_isActive          (tBuffer* const sb);
 
     //==============================================================================
 
@@ -242,7 +240,7 @@ extern "C"
         PlayModeNil
     } PlayMode;
 
-    typedef struct _tSampler
+    typedef struct tSampler
     {
         tMempool mempool;
 
@@ -279,28 +277,26 @@ extern "C"
 
         Lfloat flipStart;
         Lfloat flipIdx;
-    } _tSampler;
+    } tSampler;
 
-    typedef _tSampler *tSampler;
+    void    tSampler_init               (tSampler**const, tBuffer *const, LEAF *const leaf);
+    void    tSampler_initToPool         (tSampler**const sp, tBuffer *const b, tMempool *const mp, LEAF *const leaf);
+    void    tSampler_free               (tSampler**const);
 
-    void    tSampler_init               (tSampler *const, tBuffer *const, LEAF *const leaf);
-    void    tSampler_initToPool         (tSampler *const sp, tBuffer *const b, tMempool *const mp, LEAF *const leaf);
-    void    tSampler_free               (tSampler *const);
+    Lfloat  tSampler_tick               (tSampler* const);
+    Lfloat  tSampler_tickStereo         (tSampler* const sp, Lfloat *outputArray);
 
-    Lfloat  tSampler_tick               (tSampler const);
-    Lfloat  tSampler_tickStereo         (tSampler const sp, Lfloat *outputArray);
-
-    void    tSampler_setSample          (tSampler const, tBuffer const);
-    void    tSampler_setMode            (tSampler const, PlayMode mode);
-    void    tSampler_play               (tSampler const);
-    void    tSampler_stop               (tSampler const);
-    void    tSampler_setStart           (tSampler const, int32_t start);
-    void    tSampler_setEnd             (tSampler const, int32_t end);
-    void    tSampler_setEndUnsafe       (tSampler const, int32_t end);
-    void    tSampler_setLength          (tSampler const, int32_t length);
-    void    tSampler_setCrossfadeLength (tSampler const, uint32_t length);
-    void    tSampler_setRate            (tSampler const, Lfloat rate);
-    void    tSampler_setSampleRate      (tSampler const, Lfloat sr);
+    void    tSampler_setSample          (tSampler* const, tBuffer const);
+    void    tSampler_setMode            (tSampler* const, PlayMode mode);
+    void    tSampler_play               (tSampler* const);
+    void    tSampler_stop               (tSampler* const);
+    void    tSampler_setStart           (tSampler* const, int32_t start);
+    void    tSampler_setEnd             (tSampler* const, int32_t end);
+    void    tSampler_setEndUnsafe       (tSampler* const, int32_t end);
+    void    tSampler_setLength          (tSampler* const, int32_t length);
+    void    tSampler_setCrossfadeLength (tSampler* const, uint32_t length);
+    void    tSampler_setRate            (tSampler* const, Lfloat rate);
+    void    tSampler_setSampleRate      (tSampler* const, Lfloat sr);
 
     //==============================================================================
 
@@ -362,7 +358,7 @@ extern "C"
 
      @} */
 
-    typedef struct _tAutoSampler
+    typedef struct tAutoSampler
     {
 
         tMempool mempool;
@@ -374,25 +370,23 @@ extern "C"
         uint32_t sampleCounter;
         uint32_t powerCounter;
         uint8_t sampleTriggered;
-    } _tAutoSampler;
+    } tAutoSampler;
 
-    typedef _tAutoSampler *tAutoSampler;
+    void    tAutoSampler_init               (tAutoSampler**const, tBuffer *const, LEAF *const leaf);
+    void    tAutoSampler_initToPool         (tAutoSampler**const as, tBuffer *const b, tMempool *const mp, LEAF *const leaf);
+    void    tAutoSampler_free               (tAutoSampler**const);
 
-    void    tAutoSampler_init               (tAutoSampler *const, tBuffer *const, LEAF *const leaf);
-    void    tAutoSampler_initToPool         (tAutoSampler *const as, tBuffer *const b, tMempool *const mp, LEAF *const leaf);
-    void    tAutoSampler_free               (tAutoSampler *const);
+    Lfloat  AutoSampler_tick                (tAutoSampler* const, Lfloat input);
 
-    Lfloat  AutoSampler_tick                (tAutoSampler const, Lfloat input);
-
-    void    tAutoSampler_setBuffer          (tAutoSampler const, tBuffer const);
-    void    tAutoSampler_setMode            (tAutoSampler const, PlayMode mode);
-    void    tAutoSampler_play               (tAutoSampler const);
-    void    tAutoSampler_stop               (tAutoSampler const);
-    void    tAutoSampler_setThreshold       (tAutoSampler const, Lfloat thresh);
-    void    tAutoSampler_setWindowSize      (tAutoSampler const, uint32_t size);
-    void    tAutoSampler_setCrossfadeLength (tAutoSampler const, uint32_t length);
-    void    tAutoSampler_setRate            (tAutoSampler const, Lfloat rate);
-    void    tAutoSampler_setSampleRate      (tAutoSampler const, Lfloat sr);
+    void    tAutoSampler_setBuffer          (tAutoSampler* const, tBuffer const);
+    void    tAutoSampler_setMode            (tAutoSampler* const, PlayMode mode);
+    void    tAutoSampler_play               (tAutoSampler* const);
+    void    tAutoSampler_stop               (tAutoSampler* const);
+    void    tAutoSampler_setThreshold       (tAutoSampler* const, Lfloat thresh);
+    void    tAutoSampler_setWindowSize      (tAutoSampler* const, uint32_t size);
+    void    tAutoSampler_setCrossfadeLength (tAutoSampler* const, uint32_t length);
+    void    tAutoSampler_setRate            (tAutoSampler* const, Lfloat rate);
+    void    tAutoSampler_setSampleRate      (tAutoSampler* const, Lfloat sr);
 
     /*!
      @defgroup tmbsampler tMBSampler
@@ -459,7 +453,7 @@ extern "C"
 #define FILLEN 128
 #endif
 
-    typedef struct _tMBSampler
+    typedef struct tMBSampler
     {
 
         tMempool mempool;
@@ -482,24 +476,22 @@ extern "C"
 
         int start, end;
         int currentLoopLength;
-    } _tMBSampler;
+    } tMBSampler;
 
-    typedef _tMBSampler *tMBSampler;
+    void    tMBSampler_init       (tMBSampler**const, tBuffer *const, LEAF *const leaf);
+    void    tMBSampler_initToPool (tMBSampler**const, tBuffer *const, tMempool *const);
+    void    tMBSampler_free       (tMBSampler**const);
 
-    void    tMBSampler_init       (tMBSampler *const, tBuffer *const, LEAF *const leaf);
-    void    tMBSampler_initToPool (tMBSampler *const, tBuffer *const, tMempool *const);
-    void    tMBSampler_free       (tMBSampler *const);
+    Lfloat  tMBSampler_tick       (tMBSampler* const);
 
-    Lfloat  tMBSampler_tick       (tMBSampler const);
-
-    void    tMBSampler_setSample  (tMBSampler const, tBuffer *const);
-    void    tMBSampler_setMode    (tMBSampler const, PlayMode mode);
-    void    tMBSampler_play       (tMBSampler const);
-    void    tMBSampler_stop       (tMBSampler const);
-    void    tMBSampler_setStart   (tMBSampler const, int32_t start);
-    void    tMBSampler_setEnd     (tMBSampler const, int32_t end);
-    void    tMBSampler_setLength  (tMBSampler const, int32_t length);
-    void    tMBSampler_setRate    (tMBSampler const, Lfloat rate);
+    void    tMBSampler_setSample  (tMBSampler* const, tBuffer *const);
+    void    tMBSampler_setMode    (tMBSampler* const, PlayMode mode);
+    void    tMBSampler_play       (tMBSampler* const);
+    void    tMBSampler_stop       (tMBSampler* const);
+    void    tMBSampler_setStart   (tMBSampler* const, int32_t start);
+    void    tMBSampler_setEnd     (tMBSampler* const, int32_t end);
+    void    tMBSampler_setLength  (tMBSampler* const, int32_t length);
+    void    tMBSampler_setRate    (tMBSampler* const, Lfloat rate);
 
 #ifdef __cplusplus
 }

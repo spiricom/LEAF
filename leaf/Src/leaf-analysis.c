@@ -31,11 +31,11 @@ void tEnvelopeFollower_init (tEnvelopeFollower* const ef, Lfloat attackThreshold
     tEnvelopeFollower_initToPool(ef, attackThreshold, decayCoeff, &leaf->mempool);
 }
 
-void tEnvelopeFollower_initToPool (tEnvelopeFollower* const ef, Lfloat attackThreshold, Lfloat decayCoeff,
+void tEnvelopeFollower_initToPool (tEnvelopeFollower** const ef, Lfloat attackThreshold, Lfloat decayCoeff,
                                          tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tEnvelopeFollower* e = *ef = (_tEnvelopeFollower*) mpool_alloc(sizeof(_tEnvelopeFollower), m);
+    tEnvelopeFollower* e = *ef = (tEnvelopeFollower*) mpool_alloc(sizeof(tEnvelopeFollower), m);
     e->mempool = m;
     
     e->y = 0.0f;
@@ -43,14 +43,14 @@ void tEnvelopeFollower_initToPool (tEnvelopeFollower* const ef, Lfloat attackThr
     e->d_coeff = decayCoeff;
 }
 
-void tEnvelopeFollower_free (tEnvelopeFollower* const ef)
+void tEnvelopeFollower_free (tEnvelopeFollower** const ef)
 {
-    _tEnvelopeFollower* e = *ef;
+    tEnvelopeFollower* e = *ef;
     
     mpool_free((char*)e, e->mempool);
 }
 
-Lfloat tEnvelopeFollower_tick (tEnvelopeFollower const e, Lfloat x)
+Lfloat tEnvelopeFollower_tick (tEnvelopeFollower* const e, Lfloat x)
 {
     if (x < 0.0f ) x = -x;  /* Absolute value. */
     
@@ -68,12 +68,12 @@ Lfloat tEnvelopeFollower_tick (tEnvelopeFollower const e, Lfloat x)
     return e->y;
 }
 
-void tEnvelopeFollower_setDecayCoefficient (tEnvelopeFollower const e, Lfloat decayCoeff)
+void tEnvelopeFollower_setDecayCoefficient (tEnvelopeFollower* const e, Lfloat decayCoeff)
 {
     e->d_coeff = decayCoeff;
 }
 
-void tEnvelopeFollower_setAttackThreshold (tEnvelopeFollower const e, Lfloat attackThresh)
+void tEnvelopeFollower_setAttackThreshold (tEnvelopeFollower* const e, Lfloat attackThresh)
 {
     e->a_thresh = attackThresh;
 }
@@ -89,10 +89,10 @@ void tZeroCrossingCounter_init (tZeroCrossingCounter* const zc, int maxWindowSiz
     tZeroCrossingCounter_initToPool   (zc, maxWindowSize, &leaf->mempool);
 }
 
-void tZeroCrossingCounter_initToPool (tZeroCrossingCounter* const zc, int maxWindowSize, tMempool* const mp)
+void tZeroCrossingCounter_initToPool (tZeroCrossingCounter** const zc, int maxWindowSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tZeroCrossingCounter* z = *zc = (_tZeroCrossingCounter*) mpool_alloc(sizeof(_tZeroCrossingCounter), m);
+    tZeroCrossingCounter* z = *zc = (tZeroCrossingCounter*) mpool_alloc(sizeof(tZeroCrossingCounter), m);
     z->mempool = m;
     
     z->count = 0;
@@ -105,9 +105,9 @@ void tZeroCrossingCounter_initToPool (tZeroCrossingCounter* const zc, int maxWin
     z->countBuffer = (uint16_t*) mpool_calloc(sizeof(uint16_t) * maxWindowSize, m);
 }
 
-void tZeroCrossingCounter_free (tZeroCrossingCounter* const zc)
+void tZeroCrossingCounter_free (tZeroCrossingCounter** const zc)
 {
-    _tZeroCrossingCounter* z = *zc;
+    tZeroCrossingCounter* z = *zc;
     
     mpool_free((char*)z->inBuffer, z->mempool);
     mpool_free((char*)z->countBuffer, z->mempool);
@@ -115,7 +115,7 @@ void tZeroCrossingCounter_free (tZeroCrossingCounter* const zc)
 }
 
 //returns proportion of zero crossings within window size (0.0 would be none in window, 1.0 would be all zero crossings)
-Lfloat tZeroCrossingCounter_tick (tZeroCrossingCounter const z, Lfloat input)
+Lfloat tZeroCrossingCounter_tick (tZeroCrossingCounter* const z, Lfloat input)
 {
     z->inBuffer[z->position] = input;
     int futurePosition = ((z->position + 1) % z->currentWindowSize);
@@ -151,7 +151,7 @@ Lfloat tZeroCrossingCounter_tick (tZeroCrossingCounter const z, Lfloat input)
     return output;
 }
 
-void tZeroCrossingCounter_setWindowSize (tZeroCrossingCounter const z, Lfloat windowSize)
+void tZeroCrossingCounter_setWindowSize (tZeroCrossingCounter* const z, Lfloat windowSize)
 {
     if (windowSize <= z->maxWindowSize)
     {
@@ -175,10 +175,10 @@ void tPowerFollower_init (tPowerFollower* const pf, Lfloat factor, LEAF* const l
     tPowerFollower_initToPool(pf, factor, &leaf->mempool);
 }
 
-void tPowerFollower_initToPool (tPowerFollower* const pf, Lfloat factor, tMempool* const mp)
+void tPowerFollower_initToPool (tPowerFollower** const pf, Lfloat factor, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPowerFollower* p = *pf = (_tPowerFollower*) mpool_alloc(sizeof(_tPowerFollower), m);
+    tPowerFollower* p = *pf = (tPowerFollower*) mpool_alloc(sizeof(tPowerFollower), m);
     p->mempool = m;
     
     p->curr=0.0f;
@@ -186,14 +186,14 @@ void tPowerFollower_initToPool (tPowerFollower* const pf, Lfloat factor, tMempoo
     p->oneminusfactor=1.0f-factor;
 }
 
-void tPowerFollower_free (tPowerFollower* const pf)
+void tPowerFollower_free (tPowerFollower** const pf)
 {
-    _tPowerFollower* p = *pf;
+    tPowerFollower* p = *pf;
     
     mpool_free((char*)p, p->mempool);
 }
 
-void tPowerFollower_setFactor (tPowerFollower const p, Lfloat factor)
+void tPowerFollower_setFactor (tPowerFollower* const p, Lfloat factor)
 {
     if (factor<0.0f) factor=0.0f;
     if (factor>1.0f) factor=1.0f;
@@ -201,13 +201,13 @@ void tPowerFollower_setFactor (tPowerFollower const p, Lfloat factor)
     p->oneminusfactor=1.0f-factor;
 }
 
-Lfloat tPowerFollower_tick (tPowerFollower const p, Lfloat input)
+Lfloat tPowerFollower_tick (tPowerFollower* const p, Lfloat input)
 {
     p->curr = p->factor*input*input+p->oneminusfactor*p->curr;
     return p->curr;
 }
 
-Lfloat tPowerFollower_getPower (tPowerFollower const p)
+Lfloat tPowerFollower_getPower (tPowerFollower* const p)
 {
     return p->curr;
 }
@@ -223,10 +223,10 @@ void tEnvPD_init (tEnvPD* const xpd, int ws, int hs, int bs, LEAF* const leaf)
     tEnvPD_initToPool(xpd, ws, hs, bs, &leaf->mempool);
 }
 
-void tEnvPD_initToPool (tEnvPD* const xpd, int ws, int hs, int bs, tMempool* const mp)
+void tEnvPD_initToPool (tEnvPD** const xpd, int ws, int hs, int bs, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tEnvPD* x = *xpd = (_tEnvPD*) mpool_calloc(sizeof(_tEnvPD), m);
+    tEnvPD* x = *xpd = (tEnvPD*) mpool_calloc(sizeof(tEnvPD), m);
     x->mempool = m;
     
     int period = hs, npoints = ws;
@@ -265,19 +265,19 @@ void tEnvPD_initToPool (tEnvPD* const xpd, int ws, int hs, int bs, tMempool* con
     }
 }
 
-void tEnvPD_free (tEnvPD* const xpd)
+void tEnvPD_free (tEnvPD** const xpd)
 {
-    _tEnvPD* x = *xpd;
+    tEnvPD* x = *xpd;
     
     mpool_free((char*)x, x->mempool);
 }
 
-Lfloat tEnvPD_tick (tEnvPD const x)
+Lfloat tEnvPD_tick (tEnvPD* const x)
 {
     return powtodb(x->x_result);
 }
 
-void tEnvPD_processBlock(tEnvPD const x, Lfloat* in)
+void tEnvPD_processBlock(tEnvPD* const x, Lfloat* in)
 {
     int n = x->blockSize;
     
@@ -328,49 +328,49 @@ void tAttackDetection_init (tAttackDetection* const ad, int blocksize, int atk, 
     tAttackDetection_initToPool(ad, blocksize, atk, rel, &leaf->mempool);
 }
 
-void tAttackDetection_initToPool (tAttackDetection* const ad, int blocksize, int atk, int rel, tMempool* const mp)
+void tAttackDetection_initToPool (tAttackDetection** const ad, int blocksize, int atk, int rel, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tAttackDetection* a = *ad = (_tAttackDetection*) mpool_alloc(sizeof(_tAttackDetection), m);
+    tAttackDetection* a = *ad = (tAttackDetection*) mpool_alloc(sizeof(tAttackDetection), m);
     a->mempool = m;
     
-    atkdtk_init(a, blocksize, atk, rel);
+    atkdtk_init(*a, blocksize, atk, rel);
 }
 
-void tAttackDetection_free (tAttackDetection* const ad)
+void tAttackDetection_free (tAttackDetection** const ad)
 {
-    _tAttackDetection* a = *ad;
+    tAttackDetection* a = *ad;
     
     mpool_free((char*)a, a->mempool);
 }
 
-void tAttackDetection_setBlocksize (tAttackDetection const a, int size)
+void tAttackDetection_setBlocksize (tAttackDetection* const a, int size)
 {
     a->blockSize = size;
 }
 
-void tAttackDetection_setThreshold (tAttackDetection const a, Lfloat thres)
+void tAttackDetection_setThreshold (tAttackDetection* const a, Lfloat thres)
 {
     a->threshold = thres;
 }
 
-void tAttackDetection_setAttack (tAttackDetection const a, int inAtk)
+void tAttackDetection_setAttack (tAttackDetection* const a, int inAtk)
 {
     a->atk = inAtk;
     a->atk_coeff = powf(0.01f, 1.0f/(a->atk * a->sampleRate * 0.001f));
 }
 
-void tAttackDetection_setRelease (tAttackDetection const a, int inRel)
+void tAttackDetection_setRelease (tAttackDetection* const a, int inRel)
 {
     a->rel = inRel;
     a->rel_coeff = powf(0.01f, 1.0f/(a->rel * a->sampleRate * 0.001f));
 }
 
-int tAttackDetection_detect (tAttackDetection const a, Lfloat *in)
+int tAttackDetection_detect (tAttackDetection* const a, Lfloat *in)
 {
     int result;
     
-    atkdtk_envelope(a, in);
+    atkdtk_envelope(*a, in);
     
     if(a->env >= a->prevAmp*2) //2 times greater = 6dB increase
         result = 1;
@@ -382,7 +382,7 @@ int tAttackDetection_detect (tAttackDetection const a, Lfloat *in)
     return result;
 }
 
-void tAttackDetection_setSampleRate (tAttackDetection const a, Lfloat sr)
+void tAttackDetection_setSampleRate (tAttackDetection* const a, Lfloat sr)
 {
     a->sampleRate = sr;
     
@@ -392,7 +392,7 @@ void tAttackDetection_setSampleRate (tAttackDetection const a, Lfloat sr)
 
 /************************ Static Function Definitions *************************/
 
-static void atkdtk_init (tAttackDetection const a, int blocksize, int atk, int rel)
+static void atkdtk_init (tAttackDetection* const a, int blocksize, int atk, int rel)
 {
     LEAF* leaf = a->mempool->leaf;
     
@@ -408,7 +408,7 @@ static void atkdtk_init (tAttackDetection const a, int blocksize, int atk, int r
     tAttackDetection_setRelease(a, rel);
 }
 
-static void atkdtk_envelope(tAttackDetection const a, Lfloat *in)
+static void atkdtk_envelope(tAttackDetection* const a, Lfloat *in)
 {
     
     int i = 0;
@@ -448,10 +448,10 @@ void tSNAC_init(tSNAC* const snac, int overlaparg, LEAF* const leaf)
     tSNAC_initToPool(snac, overlaparg, &leaf->mempool);
 }
 
-void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const mp)
+void    tSNAC_initToPool    (tSNAC** const snac, int overlaparg, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tSNAC* s = *snac = (_tSNAC*) mpool_alloc(sizeof(_tSNAC), m);
+    tSNAC* s = *snac = (tSNAC*) mpool_alloc(sizeof(tSNAC), m);
     s->mempool = m;
     
     s->biasfactor = DEFBIAS;
@@ -471,9 +471,9 @@ void    tSNAC_initToPool    (tSNAC* const snac, int overlaparg, tMempool* const 
     tSNAC_setOverlap(s, overlaparg);
 }
 
-void tSNAC_free (tSNAC* const snac)
+void tSNAC_free (tSNAC** const snac)
 {
-    _tSNAC* s = *snac;
+    tSNAC* s = *snac;
     
     mpool_free((char*)s->inputbuf, s->mempool);
     mpool_free((char*)s->processbuf, s->mempool);
@@ -483,7 +483,7 @@ void tSNAC_free (tSNAC* const snac)
 }
 
 //void tSNAC_ioSamples(tSNAC* const snac, Lfloat *in, Lfloat *out, int size)
-void tSNAC_ioSamples (tSNAC const s, Lfloat *in, int size)
+void tSNAC_ioSamples (tSNAC* const s, Lfloat *in, int size)
 {
     int timeindex = s->timeindex;
     int mask = s->framesize - 1;
@@ -504,22 +504,22 @@ void tSNAC_ioSamples (tSNAC const s, Lfloat *in, int size)
     s->timeindex = timeindex;
 }
 
-void tSNAC_setOverlap (tSNAC const s, int lap)
+void tSNAC_setOverlap (tSNAC* const s, int lap)
 {
     if(!((lap==1)|(lap==2)|(lap==4)|(lap==8))) lap = DEFOVERLAP;
     s->overlap = lap;
 }
 
-void tSNAC_setBias (tSNAC const s, Lfloat bias)
+void tSNAC_setBias (tSNAC* const s, Lfloat bias)
 {
     if(bias > 1.) bias = 1.;
     if(bias < 0.) bias = 0.;
     s->biasfactor = bias;
-    snac_biasbuf(s);
+    snac_biasbuf(*s);
     return;
 }
 
-void tSNAC_setMinRMS (tSNAC const s, Lfloat rms)
+void tSNAC_setMinRMS (tSNAC* const s, Lfloat rms)
 {
     if(rms > 1.) rms = 1.;
     if(rms < 0.) rms = 0.;
@@ -527,12 +527,12 @@ void tSNAC_setMinRMS (tSNAC const s, Lfloat rms)
     return;
 }
 
-Lfloat tSNAC_getPeriod (tSNAC const s)
+Lfloat tSNAC_getPeriod (tSNAC* const s)
 {
     return(s->periodlength);
 }
 
-Lfloat tSNAC_getFidelity (tSNAC const s)
+Lfloat tSNAC_getFidelity (tSNAC* const s)
 {
     return(s->fidelity);
 }
@@ -541,7 +541,7 @@ Lfloat tSNAC_getFidelity (tSNAC const s)
 /************************ Static Function Definitions *************************/
 
 // main analysis function
-static void snac_analyzeframe(tSNAC const s)
+static void snac_analyzeframe(tSNAC* const s)
 {
     int n, tindex = s->timeindex;
     int framesize = s->framesize;
@@ -569,7 +569,7 @@ static void snac_analyzeframe(tSNAC const s)
     snac_periodandfidelity(s);
 }
 
-static void snac_autocorrelation(tSNAC const s)
+static void snac_autocorrelation(tSNAC* const s)
 {
     int n, m;
     int framesize = s->framesize;
@@ -601,7 +601,7 @@ static void snac_autocorrelation(tSNAC const s)
     return;
 }
 
-static void snac_normalize (tSNAC const s)
+static void snac_normalize (tSNAC* const s)
 {
     int framesize = s->framesize;
     int framesizeplustimeindex = s->framesize + s->timeindex;
@@ -637,7 +637,7 @@ static void snac_normalize (tSNAC const s)
     return;
 }
 
-static void snac_periodandfidelity (tSNAC const s)
+static void snac_periodandfidelity (tSNAC* const s)
 {
     Lfloat periodlength;
     
@@ -653,7 +653,7 @@ static void snac_periodandfidelity (tSNAC const s)
 }
 
 // select the peak which most probably represents period length
-static void snac_pickpeak (tSNAC const s)
+static void snac_pickpeak (tSNAC* const s)
 {
     int n, peakindex=0;
     int seek = s->framesize * SEEK;
@@ -694,7 +694,7 @@ static void snac_pickpeak (tSNAC const s)
 // verify period length via frequency domain (up till SR/4)
 // frequency domain is more precise than lag domain for period lengths < 8
 // argument 'periodlength' is initial estimation from autocorrelation
-static Lfloat snac_spectralpeak (tSNAC const s, Lfloat periodlength)
+static Lfloat snac_spectralpeak (tSNAC* const s, Lfloat periodlength)
 {
     if(periodlength < 4.0f) return periodlength;
     
@@ -738,7 +738,7 @@ static Lfloat snac_spectralpeak (tSNAC const s, Lfloat periodlength)
 
 
 // modified logarithmic bias function
-static void snac_biasbuf (tSNAC const s)
+static void snac_biasbuf (tSNAC* const s)
 {
     int n;
     int maxperiod = (int)(s->framesize * (Lfloat)SEEK);
@@ -765,10 +765,10 @@ void tPeriodDetection_init (tPeriodDetection* const pd, Lfloat* in, int bufSize,
     tPeriodDetection_initToPool(pd, in, bufSize, frameSize, &leaf->mempool);
 }
 
-void tPeriodDetection_initToPool (tPeriodDetection* const pd, Lfloat* in, int bufSize, int frameSize, tMempool* const mp)
+void tPeriodDetection_initToPool (tPeriodDetection** const pd, Lfloat* in, int bufSize, int frameSize, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tPeriodDetection* p = *pd = (_tPeriodDetection*) mpool_calloc(sizeof(_tPeriodDetection), m);
+    tPeriodDetection* p = *pd = (tPeriodDetection*) mpool_calloc(sizeof(tPeriodDetection), m);
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
     
@@ -797,16 +797,16 @@ void tPeriodDetection_initToPool (tPeriodDetection* const pd, Lfloat* in, int bu
     p->fidelityThreshold = 0.95f;
 }
 
-void tPeriodDetection_free (tPeriodDetection* const pd)
+void tPeriodDetection_free (tPeriodDetection** const pd)
 {
-    _tPeriodDetection* p = *pd;
+    tPeriodDetection* p = *pd;
     
     tEnvPD_free(&p->env);
     tSNAC_free(&p->snac);
     mpool_free((char*)p, p->mempool);
 }
 
-Lfloat tPeriodDetection_tick (tPeriodDetection const p, Lfloat sample)
+Lfloat tPeriodDetection_tick (tPeriodDetection* const p, Lfloat sample)
 {
     int i, iLast;
     
@@ -824,12 +824,12 @@ Lfloat tPeriodDetection_tick (tPeriodDetection const p, Lfloat sample)
     {
         p->index = 0;
         
-        tEnvPD_processBlock(p->env, &(p->inBuffer[i]));
+        tEnvPD_processBlock(&p->env, &(p->inBuffer[i]));
         
-        tSNAC_ioSamples(p->snac, &(p->inBuffer[i]), p->frameSize);
+        tSNAC_ioSamples(&p->snac, &(p->inBuffer[i]), p->frameSize);
         
         // Fidelity threshold recommended by Katja Vetters is 0.95 for most instruments/voices http://www.katjaas.nl/helmholtz/helmholtz.html
-        p->period = tSNAC_getPeriod(p->snac);
+        p->period = tSNAC_getPeriod(&p->snac);
         
         p->curBlock++;
         if (p->curBlock >= p->framesPerBuffer) p->curBlock = 0;
@@ -839,43 +839,43 @@ Lfloat tPeriodDetection_tick (tPeriodDetection const p, Lfloat sample)
     return p->period;
 }
 
-Lfloat tPeriodDetection_getPeriod(tPeriodDetection const p)
+Lfloat tPeriodDetection_getPeriod(tPeriodDetection* const p)
 {
     return p->period;
 }
 
-Lfloat tPeriodDetection_getFidelity(tPeriodDetection const p)
+Lfloat tPeriodDetection_getFidelity(tPeriodDetection* const p)
 {
-    return tSNAC_getFidelity(p->snac);
+    return tSNAC_getFidelity(&p->snac);
 }
 
-void tPeriodDetection_setHopSize(tPeriodDetection const p, int hs)
+void tPeriodDetection_setHopSize(tPeriodDetection* const p, int hs)
 {
     p->hopSize = hs;
 }
 
-void tPeriodDetection_setWindowSize(tPeriodDetection const p, int ws)
+void tPeriodDetection_setWindowSize(tPeriodDetection* const p, int ws)
 {
     p->windowSize = ws;
 }
 
-void tPeriodDetection_setFidelityThreshold(tPeriodDetection const p, Lfloat threshold)
+void tPeriodDetection_setFidelityThreshold(tPeriodDetection* const p, Lfloat threshold)
 {
     p->fidelityThreshold = threshold;
 }
 
-void tPeriodDetection_setAlpha            (tPeriodDetection const p, Lfloat alpha)
+void tPeriodDetection_setAlpha            (tPeriodDetection* const p, Lfloat alpha)
 {
     p->alpha = LEAF_clip(0.0f, alpha, 1.0f);
 }
 
-void tPeriodDetection_setTolerance        (tPeriodDetection const p, Lfloat tolerance)
+void tPeriodDetection_setTolerance        (tPeriodDetection* const p, Lfloat tolerance)
 {
     if (tolerance < 0.0f) p->tolerance = 0.0f;
     else p->tolerance = tolerance;
 }
 
-void tPeriodDetection_setSampleRate (tPeriodDetection const p, Lfloat sr)
+void tPeriodDetection_setSampleRate (tPeriodDetection* const p, Lfloat sr)
 {
     p->invSampleRate = 1.0f/sr;
     p->radius = expf(-1000.0f * p->hopSize * p->invSampleRate / p->timeConstant);
@@ -890,10 +890,10 @@ void    tZeroCrossingInfo_init  (tZeroCrossingInfo* const zc, LEAF* const leaf)
     tZeroCrossingInfo_initToPool(zc, &leaf->mempool);
 }
 
-void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo* const zc, tMempool* const mp)
+void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo** const zc, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tZeroCrossingInfo* z = *zc = (_tZeroCrossingInfo*) mpool_calloc(sizeof(_tZeroCrossingInfo), m);
+    tZeroCrossingInfo* z = *zc = (tZeroCrossingInfo*) mpool_calloc(sizeof(tZeroCrossingInfo), m);
     z->mempool = m;
     
     z->_leading_edge = INT_MIN;
@@ -901,30 +901,30 @@ void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo* const zc, tMempool* 
     z->_width = 0.0f;
 }
 
-void    tZeroCrossingInfo_free  (tZeroCrossingInfo* const zc)
+void    tZeroCrossingInfo_free  (tZeroCrossingInfo** const zc)
 {
-    _tZeroCrossingInfo* z = *zc;
+    tZeroCrossingInfo* z = *zc;
     
     mpool_free((char*)z, z->mempool);
 }
 
-void    tZeroCrossingInfo_updatePeak(tZeroCrossingInfo const z, Lfloat s, int pos)
+void    tZeroCrossingInfo_updatePeak(tZeroCrossingInfo* const z, Lfloat s, int pos)
 {
     z->_peak = fmaxf(s, z->_peak);
     if ((z->_width == 0.0f) && (s < (z->_peak * 0.3f)))
         z->_width = pos - z->_leading_edge;
 }
 
-int     tZeroCrossingInfo_period(tZeroCrossingInfo const z, tZeroCrossingInfo* const next)
+int     tZeroCrossingInfo_period(tZeroCrossingInfo* const z, tZeroCrossingInfo* const next)
 {
-    _tZeroCrossingInfo* n = *next;
+    tZeroCrossingInfo* n = *next;
     
     return n->_leading_edge - z->_leading_edge;
 }
 
-Lfloat   tZeroCrossingInfo_fractionalPeriod(tZeroCrossingInfo const z, tZeroCrossingInfo* const next)
+Lfloat   tZeroCrossingInfo_fractionalPeriod(tZeroCrossingInfo* const z, tZeroCrossingInfo* const next)
 {
-    _tZeroCrossingInfo* n = *next;
+    tZeroCrossingInfo* n = *next;
     
     // Get the start edge
     Lfloat prev1 = z->_before_crossing;
@@ -943,7 +943,7 @@ Lfloat   tZeroCrossingInfo_fractionalPeriod(tZeroCrossingInfo const z, tZeroCros
     return result + (dx2 - dx1);
 }
 
-int     tZeroCrossingInfo_getWidth(tZeroCrossingInfo const z)
+int     tZeroCrossingInfo_getWidth(tZeroCrossingInfo* const z)
 {
     return z->_width;
 }
@@ -957,10 +957,10 @@ void    tZeroCrossingCollector_init  (tZeroCrossingCollector* const zc, int wind
     tZeroCrossingCollector_initToPool(zc, windowSize, hysteresis, &leaf->mempool);
 }
 
-void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const zc, int windowSize, Lfloat hysteresis, tMempool* const mp)
+void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector** const zc, int windowSize, Lfloat hysteresis, tMempool* const mp)
 {
     _tMempool* m = *mp;
-    _tZeroCrossingCollector* z = *zc = (_tZeroCrossingCollector*) mpool_alloc(sizeof(_tZeroCrossingCollector), m);
+    tZeroCrossingCollector* z = *zc = (tZeroCrossingCollector*) mpool_alloc(sizeof(tZeroCrossingCollector), m);
     z->mempool = m;
     
     z->_hysteresis = -dbtoa(hysteresis);
@@ -991,9 +991,9 @@ void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector* const zc, 
     z->_peak = 0.0f;
 }
 
-void    tZeroCrossingCollector_free  (tZeroCrossingCollector* const zc)
+void    tZeroCrossingCollector_free  (tZeroCrossingCollector** const zc)
 {
-    _tZeroCrossingCollector* z = *zc;
+    tZeroCrossingCollector* z = *zc;
     
     for (unsigned i = 0; i < z->_size; i++)
     {
@@ -1004,7 +1004,7 @@ void    tZeroCrossingCollector_free  (tZeroCrossingCollector* const zc)
     mpool_free((char*)z, z->mempool);
 }
 
-int     tZeroCrossingCollector_tick(tZeroCrossingCollector const z, Lfloat s)
+int     tZeroCrossingCollector_tick(tZeroCrossingCollector* const z, Lfloat s)
 {
     
     // Offset s by half of hysteresis, so that zero cross detection is
@@ -1012,12 +1012,12 @@ int     tZeroCrossingCollector_tick(tZeroCrossingCollector const z, Lfloat s)
     s += z->_hysteresis * 0.5f;
     
     if (z->_num_edges >= (int)z->_size)
-        reset(z);
+        reset(*z);
     
     if ((z->_frame == z->_window_size/2) && (z->_num_edges == 0))
-        reset(z);
+        reset(*z);
     
-    update_state(z, s);
+    update_state(*z, s);
     
     if ((++z->_frame >= z->_window_size) && !z->_state)
     {
@@ -1028,64 +1028,64 @@ int     tZeroCrossingCollector_tick(tZeroCrossingCollector const z, Lfloat s)
         if (z->_num_edges > 1)
             z->_ready = 1;
         else
-            reset(z);
+            reset(*z);
     }
     
     return z->_state;
 }
 
-int     tZeroCrossingCollector_getState(tZeroCrossingCollector const z)
+int     tZeroCrossingCollector_getState(tZeroCrossingCollector* const z)
 {
     return z->_state;
 }
 
-tZeroCrossingInfo const tZeroCrossingCollector_getCrossing(tZeroCrossingCollector const z, int index)
+tZeroCrossingInfo const tZeroCrossingCollector_getCrossing(tZeroCrossingCollector* const z, int index)
 {
     int i = (z->_num_edges - 1) - index;
     return z->_info[(z->_pos + i) & z->_mask];
 }
 
-int     tZeroCrossingCollector_getNumEdges(tZeroCrossingCollector const z)
+int     tZeroCrossingCollector_getNumEdges(tZeroCrossingCollector* const z)
 {
     return z->_num_edges;
 }
 
-int     tZeroCrossingCollector_getCapacity(tZeroCrossingCollector const z)
+int     tZeroCrossingCollector_getCapacity(tZeroCrossingCollector* const z)
 {
     return (int)z->_size;
 }
 
-int     tZeroCrossingCollector_getFrame(tZeroCrossingCollector const z)
+int     tZeroCrossingCollector_getFrame(tZeroCrossingCollector* const z)
 {
     return z->_frame;
 }
 
-int     tZeroCrossingCollector_getWindowSize(tZeroCrossingCollector const z)
+int     tZeroCrossingCollector_getWindowSize(tZeroCrossingCollector* const z)
 {
     return z->_window_size;
 }
 
-int     tZeroCrossingCollector_isReady(tZeroCrossingCollector const z)
+int     tZeroCrossingCollector_isReady(tZeroCrossingCollector* const z)
 {
     return z->_ready;
 }
 
-Lfloat   tZeroCrossingCollector_getPeak(tZeroCrossingCollector const z)
+Lfloat   tZeroCrossingCollector_getPeak(tZeroCrossingCollector* const z)
 {
     return fmaxf(z->_peak, z->_peak_update);
 }
 
-int     tZeroCrossingCollector_isReset(tZeroCrossingCollector const z)
+int     tZeroCrossingCollector_isReset(tZeroCrossingCollector* const z)
 {
     return z->_frame == 0;
 }
 
-void    tZeroCrossingCollector_setHysteresis(tZeroCrossingCollector const z, Lfloat hysteresis)
+void    tZeroCrossingCollector_setHysteresis(tZeroCrossingCollector* const z, Lfloat hysteresis)
 {
     z->_hysteresis = -dbtoa(hysteresis);
 }
 
-static inline void update_state(tZeroCrossingCollector const z, Lfloat s)
+static inline void update_state(tZeroCrossingCollector* const z, Lfloat s)
 {
     if (z->_ready)
     {
@@ -1116,7 +1116,7 @@ static inline void update_state(tZeroCrossingCollector const z, Lfloat s)
         }
         else
         {
-            tZeroCrossingInfo_updatePeak(z->_info[z->_pos & z->_mask], s, z->_frame);
+            tZeroCrossingInfo_updatePeak(&z->_info[z->_pos & z->_mask], s, z->_frame);
         }
         if (s > z->_peak_update)
         {
@@ -1132,12 +1132,12 @@ static inline void update_state(tZeroCrossingCollector const z, Lfloat s)
     }
     
     if (z->_frame > z->_window_size * 2)
-        reset(z);
+        reset(*z);
 
     z->_prev = s;
 }
 
-static inline void shift(tZeroCrossingCollector const z, int n)
+static inline void shift(tZeroCrossingCollector* const z, int n)
 {
     tZeroCrossingInfo crossing = z->_info[z->_pos & z->_mask];
     
@@ -1156,7 +1156,7 @@ static inline void shift(tZeroCrossingCollector const z, int n)
     z->_num_edges = i;
 }
 
-static inline void reset(tZeroCrossingCollector const z)
+static inline void reset(tZeroCrossingCollector* const z)
 {
     z->_num_edges = 0;
     z->_state = 0;
@@ -1170,10 +1170,10 @@ void    tBitset_init    (tBitset* const bitset, int numBits, LEAF* const leaf)
     tBitset_initToPool(bitset, numBits, &leaf->mempool);
 }
 
-void    tBitset_initToPool  (tBitset* const bitset, int numBits, tMempool* const mempool)
+void    tBitset_initToPool  (tBitset** const bitset, int numBits, tMempool* const mempool)
 {
     _tMempool* m = *mempool;
-    _tBitset* b = *bitset = (_tBitset*) mpool_alloc(sizeof(_tBitset), m);
+    tBitset* b = *bitset = (tBitset*) mpool_alloc(sizeof(tBitset), m);
     b->mempool = m;
     
     // Size of the array value in bits
@@ -1188,15 +1188,15 @@ void    tBitset_initToPool  (tBitset* const bitset, int numBits, tMempool* const
     b->_bits = (unsigned int*) mpool_calloc(sizeof(unsigned int) * b->_size, m);
 }
 
-void    tBitset_free    (tBitset* const bitset)
+void    tBitset_free    (tBitset** const bitset)
 {
-    _tBitset* b = *bitset;
+    tBitset* b = *bitset;
     
     mpool_free((char*) b->_bits, b->mempool);
     mpool_free((char*) b, b->mempool);
 }
 
-int     tBitset_get     (tBitset const b, int index)
+int     tBitset_get     (tBitset* const b, int index)
 {
     // Check we don't get past the storage
     if (index > b->_bit_size)
@@ -1206,12 +1206,12 @@ int     tBitset_get     (tBitset const b, int index)
     return (b->_bits[index / b->_value_size] & mask) != 0;
 }
 
-unsigned int*   tBitset_getData   (tBitset const b)
+unsigned int*   tBitset_getData   (tBitset* const b)
 {
     return b->_bits;
 }
 
-void     tBitset_set     (tBitset const b, int index, unsigned int val)
+void     tBitset_set     (tBitset* const b, int index, unsigned int val)
 {
     if (index > b->_bit_size)
         return;
@@ -1221,7 +1221,7 @@ void     tBitset_set     (tBitset const b, int index, unsigned int val)
     b->_bits[i] ^= (-val ^ b->_bits[i]) & mask;
 }
 
-void     tBitset_setMultiple (tBitset const b, int index, int n, unsigned int val)
+void     tBitset_setMultiple (tBitset* const b, int index, int n, unsigned int val)
 {
     // Check that the index (i) does not get past size
     if (index > b->_bit_size)
@@ -1308,24 +1308,24 @@ void    tBACF_init  (tBACF* const bacf, tBitset* const bitset, LEAF* const leaf)
     tBACF_initToPool(bacf, bitset, &leaf->mempool);
 }
 
-void    tBACF_initToPool    (tBACF* const bacf, tBitset* const bitset, tMempool* const mempool)
+void    tBACF_initToPool    (tBACF** const bacf, tBitset* const bitset, tMempool* const mempool)
 {
     _tMempool* m = *mempool;
-    _tBACF* b = *bacf = (_tBACF*) mpool_alloc(sizeof(_tBACF), m);
+    tBACF* b = *bacf = (tBACF*) mpool_alloc(sizeof(tBACF), m);
     b->mempool = m;
     
     b->_bitset = *bitset;
     b->_mid_array = ((b->_bitset->_bit_size / b->_bitset->_value_size) / 2) - 1;
 }
 
-void    tBACF_free  (tBACF* const bacf)
+void    tBACF_free  (tBACF** const bacf)
 {
-    _tBACF* b = *bacf;
+    tBACF* b = *bacf;
     
     mpool_free((char*) b, b->mempool);
 }
 
-int    tBACF_getCorrelation  (tBACF const b, int pos)
+int    tBACF_getCorrelation  (tBACF* const b, int pos)
 {
     int value_size = b->_bitset->_value_size;
     const int index = pos / value_size;
@@ -1371,7 +1371,7 @@ int    tBACF_getCorrelation  (tBACF const b, int pos)
     return count;
 }
 
-void    tBACF_set  (tBACF const b, tBitset* const bitset)
+void    tBACF_set  (tBACF* const b, tBitset* const bitset)
 {
     b->_bitset = *bitset;
     b->_mid_array = ((b->_bitset->_bit_size / b->_bitset->_value_size) / 2) - 1;
@@ -1393,10 +1393,10 @@ void    tPeriodDetector_init    (tPeriodDetector* const detector, Lfloat lowestF
     tPeriodDetector_initToPool(detector, lowestFreq, highestFreq, hysteresis, &leaf->mempool);
 }
 
-void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat hysteresis, tMempool* const mempool)
+void    tPeriodDetector_initToPool  (tPeriodDetector** const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat hysteresis, tMempool* const mempool)
 {
     _tMempool* m = *mempool;
-    _tPeriodDetector* p = *detector = (_tPeriodDetector*) mpool_alloc(sizeof(_tPeriodDetector), m);
+    tPeriodDetector* p = *detector = (tPeriodDetector*) mpool_alloc(sizeof(tPeriodDetector), m);
     p->mempool = m;
     
     LEAF* leaf = p->mempool->leaf;
@@ -1409,7 +1409,7 @@ void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, Lfloat low
     p->_min_period = (1.0f / highestFreq) * p->sampleRate;
     p->_range = highestFreq / lowestFreq;
     
-    int windowSize = tZeroCrossingCollector_getWindowSize(p->_zc);
+    int windowSize = tZeroCrossingCollector_getWindowSize(&p->_zc);
     tBitset_initToPool(&p->_bits, windowSize, mempool);
     p->_weight = 2.0f / windowSize;
     p->_mid_point = windowSize / 2;
@@ -1424,9 +1424,9 @@ void    tPeriodDetector_initToPool  (tPeriodDetector* const detector, Lfloat low
     tBACF_initToPool(&p->_bacf, &p->_bits, mempool);
 }
 
-void    tPeriodDetector_free    (tPeriodDetector* const detector)
+void    tPeriodDetector_free    (tPeriodDetector** const detector)
 {
-    _tPeriodDetector* p = *detector;
+    tPeriodDetector* p = *detector;
     
     tZeroCrossingCollector_free(&p->_zc);
     tBitset_free(&p->_bits);
@@ -1435,11 +1435,11 @@ void    tPeriodDetector_free    (tPeriodDetector* const detector)
     mpool_free((char*) p, p->mempool);
 }
 
-int   tPeriodDetector_tick    (tPeriodDetector const p, Lfloat s)
+int   tPeriodDetector_tick    (tPeriodDetector* const p, Lfloat s)
 {
     // Zero crossing
-    int prev = tZeroCrossingCollector_getState(p->_zc);
-    int zc = tZeroCrossingCollector_tick(p->_zc, s);
+    int prev = tZeroCrossingCollector_getState(&p->_zc);
+    int zc = tZeroCrossingCollector_tick(&p->_zc, s);
     
     if (!zc && prev != zc)
     {
@@ -1447,13 +1447,13 @@ int   tPeriodDetector_tick    (tPeriodDetector const p, Lfloat s)
         p->_predicted_period = -1.0f;
     }
     
-    if (tZeroCrossingCollector_isReset(p->_zc))
+    if (tZeroCrossingCollector_isReset(&p->_zc))
     {
         p->_fundamental.period = -1.0f;
         p->_fundamental.periodicity = 0.0f;
     }
     
-    if (tZeroCrossingCollector_isReady(p->_zc))
+    if (tZeroCrossingCollector_isReady(&p->_zc))
     {
         set_bitstream(p);
         autocorrelate(p);
@@ -1462,17 +1462,17 @@ int   tPeriodDetector_tick    (tPeriodDetector const p, Lfloat s)
     return 0;
 }
 
-Lfloat   tPeriodDetector_getPeriod   (tPeriodDetector const p)
+Lfloat   tPeriodDetector_getPeriod   (tPeriodDetector* const p)
 {
     return p->_fundamental.period;
 }
 
-Lfloat   tPeriodDetector_getPeriodicity  (tPeriodDetector const p)
+Lfloat   tPeriodDetector_getPeriodicity  (tPeriodDetector* const p)
 {
     return p->_fundamental.periodicity;
 }
 
-Lfloat   tPeriodDetector_harmonic    (tPeriodDetector const p, int harmonicIndex)
+Lfloat   tPeriodDetector_harmonic    (tPeriodDetector* const p, int harmonicIndex)
 {
     if (harmonicIndex > 0)
     {
@@ -1482,7 +1482,7 @@ Lfloat   tPeriodDetector_harmonic    (tPeriodDetector const p, int harmonicIndex
         Lfloat target_period = p->_fundamental.period / (Lfloat) harmonicIndex;
         if (target_period >= p->_min_period && target_period < p->_mid_point)
         {
-            int count = tBACF_getCorrelation(p->_bacf, roundf(target_period));
+            int count = tBACF_getCorrelation(&p->_bacf, roundf(target_period));
             Lfloat periodicity = 1.0f - (count * p->_weight);
             return periodicity;
         }
@@ -1490,26 +1490,26 @@ Lfloat   tPeriodDetector_harmonic    (tPeriodDetector const p, int harmonicIndex
     return 0.0f;
 }
 
-Lfloat   tPeriodDetector_predictPeriod   (tPeriodDetector const p)
+Lfloat   tPeriodDetector_predictPeriod   (tPeriodDetector* const p)
 {
     if (p->_predicted_period == -1.0f && p->_edge_mark != p->_predict_edge)
     {
         p->_predict_edge = p->_edge_mark;
-        int n = tZeroCrossingCollector_getNumEdges(p->_zc);
+        int n = tZeroCrossingCollector_getNumEdges(&p->_zc);
         if (n > 1)
         {
-            Lfloat threshold = tZeroCrossingCollector_getPeak(p->_zc) * PULSE_THRESHOLD;
+            Lfloat threshold = tZeroCrossingCollector_getPeak(&p->_zc) * PULSE_THRESHOLD;
             for (int i = n - 1; i > 0; --i)
             {
-                tZeroCrossingInfo edge2 = tZeroCrossingCollector_getCrossing(p->_zc, i);
+                tZeroCrossingInfo edge2 = tZeroCrossingCollector_getCrossing(&p->_zc, i);
                 if (edge2->_peak >= threshold)
                 {
                     for (int j = i-1; j >= 0; --j)
                     {
-                        tZeroCrossingInfo edge1 = tZeroCrossingCollector_getCrossing(p->_zc, j);
+                        tZeroCrossingInfo edge1 = tZeroCrossingCollector_getCrossing(&p->_zc, j);
                         if (edge1->_peak >= threshold)
                         {
-                            Lfloat period = tZeroCrossingInfo_fractionalPeriod(edge1, &edge2);
+                            Lfloat period = tZeroCrossingInfo_fractionalPeriod(&edge1, &edge2);
                             if (period > p->_min_period)
                                 return (p->_predicted_period = period);
                         }
@@ -1522,22 +1522,22 @@ Lfloat   tPeriodDetector_predictPeriod   (tPeriodDetector const p)
     return p->_predicted_period;
 }
 
-int     tPeriodDetector_isReady (tPeriodDetector const p)
+int     tPeriodDetector_isReady (tPeriodDetector* const p)
 {
-    return tZeroCrossingCollector_isReady(p->_zc);
+    return tZeroCrossingCollector_isReady(&p->_zc);
 }
 
-int     tPeriodDetector_isReset (tPeriodDetector const p)
+int     tPeriodDetector_isReset (tPeriodDetector* const p)
 {
-    return tZeroCrossingCollector_isReset(p->_zc);
+    return tZeroCrossingCollector_isReset(&p->_zc);
 }
 
-void    tPeriodDetector_setHysteresis   (tPeriodDetector const p, Lfloat hysteresis)
+void    tPeriodDetector_setHysteresis   (tPeriodDetector* const p, Lfloat hysteresis)
 {
-    return tZeroCrossingCollector_setHysteresis(p->_zc, hysteresis);
+    return tZeroCrossingCollector_setHysteresis(&p->_zc, hysteresis);
 }
 
-void    tPeriodDetector_setSampleRate   (tPeriodDetector const p, Lfloat sr)
+void    tPeriodDetector_setSampleRate   (tPeriodDetector* const p, Lfloat sr)
 {
     _tMempool* m = p->mempool;
     p->sampleRate = sr;
@@ -1548,18 +1548,18 @@ void    tPeriodDetector_setSampleRate   (tPeriodDetector const p, Lfloat sr)
     p->_min_period = (1.0f / p->highestFreq) * p->sampleRate;
 }
 
-static inline void set_bitstream(tPeriodDetector const p)
+static inline void set_bitstream(tPeriodDetector* const p)
 {
-    Lfloat threshold = tZeroCrossingCollector_getPeak(p->_zc) * PULSE_THRESHOLD;
-    unsigned int leading_edge = tZeroCrossingCollector_getWindowSize(p->_zc);
+    Lfloat threshold = tZeroCrossingCollector_getPeak(&p->_zc) * PULSE_THRESHOLD;
+    unsigned int leading_edge = tZeroCrossingCollector_getWindowSize(&p->_zc);
     unsigned int trailing_edge = 0;
     
     p->_num_pulses = 0;
     tBitset_clear(p->_bits);
     
-    for (int i = 0; i != tZeroCrossingCollector_getNumEdges(p->_zc); ++i)
+    for (int i = 0; i != tZeroCrossingCollector_getNumEdges(&p->_zc); ++i)
     {
-        tZeroCrossingInfo info = tZeroCrossingCollector_getCrossing(p->_zc, i);
+        tZeroCrossingInfo info = tZeroCrossingCollector_getCrossing(&p->_zc, i);
         if (info->_peak >= threshold)
         {
             ++p->_num_pulses;
@@ -1569,15 +1569,15 @@ static inline void set_bitstream(tPeriodDetector const p)
                 trailing_edge = info->_trailing_edge;
             int pos = fmax(info->_leading_edge, 0);
             int n = info->_trailing_edge - pos;
-            tBitset_setMultiple(p->_bits, pos, n, 1);
+            tBitset_setMultiple(&p->_bits, pos, n, 1);
         }
     }
     p->_half_empty = (leading_edge > p->_mid_point) || (trailing_edge < p->_mid_point);
 }
 
-static inline void autocorrelate(tPeriodDetector const p)
+static inline void autocorrelate(tPeriodDetector* const p)
 {
-    Lfloat threshold = tZeroCrossingCollector_getPeak(p->_zc) * PULSE_THRESHOLD;
+    Lfloat threshold = tZeroCrossingCollector_getPeak(&p->_zc) * PULSE_THRESHOLD;
     
     _sub_collector collect;
     sub_collector_init(&collect, &p->_zc, p->_periodicity_diff_threshold, p->_range);
@@ -1590,24 +1590,24 @@ static inline void autocorrelate(tPeriodDetector const p)
     else
     {
         int shouldBreak = 0;
-        int n = tZeroCrossingCollector_getNumEdges(p->_zc);
+        int n = tZeroCrossingCollector_getNumEdges(&p->_zc);
         for (int i = 0; i != n - 1; ++i)
         {
-            tZeroCrossingInfo curr = tZeroCrossingCollector_getCrossing(p->_zc, i);
+            tZeroCrossingInfo curr = tZeroCrossingCollector_getCrossing(&p->_zc, i);
             if (curr->_peak >= threshold)
             {
                 for (int j = i + 1; j != n; ++j)
                 {
-                    tZeroCrossingInfo next = tZeroCrossingCollector_getCrossing(p->_zc, j);
+                    tZeroCrossingInfo next = tZeroCrossingCollector_getCrossing(&p->_zc, j);
                     if (next->_peak >= threshold)
                     {
-                        int period = tZeroCrossingInfo_period(curr, &next);
+                        int period = tZeroCrossingInfo_period(&curr, &next);
                         if (period > p->_mid_point)
                             break;
                         if (period >= p->_min_period)
                         {
                             
-                            int count = tBACF_getCorrelation(p->_bacf, period);
+                            int count = tBACF_getCorrelation(&p->_bacf, period);
                             
                             int mid = p->_bacf->_mid_array * CHAR_BIT * sizeof(unsigned int);
                             
@@ -1615,7 +1615,7 @@ static inline void autocorrelate(tPeriodDetector const p)
                             
                             if ((collect._fundamental._period == -1.0f) && count == 0)
                             {
-                                if (tBACF_getCorrelation(p->_bacf, period / 2.0f) == 0)
+                                if (tBACF_getCorrelation(&p->_bacf, period / 2.0f) == 0)
                                     count = -1;
                             }
                             else if (period < 32) // Search minimum if the resolution is low
@@ -1623,7 +1623,7 @@ static inline void autocorrelate(tPeriodDetector const p)
                                 // Search upwards for the minimum autocorrelation count
                                 for (int d = start + 1; d < mid; ++d)
                                 {
-                                    int c = tBACF_getCorrelation(p->_bacf, d);
+                                    int c = tBACF_getCorrelation(&p->_bacf, d);
                                     if (c > count)
                                         break;
                                     count = c;
@@ -1632,7 +1632,7 @@ static inline void autocorrelate(tPeriodDetector const p)
                                 // Search downwards for the minimum autocorrelation count
                                 for (int d = start - 1; d > p->_min_period; --d)
                                 {
-                                    int c = tBACF_getCorrelation(p->_bacf, d);
+                                    int c = tBACF_getCorrelation(&p->_bacf, d);
                                     if (c > count)
                                         break;
                                     count = c;
@@ -1681,9 +1681,9 @@ static inline void sub_collector_init(_sub_collector* collector, tZeroCrossingCo
 
 static inline Lfloat sub_collector_period_of(_sub_collector* collector, _auto_correlation_info info)
 {
-    tZeroCrossingInfo first = tZeroCrossingCollector_getCrossing(collector->_zc, info._i1);
-    tZeroCrossingInfo next = tZeroCrossingCollector_getCrossing(collector->_zc, info._i2);
-    return tZeroCrossingInfo_fractionalPeriod(first, &next);
+    tZeroCrossingInfo first = tZeroCrossingCollector_getCrossing(&collector->_zc, info._i1);
+    tZeroCrossingInfo next = tZeroCrossingCollector_getCrossing(&collector->_zc, info._i2);
+    return tZeroCrossingInfo_fractionalPeriod(&first, &next);
 }
 
 static inline void sub_collector_save(_sub_collector* collector, _auto_correlation_info info)
@@ -1771,10 +1771,10 @@ void    tPitchDetector_init (tPitchDetector* const detector, Lfloat lowestFreq, 
     tPitchDetector_initToPool(detector, lowestFreq, highestFreq, &leaf->mempool);
 }
 
-void    tPitchDetector_initToPool   (tPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, tMempool* const mempool)
+void    tPitchDetector_initToPool   (tPitchDetector** const detector, Lfloat lowestFreq, Lfloat highestFreq, tMempool* const mempool)
 {
     _tMempool* m = *mempool;
-    _tPitchDetector* p = *detector = (_tPitchDetector*) mpool_alloc(sizeof(_tPitchDetector), m);
+    tPitchDetector* p = *detector = (tPitchDetector*) mpool_alloc(sizeof(tPitchDetector), m);
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
     
@@ -1785,15 +1785,15 @@ void    tPitchDetector_initToPool   (tPitchDetector* const detector, Lfloat lowe
     p->sampleRate = leaf->sampleRate;
 }
 
-void    tPitchDetector_free (tPitchDetector* const detector)
+void    tPitchDetector_free (tPitchDetector** const detector)
 {
-    _tPitchDetector* p = *detector;
+    tPitchDetector* p = *detector;
     
     tPeriodDetector_free(&p->_pd);
     mpool_free((char*) p, p->mempool);
 }
 
-int     tPitchDetector_tick    (tPitchDetector const p, Lfloat s)
+int     tPitchDetector_tick    (tPitchDetector* const p, Lfloat s)
 {
     tPeriodDetector_tick(p->_pd, s);
     
@@ -1843,46 +1843,46 @@ int     tPitchDetector_tick    (tPitchDetector const p, Lfloat s)
     return ready;
 }
 
-Lfloat   tPitchDetector_getFrequency    (tPitchDetector const p)
+Lfloat   tPitchDetector_getFrequency    (tPitchDetector* const p)
 {
     return p->_current.frequency;
 }
 
-Lfloat   tPitchDetector_getPeriodicity  (tPitchDetector const p)
+Lfloat   tPitchDetector_getPeriodicity  (tPitchDetector* const p)
 {
     return p->_current.periodicity;
 }
 
-Lfloat   tPitchDetector_harmonic (tPitchDetector const p, int harmonicIndex)
+Lfloat   tPitchDetector_harmonic (tPitchDetector* const p, int harmonicIndex)
 {
-    return tPeriodDetector_harmonic(p->_pd, harmonicIndex);
+    return tPeriodDetector_harmonic(&p->_pd, harmonicIndex);
 }
 
-Lfloat   tPitchDetector_predictFrequency (tPitchDetector const p)
+Lfloat   tPitchDetector_predictFrequency (tPitchDetector* const p)
 {
-    Lfloat period = tPeriodDetector_predictPeriod(p->_pd);
+    Lfloat period = tPeriodDetector_predictPeriod(&p->_pd);
     if (period > 0.0f)
         return p->sampleRate / period;
     return 0.0f;
 }
 
-int     tPitchDetector_indeterminate    (tPitchDetector const p)
+int     tPitchDetector_indeterminate    (tPitchDetector* const p)
 {
     return p->_current.frequency == 0.0f;
 }
 
-void    tPitchDetector_setHysteresis    (tPitchDetector const p, Lfloat hysteresis)
+void    tPitchDetector_setHysteresis    (tPitchDetector* const p, Lfloat hysteresis)
 {
-    tPeriodDetector_setHysteresis(p->_pd, hysteresis);
+    tPeriodDetector_setHysteresis(&p->_pd, hysteresis);
 }
 
-void    tPitchDetector_setSampleRate    (tPitchDetector const p, Lfloat sr)
+void    tPitchDetector_setSampleRate    (tPitchDetector* const p, Lfloat sr)
 {
     p->sampleRate = sr;
-    tPeriodDetector_setSampleRate(p->_pd, p->sampleRate);
+    tPeriodDetector_setSampleRate(&p->_pd, p->sampleRate);
 }
 
-static inline Lfloat calculate_frequency(tPitchDetector const p)
+static inline Lfloat calculate_frequency(tPitchDetector* const p)
 {
     Lfloat period = p->_pd->_fundamental.period;
     if (period > 0.0f)
@@ -1890,7 +1890,7 @@ static inline Lfloat calculate_frequency(tPitchDetector const p)
     return 0.0f;
 }
 
-static inline void bias(tPitchDetector const p, _pitch_info incoming)
+static inline void bias(tPitchDetector* const p, _pitch_info incoming)
 {
     ++p->_frames_after_shift;
     int shifted = 0;
@@ -1990,10 +1990,10 @@ void    tDualPitchDetector_init (tDualPitchDetector* const detector, Lfloat lowe
     tDualPitchDetector_initToPool(detector, lowestFreq, highestFreq, inBuffer, bufSize, &leaf->mempool);
 }
 
-void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat* inBuffer, int bufSize, tMempool* const mempool)
+void    tDualPitchDetector_initToPool   (tDualPitchDetector** const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat* inBuffer, int bufSize, tMempool* const mempool)
 {
     _tMempool* m = *mempool;
-    _tDualPitchDetector* p = *detector = (_tDualPitchDetector*) mpool_alloc(sizeof(_tDualPitchDetector), m);
+    tDualPitchDetector* p = *detector = (tDualPitchDetector*) mpool_alloc(sizeof(tDualPitchDetector), m);
     p->mempool = m;
     LEAF* leaf = p->mempool->leaf;
     
@@ -2013,9 +2013,9 @@ void    tDualPitchDetector_initToPool   (tDualPitchDetector* const detector, Lfl
     p->highest = highestFreq;
 }
 
-void    tDualPitchDetector_free (tDualPitchDetector* const detector)
+void    tDualPitchDetector_free (tDualPitchDetector** const detector)
 {
-    _tDualPitchDetector* p = *detector;
+    tDualPitchDetector* p = *detector;
     
     tPeriodDetection_free(&p->_pd1);
     tPitchDetector_free(&p->_pd2);
@@ -2023,21 +2023,21 @@ void    tDualPitchDetector_free (tDualPitchDetector* const detector)
     mpool_free((char*) p, p->mempool);
 }
 
-int     tDualPitchDetector_tick    (tDualPitchDetector const p, Lfloat sample)
+int     tDualPitchDetector_tick    (tDualPitchDetector* const p, Lfloat sample)
 {
-    tPeriodDetection_tick(p->_pd1, sample);
-    int ready = tPitchDetector_tick(p->_pd2, sample);
+    tPeriodDetection_tick(&p->_pd1, sample);
+    int ready = tPitchDetector_tick(&p->_pd2, sample);
 
     if (ready)
     {
-        int pd2_indeterminate = tPitchDetector_indeterminate(p->_pd2);
+        int pd2_indeterminate = tPitchDetector_indeterminate(&p->_pd2);
         int disagreement = 0;
-        Lfloat period = tPeriodDetection_getPeriod(p->_pd1);
+        Lfloat period = tPeriodDetection_getPeriod(&p->_pd1);
         if (!pd2_indeterminate && period != 0.0f)
         {
             _pitch_info _i1;
-            _i1.frequency = p->sampleRate / tPeriodDetection_getPeriod(p->_pd1);
-            _i1.periodicity = tPeriodDetection_getFidelity(p->_pd1);
+            _i1.frequency = p->sampleRate / tPeriodDetection_getPeriod(&p->_pd1);
+            _i1.periodicity = tPeriodDetection_getFidelity(&p->_pd1);
             _pitch_info _i2 = p->_pd2->_current;
             
             Lfloat pd1_diff = fabsf(_i1.frequency - p->_mean);
@@ -2103,44 +2103,44 @@ int     tDualPitchDetector_tick    (tDualPitchDetector const p, Lfloat sample)
     return ready;
 }
 
-Lfloat   tDualPitchDetector_getFrequency    (tDualPitchDetector const p)
+Lfloat   tDualPitchDetector_getFrequency    (tDualPitchDetector* const p)
 {
     return p->_current.frequency;
 }
 
-Lfloat   tDualPitchDetector_getPeriodicity  (tDualPitchDetector const p)
+Lfloat   tDualPitchDetector_getPeriodicity  (tDualPitchDetector* const p)
 {
     return p->_current.periodicity;
 }
 
-Lfloat   tDualPitchDetector_predictFrequency (tDualPitchDetector const p)
+Lfloat   tDualPitchDetector_predictFrequency (tDualPitchDetector* const p)
 {
     if (p->_predicted_frequency == 0.0f)
-        compute_predicted_frequency(p);
+        compute_predicted_frequency(*p);
     return p->_predicted_frequency;
 }
 
-void    tDualPitchDetector_setHysteresis (tDualPitchDetector const p, Lfloat hysteresis)
+void    tDualPitchDetector_setHysteresis (tDualPitchDetector* const p, Lfloat hysteresis)
 {
-    tPitchDetector_setHysteresis(p->_pd2, hysteresis);
+    tPitchDetector_setHysteresis(&p->_pd2, hysteresis);
 }
 
-void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector const p, Lfloat thresh)
+void    tDualPitchDetector_setPeriodicityThreshold (tDualPitchDetector* const p, Lfloat thresh)
 {
     p->thresh = thresh;
 }
 
-void    tDualPitchDetector_setSampleRate (tDualPitchDetector const p, Lfloat sr)
+void    tDualPitchDetector_setSampleRate (tDualPitchDetector* const p, Lfloat sr)
 {
     p->sampleRate = sr;
-    tPeriodDetection_setSampleRate(p->_pd1, p->sampleRate);
-    tPitchDetector_setSampleRate(p->_pd2, p->sampleRate);
+    tPeriodDetection_setSampleRate(&p->_pd1, p->sampleRate);
+    tPitchDetector_setSampleRate(&p->_pd2, p->sampleRate);
 }
 
-static inline void compute_predicted_frequency(tDualPitchDetector const p)
+static inline void compute_predicted_frequency(tDualPitchDetector* const p)
 {
-    Lfloat f1 = 1.0f / tPeriodDetection_getPeriod(p->_pd1);
-    Lfloat f2 = tPitchDetector_predictFrequency(p->_pd2);
+    Lfloat f1 = 1.0f / tPeriodDetection_getPeriod(&p->_pd1);
+    Lfloat f2 = tPitchDetector_predictFrequency(&p->_pd2);
     if (f2 > 0.0f)
     {
         Lfloat error = f1 * 0.1f;

@@ -19,7 +19,7 @@
 
 
 
-typedef struct _glottis
+typedef struct glottis
 {
 	tMempool mempool;
 	Lfloat  freq;
@@ -38,15 +38,13 @@ typedef struct _glottis
     Lfloat  Again;
 
     Lfloat  T;
-} _glottis;
+} glottis;
 
-typedef _glottis* glottis;
+void    glottis_init           (glottis**glo, LEAF* const leaf);
+void    glottis_initToPool     (glottis**glo, tMempool* const mp);
 
-void    glottis_init           (glottis *glo, LEAF* const leaf);
-void    glottis_initToPool     (glottis *glo, tMempool* const mp);
-
-Lfloat  glottis_compute        (glottis glo);
-void    glottis_setup_waveform (glottis glo);
+Lfloat  glottis_compute        (glottis* glo);
+void    glottis_setup_waveform (glottis* glo);
 
 
 

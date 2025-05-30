@@ -76,7 +76,7 @@ extern "C" {
      
      @} */
     
-    typedef struct _tEnvelope
+    typedef struct tEnvelope
     {
         
         tMempool mempool;
@@ -97,20 +97,18 @@ extern "C" {
         
         Lfloat attackPhase, decayPhase, rampPhase;
         
-    } _tEnvelope;
-    
-    typedef _tEnvelope* tEnvelope;
-    
-    void    tEnvelope_init          (tEnvelope* const, Lfloat attack, Lfloat decay, int loop, LEAF* const leaf);
-    void    tEnvelope_initToPool    (tEnvelope* const, Lfloat attack, Lfloat decay, int loop, tMempool* const);
-    void    tEnvelope_free          (tEnvelope* const);
-    
-    Lfloat  tEnvelope_tick          (tEnvelope const);
+    } tEnvelope;
 
-    void    tEnvelope_setAttack     (tEnvelope const, Lfloat attack);
-    void    tEnvelope_setDecay      (tEnvelope const, Lfloat decay);
-    void    tEnvelope_loop          (tEnvelope const, int loop);
-    void    tEnvelope_on            (tEnvelope const, Lfloat velocity);
+    void    tEnvelope_init          (tEnvelope** const, Lfloat attack, Lfloat decay, int loop, LEAF* const leaf);
+    void    tEnvelope_initToPool    (tEnvelope** const, Lfloat attack, Lfloat decay, int loop, tMempool* const);
+    void    tEnvelope_free          (tEnvelope** const);
+    
+    Lfloat  tEnvelope_tick          (tEnvelope* const);
+
+    void    tEnvelope_setAttack     (tEnvelope* const, Lfloat attack);
+    void    tEnvelope_setDecay      (tEnvelope* const, Lfloat decay);
+    void    tEnvelope_loop          (tEnvelope* const, int loop);
+    void    tEnvelope_on            (tEnvelope* const, Lfloat velocity);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -161,20 +159,18 @@ extern "C" {
      
      @} */
     
-    typedef struct _tExpSmooth
+    typedef struct tExpSmooth
     {
         
         tMempool mempool;
         Lfloat factor, oneminusfactor;
         Lfloat curr,dest;
         //Lfloat invSampleRate;
-    } _tExpSmooth;
-    
-    typedef _tExpSmooth* tExpSmooth;
-    
-    void    tExpSmooth_init         (tExpSmooth* const, Lfloat val, Lfloat factor, LEAF* const leaf);
-    void    tExpSmooth_initToPool   (tExpSmooth* const, Lfloat val, Lfloat factor, tMempool* const);
-    void    tExpSmooth_free         (tExpSmooth* const);
+    } tExpSmooth;
+
+    void    tExpSmooth_init         (tExpSmooth** const, Lfloat val, Lfloat factor, LEAF* const leaf);
+    void    tExpSmooth_initToPool   (tExpSmooth** const, Lfloat val, Lfloat factor, tMempool* const);
+    void    tExpSmooth_free         (tExpSmooth** const);
     
 
 #ifdef ITCMRAM
@@ -255,7 +251,7 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
      @} */
     
     /* ADSR */
-    typedef struct _tADSR
+    typedef struct tADSR
     {
         
         tMempool mempool;
@@ -279,23 +275,21 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
         Lfloat baseLeakFactor, leakFactor;
         
         Lfloat invSampleRate;
-    } _tADSR;
+    } tADSR;
+
+    void    tADSR_init    (tADSR** const adsrenv, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, LEAF* const leaf);
+    void    tADSR_initToPool    (tADSR** const adsrenv, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, tMempool* const mp);
+    void    tADSR_free          (tADSR** const);
     
-    typedef _tADSR* tADSR;
-    
-    void    tADSR_init    (tADSR* const adsrenv, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, LEAF* const leaf);
-    void    tADSR_initToPool    (tADSR* const adsrenv, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, tMempool* const mp);
-    void    tADSR_free          (tADSR* const);
-    
-    Lfloat   tADSR_tick          (tADSR const);
-    void    tADSR_setAttack     (tADSR const, Lfloat attack);
-    void    tADSR_setDecay      (tADSR const, Lfloat decay);
-    void    tADSR_setSustain    (tADSR const, Lfloat sustain);
-    void    tADSR_setRelease    (tADSR const, Lfloat release);
-    void    tADSR_setLeakFactor (tADSR const, Lfloat leakFactor);
-    void    tADSR_on            (tADSR const, Lfloat velocity);
-    void    tADSR_off           (tADSR const);
-    void    tADSR_setSampleRate (tADSR const, Lfloat sr);
+    Lfloat   tADSR_tick          (tADSR* const);
+    void    tADSR_setAttack     (tADSR* const, Lfloat attack);
+    void    tADSR_setDecay      (tADSR* const, Lfloat decay);
+    void    tADSR_setSustain    (tADSR* const, Lfloat sustain);
+    void    tADSR_setRelease    (tADSR* const, Lfloat release);
+    void    tADSR_setLeakFactor (tADSR* const, Lfloat leakFactor);
+    void    tADSR_on            (tADSR* const, Lfloat velocity);
+    void    tADSR_off           (tADSR* const);
+    void    tADSR_setSampleRate (tADSR* const, Lfloat sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -357,7 +351,7 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
      
      @} */
     
-    typedef struct _tADSRT
+    typedef struct tADSRT
     {
         
         tMempool mempool;
@@ -381,25 +375,23 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
         Lfloat baseLeakFactor, leakFactor;
         
         Lfloat invSampleRate;
-    } _tADSRT;
+    } tADSRT;
+
+    void    tADSRT_init          (tADSRT** const, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, Lfloat* expBuffer, int bufferSize, LEAF* const leaf);
+    void    tADSRT_initToPool    (tADSRT** const, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, Lfloat* expBuffer, int bufferSize, tMempool* const);
+    void    tADSRT_free          (tADSRT** const);
     
-    typedef _tADSRT* tADSRT;
-    
-    void    tADSRT_init          (tADSRT* const, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, Lfloat* expBuffer, int bufferSize, LEAF* const leaf);
-    void    tADSRT_initToPool    (tADSRT* const, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, Lfloat* expBuffer, int bufferSize, tMempool* const);
-    void    tADSRT_free          (tADSRT* const);
-    
-    Lfloat   tADSRT_tick          (tADSRT const);
-    Lfloat   tADSRT_tickNoInterp  (tADSRT const adsrenv);
-    void    tADSRT_setAttack     (tADSRT const, Lfloat attack);
-    void    tADSRT_setDecay      (tADSRT const, Lfloat decay);
-    void    tADSRT_setSustain    (tADSRT const, Lfloat sustain);
-    void    tADSRT_setRelease    (tADSRT const, Lfloat release);
-    void    tADSRT_setLeakFactor (tADSRT const, Lfloat leakFactor);
-    void    tADSRT_on            (tADSRT const, Lfloat velocity);
-    void    tADSRT_off           (tADSRT const);
-    void 	tADSRT_clear		 (tADSRT const adsrenv);
-    void    tADSRT_setSampleRate (tADSRT const, Lfloat sr);
+    Lfloat   tADSRT_tick          (tADSRT* const);
+    Lfloat   tADSRT_tickNoInterp  (tADSRT* const adsrenv);
+    void    tADSRT_setAttack     (tADSRT* const, Lfloat attack);
+    void    tADSRT_setDecay      (tADSRT* const, Lfloat decay);
+    void    tADSRT_setSustain    (tADSRT* const, Lfloat sustain);
+    void    tADSRT_setRelease    (tADSRT* const, Lfloat release);
+    void    tADSRT_setLeakFactor (tADSRT* const, Lfloat leakFactor);
+    void    tADSRT_on            (tADSRT* const, Lfloat velocity);
+    void    tADSRT_off           (tADSRT* const);
+    void 	tADSRT_clear		 (tADSRT* const adsrenv);
+    void    tADSRT_setSampleRate (tADSRT* const, Lfloat sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -466,7 +458,7 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
         env_ramp
     };
     
-    typedef struct _tADSRS
+    typedef struct tADSRS
     {
         
         tMempool mempool;
@@ -495,23 +487,21 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
         Lfloat oneMinusFactor;
         Lfloat gain;
         Lfloat invSampleRate;
-    } _tADSRS;
+    } tADSRS;
+
+    void    tADSRS_init          (tADSRS** const, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, LEAF* const leaf);
+    void    tADSRS_initToPool    (tADSRS** const, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, tMempool* const);
+    void    tADSRS_free          (tADSRS** const);
     
-    typedef _tADSRS* tADSRS;
-    
-    void    tADSRS_init          (tADSRS* const, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, LEAF* const leaf);
-    void    tADSRS_initToPool    (tADSRS* const, Lfloat attack, Lfloat decay, Lfloat sustain, Lfloat release, tMempool* const);
-    void    tADSRS_free          (tADSRS* const);
-    
-    Lfloat   tADSRS_tick          (tADSRS const);
-    void    tADSRS_setAttack     (tADSRS const, Lfloat attack);
-    void    tADSRS_setDecay      (tADSRS const, Lfloat decay);
-    void    tADSRS_setSustain    (tADSRS const, Lfloat sustain);
-    void    tADSRS_setRelease    (tADSRS const, Lfloat release);
-    void    tADSRS_setLeakFactor (tADSRS const, Lfloat leakFactor);
-    void    tADSRS_on            (tADSRS const, Lfloat velocity);
-    void    tADSRS_off           (tADSRS const);
-    void    tADSRS_setSampleRate (tADSRS const, Lfloat sr);
+    Lfloat   tADSRS_tick          (tADSRS* const);
+    void    tADSRS_setAttack     (tADSRS* const, Lfloat attack);
+    void    tADSRS_setDecay      (tADSRS* const, Lfloat decay);
+    void    tADSRS_setSustain    (tADSRS* const, Lfloat sustain);
+    void    tADSRS_setRelease    (tADSRS* const, Lfloat release);
+    void    tADSRS_setLeakFactor (tADSRS* const, Lfloat leakFactor);
+    void    tADSRS_on            (tADSRS* const, Lfloat velocity);
+    void    tADSRS_off           (tADSRS* const);
+    void    tADSRS_setSampleRate (tADSRS* const, Lfloat sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -557,7 +547,7 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
      
      @} */
     
-    typedef struct _tRamp
+    typedef struct tRamp
     {
         tMempool mempool;
         Lfloat inc;
@@ -568,20 +558,18 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
         Lfloat time;
         Lfloat factor;
         int samples_per_tick;
-    } _tRamp;
+    } tRamp;
+
+    void    tRamp_init          (tRamp** const, Lfloat time, int samplesPerTick, LEAF* const leaf);
+    void    tRamp_initToPool    (tRamp** const, Lfloat time, int samplesPerTick, tMempool* const);
+    void    tRamp_free          (tRamp** const);
     
-    typedef _tRamp* tRamp;
-    
-    void    tRamp_init          (tRamp* const, Lfloat time, int samplesPerTick, LEAF* const leaf);
-    void    tRamp_initToPool    (tRamp* const, Lfloat time, int samplesPerTick, tMempool* const);
-    void    tRamp_free          (tRamp* const);
-    
-    Lfloat   tRamp_tick          (tRamp const);
-    Lfloat   tRamp_sample        (tRamp const);
-    void    tRamp_setTime       (tRamp const, Lfloat time);
-    void    tRamp_setDest       (tRamp const, Lfloat dest);
-    void    tRamp_setVal        (tRamp const, Lfloat val);
-    void    tRamp_setSampleRate (tRamp const, Lfloat sr);
+    Lfloat   tRamp_tick          (tRamp* const);
+    Lfloat   tRamp_sample        (tRamp* const);
+    void    tRamp_setTime       (tRamp* const, Lfloat time);
+    void    tRamp_setDest       (tRamp* const, Lfloat dest);
+    void    tRamp_setVal        (tRamp* const, Lfloat val);
+    void    tRamp_setSampleRate (tRamp* const, Lfloat sr);
     
     /*!
      @defgroup trampupdown tRampUpDown
@@ -629,7 +617,7 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
      
      @} */
     
-    typedef struct _tRampUpDown
+    typedef struct tRampUpDown
     {
         tMempool mempool;
         Lfloat upInc;
@@ -641,21 +629,19 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
         Lfloat upTime;
         Lfloat downTime;
         int samples_per_tick;
-    } _tRampUpDown;
+    } tRampUpDown;
+
+    void    tRampUpDown_init          (tRampUpDown** const, Lfloat upTime, Lfloat downTime, int samplesPerTick, LEAF* const leaf);
+    void    tRampUpDown_initToPool    (tRampUpDown** const, Lfloat upTime, Lfloat downTime, int samplesPerTick, tMempool* const);
+    void    tRampUpDown_free          (tRampUpDown** const);
     
-    typedef _tRampUpDown* tRampUpDown;
-    
-    void    tRampUpDown_init          (tRampUpDown* const, Lfloat upTime, Lfloat downTime, int samplesPerTick, LEAF* const leaf);
-    void    tRampUpDown_initToPool    (tRampUpDown* const, Lfloat upTime, Lfloat downTime, int samplesPerTick, tMempool* const);
-    void    tRampUpDown_free          (tRampUpDown* const);
-    
-    Lfloat   tRampUpDown_tick          (tRampUpDown const);
-    Lfloat   tRampUpDown_sample        (tRampUpDown const);
-    void    tRampUpDown_setUpTime       (tRampUpDown const, Lfloat upTime);
-    void    tRampUpDown_setDownTime       (tRampUpDown const, Lfloat downTime);
-    void    tRampUpDown_setDest       (tRampUpDown const, Lfloat dest);
-    void    tRampUpDown_setVal        (tRampUpDown const, Lfloat val);
-    void    tRampUpDown_setSampleRate (tRampUpDown const, Lfloat sr);
+    Lfloat   tRampUpDown_tick          (tRampUpDown* const);
+    Lfloat   tRampUpDown_sample        (tRampUpDown* const);
+    void    tRampUpDown_setUpTime       (tRampUpDown* const, Lfloat upTime);
+    void    tRampUpDown_setDownTime       (tRampUpDown* const, Lfloat downTime);
+    void    tRampUpDown_setDest       (tRampUpDown* const, Lfloat dest);
+    void    tRampUpDown_setVal        (tRampUpDown* const, Lfloat val);
+    void    tRampUpDown_setSampleRate (tRampUpDown* const, Lfloat sr);
     
     /*!
      @defgroup tslide tSlide
@@ -699,7 +685,7 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
      
      @} */
     
-    typedef struct _tSlide
+    typedef struct tSlide
     {
         tMempool mempool;
         Lfloat prevOut;
@@ -708,19 +694,17 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
         Lfloat invUpSlide;
         Lfloat invDownSlide;
         Lfloat dest;
-    } _tSlide;
+    } tSlide;
+
+    void    tSlide_init          (tSlide** const, Lfloat upSlide, Lfloat downSlide, LEAF* const leaf);
+    void    tSlide_initToPool    (tSlide** const, Lfloat upSlide, Lfloat downSlide, tMempool* const);
+    void    tSlide_free          (tSlide** const);
     
-    typedef _tSlide* tSlide;
-    
-    void    tSlide_init          (tSlide* const, Lfloat upSlide, Lfloat downSlide, LEAF* const leaf);
-    void    tSlide_initToPool    (tSlide* const, Lfloat upSlide, Lfloat downSlide, tMempool* const);
-    void    tSlide_free          (tSlide* const);
-    
-    Lfloat   tSlide_tick         (tSlide const, Lfloat in);
-    Lfloat   tSlide_tickNoInput    (tSlide const sl);
-    void    tSlide_setUpSlide    (tSlide const sl, Lfloat upSlide);
-    void    tSlide_setDownSlide    (tSlide const sl, Lfloat downSlide);
-    void    tSlide_setDest        (tSlide const sl, Lfloat dest);
+    Lfloat   tSlide_tick         (tSlide* const, Lfloat in);
+    Lfloat   tSlide_tickNoInput    (tSlide* const sl);
+    void    tSlide_setUpSlide    (tSlide* const sl, Lfloat upSlide);
+    void    tSlide_setDownSlide    (tSlide* const sl, Lfloat downSlide);
+    void    tSlide_setDest        (tSlide* const sl, Lfloat dest);
     
 #ifdef __cplusplus
 }
