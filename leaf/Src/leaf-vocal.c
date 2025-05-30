@@ -49,7 +49,7 @@ static inline int v_isnan(float f)
     return (u.x << 1) > 0xff000000u;
 }
 
-void glottis_setup_waveform(glottis const glot)
+void glottis_setup_waveform(glottis* const glot)
 {
     Lfloat Rd;
     Lfloat Ra;
@@ -131,11 +131,11 @@ void glottis_init(glottis* const glo, LEAF* const leaf)
 	glottis_initToPool(glo, &leaf->mempool);
 }
 
-void glottis_initToPool(glottis* const glo, tMempool* const mp)
+void glottis_initToPool(glottis** const glo, tMempool* const mp)
 {
 
 	_tMempool* m = *mp;
-	_glottis* glot = *glo = (_glottis*) mpool_calloc(sizeof(_glottis), m);
+	glottis* glot = *glo = (glottis*) mpool_calloc(sizeof(glottis), m);
 	glot->mempool = m;
 	LEAF* leaf = glot->mempool->leaf;
 	glot->mempool = m;
@@ -146,14 +146,14 @@ void glottis_initToPool(glottis* const glo, tMempool* const mp)
     glottis_setup_waveform(glot);
 }
 
-void glottis_free(glottis* const glo)
+void glottis_free(glottis** const glo)
 {
-	_glottis* glot = *glo;
+	glottis* glot = *glo;
 	mpool_free((char*)glot, glot->mempool);
 }
 
 
-Lfloat glottis_compute(glottis const glot)
+Lfloat glottis_compute(glottis* const glot)
 {
 	LEAF* leaf = glot->mempool->leaf;
 	Lfloat out;
@@ -534,7 +534,7 @@ void tract_addTurbulenceNoise(tract const tr)
 {
 	for (int i = 0; i < 2; i++)
 	{
-		Lfloat turbulenceNoise = tr->TnoiseGain * tSVF_tick(tr->fricativeNoiseFilt[i], tNoise_tick(tr->whiteNoise) * 0.20f);
+		Lfloat turbulenceNoise = tr->TnoiseGain * tSVF_tick(&tr->fricativeNoiseFilt[i], tNoise_tick(&tr->whiteNoise) * 0.20f);
 		tract_addTurbulenceNoiseAtPosition(tr, turbulenceNoise, tr->turbuluencePointPosition[i], tr->turbuluencePointDiameter[i]);
 	}
 }
@@ -587,8 +587,8 @@ void tract_compute(tract const tr, Lfloat  in, Lfloat  lambda)
 	}
                   */
 
-    Lfloat UVnoise = tNoise_tick(tr->whiteNoise);
-    UVnoise = tSVF_tick(tr->aspirationNoiseFilt,UVnoise);
+    Lfloat UVnoise = tNoise_tick(&tr->whiteNoise);
+    UVnoise = tSVF_tick(&tr->aspirationNoiseFilt,UVnoise);
 
     in = fast_tanh5((UVnoise * tr->AnoiseGain) + (in * (1.0f - tr->AnoiseGain)));
 
@@ -778,7 +778,7 @@ Lfloat   tVoc_tick         (tVoc const v)
 	vocal_output = 0.0f;
 	lambda1 = ((Lfloat) v->counter) * 0.015625f;// /64
 	lambda2 = (Lfloat) (v->counter + 0.5f) * 0.015625f; //   /64
-	glot = glottis_compute(v->glot);
+	glot = glottis_compute(&v->glot);
 
 	tract_compute(v->tr, glot, lambda1);
 	vocal_output += v->tr->lip_output + v->tr->nose_output;
@@ -925,12 +925,12 @@ Lfloat * tVoc_get_velum_ptr(tVoc const v)
 //0-1
 void tVoc_setAspirationNoiseFilterFreq(tVoc const v, Lfloat freq)
 {
-	tSVF_setFreqFast(v->tr->aspirationNoiseFilt,freq*30.0f + 60.0f);
+	tSVF_setFreqFast(&v->tr->aspirationNoiseFilt,freq*30.0f + 60.0f);
 }
 
 void tVoc_setAspirationNoiseFilterQ(tVoc const v, Lfloat Q)
 {
-	tSVF_setQ(v->tr->aspirationNoiseFilt,Q*0.49f + 0.5f);
+	tSVF_setQ(&v->tr->aspirationNoiseFilt,Q*0.49f + 0.5f);
 }
 
 

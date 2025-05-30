@@ -1044,17 +1044,17 @@ void tSOLAD_ioSamples(tSOLAD* const w, Lfloat* in, Lfloat* out, int blocksize)
     
     if(!i)
     {
-        Lfloat sample = tHighpass_tick(w->hp, in[0]);
+        Lfloat sample = tHighpass_tick(&w->hp, in[0]);
         w->delaybuf[0] = sample;
         w->delaybuf[w->loopSize] = sample;   // copy one sample for interpolation
         n--;
         i++;
         in++;
     }
-    while(n--) w->delaybuf[i++] = tHighpass_tick(w->hp, *in++);    // copy one input block to delay buffer
+    while(n--) w->delaybuf[i++] = tHighpass_tick(&w->hp, *in++);    // copy one input block to delay buffer
     
-    tAttackDetection_setBlocksize(w->ad, n);
-    if (tAttackDetection_detect(w->ad, in))
+    tAttackDetection_setBlocksize(&w->ad, n);
+    if (tAttackDetection_detect(&w->ad, in))
     {
         tSOLAD_setReadLag(w, w->blocksize);
     }
@@ -1367,7 +1367,7 @@ void tPitchShift_initToPool (tPitchShift** const psr, tDualPitchDetector* const 
     ps->sampleRate = leaf->sampleRate;
     
     tSOLAD_initToPool(&ps->sola, pow(2.0, ceil(log2(ps->bufSize * 2.0))), mp);
-    tSOLAD_setPitchFactor(ps->sola, DEFPITCHRATIO);
+    tSOLAD_setPitchFactor(&ps->sola, DEFPITCHRATIO);
 }
 
 void tPitchShift_free (tPitchShift** const psr)
@@ -1380,16 +1380,16 @@ void tPitchShift_free (tPitchShift** const psr)
 
 void tPitchShift_shiftBy (tPitchShift* const ps, Lfloat factor, Lfloat* in, Lfloat* out)
 {
-    Lfloat detected = tDualPitchDetector_getFrequency(ps->pd);
-    Lfloat periodicity = tDualPitchDetector_getPeriodicity(ps->pd);
+    Lfloat detected = tDualPitchDetector_getFrequency(&ps->pd);
+    Lfloat periodicity = tDualPitchDetector_getPeriodicity(&ps->pd);
     if (detected > 0.0f && periodicity > ps->pickiness)
     {
         Lfloat period = ps->sampleRate / detected;
-        tSOLAD_setPeriod(ps->sola, period);
-        tSOLAD_setPitchFactor(ps->sola, factor);
+        tSOLAD_setPeriod(&ps->sola, period);
+        tSOLAD_setPitchFactor(&ps->sola, factor);
     }
         
-    tSOLAD_ioSamples(ps->sola, in, out, ps->bufSize);
+    tSOLAD_ioSamples(&ps->sola, in, out, ps->bufSize);
 }
 
 void    tPitchShift_shiftTo (tPitchShift* const ps, Lfloat freq, Lfloat* in, Lfloat* out)
@@ -1611,7 +1611,7 @@ void tRetune_free (tRetune** const rt)
 
 Lfloat* tRetune_tick(tRetune* const r, Lfloat sample)
 {
-    tDualPitchDetector_tick(*r->dp, sample);
+    tDualPitchDetector_tick(&*r->dp, sample);
     
     r->inBuffer[r->index] = sample;
     for (int i = 0; i < r->numVoices; ++i)
@@ -1641,7 +1641,7 @@ void tRetune_setMode (tRetune* const r, int mode)
 
 void tRetune_setPickiness (tRetune* const r, Lfloat p)
 {
-    tDualPitchDetector_setPeriodicityThreshold(*r->dp, p);
+    tDualPitchDetector_setPeriodicityThreshold(&*r->dp, p);
 }
 //currently broken
 void tRetune_setNumVoices(tRetune* const r, int numVoices)

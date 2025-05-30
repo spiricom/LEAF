@@ -467,7 +467,7 @@ void    tSNAC_initToPool    (tSNAC** const snac, int overlaparg, tMempool* const
     s->spectrumbuf = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (SNAC_FRAME_SIZE / 2), m);
     s->biasbuf = (Lfloat*) mpool_calloc(sizeof(Lfloat) * SNAC_FRAME_SIZE, m);
     
-    snac_biasbuf(s);
+    snac_biasbuf(*s);
     tSNAC_setOverlap(s, overlaparg);
 }
 
@@ -492,7 +492,7 @@ void tSNAC_ioSamples (tSNAC* const s, Lfloat *in, int size)
 //    Lfloat *processbuf = s->processbuf;
     
     // call analysis function when it is time
-    if(!(timeindex & (s->framesize / s->overlap - 1))) snac_analyzeframe(s);
+    if(!(timeindex & (s->framesize / s->overlap - 1))) snac_analyzeframe(*s);
     
     while(size--)
     {
@@ -563,10 +563,10 @@ static void snac_analyzeframe(tSNAC* const s)
     for(n=framesize; n<(framesize<<1); n++) processbuf[n] = 0.;
     
     // call analysis procedures
-    snac_autocorrelation(s);
-    snac_normalize(s);
-    snac_pickpeak(s);
-    snac_periodandfidelity(s);
+    snac_autocorrelation(*s);
+    snac_normalize(*s);
+    snac_pickpeak(*s);
+    snac_periodandfidelity(*s);
 }
 
 static void snac_autocorrelation(tSNAC* const s)
@@ -645,7 +645,7 @@ static void snac_periodandfidelity (tSNAC* const s)
     {
         periodlength = (Lfloat)s->periodindex +
         interpolate3phase(s->processbuf, s->periodindex);
-        if(periodlength < 8) periodlength = snac_spectralpeak(s, periodlength);
+        if(periodlength < 8) periodlength = snac_spectralpeak(*s, periodlength);
         s->periodlength = periodlength;
         s->fidelity = interpolate3max(s->processbuf, s->periodindex);
     }
@@ -917,14 +917,14 @@ void    tZeroCrossingInfo_updatePeak(tZeroCrossingInfo* const z, Lfloat s, int p
 
 int     tZeroCrossingInfo_period(tZeroCrossingInfo* const z, tZeroCrossingInfo* const next)
 {
-    tZeroCrossingInfo* n = *next;
+    tZeroCrossingInfo* n = &*next;
     
     return n->_leading_edge - z->_leading_edge;
 }
 
 Lfloat   tZeroCrossingInfo_fractionalPeriod(tZeroCrossingInfo* const z, tZeroCrossingInfo* const next)
 {
-    tZeroCrossingInfo* n = *next;
+    tZeroCrossingInfo* n = &*next;
     
     // Get the start edge
     Lfloat prev1 = z->_before_crossing;
@@ -1089,14 +1089,14 @@ static inline void update_state(tZeroCrossingCollector* const z, Lfloat s)
 {
     if (z->_ready)
     {
-        shift(z, z->_window_size / 2);
+        shift(*z, z->_window_size / 2);
         z->_ready = 0;
         z->_peak = z->_peak_update;
         z->_peak_update = 0.0f;
     }
     
     if (z->_num_edges >= (int)z->_size)
-        reset(z);
+        reset(*z);
     
     if (s > 0.0f)
     {
@@ -1455,8 +1455,8 @@ int   tPeriodDetector_tick    (tPeriodDetector* const p, Lfloat s)
     
     if (tZeroCrossingCollector_isReady(&p->_zc))
     {
-        set_bitstream(p);
-        autocorrelate(p);
+        set_bitstream(*p);
+        autocorrelate(*p);
         return 1;
     }
     return 0;
@@ -1795,15 +1795,15 @@ void    tPitchDetector_free (tPitchDetector** const detector)
 
 int     tPitchDetector_tick    (tPitchDetector* const p, Lfloat s)
 {
-    tPeriodDetector_tick(p->_pd, s);
+    tPeriodDetector_tick(&p->_pd, s);
     
-    if (tPeriodDetector_isReset(p->_pd))
+    if (tPeriodDetector_isReset(&p->_pd))
     {
         p->_current.frequency = 0.0f;
         p->_current.periodicity = 0.0f;
     }
     
-    int ready = tPeriodDetector_isReady(p->_pd);
+    int ready = tPeriodDetector_isReady(&p->_pd);
     if (ready)
     {
         Lfloat periodicity = p->_pd->_fundamental.periodicity;
@@ -1819,7 +1819,7 @@ int     tPitchDetector_tick    (tPitchDetector* const p, Lfloat s)
         {
             if (periodicity >= ONSET_PERIODICITY)
             {
-                Lfloat f = calculate_frequency(p);
+                Lfloat f = calculate_frequency(*p);
                 if (f > 0.0f)
                 {
                     p->_current.frequency = f;
@@ -1832,11 +1832,11 @@ int     tPitchDetector_tick    (tPitchDetector* const p, Lfloat s)
         {
             if (periodicity < MIN_PERIODICITY)
                 p->_frames_after_shift = 0;
-            Lfloat f = calculate_frequency(p);
+            Lfloat f = calculate_frequency(*p);
             if (f > 0.0f)
             {
                 _pitch_info info = { f, periodicity };
-                bias(p, info);
+                bias(*p, info);
             }
         }
     }
