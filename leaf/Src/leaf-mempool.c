@@ -306,13 +306,15 @@ char* leaf_calloc(LEAF* const leaf, size_t size)
 
 void mpool_free(char* ptr, _tMempool* pool)
 {
-    pool->leaf->freeCount++;
+   if (pool != NULL)
+      pool->leaf->freeCount++;
 #if LEAF_DEBUG
     DBG("free");
 #endif
 #if LEAF_USE_DYNAMIC_ALLOCATION
     free(ptr);
 #else
+
     //if (ptr < pool->mpool || ptr >= pool->mpool + pool->msize)
     // Get the node at the freed space
     mpool_node_t* freed_node = (mpool_node_t*) (ptr - pool->leaf->header_size);
