@@ -430,7 +430,7 @@ extern "C" {
     int     tSimplePoly_getPitchAndCheckActive  (tSimplePoly const polyh, uint8_t voice);
     int     tSimplePoly_getVelocity             (tSimplePoly const poly, uint8_t voice);
     int     tSimplePoly_isOn                    (tSimplePoly const poly, uint8_t voice);
-
+    int tSimplePoly_allNotesOff(tSimplePoly const poly);
     //==============================================================================
     
 #ifdef __cplusplus
