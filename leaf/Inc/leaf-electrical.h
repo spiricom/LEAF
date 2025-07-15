@@ -32,7 +32,54 @@ extern "C" {
      @defgroup twdf tWDF
      @ingroup electrical
      @brief Wave digital filter component.
-     @{
+
+    The tWDF represents any WDF element: resistors, capacitors, inductors, adaptors, sources, nonlinear diodes
+
+     Example
+     @code{.c}
+     //initialize
+     tWDF* resistor = NULL;
+     tWDF_init(&resistor,
+               Resistor,      //component type
+               1000.0f,       //resistance in ohms
+               NULL, NULL,    //children (none)
+               leaf);
+
+     tWDF* capacitor = NULL;
+     tWDF_init(&capacitor,
+               Capacitor,     //component type
+               1e-6f,         //capacitance in farads
+               NULL, NULL,    //children (none)
+               leaf);
+
+     //Series adaptor combining R and C
+     tWDF* series = NULL;
+     tWDF_init(&series,
+               SeriesAdaptor, //adaptor type
+               0.0f,          //value unused
+               resistor,      //left child (R)
+               capacitor,     //right child (C)
+               leaf);
+
+     //audio loop
+     for (int i = 0; i < numSamples; ++i) {
+         float vin = inputSamples[i];
+         float wave = tWDF_tick(series,
+                                vin,
+                                series,   //outputPoint is the root
+                                0);       //paramsChanged = false
+         float vout = tWDF_getVoltage(series);
+         outputSamples[i] = vout;
+     }
+
+     //tweak resistor value
+     tWDF_setValue(resistor, 2000.0f);
+
+     //when done
+     tWDF_free(&series);
+     tWDF_free(&resistor);
+     tWDF_free(&capacitor);
+     @endcode
      
      @fn void    tWDF_init(tWDF** const, WDFComponentType type, Lfloat value, tWDF* const rL, tWDF* const rR, LEAF* const leaf)
      @brief Initialize a tWDF to the default mempool of a LEAF instance.
