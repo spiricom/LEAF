@@ -37,7 +37,25 @@ extern "C" {
      @defgroup tenvelopefollower tEnvelopeFollower
      @ingroup analysis
      @brief Detects and returns the basic envelope of incoming audio data.
-     @{
+
+    The envelope follower watches incoming samples and re-opens envelope to threshold limit whenever sample exceeds limit.
+    Between sample attacks, the envelope value decays each tick by the delay coefficient.
+
+    Example
+    @code{.c}
+    //initialize
+    tEnvelopeFollower* env = NULL;
+    tEnvelopeFollower_init(&env,
+                           0.1f,        //attack threshold
+                           1.0f,        //decay coefficient
+                           leaf;)
+
+    //audio loop
+    float envVal = tEnvelopeFollower_tick(env, inputSample);
+
+    //when done
+    tEnvelopeFollower_free(&env);
+    @endcode
      
      @fn void    tEnvelopeFollower_init(tEnvelopeFollower** const follower, Lfloat attackThreshold, Lfloat decayCoeff, LEAF* const leaf)
      @brief Initialize a tEnvelopeFollower to the default mempool of a LEAF instance.
@@ -98,7 +116,33 @@ extern "C" {
      @defgroup tzerocrossingcounter tZeroCrossingCounter
      @ingroup analysis
      @brief Count the amount of zero crossings within a window of the input audio data
-     @{
+
+    The zero crossing counter keeps a circular buffer of the most recent samples, up to 'maxWindowSize.
+    On each tick it:
+    1. Inserts the new sample into the buffer, overwriting the current oldest sample
+    2. Checks if the new sample and what it replaced have zero crossing
+    3. Updates internal counter
+    4. Returns the count normalized by window size, from [0.0 to 1.0]
+    Higher counts indicate rapid sign changes
+    Lower counts indicate steady signals
+
+    Example
+    @code{.c}
+    //initialize
+    tZeroCrossingCounter* zc = NULL;
+    tZeroCrossingCounter_init(&zc,
+                              1024,     //max window size
+                              leaf);
+
+    //audio loop
+    float r = tZeroCrossingCounter_tick(zc, inputSample);       //r is the fraction of zero crossings in the last window
+
+    //changing window size
+    tZeroCrossingCounter_setWindowSize(zc, 512);
+
+    /when done
+    tZeroCrossingCounter_free(&zc);
+    @endcode
      
      @fn void    tZeroCrossingCounter_init(tZeroCrossingCounter** const counter, int maxWindowSize, LEAF* const leaf)
      @brief Initialize a tZeroCrossingCounter to the default mempool of a LEAF instance.
@@ -158,7 +202,34 @@ extern "C" {
      @defgroup tpowerfollower tPowerFollower
      @ingroup analysis
      @brief Measure and follow the power of an input signal using an exponential moving average for smoothing.
-     @{
+
+    The power follower calculates a estimate of signal power by:
+    1. Squaring or taking the absolute value of each incoming sample to get its instantaneous power
+    2. Updating its internal state
+    3. Returning the updated power value
+    A higher value gives faster response and less smoothing
+    A lower value gives slower response and more smoothing
+
+     Example
+     @code{.c}
+     //initialize
+     tPowerFollower+ pf = NULL;
+     tPowerFollower_init(&pf,
+                         0.4,       //smoothing factor
+                         leaf);
+
+    //audio loop
+    float power = tPowerFollower_tick(pf, inputSample);
+
+    //getting last power directly
+    float lPower = tPowerFollower_getPower(pf);
+
+    //adjust smoothing factor
+    tPowerFollower_setFactor(pf, 0.2f);
+
+    /when done
+    tPowerFollower_free(&pdf);
+    @endcode
      
      @fn void    tPowerFollower_init(tPowerFollower** const, Lfloat factor, LEAF* const leaf)
      @brief Initialize a tPowerFollower to the default mempool of a LEAF instance.
@@ -219,7 +290,35 @@ extern "C" {
      @defgroup tenvpd tEnvPD
      @ingroup analysis
      @brief ENV~ from PD, modified for LEAF
-     @{
+
+    The ENV algorithm measures the envelope by:
+    1. Summing the squared or absolute values of samples in a sliding window of size
+    2. Calculating average over last 'windowSize' samples every 'hopSize' samples
+    3. Outputting one envelope value per hop
+    4. Using 'blockSize' to allocate extra buffer space for overlapping and vectorized DSP operations
+
+     Example
+     @code{.c}
+     //initialize
+     tEnvPD* env = NULL;
+     tEnvPD_init(&env,
+                 1024,      //number of samples per analysis frame
+                 256,       // output interval in samples
+                 512,       // internal block allocation
+                 leaf);
+
+    //audio loop, either:
+    //process one block at a time
+    float envelopeValue;
+    for (int i = 0; i < hopSize; ++i){
+        envelopeValue = tEnvPD_tick(env);
+    }
+    //or process entire block buffer simultaneously
+    TEnvPD_processBlock(env, inputBuffer);
+
+    //when done
+    tEnvPD_free(&env);
+    @endcode
      
      @fn void    tEnvPD_init(tEnvPD** const, int windowSize, int hopSize, int blockSize, LEAF* const leaf)
      @brief Initialize a tEnvPD to the default mempool of a LEAF instance.
@@ -288,7 +387,41 @@ extern "C" {
      @defgroup tattackdetection tAttackDetection
      @ingroup analysis
      @brief Detect attacks in an input signal
-     @{
+
+    The attack detector works on a fixed size block of samples it:
+    1. Computes the RMS amplitude of each incoming block of specified length
+    2. Calculates the difference between the current and previous block's RMS
+    3. If that difference exceeds set threshold, an attack is flagged
+    4. Returns the sample index within the block where the largest transient occured
+    A shorter attack (ms) makes the detected respond quicker to fast transients
+    A longer release (ms) time smooths out successive detections
+
+    Example
+    @code{.c}
+    //initialize
+    tAttackDetection* ad = NULL;
+    tAttackDetection_init(&ad,
+                          1024,     //block size in samples
+                          10,       //attack time in ms
+                          50,       //release time in ms
+                          leaf);
+
+    //audio block
+    float block[1024];
+    //detect largest attack in the block
+    int id = tAttackDetection_detect(ad, block);
+    if (id >= 0){
+        ...
+    }
+
+    //tweak parameters
+    tAttackDetection_setThreshold(ad, 5.0f);        //change detection threshold
+    tAttackDetection_setAttack(ad, 3);              //change attack response (ms)
+    tAttackDetection_setRelease(ad, 100);           //change release (ms)
+
+    //when done
+    tAttackDetection_free(&ad);
+    @endcode
      
      @fn void    tAttackDetection_init(tAttackDetection** const, int blocksize, int atk, int rel, LEAF* const leaf)
      @brief Initialize a tAttackDetection to the default mempool of a LEAF instance.
@@ -389,7 +522,42 @@ extern "C" {
      @defgroup tsnac tSNAC
      @ingroup analysis
      @brief Component of period detection algorithm from Katja Vetters http://www.katjaas.nl/helmholtz/helmholtz.html
-     @{
+
+    The SNAC algorithm estimates signal periodicity by:
+    1. Splitting each analysis frame of set samples into two overlapping segments separated by 'overlap' samples
+    2. Computing the dot product between these segments
+    3. Applying bias factor and thresholding to ignore low level noise
+    4. Scanning for lag with maximum correlation above the noise floor
+    5. Storing the detected period length in samples and fidelity (confidence) score (0.0-1.0)
+
+    Example
+    @code{.c}
+    //initialize
+    tSNAC* snac = NULL;
+    tSNAC_init(&snac,
+               4,       //overlap in samples
+               leaf);
+
+    //audio loop
+    Lfloat buffer[SNAC_FRAME_SIZE];
+    //fill buffer with audio
+    tSNAC_ioSamples(snac, buffer, SNAC_FRAME_SIZE);
+    //retrieve the detected period and fidelity
+    Lfloat periodSamples = tSNAC_getPeriod(snac);
+    Lfloat fidelity = tSNAC_getFidelity(snac);
+    if (fidelity > 0.8f){
+        float freq = sampleRate / periodSamples;
+        ...
+    }
+
+    //tweak parameters
+    tSNAC_setOverlap(snac, 2);      //change overlap
+    tSNAC_setBias(snac, 0.1f);      //change bias factor
+    tSNAC_setMinRMS(snac, 0.01f);   //change minimum RMS
+
+    //when done
+    tSNAC_free(&snac);
+    @endcode
      
      @fn void    tSNAC_init(tSNAC** const, int overlaparg, LEAF* const leaf)
      @brief Initialize a tSNAC to the default mempool of a LEAF instance.
@@ -484,7 +652,35 @@ extern "C" {
      @defgroup tperioddetection tPeriodDetection
      @ingroup analysis
      @brief Period detection algorithm from Katja Vetters http://www.katjaas.nl/helmholtz/helmholtz.html
-     @{
+
+     Example
+     @code{.c}
+     //initalize
+     tPeriodDetection* pd = NULL;
+     tPeriodDetection_init(&pd,
+                           inputBuffer,     //pointer to float array of 'bufSize'
+                           1024,            //buffer size in samples
+                           512,             //analysis frame size
+                           leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i){
+        float period = tPeriodDetection_tick(pd, inputSamples[i]);
+        if (period > 0.0f){
+            float freq = sampleRate / period;
+        }
+    }
+
+    //tweak parameters
+    tPeriodDetection_setHopSize(pd, 128);
+    tPeriodDetection_setWindowSize(pd, 512);
+    tPeriodDetection_setFidelityThreshold(pd, 0.8f);
+    tPeriodDetection_setAlpha(pd, 0.7f);
+    tPeriodDetection_setTolerance(pd, 0.1f);
+
+    //when done
+    tPeriodDetection_free(&pd);
+    @endcode
 
      @fn void    tPeriodDetection_init(tPeriodDetection** const, Lfloat* in, Lfloat* out, int bufSize, int frameSize, LEAF* const leaf)
      @brief Initialize a tPeriodDetection to the default mempool of a LEAF instance.
@@ -952,7 +1148,41 @@ extern "C" {
      @defgroup tdualpitchdetector tDualPitchDetector
      @ingroup analysis
      @brief Combined pitch detection algorithm using both Joel de Guzman's Q Audio DSP Library and Katya Vetters algorithms
-     @{
+
+     The dual pitch detector feeds each sample into:
+     1. A tPeriodDetection stage for coarse, low frequency estimates
+     2. A tPitchDetector stage for refined, high frequency and harmonic tracking
+     It then adjusts both estimates by averaging and applies hysteresis and periodicity thresholding to produce a stable pitch
+
+    Example
+    @code{.c}
+    //initialize
+    tDualPitchDetector* dpd = NULL;
+    tDualPitchDetector_init(&dpd,
+                            50.0f,      //lowest frequency
+                            2000.0f,    //highest frequency
+                            inputBuf,
+                            bufSize,
+                            leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i){
+        int ready = tDualPitchDetector_tick(dpd, inputSample[i]);
+        if (ready){
+            float freq = tDualPitchDetector_getFrequency(dpd);
+            float conf = tDualPitchDetector_getPeriodicity(dpd);
+            ...
+        }
+    }
+
+    //tweak parameters
+    tDualPitchDetector_setHysteresis(dpd, -40.0f);        // hysteresis in dB
+    tDualPitchDetector_setPeriodicityThreshold(dpd, 0.9f);// minimum periodicity
+    tDualPitchDetector_setSampleRate(dpd, sampleRate);    // update sample rate
+
+    //when done
+    tDualPitchDetector_free(&dpd);
+    @endcode
      
      @fn void tDualPitchDetector_init(tDualPitchDetector** const detector, Lfloat lowestFreq, Lfloat highestFreq, Lfloat* inBuffer, int bufSize, LEAF* const leaf)
      @brief Initialize a tDualPitchDetector to the default mempool of a LEAF instance.
