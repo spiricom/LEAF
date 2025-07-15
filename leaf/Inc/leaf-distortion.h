@@ -34,7 +34,31 @@ extern "C" {
      @defgroup tsamplereducer tSampleReducer
      @ingroup distortion
      @brief Sample rate reducer.
-     @{
+
+     The SampleReducer outputs each incoming sample and then “holds” it for a number of subsequent calls
+    determined by the reduction ratio (0.0–1.0):
+    A ratio of 1.0 means no reduction (pass-through)
+    A ratio of 0.5 outputs the new input only every two calls, holding the previous value in between
+    Lower ratios produce more aggressive sample-rate reduction and the bitcrush effect
+
+    Example
+    @code{.c}
+    // initialize
+    tSampleReducer* sr = NULL;
+    tSampleReducer_init(&sr, leaf);
+
+    // set when to output new sample by calls
+    tSampleReducer_setRatio(sr, 0.25f);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float out = tSampleReducer_tick(sr, inputSamples[i]);
+        outputSamples[i] = out;
+    }
+
+    //when done
+    tSampleReducer_free(&sr);
+    @endcode
      
      @fn void    tSampleReducer_init(tSampleReducer** const, LEAF* const leaf)
      @brief Initialize a tSampleReducer to the default mempool of a LEAF instance.
@@ -81,7 +105,36 @@ extern "C" {
      @defgroup toversampler tOversampler
      @ingroup distortion
      @brief Oversampler.
-     @{
+
+    The Oversampler upsamples each input sample by integer `ratio`,
+    applies a user‐supplied effect at the higher rate, then downsamples back to the
+    original rate.  This reduces aliasing and improves quality for nonlinear processing
+
+    Example
+    @code{.c}
+    //initialize
+    tOversampler* os = NULL;
+    tOversampler_init(&os,
+                      8,    // filter order (taps per phase)
+                      1,    // extraQuality flag
+                      leaf);
+
+    //set oversampling
+    tOversampler_setRatio(os, 4);
+
+    //audio loop
+    float oversampleBuf[4];
+    for (int i = 0; i < numSamples; ++i) {
+        float out = tOversampler_tick(os,
+                                      inputSamples[i],
+                                      oversampleBuf,
+                                      myDistortion);
+        outputSamples[i] = out;
+    }
+
+    //when done
+    tOversampler_free(&os);
+    @endcode
      
      @fn void    tOversampler_init(tOversampler** const, int order, int extraQuality, LEAF* const leaf)
      @brief Initialize a tOversampler to the default mempool of a LEAF instance.
@@ -151,7 +204,30 @@ extern "C" {
  @defgroup tWavefolder tWavefolder
  @ingroup distortion
  @brief more efficient and simpler wavefolder.
- @{
+
+ Example
+@code{.c}
+//initialize
+tWavefolder* wf = NULL;
+tWavefolder_init(&wf,
+                 1.0f,   // feed-forward gain
+                 0.5f,   // feedback gain
+                 0.8f,   // fold depth limit
+                 leaf);
+
+//audio loop
+for (int i = 0; i < numSamples; ++i) {
+     float out = tWavefolder_tick(wf, inputSamples[i]);
+     outputSamples[i] = out;
+}
+
+//tweak parameters
+tWavefolder_setGain(wf, 2.0f);
+tWavefolder_setOffset(wf, 0.1f);
+
+//when done
+tWavefolder_free(&wf);
+@endcode
  
  @fn void    tWavefolder_init(tWavefolder** const, LEAF* const leaf)
  @brief Initialize a tWavefolder to the default mempool of a LEAF instance.
@@ -207,7 +283,22 @@ void    tWavefolder_setGain      (tWavefolder* const wf, Lfloat gain);
      @defgroup tlockhartwavefolder tLockhartWavefolder
      @ingroup distortion
      @brief Analog model wavefolder.
-     @{
+
+    Example
+    @code{.c}
+    // initialize
+    tLockhartWavefolder* lfw = NULL;
+    tLockhartWavefolder_init(&lfw, leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float out = tLockhartWavefolder_tick(lfw, inputSamples[i]);
+        outputSamples[i] = out;
+    }
+
+    //when done
+    tLockhartWavefolder_free(&lfw);
+    @endcode
      
      @fn void    tLockhartWavefolder_init(tLockhartWavefolder** const, LEAF* const leaf)
      @brief Initialize a tLockhartWavefolder to the default mempool of a LEAF instance.
@@ -273,7 +364,28 @@ void    tWavefolder_setGain      (tWavefolder* const wf, Lfloat gain);
      @defgroup tcrusher tCrusher
      @ingroup distortion
      @brief Bit depth and sampler rate degrader.
-     @{
+
+    Example
+    @code{.c}
+    // initialize
+    tCrusher* cb = NULL;
+    tCrusher_init(&cb, leaf);
+
+    // configure bitcrush
+    tCrusher_setOperation(cb, 4.0f);
+    tCrusher_setQuality(cb, 0.5f);
+    tCrusher_setRound(cb, 0.1f);
+    tCrusher_setSamplingRatio(cb, 0.25f);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float out = tCrusher_tick(cb, inputSamples[i]);
+        outputSamples[i] = out;
+    }
+
+    //when done
+    tCrusher_free(&cb);
+    @endcode
      
      @fn void    tCrusher_init(tCrusher** const, LEAF* const leaf)
      @brief Initialize a tCrusher to the default mempool of a LEAF instance.
