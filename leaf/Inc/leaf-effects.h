@@ -28,7 +28,38 @@ extern "C" {
      @defgroup ttalkbox tTalkbox
      @ingroup effects
      @brief High resolution vocoder from mda using Levinson-Durbin LPC algorithm.
-     @{
+
+     The talkbox splits the input into carrier and modulator signals, computes LPC coefficients via the Levinson-Durbin algorithm on hte modulator,
+     and filters the carrier through that spectral envvelope to produce the "talking instrument" effect
+
+     Example
+    @code{.c}
+    //initialize
+    tTalkbox* tb = NULL;
+    tTalkbox_init(&tb,
+                  1024,   //analysis buffer size (samples)
+                  leaf);
+
+    //aydio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float vocoded = tTalkbox_tick(tb,
+                                      synthSamples[i],   // carrier input
+                                       voiceSamples[i]);  //modulator input
+            outputSamples[i] = vocoded;
+        }
+
+    // freeze the LPC envelope to hold a vowel tone
+    tTalkbox_setFreeze(tb, 1.0f);
+
+    // change LPC warp factor for formant shifting
+    tTalkbox_setWarpFactor(tb, 0.8f);
+
+    // resume live tracking
+    tTalkbox_setFreeze(tb, 0.0f);
+
+    //when done
+    tTalkbox_free(&tb);
+    @endcode
      
      @fn void    tTalkbox_init(tTalkbox** const, int bufsize, LEAF* const leaf)
      @brief Initialize a tTalkbox to the default mempool of a LEAF instance.
@@ -148,7 +179,32 @@ extern "C" {
      @defgroup ttalkboxLfloat tTalkboxLfloat
      @ingroup effects
      @brief High resolution vocoder from mda using Levinson-Durbin LPC algorithm.
-     @{
+
+    Example
+    @code{.c}
+    tTalkboxLfloat* tb = NULL;
+    tTalkboxLfloat_init(&tb,
+                        1024,       //analysis buffer size
+                        leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i){
+        float out = tTalkboxLfloat_tick(tb,
+                                        synthSamples[i],
+                                        voiceSamples[i]);
+        outputSamples[i] = out;
+    }
+
+    //freezing/resuming the envelope
+    tTalkboxLfloat_setFreeze(tb, 1);
+    tTalkboxLfloat_setFreeze(tb, 0);
+
+    //shifting formats
+    tTalkboxLfloat_setWarpFactor(tb, 0.8f);
+
+    //when done
+    tTalkboxLfloat_free(&tb);
+    @endcode
      
      @fn void    tTalkboxLfloat_init(tTalkboxLfloat** const, int bufsize, LEAF* const leaf)
      @brief Initialize a tTalkboxLfloat to the default mempool of a LEAF instance.
@@ -265,7 +321,33 @@ extern "C" {
      @defgroup tvocoder tVocoder
      @ingroup effects
      @brief Channel vocoder from mda.
-     @{
+
+     Example
+    @code{.c}
+    //initialize
+    tVocoder* voc = NULL;
+    tVocoder_init(&voc, leaf);
+
+    // in your audio loop:
+    for (int i = 0; i < numSamples; ++i) {
+        float vocoded = tVocoder_tick(voc,
+                                    carrierSamples[i],  //carrier input
+                                    voiceSamples[i]);   //modulator input
+        outputSamples[i] = vocoded;
+    }
+
+    // suspend envelope tracking (holds current filters)
+    tVocoder_suspend(voc);
+
+    // resume live envelope updates:
+    tVocoder_update(voc);
+
+    //adjust sample rate for correct band timing
+    tVocoder_setSampleRate(voc, sampleRate);
+
+    //when done:
+    tVocoder_free(&voc);
+    @endcode
      
      @fn void    tVocoder_init(tVocoder** const, LEAF* const leaf)
      @brief Initialize a tVocoder to the default mempool of a LEAF instance.
@@ -333,7 +415,35 @@ extern "C" {
      @defgroup trosenbergglottalpulse tRosenbergGlottalPulse
      @ingroup effects
      @brief Rosenberg glottal pulse approximator.
-     @{
+
+    The Rosenberg glottal pulse produced a simplified glottal excitation model by:
+     1. Advancing a phase accumulator at a user set frequency
+     2. Generating an opening slope over the first 'openLength' part of the cycle
+     3. Genearting a closing slope over the next 'pulseLength' portion
+     4. Holding zero for the remainder of the cycle
+
+     Example
+     @code{.c}
+     //initialize
+     tRosebBergGlottalPulse* gp = NULL;
+     tRosenbergPulse_init(&gp, leaf);
+
+     //set frequency of glottal pulse
+     tRosenbergGlottalPulse_setFreq(gp, 120.0f);
+     //set opening and close of cycle
+     tRosenbergGlottalPulse_setOpenLengthAndPulseLength(gp, 0.5, 0.6f);
+     //set sample rate for correct timing
+     tRosenbergGlottalPulse_setSampleRate(gp, sampleRate);
+
+     //audio loop
+     for (int i = 0; i < sampleRate; ++i){
+        float pulse = tRosenbergGlottalPulse_tick(gp);
+        output[i] = pulse
+    }
+
+    //when done
+    tRosenbergGlottalPulse_free(&gp);
+    @endcode
      
      @fn void    tRosenbergGlottalPulse_init(tRosenbergGlottalPulse** const, LEAF* const leaf)
      @brief Initialize a tRosenbergGlottalPulse to the default mempool of a LEAF instance.
@@ -407,7 +517,44 @@ extern "C" {
      @defgroup tsolad tSOLAD
      @ingroup effects
      @brief pitch shifting algorithm that underlies tRetune etc from Katja Vetters http://www.katjaas.nl/pitchshiftlowlatency/pitchshiftlowlatency.html
-     @{
+
+    The SOLAD algorithm performs real-time pitch shifting by
+    1. Writing incoming blocks into a circular delay buffer (`loopSize` samples)
+    2. Reading from the buffer with a lag adjusted by `pitchFactor` to change pitch
+    3. Crossfading between successive read pointers over `xfadeLength` samples to avoid clicks
+    4. Optionally using a periodicity estimate (`period`) and forced `readLag` to stabilize the shift
+
+    Example
+    @code{.c}
+    //initialize
+    tSOLAD* solad = NULL;
+    tSOLAD_init(&solad,
+                4096,   //loopSize (power of two)
+                leaf);
+
+    //2× speed-up (one octave up)
+    tSOLAD_setPitchFactor(solad, 2.0f);
+    //lock read lag for smoother output
+    tSOLAD_setReadLag(solad, 512.0f);
+    // provide an estimated period for transients (in samples)
+    tSOLAD_setPeriod(solad, 64.0f);
+
+    const int blockSize = 128;
+    float inBlock[blockSize], outBlock[blockSize];
+    while (hasAudio()) {
+        fillInput(inBlock, blockSize);
+        tSOLAD_ioSamples(solad, inBlock, outBlock, blockSize);
+         playOutput(outBlock, blockSize);
+    }
+
+    // reset internal state if needed
+    tSOLAD_resetState(solad);
+    // update sample rate for internal filters
+    tSOLAD_setSampleRate(solad, sampleRate);
+
+    //when done
+    tSOLAD_free(&solad);
+    @endcode
      
      @fn void    tSOLAD_init(tSOLAD** const, LEAF* const leaf)
      @brief Initialize a tSOLAD to the default mempool of a LEAF instance.
@@ -493,7 +640,39 @@ extern "C" {
      @defgroup tpitchshift tPitchShift
      @ingroup effects
      @brief SOLAD-based pitch shifter.
-     @{
+
+    The pitch shift combines a dual pitch detector to track the desired pitch shift factor,
+     and the SOLAD buffer to perform the time-domain shift
+     On each block or sample, you feed in audio and either specify a shift factory directly or
+     let the dual detector drive the factory automatically
+
+     Example
+    @code{.c}
+    //initialize
+    tDualPitchDetector* dpd = NULL;
+    tDualPitchDetector_init(&dpd, 50.0f, 2000.0f, leaf);
+
+    //create a PitchShift instance
+    tPitchShift* ps = NULL;
+    int bufSize = 1024;
+    tPitchShift_init(&ps, dpd, bufSize, leaf);
+
+    //audio loop
+    float inBuf[bufSize], outBuf[bufSize];
+    // fill inBuf...
+    tPitchShift_shiftBy(ps, 1.5f, inBuf, outBuf);  // +50% pitch
+
+
+    //adjust pickiness (how strongly it follows the detector)
+    tPitchShift_setPickiness(ps, 0.8f);
+
+    //set sample rate
+    tPitchShift_setSampleRate(ps, sampleRate);
+
+    //when done:
+    tPitchShift_free(&ps);
+    tDualPitchDetector_free(&dpd);
+    @endcode
      
      @fn void    tPitchShift_init(tPitchShift** const, tPeriodDetection* const, Lfloat* out, int bufSize, LEAF* const leaf)
      @brief Initialize a tPitchShift to the default mempool of a LEAF instance.
@@ -557,7 +736,33 @@ extern "C" {
      @defgroup tsimpleretune tSimpleRetune
      @ingroup effects
      @brief Wrapper for multiple pitch shifters with single-channel output.
-     @{
+
+    The simple retune spawns `numVoices` independent SOLAD‐based pitch shifters, all driven by tDualPitchDetector
+    It mixes their outputs into one channel, allowing detune, chorusing, or harmonization with minimal setup
+
+    Example
+    @code{.c}
+    // initialize
+    tSimpleRetune* tr = NULL;
+    tSimpleRetune_init(&tr,
+                        3,        //number of voices
+                        100.0f,   //minimum input frequency
+                        1000.0f,  //maximum input frequency
+                        512,      //buffer size
+                        leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float out = tSimpleRetune_tick(tr, inputSamples[i]);
+        outputSamples[i] = out;
+    }
+
+     //adjust responsiveness
+     tSimpleRetune_setPickiness(tr, 0.7f);
+
+     //when done
+     tSimpleRetune_free(&tr);
+     @endcode
      
      @fn void    tSimpleRetune_init(tSimpleRetune** const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
      @brief Initialize a tSimpleRetune to the default mempool of a LEAF instance.
@@ -630,7 +835,39 @@ extern "C" {
      @defgroup tretune tRetune
      @ingroup effects
      @brief Wrapper for multiple pitch shifters with multi-channel output.
-     @{
+
+    tRetune builds on SOLAD and dual‐detector pitch tracking to drive `numVoices` independent
+     pitch shifters, each producing its own channel.  You can use it for chorus, harmonies,
+     or multi‐voice layering with minimal setup
+
+    Example
+     @code{.c}
+     //initialize
+     tRetune* rt = NULL;
+     tRetune_init(&rt,
+                  4,       //number of voices
+                  80.0f,   //minimum input frequency
+                  1200.0f, //maximum input frequency
+                  512,     //buffer size
+                  leaf);
+
+     //audio loop,
+     for (int i = 0; i < numSamples; ++i) {
+         Lfloat* outs = tRetune_tick(rt, inputSamples[i]);
+         for (int v = 0; v < 4; ++v)
+             outputBuffers[v][i] = outs[v];
+     }
+
+     //adjust number of voices
+     tRetune_setNumVoices(rt, 3);
+
+     //set individual pitch factors
+     tRetune_setPitchFactor(rt, 1.5f, 0);  //voice 0 up a fifth
+     tRetune_setPitchFactor(rt, 0.8f, 1);  //voice 1 down a minor third
+
+     //when done
+     tRetune_free(&rt);
+     @endcode
      
      @fn void    tRetune_init(tRetune** const, int numVoices, int bufSize, int frameSize, LEAF* const leaf)
      @brief Initialize a tRetune to the default mempool of a LEAF instance.
@@ -707,7 +944,42 @@ extern "C" {
      @defgroup tformantshifter tFormantShifter
      @ingroup effects
      @brief Formant remover and adder, allowing for formant shifting.
-     @{
+
+    The formant shifter analyzes the spectral envelope of incoming audio via LPC-like filters
+     and then either subtracts that envelope (removal) or reapplies it shifted by `shiftFactor`
+     (addition).  An `intensity` control blends between dry and processed signals.
+
+     Example
+     @code{.c}
+     //initialize
+     tFormantShifter* fs = NULL;
+     tFormantShifter_init(&fs,
+                          12,    // filter order
+                          leaf);
+
+     // in your audio loop:
+     for (int i = 0; i < numSamples; ++i) {
+         float in  = inputSamples[i];
+         //remove formants for a robotic sound
+         float removed = tFormantShifter_remove(fs, in);
+         //add shifted formants (e.g. 1.2×):
+         tFormantShifter_setShiftFactor(fs, 1.2f);
+         float added   = tFormantShifter_add(fs, in);
+         //mix dry and shifted
+         float out = fs->intensity * added + (1.0f - fs->intensity) * in;
+         outputSamples[i] = out;
+     }
+
+     //for block processing with warp factor fwarp
+     float inBuf[256], outBuf[256];
+     tFormantShifter_ioSamples(fs, inBuf, outBuf, 256, 0.8f);
+
+     //adjust intensity of effect
+     tFormantShifter_setIntensity(fs, 0.75f);
+
+     //when done
+     tFormantShifter_free(&fs);
+     @endcode
      
      @fn void    tFormantShifter_init(tFormantShifter** const, int order, LEAF* const leaf)
      @brief Initialize a tFormantShifter to the default mempool of a LEAF instance.
