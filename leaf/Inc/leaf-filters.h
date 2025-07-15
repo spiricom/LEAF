@@ -93,7 +93,28 @@ extern "C" {
     @defgroup tallpass tAllpassSO
     @ingroup filters
     @brief Schroeder allpass. Comb-filter with feedforward and feedback.
-    @{
+
+    Example
+     @code{.c}
+     //initialize
+     tAllpassSO* ap2 = NULL;
+     tAllpassSO_init(&ap2, leaf);
+
+     // set coefficients (50-sample equivalent delay)
+     float theta = 2.0f * M_PI * 50.0f / sampleRate;
+     float a1 = -2.0f * cosf(theta);
+     float a2 = 1.0f;
+     tAllpassSO_setCoeff(ap2, a1, a2);
+
+     //audio loop
+     for (int i = 0; i < numSamples; ++i) {
+         float out = tAllpassSO_tick(ap2, inputSamples[i]);
+         outputSamples[i] = out;
+     }
+
+     //when done
+     tAllpassSO_free(&ap2);
+     @endcode
 
     @fn void    tAllpassSO_init(tAllpassSO** const, Lfloat initDelay, uint32_t maxDelay, LEAF* const leaf)
     @brief Initialize a tAllpassSO to the default mempool of a LEAF instance.
@@ -149,6 +170,41 @@ extern "C" {
     void    tAllpassSO_setCoeff       (tAllpassSO* const ft, Lfloat a1, Lfloat a2);
     //==============================================================================
 
+    /*!
+    @defgroup tThiranAllpassSOCascade ThiranAllpassSOCascade
+    @ingroup filters
+    @brief Cascade of second order Thiran allpass filters for fractional delay dispersion correction
+
+    Example
+     @code{.c}
+     // initialize
+     tThiranAllpassSOCascade* th = NULL;
+     tThiranAllpassSOCascade_init(&th,
+                                  4,      //order (number of 2nd‐order sections)
+                                  leaf);
+
+     //set coefficients (0.7‐sample dispersion at 1 kHz with 2× oversampling)
+     float delayFrac = 0.7f;
+     float centerFreq = 1000.0f;
+     float invOS      = 0.5f;  // 1/oversampling ratio
+     tThiranAllpassSOCascade_setCoeff(th,
+                                      delayFrac,
+                                      centerFreq,
+                                      invOS);
+
+     //audio loop:
+     for (int i = 0; i < numSamples; ++i) {
+         float out = tThiranAllpassSOCascade_tick(th, inputSamples[i]);
+         outputSamples[i] = out;
+     }
+
+     //clear filter memory when needed
+     tThiranAllpassSOCascade_clear(th);
+
+     //when done
+     tThiranAllpassSOCascade_free(&th);
+     @endcode
+    */
 
     typedef struct tThiranAllpassSOCascade
     {
@@ -189,7 +245,32 @@ extern "C" {
      @defgroup tonepole tOnePole
      @ingroup filters
      @brief OnePole filter, reimplemented from STK (Cook and Scavone).
-     @{
+
+    Example
+    @code{.c}
+    // initialize
+    tOnePole* op = NULL;
+    tOnePole_init(&op,
+                  1000.0f,  // cutoff frequency (Hz)
+                  leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float out = tOnePole_tick(op, in);
+        outputSamples[i] = out;
+    }
+
+    //tweak parameters
+    tOnePole_setFreq(op, 500.0f);
+    tOnePole_setGain(op, 0.7f);
+
+    // set raw coefficients
+    tOnePole_setCoefficients(op, 0.3f, -0.7f);
+
+    //when done
+    tOnePole_free(&op);
+    @endcode
      
      @fn void    tOnePole_init(tOnePole** const, Lfloat thePole, LEAF* const leaf)
      @brief Initialize a tOnePole to the default mempool of a LEAF instance.
@@ -345,7 +426,31 @@ extern "C" {
      @defgroup ttwopole tTwoPole
      @ingroup filters
      @brief TwoPole filter, reimplemented from STK (Cook and Scavone).
-     @{
+
+    Example
+    @code{.c}
+    // initialize
+    tTwoPole* tp = NULL;
+    tTwoPole_init(&tp, leaf);
+
+    tTwoPole_setResonance(tp,
+                          1000.0f,  //center frequency (Hz)
+                          0.9f,     //pole radius (0 < r < 1)
+                          1);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float out = tTwoPole_tick(tp, in);
+        outputSamples[i] = out;
+    }
+
+    //tweak parameters
+    tTwoPole_setResonance(tp, 500.0f, 0.7f, 1);
+
+    //when done
+    tTwoPole_free(&tp);
+    @endcode
      
      @fn void    tTwoPole_init(tTwoPole** const, LEAF* const leaf)
      @brief Initialize a tTwoPole to the default mempool of a LEAF instance.
@@ -432,7 +537,31 @@ extern "C" {
      @defgroup tonezero tOneZero
      @ingroup filters
      @brief OneZero filter, reimplemented from STK (Cook and Scavone).
-     @{
+
+    Example
+    @code{.c}
+    // initialize
+    tOneZero* oz = NULL;
+    tOneZero_init(&oz,
+                  -1.0f,  // zero coefficient
+                  leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float out = tOneZero_tick(oz, in);
+        outputSamples[i] = out;
+    }
+
+    //tweak parameters
+    tOneZero_setZero(oz, 0.5f);
+
+    // set raw coefficients
+    tOneZero_setCoefficients(oz, 0.8f, -0.2f);
+
+    //when done
+    tOneZero_free(&oz);
+    @endcode
      
      @fn void    tOneZero_init(tOneZero** const, Lfloat theZero, LEAF* const leaf)
      @brief Initialize a tOneZero to the default mempool of a LEAF instance.
@@ -510,7 +639,30 @@ extern "C" {
      @defgroup ttwozero tTwoZero
      @ingroup filters
      @brief TwoZero filter, reimplemented from STK (Cook and Scavone).
-     @{
+
+    Example
+    @code{.c}
+    // initialize
+    tTwoZero* tz = NULL;
+    tTwoZero_init(&tz, leaf);
+
+    tTwoZero_setNotch(tz,
+                      1000.0f,  //notch center frequency (Hz)
+                      0.95f);   //pole radius
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float out = tTwoZero_tick(tz, in);
+        outputSamples[i] = out;
+    }
+
+    //tweak parameters
+    tTwoZero_setNotch(tz, 500.0f, 0.8f);
+
+    //when done
+    tTwoZero_free(&tz);
+    @endcode
      
      @fn void    tTwoZero_init(tTwoZero** const, LEAF* const leaf)
      @brief Initialize a tTwoZero to the default mempool of a LEAF instance.
@@ -591,7 +743,32 @@ extern "C" {
      @defgroup tpolezero tPoleZero
      @ingroup filters
      @brief PoleZero filter, reimplemented from STK (Cook and Scavone).
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tPoleZero* pz = NULL;
+    tPoleZero_init(&pz, leaf);
+
+    tPoleZero_setAllpass(pz, 0.5f);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float out = tPoleZero_tick(pz, in);
+        outputSamples[i] = out;
+    }
+
+    //tweak parameters and types
+    tPoleZero_setBlockZero(pz, -1.0f);
+    tPoleZero_setA1(pz, 0.8f);
+    tPoleZero_setB0(pz, 0.1f);
+    tPoleZero_setB1(pz, 0.1f);
+    tPoleZero_setGain(pz, 1.2f);
+
+    //when done
+    tPoleZero_free(&pz);
+    @endcode
      
      @fn void    tPoleZero_init(tPoleZero** const, LEAF* const leaf)
      @brief Initialize a tPoleZero to the default mempool of a LEAF instance.
@@ -678,7 +855,34 @@ extern "C" {
      @defgroup tbiquad tBiQuad
      @ingroup filters
      @brief BiQuad filter, reimplemented from STK (Cook and Scavone).
-     @{
+
+    Example
+    @code{.c}
+    // initialize
+    tBiQuad* bq = NULL;
+    tBiQuad_init(&bq, leaf);
+
+    tBiQuad_setResonance(bq,
+                         1000.0f,  //center frequency (Hz)
+                         0.707f,   //pole radius (controls Q)
+                         1);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float out = tBiQuad_tick(bq, in);
+        outputSamples[i] = out;
+    }
+
+    //tweak parameters and type
+    tBiQuad_setNotch(bq,
+                     2000.0f,  //!< notch center frequency in Hz
+                     0.9f);    //!< radius (0 < r < 1)
+    tBiQuad_setGain(bq, 1.2f);
+
+    //when done
+    tBiQuad_free(&bq);
+    @endcode
      
      @fn void    tBiQuad_init(tBiQuad** const, LEAF* const leaf)
      @brief Initialize a tBiQuad to the default mempool of a LEAF instance.
@@ -782,7 +986,34 @@ extern "C" {
      @defgroup tsvf tSVF
      @ingroup filters
      @brief State Variable Filter, algorithm from Andy Simper.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tSVF* svf = NULL;
+    tSVF_init(&svf,
+              SVFTypeBandpass,  //filter type (bandpass)
+              500.0f,           //cutoff frequency (Hz)
+              1.0f,             //resonance Q
+              leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float bp  = tSVF_tickBP(svf, in);  //bandpass output
+        float lp  = tSVF_tickLP(svf, in);  //lowpass output
+        float hp  = tSVF_tickHP(svf, in);  //highpass output
+        //mix using bandpass
+        outputSamples[i] = bp;
+    }
+
+    //tweaking filter type and parameter
+    tSVF_setFilterType(svf, SVFTypeNotch);
+    tSVF_setFreq(svf, 1000.0f);
+
+    //when done
+    tSVF_free(&svf);
+    @endcode
      
      @fn void    tSVF_init(tSVF** const, SVFType type, Lfloat freq, Lfloat Q, LEAF* const leaf)
      @brief Initialize a tSVF to the default mempool of a LEAF instance.
@@ -903,7 +1134,31 @@ extern "C" {
      @defgroup tefficientsvf tEfficientSVF
      @ingroup filters
      @brief Efficient State Variable Filter for 14-bit control input, [0, 4096).
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tEfficientSVF* esvf = NULL;
+    tEfficientSVF_init(&esvf,
+                       SVFTypeLowpass,  //filter type (lowpass)
+                       2048,            //14-bit control value (0–4095)
+                       0.707f,          //resonance Q
+                       leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in   = inputSamples[i];
+        float out  = tEfficientSVF_tick(esvf, in);
+        outputSamples[i] = out;
+    }
+
+    //tweak parameters
+    tEfficientSVF_setFreq(esvf, 3072);
+    tEfficientSVF_setQ(esvf, 1.2f);
+
+    //when done
+    tEfficientSVF_free(&esvf);
+    @endcode
      
      @fn void    tEfficientSVF_init(tEfficientSVF** const, SVFType type, uint16_t input, Lfloat Q, LEAF* const leaf)
      @brief Initialize a tEfficientSVF to the default mempool of a LEAF instance.
@@ -963,7 +1218,31 @@ extern "C" {
      @defgroup thighpass tHighpass
      @ingroup filters
      @brief Simple Highpass filter.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tHighpass* hp = NULL;
+    tHighpass_init(&hp,
+                   200.0f,   //cutoff frequency (Hz)
+                   leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float out = tHighpass_tick(hp, in);
+        outputSamples[i] = out;
+    }
+
+    //tweak parameters
+    tHighpass_setFreq(hp, 800.0f);
+
+    //find current cutoff
+    float currentCutoff = tHighpass_getFreq(hp);
+
+    //when done
+    tHighpass_free(&hp);
+    @endcode
      
      @fn void    tHighpass_init(tHighpass** const, Lfloat freq, LEAF* const leaf)
      @brief Initialize a tHighpass to the default mempool of a LEAF instance.
@@ -1020,7 +1299,31 @@ extern "C" {
      @defgroup tbutterworth tButterworth
      @ingroup filters
      @brief Butterworth filter.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tButterworth* bw = NULL;
+    tButterworth_init(&bw,
+                  4,       //filter order
+                  300.0f,  //low cutoff (Hz)
+                  3000.0f, //high cutoff (Hz)
+                  leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+    float in  = inputSamples[i];
+    float out = tButterworth_tick(bw, in);
+    outputSamples[i] = out;
+    }
+
+    //tweak parameters
+    tButterworth_setFreqs(bw, 500.0f, 2500.0f);
+    tButterworth_setF2(bw, 2000.0f);        //only tweaking high cutoff
+
+    //when done
+    tButterworth_free(&bw);
+    @endcode
      
      @fn void    tButterworth_init(tButterworth** const, int N, Lfloat f1, Lfloat f2, LEAF* const leaf, LEAF* const leaf)
      @brief Initialize a tButterworth to the default mempool of a LEAF instance.
@@ -1094,7 +1397,29 @@ extern "C" {
      @defgroup tfir tFIR
      @ingroup filters
      @brief Finite impulse response filter.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    float coeffs[5] = {
+        0.2f, 0.2f, 0.2f, 0.2f, 0.2f
+    };
+    tFIR* fir = NULL;
+    tFIR_init(&fir,
+              coeffs,   //pointer to coefficient array
+              5,        //number of taps
+              leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float input  = inputSamples[i];
+        float output = tFIR_tick(fir, input);
+        outputSamples[i] = output;
+    }
+
+    //when done
+    tFIR_free(&fir);
+    @endcode
      
      @fn void    tFIR_init(tFIR** const, Lfloat* coeffs, int numTaps, LEAF* const leaf)
      @brief Initialize a tFIR to the default mempool of a LEAF instance.
@@ -1140,7 +1465,25 @@ extern "C" {
      @defgroup tmedianfilter tMedianFilter
      @ingroup filters
      @brief Median filter.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tMedianFilter* mf = NULL;
+    tMedianFilter_init(&mf,
+                       5,     //window size (must be odd)
+                       leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float input  = inputSamples[i];
+        float output = tMedianFilter_tick(mf, input);
+        outputSamples[i] = output;
+    }
+
+    //when done
+    tMedianFilter_free(&mf);
+    @endcode
      
      @fn void    tMedianFilter_init(tMedianFilter** const, int size, LEAF* const leaf)
      @brief Initialize a tMedianFilter to the default mempool of a LEAF instance.
@@ -1188,7 +1531,31 @@ extern "C" {
      @defgroup tvzfilter tVZFilter
      @ingroup filters
      @brief Vadim Zavalishin style from VA book (from implementation in RSlib posted to kvr forum)
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tVZFilter* vz = NULL;
+    tVZFilter_init(&vz,
+                   Highpass,    //filter type
+                   1000.0f,     //cutoff frequency (Hz)
+                   0.707f,      //Q factor
+                   leaf);
+
+    //tweak parameters or filter type
+    tVZFilter_setBandwidth(vz, 1.0f);
+    tVZFilter_setType(vz, Bell);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float out = tVZFilter_tick(vz, in);
+        outputSamples[i] = out;
+    }
+
+    //when done
+    tVZFilter_free(&vz);
+    @endcode
      
      @fn void    tVZFilter_init(tVZFilter** const, VZFilterType type, Lfloat freq, Lfloat Q, LEAF* const leaf)
      @brief Initialize a tVZFilter to the default mempool of a LEAF instance.
@@ -1503,7 +1870,30 @@ extern "C" {
      @defgroup tdiodefilter tDiodeFilter
      @ingroup filters
      @brief Diode filter.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tDiodeFilter* df = NULL;
+    tDiodeFilter_init(&df,
+                      1000.0f,   //cutoff frequency (Hz)
+                      0.5f,      //resonance Q
+                      leaf);
+
+    //tweak parameters
+    tDiodeFilter_setFreqFast(df, 1200.0f);
+    tDiodeFilter_setQ(df, 0.7f);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float in  = inputSamples[i];
+        float out = tDiodeFilter_tick(df, in);
+        outputSamples[i] = out;
+    }
+
+    //when done
+    tDiodeFilter_free(&df);
+    @endcode
      
      @fn void    tDiodeFilter_init(tDiodeFilter** const, Lfloat freq, Lfloat Q, LEAF* const leaf)
      @brief Initialize a tDiodeFilter to the default mempool of a LEAF instance.
