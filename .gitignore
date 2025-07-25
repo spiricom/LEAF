@@ -1,4 +1,6 @@
 .DS_Store
+*.tcl
+*.cmake
 *.idea
 cmake-build*/
 */idea/
