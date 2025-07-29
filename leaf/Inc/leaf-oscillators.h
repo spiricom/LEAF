@@ -32,7 +32,33 @@ extern "C" {
      @defgroup tcycle tCycle
      @ingroup oscillators
      @brief Wavetable cycle/sine wave oscillator
-     @{
+
+    Example
+    @code{.c}
+    //intialize
+    tCycle* osc = NULL;
+    // Initialize to default mempool
+    tCycle_init(&osc,
+                leaf);
+
+    //tweak parameters
+    tCycle_setSampleRate(osc,
+                         48000.0f);     //(Hz)
+    tCycle_setFreq(osc,
+                   440.0f);             //(Hz)
+    tCycle_setPhase(osc,
+                    0.25f);      //set initial cycle phase (fraction of cycle [0–1])
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        // Get next sample in range –1.0 … +1.0
+        Lfloat sample = tCycle_tick(osc);
+        output[i] = sample * 0.8f;  // apply output gain
+    }
+
+    //when done
+    tCycle_free(&osc);
+    @endcode
 
      @fn void    tCycle_init(tCycle** const osc, LEAF* const leaf)
      @brief Initialize a tCycle to the default mempool of a LEAF instance.
@@ -216,7 +242,32 @@ extern "C" {
      @defgroup tsawtooth tSawtooth
      @ingroup oscillators
      @brief Anti-aliased wavetable saw wave oscillator.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tSawtooth* osc = NULL;
+    tSawtooth_init(&osc,
+                   leaf);
+
+    //tweak parameters
+    tSawtooth_setSampleRate(osc,
+                            48000.0f);  //(Hz)
+    tSawtooth_setFreq(osc,
+                      261.63f);       //(Hz)
+    tSawtooth_setPhase(osc,
+                       0.5f);        //initial phase offset (fraction of cycle [0–1])
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        // Get next saw sample in range –1.0 … +1.0
+        Lfloat sample = tSawtooth_tick(osc);
+        output[i] = sample * 0.7f;  // apply output gain
+    }
+
+    //when done
+    tSawtooth_free(&osc);
+    @endcode
      
      @fn void    tSawtooth_init(tSawtooth** const osc, LEAF* const leaf)
      @brief Initialize a tSawtooth to the default mempool of a LEAF instance.
@@ -277,7 +328,34 @@ extern "C" {
      @defgroup tpbtriangle tPBTriangle
      @ingroup oscillators
      @brief Triangle wave oscillator with polyBLEP anti-aliasing.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tPBSineTriangle* osc = NULL;
+    // Initialize to default mempool
+    tPBSineTriangle_init(&osc,
+                        leaf);
+
+    //tweak parameters
+    tPBSineTriangle_setSampleRate(osc,
+                                 48000.0f);  //(Hz)
+    tPBSineTriangle_setFreq(osc,
+                            440.0f);       //(Hz)
+    //adjust waveform skew (0.0 = rising saw, 0.5 = classic triangle, 1.0 = falling saw)
+    tPBSineTriangle_setShape(osc,
+                             0.5f);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        //get next triangle sample in range –1.0 … +1.0
+        Lfloat sample = tPBSineTriangle_tick(osc);
+        output[i] = sample * 0.8f;  // apply output gain
+    }
+
+    //when done
+    tPBSineTriangle_free(&osc);
+    @endcode
      
      @fn void   tPBTriangle_init(tPBTriangle** const osc, LEAF* const leaf)
      @brief Initialize a tPBTriangle to the default mempool of a LEAF instance.
@@ -382,7 +460,35 @@ extern "C" {
      @defgroup tpbpulse tPBPulse
      @ingroup oscillators
      @brief Pulse wave oscillator with polyBLEP anti-aliasing.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tPBPulse* osc = NULL;
+    // Initialize to default mempool
+    tPBPulse_init(&osc,
+                  leaf);
+
+    //tweak parameters
+    tPBPulse_setSampleRate(osc,
+                           48000.0f);  //(Hz)
+    tPBPulse_setFreq(osc,
+                     261.63f);          //(Hz)
+
+    //set pulse width
+    tPBPulse_setWidth(osc,
+                      0.25f);           //width parameter is a fraction of period (0.0-1.0)
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        //get next pulse sample in range –1.0 … +1.0
+        Lfloat sample = tPBPulse_tick(osc);
+        output[i] = sample * 0.7f;  //apply output gain
+    }
+
+    //when done
+    tPBPulse_free(&osc);
+    @endcode
      
      @fn void    tPBPulse_init(tPBPulse** const osc, LEAF* const leaf)
      @brief Initialize a tPBPulse to the default mempool of a LEAF instance.
@@ -450,7 +556,30 @@ extern "C" {
      @defgroup tpbsaw tPBSaw
      @ingroup oscillators
      @brief Saw wave oscillator with polyBLEP anti-aliasing.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tPBSaw* osc = NULL;
+    tPBSaw_init(&osc,
+                leaf);
+
+    //tweak parameters
+    tPBSaw_setSampleRate(osc,
+                         44100.0f);  //(Hz)
+    tPBSaw_setFreq(osc,
+                   440.0f);            //(Hz)
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        //tick the saw wave oscillator (-1.0 … +1.0)
+        Lfloat sample = tPBSaw_tick(osc);
+        output[i] = sample * 0.5f;    //apply output gain
+    }
+
+    //when done
+    tPBSaw_free(&osc);
+    @endcode
      
      @fn void    tPBSaw_init(tPBSaw** const osc, LEAF* const leaf)
      @brief Initialize a tPBSaw to the default mempool of a LEAF instance.
@@ -579,7 +708,31 @@ typedef struct tPBSawSquare
      @defgroup tphasor tPhasor
      @ingroup oscillators
      @brief Aliasing phasor.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tPhasor* ph = NULL;
+    tPhasor_init(&ph,
+                 leaf);
+
+    //tweak parameters
+    tPhasor_setSampleRate(ph,
+                          48000.0f);  //(Hz)
+    tPhasor_setFreq(ph,
+                    1000.0f);         //(Hz)
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        //tick the phasor (0.0 … 1.0)
+        Lfloat phase = tPhasor_tick(ph);
+        //use phase
+        output[i] = phase * 2.0f - 1.0f;
+    }
+
+    //when done
+    tPhasor_free(&ph);
+    @endcode
      
      @fn void    tPhasor_init(tPhasor** const osc, LEAF* const leaf)
      @brief Initialize a tPhasor to the default mempool of a LEAF instance.
@@ -634,7 +787,35 @@ typedef struct tPBSawSquare
      @defgroup tnoise tNoise
      @ingroup oscillators
      @brief Noise generator, capable of producing white or pink noise.
-     @{
+
+    Example
+    @code{.c}
+    //initialize white noise
+    tNoise* white = NULL;
+    tNoise_init(&white,
+                WhiteNoise,  //noise type
+                leaf);
+
+    //pink noise
+    tNoise* pink = NULL;
+    tNoise_init(&pink,
+                PinkNoise,   //noise type
+                leaf);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        //generate one sample of white noise
+        Lfloat w = tNoise_tick(white);
+        outputWhite[i] = w;
+
+        // Generate one sample of pink noise
+        Lfloat p = tNoise_tick(pink);
+        outputPink[i] = p;
+    }
+
+    //when done
+    tNoise_free(&white);
+    tNoise_free(&pink);
      
      @fn void    tNoise_init(tNoise** const noise, NoiseType type, LEAF* const leaf)
      @brief Initialize a tNoise to the default mempool of a LEAF instance.
@@ -691,7 +872,44 @@ typedef struct tPBSawSquare
      @defgroup tneuron tNeuron
      @ingroup oscillators
      @brief Model of a neuron, adapted to act as an oscillator.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tNeuron* neuron = NULL;
+    tNeuron_init(&neuron,
+                 leaf);
+
+    //tweak parameters
+    tNeuron_setCurrent(neuron,
+                       5.0f);           //set applied current (I) in microamperes (µA)
+
+    // Set maximal conductances (gₖ, gₙ, gₗ) in millisiemens (mS)
+    tNeuron_setK(neuron,
+                 36.0f);
+    tNeuron_setN(neuron,
+                 120.0f);
+    tNeuron_setL(neuron,
+                 0.3f);
+
+    tNeuron_setC(neuron,
+                 1.0f);              //set membrane capacitance (C) in microfarads (µF)
+    tNeuron_setMode(neuron,
+                    NeuronTanh);        //set shaping mode
+    tNeuron_setTimeStep(neuron,
+                        0.025f);          //set time step (Δt) in milliseconds (ms)
+    tNeuron_setSampleRate(neuron,
+                          44100.0f);       //(Hz)
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        //advance the neuron model and get one sample
+        Lfloat out = tNeuron_tick(neuron);
+        output[i] = out;
+    }
+
+    //when done
+    tNeuron_free(&neuron);
      
      @fn void    tNeuron_init(tNeuron** const neuron, LEAF* const leaf)
      @brief Initialize a tNeuron to the default mempool of a LEAF instance.
@@ -830,7 +1048,8 @@ typedef struct tPBSawSquare
      @defgroup tmbpulse tMBPulse
      @ingroup oscillators
      @brief Pulse wave oscillator with minBLEP anti-aliasing.
-     @{
+
+     
      
      @fn void tMBPulse_init(tMBPulse** const osc, LEAF* const leaf)
      @brief Initialize a tMBPulse to the default mempool of a LEAF instance.
