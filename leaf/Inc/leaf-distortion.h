@@ -50,11 +50,11 @@ extern "C" {
      @brief Free a tSampleReducer from its mempool.
      @param reducer A pointer to the tSampleReducer to free.
      
-     @fn Lfloat   tSampleReducer_tick    (tSampleReducer* const, Lfloat input)
+     @fn float   tSampleReducer_tick    (tSampleReducer* const, float input)
      @brief
      @param reducer A pointer to the relevant tSampleReducer.
      
-     @fn void    tSampleReducer_setRatio (tSampleReducer* const, Lfloat ratio)
+     @fn void    tSampleReducer_setRatio (tSampleReducer* const, float ratio)
      @brief
      @param reducer A pointer to the relevant tSampleReducer.
      ￼￼￼
@@ -63,8 +63,8 @@ extern "C" {
     typedef struct tSampleReducer
     {
         tMempool* mempool;
-        Lfloat invRatio;
-        Lfloat hold;
+        float invRatio;
+        float hold;
         uint32_t count;
     } tSampleReducer;
 
@@ -72,8 +72,8 @@ extern "C" {
     void    tSampleReducer_initToPool (tSampleReducer** const, tMempool** const);
     void    tSampleReducer_free       (tSampleReducer** const);
     
-    Lfloat  tSampleReducer_tick       (tSampleReducer* const, Lfloat input);
-    void    tSampleReducer_setRatio   (tSampleReducer* const, Lfloat ratio);
+    float  tSampleReducer_tick       (tSampleReducer* const, float input);
+    void    tSampleReducer_setRatio   (tSampleReducer* const, float ratio);
     
     //==============================================================================
     
@@ -97,15 +97,15 @@ extern "C" {
      @brief Free a tOversampler from its mempool.
      @param oversampler A pointer to the tOversampler to free.
      
-     @fn void    tOversampler_upsample       (tOversampler* const, Lfloat input, Lfloat* output)
+     @fn void    tOversampler_upsample       (tOversampler* const, float input, float* output)
      @brief
      @param oversampler A pointer to the relevant tOversampler.
      
-     @fn Lfloat   tOversampler_downsample     (tOversampler* const os, Lfloat* input)
+     @fn float   tOversampler_downsample     (tOversampler* const os, float* input)
      @brief
      @param oversampler A pointer to the relevant tOversampler.
      
-     @fn Lfloat   tOversampler_tick           (tOversampler* const, Lfloat input, Lfloat* oversample, Lfloat (*effectTick)(Lfloat))
+     @fn float   tOversampler_tick           (tOversampler* const, float input, float* oversample, float (*effectTick)(float))
      @brief
      @param oversampler A pointer to the relevant tOversampler.
      
@@ -127,9 +127,9 @@ extern "C" {
         uint8_t allowHighQuality;
         uint32_t ratio;
         uint32_t offset;
-        Lfloat* pCoeffs;
-        Lfloat* upState;
-        Lfloat* downState;
+        float* pCoeffs;
+        float* upState;
+        float* downState;
         uint32_t numTaps;
         uint32_t phaseLength;
     } tOversampler;
@@ -138,10 +138,10 @@ extern "C" {
     void    tOversampler_initToPool     (tOversampler** const, int order, int extraQuality, tMempool** const);
     void    tOversampler_free           (tOversampler** const);
 
-    Lfloat  tOversampler_tick           (tOversampler* const, Lfloat input, Lfloat* oversample, Lfloat (*effectTick)(Lfloat));
+    float  tOversampler_tick           (tOversampler* const, float input, float* oversample, float (*effectTick)(float));
 
-    void    tOversampler_upsample       (tOversampler* const, Lfloat input, Lfloat* output);
-    Lfloat  tOversampler_downsample     (tOversampler* const, Lfloat* input);
+    void    tOversampler_upsample       (tOversampler* const, float input, float* output);
+    float  tOversampler_downsample     (tOversampler* const, float* input);
     void    tOversampler_setRatio       (tOversampler* const, int ratio);
     void    tOversampler_setQuality     (tOversampler* const, int quality);
     int     tOversampler_getLatency     (tOversampler* const);
@@ -167,7 +167,7 @@ extern "C" {
  @brief Free a tWavefolder from its mempool.
  @param wavefolder A pointer to the tWavefolder to free.
  
- @fn Lfloat   tWavefolder_tick    (tWavefolder* const, Lfloat samp)
+ @fn float   tWavefolder_tick    (tWavefolder* const, float samp)
  @brief
  @param wavefolder A pointer to the relevant tWavefolder.
  ￼￼￼
@@ -178,27 +178,27 @@ typedef struct tWavefolder
 
     tMempool* mempool;
     
-    Lfloat FBsample;
-    Lfloat gain;
-    Lfloat offset;
-    Lfloat foldDepth;
-    Lfloat FBAmount;
-    Lfloat invFBAmount;
-    Lfloat FFAmount;
+    float FBsample;
+    float gain;
+    float offset;
+    float foldDepth;
+    float FBAmount;
+    float invFBAmount;
+    float FFAmount;
     tHighpass*  dcBlock;
 } tWavefolder;
 
-void    tWavefolder_init         (tWavefolder** const, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, LEAF* const leaf);
-void    tWavefolder_initToPool   (tWavefolder** const, Lfloat ffAmount, Lfloat fbAmount, Lfloat foldDepth, tMempool** const);
+void    tWavefolder_init         (tWavefolder** const, float ffAmount, float fbAmount, float foldDepth, LEAF* const leaf);
+void    tWavefolder_initToPool   (tWavefolder** const, float ffAmount, float fbAmount, float foldDepth, tMempool** const);
 void    tWavefolder_free         (tWavefolder** const);
 
-Lfloat  tWavefolder_tick         (tWavefolder* const, Lfloat samp);
+float  tWavefolder_tick         (tWavefolder* const, float samp);
 
-void    tWavefolder_setFFAmount  (tWavefolder* const wf, Lfloat ffAmount);
-void    tWavefolder_setFBAmount  (tWavefolder* const wf, Lfloat fbAmount);
-void    tWavefolder_setFoldDepth (tWavefolder* const wf, Lfloat foldDepth);
-void    tWavefolder_setOffset    (tWavefolder* const wf, Lfloat offset);
-void    tWavefolder_setGain      (tWavefolder* const wf, Lfloat gain);
+void    tWavefolder_setFFAmount  (tWavefolder* const wf, float ffAmount);
+void    tWavefolder_setFBAmount  (tWavefolder* const wf, float fbAmount);
+void    tWavefolder_setFoldDepth (tWavefolder* const wf, float foldDepth);
+void    tWavefolder_setOffset    (tWavefolder* const wf, float offset);
+void    tWavefolder_setGain      (tWavefolder* const wf, float gain);
 
 
 //==============================================================================
@@ -223,7 +223,7 @@ void    tWavefolder_setGain      (tWavefolder* const wf, Lfloat gain);
      @brief Free a tLockhartWavefolder from its mempool.
      @param wavefolder A pointer to the tLockhartWavefolder to free.
      
-     @fn Lfloat   tLockhartWavefolder_tick    (tLockhartWavefolder* const, Lfloat samp)
+     @fn float   tLockhartWavefolder_tick    (tLockhartWavefolder* const, float samp)
      @brief
      @param wavefolder A pointer to the relevant tLockhartWavefolder.
      ￼￼￼
@@ -265,7 +265,7 @@ void    tWavefolder_setGain      (tWavefolder* const wf, Lfloat gain);
     void    tLockhartWavefolder_initToPool (tLockhartWavefolder** const, tMempool** const);
     void    tLockhartWavefolder_free       (tLockhartWavefolder** const);
     
-    Lfloat  tLockhartWavefolder_tick       (tLockhartWavefolder* const, Lfloat samp);
+    float  tLockhartWavefolder_tick       (tLockhartWavefolder* const, float samp);
 
     //==============================================================================
 
@@ -289,26 +289,26 @@ void    tWavefolder_setGain      (tWavefolder* const wf, Lfloat gain);
      @brief Free a tCrusher from its mempool.
      @param crusher A pointer to the tCrusher to free.
      
-     @fn Lfloat   tCrusher_tick    (tCrusher* const, Lfloat input)
+     @fn float   tCrusher_tick    (tCrusher* const, float input)
      @brief
      @param crusher A pointer to the relevant tCrusher.
      
-     @fn void    tCrusher_setOperation (tCrusher* const, Lfloat op)
+     @fn void    tCrusher_setOperation (tCrusher* const, float op)
      @brief
      @param crusher A pointer to the relevant tCrusher.
      @param operation 0.0 - 1.0
      
-     @fn void    tCrusher_setQuality (tCrusher* const, Lfloat val)
+     @fn void    tCrusher_setQuality (tCrusher* const, float val)
      @brief
      @param crusher A pointer to the relevant tCrusher.
      @param quality 0.0 - 1.0
      
-     @fn void    tCrusher_setRound (tCrusher* const, Lfloat rnd)
+     @fn void    tCrusher_setRound (tCrusher* const, float rnd)
      @brief
      @param crusher A pointer to the relevant tCrusher.
      @param what division to round to
      
-     @fn void    tCrusher_setSamplingRatio (tCrusher* const, Lfloat ratio)
+     @fn void    tCrusher_setSamplingRatio (tCrusher* const, float ratio)
      @brief
      @param crusher A pointer to the relevant tCrusher.
      @param sampling ratio
@@ -320,13 +320,13 @@ void    tWavefolder_setGain      (tWavefolder* const wf, Lfloat gain);
 
         tMempool* mempool;
         
-        Lfloat srr;
-        Lfloat mult, div;
-        Lfloat rnd;
+        float srr;
+        float mult, div;
+        float rnd;
         
         uint32_t  op; //which bitwise operation (0-7)
         
-        Lfloat gain;
+        float gain;
         tSampleReducer*  sReducer;
         
     } tCrusher;
@@ -335,12 +335,12 @@ void    tWavefolder_setGain      (tWavefolder* const wf, Lfloat gain);
     void    tCrusher_initToPool       (tCrusher** const, tMempool** const);
     void    tCrusher_free             (tCrusher** const);
     
-    Lfloat  tCrusher_tick             (tCrusher* const, Lfloat input);
+    float  tCrusher_tick             (tCrusher* const, float input);
 
-    void    tCrusher_setOperation     (tCrusher* const, Lfloat op);
-    void    tCrusher_setQuality       (tCrusher* const, Lfloat val);
-    void    tCrusher_setRound         (tCrusher* const, Lfloat rnd);
-    void    tCrusher_setSamplingRatio (tCrusher* const, Lfloat ratio);
+    void    tCrusher_setOperation     (tCrusher* const, float op);
+    void    tCrusher_setQuality       (tCrusher* const, float val);
+    void    tCrusher_setRound         (tCrusher* const, float rnd);
+    void    tCrusher_setSamplingRatio (tCrusher* const, float ratio);
     
     //==============================================================================
     

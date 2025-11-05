@@ -26,12 +26,12 @@
 #if LEAF_INCLUDE_ADSR_TABLES
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Envelope ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void tEnvelope_init(tEnvelope** const envlp, Lfloat attack, Lfloat decay, int loop, LEAF *const leaf)
+void tEnvelope_init(tEnvelope** const envlp, float attack, float decay, int loop, LEAF *const leaf)
 {
     tEnvelope_initToPool(envlp, attack, decay, loop, &leaf->mempool);
 }
 
-void tEnvelope_initToPool (tEnvelope** const envlp, Lfloat attack, Lfloat decay, int loop, tMempool** const mp)
+void tEnvelope_initToPool (tEnvelope** const envlp, float attack, float decay, int loop, tMempool** const mp)
 {
     tMempool *m = *mp;
     tEnvelope *env = *envlp = (tEnvelope *) mpool_alloc(sizeof(tEnvelope), m);
@@ -79,7 +79,7 @@ void tEnvelope_free (tEnvelope** const envlp)
     mpool_free((char *) env, env->mempool);
 }
 
-void tEnvelope_setAttack (tEnvelope* const env, Lfloat attack)
+void tEnvelope_setAttack (tEnvelope* const env, float attack)
 {
     int32_t attackIndex;
 
@@ -94,7 +94,7 @@ void tEnvelope_setAttack (tEnvelope* const env, Lfloat attack)
     env->attackInc = env->inc_buff[attackIndex];
 }
 
-void tEnvelope_setDecay (tEnvelope* const env, Lfloat decay)
+void tEnvelope_setDecay (tEnvelope* const env, float decay)
 {
     int32_t decayIndex;
 
@@ -114,7 +114,7 @@ void tEnvelope_loop (tEnvelope* const env, int loop)
     env->loop = loop;
 }
 
-void tEnvelope_on (tEnvelope* const env, Lfloat velocity)
+void tEnvelope_on (tEnvelope* const env, float velocity)
 {
     if (env->inAttack || env->inDecay) // In case envelope retriggered while it is still happening.
     {
@@ -133,7 +133,7 @@ void tEnvelope_on (tEnvelope* const env, Lfloat velocity)
     env->gain = velocity;
 }
 
-Lfloat tEnvelope_tick (tEnvelope* const env)
+float tEnvelope_tick (tEnvelope* const env)
 {
     if (env->inRamp) {
         if (env->rampPhase > UINT16_MAX) {
@@ -196,14 +196,14 @@ Lfloat tEnvelope_tick (tEnvelope* const env)
 #if LEAF_INCLUDE_ADSR_TABLES
 
 /* ADSR */
-void tADSR_init(tADSR** const adsrenv, Lfloat attack, Lfloat decay, Lfloat sustain,
-                 Lfloat release, LEAF *const leaf)
+void tADSR_init(tADSR** const adsrenv, float attack, float decay, float sustain,
+                 float release, LEAF *const leaf)
 {
     tADSR_initToPool(adsrenv, attack, decay, sustain, release, &leaf->mempool);
 }
 
-void tADSR_initToPool (tADSR** const adsrenv, Lfloat attack, Lfloat decay,
-                       Lfloat sustain, Lfloat release, tMempool** const mp)
+void tADSR_initToPool (tADSR** const adsrenv, float attack, float decay,
+                       float sustain, float release, tMempool** const mp)
 {
     tMempool *m = *mp;
     tADSR *adsr = *adsrenv = (tADSR *) mpool_alloc(sizeof(tADSR), m);
@@ -276,7 +276,7 @@ void tADSR_free (tADSR** const adsrenv)
     mpool_free((char *) adsr, adsr->mempool);
 }
 
-void tADSR_setAttack (tADSR* const adsr, Lfloat attack)
+void tADSR_setAttack (tADSR* const adsr, float attack)
 {
     int32_t attackIndex;
 
@@ -293,7 +293,7 @@ void tADSR_setAttack (tADSR* const adsr, Lfloat attack)
     adsr->attackInc = adsr->inc_buff[attackIndex] * (44100.f * adsr->invSampleRate);
 }
 
-void tADSR_setDecay (tADSR* const adsr, Lfloat decay)
+void tADSR_setDecay (tADSR* const adsr, float decay)
 {
     int32_t decayIndex;
 
@@ -310,14 +310,14 @@ void tADSR_setDecay (tADSR* const adsr, Lfloat decay)
     adsr->decayInc = adsr->inc_buff[decayIndex] * (44100.f * adsr->invSampleRate);
 }
 
-void tADSR_setSustain (tADSR* const adsr, Lfloat sustain)
+void tADSR_setSustain (tADSR* const adsr, float sustain)
 {
     if (sustain > 1.0f) adsr->sustain = 1.0f;
     else if (sustain < 0.0f) adsr->sustain = 0.0f;
     else adsr->sustain = sustain;
 }
 
-void tADSR_setRelease (tADSR* const adsr, Lfloat release)
+void tADSR_setRelease (tADSR* const adsr, float release)
 {
     int32_t releaseIndex;
 
@@ -335,13 +335,13 @@ void tADSR_setRelease (tADSR* const adsr, Lfloat release)
 }
 
 // 0.999999 is slow leak, 0.9 is fast leak
-void tADSR_setLeakFactor (tADSR* const adsr, Lfloat leakFactor)
+void tADSR_setLeakFactor (tADSR* const adsr, float leakFactor)
 {
     adsr->baseLeakFactor = leakFactor;
     adsr->leakFactor = powf(leakFactor, 44100.0f * adsr->invSampleRate);
 }
 
-void tADSR_on (tADSR* const adsr, Lfloat velocity)
+void tADSR_on (tADSR* const adsr, float velocity)
 {
     if ((adsr->inAttack || adsr->inDecay) ||
         (adsr->inSustain || adsr->inRelease)) // In case ADSR retriggered while it is still happening.
@@ -375,7 +375,7 @@ void tADSR_off (tADSR* const adsr)
     adsr->releasePeak = adsr->next;
 }
 
-Lfloat tADSR_tick(tADSR* const adsr)
+float tADSR_tick(tADSR* const adsr)
 {
     if (adsr->inRamp) {
         if (adsr->rampPhase > UINT16_MAX) {
@@ -446,7 +446,7 @@ Lfloat tADSR_tick(tADSR* const adsr)
     return adsr->next;
 }
 
-void tADSR_setSampleRate (tADSR* const adsr, Lfloat sr)
+void tADSR_setSampleRate (tADSR* const adsr, float sr)
 {
     adsr->invSampleRate = 1.0f / sr;
 
@@ -463,19 +463,19 @@ void tADSR_setSampleRate (tADSR* const adsr, Lfloat sr)
 //This one doesn't use any lookup table - by Nigel Redmon from his blog. Thanks, Nigel!
 //-JS
 
-Lfloat calcADSR3Coef (Lfloat rate, Lfloat targetRatio)
+float calcADSR3Coef (float rate, float targetRatio)
 {
     return (rate <= 0.0f) ? 0.0f : expf(-logf((1.0f + targetRatio) / targetRatio) / rate);
 }
 
-void tADSRS_init(tADSRS** const adsrenv, Lfloat attack, Lfloat decay, Lfloat sustain,
-                  Lfloat release, LEAF *const leaf)
+void tADSRS_init(tADSRS** const adsrenv, float attack, float decay, float sustain,
+                  float release, LEAF *const leaf)
 {
     tADSRS_initToPool(adsrenv, attack, decay, sustain, release, &leaf->mempool);
 }
 
-void tADSRS_initToPool (tADSRS** const adsrenv, Lfloat attack, Lfloat decay,
-                        Lfloat sustain, Lfloat release,
+void tADSRS_initToPool (tADSRS** const adsrenv, float attack, float decay,
+                        float sustain, float release,
                        tMempool** const mp)
 {
     tMempool *m = *mp;
@@ -524,7 +524,7 @@ void tADSRS_free(tADSRS** const adsrenv) {
     mpool_free((char *) adsr, adsr->mempool);
 }
 
-void tADSRS_setAttack(tADSRS* const adsr, Lfloat attack)
+void tADSRS_setAttack(tADSRS* const adsr, float attack)
 {
     adsr->attack = attack;
     adsr->attackRate = attack * adsr->sampleRateInMs;
@@ -532,7 +532,7 @@ void tADSRS_setAttack(tADSRS* const adsr, Lfloat attack)
     adsr->attackBase = (1.0f + adsr->targetRatioA) * (1.0f - adsr->attackCoef);
 }
 
-void tADSRS_setDecay (tADSRS* const adsr, Lfloat decay)
+void tADSRS_setDecay (tADSRS* const adsr, float decay)
 {
     adsr->decay = decay;
     adsr->decayRate = decay * adsr->sampleRateInMs;
@@ -540,28 +540,28 @@ void tADSRS_setDecay (tADSRS* const adsr, Lfloat decay)
     adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
 }
 
-void tADSRS_setSustain (tADSRS* const adsr, Lfloat sustain)
+void tADSRS_setSustain (tADSRS* const adsr, float sustain)
 {
     adsr->sustainLevel = sustain;
     adsr->decayBase = (adsr->sustainLevel - adsr->targetRatioDR) * (1.0f - adsr->decayCoef);
 }
 
-void tADSRS_setRelease(tADSRS* const adsr, Lfloat release)
+void tADSRS_setRelease(tADSRS* const adsr, float release)
 {
     adsr->release = release;
     adsr->releaseRate = release * adsr->sampleRateInMs;
-    adsr->releaseCoef = calcADSR3Coef(adsr->releaseRate, (Lfloat) adsr->targetRatioDR);
+    adsr->releaseCoef = calcADSR3Coef(adsr->releaseRate, (float) adsr->targetRatioDR);
     adsr->releaseBase = -adsr->targetRatioDR * (1.0f - adsr->releaseCoef);
 }
 
 // 0.999999 is slow leak, 0.9 is fast leak
-void tADSRS_setLeakFactor (tADSRS* const adsr, Lfloat leakFactor)
+void tADSRS_setLeakFactor (tADSRS* const adsr, float leakFactor)
 {
     adsr->baseLeakFactor = leakFactor;
     adsr->leakFactor = powf(leakFactor, 44100.0f * adsr->invSampleRate);
 }
 
-void tADSRS_on (tADSRS* const adsr, Lfloat velocity)
+void tADSRS_on (tADSRS* const adsr, float velocity)
 {
     adsr->state = env_attack;
     adsr->targetGainSquared = velocity * velocity;
@@ -574,7 +574,7 @@ void tADSRS_off (tADSRS* const adsr)
     }
 }
 
-Lfloat tADSRS_tick (tADSRS* const adsr)
+float tADSRS_tick (tADSRS* const adsr)
 {
     switch (adsr->state) {
         case env_idle:
@@ -610,7 +610,7 @@ Lfloat tADSRS_tick (tADSRS* const adsr)
     return adsr->output * adsr->gain;
 }
 
-void tADSRS_setSampleRate (tADSRS* const adsr, Lfloat sr)
+void tADSRS_setSampleRate (tADSRS* const adsr, float sr)
 {
     adsr->sampleRate = sr;
     adsr->sampleRateInMs = adsr->sampleRate * 0.001f;
@@ -626,8 +626,8 @@ void tADSRS_setSampleRate (tADSRS* const adsr, Lfloat sr)
 
 /* ADSR 4 */ // new version of our original table-based ADSR but with the table passed in by the user
 // use this if the size of the big ADSR tables is too much.
-void tADSRT_init(tADSRT** const adsrenv, Lfloat attack, Lfloat decay, Lfloat sustain,
-                  Lfloat release, Lfloat *expBuffer, int bufferSize, LEAF *const leaf)
+void tADSRT_init(tADSRT** const adsrenv, float attack, float decay, float sustain,
+                  float release, float *expBuffer, int bufferSize, LEAF *const leaf)
 {
 
     tADSRT_initToPool(adsrenv, attack, decay, sustain, release, expBuffer,
@@ -635,8 +635,8 @@ void tADSRT_init(tADSRT** const adsrenv, Lfloat attack, Lfloat decay, Lfloat sus
 
 }
 
-void tADSRT_set(tADSRT* const adsr, Lfloat attack, Lfloat decay, Lfloat sustain,
-                  Lfloat release, Lfloat *expBuffer, int bufferSize, LEAF *const leaf)
+void tADSRT_set(tADSRT* const adsr, float attack, float decay, float sustain,
+                  float release, float *expBuffer, int bufferSize, LEAF *const leaf)
 {
     adsr->exp_buff = expBuffer;
     adsr->buff_size = bufferSize;
@@ -680,8 +680,8 @@ void tADSRT_set(tADSRT* const adsr, Lfloat attack, Lfloat decay, Lfloat sustain,
 //initialize with an exponential function that decays -- i.e. a call to LEAF_generate_exp(expBuffer, 0.001f, 0.0f, 1.0f, -0.0008f, EXP_BUFFER_SIZE);
 //times are in ms
 void
-tADSRT_initToPool(tADSRT** const adsrenv, Lfloat attack, Lfloat decay, Lfloat sustain,
-                  Lfloat release, Lfloat *expBuffer, int bufferSize, tMempool** const mp)
+tADSRT_initToPool(tADSRT** const adsrenv, float attack, float decay, float sustain,
+                  float release, float *expBuffer, int bufferSize, tMempool** const mp)
 {
     tMempool *m = *mp;
     tADSRT *adsr = *adsrenv = (tADSRT *) mpool_alloc(sizeof(tADSRT), m);
@@ -699,10 +699,10 @@ void tADSRT_free (tADSRT** const adsrenv)
 }
 
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_setAttack(tADSRT* const adsrenv, Lfloat attack)
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_setAttack(tADSRT* const adsrenv, float attack)
 #else
 
-void tADSRT_setAttack (tADSRT* const adsr, Lfloat attack)
+void tADSRT_setAttack (tADSRT* const adsr, float attack)
 #endif
 {
     if (attack < 0.0f) {
@@ -713,10 +713,10 @@ void tADSRT_setAttack (tADSRT* const adsr, Lfloat attack)
 }
 
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_setDecay(tADSRT* const adsrenv, Lfloat decay)
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_setDecay(tADSRT* const adsrenv, float decay)
 #else
 
-void tADSRT_setDecay (tADSRT* const adsr, Lfloat decay)
+void tADSRT_setDecay (tADSRT* const adsr, float decay)
 #endif
 {
     if (decay < 0.0f) {
@@ -727,10 +727,10 @@ void tADSRT_setDecay (tADSRT* const adsr, Lfloat decay)
 }
 
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setSustain(tADSRT* const adsrenv, Lfloat sustain)
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setSustain(tADSRT* const adsrenv, float sustain)
 #else
 
-void tADSRT_setSustain (tADSRT* const adsr, Lfloat sustain)
+void tADSRT_setSustain (tADSRT* const adsr, float sustain)
 #endif
 {
     if (sustain > 1.0f) adsr->sustain = 1.0f;
@@ -739,10 +739,10 @@ void tADSRT_setSustain (tADSRT* const adsr, Lfloat sustain)
 }
 
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setRelease(tADSRT* const adsrenv, Lfloat release)
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setRelease(tADSRT* const adsrenv, float release)
 #else
 
-void tADSRT_setRelease (tADSRT* const adsr, Lfloat release)
+void tADSRT_setRelease (tADSRT* const adsr, float release)
 #endif
 {
 
@@ -755,10 +755,10 @@ void tADSRT_setRelease (tADSRT* const adsr, Lfloat release)
 
 // 0.999999 is slow leak, 0.9 is fast leak
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setLeakFactor(tADSRT* const adsrenv, Lfloat leakFactor)
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setLeakFactor(tADSRT* const adsrenv, float leakFactor)
 #else
 
-void tADSRT_setLeakFactor (tADSRT* const adsr, Lfloat leakFactor)
+void tADSRT_setLeakFactor (tADSRT* const adsr, float leakFactor)
 #endif
 {
     adsr->baseLeakFactor = leakFactor;
@@ -766,10 +766,10 @@ void tADSRT_setLeakFactor (tADSRT* const adsr, Lfloat leakFactor)
 }
 
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_on(tADSRT* const adsrenv, Lfloat velocity)
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_on(tADSRT* const adsrenv, float velocity)
 #else
 
-void tADSRT_on (tADSRT* const adsr, Lfloat velocity)
+void tADSRT_on (tADSRT* const adsr, float velocity)
 #endif
 {
     if (adsr->whichStage != env_idle) // In case ADSR retriggered while it is still happening.
@@ -815,10 +815,10 @@ void tADSRT_clear (tADSRT* const adsr)
 }
 
 #ifdef ITCMRAM
-Lfloat  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))   tADSRT_tick(tADSRT* const adsrenv)
+float  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))   tADSRT_tick(tADSRT* const adsrenv)
 #else
 
-Lfloat tADSRT_tick (tADSRT* const adsr)
+float tADSRT_tick (tADSRT* const adsr)
 #endif
 {
     switch (adsr->whichStage) {
@@ -828,15 +828,15 @@ Lfloat tADSRT_tick (tADSRT* const adsr)
                 adsr->next = 0.0f;
             } else {
                 uint32_t intPart = (uint32_t) adsr->rampPhase;
-                Lfloat LfloatPart = adsr->rampPhase - intPart;
-                Lfloat secondValue;
+                float floatPart = adsr->rampPhase - intPart;
+                float secondValue;
                 if (adsr->rampPhase + 1.0f > adsr->buff_sizeMinusOne) {
                     secondValue = 0.0f;
                 } else {
                     secondValue = adsr->exp_buff[(uint32_t) ((adsr->rampPhase) + 1)];
                 }
                 adsr->next =
-                        adsr->rampPeak * LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue, LfloatPart);
+                        adsr->rampPeak * LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue, floatPart);
             }
 
             adsr->rampPhase += adsr->rampInc;
@@ -852,8 +852,8 @@ Lfloat tADSRT_tick (tADSRT* const adsr)
             } else {
                 // do interpolation !
                 uint32_t intPart = (uint32_t) adsr->attackPhase;
-                Lfloat LfloatPart = adsr->attackPhase - intPart;
-                Lfloat secondValue;
+                float floatPart = adsr->attackPhase - intPart;
+                float secondValue;
                 if (adsr->attackPhase + 1.0f > adsr->buff_sizeMinusOne) {
                     secondValue = 0.0f;
                 } else {
@@ -861,7 +861,7 @@ Lfloat tADSRT_tick (tADSRT* const adsr)
                 }
 
                 adsr->next = adsr->gain * (1.0f - LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue,
-                                                                            LfloatPart)); // inverted and backwards to get proper rising exponential shape/perception
+                                                                            floatPart)); // inverted and backwards to get proper rising exponential shape/perception
             }
 
             // Increment ADSR attack.
@@ -877,14 +877,14 @@ Lfloat tADSRT_tick (tADSRT* const adsr)
                 adsr->sustainWithLeak = 1.0f;
             } else {
                 uint32_t intPart = (uint32_t) adsr->decayPhase;
-                Lfloat LfloatPart = adsr->decayPhase - intPart;
-                Lfloat secondValue;
+                float floatPart = adsr->decayPhase - intPart;
+                float secondValue;
                 if (adsr->decayPhase + 1.0f > adsr->buff_sizeMinusOne) {
                     secondValue = 0.0f;
                 } else {
                     secondValue = adsr->exp_buff[(uint32_t) ((adsr->decayPhase) + 1)];
                 }
-                Lfloat interpValue = (LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue, LfloatPart));
+                float interpValue = (LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue, floatPart));
                 adsr->next = (adsr->gain * (adsr->sustain + (interpValue * (1.0f - adsr->sustain)))) *
                              adsr->leakFactor; // do interpolation !
             }
@@ -904,15 +904,15 @@ Lfloat tADSRT_tick (tADSRT* const adsr)
                 adsr->next = 0.0f;
             } else {
                 uint32_t intPart = (uint32_t) adsr->releasePhase;
-                Lfloat LfloatPart = adsr->releasePhase - intPart;
-                Lfloat secondValue;
+                float floatPart = adsr->releasePhase - intPart;
+                float secondValue;
                 if (adsr->releasePhase + 1.0f > adsr->buff_sizeMinusOne) {
                     secondValue = 0.0f;
                 } else {
                     secondValue = adsr->exp_buff[(uint32_t) ((adsr->releasePhase) + 1)];
                 }
                 adsr->next = adsr->releasePeak * (LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue,
-                                                                            LfloatPart)); // do interpolation !
+                                                                            floatPart)); // do interpolation !
             }
 
             // Increment envelope release;
@@ -923,10 +923,10 @@ Lfloat tADSRT_tick (tADSRT* const adsr)
 }
 
 #ifdef ITCMRAM
-Lfloat  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_tickNoInterp(tADSRT* const adsrenv)
+float  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_tickNoInterp(tADSRT* const adsrenv)
 #else
 
-Lfloat tADSRT_tickNoInterp (tADSRT* const adsr)
+float tADSRT_tickNoInterp (tADSRT* const adsr)
 #endif
 {
     switch (adsr->whichStage) {
@@ -996,10 +996,10 @@ Lfloat tADSRT_tickNoInterp (tADSRT* const adsr)
 }
 
 #ifdef ITCMRAM
-void  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_setSampleRate(tADSRT* const adsrenv, Lfloat sr)
+void  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))  tADSRT_setSampleRate(tADSRT* const adsrenv, float sr)
 #else
 
-void tADSRT_setSampleRate (tADSRT* const adsr, Lfloat sr)
+void tADSRT_setSampleRate (tADSRT* const adsr, float sr)
 #endif
 {
     adsr->sampleRate = sr;
@@ -1014,12 +1014,12 @@ void tADSRT_setSampleRate (tADSRT* const adsr, Lfloat sr)
 
 /////-----------------
 /* Ramp */
-void tRamp_init(tRamp** const r, Lfloat time, int samples_per_tick, LEAF *const leaf)
+void tRamp_init(tRamp** const r, float time, int samples_per_tick, LEAF *const leaf)
 {
     tRamp_initToPool(r, time, samples_per_tick, &leaf->mempool);
 }
 
-void tRamp_initToPool (tRamp** const r, Lfloat time, int samples_per_tick,
+void tRamp_initToPool (tRamp** const r, float time, int samples_per_tick,
                        tMempool** const mp)
 {
     tMempool *m = *mp;
@@ -1040,7 +1040,7 @@ void tRamp_initToPool (tRamp** const r, Lfloat time, int samples_per_tick,
         ramp->time = time;
     }
     ramp->samples_per_tick = samples_per_tick;
-    ramp->factor = (1.0f / ramp->time) * ramp->inv_sr_ms * (Lfloat) ramp->samples_per_tick;
+    ramp->factor = (1.0f / ramp->time) * ramp->inv_sr_ms * (float) ramp->samples_per_tick;
     ramp->inc = (ramp->dest - ramp->curr) * ramp->factor;
 }
 
@@ -1050,31 +1050,31 @@ void tRamp_free (tRamp** const r)
     mpool_free((char *) ramp, ramp->mempool);
 }
 
-void tRamp_setTime (tRamp* const r, Lfloat time)
+void tRamp_setTime (tRamp* const r, float time)
 {
     if (time < r->minimum_time) {
         r->time = r->minimum_time;
     } else {
         r->time = time;
     }
-    r->factor = (1.0f / r->time) * r->inv_sr_ms * (Lfloat) r->samples_per_tick;
+    r->factor = (1.0f / r->time) * r->inv_sr_ms * (float) r->samples_per_tick;
     r->inc = (r->dest - r->curr) * r->factor;
 
 }
 
-void tRamp_setDest (tRamp* const r, Lfloat dest)
+void tRamp_setDest (tRamp* const r, float dest)
 {
     r->dest = dest;
     r->inc = (r->dest - r->curr) * r->factor;
 }
 
-void tRamp_setVal (tRamp* const r, Lfloat val)
+void tRamp_setVal (tRamp* const r, float val)
 {
     r->curr = val;
     r->inc = (r->dest - r->curr) * r->factor;
 }
 
-Lfloat tRamp_tick (tRamp* const r)
+float tRamp_tick (tRamp* const r)
 {
     r->curr += r->inc;
 
@@ -1086,29 +1086,29 @@ Lfloat tRamp_tick (tRamp* const r)
     return r->curr;
 }
 
-Lfloat tRamp_sample (tRamp* const r)
+float tRamp_sample (tRamp* const r)
 {
     return r->curr;
 }
 
-void tRamp_setSampleRate (tRamp* const r, Lfloat sr)
+void tRamp_setSampleRate (tRamp* const r, float sr)
 {
     r->sampleRate = sr;
     r->inv_sr_ms = 1.0f / (r->sampleRate * 0.001f);
-    r->factor = (1.0f / r->time) * r->inv_sr_ms * (Lfloat) r->samples_per_tick;
+    r->factor = (1.0f / r->time) * r->inv_sr_ms * (float) r->samples_per_tick;
     r->inc = (r->dest - r->curr) * r->factor;
 }
 
 //===========================================================================================
 
 /* RampUpDown */
-void tRampUpDown_init(tRampUpDown** const r, Lfloat upTime, Lfloat downTime,
+void tRampUpDown_init(tRampUpDown** const r, float upTime, float downTime,
                        int samples_per_tick, LEAF *const leaf)
 {
     tRampUpDown_initToPool(r, upTime, downTime, samples_per_tick, &leaf->mempool);
 }
 
-void tRampUpDown_initToPool (tRampUpDown** const r, Lfloat upTime, Lfloat downTime,
+void tRampUpDown_initToPool (tRampUpDown** const r, float upTime, float downTime,
                              int samples_per_tick, tMempool** const mp)
 {
     tMempool *m = *mp;
@@ -1136,8 +1136,8 @@ void tRampUpDown_initToPool (tRampUpDown** const r, Lfloat upTime, Lfloat downTi
     }
 
     ramp->samples_per_tick = samples_per_tick;
-    ramp->upInc = ((ramp->dest - ramp->curr) / ramp->upTime * ramp->inv_sr_ms) * (Lfloat) ramp->samples_per_tick;
-    ramp->downInc = ((ramp->dest - ramp->curr) / ramp->downTime * ramp->inv_sr_ms) * (Lfloat) ramp->samples_per_tick;
+    ramp->upInc = ((ramp->dest - ramp->curr) / ramp->upTime * ramp->inv_sr_ms) * (float) ramp->samples_per_tick;
+    ramp->downInc = ((ramp->dest - ramp->curr) / ramp->downTime * ramp->inv_sr_ms) * (float) ramp->samples_per_tick;
 }
 
 void tRampUpDown_free (tRampUpDown** const r)
@@ -1146,44 +1146,44 @@ void tRampUpDown_free (tRampUpDown** const r)
     mpool_free((char *) ramp, ramp->mempool);
 }
 
-void tRampUpDown_setUpTime (tRampUpDown* const r, Lfloat upTime)
+void tRampUpDown_setUpTime (tRampUpDown* const r, float upTime)
 {
     if (upTime < r->minimum_time) {
         r->upTime = r->minimum_time;
     } else {
         r->upTime = upTime;
     }
-    r->upInc = ((r->dest - r->curr) / r->upTime * r->inv_sr_ms) * (Lfloat) r->samples_per_tick;
+    r->upInc = ((r->dest - r->curr) / r->upTime * r->inv_sr_ms) * (float) r->samples_per_tick;
 }
 
 
-void tRampUpDown_setDownTime (tRampUpDown* const r, Lfloat downTime)
+void tRampUpDown_setDownTime (tRampUpDown* const r, float downTime)
 {
     if (downTime < r->minimum_time) {
         r->downTime = r->minimum_time;
     } else {
         r->downTime = downTime;
     }
-    r->downInc = ((r->dest - r->curr) / r->downTime * r->inv_sr_ms) * (Lfloat) r->samples_per_tick;
+    r->downInc = ((r->dest - r->curr) / r->downTime * r->inv_sr_ms) * (float) r->samples_per_tick;
 }
 
-void tRampUpDown_setDest (tRampUpDown* const r, Lfloat dest)
+void tRampUpDown_setDest (tRampUpDown* const r, float dest)
 {
     r->dest = dest;
-    r->upInc = ((r->dest - r->curr) / r->upTime * r->inv_sr_ms) * (Lfloat) r->samples_per_tick;
-    r->downInc = ((r->dest - r->curr) / r->downTime * r->inv_sr_ms) * (Lfloat) r->samples_per_tick;
+    r->upInc = ((r->dest - r->curr) / r->upTime * r->inv_sr_ms) * (float) r->samples_per_tick;
+    r->downInc = ((r->dest - r->curr) / r->downTime * r->inv_sr_ms) * (float) r->samples_per_tick;
 }
 
-void tRampUpDown_setVal (tRampUpDown* const r, Lfloat val)
+void tRampUpDown_setVal (tRampUpDown* const r, float val)
 {
     r->curr = val;
-    r->upInc = ((r->dest - r->curr) / r->upTime * r->inv_sr_ms) * (Lfloat) r->samples_per_tick;
-    r->downInc = ((r->dest - r->curr) / r->downTime * r->inv_sr_ms) * (Lfloat) r->samples_per_tick;
+    r->upInc = ((r->dest - r->curr) / r->upTime * r->inv_sr_ms) * (float) r->samples_per_tick;
+    r->downInc = ((r->dest - r->curr) / r->downTime * r->inv_sr_ms) * (float) r->samples_per_tick;
 }
 
-Lfloat tRampUpDown_tick (tRampUpDown* const r)
+float tRampUpDown_tick (tRampUpDown* const r)
 {
-    Lfloat test;
+    float test;
 
     if (r->dest < r->curr) {
         test = r->curr + r->downInc;
@@ -1205,20 +1205,20 @@ Lfloat tRampUpDown_tick (tRampUpDown* const r)
     return r->curr;
 }
 
-Lfloat tRampUpDown_sample (tRampUpDown* const r)
+float tRampUpDown_sample (tRampUpDown* const r)
 {
     return r->curr;
 }
 
 
 /* Exponential Smoother */
-void tExpSmooth_init(tExpSmooth** const expsmooth, Lfloat val, Lfloat factor,
+void tExpSmooth_init(tExpSmooth** const expsmooth, float val, float factor,
                      LEAF *const leaf)  // factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
 {
     tExpSmooth_initToPool(expsmooth, val, factor, &leaf->mempool);
 }
 
-void tExpSmooth_initToPool(tExpSmooth** const expsmooth, Lfloat val, Lfloat factor,
+void tExpSmooth_initToPool(tExpSmooth** const expsmooth, float val, float factor,
                            tMempool** const mp)
 {
     tMempool *m = *mp;
@@ -1242,7 +1242,7 @@ void tExpSmooth_free (tExpSmooth** const expsmooth)
 }
 
 // factor is usually a value between 0 and 0.1. Lower value is slower. 0.01 for example gives you a smoothing time of about 10ms
-void tExpSmooth_setFactor (tExpSmooth* const smooth, Lfloat factor)
+void tExpSmooth_setFactor (tExpSmooth* const smooth, float factor)
 {
     if (factor < 0.0f)
         factor = 0.0f;
@@ -1254,43 +1254,43 @@ void tExpSmooth_setFactor (tExpSmooth* const smooth, Lfloat factor)
 }
 
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tExpSmooth_setDest(tExpSmooth* const expsmooth, Lfloat dest)
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tExpSmooth_setDest(tExpSmooth* const expsmooth, float dest)
 #else
 
-void tExpSmooth_setDest (tExpSmooth* const smooth, Lfloat dest)
+void tExpSmooth_setDest (tExpSmooth* const smooth, float dest)
 #endif
 {
     smooth->dest = dest;
 }
 
-void tExpSmooth_setVal (tExpSmooth* const smooth, Lfloat val)
+void tExpSmooth_setVal (tExpSmooth* const smooth, float val)
 {
     smooth->curr = val;
 }
 
-void tExpSmooth_setValAndDest (tExpSmooth* const smooth, Lfloat val)
+void tExpSmooth_setValAndDest (tExpSmooth* const smooth, float val)
 {
     smooth->curr = val;
     smooth->dest = val;
 }
 
 #ifdef ITCMRAM
-Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tExpSmooth_tick(tExpSmooth* const expsmooth)
+float __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tExpSmooth_tick(tExpSmooth* const expsmooth)
 #else
 
-Lfloat tExpSmooth_tick (tExpSmooth* const smooth)
+float tExpSmooth_tick (tExpSmooth* const smooth)
 #endif
 {
     smooth->curr = smooth->factor * smooth->dest + smooth->oneminusfactor * smooth->curr;
     return smooth->curr;
 }
 
-Lfloat tExpSmooth_sample (tExpSmooth* const smooth)
+float tExpSmooth_sample (tExpSmooth* const smooth)
 {
     return smooth->curr;
 }
 
-void tExpSmooth_setSampleRate (tExpSmooth* const smooth, Lfloat sr)
+void tExpSmooth_setSampleRate (tExpSmooth* const smooth, float sr)
 {
     //smooth->invSampleRate = 1.0f/sr;
     //smooth->factor = powf(smooth->baseFactor, 44100.f * smooth->invSampleRate);
@@ -1300,13 +1300,13 @@ void tExpSmooth_setSampleRate (tExpSmooth* const smooth, Lfloat sr)
 //tSlide is based on the max/msp slide~ object
 ////
 
-void tSlide_init(tSlide** const sl, Lfloat upSlide, Lfloat downSlide, LEAF *const leaf)
+void tSlide_init(tSlide** const sl, float upSlide, float downSlide, LEAF *const leaf)
 {
     tSlide_initToPool(sl, upSlide, downSlide, &leaf->mempool);
 }
 
 //upslide and downslide are in samples
-void tSlide_initToPool (tSlide** const sl, Lfloat upSlide, Lfloat downSlide, tMempool** const mp)
+void tSlide_initToPool (tSlide** const sl, float upSlide, float downSlide, tMempool** const mp)
 {
     tMempool *m = *mp;
     tSlide *s = *sl = (tSlide *) mpool_alloc(sizeof(tSlide), m);
@@ -1333,24 +1333,24 @@ void tSlide_free (tSlide** const sl)
     mpool_free((char *) s, s->mempool);
 }
 
-void tSlide_setUpSlide (tSlide* const s, Lfloat upSlide)
+void tSlide_setUpSlide (tSlide* const s, float upSlide)
 {
     s->invUpSlide = 1.0f / upSlide;
 }
 
-void tSlide_setDownSlide (tSlide* const s, Lfloat downSlide)
+void tSlide_setDownSlide (tSlide* const s, float downSlide)
 {
     s->invDownSlide = 1.0f / downSlide;
 }
 
-void tSlide_setDest (tSlide* const s, Lfloat dest)
+void tSlide_setDest (tSlide* const s, float dest)
 {
     s->dest = dest;
 }
 
-Lfloat tSlide_tickNoInput (tSlide* const s)
+float tSlide_tickNoInput (tSlide* const s)
 {
-    Lfloat in = s->dest;
+    float in = s->dest;
 
     if (in >= s->prevOut) {
         s->currentOut = s->prevOut + ((in - s->prevOut) * s->invUpSlide);
@@ -1366,7 +1366,7 @@ Lfloat tSlide_tickNoInput (tSlide* const s)
     return s->currentOut;
 }
 
-Lfloat tSlide_tick (tSlide* const s, Lfloat in)
+float tSlide_tick (tSlide* const s, float in)
 {
     if (in >= s->prevOut) {
         s->currentOut = s->prevOut + ((in - s->prevOut) * s->invUpSlide);

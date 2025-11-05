@@ -51,31 +51,31 @@ extern "C" {
      @brief Free a t808Cowbell from its mempool.
      @param cowbell A pointer to the t808Cowbell to free.
      
-     @fn Lfloat   t808Cowbell_tick            (t808Cowbell* const)
+     @fn float   t808Cowbell_tick            (t808Cowbell* const)
      @brief
      @param cowbell A pointer to the relevant t808Cowbell.
      
-     @fn void    t808Cowbell_on              (t808Cowbell* const, Lfloat vel)
+     @fn void    t808Cowbell_on              (t808Cowbell* const, float vel)
      @brief
      @param cowbell A pointer to the relevant t808Cowbell.
      
-     @fn void    t808Cowbell_setDecay        (t808Cowbell* const, Lfloat decay)
+     @fn void    t808Cowbell_setDecay        (t808Cowbell* const, float decay)
      @brief
      @param cowbell A pointer to the relevant t808Cowbell.
      
-     @fn void    t808Cowbell_setHighpassFreq (t808Cowbell* const, Lfloat freq)
+     @fn void    t808Cowbell_setHighpassFreq (t808Cowbell* const, float freq)
      @brief
      @param cowbell A pointer to the relevant t808Cowbell.
      
-     @fn void    t808Cowbell_setBandpassFreq (t808Cowbell* const, Lfloat freq)
+     @fn void    t808Cowbell_setBandpassFreq (t808Cowbell* const, float freq)
      @brief
      @param cowbell A pointer to the relevant t808Cowbell.
      
-     @fn void    t808Cowbell_setFreq         (t808Cowbell* const, Lfloat freq)
+     @fn void    t808Cowbell_setFreq         (t808Cowbell* const, float freq)
      @brief
      @param cowbell A pointer to the relevant t808Cowbell.
      
-     @fn void    t808Cowbell_setOscMix       (t808Cowbell* const, Lfloat oscMix)
+     @fn void    t808Cowbell_setOscMix       (t808Cowbell* const, float oscMix)
      @brief
      @param cowbell A pointer to the relevant t808Cowbell.
      
@@ -96,8 +96,8 @@ extern "C" {
         tEnvelope*  envStick;
         tEnvelope*  envFilter;
         tHighpass*  highpass;
-        Lfloat oscMix;
-        Lfloat filterCutoff;
+        float oscMix;
+        float filterCutoff;
         uint8_t useStick;
     } t808Cowbell;
 
@@ -105,16 +105,16 @@ extern "C" {
     void    t808Cowbell_initToPool      (t808Cowbell** const, int useStick, tMempool** const);
     void    t808Cowbell_free            (t808Cowbell** const);
     
-    Lfloat  t808Cowbell_tick            (t808Cowbell* const);
+    float  t808Cowbell_tick            (t808Cowbell* const);
 
-    void    t808Cowbell_on              (t808Cowbell* const, Lfloat vel);
-    void    t808Cowbell_setDecay        (t808Cowbell* const, Lfloat decay);
-    void    t808Cowbell_setHighpassFreq (t808Cowbell* const, Lfloat freq);
-    void    t808Cowbell_setBandpassFreq (t808Cowbell* const, Lfloat freq);
-    void    t808Cowbell_setFreq         (t808Cowbell* const, Lfloat freq);
-    void    t808Cowbell_setOscMix       (t808Cowbell* const, Lfloat oscMix);
+    void    t808Cowbell_on              (t808Cowbell* const, float vel);
+    void    t808Cowbell_setDecay        (t808Cowbell* const, float decay);
+    void    t808Cowbell_setHighpassFreq (t808Cowbell* const, float freq);
+    void    t808Cowbell_setBandpassFreq (t808Cowbell* const, float freq);
+    void    t808Cowbell_setFreq         (t808Cowbell* const, float freq);
+    void    t808Cowbell_setOscMix       (t808Cowbell* const, float oscMix);
     void    t808Cowbell_setStick        (t808Cowbell* const, int useStick);
-    void    t808Cowbell_setSampleRate   (t808Cowbell* const, Lfloat sr);
+    void    t808Cowbell_setSampleRate   (t808Cowbell* const, float sr);
     
     //==============================================================================
     
@@ -138,51 +138,51 @@ extern "C" {
      @brief Free a t808Hihat from its mempool.
      @param hihat A pointer to the t808Hihat to free.
      
-     @fn Lfloat   t808Hihat_tick                  (t808Hihat* const)
+     @fn float   t808Hihat_tick                  (t808Hihat* const)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_on                    (t808Hihat* const, Lfloat vel)
+     @fn void    t808Hihat_on                    (t808Hihat* const, float vel)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setOscNoiseMix        (t808Hihat* const, Lfloat oscNoiseMix)
+     @fn void    t808Hihat_setOscNoiseMix        (t808Hihat* const, float oscNoiseMix)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setDecay              (t808Hihat* const, Lfloat decay)
+     @fn void    t808Hihat_setDecay              (t808Hihat* const, float decay)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setHighpassFreq       (t808Hihat* const, Lfloat freq)
+     @fn void    t808Hihat_setHighpassFreq       (t808Hihat* const, float freq)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setOscBandpassFreq    (t808Hihat* const, Lfloat freq)
+     @fn void    t808Hihat_setOscBandpassFreq    (t808Hihat* const, float freq)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setOscBandpassQ       (t808Hihat* const hihat, Lfloat Q)
+     @fn void    t808Hihat_setOscBandpassQ       (t808Hihat* const hihat, float Q)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setStickBandPassFreq  (t808Hihat* const, Lfloat freq)
+     @fn void    t808Hihat_setStickBandPassFreq  (t808Hihat* const, float freq)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setStickBandPassQ     (t808Hihat* const hihat, Lfloat Q)
+     @fn void    t808Hihat_setStickBandPassQ     (t808Hihat* const hihat, float Q)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setOscFreq            (t808Hihat* const, Lfloat freq)
+     @fn void    t808Hihat_setOscFreq            (t808Hihat* const, float freq)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setStretch            (t808Hihat* const hihat, Lfloat stretch)
+     @fn void    t808Hihat_setStretch            (t808Hihat* const hihat, float stretch)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_setFM                 (t808Hihat* const hihat, Lfloat FM_amount)
+     @fn void    t808Hihat_setFM                 (t808Hihat* const hihat, float FM_amount)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
     
@@ -203,30 +203,30 @@ extern "C" {
         tHighpass*  highpass;
         tNoise*  stick;
         
-        Lfloat freq;
-        Lfloat stretch;
-        Lfloat FM_amount;
-        Lfloat oscNoiseMix;
+        float freq;
+        float stretch;
+        float FM_amount;
+        float oscNoiseMix;
     } t808Hihat;
 
     void    t808Hihat_init                  (t808Hihat** const, LEAF* const leaf);
     void    t808Hihat_initToPool            (t808Hihat** const, tMempool** const);
     void    t808Hihat_free                  (t808Hihat** const);
     
-    Lfloat  t808Hihat_tick                  (t808Hihat* const);
+    float  t808Hihat_tick                  (t808Hihat* const);
 
-    void    t808Hihat_on                    (t808Hihat* const, Lfloat vel);
-    void    t808Hihat_setOscNoiseMix        (t808Hihat* const, Lfloat oscNoiseMix);
-    void    t808Hihat_setDecay              (t808Hihat* const, Lfloat decay);
-    void    t808Hihat_setHighpassFreq       (t808Hihat* const, Lfloat freq);
-    void    t808Hihat_setOscBandpassFreq    (t808Hihat* const, Lfloat freq);
-    void    t808Hihat_setOscBandpassQ       (t808Hihat* const hihat, Lfloat Q);
-    void    t808Hihat_setStickBandPassFreq  (t808Hihat* const, Lfloat freq);
-    void    t808Hihat_setStickBandPassQ     (t808Hihat* const hihat, Lfloat Q);
-    void    t808Hihat_setOscFreq            (t808Hihat* const, Lfloat freq);
-    void    t808Hihat_setStretch            (t808Hihat* const hihat, Lfloat stretch);
-    void    t808Hihat_setFM                 (t808Hihat* const hihat, Lfloat FM_amount);
-    void    t808Hihat_setSampleRate         (t808Hihat* const, Lfloat sr);
+    void    t808Hihat_on                    (t808Hihat* const, float vel);
+    void    t808Hihat_setOscNoiseMix        (t808Hihat* const, float oscNoiseMix);
+    void    t808Hihat_setDecay              (t808Hihat* const, float decay);
+    void    t808Hihat_setHighpassFreq       (t808Hihat* const, float freq);
+    void    t808Hihat_setOscBandpassFreq    (t808Hihat* const, float freq);
+    void    t808Hihat_setOscBandpassQ       (t808Hihat* const hihat, float Q);
+    void    t808Hihat_setStickBandPassFreq  (t808Hihat* const, float freq);
+    void    t808Hihat_setStickBandPassQ     (t808Hihat* const hihat, float Q);
+    void    t808Hihat_setOscFreq            (t808Hihat* const, float freq);
+    void    t808Hihat_setStretch            (t808Hihat* const hihat, float stretch);
+    void    t808Hihat_setFM                 (t808Hihat* const hihat, float FM_amount);
+    void    t808Hihat_setSampleRate         (t808Hihat* const, float sr);
     
     //==============================================================================
     
@@ -250,43 +250,43 @@ extern "C" {
      @brief Free a t808Snare from its mempool.
      @param snare A pointer to the t808Snare to free.
      
-     @fn Lfloat   t808Snare_tick                  (t808Snare* const)
+     @fn float   t808Snare_tick                  (t808Snare* const)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_on                    (t808Snare* const, Lfloat vel)
+     @fn void    t808Snare_on                    (t808Snare* const, float vel)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_setTone1Freq          (t808Snare* const, Lfloat freq)
+     @fn void    t808Snare_setTone1Freq          (t808Snare* const, float freq)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_setTone2Freq          (t808Snare* const, Lfloat freq)
+     @fn void    t808Snare_setTone2Freq          (t808Snare* const, float freq)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_setTone1Decay         (t808Snare* const, Lfloat decay)
+     @fn void    t808Snare_setTone1Decay         (t808Snare* const, float decay)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_setTone2Decay         (t808Snare* const, Lfloat decay)
+     @fn void    t808Snare_setTone2Decay         (t808Snare* const, float decay)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_setNoiseDecay         (t808Snare* const, Lfloat decay)
+     @fn void    t808Snare_setNoiseDecay         (t808Snare* const, float decay)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_setToneNoiseMix       (t808Snare* const, Lfloat toneNoiseMix)
+     @fn void    t808Snare_setToneNoiseMix       (t808Snare* const, float toneNoiseMix)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_setNoiseFilterFreq    (t808Snare* const, Lfloat noiseFilterFreq)
+     @fn void    t808Snare_setNoiseFilterFreq    (t808Snare* const, float noiseFilterFreq)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_setNoiseFilterQ       (t808Snare* const, Lfloat noiseFilterQ)
+     @fn void    t808Snare_setNoiseFilterQ       (t808Snare* const, float noiseFilterQ)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
@@ -307,32 +307,32 @@ extern "C" {
         tEnvelope*  toneEnvFilter[2];
         tEnvelope*  noiseEnvFilter;
         
-        Lfloat toneGain[2];
-        Lfloat noiseGain;
+        float toneGain[2];
+        float noiseGain;
         
-        Lfloat toneNoiseMix;
+        float toneNoiseMix;
         
-        Lfloat tone1Freq, tone2Freq;
+        float tone1Freq, tone2Freq;
         
-        Lfloat noiseFilterFreq;
+        float noiseFilterFreq;
     } t808Snare;
 
     void    t808Snare_init                  (t808Snare** const, LEAF* const leaf);
     void    t808Snare_initToPool            (t808Snare** const, tMempool** const);
     void    t808Snare_free                  (t808Snare** const);
     
-    Lfloat  t808Snare_tick                  (t808Snare* const);
+    float  t808Snare_tick                  (t808Snare* const);
 
-    void    t808Snare_on                    (t808Snare* const, Lfloat vel);
-    void    t808Snare_setTone1Freq          (t808Snare* const, Lfloat freq);
-    void    t808Snare_setTone2Freq          (t808Snare* const, Lfloat freq);
-    void    t808Snare_setTone1Decay         (t808Snare* const, Lfloat decay);
-    void    t808Snare_setTone2Decay         (t808Snare* const, Lfloat decay);
-    void    t808Snare_setNoiseDecay         (t808Snare* const, Lfloat decay);
-    void    t808Snare_setToneNoiseMix       (t808Snare* const, Lfloat toneNoiseMix);
-    void    t808Snare_setNoiseFilterFreq    (t808Snare* const, Lfloat noiseFilterFreq);
-    void    t808Snare_setNoiseFilterQ       (t808Snare* const, Lfloat noiseFilterQ);
-    void    t808Snare_setSampleRate         (t808Snare* const, Lfloat sr);
+    void    t808Snare_on                    (t808Snare* const, float vel);
+    void    t808Snare_setTone1Freq          (t808Snare* const, float freq);
+    void    t808Snare_setTone2Freq          (t808Snare* const, float freq);
+    void    t808Snare_setTone1Decay         (t808Snare* const, float decay);
+    void    t808Snare_setTone2Decay         (t808Snare* const, float decay);
+    void    t808Snare_setNoiseDecay         (t808Snare* const, float decay);
+    void    t808Snare_setToneNoiseMix       (t808Snare* const, float toneNoiseMix);
+    void    t808Snare_setNoiseFilterFreq    (t808Snare* const, float noiseFilterFreq);
+    void    t808Snare_setNoiseFilterQ       (t808Snare* const, float noiseFilterQ);
+    void    t808Snare_setSampleRate         (t808Snare* const, float sr);
     
     //==============================================================================
      //==============================================================================
@@ -357,43 +357,43 @@ extern "C" {
      @brief Free a t808SnareSmall from its mempool.
      @param snare A pointer to the t808SnareSmall to free.
      
-     @fn Lfloat   t808SnareSmall_tick                  (t808SnareSmall* const)
+     @fn float   t808SnareSmall_tick                  (t808SnareSmall* const)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_on                    (t808SnareSmall* const, Lfloat vel)
+     @fn void    t808SnareSmall_on                    (t808SnareSmall* const, float vel)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_setTone1Freq          (t808SnareSmall* const, Lfloat freq)
+     @fn void    t808SnareSmall_setTone1Freq          (t808SnareSmall* const, float freq)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_setTone2Freq          (t808SnareSmall* const, Lfloat freq)
+     @fn void    t808SnareSmall_setTone2Freq          (t808SnareSmall* const, float freq)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_setTone1Decay         (t808SnareSmall* const, Lfloat decay)
+     @fn void    t808SnareSmall_setTone1Decay         (t808SnareSmall* const, float decay)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_setTone2Decay         (t808SnareSmall* const, Lfloat decay)
+     @fn void    t808SnareSmall_setTone2Decay         (t808SnareSmall* const, float decay)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_setNoiseDecay         (t808SnareSmall* const, Lfloat decay)
+     @fn void    t808SnareSmall_setNoiseDecay         (t808SnareSmall* const, float decay)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_setToneNoiseMix       (t808SnareSmall* const, Lfloat toneNoiseMix)
+     @fn void    t808SnareSmall_setToneNoiseMix       (t808SnareSmall* const, float toneNoiseMix)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_setNoiseFilterFreq    (t808SnareSmall* const, Lfloat noiseFilterFreq)
+     @fn void    t808SnareSmall_setNoiseFilterFreq    (t808SnareSmall* const, float noiseFilterFreq)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_setNoiseFilterQ       (t808SnareSmall* const, Lfloat noiseFilterQ)
+     @fn void    t808SnareSmall_setNoiseFilterQ       (t808SnareSmall* const, float noiseFilterQ)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
@@ -414,32 +414,32 @@ extern "C" {
         tADSRS*  toneEnvFilter[2];
         tADSRS*  noiseEnvFilter;
         
-        Lfloat toneGain[2];
-        Lfloat noiseGain;
+        float toneGain[2];
+        float noiseGain;
         
-        Lfloat toneNoiseMix;
+        float toneNoiseMix;
         
-        Lfloat tone1Freq, tone2Freq;
+        float tone1Freq, tone2Freq;
         
-        Lfloat noiseFilterFreq;
+        float noiseFilterFreq;
     } t808SnareSmall;
 
     void    t808SnareSmall_init                  (t808SnareSmall** const, LEAF* const leaf);
     void    t808SnareSmall_initToPool            (t808SnareSmall** const, tMempool** const);
     void    t808SnareSmall_free                  (t808SnareSmall** const);
     
-    Lfloat  t808SnareSmall_tick                  (t808SnareSmall* const);
+    float  t808SnareSmall_tick                  (t808SnareSmall* const);
 
-    void    t808SnareSmall_on                    (t808SnareSmall* const, Lfloat vel);
-    void    t808SnareSmall_setTone1Freq          (t808SnareSmall* const, Lfloat freq);
-    void    t808SnareSmall_setTone2Freq          (t808SnareSmall* const, Lfloat freq);
-    void    t808SnareSmall_setTone1Decay         (t808SnareSmall* const, Lfloat decay);
-    void    t808SnareSmall_setTone2Decay         (t808SnareSmall* const, Lfloat decay);
-    void    t808SnareSmall_setNoiseDecay         (t808SnareSmall* const, Lfloat decay);
-    void    t808SnareSmall_setToneNoiseMix       (t808SnareSmall* const, Lfloat toneNoiseMix);
-    void    t808SnareSmall_setNoiseFilterFreq    (t808SnareSmall* const, Lfloat noiseFilterFreq);
-    void    t808SnareSmall_setNoiseFilterQ       (t808SnareSmall* const, Lfloat noiseFilterQ);
-    void    t808SnareSmall_setSampleRate         (t808SnareSmall* const, Lfloat sr);
+    void    t808SnareSmall_on                    (t808SnareSmall* const, float vel);
+    void    t808SnareSmall_setTone1Freq          (t808SnareSmall* const, float freq);
+    void    t808SnareSmall_setTone2Freq          (t808SnareSmall* const, float freq);
+    void    t808SnareSmall_setTone1Decay         (t808SnareSmall* const, float decay);
+    void    t808SnareSmall_setTone2Decay         (t808SnareSmall* const, float decay);
+    void    t808SnareSmall_setNoiseDecay         (t808SnareSmall* const, float decay);
+    void    t808SnareSmall_setToneNoiseMix       (t808SnareSmall* const, float toneNoiseMix);
+    void    t808SnareSmall_setNoiseFilterFreq    (t808SnareSmall* const, float noiseFilterFreq);
+    void    t808SnareSmall_setNoiseFilterQ       (t808SnareSmall* const, float noiseFilterQ);
+    void    t808SnareSmall_setSampleRate         (t808SnareSmall* const, float sr);
     
     //==============================================================================
     /*!
@@ -462,43 +462,43 @@ extern "C" {
      @brief Free a t808Kick from its mempool.
      @param kick A pointer to the t808Kick to free.
      
-     @fn Lfloat   t808Kick_tick               (t808Kick* const)
+     @fn float   t808Kick_tick               (t808Kick* const)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_on                 (t808Kick* const, Lfloat vel)
+     @fn void    t808Kick_on                 (t808Kick* const, float vel)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_setToneFreq        (t808Kick* const, Lfloat freq)
+     @fn void    t808Kick_setToneFreq        (t808Kick* const, float freq)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_setToneDecay       (t808Kick* const, Lfloat decay)
+     @fn void    t808Kick_setToneDecay       (t808Kick* const, float decay)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_setNoiseDecay      (t808Kick* const, Lfloat decay)
+     @fn void    t808Kick_setNoiseDecay      (t808Kick* const, float decay)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_setSighAmount      (t808Kick* const, Lfloat sigh)
+     @fn void    t808Kick_setSighAmount      (t808Kick* const, float sigh)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_setChirpAmount     (t808Kick* const, Lfloat chirp)
+     @fn void    t808Kick_setChirpAmount     (t808Kick* const, float chirp)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_setToneNoiseMix    (t808Kick* const, Lfloat toneNoiseMix)
+     @fn void    t808Kick_setToneNoiseMix    (t808Kick* const, float toneNoiseMix)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_setNoiseFilterFreq (t808Kick* const, Lfloat noiseFilterFreq)
+     @fn void    t808Kick_setNoiseFilterFreq (t808Kick* const, float noiseFilterFreq)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_setNoiseFilterQ    (t808Kick* const, Lfloat noiseFilterQ)
+     @fn void    t808Kick_setNoiseFilterQ    (t808Kick* const, float noiseFilterQ)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
@@ -518,31 +518,31 @@ extern "C" {
         tEnvelope*  noiseEnvGain;
         tEnvelope*  toneEnvFilter;
         
-        Lfloat toneGain;
-        Lfloat noiseGain;
+        float toneGain;
+        float noiseGain;
         
-        Lfloat toneInitialFreq;
-        Lfloat sighAmountInHz;
-        Lfloat chirpRatioMinusOne;
-        Lfloat noiseFilterFreq;
+        float toneInitialFreq;
+        float sighAmountInHz;
+        float chirpRatioMinusOne;
+        float noiseFilterFreq;
     } t808Kick;
 
     void    t808Kick_init               (t808Kick** const, LEAF* const leaf);
     void    t808Kick_initToPool         (t808Kick** const, tMempool** const);
     void    t808Kick_free               (t808Kick** const);
     
-    Lfloat  t808Kick_tick               (t808Kick* const);
+    float  t808Kick_tick               (t808Kick* const);
 
-    void    t808Kick_on                 (t808Kick* const, Lfloat vel);
-    void    t808Kick_setToneFreq        (t808Kick* const, Lfloat freq);
-    void    t808Kick_setToneDecay       (t808Kick* const, Lfloat decay);
-    void    t808Kick_setNoiseDecay      (t808Kick* const, Lfloat decay);
-    void    t808Kick_setSighAmount      (t808Kick* const, Lfloat sigh);
-    void    t808Kick_setChirpAmount     (t808Kick* const, Lfloat chirp);
-    void    t808Kick_setToneNoiseMix    (t808Kick* const, Lfloat toneNoiseMix);
-    void    t808Kick_setNoiseFilterFreq (t808Kick* const, Lfloat noiseFilterFreq);
-    void    t808Kick_setNoiseFilterQ    (t808Kick* const, Lfloat noiseFilterQ);
-    void    t808kick_setSampleRate      (t808Kick* const, Lfloat sr);
+    void    t808Kick_on                 (t808Kick* const, float vel);
+    void    t808Kick_setToneFreq        (t808Kick* const, float freq);
+    void    t808Kick_setToneDecay       (t808Kick* const, float decay);
+    void    t808Kick_setNoiseDecay      (t808Kick* const, float decay);
+    void    t808Kick_setSighAmount      (t808Kick* const, float sigh);
+    void    t808Kick_setChirpAmount     (t808Kick* const, float chirp);
+    void    t808Kick_setToneNoiseMix    (t808Kick* const, float toneNoiseMix);
+    void    t808Kick_setNoiseFilterFreq (t808Kick* const, float noiseFilterFreq);
+    void    t808Kick_setNoiseFilterQ    (t808Kick* const, float noiseFilterQ);
+    void    t808kick_setSampleRate      (t808Kick* const, float sr);
     
     //==============================================================================
 
@@ -567,43 +567,43 @@ extern "C" {
      @brief Free a t808KickSmall from its mempool.
      @param kick A pointer to the t808KickSmall to free.
      
-     @fn Lfloat   t808KickSmall_tick               (t808KickSmall* const)
+     @fn float   t808KickSmall_tick               (t808KickSmall* const)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_on                 (t808KickSmall* const, Lfloat vel)
+     @fn void    t808KickSmall_on                 (t808KickSmall* const, float vel)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_setToneFreq        (t808KickSmall* const, Lfloat freq)
+     @fn void    t808KickSmall_setToneFreq        (t808KickSmall* const, float freq)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_setToneDecay       (t808KickSmall* const, Lfloat decay)
+     @fn void    t808KickSmall_setToneDecay       (t808KickSmall* const, float decay)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_setNoiseDecay      (t808KickSmall* const, Lfloat decay)
+     @fn void    t808KickSmall_setNoiseDecay      (t808KickSmall* const, float decay)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_setSighAmount      (t808KickSmall* const, Lfloat sigh)
+     @fn void    t808KickSmall_setSighAmount      (t808KickSmall* const, float sigh)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_setChirpAmount     (t808KickSmall* const, Lfloat chirp)
+     @fn void    t808KickSmall_setChirpAmount     (t808KickSmall* const, float chirp)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_setToneNoiseMix    (t808KickSmall* const, Lfloat toneNoiseMix)
+     @fn void    t808KickSmall_setToneNoiseMix    (t808KickSmall* const, float toneNoiseMix)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_setNoiseFilterFreq (t808KickSmall* const, Lfloat noiseFilterFreq)
+     @fn void    t808KickSmall_setNoiseFilterFreq (t808KickSmall* const, float noiseFilterFreq)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_setNoiseFilterQ    (t808KickSmall* const, Lfloat noiseFilterQ)
+     @fn void    t808KickSmall_setNoiseFilterQ    (t808KickSmall* const, float noiseFilterQ)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
@@ -623,31 +623,31 @@ extern "C" {
         tADSRS*  noiseEnvGain;
         tADSRS*  toneEnvFilter;
         
-        Lfloat toneGain;
-        Lfloat noiseGain;
+        float toneGain;
+        float noiseGain;
         
-        Lfloat toneInitialFreq;
-        Lfloat sighAmountInHz;
-        Lfloat chirpRatioMinusOne;
-        Lfloat noiseFilterFreq;
+        float toneInitialFreq;
+        float sighAmountInHz;
+        float chirpRatioMinusOne;
+        float noiseFilterFreq;
     } t808KickSmall;
 
     void    t808KickSmall_init               (t808KickSmall** const, LEAF* const leaf);
     void    t808KickSmall_initToPool         (t808KickSmall** const, tMempool** const);
     void    t808KickSmall_free               (t808KickSmall** const);
     
-    Lfloat  t808KickSmall_tick               (t808KickSmall* const);
+    float  t808KickSmall_tick               (t808KickSmall* const);
 
-    void    t808KickSmall_on                 (t808KickSmall* const, Lfloat vel);
-    void    t808KickSmall_setToneFreq        (t808KickSmall* const, Lfloat freq);
-    void    t808KickSmall_setToneDecay       (t808KickSmall* const, Lfloat decay);
-    void    t808KickSmall_setNoiseDecay      (t808KickSmall* const, Lfloat decay);
-    void    t808KickSmall_setSighAmount      (t808KickSmall* const, Lfloat sigh);
-    void    t808KickSmall_setChirpAmount     (t808KickSmall* const, Lfloat chirp);
-    void    t808KickSmall_setToneNoiseMix    (t808KickSmall* const, Lfloat toneNoiseMix);
-    void    t808KickSmall_setNoiseFilterFreq (t808KickSmall* const, Lfloat noiseFilterFreq);
-    void    t808KickSmall_setNoiseFilterQ    (t808KickSmall* const, Lfloat noiseFilterQ);
-    void    t808KickSmall_setSampleRate      (t808KickSmall* const, Lfloat sr);
+    void    t808KickSmall_on                 (t808KickSmall* const, float vel);
+    void    t808KickSmall_setToneFreq        (t808KickSmall* const, float freq);
+    void    t808KickSmall_setToneDecay       (t808KickSmall* const, float decay);
+    void    t808KickSmall_setNoiseDecay      (t808KickSmall* const, float decay);
+    void    t808KickSmall_setSighAmount      (t808KickSmall* const, float sigh);
+    void    t808KickSmall_setChirpAmount     (t808KickSmall* const, float chirp);
+    void    t808KickSmall_setToneNoiseMix    (t808KickSmall* const, float toneNoiseMix);
+    void    t808KickSmall_setNoiseFilterFreq (t808KickSmall* const, float noiseFilterFreq);
+    void    t808KickSmall_setNoiseFilterQ    (t808KickSmall* const, float noiseFilterQ);
+    void    t808KickSmall_setSampleRate      (t808KickSmall* const, float sr);
     
     //==============================================================================
     

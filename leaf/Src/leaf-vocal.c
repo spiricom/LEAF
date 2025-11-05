@@ -51,30 +51,30 @@ static inline int v_isnan(float f)
 
 void glottis_setup_waveform(glottis* const glot)
 {
-    Lfloat Rd;
-    Lfloat Ra;
-    Lfloat Rk;
-    Lfloat Rg;
+    float Rd;
+    float Ra;
+    float Rk;
+    float Rg;
 
-    Lfloat Ta;
-    Lfloat Tp;
-    Lfloat Te;
+    float Ta;
+    float Tp;
+    float Te;
 
-    Lfloat epsilon;
-    Lfloat shift;
-    Lfloat delta;
-    Lfloat rhs_integral;
+    float epsilon;
+    float shift;
+    float delta;
+    float rhs_integral;
 
-    Lfloat lower_integral;
-    Lfloat upper_integral;
+    float lower_integral;
+    float upper_integral;
 
-    Lfloat omega;
-    Lfloat s;
-    Lfloat y;
-    Lfloat z;
+    float omega;
+    float s;
+    float y;
+    float z;
 
-    Lfloat alpha;
-    Lfloat E0;
+    float alpha;
+    float E0;
 
 
     glot->Rd = 3.0f * (1.0f - glot->tenseness);
@@ -91,18 +91,18 @@ void glottis_setup_waveform(glottis* const glot)
 
 
     Ta = Ra;
-    Tp = (Lfloat)1.0f / (2.0f*Rg);
+    Tp = (float)1.0f / (2.0f*Rg);
     Te = Tp + Tp*Rk;
 
 
 
-    epsilon = (Lfloat)1.0f / Ta;
+    epsilon = (float)1.0f / Ta;
     shift = fasterexpf(-epsilon * (1.0f - Te));
     delta = 1.0f - shift;
 
 
 
-    rhs_integral = (Lfloat)(1.0f/epsilon) * (shift-1.0f) + (1.0f-Te)*shift;
+    rhs_integral = (float)(1.0f/epsilon) * (shift-1.0f) + (1.0f-Te)*shift;
     rhs_integral = rhs_integral / delta;
     lower_integral = - (Te - Tp) / 2.0f + rhs_integral;
     upper_integral = -lower_integral;
@@ -153,14 +153,14 @@ void glottis_free(glottis** const glo)
 }
 
 
-Lfloat glottis_compute(glottis* const glot)
+float glottis_compute(glottis* const glot)
 {
 	LEAF* leaf = glot->mempool->leaf;
-	Lfloat out;
-    Lfloat aspiration;
-    Lfloat noise;
-    Lfloat t;
-    Lfloat intensity;
+	float out;
+    float aspiration;
+    float noise;
+    float t;
+    float intensity;
 
     out = 0.0f;
     intensity = 1.0f;
@@ -188,7 +188,7 @@ Lfloat glottis_compute(glottis* const glot)
     noise = (2.0f * leaf->random()) - 1.0f;
 
 #ifdef ARM_MATH_CM7
-    Lfloat sqr = 0.0f;
+    float sqr = 0.0f;
     arm_sqrt_f32(glot->tenseness, &sqr);
     aspiration = intensity * (1.0f - sqr) * 0.3f * noise;
 #else
@@ -215,8 +215,8 @@ void tract_initToPool(tract** const t,  int numTractSections, int maxNumTractSec
 	LEAF* leaf = m->leaf;
 
 	int i;
-    Lfloat diameter, d; /* needed to set up diameter arrays */
-    Lfloat n = numTractSections;
+    float diameter, d; /* needed to set up diameter arrays */
+    float n = numTractSections;
     tr->maxNumTractSections = maxNumTractSections;
     tr->n = n; //44
     tr->invN = 1.0f / n;
@@ -251,32 +251,32 @@ void tract_initToPool(tract** const t,  int numTractSections, int maxNumTractSec
 	tr->turbuluencePointDiameter[0] = 1.5f;
 	tr->turbuluencePointDiameter[1] = 1.5f;
 
-    Lfloat invNoseLength = 1.0f / tr->nose_length;
+    float invNoseLength = 1.0f / tr->nose_length;
 
-    tr->diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->rest_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->target_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->new_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->L = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->R = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->reflection = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
-    tr->new_reflection = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
-    tr->junction_outL = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
-    tr->junction_outR = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
-    tr->A = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->noseL = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->noseR = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->nose_junc_outL = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
-    tr->nose_junc_outR = (Lfloat*) mpool_calloc(sizeof(Lfloat) * (maxNumTractSections + 1), m);
-    tr->nose_diameter = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->nose_reflection = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
-    tr->noseA = (Lfloat*) mpool_calloc(sizeof(Lfloat) * maxNumTractSections, m);
+    tr->diameter = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->rest_diameter = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->target_diameter = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->new_diameter = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->L = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->R = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->reflection = (float*) mpool_calloc(sizeof(float) * (maxNumTractSections + 1), m);
+    tr->new_reflection = (float*) mpool_calloc(sizeof(float) * (maxNumTractSections + 1), m);
+    tr->junction_outL = (float*) mpool_calloc(sizeof(float) * (maxNumTractSections + 1), m);
+    tr->junction_outR = (float*) mpool_calloc(sizeof(float) * (maxNumTractSections + 1), m);
+    tr->A = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->noseL = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->noseR = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->nose_junc_outL = (float*) mpool_calloc(sizeof(float) * (maxNumTractSections + 1), m);
+    tr->nose_junc_outR = (float*) mpool_calloc(sizeof(float) * (maxNumTractSections + 1), m);
+    tr->nose_diameter = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->nose_reflection = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
+    tr->noseA = (float*) mpool_calloc(sizeof(float) * maxNumTractSections, m);
 
     for(i = 0; i < tr->n; i++) {
         diameter = 0;
         if(i < (int)(((7.0f*tr->invN) * tr->n) - 0.5f)) { //was 7
             diameter = 0.6f;
-        } else if( i < (int)((12.0f*tr->invN) * (Lfloat)tr->n)) { //was 12
+        } else if( i < (int)((12.0f*tr->invN) * (float)tr->n)) { //was 12
             diameter = 1.1f;
         } else {
             diameter = 1.5f;
@@ -290,7 +290,7 @@ void tract_initToPool(tract** const t,  int numTractSections, int maxNumTractSec
     }
 
 	for(i = 0; i < tr->nose_length; i++) {
-		d = 2.0f * ((Lfloat)i * invNoseLength);
+		d = 2.0f * ((float)i * invNoseLength);
 		if(d < 1.0f) {
 			diameter = 0.4f + 1.6f * d;
 		} else {
@@ -336,11 +336,11 @@ void tract_free(tract** const t)
 void tract_calculate_reflections(tract* const tr)
 {
 	int i;
-    Lfloat  sum;
+    float  sum;
 
     for(i = 0; i < tr->n; i++)
     {
-    	Lfloat scaledDiameter = tr->diameter[i] * tr->diameterScale;
+    	float scaledDiameter = tr->diameter[i] * tr->diameterScale;
         tr->A[i] = scaledDiameter * scaledDiameter;
         /* Calculate area from diameter squared*/
     }
@@ -349,7 +349,7 @@ void tract_calculate_reflections(tract* const tr)
     {
         tr->reflection[i] = tr->new_reflection[i];
 
-        Lfloat divisorTest = (tr->A[i - 1] + tr->A[i]);
+        float divisorTest = (tr->A[i - 1] + tr->A[i]);
 
         if(tr->A[i] <= 0.0000001f)
         {
@@ -373,17 +373,17 @@ void tract_calculate_reflections(tract* const tr)
     {
     	sum = 0.001f;
     }
-    Lfloat invSum = 1.0f / sum;
-    tr->new_reflection_left = (Lfloat)(2.0f * tr->A[tr->nose_start] - sum) * invSum;
-    tr->new_reflection_right = (Lfloat)(2.0f * tr->A[tr->nose_start + 1] - sum) * invSum;
-    tr->new_reflection_nose = (Lfloat)(2.0f * tr->noseA[0] - sum) * invSum;
+    float invSum = 1.0f / sum;
+    tr->new_reflection_left = (float)(2.0f * tr->A[tr->nose_start] - sum) * invSum;
+    tr->new_reflection_right = (float)(2.0f * tr->A[tr->nose_start + 1] - sum) * invSum;
+    tr->new_reflection_nose = (float)(2.0f * tr->noseA[0] - sum) * invSum;
 }
 
 void tract_newLength(tract* const tr, int numTractSections)
 {
 	int i;
-	Lfloat diameter, d;
-    Lfloat n;
+	float diameter, d;
+    float n;
     if (numTractSections < tr->maxNumTractSections)
     {
     	n = numTractSections;
@@ -429,7 +429,7 @@ void tract_newLength(tract* const tr, int numTractSections)
         diameter = 0;
         if(i < (int)(((7.0f*tr->invN) * tr->n) - 0.5f)) { //was 7
             diameter = 0.6f;
-        } else if( i < (int)((12.0f*tr->invN) * (Lfloat)tr->n)) { //was 12
+        } else if( i < (int)((12.0f*tr->invN) * (float)tr->n)) { //was 12
             diameter = 1.1f;
         } else {
             diameter = 1.5f;
@@ -451,9 +451,9 @@ void tract_newLength(tract* const tr, int numTractSections)
     {
     	tr->nose_length = 0.01f;
     }
-    Lfloat invNoseLength = 1.0f / tr->nose_length;
+    float invNoseLength = 1.0f / tr->nose_length;
 	for(i = 0; i < tr->nose_length; i++) {
-		d = 2.0f * ((Lfloat)i * invNoseLength);
+		d = 2.0f * ((float)i * invNoseLength);
 		if(d < 1.0f) {
 			diameter = 0.4f + 1.6f * d;
 		} else {
@@ -484,10 +484,10 @@ void tract_newLength(tract* const tr, int numTractSections)
 
 void tract_reshape(tract* const tr)
 {
-	Lfloat amount;
-    Lfloat slow_return;
-    Lfloat diameter;
-    Lfloat target_diameter;
+	float amount;
+    float slow_return;
+    float diameter;
+    float target_diameter;
     int i;
     //int current_obstruction;
 
@@ -506,7 +506,7 @@ void tract_reshape(tract* const tr)
         if(i < tr->nose_start) slow_return = 0.6f;
         else if(i >= tr->tip_start) slow_return = 1.0f;
         else {
-        	Lfloat tempDiv= (tr->tip_start - tr->nose_start);
+        	float tempDiv= (tr->tip_start - tr->nose_start);
 
             slow_return =
                 0.6f+0.4f*(i - tr->nose_start)/tempDiv;
@@ -534,20 +534,20 @@ void tract_addTurbulenceNoise(tract* const tr)
 {
 	for (int i = 0; i < 2; i++)
 	{
-		Lfloat turbulenceNoise = tr->TnoiseGain * tSVF_tick(tr->fricativeNoiseFilt[i], tNoise_tick(tr->whiteNoise) * 0.20f);
+		float turbulenceNoise = tr->TnoiseGain * tSVF_tick(tr->fricativeNoiseFilt[i], tNoise_tick(tr->whiteNoise) * 0.20f);
 		tract_addTurbulenceNoiseAtPosition(tr, turbulenceNoise, tr->turbuluencePointPosition[i], tr->turbuluencePointDiameter[i]);
 	}
 }
 
-void tract_addTurbulenceNoiseAtPosition(tract* const tr, Lfloat turbulenceNoise, Lfloat position, Lfloat diameter)
+void tract_addTurbulenceNoiseAtPosition(tract* const tr, float turbulenceNoise, float position, float diameter)
 {
 	int i = (int)floorf(position);
-	Lfloat delta = position - i;
-	//Lfloat mapped = LEAF_map(diameter, 0.38f, 0.245f, 0.0f, 1.0f);
-	Lfloat thinness0 = LEAF_clip(0.0f, 8.0f * (0.09f - diameter),  1.0f);
-	Lfloat openness = LEAF_clip(0.0f, 30.0f * (diameter), 1.0f);
-	Lfloat noise0 = turbulenceNoise * (1.0f - delta) * thinness0 * openness * 0.5f;
-	Lfloat noise1 = turbulenceNoise * delta * thinness0 * openness * 0.5f;
+	float delta = position - i;
+	//float mapped = LEAF_map(diameter, 0.38f, 0.245f, 0.0f, 1.0f);
+	float thinness0 = LEAF_clip(0.0f, 8.0f * (0.09f - diameter),  1.0f);
+	float openness = LEAF_clip(0.0f, 30.0f * (diameter), 1.0f);
+	float noise0 = turbulenceNoise * (1.0f - delta) * thinness0 * openness * 0.5f;
+	float noise1 = turbulenceNoise * delta * thinness0 * openness * 0.5f;
 
 	if ((i + 1) < tr->n) {
 		tr->R[i + 1] += noise0;
@@ -560,16 +560,16 @@ void tract_addTurbulenceNoiseAtPosition(tract* const tr, Lfloat turbulenceNoise,
  }
 
 
-void tract_compute(tract* const tr, Lfloat  in, Lfloat  lambda)
+void tract_compute(tract* const tr, float  in, float  lambda)
 {
-	Lfloat  r, w;
+	float  r, w;
     int i;
-    //Lfloat  amp;
+    //float  amp;
     //int current_size;
    // _transient_pool *thepool;
     //_transient *n;
 
-    Lfloat oneMinusLambda = 1.0f - lambda;
+    float oneMinusLambda = 1.0f - lambda;
 
    // thepool = tr->tpool;
 	//current_size = thepool->size;
@@ -587,7 +587,7 @@ void tract_compute(tract* const tr, Lfloat  in, Lfloat  lambda)
 	}
                   */
 
-    Lfloat UVnoise = tNoise_tick(tr->whiteNoise);
+    float UVnoise = tNoise_tick(tr->whiteNoise);
     UVnoise = tSVF_tick(tr->aspirationNoiseFilt,UVnoise);
 
     in = fast_tanh5((UVnoise * tr->AnoiseGain) + (in * (1.0f - tr->AnoiseGain)));
@@ -653,7 +653,7 @@ void tract_calculate_nose_reflections(tract* const tr)
     }
 
     for(i = 1; i < tr->nose_length; i++) {
-    	Lfloat tempDiv = (tr->noseA[i-1] + tr->noseA[i]);
+    	float tempDiv = (tr->noseA[i-1] + tr->noseA[i]);
     	if ((tempDiv <= 0.001f) &&  (tempDiv >= -0.001f))
     	{
     		tempDiv = 0.01f;
@@ -725,10 +725,10 @@ void remove_transient(transient_pool* const pool, unsigned int id)
 
 
 
-Lfloat move_towards(Lfloat current, Lfloat target,
-        Lfloat amt_up, Lfloat amt_down)
+float move_towards(float current, float target,
+        float amt_up, float amt_down)
 {
-    Lfloat tmp;
+    float tmp;
     if(current < target) {
         tmp = current + amt_up;
         return MIN(tmp, target);
@@ -764,20 +764,20 @@ void    tVoc_free(tVoc** const voc)
 	mpool_free((char*)v, v->mempool);
 }
 
-Lfloat   tVoc_tick         (tVoc* const v)
+float   tVoc_tick         (tVoc* const v)
 {
-	Lfloat vocal_output, glot;
-	Lfloat lambda1,lambda2;
+	float vocal_output, glot;
+	float lambda1,lambda2;
 
 	if(v->counter == 0) {
 		tract_reshape(v->tr);
 		tract_calculate_reflections(v->tr);
 	}
 
-	//Lfloat finalOutput = v->buf[v->counter];
+	//float finalOutput = v->buf[v->counter];
 	vocal_output = 0.0f;
-	lambda1 = ((Lfloat) v->counter) * 0.015625f;// /64
-	lambda2 = (Lfloat) (v->counter + 0.5f) * 0.015625f; //   /64
+	lambda1 = ((float) v->counter) * 0.015625f;// /64
+	lambda2 = (float) (v->counter + 0.5f) * 0.015625f; //   /64
 	glot = glottis_compute(v->glot);
 
 	tract_compute(v->tr, glot, lambda1);
@@ -798,10 +798,10 @@ Lfloat   tVoc_tick         (tVoc* const v)
 	return vocal_output;
 }
 
-void    tVoc_tractCompute     (tVoc* const v, Lfloat *in, Lfloat *out)
+void    tVoc_tractCompute     (tVoc* const v, float *in, float *out)
 {
-	Lfloat vocal_output;
-    Lfloat lambda1, lambda2;
+	float vocal_output;
+    float lambda1, lambda2;
 
     if(v->counter == 0) {
         tract_reshape(v->tr);
@@ -809,8 +809,8 @@ void    tVoc_tractCompute     (tVoc* const v, Lfloat *in, Lfloat *out)
     }
 
     vocal_output = 0.0f;
-    lambda1 = (Lfloat) v->counter * 0.015625f; // /64
-    lambda2 = (Lfloat) (v->counter + 0.5f) * 0.015625f;// /64
+    lambda1 = (float) v->counter * 0.015625f; // /64
+    lambda2 = (float) (v->counter + 0.5f) * 0.015625f;// /64
 
     tract_compute(v->tr, *in, lambda1);
     vocal_output += v->tr->lip_output + v->tr->nose_output;
@@ -825,32 +825,32 @@ void    tVoc_setDoubleComputeFlag(tVoc* const v, int doubleCompute)
 {
 	v->doubleCompute = doubleCompute;
 }
-void    tVoc_setSampleRate(tVoc* const v, Lfloat sr)
+void    tVoc_setSampleRate(tVoc* const v, float sr)
 {
 	v->sampleRate = sr;
 }
 
-void    tVoc_setFreq      (tVoc* const v, Lfloat freq)
+void    tVoc_setFreq      (tVoc* const v, float freq)
 {
 	v->glot->freq = freq;
 }
 
-Lfloat * tVoc_get_frequency_ptr(tVoc* const v)
+float * tVoc_get_frequency_ptr(tVoc* const v)
 {
 	return &v->glot->freq;
 }
 
-Lfloat* tVoc_get_tract_diameters(tVoc* const v)
+float* tVoc_get_tract_diameters(tVoc* const v)
 {
 	return v->tr->target_diameter;
 }
 
-Lfloat* tVoc_get_tract_rest_diameters(tVoc* const v)
+float* tVoc_get_tract_rest_diameters(tVoc* const v)
 {
 	return v->tr->rest_diameter;
 }
 
-Lfloat* tVoc_get_current_tract_diameters(tVoc* const v)
+float* tVoc_get_current_tract_diameters(tVoc* const v)
 {
 	return v->tr->diameter;
 }
@@ -861,7 +861,7 @@ int tVoc_get_tract_size(tVoc* const v)
 }
 
 
-Lfloat* tVoc_get_nose_diameters(tVoc* const v)
+float* tVoc_get_nose_diameters(tVoc* const v)
 {
 	return v->tr->nose_diameter;
 }
@@ -871,9 +871,9 @@ int tVoc_get_nose_size(tVoc* const v)
 	return v->tr->nose_length;
 }
 //diameter and index are 0-1.0f
-void tVoc_set_tongue_shape_and_touch(tVoc* const v, Lfloat tongue_index, Lfloat tongue_diameter, Lfloat touch_index, Lfloat touch_diameter)
+void tVoc_set_tongue_shape_and_touch(tVoc* const v, float tongue_index, float tongue_diameter, float touch_index, float touch_diameter)
 {
-	Lfloat *diameters;
+	float *diameters;
 	diameters = tVoc_get_tract_diameters(v);
 	tongue_diameter *= 1.45f;
 	tongue_diameter += 2.05f;
@@ -894,54 +894,54 @@ void tVoc_set_tractLength(tVoc* const v, int newLength)
 	tract_newLength(v->tr, newLength);
 }
 
-void tVoc_set_tenseness(tVoc* const v, Lfloat tenseness)
+void tVoc_set_tenseness(tVoc* const v, float tenseness)
 {
 	v->glot->tenseness = tenseness;
 }
-Lfloat * tVoc_get_tenseness_ptr(tVoc* const v)
+float * tVoc_get_tenseness_ptr(tVoc* const v)
 {
 	return &v->glot->tenseness;
 }
-void tVoc_set_velum(tVoc* const v, Lfloat velum)
+void tVoc_set_velum(tVoc* const v, float velum)
 {
 	v->tr->velum_target = velum;
 }
 
-void tVoc_setTurbulenceNoiseGain(tVoc* const v, Lfloat gain)
+void tVoc_setTurbulenceNoiseGain(tVoc* const v, float gain)
 {
 	v->tr->TnoiseGain = gain;
 }
 
-void tVoc_setAspirationNoiseGain(tVoc* const v, Lfloat gain)
+void tVoc_setAspirationNoiseGain(tVoc* const v, float gain)
 {
 	v->tr->AnoiseGain = gain;
 }
 
-Lfloat * tVoc_get_velum_ptr(tVoc* const v)
+float * tVoc_get_velum_ptr(tVoc* const v)
 {
 	return &v->tr->velum_target;
 }
 
 //0-1
-void tVoc_setAspirationNoiseFilterFreq(tVoc* const v, Lfloat freq)
+void tVoc_setAspirationNoiseFilterFreq(tVoc* const v, float freq)
 {
 	tSVF_setFreqFast(v->tr->aspirationNoiseFilt,freq*30.0f + 60.0f);
 }
 
-void tVoc_setAspirationNoiseFilterQ(tVoc* const v, Lfloat Q)
+void tVoc_setAspirationNoiseFilterQ(tVoc* const v, float Q)
 {
 	tSVF_setQ(v->tr->aspirationNoiseFilt,Q*0.49f + 0.5f);
 }
 
 
 //diameter and index are 0-1.0f
-void tVoc_set_tongue_and_touch_diameters(tVoc* const v, Lfloat tongue_index, Lfloat tongue_diameter, Lfloat touch_index, Lfloat touch_diameter, Lfloat *theDiameters)
+void tVoc_set_tongue_and_touch_diameters(tVoc* const v, float tongue_index, float tongue_diameter, float touch_index, float touch_diameter, float *theDiameters)
 {
 	int i;
-	Lfloat t;
-	Lfloat curve;
+	float t;
+	float curve;
 	//do tongue position
-	Lfloat alpha = 1.0f / (Lfloat)(v->tr->tip_start - v->tr->blade_start);
+	float alpha = 1.0f / (float)(v->tr->tip_start - v->tr->blade_start);
 
 	for (i = 0; i < v->tr->n; i++)
 	{
@@ -949,8 +949,8 @@ void tVoc_set_tongue_and_touch_diameters(tVoc* const v, Lfloat tongue_index, Lfl
 	}
 	for(i = v->tr->blade_start; i < v->tr->lip_start; i++)
 	{
-		t = 1.1f * M_PI * (Lfloat)(tongue_index - i) * alpha;
-		Lfloat fixedTongueDiameter = 2.0f + ((tongue_diameter - 2.0f) * 0.66666666666667f);
+		t = 1.1f * M_PI * (float)(tongue_index - i) * alpha;
+		float fixedTongueDiameter = 2.0f + ((tongue_diameter - 2.0f) * 0.66666666666667f);
 #ifdef ARM_MATH_CM7
 		curve = (1.5f - fixedTongueDiameter + 1.7f) * arm_cos_f32(t);
 #else
@@ -969,24 +969,24 @@ void tVoc_set_tongue_and_touch_diameters(tVoc* const v, Lfloat tongue_index, Lfl
 
 	//now do additional constrictions (touch position)
 	/*
-	Lfloat width=2.0f;
+	float width=2.0f;
 
-	Lfloat twentyfivewidth = 25.0f * v->tr->invN;
-	Lfloat tenwidth = 10.0f * v->tr->invN;
-	Lfloat fivewidth = 5.0f * v->tr->invN;
-	Lfloat normalizedTipStart = v->tr->tip_start*v->tr->invN;
+	float twentyfivewidth = 25.0f * v->tr->invN;
+	float tenwidth = 10.0f * v->tr->invN;
+	float fivewidth = 5.0f * v->tr->invN;
+	float normalizedTipStart = v->tr->tip_start*v->tr->invN;
 	if (touch_index< (twentyfivewidth)) width = tenwidth; //25 in original code
 	else if (touch_index>=normalizedTipStart) width= fivewidth;
 
 	else width = tenwidth-((fivewidth*(touch_index-twentyfivewidth))/(normalizedTipStart-twentyfivewidth));
 
-	Lfloat invWidth = 1.0f / width;
+	float invWidth = 1.0f / width;
 	*/
 
-	Lfloat width=2.0f;
-		Lfloat tenwidth = v->tr->n*0.227272727272727f;
-		Lfloat fivewidth = v->tr->n*0.113636363636364f;
-		Lfloat twentyfivewidth = v->tr->n *0.568181818181818f;
+	float width=2.0f;
+		float tenwidth = v->tr->n*0.227272727272727f;
+		float fivewidth = v->tr->n*0.113636363636364f;
+		float twentyfivewidth = v->tr->n *0.568181818181818f;
 		if (touch_index< (twentyfivewidth)) width = tenwidth; //25 in original code
 		else if (touch_index>=v->tr->tip_start) width= fivewidth;
 		else width = tenwidth-fivewidth*(touch_index-twentyfivewidth)/(v->tr->tip_start-twentyfivewidth);
@@ -994,16 +994,16 @@ void tVoc_set_tongue_and_touch_diameters(tVoc* const v, Lfloat tongue_index, Lfl
 		{
 			width = 1.0f;
 		}
-		Lfloat invWidth = 1.0f / width;
+		float invWidth = 1.0f / width;
 	if ((touch_index < v->tr->n) && (touch_diameter < 3.0f))
 	{
 		int intIndex = roundf(touch_index);
 		for (int i= -ceilf(width)-1.0f; i<width+1.0f; i++)
 		{
 			if (intIndex+i<0 || intIndex+i>=v->tr->n) continue;
-			Lfloat relpos = (intIndex+i) - touch_index;
+			float relpos = (intIndex+i) - touch_index;
 			relpos = fabsf(relpos)-0.5f;
-			Lfloat shrink;
+			float shrink;
 			if (relpos <= 0.0f) shrink = 0.0f;
 			else if (relpos > width) shrink = 1.0f;
 #ifdef ARM_MATH_CM7
@@ -1026,7 +1026,7 @@ int tVoc_get_counter(tVoc* const v)
 	return v->counter;
 }
 
-void tVoc_rescaleDiameter(tVoc* const v, Lfloat scale)
+void tVoc_rescaleDiameter(tVoc* const v, float scale)
 {
 	v->tr->diameterScale = scale;
 }

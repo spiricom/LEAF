@@ -267,7 +267,7 @@ TEST_CASE("Tests for `tFIR` filer", "[tFIR]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    Lfloat coeffs[512];
+    float coeffs[512];
     LEAF_generate_sine(coeffs, 512);
 
 tFIR* filter;

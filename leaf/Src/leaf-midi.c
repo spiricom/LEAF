@@ -269,7 +269,7 @@ void    tPoly_initToPool            (tPoly** const polyh, int maxNumVoices, tMem
     poly->glideTime = 5.0f;
     
     poly->ramps = (tRamp*) mpool_alloc(sizeof(tRamp) * poly->maxNumVoices, m);
-    poly->rampVals = (Lfloat*) mpool_alloc(sizeof(Lfloat) * poly->maxNumVoices, m);
+    poly->rampVals = (float*) mpool_alloc(sizeof(float) * poly->maxNumVoices, m);
     poly->firstReceived = (int*) mpool_alloc(sizeof(int) * poly->maxNumVoices, m);
     poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, m);
     
@@ -331,7 +331,7 @@ void tPoly_tickPitchBend(tPoly* poly)
     tRamp_tick(poly->pitchBendRamp);
 }
 
-void tPoly_setPitchBend(tPoly* const poly, Lfloat pitchBend)
+void tPoly_setPitchBend(tPoly* const poly, float pitchBend)
 {
     poly->pitchBend = pitchBend;
     tRamp_setDest(poly->pitchBendRamp, poly->pitchBend);
@@ -519,7 +519,7 @@ void tPoly_setPitchGlideActive(tPoly* const poly, int isActive)
     poly->pitchGlideIsActive = isActive;
 }
 
-void tPoly_setPitchGlideTime(tPoly* const poly, Lfloat t)
+void tPoly_setPitchGlideTime(tPoly* const poly, float t)
 {
     poly->glideTime = t;
     for (int i = 0; i < poly->maxNumVoices; ++i)
@@ -528,12 +528,12 @@ void tPoly_setPitchGlideTime(tPoly* const poly, Lfloat t)
     }
 }
 
-void tPoly_setBendGlideTime(tPoly* const poly, Lfloat t)
+void tPoly_setBendGlideTime(tPoly* const poly, float t)
 {
     tRamp_setTime(poly->pitchBendRamp, t);
 }
 
-void tPoly_setBendSamplesPerTick(tPoly* const poly, Lfloat t)
+void tPoly_setBendSamplesPerTick(tPoly* const poly, float t)
 {
 	 poly->pitchBendRamp->samples_per_tick =  t;
 }
@@ -548,7 +548,7 @@ int tPoly_getNumActiveVoices(tPoly* const poly)
     return LEAF_clip(0, tStack_getSize(poly->stack), poly->numVoices);
 }
 
-Lfloat tPoly_getPitch(tPoly* const poly, uint8_t voice)
+float tPoly_getPitch(tPoly* const poly, uint8_t voice)
 {
     return tRamp_sample(poly->ramps[voice]) + tRamp_sample(poly->pitchBendRamp);
 }
@@ -568,7 +568,7 @@ int tPoly_isOn(tPoly* const poly, uint8_t voice)
     return (poly->voices[voice][0] > 0) ? 1 : 0;
 }
 
-void tPoly_setSampleRate(tPoly* const poly, Lfloat sr)
+void tPoly_setSampleRate(tPoly* const poly, float sr)
 {
     for (int i = 0; i < poly->maxNumVoices; i++)
     {

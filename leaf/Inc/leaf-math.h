@@ -28,9 +28,9 @@ extern "C" {
      @{
      */
     
-    // Allows for bitwise operations on Lfloats
-    union unholy_t { /* a union between a Lfloat and an integer */
-        Lfloat f;
+    // Allows for bitwise operations on floats
+    union unholy_t { /* a union between a float and an integer */
+        float f;
         int i;
     };
 
@@ -109,9 +109,9 @@ extern "C" {
 #define twelfthRootOf2    1.0594630943592952646f
 
 #ifdef ITCMRAM
-Lfloat __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) LEAF_clip(Lfloat min, Lfloat val, Lfloat max)
+float __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) LEAF_clip(float min, float val, float max)
 #else
-    static inline Lfloat LEAF_clip(Lfloat min, Lfloat val, Lfloat max)
+    static inline float LEAF_clip(float min, float val, float max)
 #endif
 {
 
@@ -151,8 +151,8 @@ static inline int   LEAF_clipInt(int min, int val, int max)
 
 // This is a fast approximation to log2() found on http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html credited to this post https://community.arm.com/developer/tools-software/tools/f/armds-forum/4292/cmsis-dsp-new-functionality-proposal/22621#22621
 // Y = C[0]*F*F*F + C[1]*F*F + C[2]*F + C[3] + E;
-static inline Lfloat log2f_approx(Lfloat X) {
-    Lfloat Y, F;
+static inline float log2f_approx(float X) {
+    float Y, F;
     int E;
     F = frexpf(fabsf(X), &E);
     Y = 1.23149591368684f;
@@ -167,31 +167,31 @@ static inline Lfloat log2f_approx(Lfloat X) {
 }
 
 //another log2Approximation
-static inline Lfloat log2f_approx2(Lfloat x)
+static inline float log2f_approx2(float x)
 {
     return (0.1640425613334452f * x*x*x) + (-1.098865286222744f * x*x) + (3.148297929334117f * x) + -2.213475204444817f;
 }
 
-static inline Lfloat interpolate3max(Lfloat *buf, const int peakindex)
+static inline float interpolate3max(float *buf, const int peakindex)
 {
-    Lfloat a = buf[peakindex-1];
-    Lfloat b = buf[peakindex];
-    Lfloat c = buf[peakindex+1];
-    Lfloat realpeak;
+    float a = buf[peakindex-1];
+    float b = buf[peakindex];
+    float c = buf[peakindex+1];
+    float realpeak;
     
-    realpeak = b + (Lfloat)0.125 * (c - a) * (c - a) / ((Lfloat)2. * b - a - c);
+    realpeak = b + (float)0.125 * (c - a) * (c - a) / ((float)2. * b - a - c);
     
     return(realpeak);
 }
 
-static inline Lfloat interpolate3phase(Lfloat *buf, const int peakindex)
+static inline float interpolate3phase(float *buf, const int peakindex)
 {
-    Lfloat a = buf[peakindex-1];
-    Lfloat b = buf[peakindex];
-    Lfloat c = buf[peakindex+1];
-    Lfloat fraction;
+    float a = buf[peakindex-1];
+    float b = buf[peakindex];
+    float c = buf[peakindex+1];
+    float fraction;
     
-    fraction = ((Lfloat)0.5 * (c - a)) / ((Lfloat)2. * b - a - c);
+    fraction = ((float)0.5 * (c - a)) / ((float)2. * b - a - c);
     
     return(fraction);
 }
@@ -212,10 +212,10 @@ static inline float LEAF_mapToZeroToOneOutput(float value, float istart, float i
 }
 
 // from http://www.wild-magic.com - found on music-dsp list
-static inline Lfloat fastcosf(Lfloat fAngle)
+static inline float fastcosf(float fAngle)
 {
-    Lfloat fASqr = fAngle*fAngle;
-    Lfloat fResult = -2.605e-07f;
+    float fASqr = fAngle*fAngle;
+    float fResult = -2.605e-07f;
     fResult *= fASqr;
     fResult += 2.47609e-05f;
     fResult *= fASqr;
@@ -229,10 +229,10 @@ static inline Lfloat fastcosf(Lfloat fAngle)
     return fResult;
 }
 
-static inline Lfloat fastercosf(Lfloat fAngle)
+static inline float fastercosf(float fAngle)
 {
-    Lfloat fASqr = fAngle*fAngle;
-    Lfloat fResult = 3.705e-02f;
+    float fASqr = fAngle*fAngle;
+    float fResult = 3.705e-02f;
     fResult *= fASqr;
     fResult -= 4.967e-01f;
     fResult *= fASqr;
@@ -240,10 +240,10 @@ static inline Lfloat fastercosf(Lfloat fAngle)
     return fResult;
 }
 
-static inline Lfloat fasttanf (Lfloat fAngle)
+static inline float fasttanf (float fAngle)
 {
-    Lfloat fASqr = fAngle*fAngle;
-    Lfloat fResult = 9.5168091e-03f;
+    float fASqr = fAngle*fAngle;
+    float fResult = 9.5168091e-03f;
     fResult *= fASqr;
     fResult += 2.900525e-03f;
     fResult *= fASqr;
@@ -260,10 +260,10 @@ static inline Lfloat fasttanf (Lfloat fAngle)
     return fResult;
 }
 
-static inline Lfloat fastertanf(Lfloat fAngle)
+static inline float fastertanf(float fAngle)
 {
-    Lfloat fASqr = fAngle*fAngle;
-    Lfloat fResult = 2.033e-01f;
+    float fASqr = fAngle*fAngle;
+    float fResult = 2.033e-01f;
     fResult *= fASqr;
     fResult += 3.1755e-01f;
     fResult *= fASqr;
@@ -272,9 +272,9 @@ static inline Lfloat fastertanf(Lfloat fAngle)
     return fResult;
 }
 /* natural log on [0x1.f7a5ecp-127, 0x1.fffffep127]. Maximum relative error 9.4529e-5 */
-static inline Lfloat my_faster_logf (Lfloat a)
+static inline float my_faster_logf (float a)
 {
-    Lfloat m, r, s, t, i, f;
+    float m, r, s, t, i, f;
     int32_t e;
     union unholy_t unholy;
     unholy.f = a;
@@ -282,7 +282,7 @@ static inline Lfloat my_faster_logf (Lfloat a)
     union unholy_t unholy2;
     unholy2.i = (unholy.i - e);
     m = unholy2.f;
-    i = (Lfloat)e * 1.19209290e-7f; // 0x1.0p-23
+    i = (float)e * 1.19209290e-7f; // 0x1.0p-23
     /* m in [2/3, 4/3] */
     f = m - 1.0f;
     s = f * f;
@@ -295,9 +295,9 @@ static inline Lfloat my_faster_logf (Lfloat a)
     return r;
 }
 // from Heng Li, a combination of inverse square root (see wiki) and inversion: https://bits.stephan-brumme.com/inverse.html
-static inline Lfloat fastsqrtf(Lfloat x)
+static inline float fastsqrtf(float x)
 {
-    union { Lfloat f; uint32_t i; } z = { x };
+    union { float f; uint32_t i; } z = { x };
     z.i  = 0x5f3759df - (z.i >> 1);
     z.f *= (1.5f - (x * 0.5f * z.f * z.f));
     z.i = 0x7EEEEEEE - z.i;
@@ -316,12 +316,12 @@ static inline int fastabs_int(int in){
 }
 
 // alternative implementation for abs()
-// REQUIRES: 32 bit Lfloats
- inline  static Lfloat fastabsf(Lfloat f)
+// REQUIRES: 32 bit floats
+ inline  static float fastabsf(float f)
 {
     union
     {
-        Lfloat f;
+        float f;
         unsigned int ui;
     }alias;
     
@@ -338,7 +338,7 @@ static inline  double fastexp(double x) {
     return x;
 }
 
-static inline Lfloat fastexpf(Lfloat x) {
+static inline float fastexpf(float x) {
     x = 1.0f + (x * 0.0009765625f);
     x *= x; x *= x; x *= x; x *= x;
     x *= x; x *= x; x *= x; x *= x;
@@ -353,16 +353,16 @@ static inline  double fasterexp(double x) {
     return x;
 }
 
-static inline Lfloat fasterexpf(Lfloat x) {
+static inline float fasterexpf(float x) {
     x = 1.0f + (x * 0.00390625f);
     x *= x; x *= x; x *= x; x *= x;
     x *= x; x *= x; x *= x; x *= x;
     return x;
 }
 
-static inline Lfloat fastExp3(Lfloat x)  // cubic spline approximation
+static inline float fastExp3(float x)  // cubic spline approximation
 {
-    union { Lfloat f; int32_t i; } reinterpreter;
+    union { float f; int32_t i; } reinterpreter;
 
     reinterpreter.i = (int32_t)(12102203.0f*x) + 127*(1 << 23);
     int32_t m = (reinterpreter.i >> 7) & 0xFFFF;  // copy mantissa
@@ -372,9 +372,9 @@ static inline Lfloat fastExp3(Lfloat x)  // cubic spline approximation
     return reinterpreter.f;
 }
 
-static inline Lfloat fastExp4(Lfloat x)  // quartic spline approximation
+static inline float fastExp4(float x)  // quartic spline approximation
 {
-    union { Lfloat f; int32_t i; } reinterpreter;
+    union { float f; int32_t i; } reinterpreter;
 
     reinterpreter.i = (int32_t)(12102203.0f*x) + 127*(1 << 23);
     int32_t m = (reinterpreter.i >> 7) & 0xFFFF;  // copy mantissa
@@ -385,19 +385,19 @@ static inline Lfloat fastExp4(Lfloat x)  // quartic spline approximation
 }
 
 //not sure that this works
-float fast_sinf2(Lfloat x);
+float fast_sinf2(float x);
 
-// fast Lfloating-point exp2 function taken from Robert Bristow Johnson's
+// fast floating-point exp2 function taken from Robert Bristow Johnson's
 // post in the music-dsp list on Date: Tue, 02 Sep 2014 16:50:11 -0400
-static inline Lfloat fastexp2f(Lfloat x)
+static inline float fastexp2f(float x)
 {
     if (x >= -127.0)
     {
-        Lfloat accumulator, xPower;
-        union {Lfloat f; int32_t i;} xBits;
+        float accumulator, xPower;
+        union {float f; int32_t i;} xBits;
         
         xBits.i = (int32_t)(x + 4096.0f) - 4096L;               /* integer part */
-        x -= (Lfloat)(xBits.i);                                             /* fractional part */
+        x -= (float)(xBits.i);                                             /* fractional part */
         
         accumulator = 1.0f + 0.69303212081966f*x;
         xPower = x*x;
@@ -419,10 +419,10 @@ static inline Lfloat fastexp2f(Lfloat x)
 }
 
 
-static inline Lfloat fastPowf(Lfloat a, Lfloat b) {
+static inline float fastPowf(float a, float b) {
     union
     {
-        Lfloat d; int x;
+        float d; int x;
     }
     u = { a };
 
@@ -466,33 +466,33 @@ static inline int getBinCoeff(int N, int K)
 }
 
 /*
- you pass in a Lfloat array to get back two indexes representing the volumes of the left (index 0) and right (index 1) channels
+ you pass in a float array to get back two indexes representing the volumes of the left (index 0) and right (index 1) channels
  when t is -1, volumes[0] = 0, volumes[1] = 1
  when t = 0, volumes[0] = 0.707, volumes[1] = 0.707 (equal-power cross fade)
  when t = 1, volumes[0] = 1, volumes[1] = 0
  */
 
-static inline void LEAF_crossfade(Lfloat fade, Lfloat* volumes) {
+static inline void LEAF_crossfade(float fade, float* volumes) {
     volumes[0] = sqrtf(0.5f * (1.0f + fade));
     volumes[1] = sqrtf(0.5f * (1.0f - fade));
 }
 
 // dope af
-static inline Lfloat LEAF_chebyshevT(Lfloat in, int n){
+static inline float LEAF_chebyshevT(float in, int n){
     if (n == 0) return 1;
     else if (n == 1) return in;
     else return 2.0f * in * LEAF_chebyshevT(in, n-1) - LEAF_chebyshevT(in, n-2);
 }
 
 #if !(_WIN32 || _WIN64)
-static inline Lfloat LEAF_CompoundChebyshevT(Lfloat in, int n, Lfloat* amps){
-    Lfloat T[n+1];
+static inline float LEAF_CompoundChebyshevT(float in, int n, float* amps){
+    float T[n+1];
     T[0] = 1.0f;
     T[1] = in;
     for (int i = 2; i <= n; ++i)
         T[i] = 2*in*T[i-1] - T[i-2];
-    Lfloat out = 0;
-    Lfloat amp = 0;
+    float out = 0;
+    float amp = 0;
     for (int i = 0; i < n; ++i){
         out += amps[i]*T[i+1];
         amp += amps[i];
@@ -501,42 +501,42 @@ static inline Lfloat LEAF_CompoundChebyshevT(Lfloat in, int n, Lfloat* amps){
 }
 #endif
 
-static inline Lfloat LEAF_frequencyToMidi(Lfloat f)
+static inline float LEAF_frequencyToMidi(float f)
 {
     return (69.0f + 12.0f * log2f(f * INV_440));
 }
 
 // Jones shaper
-static inline Lfloat LEAF_shaper(Lfloat input, Lfloat m_drive)
+static inline float LEAF_shaper(float input, float m_drive)
 {
-    Lfloat fx = input * 2.0f;    // prescale
-    Lfloat w, c, xc, xc2, xc4;
+    float fx = input * 2.0f;    // prescale
+    float w, c, xc, xc2, xc4;
     
     xc = LEAF_clip(-SQRT8, fx, SQRT8);
     xc2 = xc*xc;
     c = 0.5f*fx*(3.0f - (xc2));
     xc4 = xc2 * xc2;
     w = (1.0f - xc2*0.25f + xc4*0.015625f) * WSCALE;
-    Lfloat shaperOut = w*(c+ 0.05f*xc2)*(m_drive + 0.75f);
+    float shaperOut = w*(c+ 0.05f*xc2)*(m_drive + 0.75f);
     shaperOut *= 0.5f;    // post_scale
     return shaperOut;
 }
 
 // round input to nearest rnd
-static inline Lfloat LEAF_round (Lfloat input, Lfloat rnd)
+static inline float LEAF_round (float input, float rnd)
 {
     rnd = fabsf(rnd);
     
     if (rnd <= 0.0000001f) return input;
     
-    Lfloat scale = 1.f / rnd;
+    float scale = 1.f / rnd;
     
     return roundf(input * scale) * rnd;
 }
 
 
 
-static inline Lfloat LEAF_bitwise_xor(Lfloat input, uint32_t op)
+static inline float LEAF_bitwise_xor(float input, uint32_t op)
 {
     union unholy_t unholy;
     unholy.f = input;
@@ -545,17 +545,17 @@ static inline Lfloat LEAF_bitwise_xor(Lfloat input, uint32_t op)
     return unholy.f;
 }
 
-static inline Lfloat LEAF_reedTable(Lfloat input, Lfloat offset, Lfloat slope)
+static inline float LEAF_reedTable(float input, float offset, float slope)
 {
-    Lfloat output = offset + (slope * input);
+    float output = offset + (slope * input);
     if ( output > 1.0f) output = 1.0f;
     if ( output < -1.0f) output = -1.0f;
     return output;
 }
 
-static inline Lfloat   LEAF_softClip(Lfloat val, Lfloat thresh)
+static inline float   LEAF_softClip(float val, float thresh)
 {
-    Lfloat x;
+    float x;
     
     if(val > thresh)
     {
@@ -587,7 +587,7 @@ static inline int     LEAF_isPrime(uint64_t number )
 }
 
 // Adapted from MusicDSP: http://www.musicdsp.org/showone.php?id=238
-static inline Lfloat LEAF_tanh(Lfloat x)
+static inline float LEAF_tanh(float x)
 {
     
     if( x < -3.0f )
@@ -601,63 +601,63 @@ static inline Lfloat LEAF_tanh(Lfloat x)
 
 
 // Adapted from MusicDSP: http://www.musicdsp.org/showone.php?id=238
-static inline Lfloat LEAF_tanhNoClip(Lfloat x)
+static inline float LEAF_tanhNoClip(float x)
 {
         return x * ( 27.0f + x * x ) / ( 27.0f + 9.0f * x * x );
 }
 
 // https://math.stackexchange.com/questions/107292/rapid-approximation-of-tanhx
-static inline Lfloat fast_tanh(Lfloat x){
-  Lfloat x2 = x * x;
-  Lfloat a = x * (135135.0f + x2 * (17325.0f + x2 * (378.0f + x2)));
-  Lfloat b = 135135.0f + x2 * (62370.0f + x2 * (3150.0f + x2 * 28.0f));
+static inline float fast_tanh(float x){
+  float x2 = x * x;
+  float a = x * (135135.0f + x2 * (17325.0f + x2 * (378.0f + x2)));
+  float b = 135135.0f + x2 * (62370.0f + x2 * (3150.0f + x2 * 28.0f));
   return a / b;
 }
 
-static inline Lfloat fast_tanh2(Lfloat x)
+static inline float fast_tanh2(float x)
 {
     return x*(2027025.0f+270270.0f*x*x+6930.0f*x*x*x*x+36.0f*x*x*x*x*x*x)/(2027025.0f+945945.0f*x*x+51975.0f*x*x*x*x+630.0f*x*x*x*x*x*x+x*x*x*x*x*x*x*x);
 }
 
-static inline Lfloat fast_tanh3(Lfloat x)
+static inline float fast_tanh3(float x)
 {
-    Lfloat exp2x = fastexpf(2.0f*x);
+    float exp2x = fastexpf(2.0f*x);
     return(exp2x - 1.0f) / (exp2x + 1.0f);
 }
 
 //from antto on KVR forum
-static inline Lfloat   fast_tanh4 (Lfloat x)
+static inline float   fast_tanh4 (float x)
 {
-    Lfloat xa = fabsf(x);
-    Lfloat x2 = xa * xa;
-    Lfloat x3 = xa * x2;
-    Lfloat x4 = x2 * x2;
-    Lfloat x7 = x3 * x4;
-    Lfloat res = (1.0f - 1.0f / (1.0f + xa + x2 + 0.58576695f * x3 + 0.55442112f * x4 + 0.057481508f * x7));
-    Lfloat   result = (x < 0) ? -res : res;
+    float xa = fabsf(x);
+    float x2 = xa * xa;
+    float x3 = xa * x2;
+    float x4 = x2 * x2;
+    float x7 = x3 * x4;
+    float res = (1.0f - 1.0f / (1.0f + xa + x2 + 0.58576695f * x3 + 0.55442112f * x4 + 0.057481508f * x7));
+    float   result = (x < 0) ? -res : res;
 
     return (result);
 }
 
 static inline float InvSqrt(float x)
 {
-    Lfloat xhalf = 0.5f*x;
+    float xhalf = 0.5f*x;
     int i = *(int*)&x; // get bits for floating value
     i = 0x5f3759df - (i>>1); // gives initial guess y0
-    x = *(Lfloat*)&i; // convert bits back to float
+    x = *(float*)&i; // convert bits back to float
     x = x*(1.5f-xhalf*x*x); // Newton step, repeating increases accuracy
     return x;
 }
 
 //from raphx on this post : https://www.kvraudio.com/forum/viewtopic.php?t=332930&start=30
-static inline Lfloat fast_tanh5(Lfloat x)
+static inline float fast_tanh5(float x)
 {
-    Lfloat a = x + 0.16489087f * x*x*x + 0.00985468f * x*x*x*x*x;
-    Lfloat den = InvSqrt(1.0f + a * a);
+    float a = x + 0.16489087f * x*x*x + 0.00985468f * x*x*x*x*x;
+    float den = InvSqrt(1.0f + a * a);
     return a * den;
 }
 
-static inline Lfloat leaf_softClip(Lfloat sample)
+static inline float leaf_softClip(float sample)
 {
     if (sample < -1.0f)
     {
@@ -671,26 +671,26 @@ static inline Lfloat leaf_softClip(Lfloat sample)
 
 //from Olli Niemitalo
 //https://dsp.stackexchange.com/questions/46629/finding-polynomial-approximations-of-a-sine-wave
-static inline Lfloat fastSine(Lfloat x)
+static inline float fastSine(float x)
 {
-    Lfloat term1 = x * 1.570034357f;
-    Lfloat term2 = x * x * x * -0.6425216143f;
-    Lfloat term3 = x * x * x * x * x * 0.07248725712f;
+    float term1 = x * 1.570034357f;
+    float term2 = x * x * x * -0.6425216143f;
+    float term3 = x * x * x * x * x * 0.07248725712f;
     return term1+term2+term3;
 }
 
 
     //0.001 base gives a good curve that goes from 1 to near zero
     //1000 gives a good curve from -1.0 to 0.0
-    void LEAF_generate_exp(Lfloat* buffer, Lfloat base, Lfloat start, Lfloat end, Lfloat offset, int size);
-    void LEAF_generate_table_skew_non_sym(Lfloat* buffer, Lfloat start, Lfloat end, Lfloat center, int size);
-    void LEAF_generate_sine(Lfloat* buffer, int size);
+    void LEAF_generate_exp(float* buffer, float base, float start, float end, float offset, int size);
+    void LEAF_generate_table_skew_non_sym(float* buffer, float start, float end, float center, int size);
+    void LEAF_generate_sine(float* buffer, int size);
 
-    void LEAF_generate_atodb(Lfloat* buffer, int size, Lfloat min, Lfloat max);
-    void LEAF_generate_atodbPositiveClipped(Lfloat* buffer, Lfloat lowerThreshold, Lfloat range, int size);
-    void LEAF_generate_dbtoa(Lfloat* buffer, int size, Lfloat minDb, Lfloat maxDb);
-    void LEAF_generate_mtof(Lfloat* buffer, Lfloat startMIDI, Lfloat endMIDI, int size);
-    void LEAF_generate_ftom(Lfloat* buffer, Lfloat startFreq, Lfloat endFreq, int size);
+    void LEAF_generate_atodb(float* buffer, int size, float min, float max);
+    void LEAF_generate_atodbPositiveClipped(float* buffer, float lowerThreshold, float range, int size);
+    void LEAF_generate_dbtoa(float* buffer, int size, float minDb, float maxDb);
+    void LEAF_generate_mtof(float* buffer, float startMIDI, float endMIDI, int size);
+    void LEAF_generate_ftom(float* buffer, float startFreq, float endFreq, int size);
     
 
 
@@ -698,7 +698,7 @@ static inline Lfloat fastSine(Lfloat x)
 // http://www.kvraudio.com/forum/viewtopic.php?t=375517
 // t = phase, dt = inc, assuming 0-1 phase
 // assumes discontinuity at 0, so offset inputs as needed
-static inline Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
+static inline float LEAF_poly_blep(float t, float dt)
 {
     dt = fabsf(dt);
     if (dt >= 0.0f)
@@ -721,16 +721,16 @@ static inline Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
 
 //this version is from this discussion: https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
 //    dt = -1.0f*dt;
-//    Lfloat y = 0.0f;
+//    float y = 0.0f;
 //    if (t < 2.0f * dt)
 //    {
-//        Lfloat x = t / dt;
-//        Lfloat u = 2.0f - x;
+//        float x = t / dt;
+//        float u = 2.0f - x;
 //        u *= u;
 //        u *= u;
 //        y += u;
 //        if (t < dt) {
-//            Lfloat v = 1.0f - x;
+//            float v = 1.0f - x;
 //            v *= v;
 //            v *= v;
 //            y -= 4.0f * v;
@@ -738,13 +738,13 @@ static inline Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
 //    }
 //    else if (t > 1.0f - (2.0f * dt))
 //    {
-//        Lfloat x = (t - 1.0f) / dt;
-//        Lfloat u = 2.0f - x;
+//        float x = (t - 1.0f) / dt;
+//        float u = 2.0f - x;
 //        u *= u;
 //        u *= u;
 //        y += u;
 //        if (t > 1.0f - dt) {
-//            Lfloat v = 1.0f - x;
+//            float v = 1.0f - x;
 //            v *= v;
 //            v *= v;
 //            y += 4.0f * v;
@@ -755,7 +755,7 @@ static inline Lfloat LEAF_poly_blep(Lfloat t, Lfloat dt)
 }
 
 //this is messed up right now, don't use -- JS
-static inline Lfloat LEAF_poly_blepInt(uint32_t t, uint32_t dt)
+static inline float LEAF_poly_blepInt(uint32_t t, uint32_t dt)
 {
 
     // 0 <= t < 1
@@ -774,21 +774,21 @@ static inline Lfloat LEAF_poly_blepInt(uint32_t t, uint32_t dt)
 }
 
 //this version is from this discussion: https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
-static inline Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt)
+static inline float LEAF_poly_blamp(float t, float dt)
 {
 
-    Lfloat y = 0.0f;
+    float y = 0.0f;
     if ((0.0f <= t) && (t < (2.0f * dt)))
     {
-        Lfloat x = (t / dt);
-        Lfloat u = 2.0f - x;
-        Lfloat u2 = u * u;
+        float x = (t / dt);
+        float u = 2.0f - x;
+        float u2 = u * u;
         u *= u2 * u2;
         y -= u;
         if (t < dt)
         {
-            Lfloat v = 1.0f - x;
-            Lfloat v2 = v * v;
+            float v = 1.0f - x;
+            float v2 = v * v;
             v *= v2 * v2;
             y += 4.0f * v;
         }
@@ -801,7 +801,7 @@ static inline Lfloat LEAF_poly_blamp(Lfloat t, Lfloat dt)
 // name: mtof()
 // desc: midi to freq, from PD source
 //-----------------------------------------------------------------------------
-static inline Lfloat LEAF_midiToFrequency(Lfloat f)
+static inline float LEAF_midiToFrequency(float f)
 {
     if( f <= -1500.0f ) return (0);
     else if( f > 1499.0f ) return (LEAF_midiToFrequency(1499.0f));
@@ -810,14 +810,14 @@ static inline Lfloat LEAF_midiToFrequency(Lfloat f)
 
 
 // alpha, [0.0, 1.0]
-static inline Lfloat LEAF_interpolate_hermite (Lfloat A, Lfloat B, Lfloat C, Lfloat D, Lfloat alpha)
+static inline float LEAF_interpolate_hermite (float A, float B, float C, float D, float alpha)
 {
     alpha = LEAF_clip(0.0f, alpha, 1.0f);
     
-    Lfloat a = -A*0.5f + (3.0f*B)*0.5f - (3.0f*C)*0.5f + D*0.5f;
-    Lfloat b = A - (5.0f*B)*0.5f + 2.0f*C - D * 0.5f;
-    Lfloat c = -A*0.5f + C*0.5f;
-    Lfloat d = B;
+    float a = -A*0.5f + (3.0f*B)*0.5f - (3.0f*C)*0.5f + D*0.5f;
+    float b = A - (5.0f*B)*0.5f + 2.0f*C - D * 0.5f;
+    float c = -A*0.5f + C*0.5f;
+    float d = B;
     
     return a*alpha*alpha*alpha + b*alpha*alpha + c*alpha + d;
 }
@@ -826,14 +826,14 @@ static inline Lfloat LEAF_interpolate_hermite (Lfloat A, Lfloat B, Lfloat C, Lfl
 // from http://www.musicdsp.org/archive.php?classid=5#93
 //xx is alpha (fractional part of sample value)
 //grabbed this from Tom Erbe's Delay pd code
-static inline Lfloat LEAF_interpolate_hermite_x(Lfloat yy0, Lfloat yy1, Lfloat yy2, Lfloat yy3, Lfloat xx)
+static inline float LEAF_interpolate_hermite_x(float yy0, float yy1, float yy2, float yy3, float xx)
 {
     // 4-point, 3rd-order Hermite (x-form)
-    Lfloat c0 = yy1;
-    Lfloat c1 = 0.5f * (yy2 - yy0);
-    Lfloat y0my1 = yy0 - yy1;
-    Lfloat c3 = (yy1 - yy2) + 0.5f * (yy3 - y0my1 - yy2);
-    Lfloat c2 = y0my1 + c1 - c3;
+    float c0 = yy1;
+    float c1 = 0.5f * (yy2 - yy0);
+    float y0my1 = yy0 - yy1;
+    float c3 = (yy1 - yy2) + 0.5f * (yy3 - y0my1 - yy2);
+    float c2 = y0my1 + c1 - c3;
     
     return ((c3 * xx + c2) * xx + c1) * xx + c0;
 }
@@ -841,21 +841,21 @@ static inline Lfloat LEAF_interpolate_hermite_x(Lfloat yy0, Lfloat yy1, Lfloat y
 //this is a direct way of computing the thing. Another method is suggested in this paper:
 //https://www.researchgate.net/publication/224312927_A_computationally_efficient_coefficient_update_technique_for_Lagrange_fractional_delay_filters
 //but the advantages of that only happen above 3rd-order. For 3rd-order interpolation, the mults and adds would be the same.
-static inline Lfloat LEAF_interpolate_lagrange(Lfloat y0, Lfloat y1, Lfloat y2, Lfloat y3, Lfloat d)
+static inline float LEAF_interpolate_lagrange(float y0, float y1, float y2, float y3, float d)
 {
     //
-    Lfloat dp1 = d+1.0f;
-    Lfloat dm1 = d-1.0f;
-    Lfloat dm2 = d-2.0f;
+    float dp1 = d+1.0f;
+    float dm1 = d-1.0f;
+    float dm2 = d-2.0f;
 
-    Lfloat pdp1d = dp1*d;
-    Lfloat pddm1 = d*dm1;
-    Lfloat pdm1dm2 = dm1*dm2;
+    float pdp1d = dp1*d;
+    float pddm1 = d*dm1;
+    float pdm1dm2 = dm1*dm2;
 
-    Lfloat h0 = -0.166666666666667f * pddm1 * dm2;
-    Lfloat h1 = 0.5f * dp1 * pdm1dm2;
-    Lfloat h2 = -0.5f * pdp1d * dm2;
-    Lfloat h3 = 0.166666666666667f * pdp1d * dm2;
+    float h0 = -0.166666666666667f * pddm1 * dm2;
+    float h1 = 0.5f * dp1 * pdm1dm2;
+    float h2 = -0.5f * pdp1d * dm2;
+    float h3 = 0.166666666666667f * pdp1d * dm2;
 
     return ((h3*y3) + (h2*y2) + (h1*y1)+ (h0*y0));
 }
@@ -863,14 +863,14 @@ static inline Lfloat LEAF_interpolate_lagrange(Lfloat y0, Lfloat y1, Lfloat y2, 
 
 
 // alpha, [0.0, 1.0]
-static inline Lfloat LEAF_interpolation_linear (Lfloat A, Lfloat B, Lfloat alpha)
+static inline float LEAF_interpolation_linear (float A, float B, float alpha)
 {
     alpha = LEAF_clip(0.0f, alpha, 1.0f);
     
-    Lfloat omAlpha = 1.0f - alpha;
+    float omAlpha = 1.0f - alpha;
     
     // First 1/2 of interpolation
-    Lfloat out = A * omAlpha;
+    float out = A * omAlpha;
     
     out += B * alpha;
     
@@ -879,49 +879,49 @@ static inline Lfloat LEAF_interpolation_linear (Lfloat A, Lfloat B, Lfloat alpha
 
 
 
-static inline Lfloat mtof(Lfloat f)
+static inline float mtof(float f)
 {
     if (f <= -1500.0f) return(0);
     else if (f > 1499.0f) return(mtof(1499.0f));
     else return (8.17579891564f * expf(0.0577622650f * f));
 }
 
-static inline Lfloat fast_mtof(Lfloat f)
+static inline float fast_mtof(float f)
 {
     return (8.17579891564f * fastexpf(0.0577622650f * f));
 }
 
-static inline Lfloat faster_mtof(Lfloat f)
+static inline float faster_mtof(float f)
 {
     return (8.17579891564f * fasterexpf(0.0577622650f * f));
 }
 
-static inline Lfloat ftom(Lfloat f)
+static inline float ftom(float f)
 {
     return (f > 0 ? 17.3123405046f * logf(.12231220585f * f) : -1500.0f);
 }
 
-static inline Lfloat powtodb(Lfloat f)
+static inline float powtodb(float f)
 {
     if (f <= 0) return (0);
     else
     {
-        Lfloat val = 100.0f + 10.0f/LOGTEN * logf(f);
+        float val = 100.0f + 10.0f/LOGTEN * logf(f);
         return (val < 0.0f ? 0.0f : val);
     }
 }
 
-static inline Lfloat rmstodb(Lfloat f)
+static inline float rmstodb(float f)
 {
     if (f <= 0) return (0);
     else
     {
-        Lfloat val = 100 + 20.f/LOGTEN * log(f);
+        float val = 100 + 20.f/LOGTEN * log(f);
         return (val < 0 ? 0 : val);
     }
 }
 
-static inline Lfloat dbtopow(Lfloat f)
+static inline float dbtopow(float f)
 {
     if (f <= 0)
         return(0);
@@ -933,7 +933,7 @@ static inline Lfloat dbtopow(Lfloat f)
     }
 }
 
-static inline Lfloat dbtorms(Lfloat f)
+static inline float dbtorms(float f)
 {
     if (f <= 0)
         return(0);
@@ -966,61 +966,61 @@ static inline int popcount(unsigned int x)
     return (int) y;
 }
 
-static inline Lfloat median3f(Lfloat a, Lfloat b, Lfloat c)
+static inline float median3f(float a, float b, float c)
 {
     return fmax(fmin(a, b), fmin(fmax(a, b), c));
 }
 
 
   
-static inline Lfloat atodb(Lfloat a)
+static inline float atodb(float a)
 {
     return 20.0f*log10f(a);
 }
-static inline Lfloat fasteratodb(Lfloat a)
+static inline float fasteratodb(float a)
 {
     return 20.0f*log10f_fast(a);
 }
 
-static inline Lfloat dbtoa(Lfloat db)
+static inline float dbtoa(float db)
 {
     return powf(10.0f, db * 0.05f);
 }
 
 
-static inline Lfloat fastdbtoa(Lfloat db)
+static inline float fastdbtoa(float db)
 {
     //return powf(10.0f, db * 0.05f);
     return expf(0.115129254649702f * db); //faster version from http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html
 }
 
-static inline Lfloat fasterdbtoa(Lfloat db)
+static inline float fasterdbtoa(float db)
 {
     //return powf(10.0f, db * 0.05f);
     return fasterexpf(0.115129254649702f * db); //faster version from http://openaudio.blogspot.com/2017/02/faster-log10-and-pow.html
 }
 
 
-static inline Lfloat maximum (Lfloat num1, Lfloat num2)
+static inline float maximum (float num1, float num2)
 {
     return (num1 > num2 ) ? num1 : num2;
 }
 
-static inline Lfloat minimum (Lfloat num1, Lfloat num2)
+static inline float minimum (float num1, float num2)
 {
     return (num1 < num2 ) ? num1 : num2;
 }
     //==============================================================================
 #if LEAF_INCLUDE_MINBLEP_TABLES
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_step_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat scale);
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_step_dd(float *buffer, int index, float phase, float w, float scale);
 #else
-void place_step_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat scale);
+void place_step_dd(float *buffer, int index, float phase, float w, float scale);
 #endif
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_slope_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat slope_delta);
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta);
 #else
-void place_slope_dd(Lfloat *buffer, int index, float phase, float w, float slope_delta);
+void place_slope_dd(float *buffer, int index, float phase, float w, float slope_delta);
 #endif
 #endif
 

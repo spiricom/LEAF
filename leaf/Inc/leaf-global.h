@@ -32,10 +32,10 @@ extern "C" {
     struct LEAF
     {
         ///@{
-        Lfloat   sampleRate; //!< The current audio sample rate. Set with LEAF_setSampleRate().
-        Lfloat   invSampleRate; //!< The inverse of the current sample rate.
-        Lfloat   twoPiTimesInvSampleRate; //!<  Two-pi times the inverse of the current sample rate.
-        Lfloat   (*random)(void); //!< A pointer to the random() function provided on initialization.
+        float   sampleRate; //!< The current audio sample rate. Set with LEAF_setSampleRate().
+        float   invSampleRate; //!< The inverse of the current sample rate.
+        float   twoPiTimesInvSampleRate; //!<  Two-pi times the inverse of the current sample rate.
+        float   (*random)(void); //!< A pointer to the random() function provided on initialization.
         int     clearOnAllocation; //!< A flag that determines whether memory allocated from the LEAF memory pool will be cleared.
         tMempool* mempool; //!< The default LEAF mempool object.
         tMempool _internal_mempool;

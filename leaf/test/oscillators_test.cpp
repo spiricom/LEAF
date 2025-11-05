@@ -252,7 +252,7 @@ TEST_CASE("Tests for `tTable` object", "[tTable]") {
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
     tTable osc;
-    Lfloat num[512];
+    float num[512];
 
     LEAF_generate_sine(num, 512);
     tTable_init(&osc, num, 512, &leaf);
@@ -267,7 +267,7 @@ TEST_CASE("Tests for `tWaveTable` object", "[tWaveTable]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    Lfloat num[512];
+    float num[512];
     LEAF_generate_sine(num, 512);
 
     tWaveTable osc;
@@ -284,7 +284,7 @@ TEST_CASE("Tests for `tWaveOsc` object", "[tWaveOsc]") {
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
     tWaveTable waveTable;
-    Lfloat num[512];
+    float num[512];
     LEAF_generate_sine(num, 512);
 
     tWaveTable_init(&waveTable, num, 512, 22050, &leaf);
@@ -302,7 +302,7 @@ TEST_CASE("Tests for `tWaveTableS` object", "[tWaveTableS]") {
     char leafMemory[65535];
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
-    Lfloat num[512];
+    float num[512];
     LEAF_generate_sine(num, 512);
 
     tWaveTableS osc;
@@ -319,7 +319,7 @@ TEST_CASE("Tests for `tWaveOscS` object", "[tWaveOscS]") {
     LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
 
     tWaveTableS waveTable;
-    Lfloat num[512];
+    float num[512];
     LEAF_generate_sine(num, 512);
 
     tWaveTableS_init(&waveTable, num, 512, 22050, &leaf);

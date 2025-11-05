@@ -36,7 +36,7 @@ void  tBuffer_initToPool (tBuffer** const sb, uint32_t length, tMempool** const 
     s->mempool = m;
     LEAF* leaf = s->mempool->leaf;
     
-    s->buff = (Lfloat*) mpool_alloc( sizeof(Lfloat) * length, m);
+    s->buff = (float*) mpool_alloc( sizeof(float) * length, m);
     s->sampleRate = leaf->sampleRate;
     s->channels = 1;
     s->bufferLength = length;
@@ -54,7 +54,7 @@ void  tBuffer_free (tBuffer** const sb)
     mpool_free((char*)s, s->mempool);
 }
 
-void tBuffer_tick (tBuffer* const s, Lfloat sample)
+void tBuffer_tick (tBuffer* const s, float sample)
 {
     if (s->active == 1)
     {
@@ -77,7 +77,7 @@ void tBuffer_tick (tBuffer* const s, Lfloat sample)
     }
 }
 
-void  tBuffer_read(tBuffer* const s, Lfloat* buff, uint32_t len)
+void  tBuffer_read(tBuffer* const s, float* buff, uint32_t len)
 {
     for (unsigned i = 0; i < s->bufferLength; i++)
     {
@@ -87,7 +87,7 @@ void  tBuffer_read(tBuffer* const s, Lfloat* buff, uint32_t len)
     s->recordedLength = len;
 }
 
-Lfloat tBuffer_get (tBuffer* const s, int idx)
+float tBuffer_get (tBuffer* const s, int idx)
 {
     if ((idx < 0) || (idx >= (int) s->bufferLength)) return 0.f;
     return s->buff[idx];
@@ -128,7 +128,7 @@ void  tBuffer_clear (tBuffer* const s)
 
 }
 
-void tBuffer_setBuffer(tBuffer* const s, Lfloat* externalBuffer, int length, int channels, int sampleRate)
+void tBuffer_setBuffer(tBuffer* const s, float* externalBuffer, int length, int channels, int sampleRate)
 {
     s->buff = externalBuffer;
     s->channels = channels;
@@ -191,7 +191,7 @@ void tSampler_initToPool(tSampler** const sp, tBuffer** const b, tMempool** cons
     p->len = p->end - p->start;
     
     p->idx = 0.f;
-    Lfloat rate = p->rateFactor; //adjust for sampling rate of buffer (may be different from leaf.sampleRate if audio file was loaded form SD card)
+    float rate = p->rateFactor; //adjust for sampling rate of buffer (may be different from leaf.sampleRate if audio file was loaded form SD card)
     if (rate < 0.f)
     {
         rate = -rate;
@@ -247,7 +247,7 @@ void tSampler_setSample (tSampler* const p, tBuffer* const s)
     p->idx = 0.f;
 }
 
-Lfloat tSampler_tick        (tSampler* const p)
+float tSampler_tick        (tSampler* const p)
 {
     attemptStartEndChange(p);
     
@@ -259,13 +259,13 @@ Lfloat tSampler_tick        (tSampler* const p)
         return p->last;
     }
     
-    Lfloat sample = 0.0f;
-    Lfloat cfxsample = 0.0f;
-    Lfloat crossfadeMix = 0.0f;
-    Lfloat flipsample = 0.0f;
-    Lfloat flipMix = 0.0f;
+    float sample = 0.0f;
+    float cfxsample = 0.0f;
+    float crossfadeMix = 0.0f;
+    float flipsample = 0.0f;
+    float flipMix = 0.0f;
     
-    Lfloat* buff = p->samp->buff;
+    float* buff = p->samp->buff;
     
     // Variables so start is also before end
     int myStart = p->start;
@@ -283,7 +283,7 @@ Lfloat tSampler_tick        (tSampler* const p)
     
     // Get the current integer index and alpha for interpolation
     int idx = (int) p->idx;
-    Lfloat alpha = rev + (p->idx - idx) * dir;
+    float alpha = rev + (p->idx - idx) * dir;
     idx += rev;
     
     // Get the indexes for interpolation
@@ -355,11 +355,11 @@ Lfloat tSampler_tick        (tSampler* const p)
                                                     buff[c3],
                                                     buff[c4],
                                                     alpha);
-            if (cfxlen > 0.0f) crossfadeMix = (Lfloat) offset / (Lfloat) cfxlen;
+            if (cfxlen > 0.0f) crossfadeMix = (float) offset / (float) cfxlen;
             else crossfadeMix = 0.0f;
         }
         
-        Lfloat flipLength = fabsf(p->flipIdx - p->flipStart);
+        float flipLength = fabsf(p->flipIdx - p->flipStart);
         if (flipLength > cfxlen)
         {
             p->flipStart = -1;
@@ -375,7 +375,7 @@ Lfloat tSampler_tick        (tSampler* const p)
             flipLength = fabsf(p->flipIdx - p->flipStart);
             
             int fdx = (int) p->flipIdx;
-            Lfloat falpha = (1-rev) - (p->flipIdx - fdx) * dir;
+            float falpha = (1-rev) - (p->flipIdx - fdx) * dir;
             idx += (1-rev);
             
             // Get the indexes for interpolation
@@ -395,23 +395,23 @@ Lfloat tSampler_tick        (tSampler* const p)
                                                      buff[f3],
                                                      buff[f4],
                                                      falpha);
-            flipMix = (Lfloat) (cfxlen - flipLength) / (Lfloat) cfxlen;
+            flipMix = (float) (cfxlen - flipLength) / (float) cfxlen;
         }
     }
     
-    Lfloat inc = fmodf(p->inc, (Lfloat)p->len);
+    float inc = fmodf(p->inc, (float)p->len);
     p->idx += (dir * inc);
     if (p->flipStart >= 0)
     {
         p->flipIdx += (-dir * inc);
         if((int)p->flipIdx < 0)
         {
-            p->idx += (Lfloat)length;
+            p->idx += (float)length;
         }
         if((int)p->idx >= length)
         {
             
-            p->idx -= (Lfloat)length;
+            p->idx -= (float)length;
         }
     }
     
@@ -423,12 +423,12 @@ Lfloat tSampler_tick        (tSampler* const p)
     {
         if((int)p->idx < myStart)
         {
-            p->idx += (Lfloat)(fadeRightEnd - fadeLeftEnd);
+            p->idx += (float)(fadeRightEnd - fadeLeftEnd);
         }
         if((int)p->idx > myEnd)
         {
             
-            p->idx -= (Lfloat)(fadeRightEnd - fadeLeftEnd);
+            p->idx -= (float)(fadeRightEnd - fadeLeftEnd);
         }
     }
     else if (p->mode == PlayBackAndForth)
@@ -456,7 +456,7 @@ Lfloat tSampler_tick        (tSampler* const p)
         {
             p->idx = myEnd;
         }
-        Lfloat ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
+        float ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
         if ((ticksToEnd < p->ticksPerSevenMs) && (p->active == 1))
         {
             tRamp_setDest(p->gain, 0.f);
@@ -503,7 +503,7 @@ Lfloat tSampler_tick        (tSampler* const p)
     return p->last;
 }
 
-Lfloat tSampler_tickStereo        (tSampler* const p, Lfloat* outputArray)
+float tSampler_tickStereo        (tSampler* const p, float* outputArray)
 {
     attemptStartEndChange(p);
 
@@ -515,12 +515,12 @@ Lfloat tSampler_tickStereo        (tSampler* const p, Lfloat* outputArray)
         return p->last;
     }
 
-    Lfloat cfxsample[2] = {0.0f, 0.0f};
-    Lfloat crossfadeMix = 0.0f;
-    Lfloat flipsample[2] = {0.0f, 0.0f};
-    Lfloat flipMix = 0.0f;
+    float cfxsample[2] = {0.0f, 0.0f};
+    float crossfadeMix = 0.0f;
+    float flipsample[2] = {0.0f, 0.0f};
+    float flipMix = 0.0f;
 
-    Lfloat* buff = p->samp->buff;
+    float* buff = p->samp->buff;
 
     // Variables so start is also before end
     int myStart = p->start;
@@ -538,7 +538,7 @@ Lfloat tSampler_tickStereo        (tSampler* const p, Lfloat* outputArray)
 
     // Get the current integer index and alpha for interpolation
     int idx = (int) p->idx;
-    Lfloat alpha = rev + (p->idx - idx) * dir;
+    float alpha = rev + (p->idx - idx) * dir;
     idx += rev;
 
     // Get the indexes for interpolation
@@ -623,10 +623,10 @@ Lfloat tSampler_tickStereo        (tSampler* const p, Lfloat* outputArray)
                                                                 buff[(c4 * p->channels) + 1],
                                                                 alpha);
 
-            crossfadeMix = (Lfloat) offset / (Lfloat) cfxlen;
+            crossfadeMix = (float) offset / (float) cfxlen;
         }
 
-        Lfloat flipLength = fabsf(p->flipIdx - p->flipStart);
+        float flipLength = fabsf(p->flipIdx - p->flipStart);
         if (flipLength > cfxlen)
         {
             p->flipStart = -1;
@@ -642,7 +642,7 @@ Lfloat tSampler_tickStereo        (tSampler* const p, Lfloat* outputArray)
             flipLength = fabsf(p->flipIdx - p->flipStart);
 
             int fdx = (int) p->flipIdx;
-            Lfloat falpha = (1-rev) - (p->flipIdx - fdx) * dir;
+            float falpha = (1-rev) - (p->flipIdx - fdx) * dir;
             idx += (1-rev);
 
             // Get the indexes for interpolation
@@ -669,24 +669,24 @@ Lfloat tSampler_tickStereo        (tSampler* const p, Lfloat* outputArray)
                                                      buff[(f4 * p->channels) + 1],
                                                      falpha);
 
-            if (cfxlen > 0) flipMix = (Lfloat) (cfxlen - flipLength) / (Lfloat) cfxlen;
+            if (cfxlen > 0) flipMix = (float) (cfxlen - flipLength) / (float) cfxlen;
             else flipMix = 1.0f;
         }
     }
 
-    Lfloat inc = fmodf(p->inc, (Lfloat)p->len);
+    float inc = fmodf(p->inc, (float)p->len);
     p->idx += (dir * inc);
     if (p->flipStart >= 0)
     {
         p->flipIdx += (-dir * inc);
         if((int)p->flipIdx < 0)
         {
-            p->idx += (Lfloat)length;
+            p->idx += (float)length;
         }
         if((int)p->idx >= length)
         {
 
-            p->idx -= (Lfloat)length;
+            p->idx -= (float)length;
         }
     }
 
@@ -696,12 +696,12 @@ Lfloat tSampler_tickStereo        (tSampler* const p, Lfloat* outputArray)
     {
         if((int)p->idx < myStart)
         {
-            p->idx += (Lfloat)(fadeRightEnd - fadeLeftEnd);
+            p->idx += (float)(fadeRightEnd - fadeLeftEnd);
         }
         if((int)p->idx > myEnd)
         {
 
-            p->idx -= (Lfloat)(fadeRightEnd - fadeLeftEnd);
+            p->idx -= (float)(fadeRightEnd - fadeLeftEnd);
         }
     }
     else if (p->mode == PlayBackAndForth)
@@ -729,7 +729,7 @@ Lfloat tSampler_tickStereo        (tSampler* const p, Lfloat* outputArray)
         {
             p->idx = myEnd;
         }
-        Lfloat ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
+        float ticksToEnd = rev ? ((idx - myStart) * p->iinc) : ((myEnd - idx) * p->iinc);
         if ((ticksToEnd < p->ticksPerSevenMs) && (p->active == 1))
         {
             tRamp_setDest(p->gain, 0.f);
@@ -737,7 +737,7 @@ Lfloat tSampler_tickStereo        (tSampler* const p, Lfloat* outputArray)
         }
     }
 
-    Lfloat sampleGain = tRamp_tick(p->gain);
+    float sampleGain = tRamp_tick(p->gain);
     for (int i = 0; i < p->channels; i++)
     {
         outputArray[i] = ((outputArray[i] * (1.0f - crossfadeMix)) + (cfxsample[i] * crossfadeMix)) * (1.0f - flipMix) + (flipsample[i] * flipMix);
@@ -903,7 +903,7 @@ void tSampler_setStart     (tSampler* const p, int32_t start)
             if (start > p->idx)// start given is after current index or we're in a crossfade
             {
                 p->targetstart = start;
-                Lfloat tempLen = abs(p->end - start) * 0.25f;
+                float tempLen = abs(p->end - start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;
@@ -916,7 +916,7 @@ void tSampler_setStart     (tSampler* const p, int32_t start)
             if (start < p->idx)// start given is before current index or we're in a crossfade
             {
                 p->targetstart = start;
-                Lfloat tempLen = abs(p->end - start) * 0.25f;
+                float tempLen = abs(p->end - start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;
@@ -972,7 +972,7 @@ void tSampler_setEnd       (tSampler* const p, int32_t end)
             if (end < p->idx) // end given is before current index or we're in a crossfade
             {
                 p->targetend = end;
-                Lfloat tempLen = abs(end - p->start) * 0.25f;
+                float tempLen = abs(end - p->start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;
@@ -985,7 +985,7 @@ void tSampler_setEnd       (tSampler* const p, int32_t end)
             if (end > p->idx) // end given is after current index or we're in a crossfade
             {
                 p->targetend = end;
-                Lfloat tempLen = abs(end - p->start) * 0.25f;
+                float tempLen = abs(end - p->start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;
@@ -1040,7 +1040,7 @@ void tSampler_setEndUnsafe     (tSampler* const p, int32_t end)
             if (end < p->idx) // end given is before current index or we're in a crossfade
             {
                 p->targetend = end;
-                Lfloat tempLen = abs(end - p->start) * 0.25f;
+                float tempLen = abs(end - p->start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;
@@ -1053,7 +1053,7 @@ void tSampler_setEndUnsafe     (tSampler* const p, int32_t end)
             if (end > p->idx) // end given is after current index or we're in a crossfade
             {
                 p->targetend = end;
-                Lfloat tempLen = abs(end - p->start) * 0.25f;
+                float tempLen = abs(end - p->start) * 0.25f;
                 if (cfxlen > tempLen)
                 {
                     p->cfxlen = tempLen;
@@ -1078,7 +1078,7 @@ void    tSampler_setLength    (tSampler* const p, int32_t length)
     tSampler_setEnd(p, p->start + length);
 }
 
-void tSampler_setRate      (tSampler* const p, Lfloat rate)
+void tSampler_setRate      (tSampler* const p, float rate)
 {
     rate = rate * p->rateFactor; //adjust for sampling rate of buffer (may be different from leaf.sampleRate if audio file was loaded form SD card)
     if (rate < 0.f)
@@ -1096,7 +1096,7 @@ void tSampler_setRate      (tSampler* const p, Lfloat rate)
 }
 
 
-void tSampler_setSampleRate(tSampler* const p, Lfloat sr)
+void tSampler_setSampleRate(tSampler* const p, float sr)
 {
     tBuffer* s = p->samp;
     p->sampleRate = sr;
@@ -1135,9 +1135,9 @@ void    tAutoSampler_free (tAutoSampler** const as)
     mpool_free((char*)a, a->mempool);
 }
 
-Lfloat   tAutoSampler_tick               (tAutoSampler* const a, Lfloat input)
+float   tAutoSampler_tick               (tAutoSampler* const a, float input)
 {
-    Lfloat currentPower = tEnvelopeFollower_tick(a->ef, input);
+    float currentPower = tEnvelopeFollower_tick(a->ef, input);
     
     if ((currentPower > (a->threshold)) &&
         (currentPower > a->previousPower + 0.001f) &&
@@ -1199,7 +1199,7 @@ void    tAutoSampler_stop               (tAutoSampler* const a)
     tSampler_stop(a->sampler);
 }
 
-void    tAutoSampler_setThreshold       (tAutoSampler* const a, Lfloat thresh)
+void    tAutoSampler_setThreshold       (tAutoSampler* const a, float thresh)
 {
     a->threshold = thresh;
 }
@@ -1216,12 +1216,12 @@ void    tAutoSampler_setCrossfadeLength (tAutoSampler* const a, uint32_t length)
     tSampler_setCrossfadeLength(a->sampler, length);
 }
 
-void    tAutoSampler_setRate    (tAutoSampler* const a, Lfloat rate)
+void    tAutoSampler_setRate    (tAutoSampler* const a, float rate)
 {
 
 }
 
-void    tAutoSampler_setSampleRate (tAutoSampler* const a, Lfloat sr)
+void    tAutoSampler_setSampleRate (tAutoSampler* const a, float sr)
 {
     tSampler_setSampleRate(a->sampler, sr);
 }
@@ -1252,7 +1252,7 @@ void tMBSampler_initToPool(tMBSampler** const sp, tBuffer** const b, tMempool** 
     c->syncin = 0.0f;
     c->_z = 0.0f;
     c->_j = 0;
-    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (Lfloat));
+    memset (c->_f, 0, (FILLEN + STEP_DD_PULSE_LENGTH) * sizeof (float));
 
     c->start = 0;
     c->end = 1;
@@ -1279,7 +1279,7 @@ void tMBSampler_setSample (tMBSampler* const p, tBuffer* const b)
     p->_p = 0.0f;
 }
 
-Lfloat tMBSampler_tick        (tMBSampler* const c)
+float tMBSampler_tick        (tMBSampler* const c)
 {
     if ((c->gain->curr == 0.0f) && (!c->active)) return 0.0f;
     if (c->_w == 0.0f)
@@ -1288,12 +1288,12 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
         return c->out;
     }
     
-    Lfloat last, beforeLast;
+    float last, beforeLast;
     int start, end, length;
-    Lfloat* buff;
+    float* buff;
     int    j;
-    //Lfloat  syncin;
-    Lfloat  a, p, w, z;
+    //float  syncin;
+    float  a, p, w, z;
    // syncin  = c->syncin;
         
     start = c->start;
@@ -1304,7 +1304,7 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
     last = c->last;
     beforeLast = c->beforeLast;
     p = c->_p;  /* position */
-    w = fminf((Lfloat)c->currentLoopLength * 0.5f, c->_w);  /* rate */
+    w = fminf((float)c->currentLoopLength * 0.5f, c->_w);  /* rate */
     z = c->_z;  /* low pass filter state */
     j = c->_j;  /* index into buffer _f */
     
@@ -1315,28 +1315,28 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
     
     p += w;
     
-    Lfloat next, afterNext;
+    float next, afterNext;
 //    if (syncin >= 1e-20f) {  /* sync to master */
 //
-//        Lfloat eof_offset = (syncin - 1e-20f) * w;
-//        Lfloat p_at_reset = p - eof_offset;
+//        float eof_offset = (syncin - 1e-20f) * w;
+//        float p_at_reset = p - eof_offset;
 //        p = eof_offset;
 //
 //        /* place any DD that may have occurred in subsample before reset */
 //        if (p_at_reset >= end) {
-//            while (p_at_reset >= (Lfloat) end) p_at_reset -= (Lfloat) length;
+//            while (p_at_reset >= (float) end) p_at_reset -= (float) length;
 //
-//            Lfloat f = p_at_reset + eof_offset;
+//            float f = p_at_reset + eof_offset;
 //            int i = (int) f;
 //            f -= i;
-//            Lfloat n = buff[i] * (1.0f - f) + buff[i+1] * f;
+//            float n = buff[i] * (1.0f - f) + buff[i+1] * f;
 //
 //            place_step_dd(c->_f, j, p_at_reset + eof_offset, w,
 //                          n - c->out);
 //            place_slope_dd(c->_f, j, p_at_reset + eof_offset, w, (n - c->out) - c->last_delta);
 //        }
 //
-//        Lfloat f = p_at_reset;
+//        float f = p_at_reset;
 //        int i = (int) f;
 //        f -= i;
 //        next = buff[i] * (1.0f - f) + buff[i+1] * f;
@@ -1349,17 +1349,17 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
     
     if (w > 0.0f) {
     
-        if (p >= (Lfloat) end) {  /* normal phase reset */
+        if (p >= (float) end) {  /* normal phase reset */
         
             // start and end are never negative and end must also be greater than start
             // so this loop is fine
-            while (p >= (Lfloat) end)
+            while (p >= (float) end)
             {
-                p -= (Lfloat) length;
+                p -= (float) length;
                 c->currentLoopLength = length;
             }
             
-            Lfloat f = p;
+            float f = p;
             int i = (int) f;
             f -= i;
             next = buff[i] * (1.0f - f) + buff[i+1] * f;
@@ -1370,8 +1370,8 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
             afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
  
             place_step_dd(c->_f, j, p - start, w, next - last);
-            Lfloat nextSlope = (afterNext - next) / w;
-            Lfloat lastSlope = (last - beforeLast) / w;
+            float nextSlope = (afterNext - next) / w;
+            float lastSlope = (last - beforeLast) / w;
             place_slope_dd(c->_f, j, p - start, w, nextSlope - lastSlope);
             if (c->mode == PlayNormal)
             {
@@ -1379,24 +1379,24 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
             }
             else if (c->mode == PlayBackAndForth) w = -w;
         }
-//        else if (p < (Lfloat) start) { /* start has been set ahead of the current phase */
+//        else if (p < (float) start) { /* start has been set ahead of the current phase */
 //            
-//            p = (Lfloat) start;
+//            p = (float) start;
 //            next = buff[start];
 //           
-//            Lfloat f = p + w;
+//            float f = p + w;
 //            int i = (int) f;
 //            f -= i;
 //            afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
 //
 //            place_step_dd(c->_f, j, 0, w, next - last);
-//            Lfloat nextSlope = (afterNext - next) / w;
-//            Lfloat lastSlope = (last - beforeLast) / w;
+//            float nextSlope = (afterNext - next) / w;
+//            float lastSlope = (last - beforeLast) / w;
 //            place_slope_dd(c->_f, j, 0, w, nextSlope - lastSlope);
 //        }
         else {
             
-            Lfloat f = p;
+            float f = p;
             int i = (int) f;
             f -= i;
             next = buff[i] * (1.0f - f) + buff[i+1] * f;
@@ -1411,27 +1411,27 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
 
         if (c->_last_w < 0.0f)
         {
-            Lfloat f = p + w;
+            float f = p + w;
             int i = (int) f;
             f -= i;
             afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
             
-            Lfloat nextSlope = (afterNext - next) / w;
-            Lfloat lastSlope = (last - beforeLast) / w;
+            float nextSlope = (afterNext - next) / w;
+            float lastSlope = (last - beforeLast) / w;
             place_slope_dd(c->_f, j, p - start, w, nextSlope - lastSlope);
         }
         
     } else { // if (w < 0.0f) {
         
-        if (p < (Lfloat) start) {
+        if (p < (float) start) {
         
-            while (p < (Lfloat) start)
+            while (p < (float) start)
             {
-                p += (Lfloat) length;
+                p += (float) length;
                 c->currentLoopLength = length;
             }
             
-            Lfloat f = p;
+            float f = p;
             int i = (int) f;
             f -= i;
             next = buff[i] * (1.0f - f) + buff[i+1] * f;
@@ -1442,8 +1442,8 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
             afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
 
             place_step_dd(c->_f, j, end - p, w, next - last);
-            Lfloat nextSlope = (afterNext - next) / w;
-            Lfloat lastSlope = (last - beforeLast) / w;
+            float nextSlope = (afterNext - next) / w;
+            float lastSlope = (last - beforeLast) / w;
             place_slope_dd(c->_f, j, end - p, w, nextSlope - lastSlope);
             
             if (c->mode == PlayNormal)
@@ -1452,19 +1452,19 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
             }
             else if (c->mode == PlayBackAndForth) w = -w;
         }
-//        else if (p > (Lfloat) end) {
+//        else if (p > (float) end) {
 //
-//            p = (Lfloat) end;
+//            p = (float) end;
 //            next = buff[end];
 //
-//            Lfloat f = p + w;
+//            float f = p + w;
 //            int i = (int) f;
 //            f -= i;
 //            afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
 //
 //            place_step_dd(c->_f, j, 0, w, next - last);
-//            Lfloat nextSlope = (afterNext - next) / w;
-//            Lfloat lastSlope = (last - beforeLast) / w;
+//            float nextSlope = (afterNext - next) / w;
+//            float lastSlope = (last - beforeLast) / w;
 //            place_slope_dd(c->_f, j, 0, w, nextSlope - lastSlope);
 //        }
         else {
@@ -1474,7 +1474,7 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
             {
             	tExpSmooth_setDest(c->gain, 0.0f);
             }
-            Lfloat f = p;
+            float f = p;
             int i = (int) f;
             f -= i;
             next = buff[i] * (1.0f - f) + buff[i+1] * f;
@@ -1482,13 +1482,13 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
         
         if (c->_last_w > 0.0f)
         {
-            Lfloat f = p + w;
+            float f = p + w;
             int i = (int) f;
             f -= i;
             afterNext = buff[i] * (1.0f - f) + buff[i+1] * f;
             
-            Lfloat nextSlope = (afterNext - next) / w;
-            Lfloat lastSlope = (last - beforeLast) / w;
+            float nextSlope = (afterNext - next) / w;
+            float lastSlope = (last - beforeLast) / w;
             place_slope_dd(c->_f, j, end - p, w, nextSlope - lastSlope);
         }
     }
@@ -1506,8 +1506,8 @@ Lfloat tMBSampler_tick        (tMBSampler* const c)
     if (++j == FILLEN)
     {
         j = 0;
-        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (Lfloat));
-        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (Lfloat));
+        memcpy (c->_f, c->_f + FILLEN, STEP_DD_PULSE_LENGTH * sizeof (float));
+        memset (c->_f + STEP_DD_PULSE_LENGTH, 0,  FILLEN * sizeof (float));
     }
     
     c->_p = p;
@@ -1562,7 +1562,7 @@ void    tMBSampler_setLength    (tMBSampler* const p, int32_t length)
     tMBSampler_setEnd(p, p->start + length);
 }
 
-void tMBSampler_setRate      (tMBSampler* const p, Lfloat rate)
+void tMBSampler_setRate      (tMBSampler* const p, float rate)
 {
     p->_w = rate;
 }

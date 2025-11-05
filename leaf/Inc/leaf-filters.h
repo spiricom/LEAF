@@ -36,12 +36,12 @@ extern "C" {
      @brief Schroeder allpass. Comb-filter with feedforward and feedback.
      @{
      
-     @fn void    tAllpass_init(tAllpass** const, Lfloat initDelay, uint32_t maxDelay, LEAF* const leaf)
+     @fn void    tAllpass_init(tAllpass** const, float initDelay, uint32_t maxDelay, LEAF* const leaf)
      @brief Initialize a tAllpass to the default mempool of a LEAF instance.
      @param filter A pointer to the tAllpass to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tAllpass_initToPool(tAllpass** const, Lfloat initDelay, uint32_t maxDelay, tMempool** const)
+     @fn void    tAllpass_initToPool(tAllpass** const, float initDelay, uint32_t maxDelay, tMempool** const)
      @brief Initialize a tAllpass to a specified mempool.
      @param filter A pointer to the tAllpass to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -50,15 +50,15 @@ extern "C" {
      @brief Free a tAllpass from its mempool.
      @param filter A pointer to the tAllpass to free.
      
-     @fn Lfloat   tAllpass_tick           (tAllpass* const, Lfloat input)
+     @fn float   tAllpass_tick           (tAllpass* const, float input)
      @brief
      @param filter A pointer to the relevant tAllpass.
      
-     @fn void    tAllpass_setGain        (tAllpass* const, Lfloat gain)
+     @fn void    tAllpass_setGain        (tAllpass* const, float gain)
      @brief
      @param filter A pointer to the relevant tAllpass.
      
-     @fn void    tAllpass_setDelay       (tAllpass* const, Lfloat delay)
+     @fn void    tAllpass_setDelay       (tAllpass* const, float delay)
      @brief
      @param filter A pointer to the relevant tAllpass.
      ￼￼￼
@@ -68,24 +68,24 @@ extern "C" {
     {
         tMempool* mempool;
         
-        Lfloat gain;
+        float gain;
         
         tLinearDelay* delay;
         
-        Lfloat lastOut;
+        float lastOut;
     } tAllpass;
 
     // Memory handlers for `tAllpass`
-    void    tAllpass_init           (tAllpass** const, Lfloat initDelay, uint32_t maxDelay, LEAF* const leaf);
-    void    tAllpass_initToPool     (tAllpass** const, Lfloat initDelay, uint32_t maxDelay, tMempool** const);
+    void    tAllpass_init           (tAllpass** const, float initDelay, uint32_t maxDelay, LEAF* const leaf);
+    void    tAllpass_initToPool     (tAllpass** const, float initDelay, uint32_t maxDelay, tMempool** const);
     void    tAllpass_free           (tAllpass** const);
 
     // Tick function for `tAllpass`
-    Lfloat   tAllpass_tick          (tAllpass* const, Lfloat input);
+    float   tAllpass_tick          (tAllpass* const, float input);
 
     // Setter functions for `tAllpass`
-    void    tAllpass_setGain        (tAllpass* const, Lfloat gain);
-    void    tAllpass_setDelay       (tAllpass* const, Lfloat delay);
+    void    tAllpass_setGain        (tAllpass* const, float gain);
+    void    tAllpass_setDelay       (tAllpass* const, float delay);
     
     //==============================================================================
 
@@ -95,12 +95,12 @@ extern "C" {
     @brief Schroeder allpass. Comb-filter with feedforward and feedback.
     @{
 
-    @fn void    tAllpassSO_init(tAllpassSO** const, Lfloat initDelay, uint32_t maxDelay, LEAF* const leaf)
+    @fn void    tAllpassSO_init(tAllpassSO** const, float initDelay, uint32_t maxDelay, LEAF* const leaf)
     @brief Initialize a tAllpassSO to the default mempool of a LEAF instance.
     @param filter A pointer to the tAllpassSO to initialize.
     @param leaf A pointer to the leaf instance.
  
-    @fn void    tAllpassSO_initToPool(tAllpassSO** const, Lfloat initDelay, uint32_t maxDelay, tMempool** const)
+    @fn void    tAllpassSO_initToPool(tAllpassSO** const, float initDelay, uint32_t maxDelay, tMempool** const)
     @brief Initialize a tAllpassSO to a specified mempool.
     @param filter A pointer to the tAllpassSO to initialize.
     @param mempool A pointer to the tMempool to use.
@@ -109,15 +109,15 @@ extern "C" {
     @brief Free a tAllpassSO from its mempool.
     @param filter A pointer to the tAllpassSO to free.
 
-    @fn Lfloat   tAllpassSO_tick           (tAllpassSO* const, Lfloat input)
+    @fn float   tAllpassSO_tick           (tAllpassSO* const, float input)
     @brief
     @param filter A pointer to the relevant tAllpassSO.
  
-    @fn void    tAllpassSO_setGain        (tAllpassSO* const, Lfloat gain)
+    @fn void    tAllpassSO_setGain        (tAllpassSO* const, float gain)
     @brief
     @param filter A pointer to the relevant tAllpassSO.
 
-    @fn void    tAllpassSO_setDelay       (tAllpassSO* const, Lfloat delay)
+    @fn void    tAllpassSO_setDelay       (tAllpassSO* const, float delay)
     @brief
     @param filter A pointer to the relevant tAllpassSO.
     ￼￼￼
@@ -128,12 +128,12 @@ extern "C" {
 
         tMempool* mempool;
 
-        Lfloat prevSamp;
-        Lfloat prevPrevSamp;
-        Lfloat prevSamp2;
-        Lfloat prevPrevSamp2;
-        Lfloat a1;
-        Lfloat a2;
+        float prevSamp;
+        float prevPrevSamp;
+        float prevSamp2;
+        float prevPrevSamp2;
+        float a1;
+        float a2;
 
     } tAllpassSO;
 
@@ -143,10 +143,10 @@ extern "C" {
     void    tAllpassSO_free           (tAllpassSO** const);
 
     // Tick function for `tAllpassSO`
-    Lfloat  tAllpassSO_tick           (tAllpassSO* const, Lfloat input);
+    float  tAllpassSO_tick           (tAllpassSO* const, float input);
 
     // Setter functions for `tAllpassSO`
-    void    tAllpassSO_setCoeff       (tAllpassSO* const ft, Lfloat a1, Lfloat a2);
+    void    tAllpassSO_setCoeff       (tAllpassSO* const ft, float a1, float a2);
     //==============================================================================
 
 
@@ -157,19 +157,19 @@ extern "C" {
 
         int numFilts;
         tAllpassSO** filters;
-        Lfloat B;
-        Lfloat iKey;
-        Lfloat a[2];
+        float B;
+        float iKey;
+        float a[2];
     
-        Lfloat k1[2];
-        Lfloat k2[2];
-        Lfloat k3[2];
-        Lfloat C1[2];
-        Lfloat C2[2];
+        float k1[2];
+        float k2[2];
+        float k3[2];
+        float C1[2];
+        float C2[2];
         int numActiveFilters;
         int numFiltsMap[2];
         int isHigh;
-        Lfloat D;
+        float D;
     } tThiranAllpassSOCascade;
 
     // Memory handlers for `tThiranAllpassSOCascade`
@@ -178,10 +178,10 @@ extern "C" {
     void    tThiranAllpassSOCascade_free           (tThiranAllpassSOCascade** const);
 
     // Tick function for `tThiranAllpassSOCascade`
-    Lfloat  tThiranAllpassSOCascade_tick           (tThiranAllpassSOCascade* const, Lfloat input);
+    float  tThiranAllpassSOCascade_tick           (tThiranAllpassSOCascade* const, float input);
 
     // Setter functions for `tThiranAllpassSOCascade`
-    Lfloat  tThiranAllpassSOCascade_setCoeff       (tThiranAllpassSOCascade* const ft, Lfloat dispersionCoeff, Lfloat freq, Lfloat invOversampling);
+    float  tThiranAllpassSOCascade_setCoeff       (tThiranAllpassSOCascade* const ft, float dispersionCoeff, float freq, float invOversampling);
     void    tThiranAllpassSOCascade_clear          (tThiranAllpassSOCascade* const ft);
     //==============================================================================
 
@@ -191,12 +191,12 @@ extern "C" {
      @brief OnePole filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tOnePole_init(tOnePole** const, Lfloat thePole, LEAF* const leaf)
+     @fn void    tOnePole_init(tOnePole** const, float thePole, LEAF* const leaf)
      @brief Initialize a tOnePole to the default mempool of a LEAF instance.
      @param filter A pointer to the tOnePole to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tOnePole_initToPool(tOnePole** const, Lfloat thePole, tMempool** const)
+     @fn void    tOnePole_initToPool(tOnePole** const, float thePole, tMempool** const)
      @brief Initialize a tOnePole to a specified mempool.
      @param filter A pointer to the tOnePole to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -205,31 +205,31 @@ extern "C" {
      @brief Free a tOnePole from its mempool.
      @param filter A pointer to the tOnePole to free.
      
-     @fn Lfloat   tOnePole_tick           (tOnePole* const, Lfloat input)
+     @fn float   tOnePole_tick           (tOnePole* const, float input)
      @brief
      @param filter A pointer to the relevant tOnePole.
      
-     @fn void    tOnePole_setB0          (tOnePole* const, Lfloat b0)
+     @fn void    tOnePole_setB0          (tOnePole* const, float b0)
      @brief
      @param filter A pointer to the relevant tOnePole.
      
-     @fn void    tOnePole_setA1          (tOnePole* const, Lfloat a1)
+     @fn void    tOnePole_setA1          (tOnePole* const, float a1)
      @brief
      @param filter A pointer to the relevant tOnePole.
      
-     @fn void    tOnePole_setPole        (tOnePole* const, Lfloat thePole)
+     @fn void    tOnePole_setPole        (tOnePole* const, float thePole)
      @brief
      @param filter A pointer to the relevant tOnePole.
      
-     @fn void    tOnePole_setFreq        (tOnePole* const, Lfloat freq)
+     @fn void    tOnePole_setFreq        (tOnePole* const, float freq)
      @brief
      @param filter A pointer to the relevant tOnePole.
      
-     @fn void    tOnePole_setCoefficients(tOnePole* const, Lfloat b0, Lfloat a1)
+     @fn void    tOnePole_setCoefficients(tOnePole* const, float b0, float a1)
      @brief
      @param filter A pointer to the relevant tOnePole.
      
-     @fn void    tOnePole_setGain        (tOnePole* const, Lfloat gain)
+     @fn void    tOnePole_setGain        (tOnePole* const, float gain)
      @brief
      @param filter A pointer to the relevant tOnePole.
      ￼￼￼
@@ -239,30 +239,30 @@ extern "C" {
     {
 
         tMempool* mempool;
-        Lfloat freq;
-        Lfloat gain;
-        Lfloat a0,a1;
-        Lfloat b0,b1;
-        Lfloat lastIn, lastOut;
-        Lfloat twoPiTimesInvSampleRate;
+        float freq;
+        float gain;
+        float a0,a1;
+        float b0,b1;
+        float lastIn, lastOut;
+        float twoPiTimesInvSampleRate;
     } tOnePole;
 
     // Memory handlers for `tOnePole`
-    void    tOnePole_init            (tOnePole** const, Lfloat freq, LEAF* const leaf);
-    void    tOnePole_initToPool      (tOnePole** const, Lfloat freq, tMempool** const);
+    void    tOnePole_init            (tOnePole** const, float freq, LEAF* const leaf);
+    void    tOnePole_initToPool      (tOnePole** const, float freq, tMempool** const);
     void    tOnePole_free            (tOnePole** const);
 
     // Tick function for `tOnePole`
-    Lfloat   tOnePole_tick           (tOnePole* const, Lfloat input);
+    float   tOnePole_tick           (tOnePole* const, float input);
 
     // Setter functions for `tOnePole`
-    void    tOnePole_setB0           (tOnePole* const, Lfloat b0);
-    void    tOnePole_setA1           (tOnePole* const, Lfloat a1);
-    void    tOnePole_setPole         (tOnePole* const, Lfloat thePole);
-    void    tOnePole_setFreq         (tOnePole* const, Lfloat freq);
-    void    tOnePole_setCoefficients (tOnePole* const, Lfloat b0, Lfloat a1);
-    void    tOnePole_setGain         (tOnePole* const, Lfloat gain);
-    void    tOnePole_setSampleRate   (tOnePole* const, Lfloat sr);
+    void    tOnePole_setB0           (tOnePole* const, float b0);
+    void    tOnePole_setA1           (tOnePole* const, float a1);
+    void    tOnePole_setPole         (tOnePole* const, float thePole);
+    void    tOnePole_setFreq         (tOnePole* const, float freq);
+    void    tOnePole_setCoefficients (tOnePole* const, float b0, float a1);
+    void    tOnePole_setGain         (tOnePole* const, float gain);
+    void    tOnePole_setSampleRate   (tOnePole* const, float sr);
     
     //==============================================================================
 
@@ -272,12 +272,12 @@ extern "C" {
     @brief OnePole filter, reimplemented from STK (Cook and Scavone).
     @{
 
-    @fn void    tOnePole_init(tOnePole** const, Lfloat thePole, LEAF* const leaf)
+    @fn void    tOnePole_init(tOnePole** const, float thePole, LEAF* const leaf)
     @brief Initialize a tOnePole to the default mempool of a LEAF instance.
     @param filter A pointer to the tOnePole to initialize.
     @param leaf A pointer to the leaf instance.
 
-    @fn void    tOnePole_initToPool(tOnePole** const, Lfloat thePole, tMempool** const)
+    @fn void    tOnePole_initToPool(tOnePole** const, float thePole, tMempool** const)
     @brief Initialize a tOnePole to a specified mempool.
     @param filter A pointer to the tOnePole to initialize.
     @param mempool A pointer to the tMempool to use.
@@ -286,31 +286,31 @@ extern "C" {
     @brief Free a tOnePole from its mempool.
     @param filter A pointer to the tOnePole to free.
 
-    @fn Lfloat   tOnePole_tick           (tOnePole* const, Lfloat input)
+    @fn float   tOnePole_tick           (tOnePole* const, float input)
     @brief
     @param filter A pointer to the relevant tOnePole.
 
-    @fn void    tOnePole_setB0          (tOnePole* const, Lfloat b0)
+    @fn void    tOnePole_setB0          (tOnePole* const, float b0)
     @brief
     @param filter A pointer to the relevant tOnePole.
 
-    @fn void    tOnePole_setA1          (tOnePole* const, Lfloat a1)
+    @fn void    tOnePole_setA1          (tOnePole* const, float a1)
     @brief
     @param filter A pointer to the relevant tOnePole.
 
-    @fn void    tOnePole_setPole        (tOnePole* const, Lfloat thePole)
+    @fn void    tOnePole_setPole        (tOnePole* const, float thePole)
     @brief
     @param filter A pointer to the relevant tOnePole.
 
-    @fn void    tOnePole_setFreq        (tOnePole* const, Lfloat freq)
+    @fn void    tOnePole_setFreq        (tOnePole* const, float freq)
     @brief
     @param filter A pointer to the relevant tOnePole.
 
-    @fn void    tOnePole_setCoefficients(tOnePole* const, Lfloat b0, Lfloat a1)
+    @fn void    tOnePole_setCoefficients(tOnePole* const, float b0, float a1)
     @brief
     @param filter A pointer to the relevant tOnePole.
 
-    @fn void    tOnePole_setGain        (tOnePole* const, Lfloat gain)
+    @fn void    tOnePole_setGain        (tOnePole* const, float gain)
     @brief
     @param filter A pointer to the relevant tOnePole.
     ￼￼￼
@@ -320,9 +320,9 @@ extern "C" {
     {
 
         tMempool* mempool;
-        Lfloat poleCoeff, sgain, output;
-        Lfloat twoPiTimesInvSampleRate;
-        Lfloat gain;
+        float poleCoeff, sgain, output;
+        float twoPiTimesInvSampleRate;
+        float gain;
     } tCookOnePole;
 
     // Memory handlers for `tCookOnePole`
@@ -331,13 +331,13 @@ extern "C" {
     void    tCookOnePole_free           (tCookOnePole** const);
 
     // Tick function for `tCookOnePole`
-    Lfloat  tCookOnePole_tick           (tCookOnePole* const, Lfloat input);
+    float  tCookOnePole_tick           (tCookOnePole* const, float input);
 
     // Setter functions for `tCookOnePole`
-    void    tCookOnePole_setPole        (tCookOnePole* const, Lfloat thePole);
-    void    tCookOnePole_setGain        (tCookOnePole* const, Lfloat gain);
-    void    tCookOnePole_setGainAndPole (tCookOnePole* const ft, Lfloat gain, Lfloat pole);
-    void    tCookOnePole_setSampleRate  (tCookOnePole* const, Lfloat sr);
+    void    tCookOnePole_setPole        (tCookOnePole* const, float thePole);
+    void    tCookOnePole_setGain        (tCookOnePole* const, float gain);
+    void    tCookOnePole_setGainAndPole (tCookOnePole* const ft, float gain, float pole);
+    void    tCookOnePole_setSampleRate  (tCookOnePole* const, float sr);
 
     //==============================================================================
 
@@ -361,31 +361,31 @@ extern "C" {
      @brief Free a tTwoPole from its mempool.
      @param filter A pointer to the tTwoPole to free.
      
-     @fn Lfloat   tTwoPole_tick           (tTwoPole* const, Lfloat input)
+     @fn float   tTwoPole_tick           (tTwoPole* const, float input)
      @brief
      @param filter A pointer to the relevant tTwoPole.
      
-     @fn void    tTwoPole_setB0          (tTwoPole* const, Lfloat b0)
+     @fn void    tTwoPole_setB0          (tTwoPole* const, float b0)
      @brief
      @param filter A pointer to the relevant tTwoPole.
      
-     @fn void    tTwoPole_setA1          (tTwoPole* const, Lfloat a1)
+     @fn void    tTwoPole_setA1          (tTwoPole* const, float a1)
      @brief
      @param filter A pointer to the relevant tTwoPole.
      
-     @fn void    tTwoPole_setA2          (tTwoPole* const, Lfloat a2)
+     @fn void    tTwoPole_setA2          (tTwoPole* const, float a2)
      @brief
      @param filter A pointer to the relevant tTwoPole.
      
-     @fn void    tTwoPole_setResonance   (tTwoPole* const, Lfloat freq, Lfloat radius, int normalize)
+     @fn void    tTwoPole_setResonance   (tTwoPole* const, float freq, float radius, int normalize)
      @brief
      @param filter A pointer to the relevant tTwoPole.
      
-     @fn void    tTwoPole_setCoefficients(tTwoPole* const, Lfloat b0, Lfloat a1, Lfloat a2)
+     @fn void    tTwoPole_setCoefficients(tTwoPole* const, float b0, float a1, float a2)
      @brief
      @param filter A pointer to the relevant tTwoPole.
      
-     @fn void    tTwoPole_setGain        (tTwoPole* const, Lfloat gain)
+     @fn void    tTwoPole_setGain        (tTwoPole* const, float gain)
      @brief
      @param filter A pointer to the relevant tTwoPole.
      ￼￼￼
@@ -396,17 +396,17 @@ extern "C" {
 
         tMempool* mempool;
         
-        Lfloat gain;
-        Lfloat a0, a1, a2;
-        Lfloat b0;
+        float gain;
+        float a0, a1, a2;
+        float b0;
         
-        Lfloat radius, frequency;
+        float radius, frequency;
         int normalize;
         
-        Lfloat lastOut[2];
+        float lastOut[2];
         
-        Lfloat sampleRate;
-        Lfloat twoPiTimesInvSampleRate;
+        float sampleRate;
+        float twoPiTimesInvSampleRate;
     } tTwoPole;
 
     // Memory handlers for `tTwoPole`
@@ -415,16 +415,16 @@ extern "C" {
     void    tTwoPole_free            (tTwoPole** const);
 
     // Tick function for `tTwoPole`
-    Lfloat  tTwoPole_tick            (tTwoPole* const, Lfloat input);
+    float  tTwoPole_tick            (tTwoPole* const, float input);
 
     // Setter functions for `tTwoPole`
-    void    tTwoPole_setB0           (tTwoPole* const, Lfloat b0);
-    void    tTwoPole_setA1           (tTwoPole* const, Lfloat a1);
-    void    tTwoPole_setA2           (tTwoPole* const, Lfloat a2);
-    void    tTwoPole_setResonance    (tTwoPole* const, Lfloat freq, Lfloat radius, int normalize);
-    void    tTwoPole_setCoefficients (tTwoPole* const, Lfloat b0, Lfloat a1, Lfloat a2);
-    void    tTwoPole_setGain         (tTwoPole* const, Lfloat gain);
-    void    tTwoPole_setSampleRate   (tTwoPole* const, Lfloat sr);
+    void    tTwoPole_setB0           (tTwoPole* const, float b0);
+    void    tTwoPole_setA1           (tTwoPole* const, float a1);
+    void    tTwoPole_setA2           (tTwoPole* const, float a2);
+    void    tTwoPole_setResonance    (tTwoPole* const, float freq, float radius, int normalize);
+    void    tTwoPole_setCoefficients (tTwoPole* const, float b0, float a1, float a2);
+    void    tTwoPole_setGain         (tTwoPole* const, float gain);
+    void    tTwoPole_setSampleRate   (tTwoPole* const, float sr);
     
     //==============================================================================
     
@@ -434,12 +434,12 @@ extern "C" {
      @brief OneZero filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tOneZero_init(tOneZero** const, Lfloat theZero, LEAF* const leaf)
+     @fn void    tOneZero_init(tOneZero** const, float theZero, LEAF* const leaf)
      @brief Initialize a tOneZero to the default mempool of a LEAF instance.
      @param filter A pointer to the tSlide to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tOneZero_initToPool(tOneZero** const, Lfloat theZero, tMempool** const)
+     @fn void    tOneZero_initToPool(tOneZero** const, float theZero, tMempool** const)
      @brief Initialize a tOneZero to a specified mempool.
      @param filter A pointer to the tOneZero to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -448,31 +448,31 @@ extern "C" {
      @brief Free a tOneZero from its mempool.
      @param filter A pointer to the tOneZero to free.
      
-     @fn Lfloat   tOneZero_tick           (tOneZero* const, Lfloat input)
+     @fn float   tOneZero_tick           (tOneZero* const, float input)
      @brief
      @param filter A pointer to the relevant tOneZero.
      
-     @fn void    tOneZero_setB0          (tOneZero* const, Lfloat b0)
+     @fn void    tOneZero_setB0          (tOneZero* const, float b0)
      @brief
      @param filter A pointer to the relevant tOneZero.
      
-     @fn void    tOneZero_setB1          (tOneZero* const, Lfloat b1)
+     @fn void    tOneZero_setB1          (tOneZero* const, float b1)
      @brief
      @param filter A pointer to the relevant tOneZero.
      
-     @fn void    tOneZero_setZero        (tOneZero* const, Lfloat theZero)
+     @fn void    tOneZero_setZero        (tOneZero* const, float theZero)
      @brief
      @param filter A pointer to the relevant tOneZero.
      
-     @fn void    tOneZero_setCoefficients(tOneZero* const, Lfloat b0, Lfloat b1)
+     @fn void    tOneZero_setCoefficients(tOneZero* const, float b0, float b1)
      @brief
      @param filter A pointer to the relevant tOneZero.
      
-     @fn void    tOneZero_setGain        (tOneZero* const, Lfloat gain)
+     @fn void    tOneZero_setGain        (tOneZero* const, float gain)
      @brief
      @param filter A pointer to the relevant tOneZero.
      
-     @fn Lfloat   tOneZero_getPhaseDelay  (tOneZero *f, Lfloat frequency)
+     @fn float   tOneZero_getPhaseDelay  (tOneZero *f, float frequency)
      @brief
      @param filter A pointer to the relevant tOneZero.
      ￼￼￼
@@ -481,28 +481,28 @@ extern "C" {
     typedef struct tOneZero
     {
         tMempool* mempool;
-        Lfloat gain;
-        Lfloat b0,b1;
-        Lfloat lastIn, lastOut, frequency;
-        Lfloat invSampleRate;
+        float gain;
+        float b0,b1;
+        float lastIn, lastOut, frequency;
+        float invSampleRate;
     } tOneZero;
 
     // Memory handlers for `tOneZero`
-    void    tOneZero_init           (tOneZero** const, Lfloat theZero, LEAF* const leaf);
-    void    tOneZero_initToPool     (tOneZero** const, Lfloat theZero, tMempool** const);
+    void    tOneZero_init           (tOneZero** const, float theZero, LEAF* const leaf);
+    void    tOneZero_initToPool     (tOneZero** const, float theZero, tMempool** const);
     void    tOneZero_free           (tOneZero** const);
 
     // Tick function for `tOneZero`
-    Lfloat  tOneZero_tick            (tOneZero* const, Lfloat input);
+    float  tOneZero_tick            (tOneZero* const, float input);
 
     // Setter functions for `tOneZero`
-    void    tOneZero_setB0           (tOneZero* const, Lfloat b0);
-    void    tOneZero_setB1           (tOneZero* const, Lfloat b1);
-    void    tOneZero_setZero         (tOneZero* const, Lfloat theZero);
-    void    tOneZero_setCoefficients (tOneZero* const, Lfloat b0, Lfloat b1);
-    void    tOneZero_setGain         (tOneZero* const, Lfloat gain);
-    Lfloat  tOneZero_getPhaseDelay   (tOneZero* const, Lfloat frequency);
-    void    tOneZero_setSampleRate   (tOneZero* const, Lfloat sr);
+    void    tOneZero_setB0           (tOneZero* const, float b0);
+    void    tOneZero_setB1           (tOneZero* const, float b1);
+    void    tOneZero_setZero         (tOneZero* const, float theZero);
+    void    tOneZero_setCoefficients (tOneZero* const, float b0, float b1);
+    void    tOneZero_setGain         (tOneZero* const, float gain);
+    float  tOneZero_getPhaseDelay   (tOneZero* const, float frequency);
+    void    tOneZero_setSampleRate   (tOneZero* const, float sr);
     
     //==============================================================================
     
@@ -526,31 +526,31 @@ extern "C" {
      @brief Free a tTwoZero from its mempool.
      @param filter A pointer to the tTwoZero to free.
      
-     @fn Lfloat   tTwoZero_tick           (tTwoZero* const, Lfloat input)
+     @fn float   tTwoZero_tick           (tTwoZero* const, float input)
      @brief
      @param filter A pointer to the relevant tTwoZero.
      
-     @fn void    tTwoZero_setB0          (tTwoZero* const, Lfloat b0)
+     @fn void    tTwoZero_setB0          (tTwoZero* const, float b0)
      @brief
      @param filter A pointer to the relevant tTwoZero.
      
-     @fn void    tTwoZero_setB1          (tTwoZero* const, Lfloat b1)
+     @fn void    tTwoZero_setB1          (tTwoZero* const, float b1)
      @brief
      @param filter A pointer to the relevant tTwoZero.
      
-     @fn void    tTwoZero_setB2          (tTwoZero* const, Lfloat b2)
+     @fn void    tTwoZero_setB2          (tTwoZero* const, float b2)
      @brief
      @param filter A pointer to the relevant tTwoZero.
      
-     @fn void    tTwoZero_setNotch       (tTwoZero* const, Lfloat frequency, Lfloat radius)
+     @fn void    tTwoZero_setNotch       (tTwoZero* const, float frequency, float radius)
      @brief
      @param filter A pointer to the relevant tTwoZero.
      
-     @fn void    tTwoZero_setCoefficients(tTwoZero* const, Lfloat b0, Lfloat b1, Lfloat b2)
+     @fn void    tTwoZero_setCoefficients(tTwoZero* const, float b0, float b1, float b2)
      @brief
      @param filter A pointer to the relevant tTwoZero.
      
-     @fn void    tTwoZero_setGain        (tTwoZero* const, Lfloat gain)
+     @fn void    tTwoZero_setGain        (tTwoZero* const, float gain)
      @brief
      @param filter A pointer to the relevant tTwoZero.
      
@@ -561,11 +561,11 @@ extern "C" {
     {
         tMempool* mempool;
         
-        Lfloat gain;
-        Lfloat b0, b1, b2;
-        Lfloat frequency, radius;
-        Lfloat lastIn[2];
-        Lfloat twoPiTimesInvSampleRate;
+        float gain;
+        float b0, b1, b2;
+        float frequency, radius;
+        float lastIn[2];
+        float twoPiTimesInvSampleRate;
     } tTwoZero;
 
     // Memory handlers for `tTwoZero`
@@ -574,16 +574,16 @@ extern "C" {
     void    tTwoZero_free           (tTwoZero** const);
 
     // Tick function for `tTwoZero`
-    Lfloat  tTwoZero_tick           (tTwoZero* const, Lfloat input);
+    float  tTwoZero_tick           (tTwoZero* const, float input);
 
     // Setter functions for `tTwoZero`
-    void    tTwoZero_setB0          (tTwoZero* const, Lfloat b0);
-    void    tTwoZero_setB1          (tTwoZero* const, Lfloat b1);
-    void    tTwoZero_setB2          (tTwoZero* const, Lfloat b2);
-    void    tTwoZero_setNotch       (tTwoZero* const, Lfloat frequency, Lfloat radius);
-    void    tTwoZero_setCoefficients(tTwoZero* const, Lfloat b0, Lfloat b1, Lfloat b2);
-    void    tTwoZero_setGain        (tTwoZero* const, Lfloat gain);
-    void    tTwoZero_setSampleRate  (tTwoZero* const, Lfloat sr);
+    void    tTwoZero_setB0          (tTwoZero* const, float b0);
+    void    tTwoZero_setB1          (tTwoZero* const, float b1);
+    void    tTwoZero_setB2          (tTwoZero* const, float b2);
+    void    tTwoZero_setNotch       (tTwoZero* const, float frequency, float radius);
+    void    tTwoZero_setCoefficients(tTwoZero* const, float b0, float b1, float b2);
+    void    tTwoZero_setGain        (tTwoZero* const, float gain);
+    void    tTwoZero_setSampleRate  (tTwoZero* const, float sr);
     
     //==============================================================================
     
@@ -608,35 +608,35 @@ extern "C" {
      @param filter A pointer to the tPoleZero to free.
      
      
-     @fn Lfloat   tPoleZero_tick              (tPoleZero* const, Lfloat input)
+     @fn float   tPoleZero_tick              (tPoleZero* const, float input)
      @brief
      @param filter A pointer to the relevant tPoleZero.
      
-     @fn void    tPoleZero_setB0             (tPoleZero* const, Lfloat b0)
+     @fn void    tPoleZero_setB0             (tPoleZero* const, float b0)
      @brief
      @param filter A pointer to the relevant tPoleZero.
      
-     @fn void    tPoleZero_setB1             (tPoleZero* const, Lfloat b1)
+     @fn void    tPoleZero_setB1             (tPoleZero* const, float b1)
      @brief
      @param filter A pointer to the relevant tPoleZero.
      
-     @fn void    tPoleZero_setA1             (tPoleZero* const, Lfloat a1)
+     @fn void    tPoleZero_setA1             (tPoleZero* const, float a1)
      @brief
      @param filter A pointer to the relevant tPoleZero.
      
-     @fn void    tPoleZero_setCoefficients   (tPoleZero* const, Lfloat b0, Lfloat b1, Lfloat a1)
+     @fn void    tPoleZero_setCoefficients   (tPoleZero* const, float b0, float b1, float a1)
      @brief
      @param filter A pointer to the relevant tPoleZero.
      
-     @fn void    tPoleZero_setAllpass        (tPoleZero* const, Lfloat coeff)
+     @fn void    tPoleZero_setAllpass        (tPoleZero* const, float coeff)
      @brief
      @param filter A pointer to the relevant tPoleZero.
      
-     @fn void    tPoleZero_setBlockZero      (tPoleZero* const, Lfloat thePole)
+     @fn void    tPoleZero_setBlockZero      (tPoleZero* const, float thePole)
      @brief
      @param filter A pointer to the relevant tPoleZero.
      
-     @fn void    tPoleZero_setGain           (tPoleZero* const, Lfloat gain)
+     @fn void    tPoleZero_setGain           (tPoleZero* const, float gain)
      @brief
      @param filter A pointer to the relevant tPoleZero.
      
@@ -648,11 +648,11 @@ extern "C" {
 
         tMempool* mempool;
         
-        Lfloat gain;
-        Lfloat a1;
-        Lfloat b0,b1;
+        float gain;
+        float a1;
+        float b0,b1;
         
-        Lfloat lastIn, lastOut;
+        float lastIn, lastOut;
     } tPoleZero;
 
     // Memory handlers for `tPoleZero`
@@ -661,16 +661,16 @@ extern "C" {
     void    tPoleZero_free              (tPoleZero** const);
 
     // Tick function for `tPoleZero`
-    Lfloat  tPoleZero_tick              (tPoleZero* const, Lfloat input);
+    float  tPoleZero_tick              (tPoleZero* const, float input);
 
     // Setter functions for `tPoleZero`
-    void    tPoleZero_setB0             (tPoleZero* const, Lfloat b0);
-    void    tPoleZero_setB1             (tPoleZero* const, Lfloat b1);
-    void    tPoleZero_setA1             (tPoleZero* const, Lfloat a1);
-    void    tPoleZero_setCoefficients   (tPoleZero* const, Lfloat b0, Lfloat b1, Lfloat a1);
-    void    tPoleZero_setAllpass        (tPoleZero* const, Lfloat coeff);
-    void    tPoleZero_setBlockZero      (tPoleZero* const, Lfloat thePole);
-    void    tPoleZero_setGain           (tPoleZero* const, Lfloat gain);
+    void    tPoleZero_setB0             (tPoleZero* const, float b0);
+    void    tPoleZero_setB1             (tPoleZero* const, float b1);
+    void    tPoleZero_setA1             (tPoleZero* const, float a1);
+    void    tPoleZero_setCoefficients   (tPoleZero* const, float b0, float b1, float a1);
+    void    tPoleZero_setAllpass        (tPoleZero* const, float coeff);
+    void    tPoleZero_setBlockZero      (tPoleZero* const, float thePole);
+    void    tPoleZero_setGain           (tPoleZero* const, float gain);
     
     //==============================================================================
     
@@ -695,43 +695,43 @@ extern "C" {
      @param filter A pointer to the tBiQuad to free.
      
      
-     @fn Lfloat   tBiQuad_tick           (tBiQuad* const, Lfloat input)
+     @fn float   tBiQuad_tick           (tBiQuad* const, float input)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
-     @fn void    tBiQuad_setB0          (tBiQuad* const, Lfloat b0)
+     @fn void    tBiQuad_setB0          (tBiQuad* const, float b0)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
-     @fn void    tBiQuad_setB1          (tBiQuad* const, Lfloat b1)
+     @fn void    tBiQuad_setB1          (tBiQuad* const, float b1)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
-     @fn void    tBiQuad_setB2          (tBiQuad* const, Lfloat b2)
+     @fn void    tBiQuad_setB2          (tBiQuad* const, float b2)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
-     @fn void    tBiQuad_setA1          (tBiQuad* const, Lfloat a1)
+     @fn void    tBiQuad_setA1          (tBiQuad* const, float a1)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
-     @fn void    tBiQuad_setA2          (tBiQuad* const, Lfloat a2)
+     @fn void    tBiQuad_setA2          (tBiQuad* const, float a2)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
-     @fn void    tBiQuad_setNotch       (tBiQuad* const, Lfloat freq, Lfloat radius)
+     @fn void    tBiQuad_setNotch       (tBiQuad* const, float freq, float radius)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
-     @fn void    tBiQuad_setResonance   (tBiQuad* const, Lfloat freq, Lfloat radius, int normalize)
+     @fn void    tBiQuad_setResonance   (tBiQuad* const, float freq, float radius, int normalize)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
-     @fn void    tBiQuad_setCoefficients(tBiQuad* const, Lfloat b0, Lfloat b1, Lfloat b2, Lfloat a1, Lfloat a2)
+     @fn void    tBiQuad_setCoefficients(tBiQuad* const, float b0, float b1, float b2, float a1, float a2)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
-     @fn void    tBiQuad_setGain        (tBiQuad* const, Lfloat gain)
+     @fn void    tBiQuad_setGain        (tBiQuad* const, float gain)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
@@ -742,18 +742,18 @@ extern "C" {
     {
         tMempool* mempool;
         
-        Lfloat gain;
-        Lfloat a0, a1, a2;
-        Lfloat b0, b1, b2;
+        float gain;
+        float a0, a1, a2;
+        float b0, b1, b2;
         
-        Lfloat lastIn[2];
-        Lfloat lastOut[2];
+        float lastIn[2];
+        float lastOut[2];
         
-        Lfloat frequency, radius;
+        float frequency, radius;
         int normalize;
         
-        Lfloat sampleRate;
-        Lfloat twoPiTimesInvSampleRate;
+        float sampleRate;
+        float twoPiTimesInvSampleRate;
     } tBiQuad;
 
     // Memory handlers for `tBiQuad`
@@ -762,19 +762,19 @@ extern "C" {
     void    tBiQuad_free           (tBiQuad** const);
 
     // Tick function for `tBiQuad`
-    Lfloat  tBiQuad_tick           (tBiQuad* const, Lfloat input);
+    float  tBiQuad_tick           (tBiQuad* const, float input);
 
     // Setter functions for `tBiQuad`
-    void    tBiQuad_setB0          (tBiQuad* const, Lfloat b0);
-    void    tBiQuad_setB1          (tBiQuad* const, Lfloat b1);
-    void    tBiQuad_setB2          (tBiQuad* const, Lfloat b2);
-    void    tBiQuad_setA1          (tBiQuad* const, Lfloat a1);
-    void    tBiQuad_setA2          (tBiQuad* const, Lfloat a2);
-    void    tBiQuad_setNotch       (tBiQuad* const, Lfloat freq, Lfloat radius);
-    void    tBiQuad_setResonance   (tBiQuad* const, Lfloat freq, Lfloat radius, int normalize);
-    void    tBiQuad_setCoefficients(tBiQuad* const, Lfloat b0, Lfloat b1, Lfloat b2, Lfloat a1, Lfloat a2);
-    void    tBiQuad_setGain        (tBiQuad* const, Lfloat gain);
-    void    tBiQuad_setSampleRate  (tBiQuad* const, Lfloat sr);
+    void    tBiQuad_setB0          (tBiQuad* const, float b0);
+    void    tBiQuad_setB1          (tBiQuad* const, float b1);
+    void    tBiQuad_setB2          (tBiQuad* const, float b2);
+    void    tBiQuad_setA1          (tBiQuad* const, float a1);
+    void    tBiQuad_setA2          (tBiQuad* const, float a2);
+    void    tBiQuad_setNotch       (tBiQuad* const, float freq, float radius);
+    void    tBiQuad_setResonance   (tBiQuad* const, float freq, float radius, int normalize);
+    void    tBiQuad_setCoefficients(tBiQuad* const, float b0, float b1, float b2, float a1, float a2);
+    void    tBiQuad_setGain        (tBiQuad* const, float gain);
+    void    tBiQuad_setSampleRate  (tBiQuad* const, float sr);
     
     //==============================================================================
     
@@ -784,12 +784,12 @@ extern "C" {
      @brief State Variable Filter, algorithm from Andy Simper.
      @{
      
-     @fn void    tSVF_init(tSVF** const, SVFType type, Lfloat freq, Lfloat Q, LEAF* const leaf)
+     @fn void    tSVF_init(tSVF** const, SVFType type, float freq, float Q, LEAF* const leaf)
      @brief Initialize a tSVF to the default mempool of a LEAF instance.
      @param filter A pointer to the tSVF to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSVF_initToPool(tSVF** const, SVFType type, Lfloat freq, Lfloat Q, tMempool** const)
+     @fn void    tSVF_initToPool(tSVF** const, SVFType type, float freq, float Q, tMempool** const)
      @brief Initialize a tSVF to a specified mempool.
      @param filter A pointer to the tSVF to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -798,19 +798,19 @@ extern "C" {
      @brief Free a tSVF from its mempool.
      @param filter A pointer to the tSVF to free.
      
-     @fn Lfloat   tSVF_tick           (tSVF* const, Lfloat v0)
+     @fn float   tSVF_tick           (tSVF* const, float v0)
      @brief
      @param filter A pointer to the relevant tSVF.
      
-     @fn void    tSVF_setFreq        (tSVF* const, Lfloat freq)
+     @fn void    tSVF_setFreq        (tSVF* const, float freq)
      @brief
      @param filter A pointer to the relevant tSVF.
      
-     @fn void    tSVF_setQ           (tSVF* const, Lfloat Q)
+     @fn void    tSVF_setQ           (tSVF* const, float Q)
      @brief
      @param filter A pointer to the relevant tSVF.
      
-     @fn void    tSVF_setFreqAndQ    (tSVF* const svff, Lfloat freq, Lfloat Q)
+     @fn void    tSVF_setFreqAndQ    (tSVF* const svff, float freq, float Q)
      @brief
      @param filter A pointer to the relevant tSVF.
      ￼￼￼
@@ -835,68 +835,68 @@ extern "C" {
     {
         tMempool* mempool;
         SVFType type;
-        Lfloat cutoff, Q, cutoffMIDI;
-        Lfloat ic1eq,ic2eq;
-        Lfloat g,k,a1,a2,a3,cH,cB,cL,cBK;
-        Lfloat sampleRate;
-        Lfloat invSampleRate;
-        Lfloat phaseComp;
-        Lfloat sampleRatio;
-        const Lfloat *table;
+        float cutoff, Q, cutoffMIDI;
+        float ic1eq,ic2eq;
+        float g,k,a1,a2,a3,cH,cB,cL,cBK;
+        float sampleRate;
+        float invSampleRate;
+        float phaseComp;
+        float sampleRatio;
+        const float *table;
     } tSVF;
 
     // Memory handlers for `tSVF`
-    void    tSVF_init                (tSVF** const, SVFType type, Lfloat freq, Lfloat Q, LEAF* const leaf);
-    void    tSVF_initToPool          (tSVF** const, SVFType type, Lfloat freq, Lfloat Q, tMempool** const);
+    void    tSVF_init                (tSVF** const, SVFType type, float freq, float Q, LEAF* const leaf);
+    void    tSVF_initToPool          (tSVF** const, SVFType type, float freq, float Q, tMempool** const);
     void    tSVF_free                (tSVF** const);
 
     // Tick functions for `tSVF`
-    Lfloat  tSVF_tick                (tSVF* const, Lfloat v0);
-    Lfloat  tSVF_tickLP              (tSVF* const, Lfloat v0);
-    Lfloat  tSVF_tickHP              (tSVF* const, Lfloat v0);
-    Lfloat  tSVF_tickBP              (tSVF* const, Lfloat v0);
+    float  tSVF_tick                (tSVF* const, float v0);
+    float  tSVF_tickLP              (tSVF* const, float v0);
+    float  tSVF_tickHP              (tSVF* const, float v0);
+    float  tSVF_tickBP              (tSVF* const, float v0);
 
     // Setter functions for `tSVF`
-    void    tSVF_setFreq             (tSVF* const, Lfloat freq);
-    void    tSVF_setFreqFast         (tSVF* const vf, Lfloat cutoff);
-    void    tSVF_setQ                (tSVF* const, Lfloat Q);
-    void    tSVF_setFreqAndQ         (tSVF* const svff, Lfloat freq, Lfloat Q);
-    void    tSVF_setFreqAndQFast     (tSVF* const svff, Lfloat cutoff, Lfloat Q);
+    void    tSVF_setFreq             (tSVF* const, float freq);
+    void    tSVF_setFreqFast         (tSVF* const vf, float cutoff);
+    void    tSVF_setQ                (tSVF* const, float Q);
+    void    tSVF_setFreqAndQ         (tSVF* const svff, float freq, float Q);
+    void    tSVF_setFreqAndQFast     (tSVF* const svff, float cutoff, float Q);
     void    tSVF_setFilterType       (tSVF* const svff, SVFType type);
-    void    tSVF_setSampleRate       (tSVF* const svff, Lfloat sr);
-    Lfloat  tSVF_getPhaseAtFrequency (tSVF* const svff, Lfloat freq);
+    void    tSVF_setSampleRate       (tSVF* const svff, float sr);
+    float  tSVF_getPhaseAtFrequency (tSVF* const svff, float freq);
     
     //==============================================================================
 
     typedef struct tSVF_LP
     {
         tMempool* mempool;
-        Lfloat ic1eq,ic2eq;
-        Lfloat g,onePlusg,k,a0,a1,a2,a3,a4,a5;
-        Lfloat sampleRate;
-        Lfloat invSampleRate;
-        Lfloat phaseComp;
-        Lfloat sampleRatio;
+        float ic1eq,ic2eq;
+        float g,onePlusg,k,a0,a1,a2,a3,a4,a5;
+        float sampleRate;
+        float invSampleRate;
+        float phaseComp;
+        float sampleRatio;
         uint32_t nan;
-        const Lfloat *table;
+        const float *table;
     } tSVF_LP;
 
     // Memory handlers for `tSVF_LP`
-    void    tSVF_LP_init                (tSVF_LP** const, Lfloat freq, Lfloat Q, LEAF* const leaf);
-    void    tSVF_LP_initToPool          (tSVF_LP** const, Lfloat freq, Lfloat Q, tMempool** const);
+    void    tSVF_LP_init                (tSVF_LP** const, float freq, float Q, LEAF* const leaf);
+    void    tSVF_LP_initToPool          (tSVF_LP** const, float freq, float Q, tMempool** const);
     void    tSVF_LP_free                (tSVF_LP** const);
 
     // Tick function for `tSVF_LP`
-    Lfloat  tSVF_LP_tick                (tSVF_LP* const, Lfloat v0);
+    float  tSVF_LP_tick                (tSVF_LP* const, float v0);
 
     // Setter functions for `tSVF_LP`
-    void    tSVF_LP_setFreq             (tSVF_LP* const, Lfloat freq);
-    void    tSVF_LP_setFreqFast         (tSVF_LP* const vf, Lfloat cutoff);
-    void    tSVF_LP_setQ                (tSVF_LP* const, Lfloat Q);
-    void    tSVF_LP_setFreqAndQ         (tSVF_LP* const svff, Lfloat freq, Lfloat Q);
-    void    tSVF_LP_setFreqAndQFast     (tSVF_LP* const svff, Lfloat cutoff, Lfloat Q);
-    void    tSVF_LP_setSampleRate       (tSVF_LP* const svff, Lfloat sr);
-    Lfloat  tSVF_LP_getPhaseAtFrequency (tSVF_LP* const svff, Lfloat freq);
+    void    tSVF_LP_setFreq             (tSVF_LP* const, float freq);
+    void    tSVF_LP_setFreqFast         (tSVF_LP* const vf, float cutoff);
+    void    tSVF_LP_setQ                (tSVF_LP* const, float Q);
+    void    tSVF_LP_setFreqAndQ         (tSVF_LP* const svff, float freq, float Q);
+    void    tSVF_LP_setFreqAndQFast     (tSVF_LP* const svff, float cutoff, float Q);
+    void    tSVF_LP_setSampleRate       (tSVF_LP* const svff, float sr);
+    float  tSVF_LP_getPhaseAtFrequency (tSVF_LP* const svff, float freq);
     //==============================================================================
     
     /*!
@@ -905,12 +905,12 @@ extern "C" {
      @brief Efficient State Variable Filter for 14-bit control input, [0, 4096).
      @{
      
-     @fn void    tEfficientSVF_init(tEfficientSVF** const, SVFType type, uint16_t input, Lfloat Q, LEAF* const leaf)
+     @fn void    tEfficientSVF_init(tEfficientSVF** const, SVFType type, uint16_t input, float Q, LEAF* const leaf)
      @brief Initialize a tEfficientSVF to the default mempool of a LEAF instance.
      @param filter A pointer to the tEfficientSVF to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tEfficientSVF_initToPool(tEfficientSVF** const, SVFType type, uint16_t input, Lfloat Q, tMempool** const)
+     @fn void    tEfficientSVF_initToPool(tEfficientSVF** const, SVFType type, uint16_t input, float Q, tMempool** const)
      @brief Initialize a tEfficientSVF to a specified mempool.
      @param filter A pointer to the tEfficientSVF to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -919,7 +919,7 @@ extern "C" {
      @brief Free a tEfficientSVF from its mempool.
      @param filter A pointer to the tEfficientSVF to free.
      
-     @fn Lfloat   tEfficientSVF_tick          (tEfficientSVF* const, Lfloat v0)
+     @fn float   tEfficientSVF_tick          (tEfficientSVF* const, float v0)
      @brief
      @param filter A pointer to the relevant tEfficientSVF.
      
@@ -927,7 +927,7 @@ extern "C" {
      @brief
      @param filter A pointer to the relevant tEfficientSVF.
      
-     @fn void    tEfficientSVF_setQ          (tEfficientSVF* const, Lfloat Q)
+     @fn void    tEfficientSVF_setQ          (tEfficientSVF* const, float Q)
      @brief
      @param filter A pointer to the relevant tEfficientSVF.
      ￼￼￼
@@ -938,25 +938,25 @@ extern "C" {
 
         tMempool* mempool;
         SVFType type;
-        Lfloat cutoff, Q;
-        Lfloat ic1eq,ic2eq;
-        Lfloat g,k,a1,a2,a3;
-        const Lfloat *table;
+        float cutoff, Q;
+        float ic1eq,ic2eq;
+        float g,k,a1,a2,a3;
+        const float *table;
     } tEfficientSVF;
 
     // Memory handlers for `tEfficientSVF`
-    void    tEfficientSVF_init          (tEfficientSVF** const, SVFType type, uint16_t input, Lfloat Q, LEAF* const leaf);
-    void    tEfficientSVF_initToPool    (tEfficientSVF** const, SVFType type, uint16_t input, Lfloat Q, tMempool** const);
+    void    tEfficientSVF_init          (tEfficientSVF** const, SVFType type, uint16_t input, float Q, LEAF* const leaf);
+    void    tEfficientSVF_initToPool    (tEfficientSVF** const, SVFType type, uint16_t input, float Q, tMempool** const);
     void    tEfficientSVF_free          (tEfficientSVF** const);
 
     // Tick function for `tEfficientSVF`
-    Lfloat  tEfficientSVF_tick          (tEfficientSVF* const, Lfloat v0);
+    float  tEfficientSVF_tick          (tEfficientSVF* const, float v0);
 
     // Setter functions for `tEfficientSVF`
-    void    tEfficientSVF_setFreq       (tEfficientSVF* const svff, Lfloat cutoff);
-    void    tEfficientSVF_setQ          (tEfficientSVF* const, Lfloat Q);
-    void    tEfficientSVF_setFreqAndQ   (tEfficientSVF* const, uint16_t controlFreq, Lfloat Q);
-    void    tEfficientSVF_setSampleRate (tEfficientSVF* const, Lfloat sampleRate);
+    void    tEfficientSVF_setFreq       (tEfficientSVF* const svff, float cutoff);
+    void    tEfficientSVF_setQ          (tEfficientSVF* const, float Q);
+    void    tEfficientSVF_setFreqAndQ   (tEfficientSVF* const, uint16_t controlFreq, float Q);
+    void    tEfficientSVF_setSampleRate (tEfficientSVF* const, float sampleRate);
     //==============================================================================
     
     /*!
@@ -965,12 +965,12 @@ extern "C" {
      @brief Simple Highpass filter.
      @{
      
-     @fn void    tHighpass_init(tHighpass** const, Lfloat freq, LEAF* const leaf)
+     @fn void    tHighpass_init(tHighpass** const, float freq, LEAF* const leaf)
      @brief Initialize a tHighpass to the default mempool of a LEAF instance.
      @param filter A pointer to the tHighpass to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tHighpass_initToPool(tHighpass** const, Lfloat freq, tMempool** const)
+     @fn void    tHighpass_initToPool(tHighpass** const, float freq, tMempool** const)
      @brief Initialize a tHighpass to a specified mempool.
      @param filter A pointer to the tHighpass to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -979,15 +979,15 @@ extern "C" {
      @brief Free a tHighpass from its mempool.
      @param filter A pointer to the tHighpass to free.
      
-     @fn Lfloat   tHighpass_tick          (tHighpass* const, Lfloat x)
+     @fn float   tHighpass_tick          (tHighpass* const, float x)
      @brief
      @param filter A pointer to the relevant tHighpass.
      
-     @fn void    tHighpass_setFreq       (tHighpass* const, Lfloat freq)
+     @fn void    tHighpass_setFreq       (tHighpass* const, float freq)
      @brief
      @param filter A pointer to the relevant tHighpass.
      
-     @fn Lfloat   tHighpass_getFreq       (tHighpass* const)
+     @fn float   tHighpass_getFreq       (tHighpass* const)
      @brief
      @param filter A pointer to the relevant tHighpass.
      ￼￼￼
@@ -996,23 +996,23 @@ extern "C" {
     typedef struct tHighpass
     {
         tMempool* mempool;
-        Lfloat xs, ys, R;
-        Lfloat frequency;
-        Lfloat twoPiTimesInvSampleRate;
+        float xs, ys, R;
+        float frequency;
+        float twoPiTimesInvSampleRate;
     } tHighpass;
 
     // Memory handlers for `tHighpass`
-    void    tHighpass_init          (tHighpass** const, Lfloat freq, LEAF* const leaf);
-    void    tHighpass_initToPool    (tHighpass** const, Lfloat freq, tMempool** const);
+    void    tHighpass_init          (tHighpass** const, float freq, LEAF* const leaf);
+    void    tHighpass_initToPool    (tHighpass** const, float freq, tMempool** const);
     void    tHighpass_free          (tHighpass** const);
 
     // Tick function for `tHighpass`
-    Lfloat  tHighpass_tick          (tHighpass* const, Lfloat x);
+    float  tHighpass_tick          (tHighpass* const, float x);
 
     // Setter functions for `tHighpass`
-    void    tHighpass_setFreq       (tHighpass* const, Lfloat freq);
-    Lfloat  tHighpass_getFreq       (tHighpass* const);
-    void    tHighpass_setSampleRate (tHighpass* const, Lfloat sr);
+    void    tHighpass_setFreq       (tHighpass* const, float freq);
+    float  tHighpass_getFreq       (tHighpass* const);
+    void    tHighpass_setSampleRate (tHighpass* const, float sr);
     
     //==============================================================================
     
@@ -1022,7 +1022,7 @@ extern "C" {
      @brief Butterworth filter.
      @{
      
-     @fn void    tButterworth_init(tButterworth** const, int N, Lfloat f1, Lfloat f2, LEAF* const leaf, LEAF* const leaf)
+     @fn void    tButterworth_init(tButterworth** const, int N, float f1, float f2, LEAF* const leaf, LEAF* const leaf)
      @brief Initialize a tButterworth to the default mempool of a LEAF instance.
      @param filter A pointer to the tButterworth to initialize.
      @param leaf A pointer to the leaf instance.
@@ -1030,7 +1030,7 @@ extern "C" {
      @param lowCutoff Lower cutoff frequency.
      @param upperCutoff Upper cutoff frequency.
      
-     @fn void    tButterworth_initToPool(tButterworth** const, int N, Lfloat f1, Lfloat f2, tMempool** const)
+     @fn void    tButterworth_initToPool(tButterworth** const, int N, float f1, float f2, tMempool** const)
      @brief Initialize a tButterworth to a specified mempool.
      @param filter A pointer to the tButterworth to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1042,19 +1042,19 @@ extern "C" {
      @brief Free a tButterworth from its mempool.
      @param filter A pointer to the tButterworth to free.
      
-     @fn Lfloat   tButterworth_tick           (tButterworth* const, Lfloat input)
+     @fn float   tButterworth_tick           (tButterworth* const, float input)
      @brief
      @param filter A pointer to the relevant tButterworth.
      
-     @fn void    tButterworth_setF1          (tButterworth* const, Lfloat in)
+     @fn void    tButterworth_setF1          (tButterworth* const, float in)
      @brief
      @param filter A pointer to the relevant tButterworth.
      
-     @fn void    tButterworth_setF2          (tButterworth* const, Lfloat in)
+     @fn void    tButterworth_setF2          (tButterworth* const, float in)
      @brief
      @param filter A pointer to the relevant tButterworth.
      
-     @fn void    tButterworth_setFreqs       (tButterworth* const, Lfloat f1, Lfloat f2)
+     @fn void    tButterworth_setFreqs       (tButterworth* const, float f1, float f2)
      @brief
      @param filter A pointer to the relevant tButterworth.
      ￼￼￼
@@ -1065,28 +1065,28 @@ extern "C" {
     {
         tMempool* mempool;
         
-        Lfloat gain;
+        float gain;
         int order;
         int numSVF;
         
         tSVF** svfs;
         
-        Lfloat f1,f2;
+        float f1,f2;
     } tButterworth;
 
     // Memory handlers for `tButterworth`
-    void    tButterworth_init           (tButterworth** const, int N, Lfloat f1, Lfloat f2, LEAF* const leaf);
-    void    tButterworth_initToPool     (tButterworth** const, int N, Lfloat f1, Lfloat f2, tMempool** const);
+    void    tButterworth_init           (tButterworth** const, int N, float f1, float f2, LEAF* const leaf);
+    void    tButterworth_initToPool     (tButterworth** const, int N, float f1, float f2, tMempool** const);
     void    tButterworth_free           (tButterworth** const);
 
     // Tick function for `tButterworth`
-    Lfloat  tButterworth_tick           (tButterworth* const, Lfloat input);
+    float  tButterworth_tick           (tButterworth* const, float input);
 
     // Setter functions for `tButterworth`
-    void    tButterworth_setF1          (tButterworth* const, Lfloat in);
-    void    tButterworth_setF2          (tButterworth* const, Lfloat in);
-    void    tButterworth_setFreqs       (tButterworth* const, Lfloat f1, Lfloat f2);
-    void    tButterworth_setSampleRate  (tButterworth* const, Lfloat sr);
+    void    tButterworth_setF1          (tButterworth* const, float in);
+    void    tButterworth_setF2          (tButterworth* const, float in);
+    void    tButterworth_setFreqs       (tButterworth* const, float f1, float f2);
+    void    tButterworth_setSampleRate  (tButterworth* const, float sr);
     
     //==============================================================================
     
@@ -1096,12 +1096,12 @@ extern "C" {
      @brief Finite impulse response filter.
      @{
      
-     @fn void    tFIR_init(tFIR** const, Lfloat* coeffs, int numTaps, LEAF* const leaf)
+     @fn void    tFIR_init(tFIR** const, float* coeffs, int numTaps, LEAF* const leaf)
      @brief Initialize a tFIR to the default mempool of a LEAF instance.
      @param filter A pointer to the tFIR to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tFIR_initToPool(tFIR** const, Lfloat* coeffs, int numTaps, tMempool** const)
+     @fn void    tFIR_initToPool(tFIR** const, float* coeffs, int numTaps, tMempool** const)
      @brief Initialize a tFIR to a specified mempool.
      @param filter A pointer to the tFIR to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1110,7 +1110,7 @@ extern "C" {
      @brief Free a tFIR from its mempool.
      @param filter A pointer to the tFIR to free.
      
-     @fn Lfloat   tFIR_tick           (tFIR* const, Lfloat input)
+     @fn float   tFIR_tick           (tFIR* const, float input)
      @brief
      @param filter A pointer to the relevant tFIR.
      ￼￼￼
@@ -1120,18 +1120,18 @@ extern "C" {
     {
 
         tMempool* mempool;
-        Lfloat* past;
-        Lfloat* coeff;
+        float* past;
+        float* coeff;
         int numTaps;
     } tFIR;
 
     // Memory handlers for `tFIR`
-    void    tFIR_init           (tFIR** const, Lfloat* coeffs, int numTaps, LEAF* const leaf);
-    void    tFIR_initToPool     (tFIR** const, Lfloat* coeffs, int numTaps, tMempool** const);
+    void    tFIR_init           (tFIR** const, float* coeffs, int numTaps, LEAF* const leaf);
+    void    tFIR_initToPool     (tFIR** const, float* coeffs, int numTaps, tMempool** const);
     void    tFIR_free           (tFIR** const);
 
     // Tick function for `tFIR`
-    Lfloat  tFIR_tick           (tFIR* const, Lfloat input);
+    float  tFIR_tick           (tFIR* const, float input);
     
     
     //==============================================================================
@@ -1156,7 +1156,7 @@ extern "C" {
      @brief Free a tMedianFilter from its mempool.
      @param filter A pointer to the tMedianFilter to free.
      
-     @fn Lfloat   tMedianFilter_tick           (tMedianFilter* const, Lfloat input)
+     @fn float   tMedianFilter_tick           (tMedianFilter* const, float input)
      @brief
      @param filter A pointer to the relevant tMedianFilter.
      ￼￼￼
@@ -1166,7 +1166,7 @@ extern "C" {
     {
 
         tMempool* mempool;
-        Lfloat* val;
+        float* val;
         int* age;
         int m;
         int size;
@@ -1181,7 +1181,7 @@ extern "C" {
     void    tMedianFilter_free           (tMedianFilter** const);
 
     // Tick function for `tMedianFilter`
-    Lfloat  tMedianFilter_tick           (tMedianFilter* const, Lfloat input);
+    float  tMedianFilter_tick           (tMedianFilter* const, float input);
     
     
     /*!
@@ -1190,12 +1190,12 @@ extern "C" {
      @brief Vadim Zavalishin style from VA book (from implementation in RSlib posted to kvr forum)
      @{
      
-     @fn void    tVZFilter_init(tVZFilter** const, VZFilterType type, Lfloat freq, Lfloat Q, LEAF* const leaf)
+     @fn void    tVZFilter_init(tVZFilter** const, VZFilterType type, float freq, float Q, LEAF* const leaf)
      @brief Initialize a tVZFilter to the default mempool of a LEAF instance.
      @param filter A pointer to the tVZFilter to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tVZFilter_initToPool(tVZFilter** const, VZFilterType type, Lfloat freq, Lfloat Q, tMempool** const)
+     @fn void    tVZFilter_initToPool(tVZFilter** const, VZFilterType type, float freq, float Q, tMempool** const)
      @brief Initialize a tVZFilter to a specified mempool.
      @param filter A pointer to the tVZFilter to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1204,11 +1204,11 @@ extern "C" {
      @brief Free a tVZFilter from its mempool.
      @param filter A pointer to the tVZFilter to free.
      
-     @fn Lfloat   tVZFilter_tick               (tVZFilter* const, Lfloat input)
+     @fn float   tVZFilter_tick               (tVZFilter* const, float input)
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
-     @fn Lfloat   tVZFilter_tickEfficient               (tVZFilter* const vf, Lfloat in)
+     @fn float   tVZFilter_tickEfficient               (tVZFilter* const vf, float in)
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
@@ -1216,19 +1216,19 @@ extern "C" {
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
-     @fn void    tVZFilter_setBandwidth            (tVZFilter* const, Lfloat bandWidth)
+     @fn void    tVZFilter_setBandwidth            (tVZFilter* const, float bandWidth)
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
-     @fn void    tVZFilter_setFreq           (tVZFilter* const, Lfloat freq)
+     @fn void    tVZFilter_setFreq           (tVZFilter* const, float freq)
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
-     @fn void    tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, Lfloat freq, Lfloat bw)
+     @fn void    tVZFilter_setFreqAndBandwidth    (tVZFilter* const vf, float freq, float bw)
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
-     @fn void    tVZFilter_setGain                  (tVZFilter* const, Lfloat gain)
+     @fn void    tVZFilter_setGain                  (tVZFilter* const, float gain)
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
@@ -1236,11 +1236,11 @@ extern "C" {
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
-     @fn Lfloat   tVZFilter_BandwidthToR        (tVZFilter* const vf, Lfloat B)
+     @fn float   tVZFilter_BandwidthToR        (tVZFilter* const vf, float B)
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
-     @fn void    tVZFilter_setSampleRate  (tVZFilter* const, Lfloat sampleRate)
+     @fn void    tVZFilter_setSampleRate  (tVZFilter* const, float sampleRate)
      @brief
      @param filter A pointer to the relevant tVZFilter.
      ￼￼￼
@@ -1268,236 +1268,236 @@ extern "C" {
         
         VZFilterType type;
         // state:
-        Lfloat s1, s2;
+        float s1, s2;
         
         // filter coefficients:
-        Lfloat g;          // embedded integrator gain
-        Lfloat R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
-        Lfloat h;          // factor for feedback (== 1/(1+2*R*g+g*g))
-        Lfloat cL, cB, cH; // coefficients for low-, band-, and highpass signals
+        float g;          // embedded integrator gain
+        float R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+        float h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+        float cL, cB, cH; // coefficients for low-, band-, and highpass signals
         
         // parameters:
-        Lfloat fc;    // characteristic frequency
-        Lfloat G;     // gain
-        Lfloat invG;        //1/gain
-        Lfloat Q; //q of filter
-        Lfloat B;     // bandwidth (in octaves)
-        Lfloat m;     // morph parameter (0...1)
-        Lfloat R2Plusg; //precomputed for the tick
-        Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
-        Lfloat invSampleRate;
-        Lfloat sampRatio;
-        Lfloat cutoffMIDI;
-        const Lfloat *table;
+        float fc;    // characteristic frequency
+        float G;     // gain
+        float invG;        //1/gain
+        float Q; //q of filter
+        float B;     // bandwidth (in octaves)
+        float m;     // morph parameter (0...1)
+        float R2Plusg; //precomputed for the tick
+        float sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+        float invSampleRate;
+        float sampRatio;
+        float cutoffMIDI;
+        const float *table;
     } tVZFilter;
 
     // Memory handlers for `tVZFilter`
-    void    tVZFilter_init                                (tVZFilter** const, VZFilterType type, Lfloat freq, Lfloat Q,
+    void    tVZFilter_init                                (tVZFilter** const, VZFilterType type, float freq, float Q,
                                                            LEAF* const leaf);
-    void    tVZFilter_initToPool                          (tVZFilter** const, VZFilterType type, Lfloat freq, Lfloat Q,
+    void    tVZFilter_initToPool                          (tVZFilter** const, VZFilterType type, float freq, float Q,
                                                            tMempool** const);
     void    tVZFilter_free                                (tVZFilter** const);
 
     // Tick functions for `tVZFilter`
-    Lfloat  tVZFilter_tick                                (tVZFilter* const, Lfloat input);
-    Lfloat  tVZFilter_tickEfficient                       (tVZFilter* const vf, Lfloat in);
+    float  tVZFilter_tick                                (tVZFilter* const, float input);
+    float  tVZFilter_tickEfficient                       (tVZFilter* const vf, float in);
 
     // Setter functions for `tVZFilter`
-    void    tVZFilter_setSampleRate                       (tVZFilter* const, Lfloat sampleRate);
+    void    tVZFilter_setSampleRate                       (tVZFilter* const, float sampleRate);
     void    tVZFilter_calcCoeffs                          (tVZFilter* const);
     void    tVZFilter_calcCoeffsEfficientBP               (tVZFilter* const);
-    void    tVZFilter_setBandwidth                        (tVZFilter* const, Lfloat bandWidth);
-    void    tVZFilter_setFreq                             (tVZFilter* const, Lfloat freq);
-    void    tVZFilter_setFreqFast                         (tVZFilter* const vf, Lfloat cutoff);
-    void    tVZFilter_setFreqAndBandwidth                 (tVZFilter* const vf, Lfloat freq, Lfloat bw);
-    void    tVZFilter_setFreqAndBandwidthEfficientBP      (tVZFilter* const vf, Lfloat freq, Lfloat bw);
-    void    tVZFilter_setGain                             (tVZFilter* const, Lfloat gain);
-    void    tVZFilter_setResonance                        (tVZFilter* const vf, Lfloat res);
-    void    tVZFilter_setFrequencyAndResonance            (tVZFilter* const vf, Lfloat freq, Lfloat res);
-    void    tVZFilter_setFrequencyAndResonanceAndGain     (tVZFilter* const vf, Lfloat freq, Lfloat res, Lfloat gains);
-    void    tVZFilter_setFastFrequencyAndResonanceAndGain (tVZFilter* const vf, Lfloat freq, Lfloat res, Lfloat gain);
-    void    tVZFilter_setFrequencyAndBandwidthAndGain     (tVZFilter* const vf, Lfloat freq, Lfloat BW, Lfloat gain);
-    void    tVZFilter_setFrequencyAndResonanceAndMorph    (tVZFilter* const vf, Lfloat freq, Lfloat res, Lfloat morph);
-    void    tVZFilter_setMorphOnly                        (tVZFilter* const vf, Lfloat morph);
-    void    tVZFilter_setMorph                            (tVZFilter* const vf, Lfloat morph);
+    void    tVZFilter_setBandwidth                        (tVZFilter* const, float bandWidth);
+    void    tVZFilter_setFreq                             (tVZFilter* const, float freq);
+    void    tVZFilter_setFreqFast                         (tVZFilter* const vf, float cutoff);
+    void    tVZFilter_setFreqAndBandwidth                 (tVZFilter* const vf, float freq, float bw);
+    void    tVZFilter_setFreqAndBandwidthEfficientBP      (tVZFilter* const vf, float freq, float bw);
+    void    tVZFilter_setGain                             (tVZFilter* const, float gain);
+    void    tVZFilter_setResonance                        (tVZFilter* const vf, float res);
+    void    tVZFilter_setFrequencyAndResonance            (tVZFilter* const vf, float freq, float res);
+    void    tVZFilter_setFrequencyAndResonanceAndGain     (tVZFilter* const vf, float freq, float res, float gains);
+    void    tVZFilter_setFastFrequencyAndResonanceAndGain (tVZFilter* const vf, float freq, float res, float gain);
+    void    tVZFilter_setFrequencyAndBandwidthAndGain     (tVZFilter* const vf, float freq, float BW, float gain);
+    void    tVZFilter_setFrequencyAndResonanceAndMorph    (tVZFilter* const vf, float freq, float res, float morph);
+    void    tVZFilter_setMorphOnly                        (tVZFilter* const vf, float morph);
+    void    tVZFilter_setMorph                            (tVZFilter* const vf, float morph);
     void    tVZFilter_setType                             (tVZFilter* const, VZFilterType type);
-    Lfloat  tVZFilter_BandwidthToR                        (tVZFilter* const vf, Lfloat B);
-    Lfloat  tVZFilter_BandwidthToREfficientBP             (tVZFilter* const vf, Lfloat B);
+    float  tVZFilter_BandwidthToR                        (tVZFilter* const vf, float B);
+    float  tVZFilter_BandwidthToREfficientBP             (tVZFilter* const vf, float B);
     
 
     typedef struct tVZFilterLS
     {
         tMempool* mempool;
         // state:
-        Lfloat s1, s2;
+        float s1, s2;
 
         // filter coefficients:
-        Lfloat g;          // embedded integrator gain
-        Lfloat R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
-        Lfloat h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+        float g;          // embedded integrator gain
+        float R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+        float h;          // factor for feedback (== 1/(1+2*R*g+g*g))
 
         // parameters:
-        Lfloat fc;    // characteristic frequency
-        Lfloat G;     // gain
-        Lfloat Q; //q of filter
-        Lfloat B;     // bandwidth (in octaves)
-        Lfloat R2Plusg; //precomputed for the tick
-        Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
-        Lfloat invSampleRate;
-        Lfloat gPreDiv;
-        Lfloat invSqrtA;
-        Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
-        const Lfloat *table;
-        Lfloat cutoffMIDI;
+        float fc;    // characteristic frequency
+        float G;     // gain
+        float Q; //q of filter
+        float B;     // bandwidth (in octaves)
+        float R2Plusg; //precomputed for the tick
+        float sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+        float invSampleRate;
+        float gPreDiv;
+        float invSqrtA;
+        float sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+        const float *table;
+        float cutoffMIDI;
     } tVZFilterLS;
 
     // Memory handlers for `tVZFilterLS`
-    void    tVZFilterLS_init                           (tVZFilterLS** const,Lfloat freq, Lfloat Q, Lfloat gain,
+    void    tVZFilterLS_init                           (tVZFilterLS** const,float freq, float Q, float gain,
                                                         LEAF* const leaf);
-    void    tVZFilterLS_initToPool                     (tVZFilterLS** const, Lfloat freq, Lfloat Q, Lfloat gain,
+    void    tVZFilterLS_initToPool                     (tVZFilterLS** const, float freq, float Q, float gain,
                                                         tMempool** const);
     void    tVZFilterLS_free                           (tVZFilterLS** const);
 
     // Tick function for `tVZFilterLS`
-    Lfloat  tVZFilterLS_tick                           (tVZFilterLS* const, Lfloat input);
+    float  tVZFilterLS_tick                           (tVZFilterLS* const, float input);
 
     // Setter functions for `tVZFilterLS`
-    void    tVZFilterLS_setSampleRate                  (tVZFilterLS* const, Lfloat sampleRate);
-    void    tVZFilterLS_setBandwidthSlow               (tVZFilterLS* const, Lfloat bandWidth);
-    void    tVZFilterLS_setFreq                        (tVZFilterLS* const, Lfloat freq);
-    void    tVZFilterLS_setFreqFast                    (tVZFilterLS* const vf, Lfloat cutoff);
-    void    tVZFilterLS_setGain                        (tVZFilterLS* const, Lfloat gain);
-    void    tVZFilterLS_setResonance                   (tVZFilterLS* const vf, Lfloat res);
-    void    tVZFilterLS_setFreqFastAndResonanceAndGain (tVZFilterLS* const vf, Lfloat cutoff, Lfloat res, Lfloat gain);
+    void    tVZFilterLS_setSampleRate                  (tVZFilterLS* const, float sampleRate);
+    void    tVZFilterLS_setBandwidthSlow               (tVZFilterLS* const, float bandWidth);
+    void    tVZFilterLS_setFreq                        (tVZFilterLS* const, float freq);
+    void    tVZFilterLS_setFreqFast                    (tVZFilterLS* const vf, float cutoff);
+    void    tVZFilterLS_setGain                        (tVZFilterLS* const, float gain);
+    void    tVZFilterLS_setResonance                   (tVZFilterLS* const vf, float res);
+    void    tVZFilterLS_setFreqFastAndResonanceAndGain (tVZFilterLS* const vf, float cutoff, float res, float gain);
 
 
     typedef struct tVZFilterHS
     {
         tMempool* mempool;
         // state:
-        Lfloat s1, s2;
+        float s1, s2;
 
         // filter coefficients:
-        Lfloat g;          // embedded integrator gain
-        Lfloat R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
-        Lfloat h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+        float g;          // embedded integrator gain
+        float R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+        float h;          // factor for feedback (== 1/(1+2*R*g+g*g))
 
 
         // parameters:
-        Lfloat fc;    // characteristic frequency
-        Lfloat G;     // gain
-        Lfloat Q; //q of filter
-        Lfloat B;     // bandwidth (in octaves)
-        Lfloat R2Plusg; //precomputed for the tick
-        Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
-        Lfloat invSampleRate;
-        Lfloat gPreDiv;
-        Lfloat sqrtA;
-        Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
-        const Lfloat *table;
-        Lfloat cutoffMIDI;
+        float fc;    // characteristic frequency
+        float G;     // gain
+        float Q; //q of filter
+        float B;     // bandwidth (in octaves)
+        float R2Plusg; //precomputed for the tick
+        float sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+        float invSampleRate;
+        float gPreDiv;
+        float sqrtA;
+        float sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+        const float *table;
+        float cutoffMIDI;
     } tVZFilterHS;
 
     // Memory handlers for `tVZFilterHS`
-    void    tVZFilterHS_init                           (tVZFilterHS** const,Lfloat freq, Lfloat Q, Lfloat gain,
+    void    tVZFilterHS_init                           (tVZFilterHS** const,float freq, float Q, float gain,
                                                         LEAF* const leaf);
-    void    tVZFilterHS_initToPool                     (tVZFilterHS** const, Lfloat freq, Lfloat Q, Lfloat gain,
+    void    tVZFilterHS_initToPool                     (tVZFilterHS** const, float freq, float Q, float gain,
                                                         tMempool** const);
     void    tVZFilterHS_free                           (tVZFilterHS** const);
 
     // Tick function for `tVZFilterHS`
-    Lfloat  tVZFilterHS_tick                           (tVZFilterHS* const, Lfloat input);
+    float  tVZFilterHS_tick                           (tVZFilterHS* const, float input);
 
     // Setter functions for `tVZFilterHS`
-    void    tVZFilterHS_setSampleRate                  (tVZFilterHS* const, Lfloat sampleRate);
-    void    tVZFilterHS_setBandwidthSlow               (tVZFilterHS* const, Lfloat bandWidth);
-    void    tVZFilterHS_setFreq                        (tVZFilterHS* const, Lfloat freq);
-    void    tVZFilterHS_setFreqFast                    (tVZFilterHS* const vf, Lfloat cutoff);
-    void    tVZFilterHS_setGain                        (tVZFilterHS* const, Lfloat gain);
-    void    tVZFilterHS_setResonance                   (tVZFilterHS* const vf, Lfloat res);
-    void    tVZFilterHS_setFreqFastAndResonanceAndGain (tVZFilterHS* const vf, Lfloat cutoff, Lfloat res, Lfloat gain);
+    void    tVZFilterHS_setSampleRate                  (tVZFilterHS* const, float sampleRate);
+    void    tVZFilterHS_setBandwidthSlow               (tVZFilterHS* const, float bandWidth);
+    void    tVZFilterHS_setFreq                        (tVZFilterHS* const, float freq);
+    void    tVZFilterHS_setFreqFast                    (tVZFilterHS* const vf, float cutoff);
+    void    tVZFilterHS_setGain                        (tVZFilterHS* const, float gain);
+    void    tVZFilterHS_setResonance                   (tVZFilterHS* const vf, float res);
+    void    tVZFilterHS_setFreqFastAndResonanceAndGain (tVZFilterHS* const vf, float cutoff, float res, float gain);
 
     typedef struct tVZFilterBell
     {
         tMempool* mempool;
         // state:
-        Lfloat s1, s2;
+        float s1, s2;
 
         // filter coefficients:
-        Lfloat g;          // embedded integrator gain
-        Lfloat R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
-        Lfloat h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+        float g;          // embedded integrator gain
+        float R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+        float h;          // factor for feedback (== 1/(1+2*R*g+g*g))
 
 
         // parameters:
-        Lfloat fc;    // characteristic frequency
-        Lfloat G;     // gain
-        Lfloat B;     // bandwidth (in octaves)
-        Lfloat R2Plusg; //precomputed for the tick
-        Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
-        Lfloat invSampleRate;
-        Lfloat rToUse;
-        Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
-        const Lfloat *table;
-        Lfloat cutoffMIDI;
+        float fc;    // characteristic frequency
+        float G;     // gain
+        float B;     // bandwidth (in octaves)
+        float R2Plusg; //precomputed for the tick
+        float sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+        float invSampleRate;
+        float rToUse;
+        float sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+        const float *table;
+        float cutoffMIDI;
     } tVZFilterBell;
 
     // Memory handlers for `tVZFilterBell`
-    void    tVZFilterBell_init                            (tVZFilterBell** const,Lfloat freq, Lfloat BW, Lfloat gain,
+    void    tVZFilterBell_init                            (tVZFilterBell** const,float freq, float BW, float gain,
                                                            LEAF* const leaf);
-    void    tVZFilterBell_initToPool                      (tVZFilterBell** const, Lfloat freq, Lfloat BW, Lfloat gain,
+    void    tVZFilterBell_initToPool                      (tVZFilterBell** const, float freq, float BW, float gain,
                                                            tMempool** const);
     void    tVZFilterBell_free                            (tVZFilterBell** const);
 
     // Tick function for `tVZFilterBell`
-    Lfloat  tVZFilterBell_tick                           (tVZFilterBell* const, Lfloat input);
+    float  tVZFilterBell_tick                           (tVZFilterBell* const, float input);
 
     // Setter functions for `tVZFilterBell`
-    void    tVZFilterBell_setSampleRate                   (tVZFilterBell* const, Lfloat sampleRate);
-    void    tVZFilterBell_setBandwidth                    (tVZFilterBell* const, Lfloat bandWidth);
-    void    tVZFilterBell_setFreq                         (tVZFilterBell* const, Lfloat freq);
-    void    tVZFilterBell_setFreqFast                     (tVZFilterBell* const vf, Lfloat cutoff);
-    void    tVZFilterBell_setFreqAndGainFast              (tVZFilterBell* const, Lfloat freq, Lfloat gain);
-    void    tVZFilterBell_setFrequencyAndGain             (tVZFilterBell* const, Lfloat freq, Lfloat gain);
-    void    tVZFilterBell_setFrequencyAndBandwidthAndGain (tVZFilterBell* const vf, Lfloat freq, Lfloat bandwidth, Lfloat gain);
-    void    tVZFilterBell_setFreqAndBWAndGainFast         (tVZFilterBell* const vf, Lfloat cutoff, Lfloat BW, Lfloat gain);
-    void    tVZFilterBell_setGain                         (tVZFilterBell* const, Lfloat gain);
+    void    tVZFilterBell_setSampleRate                   (tVZFilterBell* const, float sampleRate);
+    void    tVZFilterBell_setBandwidth                    (tVZFilterBell* const, float bandWidth);
+    void    tVZFilterBell_setFreq                         (tVZFilterBell* const, float freq);
+    void    tVZFilterBell_setFreqFast                     (tVZFilterBell* const vf, float cutoff);
+    void    tVZFilterBell_setFreqAndGainFast              (tVZFilterBell* const, float freq, float gain);
+    void    tVZFilterBell_setFrequencyAndGain             (tVZFilterBell* const, float freq, float gain);
+    void    tVZFilterBell_setFrequencyAndBandwidthAndGain (tVZFilterBell* const vf, float freq, float bandwidth, float gain);
+    void    tVZFilterBell_setFreqAndBWAndGainFast         (tVZFilterBell* const vf, float cutoff, float BW, float gain);
+    void    tVZFilterBell_setGain                         (tVZFilterBell* const, float gain);
 
     typedef struct tVZFilterBR
     {
         tMempool* mempool;
         // state:
-        Lfloat s1, s2;
+        float s1, s2;
 
         // filter coefficients:
-        Lfloat g;          // embedded integrator gain
-        Lfloat R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
-        Lfloat h;          // factor for feedback (== 1/(1+2*R*g+g*g))
+        float g;          // embedded integrator gain
+        float R2;         // twice the damping coefficient (R2 == 2*R == 1/Q)
+        float h;          // factor for feedback (== 1/(1+2*R*g+g*g))
         // parameters:
-        Lfloat R2Plusg; //precomputed for the tick
-        Lfloat cutoffMIDI;
-        Lfloat G;
-        Lfloat sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
-        Lfloat invSampleRate;
-        Lfloat sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
-        const Lfloat *table;
+        float R2Plusg; //precomputed for the tick
+        float cutoffMIDI;
+        float G;
+        float sampleRate;    //local sampling rate of filter (may be different from leaf sr if oversampled)
+        float invSampleRate;
+        float sampRatio; // ratio of the sample rate to 48000 (which is what the tanf table was calculated for)
+        const float *table;
     } tVZFilterBR;
 
     // Memory handlers for `tVZFilterBR`
-    void    tVZFilterBR_init                    (tVZFilterBR** const,Lfloat freq, Lfloat Q, LEAF* const leaf);
-    void    tVZFilterBR_initToPool              (tVZFilterBR** const, Lfloat freq, Lfloat Q, tMempool** const);
+    void    tVZFilterBR_init                    (tVZFilterBR** const,float freq, float Q, LEAF* const leaf);
+    void    tVZFilterBR_initToPool              (tVZFilterBR** const, float freq, float Q, tMempool** const);
     void    tVZFilterBR_free                    (tVZFilterBR** const);
 
     // Tick function for `tVZFilterBR`
-    Lfloat  tVZFilterBR_tick                    (tVZFilterBR* const, Lfloat input);
+    float  tVZFilterBR_tick                    (tVZFilterBR* const, float input);
 
     // Setter functions for `tVZFilterBR`
-    void    tVZFilterBR_setSampleRate           (tVZFilterBR* const, Lfloat sampleRate);
-    void    tVZFilterBR_setGain                 (tVZFilterBR* const, Lfloat gain);
-    void    tVZFilterBR_setFreq                 (tVZFilterBR* const, Lfloat freq);
-    void    tVZFilterBR_setFreqFast             (tVZFilterBR* const vf, Lfloat cutoff);
-    void    tVZFilterBR_setResonance            (tVZFilterBR* const vf, Lfloat res);
-    void    tVZFilterBR_setFreqAndResonanceFast (tVZFilterBR* const vf, Lfloat cutoff, Lfloat res);
+    void    tVZFilterBR_setSampleRate           (tVZFilterBR* const, float sampleRate);
+    void    tVZFilterBR_setGain                 (tVZFilterBR* const, float gain);
+    void    tVZFilterBR_setFreq                 (tVZFilterBR* const, float freq);
+    void    tVZFilterBR_setFreqFast             (tVZFilterBR* const vf, float cutoff);
+    void    tVZFilterBR_setResonance            (tVZFilterBR* const vf, float res);
+    void    tVZFilterBR_setFreqAndResonanceFast (tVZFilterBR* const vf, float cutoff, float res);
 
     /*!
      @defgroup tdiodefilter tDiodeFilter
@@ -1505,12 +1505,12 @@ extern "C" {
      @brief Diode filter.
      @{
      
-     @fn void    tDiodeFilter_init(tDiodeFilter** const, Lfloat freq, Lfloat Q, LEAF* const leaf)
+     @fn void    tDiodeFilter_init(tDiodeFilter** const, float freq, float Q, LEAF* const leaf)
      @brief Initialize a tDiodeFilter to the default mempool of a LEAF instance.
      @param filter A pointer to the tDiodeFilter to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tDiodeFilter_initToPool(tDiodeFilter** const, Lfloat freq, Lfloat Q, tMempool** const)
+     @fn void    tDiodeFilter_initToPool(tDiodeFilter** const, float freq, float Q, tMempool** const)
      @brief Initialize a tDiodeFilter to a specified mempool.
      @param filter A pointer to the tDiodeFilter to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1519,15 +1519,15 @@ extern "C" {
      @brief Free a tDiodeFilter from its mempool.
      @param filter A pointer to the tDiodeFilter to free.
      
-     @fn Lfloat   tDiodeFilter_tick               (tDiodeFilter* const, Lfloat input)
+     @fn float   tDiodeFilter_tick               (tDiodeFilter* const, float input)
      @brief
      @param filter A pointer to the relevant tDiodeFilter.
      
-     @fn void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, Lfloat cutoff)
+     @fn void    tDiodeFilter_setFreq     (tDiodeFilter* const vf, float cutoff)
      @brief
      @param filter A pointer to the relevant tDiodeFilter.
      
-     @fn void    tDiodeFilter_setQ     (tDiodeFilter* const vf, Lfloat resonance)
+     @fn void    tDiodeFilter_setQ     (tDiodeFilter* const vf, float resonance)
      @brief
      @param filter A pointer to the relevant tDiodeFilter.
      ￼￼￼
@@ -1537,37 +1537,37 @@ extern "C" {
     typedef struct tDiodeFilter
     {
         tMempool* mempool;
-        Lfloat cutoff;
-        Lfloat f;
-        Lfloat r;
-        Lfloat Vt;
-        Lfloat n;
-        Lfloat gamma;
-        Lfloat zi;
-        Lfloat g0inv;
-        Lfloat g1inv;
-        Lfloat g2inv;
-        Lfloat s0, s1, s2, s3;
-        Lfloat invSampleRate;
-        Lfloat sampRatio;
-        const Lfloat *table;
-        Lfloat cutoffMIDI;
+        float cutoff;
+        float f;
+        float r;
+        float Vt;
+        float n;
+        float gamma;
+        float zi;
+        float g0inv;
+        float g1inv;
+        float g2inv;
+        float s0, s1, s2, s3;
+        float invSampleRate;
+        float sampRatio;
+        const float *table;
+        float cutoffMIDI;
     } tDiodeFilter;
 
     // Memory handlers for `tDiodeFilter`
-    void    tDiodeFilter_init           (tDiodeFilter** const, Lfloat freq, Lfloat Q, LEAF* const leaf);
-    void    tDiodeFilter_initToPool     (tDiodeFilter** const, Lfloat freq, Lfloat Q, tMempool** const);
+    void    tDiodeFilter_init           (tDiodeFilter** const, float freq, float Q, LEAF* const leaf);
+    void    tDiodeFilter_initToPool     (tDiodeFilter** const, float freq, float Q, tMempool** const);
     void    tDiodeFilter_free           (tDiodeFilter** const);
 
     // Tick functions for `tDiodeFilter`
-    Lfloat  tDiodeFilter_tick           (tDiodeFilter* const, Lfloat input);
-    Lfloat  tDiodeFilter_tickEfficient  (tDiodeFilter* const vf, Lfloat in);
+    float  tDiodeFilter_tick           (tDiodeFilter* const, float input);
+    float  tDiodeFilter_tickEfficient  (tDiodeFilter* const vf, float in);
 
     // Setter functions for `tDiodeFilter`
-    void    tDiodeFilter_setFreq        (tDiodeFilter* const vf, Lfloat cutoff);
-    void    tDiodeFilter_setFreqFast    (tDiodeFilter* const vf, Lfloat cutoff);
-    void    tDiodeFilter_setQ           (tDiodeFilter* const vf, Lfloat resonance);
-    void    tDiodeFilter_setSampleRate  (tDiodeFilter* const vf, Lfloat sr);
+    void    tDiodeFilter_setFreq        (tDiodeFilter* const vf, float cutoff);
+    void    tDiodeFilter_setFreqFast    (tDiodeFilter* const vf, float cutoff);
+    void    tDiodeFilter_setQ           (tDiodeFilter* const vf, float resonance);
+    void    tDiodeFilter_setSampleRate  (tDiodeFilter* const vf, float sr);
     
     
     
@@ -1575,35 +1575,35 @@ extern "C" {
     typedef struct tLadderFilter
     {
         tMempool* mempool;
-        Lfloat cutoff;
-        Lfloat invSampleRate;
-        Lfloat sampleRatio;
+        float cutoff;
+        float invSampleRate;
+        float sampleRatio;
         int oversampling;
-        Lfloat invOS;
-        Lfloat c;
-        Lfloat fb;
-        Lfloat c2;
-        Lfloat a;
-        Lfloat s;
-        Lfloat d;
-        Lfloat b[4]; // stored states
-        const Lfloat *table;
-        Lfloat cutoffMIDI;
+        float invOS;
+        float c;
+        float fb;
+        float c2;
+        float a;
+        float s;
+        float d;
+        float b[4]; // stored states
+        const float *table;
+        float cutoffMIDI;
     } tLadderFilter;
 
     // Memory handlers for `tLadderFilter`
-    void    tLadderFilter_init            (tLadderFilter** const, Lfloat freq, Lfloat Q, LEAF* const leaf);
-    void    tLadderFilter_initToPool      (tLadderFilter** const, Lfloat freq, Lfloat Q, tMempool** const);
+    void    tLadderFilter_init            (tLadderFilter** const, float freq, float Q, LEAF* const leaf);
+    void    tLadderFilter_initToPool      (tLadderFilter** const, float freq, float Q, tMempool** const);
     void    tLadderFilter_free            (tLadderFilter** const);
 
     // Tick function for `tLadderFilter`
-    Lfloat  tLadderFilter_tick            (tLadderFilter* const, Lfloat input);
+    float  tLadderFilter_tick            (tLadderFilter* const, float input);
 
     // Setter functions for `tLadderFilter`
-    void    tLadderFilter_setFreq         (tLadderFilter* const vf, Lfloat cutoff);
-    void    tLadderFilter_setFreqFast     (tLadderFilter* const vf, Lfloat cutoff);
-    void    tLadderFilter_setQ            (tLadderFilter* const vf, Lfloat resonance);
-    void    tLadderFilter_setSampleRate   (tLadderFilter* const vf, Lfloat sr);
+    void    tLadderFilter_setFreq         (tLadderFilter* const vf, float cutoff);
+    void    tLadderFilter_setFreqFast     (tLadderFilter* const vf, float cutoff);
+    void    tLadderFilter_setQ            (tLadderFilter* const vf, float resonance);
+    void    tLadderFilter_setSampleRate   (tLadderFilter* const vf, float sr);
     void    tLadderFilter_setOversampling (tLadderFilter* const vf, int os);
 
 
@@ -1611,28 +1611,28 @@ extern "C" {
     typedef struct tTiltFilter
     {
         tMempool* mempool;
-        Lfloat cutoff;
-        Lfloat sr3;
-        Lfloat gfactor;
-        Lfloat a0;
-        Lfloat b1;
-        Lfloat lp_out;
-        Lfloat lgain;
-        Lfloat hgain;
-        Lfloat invAmp;
+        float cutoff;
+        float sr3;
+        float gfactor;
+        float a0;
+        float b1;
+        float lp_out;
+        float lgain;
+        float hgain;
+        float invAmp;
     } tTiltFilter;
 
     // Memory handlers for `tTiltFilter`
-    void    tTiltFilter_init          (tTiltFilter** const, Lfloat freq, LEAF* const leaf);
-    void    tTiltFilter_initToPool    (tTiltFilter** const, Lfloat freq, tMempool** const);
+    void    tTiltFilter_init          (tTiltFilter** const, float freq, LEAF* const leaf);
+    void    tTiltFilter_initToPool    (tTiltFilter** const, float freq, tMempool** const);
     void    tTiltFilter_free          (tTiltFilter** const);
 
     // Tick function for `tTiltFilter`
-    Lfloat  tTiltFilter_tick          (tTiltFilter* const, Lfloat input);
+    float  tTiltFilter_tick          (tTiltFilter* const, float input);
 
     // Setter functions for `tTiltFilter`
-    void    tTiltFilter_setTilt       (tTiltFilter* const vf, Lfloat tilt);
-    void    tTiltFilter_setSampleRate (tTiltFilter* const vf, Lfloat sr);
+    void    tTiltFilter_setTilt       (tTiltFilter* const vf, float tilt);
+    void    tTiltFilter_setSampleRate (tTiltFilter* const vf, float sr);
 
 
 #ifdef __cplusplus

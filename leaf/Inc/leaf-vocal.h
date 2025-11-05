@@ -22,28 +22,28 @@
 typedef struct glottis
 {
 	tMempool* mempool;
-	Lfloat  freq;
-    Lfloat  tenseness;
-    Lfloat  Rd;
-    Lfloat  waveform_length;
-    Lfloat  time_in_waveform;
+	float  freq;
+    float  tenseness;
+    float  Rd;
+    float  waveform_length;
+    float  time_in_waveform;
 
-    Lfloat  alpha;
-    Lfloat  E0;
-    Lfloat  epsilon;
-    Lfloat  shift;
-    Lfloat  delta;
-    Lfloat  Te;
-    Lfloat  omega;
-    Lfloat  Again;
+    float  alpha;
+    float  E0;
+    float  epsilon;
+    float  shift;
+    float  delta;
+    float  Te;
+    float  omega;
+    float  Again;
 
-    Lfloat  T;
+    float  T;
 } glottis;
 
 void    glottis_init           (glottis**glo, LEAF* const leaf);
 void    glottis_initToPool     (glottis**glo, tMempool** const mp);
 
-Lfloat  glottis_compute        (glottis* glo);
+float  glottis_compute        (glottis* glo);
 void    glottis_setup_waveform (glottis* glo);
 
 
@@ -51,10 +51,10 @@ void    glottis_setup_waveform (glottis* glo);
 typedef struct transient
 {
     int  position;
-    Lfloat  time_alive;
-    Lfloat  lifetime;
-    Lfloat  strength;
-    Lfloat  exponent;
+    float  time_alive;
+    float  lifetime;
+    float  strength;
+    float  exponent;
     char is_free;
     unsigned int id;
     struct transient *next;
@@ -75,23 +75,23 @@ typedef struct tract
 {
 	tMempool* mempool;
 	int n;
-	Lfloat invN;
+	float invN;
 	int nMinusOne;
 	int maxNumTractSections;
-	    Lfloat*  diameter;
-	    Lfloat*  rest_diameter;
-	    Lfloat*  target_diameter;
-	    Lfloat*  new_diameter;
-	    Lfloat*  R;
-	    Lfloat*  L;
-	    Lfloat*  reflection;
-	    Lfloat*  new_reflection;
-	    Lfloat*  junction_outL;
-	    Lfloat*  junction_outR;
-	    Lfloat*  A;
+	    float*  diameter;
+	    float*  rest_diameter;
+	    float*  target_diameter;
+	    float*  new_diameter;
+	    float*  R;
+	    float*  L;
+	    float*  reflection;
+	    float*  new_reflection;
+	    float*  junction_outL;
+	    float*  junction_outR;
+	    float*  A;
 
-	    Lfloat TnoiseGain;
-	    Lfloat AnoiseGain;
+	    float TnoiseGain;
+	    float AnoiseGain;
 	    int nose_length;
 
 
@@ -102,46 +102,46 @@ typedef struct tract
 	    int blade_start;
 	    int lip_start;
 
-		Lfloat tongueUpperBound;
-		Lfloat tongueLowerBound;
+		float tongueUpperBound;
+		float tongueLowerBound;
 
-	    Lfloat*  noseL;
-	    Lfloat*  noseR;
-	    Lfloat*  nose_junc_outL;
-	    Lfloat*  nose_junc_outR;
-	    Lfloat*  nose_reflection;
-	    Lfloat*  nose_diameter;
-	    Lfloat*  noseA;
+	    float*  noseL;
+	    float*  noseR;
+	    float*  nose_junc_outL;
+	    float*  nose_junc_outR;
+	    float*  nose_reflection;
+	    float*  nose_diameter;
+	    float*  noseA;
 
-	    Lfloat  reflection_left;
-	    Lfloat  reflection_right;
-	    Lfloat  reflection_nose;
+	    float  reflection_left;
+	    float  reflection_right;
+	    float  reflection_nose;
 
-	    Lfloat  new_reflection_left;
-	    Lfloat  new_reflection_right;
-	    Lfloat  new_reflection_nose;
+	    float  new_reflection_left;
+	    float  new_reflection_right;
+	    float  new_reflection_nose;
 
-	    Lfloat  velum_target;
+	    float  velum_target;
 
-	    Lfloat  glottal_reflection;
-	    Lfloat  lip_reflection;
+	    float  glottal_reflection;
+	    float  lip_reflection;
 	    int  last_obstruction;
-	    Lfloat  fade;
-	    Lfloat  movement_speed;
-	    Lfloat  lip_output;
-	    Lfloat  nose_output;
-	    Lfloat  block_time;
-	    Lfloat diameterScale;
+	    float  fade;
+	    float  movement_speed;
+	    float  lip_output;
+	    float  nose_output;
+	    float  block_time;
+	    float diameterScale;
 
 	    tSVF* fricativeNoiseFilt[2];
 	    tSVF* aspirationNoiseFilt;
 	    tNoise* whiteNoise;
 
-	    Lfloat turbuluencePointPosition[2];
-	    Lfloat turbuluencePointDiameter[2];
+	    float turbuluencePointPosition[2];
+	    float turbuluencePointDiameter[2];
 	    transient_pool* tpool;
 
-	    Lfloat  T;
+	    float  T;
 } tract;
 
 
@@ -152,13 +152,13 @@ void    tract_initToPool(tract** const t,  int numTractSections, int maxNumTract
 void    tract_calculate_reflections        (tract* t);
 void    tract_newLength                    (tract* t, int newLength);
 void    tract_reshape                      (tract* t);
-void    tract_compute                      (tract* t, Lfloat  in, Lfloat  lambda);
+void    tract_compute                      (tract* t, float  in, float  lambda);
 void    tract_calculate_nose_reflections   (tract* t);
 void    tract_addTurbulenceNoise           (tract* const t);
-void    tract_addTurbulenceNoiseAtPosition (tract* const t, Lfloat turbulenceNoise, Lfloat position, Lfloat diameter);
+void    tract_addTurbulenceNoiseAtPosition (tract* const t, float turbulenceNoise, float position, float diameter);
 int     append_transient                   (transient_pool* pool, int position);
 void    remove_transient                   (transient_pool* pool, unsigned int id);
-Lfloat  move_towards                       (Lfloat current, Lfloat target, Lfloat amt_up, Lfloat amt_down);
+float  move_towards                       (float current, float target, float amt_up, float amt_down);
 
 
 
@@ -169,7 +169,7 @@ typedef struct tVoc
     glottis*  glot; /*The Glottis*/
     tract*  tr; /*The Vocal Tract */
     int doubleCompute;
-    //Lfloat*  buf;
+    //float*  buf;
     int counter;
     int sampleRate;
 } tVoc;
@@ -178,30 +178,30 @@ void    tVoc_init(tVoc** const voc, int numTractSections, int maxNumTractSection
 void    tVoc_initToPool(tVoc** const voc, int numTractSections,int maxNumTractSections, tMempool** const mempool);
 void    tVoc_free(tVoc** const voc);
 
-Lfloat  tVoc_tick                           (tVoc* const voc);
+float  tVoc_tick                           (tVoc* const voc);
 
-void    tVoc_tractCompute                   (tVoc* const voc, Lfloat *in, Lfloat *out);
-void    tVoc_setSampleRate                  (tVoc* const voc, Lfloat sr);
-void    tVoc_setFreq                        (tVoc* const voc, Lfloat freq);
-Lfloat* tVoc_get_tract_diameters            (tVoc* const voc);
-Lfloat* tVoc_get_current_tract_diameters    (tVoc* const voc);
-Lfloat* tVoc_get_tract_rest_diameters       (tVoc* const voc);
+void    tVoc_tractCompute                   (tVoc* const voc, float *in, float *out);
+void    tVoc_setSampleRate                  (tVoc* const voc, float sr);
+void    tVoc_setFreq                        (tVoc* const voc, float freq);
+float* tVoc_get_tract_diameters            (tVoc* const voc);
+float* tVoc_get_current_tract_diameters    (tVoc* const voc);
+float* tVoc_get_tract_rest_diameters       (tVoc* const voc);
 void    tVoc_set_tractLength                (tVoc* const voc, int newLength);
 int     tVoc_get_tract_size                 (tVoc* const voc);
-Lfloat* tVoc_get_nose_diameters             (tVoc* const voc);
+float* tVoc_get_nose_diameters             (tVoc* const voc);
 int     tVoc_get_nose_size                  (tVoc* const voc);
-void    tVoc_set_tongue_shape_and_touch     (tVoc* const voc, Lfloat tongue_index, Lfloat tongue_diameter, Lfloat touch_index, Lfloat touch_diameter);
-void    tVoc_set_tongue_and_touch_diameters (tVoc* const voc, Lfloat tongue_index, Lfloat tongue_diameter, Lfloat touch_index, Lfloat touch_diameter, Lfloat *theDiameters);
-void    tVoc_set_tenseness                  (tVoc* const voc, Lfloat breathiness);
-Lfloat* tVoc_get_tenseness_ptr              (tVoc* const voc);
-void    tVoc_set_velum                      (tVoc* const voc, Lfloat velum);
-Lfloat* tVoc_get_velum_ptr                  (tVoc* const voc);
+void    tVoc_set_tongue_shape_and_touch     (tVoc* const voc, float tongue_index, float tongue_diameter, float touch_index, float touch_diameter);
+void    tVoc_set_tongue_and_touch_diameters (tVoc* const voc, float tongue_index, float tongue_diameter, float touch_index, float touch_diameter, float *theDiameters);
+void    tVoc_set_tenseness                  (tVoc* const voc, float breathiness);
+float* tVoc_get_tenseness_ptr              (tVoc* const voc);
+void    tVoc_set_velum                      (tVoc* const voc, float velum);
+float* tVoc_get_velum_ptr                  (tVoc* const voc);
 void    tVoc_setDoubleComputeFlag           (tVoc* const voc, int doubleCompute);
 int     tVoc_get_counter                    (tVoc* const voc);
-void    tVoc_rescaleDiameter                (tVoc* const voc, Lfloat scale);
-void    tVoc_setTurbulenceNoiseGain         (tVoc* const voc, Lfloat gain);
-void    tVoc_setAspirationNoiseGain         (tVoc* const voc, Lfloat gain);
-void    tVoc_setAspirationNoiseFilterFreq   (tVoc* const voc, Lfloat Q);
-void    tVoc_setAspirationNoiseFilterQ      (tVoc* const voc, Lfloat freq);
+void    tVoc_rescaleDiameter                (tVoc* const voc, float scale);
+void    tVoc_setTurbulenceNoiseGain         (tVoc* const voc, float gain);
+void    tVoc_setAspirationNoiseGain         (tVoc* const voc, float gain);
+void    tVoc_setAspirationNoiseFilterFreq   (tVoc* const voc, float Q);
+void    tVoc_setAspirationNoiseFilterQ      (tVoc* const voc, float freq);
 
 #endif /* INC_LEAF_VOCAL_H_ */
