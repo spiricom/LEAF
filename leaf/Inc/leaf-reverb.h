@@ -38,12 +38,12 @@ extern "C" {
      @brief Reverb, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tPRCReverb_init(tPRCReverb** const, float t60, LEAF* const leaf)
+     @fn void    tPRCReverb_init(tPRCReverb* const, float t60, LEAF* const leaf)
      @brief Initialize a tPRCReverb to the default mempool of a LEAF instance.
      @param reverb A pointer to the tPRCReverb to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPRCReverb_initToPool(tPRCReverb** const, float t60, tMempool** const)
+     @fn void    tPRCReverb_init                 (tMempool** const)
      @brief Initialize a tPRCReverb to a specified mempool.
      @param reverb A pointer to the tPRCReverb to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -56,7 +56,7 @@ extern "C" {
      @brief
      @param reverb A pointer to the relevant tPRCReverb.
      
-     @fn float   tPRCReverb_tick         (tPRCReverb* const, float input)
+     @fn float   tPRCReverb_tick         (tPRCReverb* const, tPRCReverb** const, float t60, float input)
      @brief
      @param reverb A pointer to the relevant tPRCReverb.
 
@@ -88,8 +88,8 @@ extern "C" {
         float lastIn, lastOut;
     } tPRCReverb;
 
-    void    tPRCReverb_init          (tPRCReverb** const, float t60, LEAF* const leaf);
-    void    tPRCReverb_initToPool    (tPRCReverb** const, float t60, tMempool** const);
+    void    tPRCReverb_create               (tMempool** const mempool, tPRCReverb** const);
+    void    tPRCReverb_init                 (LEAF* const leaf, tPRCReverb* const, float t60);
     void    tPRCReverb_free          (tPRCReverb** const);
 
     float  tPRCReverb_tick          (tPRCReverb* const, float input);
@@ -107,12 +107,12 @@ extern "C" {
      @brief Reverb, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tNReverb_init(tNReverb** const, float t60, LEAF* const leaf)
+     @fn void    tNReverb_init(tNReverb* const, float t60, LEAF* const leaf)
      @brief Initialize a tNReverb to the default mempool of a LEAF instance.
      @param reverb A pointer to the tNReverb to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tNReverb_initToPool(tNReverb** const, float t60, tMempool** const)
+     @fn void    tNReverb_init                 (tMempool** const)
      @brief Initialize a tNReverb to a specified mempool.
      @param reverb A pointer to the tNReverb to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -125,7 +125,7 @@ extern "C" {
      @brief
      @param reverb A pointer to the relevant tNReverb.
      
-     @fn float   tNReverb_tick           (tNReverb* const, float input)
+     @fn float   tNReverb_tick           (tNReverb* const, tNReverb** const, float t60, float input)
      @brief
      @param reverb A pointer to the relevant tNReverb.
      
@@ -162,8 +162,8 @@ extern "C" {
         float lastIn, lastOut;
     } tNReverb;
 
-    void    tNReverb_init           (tNReverb** const, float t60, LEAF* const leaf);
-    void    tNReverb_initToPool     (tNReverb** const, float t60, tMempool** const);
+    void    tNReverb_create               (tMempool** const mempool, tNReverb** const);
+    void    tNReverb_init                 (LEAF* const leaf, tNReverb* const, float t60);
     void    tNReverb_free           (tNReverb** const);
 
     float  tNReverb_tick           (tNReverb* const, float input);
@@ -182,12 +182,12 @@ extern "C" {
      @brief Dattorro plate reverb.
      @{
      
-     @fn void    tDattorroReverb_init(tDattorroReverb** const, LEAF* const leaf)
+     @fn void    tDattorroReverb_init(tDattorroReverb* const, LEAF* const leaf)
      @brief Initialize a tDattorroReverb to the default mempool of a LEAF instance.
      @param reverb A pointer to the tDattorroReverb to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tDattorroReverb_initToPool(tDattorroReverb** const, tMempool** const)
+     @fn void    tDattorroReverb_init                 (tMempool** const)
      @brief Initialize a tDattorroReverb to a specified mempool.
      @param reverb A pointer to the tDattorroReverb to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -200,7 +200,7 @@ extern "C" {
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
-     @fn float   tDattorroReverb_tick              (tDattorroReverb* const, float input)
+     @fn float   tDattorroReverb_tick              (tDattorroReverb* const, tDattorroReverb** const, float input)
      @brief
      @param reverb A pointer to the relevant tDattorroReverb.
      
@@ -288,8 +288,8 @@ extern "C" {
         tCycle*       f2_lfo;
     } tDattorroReverb;
 
-    void    tDattorroReverb_init              (tDattorroReverb** const, LEAF* const leaf);
-    void    tDattorroReverb_initToPool        (tDattorroReverb** const, tMempool** const);
+    void    tDattorroReverb_create               (tMempool** const mempool, tDattorroReverb** const);
+    void    tDattorroReverb_init                 (LEAF* const leaf, tDattorroReverb* const);
     void    tDattorroReverb_free              (tDattorroReverb** const);
 
     float  tDattorroReverb_tick              (tDattorroReverb* const, float input);

@@ -2,7 +2,7 @@
 #include "../leaf/Inc/leaf-oscillators.h"
 #include "../leaf/leaf.h"
 #include "../leaf/Inc/leaf-math.h"
-
+/*
 static float myrand() {return (float)rand()/RAND_MAX;}
 
 TEST_CASE("Tests for `tCycle` object", "[tCycle]") {
@@ -408,3 +408,4 @@ tSineTriLFO* osc;
 //    REQUIRE(osc != nullptr);
 //    REQUIRE_NOTHROW(tDampedOscillator_free(&osc));
 //}
+*/

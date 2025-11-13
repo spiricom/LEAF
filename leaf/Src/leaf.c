@@ -22,24 +22,24 @@ void LEAF_init(LEAF* const leaf, float sr, char* memory, size_t memorysize, floa
 {
     leaf->_internal_mempool.leaf = leaf;
     leaf_pool_init(leaf, memory, memorysize);
-    
+
     leaf->sampleRate = sr;
-    
+
     leaf->invSampleRate = 1.0f/sr;
-    
+
     leaf->twoPiTimesInvSampleRate = leaf->invSampleRate * TWO_PI;
 
     leaf->random = random;
-    
+
     leaf->clearOnAllocation = 0;
-    
+
     leaf->errorCallback = &LEAF_defaultErrorCallback;
-    
+
     for (int i = 0; i < LEAFErrorNil; ++i)
         leaf->errorState[i] = 0;
-    
+
     leaf->allocCount = 0;
-    
+
     leaf->freeCount = 0;
     leaf->uuid = 0;
     leaf->lfoRateTable = NULL;

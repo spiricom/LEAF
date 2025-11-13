@@ -38,12 +38,12 @@ extern "C" {
      @brief A basic stack of integers with a fixed capacity of 128, used by tPoly to keep track of MIDI notes.
      @{
      
-     @fn void    tStack_init(tStack** const stack, LEAF* const leaf)
+     @fn void    tStack_init(tStack* const stack, LEAF* const leaf)
      @brief Initialize a tStack to the default mempool of a LEAF instance.
      @param stack A pointer to the tStack to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tStack_initToPool(tStack** const stack, tMempool** const mempool)
+     @fn void    tStack_init                 (tMempool** const mempool)
      @brief Initialize a tStack to a specified mempool.
      @param stack A pointer to the tStack to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -52,7 +52,7 @@ extern "C" {
      @brief Free a tStack from its mempool.
      @param stack A pointer to the tStack to free.
      
-     @fn void    tStack_setCapacity          (tStack* const stack, uint16_t cap)
+     @fn void    tStack_setCapacity          (tStack* const stack, tStack** const stack, uint16_t cap)
      @brief Set the capacity of the stack.
      @param stack A pointer to the relevant tStack.
      @param cap The new capacity.
@@ -117,8 +117,8 @@ extern "C" {
         int ordered;
     } tStack;
 
-    void    tStack_init                 (tStack** const stack, LEAF* const leaf);
-    void    tStack_initToPool           (tStack** const stack, tMempool** const pool);
+    void    tStack_create               (tMempool** const mempool, tStack** const);
+    void    tStack_init                 (LEAF* const leaf, tStack* const stack);
     void    tStack_free                 (tStack** const stack);
     
     void    tStack_setCapacity          (tStack* const stack, uint16_t cap);
@@ -138,13 +138,13 @@ extern "C" {
      @brief Polyphony handler with glide and pitch bend options.
      @{
      
-     @fn void    tPoly_init(tPoly** const poly, int maxNumVoices, LEAF* const leaf)
+     @fn void    tPoly_init(tPoly* const poly, int maxNumVoices, LEAF* const leaf)
      @brief Initialize a tPoly to the default mempool of a LEAF instance.
      @param poly A pointer to the tPoly to initialize.
      @param maxNumVoices The maximum number of voices this tPoly can handle at once.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPoly_initToPool(tPoly** const poly, int maxNumVoices, tMempool** const pool)
+     @fn void    tPoly_init                 (tMempool** const pool)
      @brief Initialize a tPoly to a specified mempool.
      @param poly A pointer to the tPoly to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -153,7 +153,7 @@ extern "C" {
      @brief Free a tPoly from its mempool.
      @param poly A pointer to the tPoly to free.
      
-     @fn int     tPoly_noteOn                (tPoly* const poly, int note, uint8_t vel)
+     @fn int     tPoly_noteOn                (tPoly* const poly, tPoly** const poly, int maxNumVoices, int note, uint8_t vel)
      @brief Add a note with a given velocity to the poly handler.
      @param poly A pointer to the relevant tPoly.
      @param note The MIDI note number to add.
@@ -283,8 +283,8 @@ extern "C" {
         int maxLength;
     } tPoly;
 
-    void    tPoly_init                  (tPoly** const poly, int maxNumVoices, LEAF* const leaf);
-    void    tPoly_initToPool            (tPoly** const poly, int maxNumVoices, tMempool** const pool);
+    void    tPoly_create               (tMempool** const mempool, tPoly** const);
+    void    tPoly_init                 (LEAF* const leaf, tPoly* const poly, int maxNumVoices);
     void    tPoly_free                  (tPoly** const poly);
 
     void    tPoly_tickPitch             (tPoly* const poly);
@@ -316,13 +316,13 @@ extern "C" {
      @brief Polyphony handler.
      @{
      
-     @fn void    tSimplePoly_init(tSimplePoly** const poly, int maxNumVoices, LEAF* const leaf)
+     @fn void    tSimplePoly_init(tSimplePoly* const poly, int maxNumVoices, LEAF* const leaf)
      @brief Initialize a tSimplePoly to the default mempool of a LEAF instance.
      @param poly A pointer to the tSimplePoly to initialize.
      @param maxNumVoices The maximum number of voices this tSimplePoly can handle at once.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSimplePoly_initToPool(tSimplePoly** const poly, int maxNumVoices, tMempool** const pool)
+     @fn void    tSimplePoly_init                 (tMempool** const pool)
      @brief Initialize a tSimplePoly to a specified mempool.
      @param poly A pointer to the tSimplePoly to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -331,7 +331,7 @@ extern "C" {
      @brief Free a tSimplePoly from its mempool.
      @param poly A pointer to the tSimplePoly to free.
      
-     @fn int     tSimplePoly_noteOn                (tSimplePoly* const poly, int note, uint8_t vel)
+     @fn int     tSimplePoly_noteOn                (tSimplePoly* const poly, tSimplePoly** const poly, int maxNumVoices, int note, uint8_t vel)
      @brief Add a note with a given velocity to the poly handler.
      @param poly A pointer to the relevant tSimplePoly.
      @param note The MIDI note number to add.
@@ -408,8 +408,8 @@ extern "C" {
         int notes[128][2];
     } tSimplePoly;
 
-    void    tSimplePoly_init                    (tSimplePoly** const poly, int maxNumVoices, LEAF* const leaf);
-    void    tSimplePoly_initToPool              (tSimplePoly** const poly, int maxNumVoices, tMempool** const pool);
+    void    tSimplePoly_create               (tMempool** const mempool, tSimplePoly** const);
+    void    tSimplePoly_init                 (LEAF* const leaf, tSimplePoly* const poly, int maxNumVoices);
     void    tSimplePoly_free                    (tSimplePoly** const poly);
     
     int     tSimplePoly_noteOn                  (tSimplePoly* const poly, int note, uint8_t vel);

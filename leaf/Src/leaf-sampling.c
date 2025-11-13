@@ -24,17 +24,15 @@
 
 //==============================================================================
 
-void  tBuffer_init(tBuffer** const sb, uint32_t length, LEAF* const leaf)
+void tBuffer_create(tMempool** const mp, tBuffer** const sb)
 {
-    tBuffer_initToPool(sb, length, &leaf->mempool);
+    ALLOC_FROM_POOL(tBuffer, sb, mp);
 }
 
-void  tBuffer_initToPool (tBuffer** const sb, uint32_t length, tMempool** const mp)
+void tBuffer_init(LEAF* const leaf, tBuffer* const sb, uint32_t length)
 {
-    tMempool* m = *mp;
-    tBuffer* s = *sb = (tBuffer*) mpool_alloc(sizeof(tBuffer), m);
-    s->mempool = m;
-    LEAF* leaf = s->mempool->leaf;
+
+LEAF* leaf = s->mempool->leaf;
     
     s->buff = (float*) mpool_alloc( sizeof(float) * length, m);
     s->sampleRate = leaf->sampleRate;
@@ -44,6 +42,7 @@ void  tBuffer_initToPool (tBuffer** const sb, uint32_t length, tMempool** const 
     s->active = 0;
     s->idx = 0;
     s->mode = RecordOneShot;
+
 }
 
 void  tBuffer_free (tBuffer** const sb)
@@ -162,18 +161,15 @@ int tBuffer_isActive(tBuffer* const s)
 static void handleStartEndChange(tSampler* const sp);
 static void attemptStartEndChange(tSampler* const sp);
 
-void tSampler_init(tSampler** const sp, tBuffer** const b, LEAF* const leaf)
+void tSampler_create(tMempool** const mp, tSampler** const sp)
 {
-    tSampler_initToPool(sp, b, &leaf->mempool, leaf);
+    ALLOC_FROM_POOL(tSampler, sp, mp);
 }
 
-void tSampler_initToPool(tSampler** const sp, tBuffer** const b, tMempool** const mp, LEAF* const leaf)
+void tSampler_init(LEAF* const leaf, tSampler* const sp, tBuffer* const b, LEAF* const leaf)
 {
-    tMempool* m = *mp;
-    tSampler* p = *sp = (tSampler*) mpool_alloc(sizeof(tSampler), m);
-    p->mempool = m;
-    
-    tBuffer* s = *b;
+
+tBuffer* s = *b;
     
     p->invSampleRate = leaf->invSampleRate;
     p->sampleRate = leaf->sampleRate;
@@ -196,7 +192,8 @@ void tSampler_initToPool(tSampler** const sp, tBuffer** const b, tMempool** cons
     {
         rate = -rate;
         p->dir = -1;
-    }
+    
+}
     else
     {
         p->dir = 1;
@@ -1108,21 +1105,19 @@ void tSampler_setSampleRate(tSampler* const p, float sr)
 
 //==============================================================================
 
-void    tAutoSampler_init(tAutoSampler** const as, tBuffer** const b, LEAF* const leaf)
+void tAutoSampler_create(tMempool** const mp, tAutoSampler** const as)
 {
-    tAutoSampler_initToPool(as, b, &leaf->mempool, leaf);
+    ALLOC_FROM_POOL(tAutoSampler, as, mp);
 }
 
-void    tAutoSampler_initToPool (tAutoSampler** const as, tBuffer** const b, tMempool** const mp, LEAF* const leaf)
+void tAutoSampler_init(LEAF* const leaf, tAutoSampler* const as, tBuffer* const b, LEAF* const leaf)
 {
-    tMempool* m = *mp;
-    tAutoSampler* a = *as = (tAutoSampler*) mpool_alloc(sizeof(tAutoSampler), m);
-    a->mempool = m;
-    
-    tBuffer_setRecordMode(*b, RecordOneShot);
+
+tBuffer_setRecordMode(*b, RecordOneShot);
     tSampler_initToPool(&a->sampler, b, mp, leaf);
     tSampler_setMode(a->sampler, PlayLoop);
     tEnvelopeFollower_initToPool(&a->ef, 0.05f, 0.9999f, mp);
+
 }
 
 void    tAutoSampler_free (tAutoSampler** const as)
@@ -1227,18 +1222,15 @@ void    tAutoSampler_setSampleRate (tAutoSampler* const a, float sr)
 }
 
 
-void tMBSampler_init(tMBSampler** const sp, tBuffer** const b, LEAF* const leaf)
+void tMBSampler_create(tMempool** const mp, tMBSampler** const sp)
 {
-    tMBSampler_initToPool(sp, b, &leaf->mempool);
+    ALLOC_FROM_POOL(tMBSampler, sp, mp);
 }
 
-void tMBSampler_initToPool(tMBSampler** const sp, tBuffer** const b, tMempool** const mp)
+void tMBSampler_init(LEAF* const leaf, tMBSampler* const sp, tBuffer* const b)
 {
-    tMempool* m = *mp;
-    tMBSampler* c = *sp = (tMBSampler*) mpool_alloc(sizeof(tMBSampler), m);
-    c->mempool = m;
-    
-    c->samp = *b;
+
+c->samp = *b;
     
     c->mode = PlayLoop;
     c->active = 0;
@@ -1258,6 +1250,7 @@ void tMBSampler_initToPool(tMBSampler** const sp, tBuffer** const b, tMempool** 
     c->end = 1;
     c->currentLoopLength = 1;
     tMBSampler_setEnd(*sp, c->samp->bufferLength);
+
 }
 
 void tMBSampler_free (tMBSampler** const sp)

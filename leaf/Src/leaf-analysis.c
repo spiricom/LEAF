@@ -22,25 +22,173 @@
 #include "../../TestPlugin/JuceLibraryCode/JuceHeader.h"
 #endif
 
+//////definitions for heap only types
+struct tZeroCrossingCollector
+{
+    tMempool* mempool;
+
+    tZeroCrossingInfo* _info;
+    unsigned int _size;
+    unsigned int _pos;
+    unsigned int _mask;
+
+    float                _prev;// = 0.0f;
+    float                _hysteresis;
+    int                  _state;// = false;
+    int                  _num_edges;// = 0;
+    int                  _window_size;
+    int                  _frame;// = 0;
+    int                  _ready;// = false;
+    float                _peak_update;// = 0.0f;
+    float                _peak;// = 0.0f;
+} ;
+
+ struct tBitset
+{
+    tMempool* mempool;
+
+    unsigned int _value_size;
+    unsigned int _size;
+    unsigned int _bit_size;
+    unsigned int* _bits;
+} ;
+ struct tBACF
+{
+    tMempool* mempool;
+
+    tBitset* _bitset;
+    unsigned int _mid_array;
+};
+
+struct tPeriodDetector
+{
+    tMempool* mempool;
+
+    tZeroCrossingCollector*          _zc;
+    _period_info            _fundamental;
+    unsigned int            _min_period;
+    int                     _range;
+    tBitset*                 _bits;
+    float                   _weight;
+    unsigned int            _mid_point;
+    float                   _periodicity_diff_threshold;
+    float                   _predicted_period;// = -1.0f;
+    unsigned int            _edge_mark;// = 0;
+    unsigned int            _predict_edge;// = 0;
+    unsigned int            _num_pulses; // = 0;
+    int                     _half_empty; // 0;
+
+    float                   sampleRate;
+    float                   lowestFreq;
+    float                   highestFreq;
+
+    tBACF*                   _bacf;
+
+};
+
+struct tSNAC
+    {
+        tMempool* mempool;
+
+        float* inputbuf;
+        float* processbuf;
+        float* spectrumbuf;
+        float* biasbuf;
+        uint16_t timeindex;
+        uint16_t framesize;
+        uint16_t overlap;
+        uint16_t periodindex;
+
+        float periodlength;
+        float fidelity;
+        float biasfactor;
+        float minrms;
+
+    };
+
+struct tPeriodDetection
+{
+    tMempool* mempool;
+
+    tEnvPD env;
+    tSNAC* snac;
+    float* inBuffer;
+    float* outBuffer;
+    int frameSize;
+    int bufSize;
+    int framesPerBuffer;
+    int curBlock;
+    int lastBlock;
+    int i;
+    int indexstore;
+    int iLast;
+    int index;
+    float period;
+
+    uint16_t hopSize;
+    uint16_t windowSize;
+    uint8_t fba;
+
+    float timeConstant;
+    float radius;
+    float max;
+    float lastmax;
+    float deltamax;
+
+    float fidelityThreshold;
+
+    float history;
+    float alpha;
+    float tolerance;
+
+    float invSampleRate;
+};
+
+struct tPitchDetector
+{
+
+    tMempool* mempool;
+
+    tPeriodDetector* _pd;
+    _pitch_info _current;
+    int _frames_after_shift;// = 0;
+
+    float sampleRate;
+
+};
+struct tDualPitchDetector
+{
+    tMempool* mempool;
+
+    tPeriodDetection* _pd1;
+    tPitchDetector* _pd2;
+    _pitch_info _current;
+    float _mean;
+    float _predicted_frequency;
+    int _first;
+
+    float highest, lowest;
+    float thresh;
+
+    float sampleRate;
+
+};
 /******************************************************************************/
 /*                            Envelope Follower                               */
 /******************************************************************************/
 
-void tEnvelopeFollower_init(tEnvelopeFollower** const ef, float attackThreshold, float decayCoeff, LEAF* const leaf)
+void tEnvelopeFollower_create(tMempool** const mp, tEnvelopeFollower** const ef)
 {
-    tEnvelopeFollower_initToPool(ef, attackThreshold, decayCoeff, &leaf->mempool);
+    ALLOC_FROM_POOL(tEnvelopeFollower, ef, mp);
 }
 
-void tEnvelopeFollower_initToPool (tEnvelopeFollower** const ef, float attackThreshold, float decayCoeff,
-                                         tMempool** const mp)
+void tEnvelopeFollower_init(LEAF* const leaf, tEnvelopeFollower* const ef, float attackThreshold, float decayCoeff)
 {
-    tMempool* m = *mp;
-    tEnvelopeFollower* e = *ef = (tEnvelopeFollower*) mpool_alloc(sizeof(tEnvelopeFollower), m);
-    e->mempool = m;
-    
-    e->y = 0.0f;
-    e->a_thresh = attackThreshold;
-    e->d_coeff = decayCoeff;
+
+ef->y = 0.0f;
+    ef->a_thresh = attackThreshold;
+    ef->d_coeff = decayCoeff;
+
 }
 
 void tEnvelopeFollower_free (tEnvelopeFollower** const ef)
@@ -84,31 +232,31 @@ void tEnvelopeFollower_setAttackThreshold (tEnvelopeFollower* const e, float att
 /******************************************************************************/
 
 
-void tZeroCrossingCounter_init(tZeroCrossingCounter** const zc, int maxWindowSize, LEAF* const leaf)
+void tZeroCrossingCounter_create(tMempool** const mp, tZeroCrossingCounter** const zc)
 {
-    tZeroCrossingCounter_initToPool   (zc, maxWindowSize, &leaf->mempool);
+    ALLOC_FROM_POOL(tZeroCrossingCounter, zc, mp);
 }
 
-void tZeroCrossingCounter_initToPool (tZeroCrossingCounter** const zc, int maxWindowSize, tMempool** const mp)
+void tZeroCrossingCounter_init(LEAF* const leaf, tZeroCrossingCounter* const zc, int maxWindowSize)
 {
-    tMempool* m = *mp;
-    tZeroCrossingCounter* z = *zc = (tZeroCrossingCounter*) mpool_alloc(sizeof(tZeroCrossingCounter), m);
-    z->mempool = m;
-    
-    z->count = 0;
-    z->maxWindowSize = maxWindowSize;
-    z->currentWindowSize = maxWindowSize;
-    z->invCurrentWindowSize = 1.0f / (float)maxWindowSize;
-    z->position = 0;
-    z->prevPosition = maxWindowSize;
-    z->inBuffer = (float*) mpool_calloc(sizeof(float) * maxWindowSize, m);
-    z->countBuffer = (uint16_t*) mpool_calloc(sizeof(uint16_t) * maxWindowSize, m);
+
+    zc->count = 0;
+    zc->maxWindowSize = maxWindowSize;
+    zc->currentWindowSize = maxWindowSize;
+    zc->invCurrentWindowSize = 1.0f / (float)maxWindowSize;
+    zc->position = 0;
+    zc->prevPosition = maxWindowSize;
+
+    tMempool* m = zc->mempool;
+    zc->inBuffer = (float*) mpool_calloc(sizeof(float) * maxWindowSize, m);
+    zc->countBuffer = (uint16_t*) mpool_calloc(sizeof(uint16_t) * maxWindowSize, m);
+
 }
 
 void tZeroCrossingCounter_free (tZeroCrossingCounter** const zc)
 {
     tZeroCrossingCounter* z = *zc;
-    
+
     mpool_free((char*)z->inBuffer, z->mempool);
     mpool_free((char*)z->countBuffer, z->mempool);
     mpool_free((char*)z, z->mempool);
@@ -170,20 +318,18 @@ void tZeroCrossingCounter_setWindowSize (tZeroCrossingCounter* const z, float wi
 /******************************************************************************/
 
 
-void tPowerFollower_init(tPowerFollower** const pf, float factor, LEAF* const leaf)
+void tPowerFollower_create(tMempool** const mp, tPowerFollower** const pf)
 {
-    tPowerFollower_initToPool(pf, factor, &leaf->mempool);
+    ALLOC_FROM_POOL(tPowerFollower, pf, mp);
 }
 
-void tPowerFollower_initToPool (tPowerFollower** const pf, float factor, tMempool** const mp)
+void tPowerFollower_init(LEAF* const leaf, tPowerFollower* const p, float factor)
 {
-    tMempool* m = *mp;
-    tPowerFollower* p = *pf = (tPowerFollower*) mpool_alloc(sizeof(tPowerFollower), m);
-    p->mempool = m;
-    
-    p->curr=0.0f;
+
+p->curr=0.0f;
     p->factor=factor;
     p->oneminusfactor=1.0f-factor;
+
 }
 
 void tPowerFollower_free (tPowerFollower** const pf)
@@ -218,17 +364,14 @@ float tPowerFollower_getPower (tPowerFollower* const p)
 /******************************************************************************/
 
 
-void tEnvPD_init(tEnvPD** const xpd, int ws, int hs, int bs, LEAF* const leaf)
+void tEnvPD_create(tMempool** const mp, tEnvPD** const xpd)
 {
-    tEnvPD_initToPool(xpd, ws, hs, bs, &leaf->mempool);
+    ALLOC_FROM_POOL(tEnvPD, xpd, mp);
 }
 
-void tEnvPD_initToPool (tEnvPD** const xpd, int ws, int hs, int bs, tMempool** const mp)
+void tEnvPD_init(LEAF* const leaf, tEnvPD* const x, int ws, int hs, int bs)
 {
-    tMempool* m = *mp;
-    tEnvPD* x = *xpd = (tEnvPD*) mpool_calloc(sizeof(tEnvPD), m);
-    x->mempool = m;
-    
+
     int period = hs, npoints = ws;
     
     int i;
@@ -258,7 +401,8 @@ void tEnvPD_initToPool (tEnvPD** const xpd, int ws, int hs, int bs, tMempool** c
     if (x->x_period % x->blockSize)
     {
         x->x_realperiod = x->x_period + x->blockSize - (x->x_period % x->blockSize);
-    }
+    
+}
     else
     {
         x->x_realperiod = x->x_period;
@@ -317,24 +461,25 @@ void tEnvPD_processBlock(tEnvPD* const x, float* in)
 /******************************************************************************/
 
 /*********************** Static Function Declarations *************************/
-
-static void atkdtk_init     (tAttackDetection* const a, int blocksize, int atk, int rel);
 static void atkdtk_envelope (tAttackDetection* const a, float *in);
-
-/******************************************************************************/
-
-void tAttackDetection_init(tAttackDetection** const ad, int blocksize, int atk, int rel, LEAF* const leaf)
+void tAttackDetection_create(tMempool** const mp, tAttackDetection** const ad)
 {
-    tAttackDetection_initToPool(ad, blocksize, atk, rel, &leaf->mempool);
+    ALLOC_FROM_POOL(tAttackDetection, ad, mp);
 }
 
-void tAttackDetection_initToPool (tAttackDetection** const ad, int blocksize, int atk, int rel, tMempool** const mp)
+void tAttackDetection_init(LEAF* const leaf, tAttackDetection* const a, int blocksize, int atk, int rel)
 {
-    tMempool* m = *mp;
-    tAttackDetection* a = *ad = (tAttackDetection*) mpool_alloc(sizeof(tAttackDetection), m);
-    a->mempool = m;
-    
-    atkdtk_init(a, blocksize, atk, rel);
+
+    a->env = 0;
+    a->blockSize = blocksize;
+    a->threshold = DEFTHRESHOLD;
+    a->sampleRate = leaf->sampleRate;
+    a->prevAmp = 0;
+
+    a->env = 0;
+
+    tAttackDetection_setAttack(a, atk);
+    tAttackDetection_setRelease(a, rel);
 }
 
 void tAttackDetection_free (tAttackDetection** const ad)
@@ -392,21 +537,6 @@ void tAttackDetection_setSampleRate (tAttackDetection* const a, float sr)
 
 /************************ Static Function Definitions *************************/
 
-static void atkdtk_init(tAttackDetection* const a, int blocksize, int atk, int rel)
-{
-    LEAF* leaf = a->mempool->leaf;
-    
-    a->env = 0;
-    a->blockSize = blocksize;
-    a->threshold = DEFTHRESHOLD;
-    a->sampleRate = leaf->sampleRate;
-    a->prevAmp = 0;
-    
-    a->env = 0;
-    
-    tAttackDetection_setAttack(a, atk);
-    tAttackDetection_setRelease(a, rel);
-}
 
 static void atkdtk_envelope(tAttackDetection* const a, float *in)
 {
@@ -443,18 +573,15 @@ static  float snac_spectralpeak      (tSNAC* const s, float periodlength);
 
 /******************************************************************************/
 
-void tSNAC_init(tSNAC** const snac, int overlaparg, LEAF* const leaf)
+void tSNAC_create(tMempool** const mp, tSNAC** const snac)
 {
-    tSNAC_initToPool(snac, overlaparg, &leaf->mempool);
+    ALLOC_FROM_POOL(tSNAC, snac, mp);
 }
 
-void    tSNAC_initToPool    (tSNAC** const snac, int overlaparg, tMempool** const mp)
+void tSNAC_init(LEAF* const leaf, tSNAC* const s, int overlaparg)
 {
-    tMempool* m = *mp;
-    tSNAC* s = *snac = (tSNAC*) mpool_alloc(sizeof(tSNAC), m);
-    s->mempool = m;
-    
-    s->biasfactor = DEFBIAS;
+
+s->biasfactor = DEFBIAS;
     s->timeindex = 0;
     s->periodindex = 0;
     s->periodlength = 0.;
@@ -462,13 +589,14 @@ void    tSNAC_initToPool    (tSNAC** const snac, int overlaparg, tMempool** cons
     s->minrms = DEFMINRMS;
     s->framesize = SNAC_FRAME_SIZE;
     
-    s->inputbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, m);
-    s->processbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE * 2), m);
-    s->spectrumbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE / 2), m);
-    s->biasbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, m);
+    s->inputbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, s->mempool);
+    s->processbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE * 2), s->mempool);
+    s->spectrumbuf = (float*) mpool_calloc(sizeof(float) * (SNAC_FRAME_SIZE / 2), s->mempool);
+    s->biasbuf = (float*) mpool_calloc(sizeof(float) * SNAC_FRAME_SIZE, s->mempool);
     
     snac_biasbuf(s);
     tSNAC_setOverlap(s, overlaparg);
+
 }
 
 void tSNAC_free (tSNAC** const snac)
@@ -760,17 +888,16 @@ static void snac_biasbuf (tSNAC* const s)
 /*                             Period Detection                               */
 /******************************************************************************/
 
-void tPeriodDetection_init(tPeriodDetection** const pd, float* in, int bufSize, int frameSize, LEAF* const leaf)
+void tPeriodDetection_create(tMempool** const mp, tPeriodDetection** const pd)
 {
-    tPeriodDetection_initToPool(pd, in, bufSize, frameSize, &leaf->mempool);
+    ALLOC_FROM_POOL(tPeriodDetection, pd, mp);
 }
 
-void tPeriodDetection_initToPool (tPeriodDetection** const pd, float* in, int bufSize, int frameSize, tMempool** const mp)
+void tPeriodDetection_init(LEAF* const leaf, tPeriodDetection* const p, float* in, int bufSize, int frameSize)
 {
-    tMempool* m = *mp;
-    tPeriodDetection* p = *pd = (tPeriodDetection*) mpool_calloc(sizeof(tPeriodDetection), m);
-    p->mempool = m;
-    LEAF* leaf = p->mempool->leaf;
+
+
+
     
     p->invSampleRate = leaf->invSampleRate;
     p->inBuffer = in;
@@ -785,9 +912,10 @@ void tPeriodDetection_initToPool (tPeriodDetection** const pd, float* in, int bu
     p->windowSize = DEFWINDOWSIZE;
     p->fba = FBA;
     
-    tEnvPD_initToPool(&p->env, p->windowSize, p->hopSize, p->frameSize, mp);
+    tEnvPD_init(leaf, &p->env, p->windowSize, p->hopSize, p->frameSize);
     
-    tSNAC_initToPool(&p->snac, DEFOVERLAP, mp);
+    tSNAC_create(&(p->mempool),&p->snac);
+    tSNAC_init(leaf,p->snac, DEFOVERLAP);
     
     p->history = 0.0f;
     p->alpha = 1.0f;
@@ -795,13 +923,13 @@ void tPeriodDetection_initToPool (tPeriodDetection** const pd, float* in, int bu
     p->timeConstant = DEFTIMECONSTANT;
     p->radius = expf(-1000.0f * p->hopSize * p->invSampleRate / p->timeConstant);
     p->fidelityThreshold = 0.95f;
+
 }
 
 void tPeriodDetection_free (tPeriodDetection** const pd)
 {
     tPeriodDetection* p = *pd;
     
-    tEnvPD_free(&p->env);
     tSNAC_free(&p->snac);
     mpool_free((char*)p, p->mempool);
 }
@@ -824,7 +952,7 @@ float tPeriodDetection_tick (tPeriodDetection* const p, float sample)
     {
         p->index = 0;
         
-        tEnvPD_processBlock(p->env, &(p->inBuffer[i]));
+        tEnvPD_processBlock(&p->env, &(p->inBuffer[i]));
         
         tSNAC_ioSamples(p->snac, &(p->inBuffer[i]), p->frameSize);
         
@@ -885,20 +1013,17 @@ void tPeriodDetection_setSampleRate (tPeriodDetection* const p, float sr)
 /*                          Zero Crossing Info                                */
 /******************************************************************************/
 
-void    tZeroCrossingInfo_init(tZeroCrossingInfo** const zc, LEAF* const leaf)
+void tZeroCrossingInfo_create(tMempool** const mp, tZeroCrossingInfo** const zc)
 {
-    tZeroCrossingInfo_initToPool(zc, &leaf->mempool);
+    ALLOC_FROM_POOL(tZeroCrossingInfo, zc, mp);
 }
 
-void    tZeroCrossingInfo_initToPool    (tZeroCrossingInfo** const zc, tMempool** const mp)
+void tZeroCrossingInfo_init(LEAF* const leaf, tZeroCrossingInfo* const z)
 {
-    tMempool* m = *mp;
-    tZeroCrossingInfo* z = *zc = (tZeroCrossingInfo*) mpool_calloc(sizeof(tZeroCrossingInfo), m);
-    z->mempool = m;
-    
     z->_leading_edge = INT_MIN;
     z->_trailing_edge = INT_MIN;
     z->_width = 0.0f;
+
 }
 
 void    tZeroCrossingInfo_free  (tZeroCrossingInfo** const zc)
@@ -906,6 +1031,7 @@ void    tZeroCrossingInfo_free  (tZeroCrossingInfo** const zc)
     tZeroCrossingInfo* z = *zc;
     
     mpool_free((char*)z, z->mempool);
+    *zc = NULL;
 }
 
 void    tZeroCrossingInfo_updatePeak(tZeroCrossingInfo* const z, float s, int pos)
@@ -950,18 +1076,15 @@ static inline void update_state(tZeroCrossingCollector* const zc, float s);
 static inline void shift(tZeroCrossingCollector* const zc, int n);
 static inline void reset(tZeroCrossingCollector* const zc);
 
-void    tZeroCrossingCollector_init(tZeroCrossingCollector** const zc, int windowSize, float hysteresis, LEAF* const leaf)
+void tZeroCrossingCollector_create(tMempool** const mp, tZeroCrossingCollector** const zc)
 {
-    tZeroCrossingCollector_initToPool(zc, windowSize, hysteresis, &leaf->mempool);
+    ALLOC_FROM_POOL(tZeroCrossingCollector, zc, mp);
 }
 
-void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector** const zc, int windowSize, float hysteresis, tMempool** const mp)
+void tZeroCrossingCollector_init(LEAF* const leaf, tZeroCrossingCollector* const z, int windowSize, float hysteresis)
 {
-    tMempool* m = *mp;
-    tZeroCrossingCollector* z = *zc = (tZeroCrossingCollector*) mpool_alloc(sizeof(tZeroCrossingCollector), m);
-    z->mempool = m;
-    
-    z->_hysteresis = -dbtoa(hysteresis);
+
+z->_hysteresis = -dbtoa(hysteresis);
     int bits = CHAR_BIT * sizeof(unsigned int);
     z->_window_size = fmax(2, (windowSize + bits - 1) / bits) * bits;
     
@@ -971,11 +1094,11 @@ void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector** const zc,
     z->_size = pow(2.0, ceil(log2((double)size)));
     z->_mask = z->_size - 1;
 
-    z->_info = (tZeroCrossingInfo**) mpool_calloc(sizeof(tZeroCrossingInfo*) * z->_size, m);
+    z->_info = (tZeroCrossingInfo*) mpool_calloc(sizeof(tZeroCrossingInfo) * z->_size, z->mempool);
 
     for (unsigned i = 0; i < z->_size; i++)
     {
-        tZeroCrossingInfo_initToPool(&z->_info[i], mp);
+        tZeroCrossingInfo_init(leaf,&z->_info[i]);
     }
     
     z->_pos = 0;
@@ -992,12 +1115,7 @@ void    tZeroCrossingCollector_initToPool    (tZeroCrossingCollector** const zc,
 void    tZeroCrossingCollector_free  (tZeroCrossingCollector** const zc)
 {
     tZeroCrossingCollector* z = *zc;
-    
-    for (unsigned i = 0; i < z->_size; i++)
-    {
-        tZeroCrossingInfo_free(&z->_info[i]);
-    }
-    
+
     mpool_free((char*)z->_info, z->mempool);
     mpool_free((char*)z, z->mempool);
 }
@@ -1040,7 +1158,7 @@ int     tZeroCrossingCollector_getState(tZeroCrossingCollector* const z)
 tZeroCrossingInfo* const tZeroCrossingCollector_getCrossing(tZeroCrossingCollector* const z, int index)
 {
     int i = (z->_num_edges - 1) - index;
-    return z->_info[(z->_pos + i) & z->_mask];
+    return &z->_info[(z->_pos + i) & z->_mask];
 }
 
 int     tZeroCrossingCollector_getNumEdges(tZeroCrossingCollector* const z)
@@ -1102,7 +1220,7 @@ static inline void update_state(tZeroCrossingCollector* const z, float s)
         {
             --z->_pos;
             z->_pos &= z->_mask;
-            tZeroCrossingInfo* crossing = z->_info[z->_pos & z->_mask];
+            tZeroCrossingInfo* crossing = &z->_info[z->_pos & z->_mask];
             crossing->_before_crossing = z->_prev;
             crossing->_after_crossing = s;
             crossing->_peak = s;
@@ -1114,7 +1232,7 @@ static inline void update_state(tZeroCrossingCollector* const z, float s)
         }
         else
         {
-            tZeroCrossingInfo_updatePeak(z->_info[z->_pos & z->_mask], s, z->_frame);
+            tZeroCrossingInfo_updatePeak(&z->_info[z->_pos & z->_mask], s, z->_frame);
         }
         if (s > z->_peak_update)
         {
@@ -1124,7 +1242,7 @@ static inline void update_state(tZeroCrossingCollector* const z, float s)
     else if (z->_state && (s < z->_hysteresis))
     {
         z->_state = 0;
-        z->_info[z->_pos & z->_mask]->_trailing_edge = z->_frame;
+        z->_info[z->_pos & z->_mask]._trailing_edge = z->_frame;
         if (z->_peak == 0.0f)
             z->_peak = z->_peak_update;
     }
@@ -1137,7 +1255,7 @@ static inline void update_state(tZeroCrossingCollector* const z, float s)
 
 static inline void shift(tZeroCrossingCollector* const z, int n)
 {
-    tZeroCrossingInfo* crossing = z->_info[z->_pos & z->_mask];
+    tZeroCrossingInfo* crossing = &z->_info[z->_pos & z->_mask];
     
     crossing->_leading_edge -= n;
     if (!z->_state)
@@ -1146,8 +1264,8 @@ static inline void shift(tZeroCrossingCollector* const z, int n)
     for (; i != z->_num_edges; ++i)
     {
         int idx = (z->_pos + i) & z->_mask;
-        z->_info[idx]->_leading_edge -= n;
-        int edge = (z->_info[idx]->_trailing_edge -= n);
+        z->_info[idx]._leading_edge -= n;
+        int edge = (z->_info[idx]._trailing_edge -= n);
         if (edge < 0.0f)
             break;
     }
@@ -1163,18 +1281,15 @@ static inline void reset(tZeroCrossingCollector* const z)
 
 
 
-void    tBitset_init(tBitset** const bitset, int numBits, LEAF* const leaf)
+void tBitset_create(tMempool** const mp, tBitset** const bitset)
 {
-    tBitset_initToPool(bitset, numBits, &leaf->mempool);
+    ALLOC_FROM_POOL(tBitset, bitset, mp);
 }
 
-void    tBitset_initToPool  (tBitset** const bitset, int numBits, tMempool** const mempool)
+void tBitset_init(LEAF* const leaf, tBitset* const b, int numBits)
 {
-    tMempool* m = *mempool;
-    tBitset* b = *bitset = (tBitset*) mpool_alloc(sizeof(tBitset), m);
-    b->mempool = m;
-    
-    // Size of the array value in bits
+
+// Size of the array value in bits
     b->_value_size = (CHAR_BIT * sizeof(unsigned int));
     
     // Size of the array needed to store numBits bits
@@ -1183,7 +1298,8 @@ void    tBitset_initToPool  (tBitset** const bitset, int numBits, tMempool** con
     // Siz of the array in bits
     b->_bit_size = b->_size * b->_value_size;
     
-    b->_bits = (unsigned int*) mpool_calloc(sizeof(unsigned int) * b->_size, m);
+    b->_bits = (unsigned int*) mpool_calloc(sizeof(unsigned int) * b->_size, b->mempool);
+
 }
 
 void    tBitset_free    (tBitset** const bitset)
@@ -1301,19 +1417,17 @@ void    tBitset_clear   (tBitset* const b)
     }
 }
 
-void    tBACF_init(tBACF** const bacf, tBitset** const bitset, LEAF* const leaf)
+void tBACF_create(tMempool** const mp, tBACF** const bacf)
 {
-    tBACF_initToPool(bacf, bitset, &leaf->mempool);
+    ALLOC_FROM_POOL(tBACF, bacf, mp);
 }
 
-void    tBACF_initToPool    (tBACF** const bacf, tBitset** const bitset, tMempool** const mempool)
+void tBACF_init(LEAF* const leaf, tBACF* const b, tBitset* const bitset)
 {
-    tMempool* m = *mempool;
-    tBACF* b = *bacf = (tBACF*) mpool_alloc(sizeof(tBACF), m);
-    b->mempool = m;
-    
-    b->_bitset = *bitset;
+
+    b->_bitset = bitset;
     b->_mid_array = ((b->_bitset->_bit_size / b->_bitset->_value_size) / 2) - 1;
+
 }
 
 void    tBACF_free  (tBACF** const bacf)
@@ -1377,7 +1491,6 @@ void    tBACF_set  (tBACF* const b, tBitset** const bitset)
 
 static inline void set_bitstream(tPeriodDetector* const p);
 static inline void autocorrelate(tPeriodDetector* const detector);
-
 static inline void sub_collector_init(_sub_collector* collector, tZeroCrossingCollector* const crossings, float pdt, int range);
 static inline float sub_collector_period_of(_sub_collector* collector, _auto_correlation_info info);
 static inline void sub_collector_save(_sub_collector* collector, _auto_correlation_info info);
@@ -1386,29 +1499,28 @@ static inline int sub_collector_process_harmonics(_sub_collector* collector, _au
 static inline void sub_collector_process(_sub_collector* collector, _auto_correlation_info info);
 static inline void sub_collector_get(_sub_collector* collector, _auto_correlation_info info, _period_info* result);
 
-void    tPeriodDetector_init(tPeriodDetector** const detector, float lowestFreq, float highestFreq, float hysteresis, LEAF* const leaf)
+void    tPeriodDetector_create               (tMempool** const mempool, tPeriodDetector** const p)
 {
-    tPeriodDetector_initToPool(detector, lowestFreq, highestFreq, hysteresis, &leaf->mempool);
+    ALLOC_FROM_POOL (tPeriodDetector, p, mempool);
 }
 
-void    tPeriodDetector_initToPool  (tPeriodDetector** const detector, float lowestFreq, float highestFreq, float hysteresis, tMempool** const mempool)
+
+void tPeriodDetector_init(LEAF* const leaf, tPeriodDetector* const p, float lowestFreq, float highestFreq, float hysteresis)
 {
-    tMempool* m = *mempool;
-    tPeriodDetector* p = *detector = (tPeriodDetector*) mpool_alloc(sizeof(tPeriodDetector), m);
-    p->mempool = m;
-    
-    LEAF* leaf = p->mempool->leaf;
+
+
     
     p->sampleRate = leaf->sampleRate;
     p->lowestFreq = lowestFreq;
     p->highestFreq = highestFreq;
-    
-    tZeroCrossingCollector_initToPool(&p->_zc, (1.0f / lowestFreq) * p->sampleRate * 2.0f, hysteresis, mempool);
+    tZeroCrossingCollector_create (&p->mempool,&p->_zc);
+    tZeroCrossingCollector_init(leaf,p->_zc, (1.0f / lowestFreq) * p->sampleRate * 2.0f, hysteresis);
     p->_min_period = (1.0f / highestFreq) * p->sampleRate;
     p->_range = highestFreq / lowestFreq;
     
     int windowSize = tZeroCrossingCollector_getWindowSize(p->_zc);
-    tBitset_initToPool(&p->_bits, windowSize, mempool);
+    tBitset_create (&p->mempool,&p->_bits);
+    tBitset_init(leaf,p->_bits, windowSize);
     p->_weight = 2.0f / windowSize;
     p->_mid_point = windowSize / 2;
     p->_periodicity_diff_threshold = p->_mid_point * PERIODICITY_DIFF_FACTOR;
@@ -1418,8 +1530,9 @@ void    tPeriodDetector_initToPool  (tPeriodDetector** const detector, float low
     p->_predict_edge = 0;
     p->_num_pulses = 0;
     p->_half_empty = 0;
-    
-    tBACF_initToPool(&p->_bacf, &p->_bits, mempool);
+    tBACF_create (&p->mempool, &p->_bacf);
+    tBACF_init(leaf,p->_bacf, p->_bits);
+
 }
 
 void    tPeriodDetector_free    (tPeriodDetector** const detector)
@@ -1542,7 +1655,8 @@ void    tPeriodDetector_setSampleRate   (tPeriodDetector* const p, float sr)
     float hysteresis = p->_zc->_hysteresis;
     
     tZeroCrossingCollector_free(&p->_zc);
-    tZeroCrossingCollector_initToPool(&p->_zc, (1.0f / p->lowestFreq) * p->sampleRate * 2.0f, hysteresis, &m);
+    tZeroCrossingCollector_create(&m,&p->_zc);
+    tZeroCrossingCollector_init(p->mempool->leaf,p->_zc, (1.0f / p->lowestFreq) * p->sampleRate * 2.0f, hysteresis);
     p->_min_period = (1.0f / p->highestFreq) * p->sampleRate;
 }
 
@@ -1662,7 +1776,6 @@ static inline void autocorrelate(tPeriodDetector* const p)
     // Get the final resuts
     sub_collector_get(&collect, collect._fundamental, &p->_fundamental);
 }
-
 static inline void sub_collector_init(_sub_collector* collector, tZeroCrossingCollector* const crossings, float pdt, int range)
 {
     collector->_zc = crossings;
@@ -1764,23 +1877,21 @@ static inline void sub_collector_get(_sub_collector* collector, _auto_correlatio
 static inline float calculate_frequency(tPitchDetector* const detector);
 static inline void bias(tPitchDetector* const detector, _pitch_info incoming);
 
-void    tPitchDetector_init(tPitchDetector** const detector, float lowestFreq, float highestFreq, LEAF* const leaf)
+void tPitchDetector_create(tMempool** const mp, tPitchDetector** const detector)
 {
-    tPitchDetector_initToPool(detector, lowestFreq, highestFreq, &leaf->mempool);
+    ALLOC_FROM_POOL(tPitchDetector, detector, mp);
 }
 
-void    tPitchDetector_initToPool   (tPitchDetector** const detector, float lowestFreq, float highestFreq, tMempool** const mempool)
+void tPitchDetector_init(LEAF* const leaf, tPitchDetector* const p, float lowestFreq, float highestFreq)
 {
-    tMempool* m = *mempool;
-    tPitchDetector* p = *detector = (tPitchDetector*) mpool_alloc(sizeof(tPitchDetector), m);
-    p->mempool = m;
-    LEAF* leaf = p->mempool->leaf;
-    
-    tPeriodDetector_initToPool(&p->_pd, lowestFreq, highestFreq, -120.0f, mempool);
+
+    tPeriodDetector_create (&p->mempool, &p->_pd);
+    tPeriodDetector_init(leaf, p->_pd, lowestFreq, highestFreq, -120.0f);
     p->_current.frequency = 0.0f;
     p->_current.periodicity = 0.0f;
     p->_frames_after_shift = 0;
     p->sampleRate = leaf->sampleRate;
+
 }
 
 void    tPitchDetector_free (tPitchDetector** const detector)
@@ -1983,21 +2094,20 @@ static inline void bias(tPitchDetector* const p, _pitch_info incoming)
 
 static inline void compute_predicted_frequency(tDualPitchDetector* const detector);
 
-void    tDualPitchDetector_init(tDualPitchDetector** const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, LEAF* const leaf)
+void tDualPitchDetector_create(tMempool** const mp, tDualPitchDetector** const detector)
 {
-    tDualPitchDetector_initToPool(detector, lowestFreq, highestFreq, inBuffer, bufSize, &leaf->mempool);
+    ALLOC_FROM_POOL(tDualPitchDetector, detector, mp);
 }
 
-void    tDualPitchDetector_initToPool   (tDualPitchDetector** const detector, float lowestFreq, float highestFreq, float* inBuffer, int bufSize, tMempool** const mempool)
+void tDualPitchDetector_init(LEAF* const leaf, tDualPitchDetector* const p, float lowestFreq, float highestFreq, float* inBuffer, int bufSize)
 {
-    tMempool* m = *mempool;
-    tDualPitchDetector* p = *detector = (tDualPitchDetector*) mpool_alloc(sizeof(tDualPitchDetector), m);
-    p->mempool = m;
-    LEAF* leaf = p->mempool->leaf;
-    
-    tPeriodDetection_initToPool(&p->_pd1, inBuffer, bufSize, bufSize / 2, mempool);
-    tPitchDetector_initToPool(&p->_pd2, lowestFreq, highestFreq, mempool);
-    
+
+
+    tPeriodDetection_create(&p->mempool, &p->_pd1);
+    tPeriodDetection_init (leaf,p->_pd1, inBuffer, bufSize, bufSize / 2);
+    tPitchDetector_create(&p->mempool, &p->_pd2);
+    tPitchDetector_init(leaf, p->_pd2, lowestFreq, highestFreq);
+
     p->sampleRate = leaf->sampleRate;
 
     p->_current.frequency = 0.0f;
@@ -2009,6 +2119,7 @@ void    tDualPitchDetector_initToPool   (tDualPitchDetector** const detector, fl
     
     p->lowest = lowestFreq;
     p->highest = highestFreq;
+
 }
 
 void    tDualPitchDetector_free (tDualPitchDetector** const detector)

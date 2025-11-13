@@ -40,8 +40,8 @@ typedef struct glottis
     float  T;
 } glottis;
 
-void    glottis_init           (glottis**glo, LEAF* const leaf);
-void    glottis_initToPool     (glottis**glo, tMempool** const mp);
+void    glottis_create               (tMempool** const mempool, glottis** const);
+void    glottis_init                 (LEAF* const leaf, glottis**glo);
 
 float  glottis_compute        (glottis* glo);
 void    glottis_setup_waveform (glottis* glo);
@@ -146,8 +146,8 @@ typedef struct tract
 
 
 
-void    tract_init(tract** const t,  int numTractSections, int maxNumTractSections, LEAF* const leaf);
-void    tract_initToPool(tract** const t,  int numTractSections, int maxNumTractSections, tMempool** const mp);
+void    tract_create               (tMempool** const mempool, tract** const);
+void    tract_init                 (LEAF* const leaf, tract* const t, int numTractSections, int maxNumTractSections);
 
 void    tract_calculate_reflections        (tract* t);
 void    tract_newLength                    (tract* t, int newLength);
@@ -174,8 +174,8 @@ typedef struct tVoc
     int sampleRate;
 } tVoc;
 
-void    tVoc_init(tVoc** const voc, int numTractSections, int maxNumTractSections, LEAF* const leaf);
-void    tVoc_initToPool(tVoc** const voc, int numTractSections,int maxNumTractSections, tMempool** const mempool);
+void    tVoc_create               (tMempool** const mempool, tVoc** const);
+void    tVoc_init                 (LEAF* const leaf, tVoc* const voc, int numTractSections, int maxNumTractSections);
 void    tVoc_free(tVoc** const voc);
 
 float  tVoc_tick                           (tVoc* const voc);

@@ -19,24 +19,23 @@
 #endif
 
 // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ PRCReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ //
-void    tPRCReverb_init(tPRCReverb** const rev, float t60, LEAF* const leaf)
+void tPRCReverb_create(tMempool** const mp, tPRCReverb** const rev)
 {
-    tPRCReverb_initToPool(rev, t60, &leaf->mempool);
+    ALLOC_FROM_POOL(tPRCReverb, rev, mp);
 }
 
-void    tPRCReverb_initToPool   (tPRCReverb** const rev, float t60, tMempool** const mp)
+void tPRCReverb_init(LEAF* const leaf, tPRCReverb* const rev, float t60)
 {
-    tMempool* m = *mp;
-    tPRCReverb* r = *rev = (tPRCReverb*) mpool_alloc(sizeof(tPRCReverb), m);
-    r->mempool = m;
-    LEAF* leaf = r->mempool->leaf;
+
+LEAF* leaf = r->mempool->leaf;
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
     r->sampleRate = leaf->sampleRate;
     r->invSampleRate = leaf->invSampleRate;
     
-    int lengths[4] = { 341, 613, 1557, 2137 }; // Delay lengths for 44100 Hz sample rate.
+    int lengths[4] = { 341, 613, 1557, 2137 
+}; // Delay lengths for 44100 Hz sample rate.
     double scaler = r->sampleRate * INV_44100;
     
     int delay, i;
@@ -162,24 +161,23 @@ void     tPRCReverb_setSampleRate (tPRCReverb* const r, float sr)
 }
 
 /* ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ NReverb ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ */
-void    tNReverb_init(tNReverb** const rev, float t60, LEAF* const leaf)
+void tNReverb_create(tMempool** const mp, tNReverb** const rev)
 {
-    tNReverb_initToPool(rev, t60, &leaf->mempool);
+    ALLOC_FROM_POOL(tNReverb, rev, mp);
 }
 
-void    tNReverb_initToPool     (tNReverb** const rev, float t60, tMempool** const mp)
+void tNReverb_init(LEAF* const leaf, tNReverb* const rev, float t60)
 {
-    tMempool* m = *mp;
-    tNReverb* r = *rev = (tNReverb*) mpool_alloc(sizeof(tNReverb), m);
-    r->mempool = m;
-    LEAF* leaf = r->mempool->leaf;
+
+LEAF* leaf = r->mempool->leaf;
     
     if (t60 <= 0.0f) t60 = 0.001f;
     
     r->sampleRate = leaf->sampleRate;
     r->invSampleRate = leaf->invSampleRate;
     
-    int lengths[15] = {1433, 1601, 1867, 2053, 2251, 2399, 347, 113, 37, 59, 53, 43, 37, 29, 19}; // Delay lengths for 44100 Hz sample rate.
+    int lengths[15] = {1433, 1601, 1867, 2053, 2251, 2399, 347, 113, 37, 59, 53, 43, 37, 29, 19
+}; // Delay lengths for 44100 Hz sample rate.
     double scaler = r->sampleRate * INV_44100;// / 25641.0f;
     
     int delay, i;
@@ -407,17 +405,15 @@ void     tNReverb_setSampleRate (tNReverb* const r, float sr)
 float       in_allpass_delays[4] = { 4.771f, 3.595f, 12.73f, 9.307f };
 float       in_allpass_gains[4] = { 0.75f, 0.75f, 0.625f, 0.625f };
 
-void    tDattorroReverb_init(tDattorroReverb** const rev, LEAF* const leaf)
+void tDattorroReverb_create(tMempool** const mp, tDattorroReverb** const rev)
 {
-    tDattorroReverb_initToPool(rev, &leaf->mempool);
+    ALLOC_FROM_POOL(tDattorroReverb, rev, mp);
 }
 
-void    tDattorroReverb_initToPool        (tDattorroReverb** const rev, tMempool** const mp)
+void tDattorroReverb_init(LEAF* const leaf, tDattorroReverb* const rev)
 {
-    tMempool* m = *mp;
-    tDattorroReverb* r = *rev = (tDattorroReverb*) mpool_alloc(sizeof(tDattorroReverb), m);
-    r->mempool = m;
-    LEAF* leaf = r->mempool->leaf;
+
+LEAF* leaf = r->mempool->leaf;
     
     r->sampleRate = leaf->sampleRate;
     
@@ -433,7 +429,8 @@ void    tDattorroReverb_initToPool        (tDattorroReverb** const rev, tMempool
     {
         tAllpass_initToPool(&r->in_allpass[i], SAMP(in_allpass_delays[i]), SAMP(20.f), mp); // * r->size_max
         tAllpass_setGain(r->in_allpass[i], in_allpass_gains[i]);
-    }
+    
+}
     
     // FEEDBACK 1
     tAllpass_initToPool(&r->f1_allpass, SAMP(30.51f), SAMP(100.f), mp); // * r->size_max

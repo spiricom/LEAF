@@ -20,23 +20,21 @@
 /* Stack */
 //====================================================================================
 
-void tStack_init(tStack** const stack, LEAF* const leaf)
+void tStack_create(tMempool** const mp, tStack** const stack)
 {
-    tStack_initToPool(stack, &leaf->mempool);
+    ALLOC_FROM_POOL(tStack, stack, mp);
 }
 
-void    tStack_initToPool           (tStack** const stack, tMempool** const mp)
+void tStack_init(LEAF* const leaf, tStack* const stack)
 {
-    tMempool* m = *mp;
-    tStack* ns = *stack = (tStack*) mpool_alloc(sizeof(tStack), m);
-    ns->mempool = m;
-    
-    ns->ordered = 0;
+
+ns->ordered = 0;
     ns->size = 0;
     ns->pos = 0;
     ns->capacity = STACK_SIZE;
     
     for (int i = 0; i < STACK_SIZE; i++) ns->data[i] = -1;
+
 }
 
 void    tStack_free        (tStack** const stack)
@@ -239,18 +237,15 @@ int tStack_first(tStack* const ns)
 
 
 // POLY
-void tPoly_init(tPoly** const polyh, int maxNumVoices, LEAF* const leaf)
+void tPoly_create(tMempool** const mp, tPoly** const polyh)
 {
-    tPoly_initToPool(polyh, maxNumVoices, &leaf->mempool);
+    ALLOC_FROM_POOL(tPoly, polyh, mp);
 }
 
-void    tPoly_initToPool            (tPoly** const polyh, int maxNumVoices, tMempool** const mp)
+void tPoly_init(LEAF* const leaf, tPoly* const polyh, int maxNumVoices)
 {
-    tMempool* m = *mp;
-    tPoly* poly = *polyh = (tPoly*) mpool_alloc(sizeof(tPoly), m);
-    poly->mempool = m;
-    
-    poly->numVoices = maxNumVoices;
+
+poly->numVoices = maxNumVoices;
     poly->maxNumVoices = maxNumVoices;
     poly->lastVoiceToChange = 0;
     
@@ -264,7 +259,8 @@ void    tPoly_initToPool            (tPoly** const polyh, int maxNumVoices, tMem
     {
         poly->notes[i][0] = 0;
         poly->notes[i][1] = -1;
-    }
+    
+}
     
     poly->glideTime = 5.0f;
     
@@ -582,25 +578,23 @@ void tPoly_setSampleRate(tPoly* const poly, float sr)
 
 
 // SIMPLE POLY
-void tSimplePoly_init(tSimplePoly** const polyh, int maxNumVoices, LEAF* const leaf)
+void tSimplePoly_create(tMempool** const mp, tSimplePoly** const polyh)
 {
-    tSimplePoly_initToPool(polyh, maxNumVoices, &leaf->mempool);
+    ALLOC_FROM_POOL(tSimplePoly, polyh, mp);
 }
 
-void    tSimplePoly_initToPool            (tSimplePoly** const polyh, int maxNumVoices, tMempool** const mp)
+void tSimplePoly_init(LEAF* const leaf, tSimplePoly* const polyh, int maxNumVoices)
 {
-    tMempool* m = *mp;
-    tSimplePoly* poly = *polyh = (tSimplePoly*) mpool_alloc(sizeof(tSimplePoly), m);
-    poly->mempool = m;
 
-    poly->numVoices = maxNumVoices;
+poly->numVoices = maxNumVoices;
     poly->maxNumVoices = maxNumVoices;
 
     for (int i = 0; i < 128; i++)
     {
         poly->notes[i][0] = -1;
         poly->notes[i][1] = 0;
-    }
+    
+}
     poly->stealing_on = 1;
     poly->recover_stolen = 1;
     poly->voices = (int**) mpool_calloc(sizeof(int*) * poly->maxNumVoices, m);

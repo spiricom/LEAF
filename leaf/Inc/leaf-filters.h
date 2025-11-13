@@ -18,8 +18,7 @@ extern "C" {
 #include "leaf-math.h"
 #include "leaf-mempool.h"
 #include "leaf-delay.h"
-#include "leaf-tables.h"
-    
+
     /*!
      * @internal
      * Header.
@@ -36,12 +35,12 @@ extern "C" {
      @brief Schroeder allpass. Comb-filter with feedforward and feedback.
      @{
      
-     @fn void    tAllpass_init(tAllpass** const, float initDelay, uint32_t maxDelay, LEAF* const leaf)
+     @fn void    tAllpass_init(tAllpass* const, float initDelay, uint32_t maxDelay, LEAF* const leaf)
      @brief Initialize a tAllpass to the default mempool of a LEAF instance.
      @param filter A pointer to the tAllpass to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tAllpass_initToPool(tAllpass** const, float initDelay, uint32_t maxDelay, tMempool** const)
+     @fn void    tAllpass_init                 (tMempool** const)
      @brief Initialize a tAllpass to a specified mempool.
      @param filter A pointer to the tAllpass to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -50,7 +49,7 @@ extern "C" {
      @brief Free a tAllpass from its mempool.
      @param filter A pointer to the tAllpass to free.
      
-     @fn float   tAllpass_tick           (tAllpass* const, float input)
+     @fn float   tAllpass_tick           (tAllpass* const, tAllpass** const, float initDelay, uint32_t maxDelay, float input)
      @brief
      @param filter A pointer to the relevant tAllpass.
      
@@ -64,20 +63,12 @@ extern "C" {
      ￼￼￼
      @} */
     
-    typedef struct tAllpass
-    {
-        tMempool* mempool;
-        
-        float gain;
-        
-        tLinearDelay* delay;
-        
-        float lastOut;
-    } tAllpass;
+    typedef struct tAllpass tAllpass;
+
 
     // Memory handlers for `tAllpass`
-    void    tAllpass_init           (tAllpass** const, float initDelay, uint32_t maxDelay, LEAF* const leaf);
-    void    tAllpass_initToPool     (tAllpass** const, float initDelay, uint32_t maxDelay, tMempool** const);
+    void    tAllpass_create               (tMempool** const mempool, tAllpass** const);
+    void    tAllpass_init                 (LEAF* const leaf, tAllpass* const, float initDelay, uint32_t maxDelay);
     void    tAllpass_free           (tAllpass** const);
 
     // Tick function for `tAllpass`
@@ -95,12 +86,12 @@ extern "C" {
     @brief Schroeder allpass. Comb-filter with feedforward and feedback.
     @{
 
-    @fn void    tAllpassSO_init(tAllpassSO** const, float initDelay, uint32_t maxDelay, LEAF* const leaf)
+    @fn void    tAllpassSO_init(tAllpassSO* const, float initDelay, uint32_t maxDelay, LEAF* const leaf)
     @brief Initialize a tAllpassSO to the default mempool of a LEAF instance.
     @param filter A pointer to the tAllpassSO to initialize.
     @param leaf A pointer to the leaf instance.
  
-    @fn void    tAllpassSO_initToPool(tAllpassSO** const, float initDelay, uint32_t maxDelay, tMempool** const)
+    @fn void    tAllpassSO_init                 (tMempool** const)
     @brief Initialize a tAllpassSO to a specified mempool.
     @param filter A pointer to the tAllpassSO to initialize.
     @param mempool A pointer to the tMempool to use.
@@ -109,7 +100,7 @@ extern "C" {
     @brief Free a tAllpassSO from its mempool.
     @param filter A pointer to the tAllpassSO to free.
 
-    @fn float   tAllpassSO_tick           (tAllpassSO* const, float input)
+    @fn float   tAllpassSO_tick           (tAllpassSO* const, tAllpassSO** const, float initDelay, uint32_t maxDelay, float input)
     @brief
     @param filter A pointer to the relevant tAllpassSO.
  
@@ -138,8 +129,8 @@ extern "C" {
     } tAllpassSO;
 
     // Memory handlers for `tAllpassSO`
-    void    tAllpassSO_init           (tAllpassSO** const, LEAF* const leaf);
-    void    tAllpassSO_initToPool     (tAllpassSO** const, tMempool** const);
+    void    tAllpassSO_create               (tMempool** const mempool, tAllpassSO** const);
+    void    tAllpassSO_init                 (LEAF* const leaf, tAllpassSO* const);
     void    tAllpassSO_free           (tAllpassSO** const);
 
     // Tick function for `tAllpassSO`
@@ -150,31 +141,12 @@ extern "C" {
     //==============================================================================
 
 
-    typedef struct tThiranAllpassSOCascade
-    {
+    typedef struct tThiranAllpassSOCascade tThiranAllpassSOCascade;
 
-        tMempool* mempool;
-
-        int numFilts;
-        tAllpassSO** filters;
-        float B;
-        float iKey;
-        float a[2];
-    
-        float k1[2];
-        float k2[2];
-        float k3[2];
-        float C1[2];
-        float C2[2];
-        int numActiveFilters;
-        int numFiltsMap[2];
-        int isHigh;
-        float D;
-    } tThiranAllpassSOCascade;
 
     // Memory handlers for `tThiranAllpassSOCascade`
-    void    tThiranAllpassSOCascade_init           (tThiranAllpassSOCascade** const, int order, LEAF* const leaf);
-    void    tThiranAllpassSOCascade_initToPool     (tThiranAllpassSOCascade** const, int order, tMempool** const);
+    void    tThiranAllpassSOCascade_create               (tMempool** const mempool, tThiranAllpassSOCascade** const);
+    void    tThiranAllpassSOCascade_init                 (LEAF* const leaf, tThiranAllpassSOCascade* const, int order);
     void    tThiranAllpassSOCascade_free           (tThiranAllpassSOCascade** const);
 
     // Tick function for `tThiranAllpassSOCascade`
@@ -191,12 +163,12 @@ extern "C" {
      @brief OnePole filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tOnePole_init(tOnePole** const, float thePole, LEAF* const leaf)
+     @fn void    tOnePole_init(tOnePole* const, float thePole, LEAF* const leaf)
      @brief Initialize a tOnePole to the default mempool of a LEAF instance.
      @param filter A pointer to the tOnePole to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tOnePole_initToPool(tOnePole** const, float thePole, tMempool** const)
+     @fn void    tOnePole_init                 (tMempool** const)
      @brief Initialize a tOnePole to a specified mempool.
      @param filter A pointer to the tOnePole to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -205,7 +177,7 @@ extern "C" {
      @brief Free a tOnePole from its mempool.
      @param filter A pointer to the tOnePole to free.
      
-     @fn float   tOnePole_tick           (tOnePole* const, float input)
+     @fn float   tOnePole_tick           (tOnePole* const, tOnePole** const, float thePole, float input)
      @brief
      @param filter A pointer to the relevant tOnePole.
      
@@ -248,8 +220,8 @@ extern "C" {
     } tOnePole;
 
     // Memory handlers for `tOnePole`
-    void    tOnePole_init            (tOnePole** const, float freq, LEAF* const leaf);
-    void    tOnePole_initToPool      (tOnePole** const, float freq, tMempool** const);
+    void    tOnePole_create               (tMempool** const mempool, tOnePole** const);
+    void    tOnePole_init                 (LEAF* const leaf, tOnePole* const, float freq);
     void    tOnePole_free            (tOnePole** const);
 
     // Tick function for `tOnePole`
@@ -272,12 +244,12 @@ extern "C" {
     @brief OnePole filter, reimplemented from STK (Cook and Scavone).
     @{
 
-    @fn void    tOnePole_init(tOnePole** const, float thePole, LEAF* const leaf)
+    @fn void    tOnePole_init(tOnePole* const, float thePole, LEAF* const leaf)
     @brief Initialize a tOnePole to the default mempool of a LEAF instance.
     @param filter A pointer to the tOnePole to initialize.
     @param leaf A pointer to the leaf instance.
 
-    @fn void    tOnePole_initToPool(tOnePole** const, float thePole, tMempool** const)
+    @fn void    tOnePole_init                 (tMempool** const)
     @brief Initialize a tOnePole to a specified mempool.
     @param filter A pointer to the tOnePole to initialize.
     @param mempool A pointer to the tMempool to use.
@@ -286,7 +258,7 @@ extern "C" {
     @brief Free a tOnePole from its mempool.
     @param filter A pointer to the tOnePole to free.
 
-    @fn float   tOnePole_tick           (tOnePole* const, float input)
+    @fn float   tOnePole_tick           (tOnePole* const, tOnePole** const, float thePole, float input)
     @brief
     @param filter A pointer to the relevant tOnePole.
 
@@ -326,8 +298,8 @@ extern "C" {
     } tCookOnePole;
 
     // Memory handlers for `tCookOnePole`
-    void    tCookOnePole_init           (tCookOnePole** const, LEAF* const leaf);
-    void    tCookOnePole_initToPool     (tCookOnePole** const, tMempool** const);
+    void    tCookOnePole_create               (tMempool** const mempool, tCookOnePole** const);
+    void    tCookOnePole_init                 (LEAF* const leaf, tCookOnePole* const);
     void    tCookOnePole_free           (tCookOnePole** const);
 
     // Tick function for `tCookOnePole`
@@ -347,12 +319,12 @@ extern "C" {
      @brief TwoPole filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tTwoPole_init(tTwoPole** const, LEAF* const leaf)
+     @fn void    tTwoPole_init(tTwoPole* const, LEAF* const leaf)
      @brief Initialize a tTwoPole to the default mempool of a LEAF instance.
      @param filter A pointer to the tTwoPole to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tTwoPole_initToPool(tTwoPole** const, tMempool** const)
+     @fn void    tTwoPole_init                 (tMempool** const)
      @brief Initialize a tTwoPole to a specified mempool.
      @param filter A pointer to the tTwoPole to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -361,7 +333,7 @@ extern "C" {
      @brief Free a tTwoPole from its mempool.
      @param filter A pointer to the tTwoPole to free.
      
-     @fn float   tTwoPole_tick           (tTwoPole* const, float input)
+     @fn float   tTwoPole_tick           (tTwoPole* const, tTwoPole** const, float input)
      @brief
      @param filter A pointer to the relevant tTwoPole.
      
@@ -410,8 +382,8 @@ extern "C" {
     } tTwoPole;
 
     // Memory handlers for `tTwoPole`
-    void    tTwoPole_init            (tTwoPole** const, LEAF* const leaf);
-    void    tTwoPole_initToPool      (tTwoPole** const, tMempool** const);
+    void    tTwoPole_create               (tMempool** const mempool, tTwoPole** const);
+    void    tTwoPole_init                 (LEAF* const leaf, tTwoPole* const);
     void    tTwoPole_free            (tTwoPole** const);
 
     // Tick function for `tTwoPole`
@@ -434,12 +406,12 @@ extern "C" {
      @brief OneZero filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tOneZero_init(tOneZero** const, float theZero, LEAF* const leaf)
+     @fn void    tOneZero_init(tOneZero* const, float theZero, LEAF* const leaf)
      @brief Initialize a tOneZero to the default mempool of a LEAF instance.
      @param filter A pointer to the tSlide to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tOneZero_initToPool(tOneZero** const, float theZero, tMempool** const)
+     @fn void    tOneZero_init                 (tMempool** const)
      @brief Initialize a tOneZero to a specified mempool.
      @param filter A pointer to the tOneZero to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -448,7 +420,7 @@ extern "C" {
      @brief Free a tOneZero from its mempool.
      @param filter A pointer to the tOneZero to free.
      
-     @fn float   tOneZero_tick           (tOneZero* const, float input)
+     @fn float   tOneZero_tick           (tOneZero* const, tOneZero** const, float theZero, float input)
      @brief
      @param filter A pointer to the relevant tOneZero.
      
@@ -488,8 +460,8 @@ extern "C" {
     } tOneZero;
 
     // Memory handlers for `tOneZero`
-    void    tOneZero_init           (tOneZero** const, float theZero, LEAF* const leaf);
-    void    tOneZero_initToPool     (tOneZero** const, float theZero, tMempool** const);
+    void    tOneZero_create               (tMempool** const mempool, tOneZero** const);
+    void    tOneZero_init                 (LEAF* const leaf, tOneZero* const, float theZero);
     void    tOneZero_free           (tOneZero** const);
 
     // Tick function for `tOneZero`
@@ -512,12 +484,12 @@ extern "C" {
      @brief TwoZero filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tTwoZero_init(tTwoZero** const, LEAF* const leaf)
+     @fn void    tTwoZero_init(tTwoZero* const, LEAF* const leaf)
      @brief Initialize a tTwoZero to the default mempool of a LEAF instance.
      @param filter A pointer to the tTwoZero to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tTwoZero_initToPool(tTwoZero** const, tMempool** const)
+     @fn void    tTwoZero_init                 (tMempool** const)
      @brief Initialize a tTwoZero to a specified mempool.
      @param filter A pointer to the tTwoZero to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -526,7 +498,7 @@ extern "C" {
      @brief Free a tTwoZero from its mempool.
      @param filter A pointer to the tTwoZero to free.
      
-     @fn float   tTwoZero_tick           (tTwoZero* const, float input)
+     @fn float   tTwoZero_tick           (tTwoZero* const, tTwoZero** const, float input)
      @brief
      @param filter A pointer to the relevant tTwoZero.
      
@@ -569,8 +541,8 @@ extern "C" {
     } tTwoZero;
 
     // Memory handlers for `tTwoZero`
-    void    tTwoZero_init           (tTwoZero** const, LEAF* const leaf);
-    void    tTwoZero_initToPool     (tTwoZero** const, tMempool** const);
+    void    tTwoZero_create               (tMempool** const mempool, tTwoZero** const);
+    void    tTwoZero_init                 (LEAF* const leaf, tTwoZero* const);
     void    tTwoZero_free           (tTwoZero** const);
 
     // Tick function for `tTwoZero`
@@ -593,12 +565,12 @@ extern "C" {
      @brief PoleZero filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tPoleZero_init(tPoleZero** const, LEAF* const leaf)
+     @fn void    tPoleZero_init(tPoleZero* const, LEAF* const leaf)
      @brief Initialize a tPoleZero to the default mempool of a LEAF instance.
      @param filter A pointer to the tPoleZero to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPoleZero_initToPool(tPoleZero** const, tMempool** const)
+     @fn void    tPoleZero_init                 (tMempool** const)
      @brief Initialize a tPoleZero to a specified mempool.
      @param filter A pointer to the tPoleZero to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -608,7 +580,7 @@ extern "C" {
      @param filter A pointer to the tPoleZero to free.
      
      
-     @fn float   tPoleZero_tick              (tPoleZero* const, float input)
+     @fn float   tPoleZero_tick              (tPoleZero* const, tPoleZero** const, float input)
      @brief
      @param filter A pointer to the relevant tPoleZero.
      
@@ -656,8 +628,8 @@ extern "C" {
     } tPoleZero;
 
     // Memory handlers for `tPoleZero`
-    void    tPoleZero_init              (tPoleZero** const, LEAF* const leaf);
-    void    tPoleZero_initToPool        (tPoleZero** const, tMempool** const);
+    void    tPoleZero_create               (tMempool** const mempool, tPoleZero** const);
+    void    tPoleZero_init                 (LEAF* const leaf, tPoleZero* const);
     void    tPoleZero_free              (tPoleZero** const);
 
     // Tick function for `tPoleZero`
@@ -680,12 +652,12 @@ extern "C" {
      @brief BiQuad filter, reimplemented from STK (Cook and Scavone).
      @{
      
-     @fn void    tBiQuad_init(tBiQuad** const, LEAF* const leaf)
+     @fn void    tBiQuad_init(tBiQuad* const, LEAF* const leaf)
      @brief Initialize a tBiQuad to the default mempool of a LEAF instance.
      @param filter A pointer to the tBiQuad to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tBiQuad_initToPool(tBiQuad** const, tMempool** const)
+     @fn void    tBiQuad_init                 (tMempool** const)
      @brief Initialize a tBiQuad to a specified mempool.
      @param filter A pointer to the tBiQuad to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -695,7 +667,7 @@ extern "C" {
      @param filter A pointer to the tBiQuad to free.
      
      
-     @fn float   tBiQuad_tick           (tBiQuad* const, float input)
+     @fn float   tBiQuad_tick           (tBiQuad* const, tBiQuad** const, float input)
      @brief
      @param filter A pointer to the relevant tBiQuad.
      
@@ -757,8 +729,8 @@ extern "C" {
     } tBiQuad;
 
     // Memory handlers for `tBiQuad`
-    void    tBiQuad_init           (tBiQuad** const, LEAF* const leaf);
-    void    tBiQuad_initToPool     (tBiQuad** const, tMempool** const);
+    void    tBiQuad_create               (tMempool** const mempool, tBiQuad** const);
+    void    tBiQuad_init                 (LEAF* const leaf, tBiQuad* const);
     void    tBiQuad_free           (tBiQuad** const);
 
     // Tick function for `tBiQuad`
@@ -784,12 +756,12 @@ extern "C" {
      @brief State Variable Filter, algorithm from Andy Simper.
      @{
      
-     @fn void    tSVF_init(tSVF** const, SVFType type, float freq, float Q, LEAF* const leaf)
+     @fn void    tSVF_init(tSVF* const, SVFType type, float freq, float Q, LEAF* const leaf)
      @brief Initialize a tSVF to the default mempool of a LEAF instance.
      @param filter A pointer to the tSVF to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSVF_initToPool(tSVF** const, SVFType type, float freq, float Q, tMempool** const)
+     @fn void    tSVF_init                 (tMempool** const)
      @brief Initialize a tSVF to a specified mempool.
      @param filter A pointer to the tSVF to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -798,7 +770,7 @@ extern "C" {
      @brief Free a tSVF from its mempool.
      @param filter A pointer to the tSVF to free.
      
-     @fn float   tSVF_tick           (tSVF* const, float v0)
+     @fn float   tSVF_tick           (tSVF* const, tSVF** const, SVFType type, float freq, float Q, float v0)
      @brief
      @param filter A pointer to the relevant tSVF.
      
@@ -846,8 +818,8 @@ extern "C" {
     } tSVF;
 
     // Memory handlers for `tSVF`
-    void    tSVF_init                (tSVF** const, SVFType type, float freq, float Q, LEAF* const leaf);
-    void    tSVF_initToPool          (tSVF** const, SVFType type, float freq, float Q, tMempool** const);
+    void    tSVF_create               (tMempool** const mempool, tSVF** const);
+    void    tSVF_init                 (LEAF* const leaf, tSVF* const, SVFType type, float freq, float Q);
     void    tSVF_free                (tSVF** const);
 
     // Tick functions for `tSVF`
@@ -882,8 +854,8 @@ extern "C" {
     } tSVF_LP;
 
     // Memory handlers for `tSVF_LP`
-    void    tSVF_LP_init                (tSVF_LP** const, float freq, float Q, LEAF* const leaf);
-    void    tSVF_LP_initToPool          (tSVF_LP** const, float freq, float Q, tMempool** const);
+    void    tSVF_LP_create               (tMempool** const mempool, tSVF_LP** const);
+    void    tSVF_LP_init                 (LEAF* const leaf, tSVF_LP* const, float freq, float Q);
     void    tSVF_LP_free                (tSVF_LP** const);
 
     // Tick function for `tSVF_LP`
@@ -905,12 +877,12 @@ extern "C" {
      @brief Efficient State Variable Filter for 14-bit control input, [0, 4096).
      @{
      
-     @fn void    tEfficientSVF_init(tEfficientSVF** const, SVFType type, uint16_t input, float Q, LEAF* const leaf)
+     @fn void    tEfficientSVF_init(tEfficientSVF* const, SVFType type, uint16_t input, float Q, LEAF* const leaf)
      @brief Initialize a tEfficientSVF to the default mempool of a LEAF instance.
      @param filter A pointer to the tEfficientSVF to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tEfficientSVF_initToPool(tEfficientSVF** const, SVFType type, uint16_t input, float Q, tMempool** const)
+     @fn void    tEfficientSVF_init                 (tMempool** const)
      @brief Initialize a tEfficientSVF to a specified mempool.
      @param filter A pointer to the tEfficientSVF to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -919,7 +891,7 @@ extern "C" {
      @brief Free a tEfficientSVF from its mempool.
      @param filter A pointer to the tEfficientSVF to free.
      
-     @fn float   tEfficientSVF_tick          (tEfficientSVF* const, float v0)
+     @fn float   tEfficientSVF_tick          (tEfficientSVF* const, tEfficientSVF** const, SVFType type, uint16_t input, float Q, float v0)
      @brief
      @param filter A pointer to the relevant tEfficientSVF.
      
@@ -945,8 +917,8 @@ extern "C" {
     } tEfficientSVF;
 
     // Memory handlers for `tEfficientSVF`
-    void    tEfficientSVF_init          (tEfficientSVF** const, SVFType type, uint16_t input, float Q, LEAF* const leaf);
-    void    tEfficientSVF_initToPool    (tEfficientSVF** const, SVFType type, uint16_t input, float Q, tMempool** const);
+    void    tEfficientSVF_create               (tMempool** const mempool, tEfficientSVF** const);
+    void    tEfficientSVF_init                 (LEAF* const leaf, tEfficientSVF* const, SVFType type, uint16_t input, float Q);
     void    tEfficientSVF_free          (tEfficientSVF** const);
 
     // Tick function for `tEfficientSVF`
@@ -965,12 +937,12 @@ extern "C" {
      @brief Simple Highpass filter.
      @{
      
-     @fn void    tHighpass_init(tHighpass** const, float freq, LEAF* const leaf)
+     @fn void    tHighpass_init(tHighpass* const, float freq, LEAF* const leaf)
      @brief Initialize a tHighpass to the default mempool of a LEAF instance.
      @param filter A pointer to the tHighpass to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tHighpass_initToPool(tHighpass** const, float freq, tMempool** const)
+     @fn void    tHighpass_init                 (tMempool** const)
      @brief Initialize a tHighpass to a specified mempool.
      @param filter A pointer to the tHighpass to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -979,7 +951,7 @@ extern "C" {
      @brief Free a tHighpass from its mempool.
      @param filter A pointer to the tHighpass to free.
      
-     @fn float   tHighpass_tick          (tHighpass* const, float x)
+     @fn float   tHighpass_tick          (tHighpass* const, tHighpass** const, float freq, float x)
      @brief
      @param filter A pointer to the relevant tHighpass.
      
@@ -1002,8 +974,8 @@ extern "C" {
     } tHighpass;
 
     // Memory handlers for `tHighpass`
-    void    tHighpass_init          (tHighpass** const, float freq, LEAF* const leaf);
-    void    tHighpass_initToPool    (tHighpass** const, float freq, tMempool** const);
+    void    tHighpass_create               (tMempool** const mempool, tHighpass** const);
+    void    tHighpass_init                 (LEAF* const leaf, tHighpass* const, float freq);
     void    tHighpass_free          (tHighpass** const);
 
     // Tick function for `tHighpass`
@@ -1022,7 +994,7 @@ extern "C" {
      @brief Butterworth filter.
      @{
      
-     @fn void    tButterworth_init(tButterworth** const, int N, float f1, float f2, LEAF* const leaf, LEAF* const leaf)
+     @fn void    tButterworth_init(tButterworth* const, int N, float f1, float f2, LEAF* const leaf, LEAF* const leaf)
      @brief Initialize a tButterworth to the default mempool of a LEAF instance.
      @param filter A pointer to the tButterworth to initialize.
      @param leaf A pointer to the leaf instance.
@@ -1030,7 +1002,7 @@ extern "C" {
      @param lowCutoff Lower cutoff frequency.
      @param upperCutoff Upper cutoff frequency.
      
-     @fn void    tButterworth_initToPool(tButterworth** const, int N, float f1, float f2, tMempool** const)
+     @fn void    tButterworth_init                 (tMempool** const)
      @brief Initialize a tButterworth to a specified mempool.
      @param filter A pointer to the tButterworth to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1042,7 +1014,7 @@ extern "C" {
      @brief Free a tButterworth from its mempool.
      @param filter A pointer to the tButterworth to free.
      
-     @fn float   tButterworth_tick           (tButterworth* const, float input)
+     @fn float   tButterworth_tick           (tButterworth* const, tButterworth** const, int N, float f1, float f2, float input)
      @brief
      @param filter A pointer to the relevant tButterworth.
      
@@ -1061,22 +1033,12 @@ extern "C" {
      @} */
     
 #define NUM_SVF_BW 16
-    typedef struct tButterworth
-    {
-        tMempool* mempool;
-        
-        float gain;
-        int order;
-        int numSVF;
-        
-        tSVF** svfs;
-        
-        float f1,f2;
-    } tButterworth;
+    typedef struct tButterworth tButterworth;
+
 
     // Memory handlers for `tButterworth`
-    void    tButterworth_init           (tButterworth** const, int N, float f1, float f2, LEAF* const leaf);
-    void    tButterworth_initToPool     (tButterworth** const, int N, float f1, float f2, tMempool** const);
+    void    tButterworth_create               (tMempool** const mempool, tButterworth** const);
+    void    tButterworth_init                 (LEAF* const leaf, tButterworth* const, int N, float f1, float f2);
     void    tButterworth_free           (tButterworth** const);
 
     // Tick function for `tButterworth`
@@ -1096,12 +1058,12 @@ extern "C" {
      @brief Finite impulse response filter.
      @{
      
-     @fn void    tFIR_init(tFIR** const, float* coeffs, int numTaps, LEAF* const leaf)
+     @fn void    tFIR_init(tFIR* const, float* coeffs, int numTaps, LEAF* const leaf)
      @brief Initialize a tFIR to the default mempool of a LEAF instance.
      @param filter A pointer to the tFIR to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tFIR_initToPool(tFIR** const, float* coeffs, int numTaps, tMempool** const)
+     @fn void    tFIR_init                 (tMempool** const)
      @brief Initialize a tFIR to a specified mempool.
      @param filter A pointer to the tFIR to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1110,24 +1072,17 @@ extern "C" {
      @brief Free a tFIR from its mempool.
      @param filter A pointer to the tFIR to free.
      
-     @fn float   tFIR_tick           (tFIR* const, float input)
+     @fn float   tFIR_tick           (tFIR* const, tFIR** const, float* coeffs, int numTaps, float input)
      @brief
      @param filter A pointer to the relevant tFIR.
      ￼￼￼
      @} */
     
-    typedef struct tFIR
-    {
-
-        tMempool* mempool;
-        float* past;
-        float* coeff;
-        int numTaps;
-    } tFIR;
+    typedef struct tFIR tFIR;
 
     // Memory handlers for `tFIR`
-    void    tFIR_init           (tFIR** const, float* coeffs, int numTaps, LEAF* const leaf);
-    void    tFIR_initToPool     (tFIR** const, float* coeffs, int numTaps, tMempool** const);
+    void    tFIR_create               (tMempool** const mempool, tFIR** const);
+    void    tFIR_init                 (LEAF* const leaf, tFIR* const, float* coeffs, int numTaps);
     void    tFIR_free           (tFIR** const);
 
     // Tick function for `tFIR`
@@ -1142,12 +1097,12 @@ extern "C" {
      @brief Median filter.
      @{
      
-     @fn void    tMedianFilter_init(tMedianFilter** const, int size, LEAF* const leaf)
+     @fn void    tMedianFilter_init(tMedianFilter* const, int size, LEAF* const leaf)
      @brief Initialize a tMedianFilter to the default mempool of a LEAF instance.
      @param filter A pointer to the tMedianFilter to initialize.
      @param leaf A pointer to the leaf instance.f
      
-     @fn void    tMedianFilter_initToPool(tMedianFilter** const, int size, tMempool** const)
+     @fn void    tMedianFilter_init                 (tMempool** const)
      @brief Initialize a tMedianFilter to a specified mempool.
      @param filter A pointer to the tMedianFilter to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1156,28 +1111,17 @@ extern "C" {
      @brief Free a tMedianFilter from its mempool.
      @param filter A pointer to the tMedianFilter to free.
      
-     @fn float   tMedianFilter_tick           (tMedianFilter* const, float input)
+     @fn float   tMedianFilter_tick           (tMedianFilter* const, tMedianFilter** const, int size, float input)
      @brief
      @param filter A pointer to the relevant tMedianFilter.
      ￼￼￼
      @} */
     
-    typedef struct tMedianFilter
-    {
-
-        tMempool* mempool;
-        float* val;
-        int* age;
-        int m;
-        int size;
-        int middlePosition;
-        int last;
-        int pos;
-    } tMedianFilter;
+    typedef struct tMedianFilter tMedianFilter;
 
     // Memory handlers for `tMedianFilter`
-    void    tMedianFilter_init           (tMedianFilter** const, int size, LEAF* const leaf);
-    void    tMedianFilter_initToPool     (tMedianFilter** const, int size, tMempool** const);
+    void    tMedianFilter_create               (tMempool** const mempool, tMedianFilter** const);
+    void    tMedianFilter_init                 (LEAF* const leaf, tMedianFilter* const, int size);
     void    tMedianFilter_free           (tMedianFilter** const);
 
     // Tick function for `tMedianFilter`
@@ -1190,12 +1134,12 @@ extern "C" {
      @brief Vadim Zavalishin style from VA book (from implementation in RSlib posted to kvr forum)
      @{
      
-     @fn void    tVZFilter_init(tVZFilter** const, VZFilterType type, float freq, float Q, LEAF* const leaf)
+     @fn void    tVZFilter_init(tVZFilter* const, VZFilterType type, float freq, float Q, LEAF* const leaf)
      @brief Initialize a tVZFilter to the default mempool of a LEAF instance.
      @param filter A pointer to the tVZFilter to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tVZFilter_initToPool(tVZFilter** const, VZFilterType type, float freq, float Q, tMempool** const)
+     @fn void    tVZFilter_init                 (tMempool** const)
      @brief Initialize a tVZFilter to a specified mempool.
      @param filter A pointer to the tVZFilter to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1204,7 +1148,7 @@ extern "C" {
      @brief Free a tVZFilter from its mempool.
      @param filter A pointer to the tVZFilter to free.
      
-     @fn float   tVZFilter_tick               (tVZFilter* const, float input)
+     @fn float   tVZFilter_tick               (tVZFilter* const, tVZFilter** const, VZFilterType type, float freq, float Q, float input)
      @brief
      @param filter A pointer to the relevant tVZFilter.
      
@@ -1292,10 +1236,8 @@ extern "C" {
     } tVZFilter;
 
     // Memory handlers for `tVZFilter`
-    void    tVZFilter_init                                (tVZFilter** const, VZFilterType type, float freq, float Q,
-                                                           LEAF* const leaf);
-    void    tVZFilter_initToPool                          (tVZFilter** const, VZFilterType type, float freq, float Q,
-                                                           tMempool** const);
+    void    tVZFilter_create                                (tMempool** const mempool,  tVZFilter** const);
+    void    tVZFilter_init                 (LEAF* const leaf, tVZFilter* const, VZFilterType type, float freq, float Q);
     void    tVZFilter_free                                (tVZFilter** const);
 
     // Tick functions for `tVZFilter`
@@ -1352,10 +1294,8 @@ extern "C" {
     } tVZFilterLS;
 
     // Memory handlers for `tVZFilterLS`
-    void    tVZFilterLS_init                           (tVZFilterLS** const,float freq, float Q, float gain,
-                                                        LEAF* const leaf);
-    void    tVZFilterLS_initToPool                     (tVZFilterLS** const, float freq, float Q, float gain,
-                                                        tMempool** const);
+    void    tVZFilterLS_create                                (tMempool** const mempool,tVZFilterLS** const);
+    void    tVZFilterLS_init                 (LEAF* const leaf, tVZFilterLS* const, float freq, float Q, float gain);
     void    tVZFilterLS_free                           (tVZFilterLS** const);
 
     // Tick function for `tVZFilterLS`
@@ -1399,10 +1339,8 @@ extern "C" {
     } tVZFilterHS;
 
     // Memory handlers for `tVZFilterHS`
-    void    tVZFilterHS_init                           (tVZFilterHS** const,float freq, float Q, float gain,
-                                                        LEAF* const leaf);
-    void    tVZFilterHS_initToPool                     (tVZFilterHS** const, float freq, float Q, float gain,
-                                                        tMempool** const);
+    void    tVZFilterHS_create                          (tMempool** const, tVZFilterHS** const);
+    void    tVZFilterHS_init                 (LEAF* const leaf, tVZFilterHS* const, float freq, float Q, float gain);
     void    tVZFilterHS_free                           (tVZFilterHS** const);
 
     // Tick function for `tVZFilterHS`
@@ -1443,10 +1381,8 @@ extern "C" {
     } tVZFilterBell;
 
     // Memory handlers for `tVZFilterBell`
-    void    tVZFilterBell_init                            (tVZFilterBell** const,float freq, float BW, float gain,
-                                                           LEAF* const leaf);
-    void    tVZFilterBell_initToPool                      (tVZFilterBell** const, float freq, float BW, float gain,
-                                                           tMempool** const);
+    void    tVZFilterBell_create                           (tMempool** const, tVZFilterBell** const);
+    void    tVZFilterBell_init                 (LEAF* const leaf, tVZFilterBell* const, float freq, float BW, float gain);
     void    tVZFilterBell_free                            (tVZFilterBell** const);
 
     // Tick function for `tVZFilterBell`
@@ -1484,8 +1420,8 @@ extern "C" {
     } tVZFilterBR;
 
     // Memory handlers for `tVZFilterBR`
-    void    tVZFilterBR_init                    (tVZFilterBR** const,float freq, float Q, LEAF* const leaf);
-    void    tVZFilterBR_initToPool              (tVZFilterBR** const, float freq, float Q, tMempool** const);
+    void    tVZFilterBR_create               (tMempool** const mempool, tVZFilterBR** const);
+    void    tVZFilterBR_init                 (LEAF* const leaf, tVZFilterBR* const, float freq, float Q);
     void    tVZFilterBR_free                    (tVZFilterBR** const);
 
     // Tick function for `tVZFilterBR`
@@ -1505,12 +1441,12 @@ extern "C" {
      @brief Diode filter.
      @{
      
-     @fn void    tDiodeFilter_init(tDiodeFilter** const, float freq, float Q, LEAF* const leaf)
+     @fn void    tDiodeFilter_init(tDiodeFilter* const, float freq, float Q, LEAF* const leaf)
      @brief Initialize a tDiodeFilter to the default mempool of a LEAF instance.
      @param filter A pointer to the tDiodeFilter to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tDiodeFilter_initToPool(tDiodeFilter** const, float freq, float Q, tMempool** const)
+     @fn void    tDiodeFilter_init                 (tMempool** const)
      @brief Initialize a tDiodeFilter to a specified mempool.
      @param filter A pointer to the tDiodeFilter to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1519,7 +1455,7 @@ extern "C" {
      @brief Free a tDiodeFilter from its mempool.
      @param filter A pointer to the tDiodeFilter to free.
      
-     @fn float   tDiodeFilter_tick               (tDiodeFilter* const, float input)
+     @fn float   tDiodeFilter_tick               (tDiodeFilter* const, tDiodeFilter** const, float freq, float Q, float input)
      @brief
      @param filter A pointer to the relevant tDiodeFilter.
      
@@ -1555,8 +1491,8 @@ extern "C" {
     } tDiodeFilter;
 
     // Memory handlers for `tDiodeFilter`
-    void    tDiodeFilter_init           (tDiodeFilter** const, float freq, float Q, LEAF* const leaf);
-    void    tDiodeFilter_initToPool     (tDiodeFilter** const, float freq, float Q, tMempool** const);
+    void    tDiodeFilter_create               (tMempool** const mempool, tDiodeFilter** const);
+    void    tDiodeFilter_init                 (LEAF* const leaf, tDiodeFilter* const, float freq, float Q);
     void    tDiodeFilter_free           (tDiodeFilter** const);
 
     // Tick functions for `tDiodeFilter`
@@ -1592,8 +1528,8 @@ extern "C" {
     } tLadderFilter;
 
     // Memory handlers for `tLadderFilter`
-    void    tLadderFilter_init            (tLadderFilter** const, float freq, float Q, LEAF* const leaf);
-    void    tLadderFilter_initToPool      (tLadderFilter** const, float freq, float Q, tMempool** const);
+    void    tLadderFilter_create               (tMempool** const mempool, tLadderFilter** const);
+    void    tLadderFilter_init                 (LEAF* const leaf, tLadderFilter* const, float freq, float Q);
     void    tLadderFilter_free            (tLadderFilter** const);
 
     // Tick function for `tLadderFilter`
@@ -1623,8 +1559,8 @@ extern "C" {
     } tTiltFilter;
 
     // Memory handlers for `tTiltFilter`
-    void    tTiltFilter_init          (tTiltFilter** const, float freq, LEAF* const leaf);
-    void    tTiltFilter_initToPool    (tTiltFilter** const, float freq, tMempool** const);
+    void    tTiltFilter_create               (tMempool** const mempool, tTiltFilter** const);
+    void    tTiltFilter_init                 (LEAF* const leaf, tTiltFilter* const, float freq);
     void    tTiltFilter_free          (tTiltFilter** const);
 
     // Tick function for `tTiltFilter`

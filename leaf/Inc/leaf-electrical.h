@@ -34,12 +34,12 @@ extern "C" {
      @brief Wave digital filter component.
      @{
      
-     @fn void    tWDF_init(tWDF** const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, LEAF* const leaf)
+     @fn void    tWDF_init(tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, LEAF* const leaf)
      @brief Initialize a tWDF to the default mempool of a LEAF instance.
      @param wdf A pointer to the tWDF to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tWDF_initToPool(tWDF** const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, * const)
+     @fn void    tWDF_init                 (tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR, * const)
      @brief Initialize a tWDF to a specified mempool.
      @param wdf A pointer to the tWDF to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -136,8 +136,8 @@ extern "C" {
     };
     
     //WDF Linear Components
-    void    tWDF_init(tWDF** const, WDFComponentType type, float value, tWDF** const rL, tWDF** const rR, LEAF* const leaf);
-    void    tWDF_initToPool(tWDF** const, WDFComponentType type, float value, tWDF** const rL, tWDF** const rR, tMempool** const);
+    void    tWDF_create               (tMempool** const mempool, tWDF** const);
+    void    tWDF_init                 (LEAF* const leaf, tWDF* const, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR);
     void    tWDF_free(tWDF** const);
     
     float  tWDF_tick                   (tWDF* const, float sample, tWDF* const outputPoint, uint8_t paramsChanged);

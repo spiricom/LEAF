@@ -18,18 +18,15 @@
 
 // ----------------- COWBELL ----------------------------//
 
-void t808Cowbell_init(t808Cowbell** const cowbellInst, int useStick, LEAF* const leaf)
+void t808Cowbell_create(tMempool** const mp, t808Cowbell** const cowbellInst)
 {
-    t808Cowbell_initToPool(cowbellInst, useStick, &leaf->mempool);
+    ALLOC_FROM_POOL(t808Cowbell, cowbellInst, mp);
 }
 
-void        t808Cowbell_initToPool      (t808Cowbell** const cowbellInst, int useStick, tMempool** const mp)
+void t808Cowbell_init(LEAF* const leaf, t808Cowbell* const cowbellInst, int useStick)
 {
-    tMempool* m = *mp;
-    t808Cowbell* cowbell = *cowbellInst = (t808Cowbell*) mpool_alloc(sizeof(t808Cowbell), m);
-    cowbell->mempool = m;
-    
-    tSquare_initToPool(&cowbell->p[0], mp);
+
+tSquare_initToPool(&cowbell->p[0], mp);
     tSquare_setFreq(cowbell->p[0], 540.0f);
     
     tSquare_initToPool(&cowbell->p[1], mp);
@@ -52,6 +49,7 @@ void        t808Cowbell_initToPool      (t808Cowbell** const cowbellInst, int us
     tEnvelope_initToPool(&cowbell->envStick, 5.0f, 5.0f, 0, mp);
     
     cowbell->useStick = useStick;
+
 }
 
 void        t808Cowbell_free    (t808Cowbell** const cowbellInst)
@@ -142,21 +140,19 @@ void t808Cowbell_setSampleRate(t808Cowbell* const cowbell, float sr)
 
 // ----------------- HIHAT ----------------------------//
 
-void t808Hihat_init(t808Hihat** const hihatInst, LEAF* const leaf)
+void t808Hihat_create(tMempool** const mp, t808Hihat** const hihatInst)
 {
-    t808Hihat_initToPool(hihatInst, &leaf->mempool);
+    ALLOC_FROM_POOL(t808Hihat, hihatInst, mp);
 }
 
-void    t808Hihat_initToPool  (t808Hihat** const hihatInst, tMempool** const mp)
+void t808Hihat_init(LEAF* const leaf, t808Hihat* const hihatInst)
 {
-    tMempool* m = *mp;
-    t808Hihat* hihat = *hihatInst = (t808Hihat*) mpool_alloc(sizeof(t808Hihat), m);
-    hihat->mempool = m;
-    
-    for (int i = 0; i < 6; i++)
+
+for (int i = 0; i < 6; i++)
     {
         tSquare_initToPool(&hihat->p[i], mp);
-    }
+    
+}
     
     tNoise_initToPool(&hihat->stick, PinkNoise, mp);
     tNoise_initToPool(&hihat->n, WhiteNoise, mp);
@@ -311,18 +307,16 @@ void t808Hihat_setSampleRate(t808Hihat* const hihat, float sr)
 
 // ----------------- SNARE ----------------------------//
 
-void t808Snare_init(t808Snare** const snareInst, LEAF* const leaf)
+void t808Snare_create(tMempool** const mp, t808Snare** const snareInst)
 {
-    t808Snare_initToPool(snareInst, &leaf->mempool);
+    ALLOC_FROM_POOL(t808Snare, snareInst, mp);
 }
 
-void    t808Snare_initToPool    (t808Snare** const snareInst, tMempool** const mp)
+void t808Snare_init(LEAF* const leaf, t808Snare* const snareInst)
 {
-    tMempool* m = *mp;
-    t808Snare* snare = *snareInst = (t808Snare*) mpool_alloc(sizeof(t808Snare), m);
-    snare->mempool = m;
-    
-    float ratio[2] = {1.0, 1.5};
+
+float ratio[2] = {1.0, 1.5
+};
     for (int i = 0; i < 2; i++)
     {
         tTriangle_initToPool(&snare->tone[i], mp);
@@ -458,18 +452,16 @@ void t808Snare_setSampleRate(t808Snare* const snare, float sr)
 
 // ----------------- SNARE WITHOUT ENVELOPE TABLE (SMALLER) ----------------------------//
 
-void t808SnareSmall_init(t808SnareSmall** const snareInst, LEAF* const leaf)
+void t808SnareSmall_create(tMempool** const mp, t808SnareSmall** const snareInst)
 {
-    t808SnareSmall_initToPool(snareInst, &leaf->mempool);
+    ALLOC_FROM_POOL(t808SnareSmall, snareInst, mp);
 }
 
-void    t808SnareSmall_initToPool    (t808SnareSmall** const snareInst, tMempool** const mp)
+void t808SnareSmall_init(LEAF* const leaf, t808SnareSmall* const snareInst)
 {
-    tMempool* m = *mp;
-    t808SnareSmall* snare = *snareInst = (t808SnareSmall*) mpool_alloc(sizeof(t808SnareSmall), m);
-    snare->mempool = m;
-    
-    float ratio[2] = {1.0, 1.5};
+
+float ratio[2] = {1.0, 1.5
+};
     for (int i = 0; i < 2; i++)
     {
         tPBTriangle_initToPool(&snare->tone[i], mp);
@@ -602,18 +594,15 @@ void t808SnareSmall_setSampleRate(t808SnareSmall* const snare, float sr)
 
 // ----------------- KICK ----------------------------//
 
-void t808Kick_init(t808Kick** const kickInst, LEAF* const leaf)
+void t808Kick_create(tMempool** const mp, t808Kick** const kickInst)
 {
-    t808Kick_initToPool(kickInst, &leaf->mempool);
+    ALLOC_FROM_POOL(t808Kick, kickInst, mp);
 }
 
-void t808Kick_initToPool (t808Kick** const kickInst, tMempool** const mp)
+void t808Kick_init(LEAF* const leaf, t808Kick* const kickInst)
 {
-    tMempool* m = *mp;
-    t808Kick* kick = *kickInst = (t808Kick*) mpool_alloc(sizeof(t808Kick), m);
-    kick->mempool = m;
-    
-    tCycle_initToPool(&kick->tone, mp);
+
+tCycle_initToPool(&kick->tone, mp);
     kick->toneInitialFreq = 40.0f;
     kick->sighAmountInHz = 7.0f;
     kick->chirpRatioMinusOne = 3.3f;
@@ -625,6 +614,7 @@ void t808Kick_initToPool (t808Kick** const kickInst, tMempool** const mp)
     tNoise_initToPool(&kick->noiseOsc, PinkNoise, mp);
     tEnvelope_initToPool(&kick->noiseEnvGain, 0.0f, 1.0f, 0, mp);
     kick->noiseGain = 0.3f;
+
 }
 
 void    t808Kick_free   (t808Kick** const kickInst)
@@ -684,18 +674,15 @@ void        t808Kick_setSampleRate  (t808Kick** const kickInst, float sr)
 
 // ----------------- KICK ----------------------------//
 
-void t808KickSmall_init(t808KickSmall** const kickInst, LEAF* const leaf)
+void t808KickSmall_create(tMempool** const mp, t808KickSmall** const kickInst)
 {
-    t808KickSmall_initToPool(kickInst, &leaf->mempool);
+    ALLOC_FROM_POOL(t808KickSmall, kickInst, mp);
 }
 
-void t808KickSmall_initToPool (t808KickSmall** const kickInst, tMempool** const mp)
+void t808KickSmall_init(LEAF* const leaf, t808KickSmall* const kickInst)
 {
-    tMempool* m = *mp;
-    t808KickSmall* kick = *kickInst = (t808KickSmall*) mpool_alloc(sizeof(t808KickSmall), m);
-    kick->mempool = m;
-    
-    tCycle_initToPool(&kick->tone, mp);
+
+tCycle_initToPool(&kick->tone, mp);
     kick->toneInitialFreq = 40.0f;
     kick->sighAmountInHz = 7.0f;
     kick->chirpRatioMinusOne = 3.3f;
@@ -707,6 +694,7 @@ void t808KickSmall_initToPool (t808KickSmall** const kickInst, tMempool** const 
     tNoise_initToPool(&kick->noiseOsc, PinkNoise, mp);
     tADSRS_initToPool(&kick->noiseEnvGain, 0.0f, 1.0f, 0.0f, 0.0f, mp);
     kick->noiseGain = 0.3f;
+
 }
 
 void    t808KickSmall_free   (t808KickSmall** const kickInst)

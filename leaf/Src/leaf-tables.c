@@ -14,19 +14,18 @@
 
 #include "stdlib.h"
 
-void tLookupTable_init(tLookupTable** const tLookupTable, float start, float end, float center, int size, LEAF* const leaf)
+void tLookupTable_create(tMempool** const mp, tLookupTable** const table)
 {
-    tLookupTable_initToPool(tLookupTable, start, end, center, size, &leaf->mempool);
+    ALLOC_FROM_POOL(tLookupTable, table, mp);
 }
 
-void tLookupTable_initToPool(tLookupTable** const table, float start, float end, float center, int size, tMempool** const mempool)
+void tLookupTable_init(LEAF* const leaf, tLookupTable* const t, float start, float end, float center, int size)
 {
-    tMempool* m = *mempool;
-    tLookupTable* t = *table = (tLookupTable*) mpool_alloc(sizeof(tLookupTable), m);
-    t->table = (float*) mpool_alloc(sizeof(float) * size, m);
+
+    t->table = (float*) mpool_alloc(sizeof(float) * size, t->mempool);
     t->tableSize = size;
-    t->mempool = m;
     LEAF_generate_table_skew_non_sym(t->table, start, end, center, size);
+
 }
 
 

@@ -36,12 +36,12 @@ extern "C" {
      @brief Sample rate reducer.
      @{
      
-     @fn void    tSampleReducer_init(tSampleReducer** const, LEAF* const leaf)
+     @fn void    tSampleReducer_init(tSampleReducer* const, LEAF* const leaf)
      @brief Initialize a tSampleReducer to the default mempool of a LEAF instance.
      @param reducer A pointer to the tSampleReducer to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSampleReducer_initToPool(tSampleReducer** const, tMempool** const)
+     @fn void    tSampleReducer_init                 (tMempool** const)
      @brief Initialize a tSampleReducer to a specified mempool.
      @param reducer A pointer to the tSampleReducer to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -50,7 +50,7 @@ extern "C" {
      @brief Free a tSampleReducer from its mempool.
      @param reducer A pointer to the tSampleReducer to free.
      
-     @fn float   tSampleReducer_tick    (tSampleReducer* const, float input)
+     @fn float   tSampleReducer_tick    (tSampleReducer* const, tSampleReducer** const, float input)
      @brief
      @param reducer A pointer to the relevant tSampleReducer.
      
@@ -68,8 +68,8 @@ extern "C" {
         uint32_t count;
     } tSampleReducer;
 
-    void    tSampleReducer_init       (tSampleReducer** const, LEAF* const leaf);
-    void    tSampleReducer_initToPool (tSampleReducer** const, tMempool** const);
+    void    tSampleReducer_create               (tMempool** const mempool, tSampleReducer** const);
+    void    tSampleReducer_init                 (LEAF* const leaf, tSampleReducer* const);
     void    tSampleReducer_free       (tSampleReducer** const);
     
     float  tSampleReducer_tick       (tSampleReducer* const, float input);
@@ -83,12 +83,12 @@ extern "C" {
      @brief Oversampler.
      @{
      
-     @fn void    tOversampler_init(tOversampler** const, int order, int extraQuality, LEAF* const leaf)
+     @fn void    tOversampler_init(tOversampler* const, int order, int extraQuality, LEAF* const leaf)
      @brief Initialize a tOversampler to the default mempool of a LEAF instance.
      @param oversampler A pointer to the tOversampler to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tOversampler_initToPool(tOversampler** const, int order, int extraQuality, tMempool** const)
+     @fn void    tOversampler_init                 (tMempool** const)
      @brief Initialize a tOversampler to a specified mempool.
      @param oversampler A pointer to the tOversampler to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -97,7 +97,7 @@ extern "C" {
      @brief Free a tOversampler from its mempool.
      @param oversampler A pointer to the tOversampler to free.
      
-     @fn void    tOversampler_upsample       (tOversampler* const, float input, float* output)
+     @fn void    tOversampler_upsample       (tOversampler* const, tOversampler** const, int order, int extraQuality, float input, float* output)
      @brief
      @param oversampler A pointer to the relevant tOversampler.
      
@@ -120,22 +120,11 @@ extern "C" {
      ￼￼￼
      @} */
     
-    typedef struct tOversampler
-    {
-        tMempool* mempool;
-        uint32_t maxRatio;
-        uint8_t allowHighQuality;
-        uint32_t ratio;
-        uint32_t offset;
-        float* pCoeffs;
-        float* upState;
-        float* downState;
-        uint32_t numTaps;
-        uint32_t phaseLength;
-    } tOversampler;
+    typedef struct tOversampler tOversampler;
 
-    void    tOversampler_init           (tOversampler** const, int order, int extraQuality, LEAF* const leaf);
-    void    tOversampler_initToPool     (tOversampler** const, int order, int extraQuality, tMempool** const);
+
+    void    tOversampler_create               (tMempool** const mempool, tOversampler** const);
+    void    tOversampler_init                 (LEAF* const leaf, tOversampler* const, int order, int extraQuality);
     void    tOversampler_free           (tOversampler** const);
 
     float  tOversampler_tick           (tOversampler* const, float input, float* oversample, float (*effectTick)(float));
@@ -153,12 +142,12 @@ extern "C" {
  @brief more efficient and simpler wavefolder.
  @{
  
- @fn void    tWavefolder_init(tWavefolder** const, LEAF* const leaf)
+ @fn void    tWavefolder_init(tWavefolder* const, LEAF* const leaf)
  @brief Initialize a tWavefolder to the default mempool of a LEAF instance.
  @param wavefolder A pointer to the tWavefolder to initialize.
  @param leaf A pointer to the leaf instance.
  
- @fn void    tWavefolder_initToPool(tWavefolder** const, tMempool** const)
+ @fn void    tWavefolder_init                 (tMempool** const)
  @brief Initialize a tWavefolder to a specified mempool.
  @param wavefolder A pointer to the tWavefolder to initialize.
  @param mempool A pointer to the tMempool to use.
@@ -167,7 +156,7 @@ extern "C" {
  @brief Free a tWavefolder from its mempool.
  @param wavefolder A pointer to the tWavefolder to free.
  
- @fn float   tWavefolder_tick    (tWavefolder* const, float samp)
+ @fn float   tWavefolder_tick    (tWavefolder* const, tWavefolder** const, float samp)
  @brief
  @param wavefolder A pointer to the relevant tWavefolder.
  ￼￼￼
@@ -185,11 +174,11 @@ typedef struct tWavefolder
     float FBAmount;
     float invFBAmount;
     float FFAmount;
-    tHighpass*  dcBlock;
+    tHighpass  dcBlock;
 } tWavefolder;
 
-void    tWavefolder_init         (tWavefolder** const, float ffAmount, float fbAmount, float foldDepth, LEAF* const leaf);
-void    tWavefolder_initToPool   (tWavefolder** const, float ffAmount, float fbAmount, float foldDepth, tMempool** const);
+void    tWavefolder_create               (tMempool** const mempool, tWavefolder** const);
+void    tWavefolder_init                 (LEAF* const leaf, tWavefolder* const, float ffAmount, float fbAmount, float foldDepth);
 void    tWavefolder_free         (tWavefolder** const);
 
 float  tWavefolder_tick         (tWavefolder* const, float samp);
@@ -209,12 +198,12 @@ void    tWavefolder_setGain      (tWavefolder* const wf, float gain);
      @brief Analog model wavefolder.
      @{
      
-     @fn void    tLockhartWavefolder_init(tLockhartWavefolder** const, LEAF* const leaf)
+     @fn void    tLockhartWavefolder_init(tLockhartWavefolder* const, LEAF* const leaf)
      @brief Initialize a tLockhartWavefolder to the default mempool of a LEAF instance.
      @param wavefolder A pointer to the tLockhartWavefolder to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tLockhartWavefolder_initToPool(tLockhartWavefolder** const, tMempool** const)
+     @fn void    tLockhartWavefolder_init                 (tMempool** const)
      @brief Initialize a tLockhartWavefolder to a specified mempool.
      @param wavefolder A pointer to the tLockhartWavefolder to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -223,7 +212,7 @@ void    tWavefolder_setGain      (tWavefolder* const wf, float gain);
      @brief Free a tLockhartWavefolder from its mempool.
      @param wavefolder A pointer to the tLockhartWavefolder to free.
      
-     @fn float   tLockhartWavefolder_tick    (tLockhartWavefolder* const, float samp)
+     @fn float   tLockhartWavefolder_tick    (tLockhartWavefolder* const, tLockhartWavefolder** const, float samp)
      @brief
      @param wavefolder A pointer to the relevant tLockhartWavefolder.
      ￼￼￼
@@ -261,8 +250,8 @@ void    tWavefolder_setGain      (tWavefolder* const wf, float gain);
 
     } tLockhartWavefolder;
 
-    void    tLockhartWavefolder_init       (tLockhartWavefolder** const, LEAF* const leaf);
-    void    tLockhartWavefolder_initToPool (tLockhartWavefolder** const, tMempool** const);
+    void    tLockhartWavefolder_create               (tMempool** const mempool, tLockhartWavefolder** const);
+    void    tLockhartWavefolder_init                 (LEAF* const leaf, tLockhartWavefolder* const);
     void    tLockhartWavefolder_free       (tLockhartWavefolder** const);
     
     float  tLockhartWavefolder_tick       (tLockhartWavefolder* const, float samp);
@@ -275,12 +264,12 @@ void    tWavefolder_setGain      (tWavefolder* const wf, float gain);
      @brief Bit depth and sampler rate degrader.
      @{
      
-     @fn void    tCrusher_init(tCrusher** const, LEAF* const leaf)
+     @fn void    tCrusher_init(tCrusher* const, LEAF* const leaf)
      @brief Initialize a tCrusher to the default mempool of a LEAF instance.
      @param crusher A pointer to the tCrusher to initialize.
      @param leaf A pointer to the leaf instance.f
      
-     @fn void    tCrusher_initToPool(tCrusher** const, tMempool** const)
+     @fn void    tCrusher_init                 (tMempool** const)
      @brief Initialize a tCrusher to a specified mempool.
      @param crusher A pointer to the tCrusher to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -289,7 +278,7 @@ void    tWavefolder_setGain      (tWavefolder* const wf, float gain);
      @brief Free a tCrusher from its mempool.
      @param crusher A pointer to the tCrusher to free.
      
-     @fn float   tCrusher_tick    (tCrusher* const, float input)
+     @fn float   tCrusher_tick    (tCrusher* const, tCrusher** const, float input)
      @brief
      @param crusher A pointer to the relevant tCrusher.
      
@@ -327,12 +316,12 @@ void    tWavefolder_setGain      (tWavefolder* const wf, float gain);
         uint32_t  op; //which bitwise operation (0-7)
         
         float gain;
-        tSampleReducer*  sReducer;
+        tSampleReducer  sReducer;
         
     } tCrusher;
 
-    void    tCrusher_init             (tCrusher** const, LEAF* const leaf);
-    void    tCrusher_initToPool       (tCrusher** const, tMempool** const);
+    void    tCrusher_create               (tMempool** const mempool, tCrusher** const);
+    void    tCrusher_init                 (LEAF* const leaf, tCrusher* const);
     void    tCrusher_free             (tCrusher** const);
     
     float  tCrusher_tick             (tCrusher* const, float input);

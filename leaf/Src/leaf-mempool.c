@@ -80,10 +80,11 @@ void mpool_create (char* memory, size_t size, tMempool* pool)
 }
 
 
-void leaf_pool_init(LEAF* const leaf, char* memory, size_t size)
+void leaf_pool_init(LEAF* const leaf,char* memory, size_t size)
 {
+
     mpool_create(memory, size, &leaf->_internal_mempool);
-    
+
     leaf->mempool = &leaf->_internal_mempool;
 }
 
@@ -450,10 +451,6 @@ static inline void delink_node(mpool_node_t* node)
     node->prev = NULL;
 }
 
-void tMempool_init(tMempool** const mp, char* memory, size_t size, LEAF* const leaf)
-{
-    tMempool_initToPool(mp, memory, size, &leaf->mempool);
-}
 
 void tMempool_free(tMempool** const mp)
 {
@@ -462,12 +459,16 @@ void tMempool_free(tMempool** const mp)
     mpool_free((char*)m, m->mempool);
 }
 
+void tMempool_init(tMempool** const mp, char* memory, size_t size, LEAF* const leaf)
+{
+    tMempool_initToPool(mp, memory, size, &leaf->mempool);
+}
 void    tMempool_initToPool     (tMempool** const mp, char* memory, size_t size, tMempool** const mem)
 {
     tMempool* mm = *mem;
     tMempool* m = *mp = (tMempool*) mpool_alloc(sizeof(tMempool), mm);
     m->leaf = mm->leaf;
-    
+
     mpool_create (memory, size, m);
 }
 

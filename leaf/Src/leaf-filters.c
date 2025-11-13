@@ -2,7 +2,7 @@
  
  leaf-filter.c
  Created: 20 Jan 2017 12:01:10pm
- Author:  Michael R Mulshine and Joshua Warner
+ Author:  Michael R Mulshine
  
  ==============================================================================*/
 
@@ -25,29 +25,84 @@
 #include <arm_math.h>
 #endif
 
+struct tAllpass{
+    tMempool* mempool;
 
+    float gain;
+
+    tLinearDelay* delay;
+
+    float lastOut;
+};
+
+struct tThiranAllpassSOCascade {
+
+    tMempool* mempool;
+
+    int numFilts;
+    tAllpassSO* filters;
+    float B;
+    float iKey;
+    float a[2];
+
+    float k1[2];
+    float k2[2];
+    float k3[2];
+    float C1[2];
+    float C2[2];
+    int numActiveFilters;
+    int numFiltsMap[2];
+    int isHigh;
+    float D;
+} ;
+
+struct tFIR {
+
+    tMempool* mempool;
+    float* past;
+    float* coeff;
+    int numTaps;
+};
+struct tMedianFilter
+{
+
+    tMempool* mempool;
+    float* val;
+    int* age;
+    int m;
+    int size;
+    int middlePosition;
+    int last;
+    int pos;
+};
+struct tButterworth
+{
+    tMempool* mempool;
+
+    float gain;
+    int order;
+    int numSVF;
+
+    tSVF* svfs;
+
+    float f1,f2;
+};
 /******************************************************************************/
 /*                              AllPass Filter                                */
 /******************************************************************************/
 
 
-void tAllpass_init(tAllpass** const ft, float initDelay, uint32_t maxDelay,
-                    LEAF *const leaf)
+void tAllpass_create(tMempool** const mp, tAllpass** const ft)
 {
-    tAllpass_initToPool(ft, initDelay, maxDelay, &leaf->mempool);
+    ALLOC_FROM_POOL(tAllpass, ft, mp);
 }
 
-void tAllpass_initToPool (tAllpass** const ft, float initDelay,
-                          uint32_t maxDelay, tMempool** const mp)
+void tAllpass_init(LEAF* const leaf, tAllpass* const f, float initDelay, uint32_t maxDelay)
 {
-    tMempool *m = *mp;
-    tAllpass *f = *ft = (tAllpass *) mpool_alloc(sizeof(tAllpass), m);
-
-    f->mempool = m;
     f->gain = 0.7f;
     f->lastOut = 0.0f;
-
-    tLinearDelay_initToPool(&f->delay, initDelay, maxDelay, mp);
+    tLinearDelay_create (&f->mempool,&f->delay);
+    tLinearDelay_init(leaf, f->delay, initDelay, maxDelay);
 }
 
 void tAllpass_free (tAllpass** const ft)
@@ -56,6 +111,7 @@ void tAllpass_free (tAllpass** const ft)
 
     tLinearDelay_free(&f->delay);
     mpool_free((char *) f, f->mempool);
+    f = NULL;
 }
 
 void tAllpass_setDelay (tAllpass* const f, float delay)
@@ -83,17 +139,13 @@ float tAllpass_tick (tAllpass* const f, float input)
 /******************************************************************************/
 
 
-void tAllpassSO_init(tAllpassSO** const ft, LEAF *const leaf)
+void tAllpassSO_create(tMempool** const mp, tAllpassSO** const ft)
 {
-    tAllpassSO_initToPool(ft, &leaf->mempool);
+    ALLOC_FROM_POOL(tAllpassSO, ft, mp);
 }
 
-void tAllpassSO_initToPool (tAllpassSO** const ft, tMempool** const mp)
+void tAllpassSO_init(LEAF* const leaf, tAllpassSO* const f)
 {
-    tMempool *m = *mp;
-    tAllpassSO *f = *ft = (tAllpassSO *) mpool_alloc(sizeof(tAllpassSO), m);
-    f->mempool = m;
-
     f->prevSamp = 0.0f;
     f->prevPrevSamp = 0.0f;
     f->a1 = 0.0f;
@@ -167,21 +219,17 @@ float tAllpassSO_tick (tAllpassSO* const f, float input)
 /******************************************************************************/
 
 
-void tThiranAllpassSOCascade_init(tThiranAllpassSOCascade** const ft,
-                                  int numFilts, LEAF *const leaf)
+void tThiranAllpassSOCascade_create(tMempool** const mp, tThiranAllpassSOCascade** const ft)
 {
-    tThiranAllpassSOCascade_initToPool(ft, numFilts, &leaf->mempool);
+    ALLOC_FROM_POOL(tThiranAllpassSOCascade, ft, mp);
 }
 
-void tThiranAllpassSOCascade_initToPool (tThiranAllpassSOCascade** const ft,
-                                        int numFilts, tMempool** const mp)
+void tThiranAllpassSOCascade_init(LEAF* const leaf, tThiranAllpassSOCascade* const f, int numFilts)
 {
-    tMempool *m = *mp;
-    tThiranAllpassSOCascade *f = *ft = (tThiranAllpassSOCascade *) mpool_alloc(
-            sizeof(tThiranAllpassSOCascade), m);
-    f->mempool = m;
+
+
     f->numFilts = numFilts;
-    f->filters = (tAllpassSO **) mpool_calloc(sizeof(tAllpassSO*) * numFilts, m);
+    f->filters = (tAllpassSO *) mpool_calloc(sizeof(tAllpassSO) * numFilts, f->mempool);
     f->k1[0] = -0.00050469f;
     f->k2[0] = -0.0064264f;
     f->k3[0] = -2.8743f;
@@ -197,17 +245,15 @@ void tThiranAllpassSOCascade_initToPool (tThiranAllpassSOCascade** const ft,
     f->numFiltsMap[1] = 1;
     f->numActiveFilters = numFilts;
     for (int i = 0; i < numFilts; i++) {
-        tAllpassSO_initToPool(&f->filters[i], mp);
-    }
+        tAllpassSO_init(leaf,&f->filters[i]);
+    
+}
 }
 
 void tThiranAllpassSOCascade_free (tThiranAllpassSOCascade** const ft)
 {
     tThiranAllpassSOCascade *f = *ft;
-    for (int i = 0; i < f->numFilts; i++) {
-        tAllpassSO_free(&f->filters[i]);
-    }
-    mpool_free((char *) f->filters, f->mempool); //do I need to free the pointers separately?
+    mpool_free((char *) f->filters, f->mempool);
     mpool_free((char *) f, f->mempool);
 }
 
@@ -274,7 +320,7 @@ float tThiranAllpassSOCascade_setCoeff (tThiranAllpassSOCascade* const f,
     //f->a[1] = LEAF_clip(-1.999999f, f->a[1], 2.0f);
 
     for (int i = 0; i < f->numActiveFilters; i++) {
-        tAllpassSO_setCoeff(f->filters[i], f->a[0], f->a[1]);
+        tAllpassSO_setCoeff(&f->filters[i], f->a[0], f->a[1]);
         //f->filters[i]->prevSamp = 0.0f;
         //f->filters[i]->prevPrevSamp = 0.0f;
         //probably should adjust the gain of the internal state variables
@@ -290,7 +336,7 @@ float tThiranAllpassSOCascade_tick (tThiranAllpassSOCascade* const f, float inpu
 {
     float sample = input;
     for (int i = 0; i < f->numActiveFilters; i++) {
-        sample = tAllpassSO_tick(f->filters[i], sample);
+        sample = tAllpassSO_tick(&f->filters[i], sample);
     }
     return sample;
 }
@@ -299,8 +345,8 @@ void tThiranAllpassSOCascade_clear (tThiranAllpassSOCascade* const f)
 {
     for (int i = 0; i < f->numFilts; i++) {
         //tAllpassSO_setCoeff(f->filters[i], f->a[1], f->a[2]);
-        f->filters[i]->prevSamp = 0.0f;
-        f->filters[i]->prevPrevSamp = 0.0f;
+        f->filters[i].prevSamp = 0.0f;
+        f->filters[i].prevPrevSamp = 0.0f;
 
     }
 }
@@ -311,17 +357,14 @@ void tThiranAllpassSOCascade_clear (tThiranAllpassSOCascade* const f)
 /******************************************************************************/
 
 
-void tOnePole_init(tOnePole** const ft, float freq, LEAF *const leaf)
+void tOnePole_create(tMempool** const mp, tOnePole** const ft)
 {
-    tOnePole_initToPool(ft, freq, &leaf->mempool);
+    ALLOC_FROM_POOL(tOnePole, ft, mp);
 }
 
-void tOnePole_initToPool (tOnePole** const ft, float freq, tMempool** const mp)
+void tOnePole_init(LEAF* const leaf, tOnePole* const f, float freq)
 {
-    tMempool *m = *mp;
-    tOnePole *f = *ft = (tOnePole *) mpool_alloc(sizeof(tOnePole), m);
-    f->mempool = m;
-    LEAF *leaf = f->mempool->leaf;
+
 
     f->gain = 1.0f;
     f->a0 = 1.0;
@@ -331,7 +374,8 @@ void tOnePole_initToPool (tOnePole** const ft, float freq, tMempool** const mp)
 
     f->twoPiTimesInvSampleRate = leaf->twoPiTimesInvSampleRate;
 
-    tOnePole_setFreq(*ft, freq);
+    tOnePole_setFreq(f, freq);
+
 }
 
 void tOnePole_free (tOnePole** const ft)
@@ -408,23 +452,21 @@ void tOnePole_setSampleRate (tOnePole* const f, float sr)
 /******************************************************************************/
 
 
-void tCookOnePole_init(tCookOnePole** const ft, LEAF *const leaf)
+void tCookOnePole_create(tMempool** const mp, tCookOnePole** const ft)
 {
-    tCookOnePole_initToPool(ft, &leaf->mempool);
+    ALLOC_FROM_POOL(tCookOnePole, ft, mp);
 }
 
-void tCookOnePole_initToPool (tCookOnePole** const ft, tMempool** const mp)
+void tCookOnePole_init(LEAF* const leaf, tCookOnePole* const f)
 {
-    tMempool *m = *mp;
-    tCookOnePole *f = *ft = (tCookOnePole *) mpool_alloc(sizeof(tCookOnePole), m);
-    f->mempool = m;
-    LEAF *leaf = f->mempool->leaf;
+
 
     f->poleCoeff = 0.9f;
     f->sgain = 0.1f;
     f->output = 0.0f;
 
     f->twoPiTimesInvSampleRate = leaf->twoPiTimesInvSampleRate;
+
 }
 
 void tCookOnePole_free (tCookOnePole** const ft)
@@ -476,17 +518,14 @@ void tCookOnePole_setSampleRate (tCookOnePole* const f, float sr)
 /******************************************************************************/
 
 
-void tTwoPole_init(tTwoPole** const ft, LEAF *const leaf)
+void tTwoPole_create(tMempool** const mp, tTwoPole** const ft)
 {
-    tTwoPole_initToPool(ft, &leaf->mempool);
+    ALLOC_FROM_POOL(tTwoPole, ft, mp);
 }
 
-void tTwoPole_initToPool (tTwoPole** const ft, tMempool** const mp)
+void tTwoPole_init(LEAF* const leaf, tTwoPole* const f)
 {
-    tMempool *m = *mp;
-    tTwoPole *f = *ft = (tTwoPole *) mpool_alloc(sizeof(tTwoPole), m);
-    f->mempool = m;
-    LEAF *leaf = f->mempool->leaf;
+
 
     f->gain = 1.0f;
     f->a0 = 1.0;
@@ -497,6 +536,7 @@ void tTwoPole_initToPool (tTwoPole** const ft, tMempool** const mp)
 
     f->sampleRate = leaf->sampleRate;
     f->twoPiTimesInvSampleRate = leaf->twoPiTimesInvSampleRate;
+
 }
 
 void tTwoPole_free (tTwoPole** const ft)
@@ -590,23 +630,21 @@ void tTwoPole_setSampleRate (tTwoPole* const f, float sr)
 /******************************************************************************/
 
 
-void tOneZero_init(tOneZero** const ft, float theZero, LEAF *const leaf)
+void tOneZero_create(tMempool** const mp, tOneZero** const ft)
 {
-    tOneZero_initToPool(ft, theZero, &leaf->mempool);
+    ALLOC_FROM_POOL(tOneZero, ft, mp);
 }
 
-void tOneZero_initToPool (tOneZero** const ft, float theZero, tMempool** const mp)
+void tOneZero_init(LEAF* const leaf, tOneZero* const f, float theZero)
 {
-    tMempool *m = *mp;
-    tOneZero *f = *ft = (tOneZero *) mpool_alloc(sizeof(tOneZero), m);
-    f->mempool = m;
-    LEAF *leaf = f->mempool->leaf;
+
 
     f->gain = 1.0f;
     f->lastIn = 0.0f;
     f->lastOut = 0.0f;
     f->invSampleRate = leaf->invSampleRate;
-    tOneZero_setZero(*ft, theZero);
+    tOneZero_setZero(f, theZero);
+
 }
 
 void tOneZero_free (tOneZero** const ft)
@@ -695,22 +733,19 @@ void tOneZero_setSampleRate (tOneZero* const f, float sr)
 /******************************************************************************/
 
 
-void tTwoZero_init(tTwoZero** const ft, LEAF *const leaf)
+void tTwoZero_create(tMempool** const mp, tTwoZero** const ft)
 {
-    tTwoZero_initToPool(ft, &leaf->mempool);
+    ALLOC_FROM_POOL(tTwoZero, ft, mp);
 }
 
-void tTwoZero_initToPool (tTwoZero** const ft, tMempool** const mp)
+void tTwoZero_init(LEAF* const leaf, tTwoZero* const f)
 {
-    tMempool *m = *mp;
-    tTwoZero *f = *ft = (tTwoZero *) mpool_alloc(sizeof(tTwoZero), m);
-    f->mempool = m;
-    LEAF *leaf = f->mempool->leaf;
 
     f->twoPiTimesInvSampleRate = leaf->twoPiTimesInvSampleRate;
     f->gain = 1.0f;
     f->lastIn[0] = 0.0f;
     f->lastIn[1] = 0.0f;
+
 }
 
 void tTwoZero_free (tTwoZero** const ft)
@@ -785,17 +820,13 @@ void tTwoZero_setSampleRate (tTwoZero* const f, float sr)
 /******************************************************************************/
 
 
-void tPoleZero_init(tPoleZero** const pzf, LEAF *const leaf)
+void tPoleZero_create(tMempool** const mp, tPoleZero** const pzf)
 {
-    tPoleZero_initToPool(pzf, &leaf->mempool);
+    ALLOC_FROM_POOL(tPoleZero, pzf, mp);
 }
 
-void tPoleZero_initToPool (tPoleZero** const pzf, tMempool** const mp)
+void tPoleZero_init(LEAF* const leaf, tPoleZero* const f)
 {
-    tMempool *m = *mp;
-    tPoleZero *f = *pzf = (tPoleZero *) mpool_alloc(sizeof(tPoleZero), m);
-    f->mempool = m;
-
     f->gain = 1.0f;
     f->b0 = 1.0f;
 
@@ -886,17 +917,14 @@ float tPoleZero_tick (tPoleZero* const f, float input)
 /******************************************************************************/
 
 
-void tBiQuad_init(tBiQuad** const ft, LEAF *const leaf)
+void tBiQuad_create(tMempool** const mp, tBiQuad** const ft)
 {
-    tBiQuad_initToPool(ft, &leaf->mempool);
+    ALLOC_FROM_POOL(tBiQuad, ft, mp);
 }
 
-void tBiQuad_initToPool (tBiQuad** const ft, tMempool** const mp)
+void tBiQuad_init(LEAF* const leaf, tBiQuad* const f)
 {
-    tMempool *m = *mp;
-    tBiQuad *f = *ft = (tBiQuad *) mpool_alloc(sizeof(tBiQuad), m);
-    f->mempool = m;
-    LEAF *leaf = f->mempool->leaf;
+
 
     f->gain = 1.0f;
 
@@ -909,6 +937,7 @@ void tBiQuad_initToPool (tBiQuad** const ft, tMempool** const mp)
     f->lastOut[1] = 0.0f;
 
     f->twoPiTimesInvSampleRate = leaf->twoPiTimesInvSampleRate;
+
 }
 
 void tBiQuad_free (tBiQuad** const ft)
@@ -1038,24 +1067,14 @@ void tBiQuad_setSampleRate (tBiQuad* const f, float sr)
 
 // Less efficient, more accurate version of SVF, in which cutoff frequency is
 // taken as floating point Hz value and tanf is calculated when frequency changes.
-void tSVF_init(tSVF** const svff, SVFType type, float freq, float Q,
-                LEAF *const leaf)
+void tSVF_create(tMempool** const mp, tSVF** const svff)
 {
-    tSVF_initToPool(svff, type, freq, Q, &leaf->mempool);
-    // or maybe this?
-    /*
-     * hp=1 bp=A/Q (where A is 10^(G/40) and G is gain in decibels) and lp = 1
-     */
+    ALLOC_FROM_POOL(tSVF, svff, mp);
 }
 
-void tSVF_initToPool (tSVF** const svff, SVFType type, float freq, float Q,
-                      tMempool** const mp)
+void tSVF_init(LEAF* const leaf, tSVF* const svf, SVFType type, float freq, float Q)
 {
-    tMempool *m = *mp;
-    tSVF *svf = *svff = (tSVF *) mpool_alloc(sizeof(tSVF), m);
-    svf->mempool = m;
 
-    LEAF *leaf = svf->mempool->leaf;
 
     svf->sampleRate = leaf->sampleRate;
     svf->invSampleRate = leaf->invSampleRate;
@@ -1082,7 +1101,8 @@ void tSVF_initToPool (tSVF** const svff, SVFType type, float freq, float Q,
         svf->cB = 0.0f;
         svf->cBK = 0.0f;
         svf->cL = 1.0f;
-    } else if (type == SVFTypeBandpass) {
+    
+} else if (type == SVFTypeBandpass) {
         svf->cH = 0.0f;
         svf->cB = 1.0f;
         svf->cBK = 0.0f;
@@ -1292,18 +1312,14 @@ float tSVF_getPhaseAtFrequency (tSVF* const svf, float freq)
 
 // Less efficient, more accurate version of SVF, in which cutoff frequency is taken as floating point Hz value and tanf
 // is calculated when frequency changes.
-void tSVF_LP_init(tSVF_LP** const svff, float freq, float Q, LEAF *const leaf)
+void tSVF_LP_create(tMempool** const mp, tSVF_LP** const svff)
 {
-    tSVF_LP_initToPool(svff, freq, Q, &leaf->mempool);
+    ALLOC_FROM_POOL(tSVF_LP, svff, mp);
 }
 
-void tSVF_LP_initToPool (tSVF_LP** const svff, float freq, float Q, tMempool** const mp)
+void tSVF_LP_init(LEAF* const leaf, tSVF_LP* const svf, float freq, float Q)
 {
-    tMempool *m = *mp;
-    tSVF_LP *svf = *svff = (tSVF_LP *) mpool_alloc(sizeof(tSVF_LP), m);
-    svf->mempool = m;
 
-    LEAF *leaf = svf->mempool->leaf;
 
     svf->sampleRate = leaf->sampleRate;
     svf->invSampleRate = leaf->invSampleRate;
@@ -1314,7 +1330,8 @@ void tSVF_LP_initToPool (tSVF_LP** const svff, float freq, float Q, tMempool** c
     svf->g = tanf(PI * freq * svf->invSampleRate);
     if (Q > 0.99f) {
         Q = 0.99f;
-    }
+    
+}
     svf->k = 2.0f * Q;
     svf->onePlusg = 1.0f + svf->g;
     svf->a0 = 1.0f / ((svf->onePlusg * svf->onePlusg) - (svf->g * svf->k));
@@ -1478,25 +1495,23 @@ float tSVF_LP_getPhaseAtFrequency (tSVF_LP* const svf, float freq)
 
 
 // Efficient version of tSVF where frequency is set based on 12-bit integer input for lookup in tanh wavetable.
-void tEfficientSVF_init(tEfficientSVF** const svff, SVFType type, uint16_t input, float Q, LEAF *const leaf) {
-    tEfficientSVF_initToPool(svff, type, input, Q, &leaf->mempool);
+void tEfficientSVF_create(tMempool** const mp, tEfficientSVF** const svff)
+{
+    ALLOC_FROM_POOL(tEfficientSVF, svff, mp);
 }
 
-void tEfficientSVF_initToPool (tEfficientSVF** const svff, SVFType type,
-                               uint16_t input, float Q, tMempool** const mp)
+void tEfficientSVF_init(LEAF* const leaf, tEfficientSVF* const svf, SVFType type, uint16_t input, float Q)
 {
-    tMempool *m = *mp;
-    tEfficientSVF *svf = *svff = (tEfficientSVF *) mpool_alloc(sizeof(tEfficientSVF), m);
-    svf->mempool = m;
+
 
     svf->type = type;
 
     svf->ic1eq = 0.0f;
     svf->ic2eq = 0.0f;
-    LEAF *leaf = svf->mempool->leaf;
     if (leaf->sampleRate > 80000) {
         svf->table = __filterTanhTable_96000;
-    } else {
+    
+} else {
         svf->table = __filterTanhTable_48000;
     }
 
@@ -1581,17 +1596,14 @@ void tEfficientSVF_setSampleRate (tEfficientSVF* const svf, float sampleRate)
 /******************************************************************************/
 
 
-void tHighpass_init(tHighpass** const ft, float freq, LEAF *const leaf)
+void tHighpass_create(tMempool** const mp, tHighpass** const ft)
 {
-    tHighpass_initToPool(ft, freq, &leaf->mempool);
+    ALLOC_FROM_POOL(tHighpass, ft, mp);
 }
 
-void tHighpass_initToPool (tHighpass** const ft, float freq, tMempool** const mp)
+void tHighpass_init(LEAF* const leaf, tHighpass* const f, float freq)
 {
-    tMempool *m = *mp;
-    tHighpass *f = *ft = (tHighpass *) mpool_calloc(sizeof(tHighpass), m);
-    f->mempool = m;
-    LEAF *leaf = f->mempool->leaf;
+
 
     f->twoPiTimesInvSampleRate = leaf->twoPiTimesInvSampleRate;
     f->R = (1.0f - (freq * f->twoPiTimesInvSampleRate));
@@ -1599,6 +1611,7 @@ void tHighpass_initToPool (tHighpass** const ft, float freq, tMempool** const mp
     f->xs = 0.0f;
 
     f->frequency = freq;
+
 }
 
 void tHighpass_free (tHighpass** const ft)
@@ -1638,18 +1651,14 @@ void tHighpass_setSampleRate (tHighpass* const f, float sr)
 /******************************************************************************/
 
 
-void tButterworth_init(tButterworth** const ft, int order, float f1, float f2,
-                        LEAF *const leaf)
+void tButterworth_create(tMempool** const mp, tButterworth** const ft)
 {
-    tButterworth_initToPool(ft, order, f1, f2, &leaf->mempool);
+    ALLOC_FROM_POOL(tButterworth, ft, mp);
 }
 
-void tButterworth_initToPool (tButterworth** const ft, int order, float f1,
-                              float f2, tMempool** const mp)
+void tButterworth_init(LEAF* const leaf, tButterworth* const f, int order, float f1, float f2)
 {
-    tMempool *m = *mp;
-    tButterworth *f = *ft = (tButterworth *) mpool_alloc(sizeof(tButterworth), m);
-    f->mempool = m;
+
 
     f->f1 = f1;
     f->f2 = f2;
@@ -1658,33 +1667,31 @@ void tButterworth_initToPool (tButterworth** const ft, int order, float f1,
     f->numSVF = f->order = order;
     if (f1 >= 0.0f && f2 >= 0.0f) f->numSVF *= 2;
 
-    f->svfs = (tSVF **) mpool_alloc(sizeof(tSVF*) * f->numSVF, m);
+    f->svfs = (tSVF *) mpool_alloc(sizeof(tSVF) * f->numSVF, f->mempool);
 
     int o = 0;
     if (f1 >= 0.0f) o = f->order;
     for (int i = 0; i < f->order; ++i) {
         if (f1 >= 0.0f)
-            tSVF_initToPool(&f->svfs[i], SVFTypeHighpass, f1, 0.5f / cosf((1.0f + 2.0f * i) * PI / (4 * f->order)), mp);
+            tSVF_init(leaf,&f->svfs[i], SVFTypeHighpass, f1, 0.5f / cosf((1.0f + 2.0f * i) * PI / (4 * f->order)) );
         if (f2 >= 0.0f)
-            tSVF_initToPool(&f->svfs[i + o], SVFTypeLowpass, f2, 0.5f / cosf((1.0f + 2.0f * i) * PI / (4 * f->order)),
-                            mp);
-    }
+            tSVF_init(leaf,&f->svfs[i + o], SVFTypeLowpass, f2, 0.5f / cosf((1.0f + 2.0f * i) * PI / (4 * f->order)));
+    
+}
 }
 
 void tButterworth_free (tButterworth** const ft)
 {
     tButterworth *f = *ft;
-
-    for (int i = 0; i < f->numSVF; ++i) tSVF_free(&f->svfs[i]);
-
     mpool_free((char *) f->svfs, f->mempool);
     mpool_free((char *) f, f->mempool);
+    f = NULL;
 }
 
 float tButterworth_tick (tButterworth* const f, float samp)
 {
     for (int i = 0; i < f->numSVF; ++i)
-        samp = tSVF_tick(f->svfs[i], samp);
+        samp = tSVF_tick(&f->svfs[i], samp);
 
     return samp;
 }
@@ -1694,7 +1701,7 @@ void tButterworth_setF1 (tButterworth* const f, float f1)
     if (f->f1 < 0.0f || f1 < 0.0f) return;
 
     f->f1 = f1;
-    for (int i = 0; i < f->order; ++i) tSVF_setFreq(f->svfs[i], f1);
+    for (int i = 0; i < f->order; ++i) tSVF_setFreq(&f->svfs[i], f1);
 }
 
 void tButterworth_setF2 (tButterworth* const f, float f2)
@@ -1704,7 +1711,7 @@ void tButterworth_setF2 (tButterworth* const f, float f2)
     int o = 0;
     if (f->f1 >= 0.0f) o = f->order;
     f->f2 = f2;
-    for (int i = 0; i < f->order; ++i) tSVF_setFreq(f->svfs[i + o], f2);
+    for (int i = 0; i < f->order; ++i) tSVF_setFreq(&f->svfs[i + o], f2);
 }
 
 void tButterworth_setFreqs (tButterworth* const f, float f1, float f2)
@@ -1715,7 +1722,7 @@ void tButterworth_setFreqs (tButterworth* const f, float f1, float f2)
 
 void tButterworth_setSampleRate (tButterworth* const f, float sr)
 {
-    for (int i = 0; i < f->numSVF; ++i) tSVF_setSampleRate(f->svfs[i], sr);
+    for (int i = 0; i < f->numSVF; ++i) tSVF_setSampleRate(&f->svfs[i], sr);
 }
 
 
@@ -1724,21 +1731,20 @@ void tButterworth_setSampleRate (tButterworth* const f, float sr)
 /******************************************************************************/
 
 
-void tFIR_init(tFIR** const firf, float *coeffs, int numTaps, LEAF *const leaf)
+void tFIR_create(tMempool** const mp, tFIR** const firf)
 {
-    tFIR_initToPool(firf, coeffs, numTaps, &leaf->mempool);
+    ALLOC_FROM_POOL(tFIR, firf, mp);
 }
 
-void tFIR_initToPool (tFIR** const firf, float *coeffs, int numTaps, tMempool** const mp)
+void tFIR_init(LEAF* const leaf, tFIR* const fir, float *coeffs, int numTaps)
 {
-    tMempool *m = *mp;
-    tFIR *fir = *firf = (tFIR *) mpool_alloc(sizeof(tFIR), m);
-    fir->mempool = m;
+
 
     fir->numTaps = numTaps;
     fir->coeff = coeffs;
-    fir->past = (float *) mpool_alloc(sizeof(float) * fir->numTaps, m);
+    fir->past = (float *) mpool_alloc(sizeof(float) * fir->numTaps, fir->mempool);
     for (int i = 0; i < fir->numTaps; ++i) fir->past[i] = 0.0f;
+
 }
 
 void tFIR_free (tFIR** const firf)
@@ -1770,27 +1776,26 @@ float tFIR_tick (tFIR* const fir, float input)
 /// translated from a Gen~ port of the Supercollider code that I believe was made by Rodrigo Costanzo and which I got from PA Tremblay - JS
 
 
-void tMedianFilter_init(tMedianFilter** const f, int size, LEAF *const leaf)
+void tMedianFilter_create(tMempool** const mp, tMedianFilter** const f)
 {
-    tMedianFilter_initToPool(f, size, &leaf->mempool);
+    ALLOC_FROM_POOL(tMedianFilter, f, mp);
 }
 
-void tMedianFilter_initToPool (tMedianFilter** const mf, int size, tMempool** const mp)
+void tMedianFilter_init(LEAF* const leaf, tMedianFilter* const f, int size)
 {
-    tMempool *m = *mp;
-    tMedianFilter *f = *mf = (tMedianFilter *) mpool_alloc(sizeof(tMedianFilter), m);
-    f->mempool = m;
+
 
     f->size = size;
     f->middlePosition = size / 2;
     f->last = size - 1;
     f->pos = -1;
-    f->val = (float *) mpool_alloc(sizeof(float) * size, m);
-    f->age = (int *) mpool_alloc(sizeof(int) * size, m);
+    f->val = (float *) mpool_alloc(sizeof(float) * size, f->mempool);
+    f->age = (int *) mpool_alloc(sizeof(int) * size, f->mempool);
     for (int i = 0; i < f->size; ++i) {
         f->val[i] = 0.0f;
         f->age[i] = i;
-    }
+    
+}
 
 }
 
@@ -1845,20 +1850,13 @@ float tMedianFilter_tick (tMedianFilter* const f, float input)
 /******************************************************************************/
 
 
-void tVZFilter_init(tVZFilter** const vf, VZFilterType type, float freq,
-                     float bandWidth, LEAF *const leaf)
+void tVZFilter_create(tMempool** const mp, tVZFilter** const vf)
 {
-    tVZFilter_initToPool(vf, type, freq, bandWidth, &leaf->mempool);
+    ALLOC_FROM_POOL(tVZFilter, vf, mp);
 }
 
-void tVZFilter_initToPool (tVZFilter** const vf, VZFilterType type, float freq,
-                           float bandWidth, tMempool** const mp)
+void tVZFilter_init(LEAF* const leaf, tVZFilter* const f, VZFilterType type, float freq, float bandWidth)
 {
-    tMempool *m = *mp;
-    tVZFilter *f = *vf = (tVZFilter *) mpool_alloc(sizeof(tVZFilter), m);
-    f->mempool = m;
-
-    LEAF *leaf = f->mempool->leaf;
 
     f->sampleRate = leaf->sampleRate;
     f->invSampleRate = leaf->invSampleRate;
@@ -1877,11 +1875,12 @@ void tVZFilter_initToPool (tVZFilter** const vf, VZFilterType type, float freq,
     f->R2 = f->invG;
     f->R2Plusg = f->R2 + f->g;
     f->g = tanf(PI * f->fc * f->invSampleRate);  // embedded integrator gain (Fig 3.11)
-    tVZFilter_setBandwidth(*vf, f->B);
-    tVZFilter_calcCoeffs(*vf);
+    tVZFilter_setBandwidth(f, f->B);
+    tVZFilter_calcCoeffs(f);
     if (leaf->sampleRate > 80000) {
         f->table = __filterTanhTable_96000;
-    } else {
+    
+} else {
         f->table = __filterTanhTable_48000;
     }
 }
@@ -2371,20 +2370,14 @@ void tVZFilter_setSampleRate (tVZFilter* const f, float sr)
 /******************************************************************************/
 
 
-void tVZFilterLS_init(tVZFilterLS** const vf, float freq, float Q, float gain,
-                       LEAF *const leaf)
+void tVZFilterLS_create(tMempool** const mp, tVZFilterLS** const vf)
 {
-    tVZFilterLS_initToPool(vf, freq, Q, gain, &leaf->mempool);
+    ALLOC_FROM_POOL(tVZFilterLS, vf, mp);
 }
 
-void tVZFilterLS_initToPool (tVZFilterLS** const vf, float freq, float Q,
-                             float gain, tMempool** const mp)
+void tVZFilterLS_init(LEAF* const leaf, tVZFilterLS* const f, float freq, float Q, float gain)
 {
-    tMempool *m = *mp;
-    tVZFilterLS *f = *vf = (tVZFilterLS *) mpool_alloc(sizeof(tVZFilterLS), m);
-    f->mempool = m;
 
-    LEAF *leaf = f->mempool->leaf;
 
     f->sampleRate = leaf->sampleRate;
     f->sampRatio = 48000.0f / f->sampleRate;
@@ -2403,7 +2396,8 @@ void tVZFilterLS_initToPool (tVZFilterLS** const vf, float freq, float Q,
     f->h = 1.0f / (1.0f + (f->R2 * f->g) + (f->g * f->g));  // factor for feedback
     if (leaf->sampleRate > 80000) {
         f->table = __filterTanhTable_96000;
-    } else {
+    
+} else {
         f->table = __filterTanhTable_48000;
     }
 }
@@ -2530,20 +2524,14 @@ void tVZFilterLS_setFreqFastAndResonanceAndGain (tVZFilterLS* const f, float cut
 /******************************************************************************/
 
 
-void tVZFilterHS_init(tVZFilterHS** const vf, float freq, float Q, float gain,
-                       LEAF *const leaf)
+void tVZFilterHS_create(tMempool** const mp, tVZFilterHS** const vf)
 {
-    tVZFilterHS_initToPool(vf, freq, Q, gain, &leaf->mempool);
+    ALLOC_FROM_POOL(tVZFilterHS, vf, mp);
 }
 
-void tVZFilterHS_initToPool (tVZFilterHS** const vf, float freq, float Q,
-                             float gain, tMempool** const mp)
+void tVZFilterHS_init(LEAF* const leaf, tVZFilterHS* const f, float freq, float Q, float gain)
 {
-    tMempool *m = *mp;
-    tVZFilterHS *f = *vf = (tVZFilterHS *) mpool_alloc(sizeof(tVZFilterHS), m);
-    f->mempool = m;
 
-    LEAF *leaf = f->mempool->leaf;
 
     f->sampleRate = leaf->sampleRate;
     f->invSampleRate = leaf->invSampleRate;
@@ -2562,7 +2550,8 @@ void tVZFilterHS_initToPool (tVZFilterHS** const vf, float freq, float Q,
     f->h = 1.0f / (1.0f + (f->R2 * f->g) + (f->g * f->g));  // factor for feedback
     if (leaf->sampleRate > 80000) {
         f->table = __filterTanhTable_96000;
-    } else {
+    
+} else {
         f->table = __filterTanhTable_48000;
     }
 }
@@ -2693,20 +2682,14 @@ void tVZFilterHS_setFreqFastAndResonanceAndGain (tVZFilterHS* const f, float cut
 /******************************************************************************/
 
 
-void tVZFilterBell_init(tVZFilterBell** const vf, float freq, float BW,
-                         float gain, LEAF *const leaf)
+void tVZFilterBell_create(tMempool** const mp, tVZFilterBell** const vf)
 {
-    tVZFilterBell_initToPool(vf, freq, BW, gain, &leaf->mempool);
+    ALLOC_FROM_POOL(tVZFilterBell, vf, mp);
 }
 
-void tVZFilterBell_initToPool (tVZFilterBell** const vf, float freq, float BW,
-                               float gain, tMempool** const mp)
+void tVZFilterBell_init(LEAF* const leaf, tVZFilterBell* const f, float freq, float BW, float gain)
 {
-    tMempool *m = *mp;
-    tVZFilterBell *f = *vf = (tVZFilterBell *) mpool_alloc(sizeof(tVZFilterBell), m);
-    f->mempool = m;
 
-    LEAF *leaf = f->mempool->leaf;
 
     f->sampleRate = leaf->sampleRate;
     f->invSampleRate = leaf->invSampleRate;
@@ -2729,7 +2712,8 @@ void tVZFilterBell_initToPool (tVZFilterBell** const vf, float freq, float BW,
     f->h = 1.0f / (1.0f + (f->R2 * f->g) + (f->g * f->g));  // factor for feedback
     if (leaf->sampleRate > 80000) {
         f->table = __filterTanhTable_96000;
-    } else {
+    
+} else {
         f->table = __filterTanhTable_48000;
     }
 }
@@ -2953,18 +2937,14 @@ void tVZFilterBell_setFreqAndBWAndGainFast (tVZFilterBell* const f, float cutoff
 /******************************************************************************/
 
 
-void tVZFilterBR_init(tVZFilterBR** const vf, float freq, float Q, LEAF *const leaf)
+void tVZFilterBR_create(tMempool** const mp, tVZFilterBR** const vf)
 {
-    tVZFilterBR_initToPool(vf, freq, Q, &leaf->mempool);
+    ALLOC_FROM_POOL(tVZFilterBR, vf, mp);
 }
 
-void tVZFilterBR_initToPool (tVZFilterBR** const vf, float freq, float Q, tMempool** const mp)
+void tVZFilterBR_init(LEAF* const leaf, tVZFilterBR* const f, float freq, float Q)
 {
-    tMempool *m = *mp;
-    tVZFilterBR *f = *vf = (tVZFilterBR *) mpool_alloc(sizeof(tVZFilterBR), m);
-    f->mempool = m;
 
-    LEAF *leaf = f->mempool->leaf;
 
     f->sampleRate = leaf->sampleRate;
     f->sampRatio = 48000.0f / f->sampleRate;
@@ -2980,7 +2960,8 @@ void tVZFilterBR_initToPool (tVZFilterBR** const vf, float freq, float Q, tMempo
     f->h = 1.0f / (1.0f + (f->R2 * f->g) + (f->g * f->g));  // factor for feedback precomputation
     if (leaf->sampleRate > 80000) {
         f->table = __filterTanhTable_96000;
-    } else {
+    
+} else {
         f->table = __filterTanhTable_48000;
     }
 }
@@ -3090,20 +3071,14 @@ void tVZFilterBR_setFreqAndResonanceFast (tVZFilterBR* const f, float cutoff, fl
 //taken from Ivan C's model of the EMS diode ladder, based on mystran's code from KVR forums
 //https://www.kvraudio.com/forum/viewtopic.php?f=33&t=349859&start=255
 
-void tDiodeFilter_init(tDiodeFilter** const vf, float cutoff, float resonance,
-                        LEAF *const leaf)
+void tDiodeFilter_create(tMempool** const mp, tDiodeFilter** const vf)
 {
-    tDiodeFilter_initToPool(vf, cutoff, resonance, &leaf->mempool);
+    ALLOC_FROM_POOL(tDiodeFilter, vf, mp);
 }
 
-void tDiodeFilter_initToPool (tDiodeFilter** const vf, float cutoff, float resonance,
-                              tMempool** const mp)
+void tDiodeFilter_init(LEAF* const leaf, tDiodeFilter* const f, float cutoff, float resonance)
 {
-    tMempool *m = *mp;
-    tDiodeFilter *f = *vf = (tDiodeFilter *) mpool_alloc(sizeof(tDiodeFilter), m);
-    f->mempool = m;
 
-    LEAF *leaf = f->mempool->leaf;
 
     f->invSampleRate = leaf->invSampleRate;
     f->cutoff = cutoff;
@@ -3125,7 +3100,8 @@ void tDiodeFilter_initToPool (tDiodeFilter** const vf, float cutoff, float reson
     f->sampRatio = 48000.0f / leaf->sampleRate;
     if (leaf->sampleRate > 80000) {
         f->table = __filterTanhTable_96000;
-    } else {
+    
+} else {
         f->table = __filterTanhTable_48000;
     }
 }
@@ -3314,20 +3290,14 @@ void tDiodeFilter_setSampleRate(tDiodeFilter* const f, float sr) {
 /******************************************************************************/
 
 
-void tLadderFilter_init(tLadderFilter** const vf, float cutoff, float resonance,
-                         LEAF *const leaf)
+void tLadderFilter_create(tMempool** const mp, tLadderFilter** const vf)
 {
-    tLadderFilter_initToPool(vf, cutoff, resonance, &leaf->mempool);
+    ALLOC_FROM_POOL(tLadderFilter, vf, mp);
 }
 
-void tLadderFilter_initToPool (tLadderFilter** const vf, float cutoff,
-                               float resonance, tMempool** const mp)
+void tLadderFilter_init(LEAF* const leaf, tLadderFilter* const f, float cutoff, float resonance)
 {
-    tMempool *m = *mp;
-    tLadderFilter *f = *vf = (tLadderFilter *) mpool_alloc(sizeof(tLadderFilter), m);
-    f->mempool = m;
 
-    LEAF *leaf = f->mempool->leaf;
 
     f->invSampleRate = leaf->invSampleRate;
     f->sampleRatio = 48000.0f / leaf->sampleRate;
@@ -3354,7 +3324,8 @@ void tLadderFilter_initToPool (tLadderFilter** const vf, float cutoff,
     f->b[0] = 0.04f;
     if (leaf->sampleRate > 80000) {
         f->table = __filterTanhTable_96000;
-    } else {
+    
+} else {
         f->table = __filterTanhTable_48000;
     }
 }
@@ -3517,18 +3488,14 @@ void tLadderFilter_setOversampling (tLadderFilter* const f, int os)
 /******************************************************************************/
 
 
-void tTiltFilter_init(tTiltFilter** const vf, float cutoff, LEAF *const leaf)
+void tTiltFilter_create(tMempool** const mp, tTiltFilter** const vf)
 {
-    tTiltFilter_initToPool(vf, cutoff, &leaf->mempool);
+    ALLOC_FROM_POOL(tTiltFilter, vf, mp);
 }
 
-void tTiltFilter_initToPool (tTiltFilter** const vf, float cutoff, tMempool** const mp)
+void tTiltFilter_init(LEAF* const leaf, tTiltFilter* const f, float cutoff)
 {
-    tMempool *m = *mp;
-    tTiltFilter *f = *vf = (tTiltFilter *) mpool_alloc(sizeof(tTiltFilter), m);
-    f->mempool = m;
 
-    LEAF *leaf = f->mempool->leaf;
     f->cutoff = cutoff;
     f->invAmp = 1.0f / (6.0f / logf(2.0f));
     f->gfactor = 5.0f;
@@ -3539,6 +3506,7 @@ void tTiltFilter_initToPool (tTiltFilter** const vf, float cutoff, tMempool** co
     float n = 1.0f / (f->sr3 + omega);
     f->a0 = 2.0f * omega * n;
     f->b1 = (f->sr3 - omega) * n;
+
 }
 
 void tTiltFilter_free (tTiltFilter** const vf)

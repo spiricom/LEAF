@@ -26,9 +26,9 @@ typedef struct tLookupTable
     tMempool* mempool;
 } tLookupTable;
 
-void tLookupTable_init(tLookupTable**  const tLookupTable, float start, float end, float center, int size, LEAF* const leaf);
+void    tLookupTable_create               (tMempool** const mempool, tLookupTable** const);
 
-void tLookupTable_initToPool(tLookupTable**  const tLookupTable, float start, float end, float center, int size, tMempool** const mempool);
+void    tLookupTable_init                 (LEAF* const leaf, tLookupTable* const tLookupTable, float start, float end, float center, int size);
 
     /*!
      @ingroup tables

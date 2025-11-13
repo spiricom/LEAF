@@ -47,36 +47,10 @@ static float get_reflected_wave_for_ideal      (tWDF* const n, float input, floa
 static float get_reflected_wave_for_diode      (tWDF* const n, float input, float incident_wave);
 static float get_reflected_wave_for_diode_pair (tWDF* const n, float input, float incident_wave);
 
-static void wdf_init(tWDF** const wdf, WDFComponentType type, float value, tWDF** const rL, tWDF** const rR)
+static void wdf_create(tMempool** const mp, wdf** const wdf)
 {
-    tWDF* r = *wdf;
-    LEAF* leaf = r->mempool->leaf;
-    
-    r->type = type;
-    r->child_left = *rL;
-    r->child_right = *rR;
-    r->incident_wave_up = 0.0f;
-    r->incident_wave_left = 0.0f;
-    r->incident_wave_right = 0.0f;
-    r->reflected_wave_up = 0.0f;
-    r->reflected_wave_left = 0.0f;
-    r->reflected_wave_right = 0.0f;
-    r->sample_rate = leaf->sampleRate;
-    r->value = value;
-    
-    tWDF* child;
-    if (r->child_left != NULL) child = r->child_left;
-    else child = r->child_right;
-    
-    if (r->type == Resistor)
-    {
-        r->port_resistance_up = r->value;
-        r->port_conductance_up = 1.0f / r->value;
-        
-        r->get_port_resistance = &get_port_resistance_for_resistor;
-        r->get_reflected_wave_up = &get_reflected_wave_for_resistor;
-        r->set_incident_wave = &set_incident_wave_for_leaf;
-    }
+    ALLOC_FROM_POOL(wdf, wdf, mp);
+}
     else if (r->type == Capacitor)
     {
         r->port_conductance_up = r->sample_rate * 2.0f * r->value;
@@ -167,17 +141,19 @@ static void wdf_init(tWDF** const wdf, WDFComponentType type, float value, tWDF*
     }
 }
 //WDF
-void tWDF_init(tWDF** const wdf, WDFComponentType type, float value, tWDF** const rL, tWDF** const rR, LEAF* const leaf)
+void tWDF_create(tMempool** const mp, tWDF** const wdf)
 {
-    tWDF_initToPool(wdf, type, value, rL, rR, &leaf->mempool);
+    ALLOC_FROM_POOL(tWDF, wdf, mp);
 }
 
-void    tWDF_initToPool(tWDF** const wdf, WDFComponentType type, float value, tWDF** const rL, tWDF** const rR, tMempool** const mp)
+void tWDF_init(LEAF* const leaf, tWDF* const wdf, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
 {
+
     tMempool* m = *mp;
     *wdf = (tWDF*) mpool_alloc(sizeof(tWDF), m);
     
     wdf_init(wdf, type, value, rL, rR);
+
 }
 
 void    tWDF_free (tWDF** const wdf)

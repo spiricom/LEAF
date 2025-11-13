@@ -31,24 +31,24 @@ SET(LIBRARY_BASE_PATH "${PROJECT_SOURCE_DIR}")
 SET(PUBLIC_SOURCES_FILES
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf.c"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-math.c"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-mempool.c"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-analysis.c"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-envelopes.c"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-tables.c"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-delay.c"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-filters.c"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-distortion.c"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-dynamics.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-effects.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-envelopes.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-electrical.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-filters.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-instruments.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-mempool.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-midi.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-oscillators.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-physical.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-reverb.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-sampling.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-tables.c"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-vocal.c"
+             "${LIBRARY_BASE_PATH}/leaf/Src/leaf-oscillators.c"
 
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-effects.c"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-electrical.c"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-instruments.c"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-midi.c"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-physical.c"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-reverb.c"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-sampling.c"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-vocal.c"
 )
 
 SET(PRIVATE_SOURCES_FILES
@@ -56,27 +56,28 @@ SET(PRIVATE_SOURCES_FILES
 )
 
 SET(PUBLIC_HEADERS_FILES
-        "${LIBRARY_BASE_PATH}/leaf/leaf-config.h"
+#        "${LIBRARY_BASE_PATH}/leaf/leaf-config.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-math.h"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-mempool.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-analysis.h"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-envelopes.h"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-tables.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-delay.h"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-filters.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-distortion.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-dynamics.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-effects.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-envelopes.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-electrical.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-filters.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-instruments.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-mempool.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-midi.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-oscillators.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-physical.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-reverb.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-sampling.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-tables.h"
-        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-vocal.h"
-        "${LIBRARY_BASE_PATH}/leaf/leaf.h"
+                "${LIBRARY_BASE_PATH}/leaf/Src/leaf-oscillators.h"
+
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-effects.h"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-electrical.h"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-instruments.h"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-midi.h"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-physical.h"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-reverb.h"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-sampling.h"
+#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-vocal.h"
+#        "${LIBRARY_BASE_PATH}/leaf/leaf.h"
 
 )
 
@@ -103,17 +104,16 @@ enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-#add_subdirectory(test)
+add_subdirectory(test)
 add_compile_options( -w )
 add_compile_options(-Wno-implicit-float-conversion)
-#ENABLE_TESTING()
-SET_TARGET_PROPERTIES (
-        ${BINARY_NAME} PROPERTIES
-        VERSION		${LIBRARY_VERSION_STRING}
-        SOVERSION	${LIBRARY_VERSION_MAJOR}
-        PUBLIC_HEADER  ${PUBLIC_HEADERS_FILES}
+ENABLE_TESTING()
+set_target_properties(${BINARY_NAME}
+        PROPERTIES
+        VERSION "${LIBRARY_VERSION_STRING}"
+        SOVERSION "${LIBRARY_VERSION_MAJOR}"
+        PUBLIC_HEADER "${PUBLIC_HEADERS_FILES}"
 )
-
 ################################################################################
 ### Adding compilator definitions, like debug symbols
 

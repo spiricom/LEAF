@@ -37,12 +37,12 @@ extern "C" {
      @brief 808 drum machine cowbell.
      @{
      
-     @fn void    t808Cowbell_init(t808Cowbell** const, int useStick, LEAF* const leaf)
+     @fn void    t808Cowbell_init(t808Cowbell* const, int useStick, LEAF* const leaf)
      @brief Initialize a t808Cowbell to the default mempool of a LEAF instance.
      @param cowbell A pointer to the t808Cowbell to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808Cowbell_initToPool(t808Cowbell** const, int useStick, tMempool** const)
+     @fn void    t808Cowbell_init                 (tMempool** const)
      @brief Initialize a t808Cowbell to a specified mempool.
      @param cowbell A pointer to the t808Cowbell to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -55,7 +55,7 @@ extern "C" {
      @brief
      @param cowbell A pointer to the relevant t808Cowbell.
      
-     @fn void    t808Cowbell_on              (t808Cowbell* const, float vel)
+     @fn void    t808Cowbell_on              (t808Cowbell* const, t808Cowbell** const, int useStick, float vel)
      @brief
      @param cowbell A pointer to the relevant t808Cowbell.
      
@@ -101,8 +101,8 @@ extern "C" {
         uint8_t useStick;
     } t808Cowbell;
 
-    void    t808Cowbell_init            (t808Cowbell** const, int useStick, LEAF* const leaf);
-    void    t808Cowbell_initToPool      (t808Cowbell** const, int useStick, tMempool** const);
+    void    t808Cowbell_create               (tMempool** const mempool, t808Cowbell** const);
+    void    t808Cowbell_init                 (LEAF* const leaf, t808Cowbell* const, int useStick);
     void    t808Cowbell_free            (t808Cowbell** const);
     
     float  t808Cowbell_tick            (t808Cowbell* const);
@@ -124,12 +124,12 @@ extern "C" {
      @brief 808 drum machine hihat.
      @{
      
-     @fn void    t808Hihat_init(t808Hihat** const, LEAF* const leaf)
+     @fn void    t808Hihat_init(t808Hihat* const, LEAF* const leaf)
      @brief Initialize a t808Hihat to the default mempool of a LEAF instance.
      @param hihat A pointer to the t808Hihat to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808Hihat_initToPool(t808Hihat** const, tMempool** const)
+     @fn void    t808Hihat_init                 (tMempool** const)
      @brief Initialize a t808Hihat to a specified mempool.
      @param hihat A pointer to the t808Hihat to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -142,7 +142,7 @@ extern "C" {
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
-     @fn void    t808Hihat_on                    (t808Hihat* const, float vel)
+     @fn void    t808Hihat_on                    (t808Hihat* const, t808Hihat** const, float vel)
      @brief
      @param hihat A pointer to the relevant t808Hihat.
      
@@ -209,8 +209,8 @@ extern "C" {
         float oscNoiseMix;
     } t808Hihat;
 
-    void    t808Hihat_init                  (t808Hihat** const, LEAF* const leaf);
-    void    t808Hihat_initToPool            (t808Hihat** const, tMempool** const);
+    void    t808Hihat_create               (tMempool** const mempool, t808Hihat** const);
+    void    t808Hihat_init                 (LEAF* const leaf, t808Hihat* const);
     void    t808Hihat_free                  (t808Hihat** const);
     
     float  t808Hihat_tick                  (t808Hihat* const);
@@ -236,12 +236,12 @@ extern "C" {
      @brief 808 drum machine snare.
      @{
      
-     @fn void    t808Snare_init(t808Snare** const, LEAF* const leaf)
+     @fn void    t808Snare_init(t808Snare* const, LEAF* const leaf)
      @brief Initialize a t808Snare to the default mempool of a LEAF instance.
      @param snare A pointer to the t808Snare to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808Snare_initToPool(t808Snare** const, tMempool** const)
+     @fn void    t808Snare_init                 (tMempool** const)
      @brief Initialize a t808Snare to a specified mempool.
      @param snare A pointer to the t808Snare to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -254,7 +254,7 @@ extern "C" {
      @brief
      @param snare A pointer to the relevant t808Snare.
      
-     @fn void    t808Snare_on                    (t808Snare* const, float vel)
+     @fn void    t808Snare_on                    (t808Snare* const, t808Snare** const, float vel)
      @brief
      @param snare A pointer to the relevant t808Snare.
      
@@ -317,8 +317,8 @@ extern "C" {
         float noiseFilterFreq;
     } t808Snare;
 
-    void    t808Snare_init                  (t808Snare** const, LEAF* const leaf);
-    void    t808Snare_initToPool            (t808Snare** const, tMempool** const);
+    void    t808Snare_create               (tMempool** const mempool, t808Snare** const);
+    void    t808Snare_init                 (LEAF* const leaf, t808Snare* const);
     void    t808Snare_free                  (t808Snare** const);
     
     float  t808Snare_tick                  (t808Snare* const);
@@ -343,12 +343,12 @@ extern "C" {
      @brief 808 drum machine snare.
      @{
      
-     @fn void    t808SnareSmall_init(t808SnareSmall** const, LEAF* const leaf)
+     @fn void    t808SnareSmall_init(t808SnareSmall* const, LEAF* const leaf)
      @brief Initialize a t808SnareSmall to the default mempool of a LEAF instance.
      @param snare A pointer to the t808SnareSmall to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808SnareSmall_initToPool(t808SnareSmall** const, tMempool** const)
+     @fn void    t808SnareSmall_init                 (tMempool** const)
      @brief Initialize a t808SnareSmall to a specified mempool.
      @param snare A pointer to the t808SnareSmall to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -361,7 +361,7 @@ extern "C" {
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
-     @fn void    t808SnareSmall_on                    (t808SnareSmall* const, float vel)
+     @fn void    t808SnareSmall_on                    (t808SnareSmall* const, t808SnareSmall** const, float vel)
      @brief
      @param snare A pointer to the relevant t808SnareSmall.
      
@@ -424,8 +424,8 @@ extern "C" {
         float noiseFilterFreq;
     } t808SnareSmall;
 
-    void    t808SnareSmall_init                  (t808SnareSmall** const, LEAF* const leaf);
-    void    t808SnareSmall_initToPool            (t808SnareSmall** const, tMempool** const);
+    void    t808SnareSmall_create               (tMempool** const mempool, t808SnareSmall** const);
+    void    t808SnareSmall_init                 (LEAF* const leaf, t808SnareSmall* const);
     void    t808SnareSmall_free                  (t808SnareSmall** const);
     
     float  t808SnareSmall_tick                  (t808SnareSmall* const);
@@ -448,12 +448,12 @@ extern "C" {
      @brief 808 drum machine kick.
      @{
      
-     @fn void    t808Kick_init(t808Kick** const, LEAF* const leaf)
+     @fn void    t808Kick_init(t808Kick* const, LEAF* const leaf)
      @brief Initialize a t808Kick to the default mempool of a LEAF instance.
      @param kick A pointer to the t808Kick to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808Kick_initToPool(t808Kick** const, tMempool** const)
+     @fn void    t808Kick_init                 (tMempool** const)
      @brief Initialize a t808Kick to a specified mempool.
      @param kick A pointer to the t808Kick to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -466,7 +466,7 @@ extern "C" {
      @brief
      @param kick A pointer to the relevant t808Kick.
      
-     @fn void    t808Kick_on                 (t808Kick* const, float vel)
+     @fn void    t808Kick_on                 (t808Kick* const, t808Kick** const, float vel)
      @brief
      @param kick A pointer to the relevant t808Kick.
      
@@ -527,8 +527,8 @@ extern "C" {
         float noiseFilterFreq;
     } t808Kick;
 
-    void    t808Kick_init               (t808Kick** const, LEAF* const leaf);
-    void    t808Kick_initToPool         (t808Kick** const, tMempool** const);
+    void    t808Kick_create               (tMempool** const mempool, t808Kick** const);
+    void    t808Kick_init                 (LEAF* const leaf, t808Kick* const);
     void    t808Kick_free               (t808Kick** const);
     
     float  t808Kick_tick               (t808Kick* const);
@@ -553,12 +553,12 @@ extern "C" {
      @brief 808 drum machine kick.
      @{
      
-     @fn void    t808KickSmall_init(t808KickSmall** const, LEAF* const leaf)
+     @fn void    t808KickSmall_init(t808KickSmall* const, LEAF* const leaf)
      @brief Initialize a t808KickSmall to the default mempool of a LEAF instance.
      @param kick A pointer to the t808KickSmall to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    t808KickSmall_initToPool(t808KickSmall** const, tMempool** const)
+     @fn void    t808KickSmall_init                 (tMempool** const)
      @brief Initialize a t808KickSmall to a specified mempool.
      @param kick A pointer to the t808KickSmall to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -571,7 +571,7 @@ extern "C" {
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
-     @fn void    t808KickSmall_on                 (t808KickSmall* const, float vel)
+     @fn void    t808KickSmall_on                 (t808KickSmall* const, t808KickSmall** const, float vel)
      @brief
      @param kick A pointer to the relevant t808KickSmall.
      
@@ -632,8 +632,8 @@ extern "C" {
         float noiseFilterFreq;
     } t808KickSmall;
 
-    void    t808KickSmall_init               (t808KickSmall** const, LEAF* const leaf);
-    void    t808KickSmall_initToPool         (t808KickSmall** const, tMempool** const);
+    void    t808KickSmall_create               (tMempool** const mempool, t808KickSmall** const);
+    void    t808KickSmall_init                 (LEAF* const leaf, t808KickSmall* const);
     void    t808KickSmall_free               (t808KickSmall** const);
     
     float  t808KickSmall_tick               (t808KickSmall* const);

@@ -126,13 +126,14 @@ void glottis_setup_waveform(glottis* const glot)
     glot->Te = Te;
     glot->omega = omega;
 }
-void glottis_init(glottis** const glo, LEAF* const leaf)
+void glottis_create(tMempool** const mp, glottis** const glo)
 {
-	glottis_initToPool(glo, &leaf->mempool);
+    ALLOC_FROM_POOL(glottis, glo, mp);
 }
 
-void glottis_initToPool(glottis** const glo, tMempool** const mp)
+void glottis_init(LEAF* const leaf, glottis** const glo)
 {
+
 
 	tMempool* m = *mp;
 	glottis* glot = *glo = (glottis*) mpool_calloc(sizeof(glottis), m);
@@ -144,6 +145,7 @@ void glottis_initToPool(glottis** const glo, tMempool** const mp)
     glot->T = 1.0f/leaf->sampleRate; /* big T */
     glot->time_in_waveform = 0;
     glottis_setup_waveform(glot);
+
 }
 
 void glottis_free(glottis** const glo)
@@ -202,13 +204,14 @@ float glottis_compute(glottis* const glot)
     return out;
 }
 
-void tract_init(tract** const t,  int numTractSections, int maxNumTractSections, LEAF* const leaf)
+void tract_create(tMempool** const mp, tract** const t)
 {
-	tract_initToPool(t, numTractSections, maxNumTractSections, &leaf->mempool);
+    ALLOC_FROM_POOL(tract, t, mp);
 }
 
-void tract_initToPool(tract** const t,  int numTractSections, int maxNumTractSections, tMempool** const mp)
+void tract_init(LEAF* const leaf, tract* const t, int numTractSections, int maxNumTractSections)
 {
+
 	tMempool* m = *mp;
 	tract* tr = *t = (tract*) mpool_calloc(sizeof(tract), m);
 	tr->mempool = m;
@@ -276,7 +279,8 @@ void tract_initToPool(tract** const t,  int numTractSections, int maxNumTractSec
         diameter = 0;
         if(i < (int)(((7.0f*tr->invN) * tr->n) - 0.5f)) { //was 7
             diameter = 0.6f;
-        } else if( i < (int)((12.0f*tr->invN) * (float)tr->n)) { //was 12
+        
+} else if( i < (int)((12.0f*tr->invN) * (float)tr->n)) { //was 12
             diameter = 1.1f;
         } else {
             diameter = 1.5f;
@@ -741,19 +745,18 @@ float move_towards(float current, float target,
 
 
 
-void    tVoc_init(tVoc** const voc, int numTractSections, int maxNumTractSections, LEAF* const leaf)
+void tVoc_create(tMempool** const mp, tVoc** const voc)
 {
-	tVoc_initToPool   (voc, numTractSections, maxNumTractSections, &leaf->mempool);
+    ALLOC_FROM_POOL(tVoc, voc, mp);
 }
 
-void    tVoc_initToPool(tVoc** const voc, int numTractSections, int maxNumTractSections, tMempool** const mp)
+void tVoc_init(LEAF* const leaf, tVoc* const voc, int numTractSections, int maxNumTractSections)
 {
-	tMempool* m = *mp;
-	tVoc* v = *voc = (tVoc*) mpool_alloc(sizeof(tVoc), m);
-	v->mempool = m;
-	glottis_initToPool(&v->glot, &m); /* initialize glottis */
+
+glottis_initToPool(&v->glot, &m); /* initialize glottis */
 	tract_initToPool(&v->tr, numTractSections, maxNumTractSections, &m); /* initialize vocal tract */
 	v->counter = 0;
+
 }
 void    tVoc_free(tVoc** const voc)
 {

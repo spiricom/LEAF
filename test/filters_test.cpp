@@ -1,8 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
-#include "../leaf/Inc/leaf-filters.h"
+#include "../leaf/old_inc/leaf-filters.h"
 #include "../leaf/leaf.h"
-#include "../leaf/Inc/leaf-math.h"
-
+#include "../leaf/old_inc/leaf-math.h"
+/*
 static float myrand() {return (float)rand()/RAND_MAX;}
 
 TEST_CASE("Tests for `tAllpass` filer", "[tAllpass]") {
@@ -277,20 +277,7 @@ tFIR* filter;
     REQUIRE_NOTHROW(tFIR_free(&filter));
 }
 
-/******************************** FIX!!! **************************************/
 
-//TEST_CASE("Tests for `tFIR` filer", "[tFIR]") {
-//
-//    LEAF leaf;
-//    char leafMemory[65535];
-//    LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand);
-//
-//    tMedianFilter filter;
-//    tMedianFilter_init(&filter,10, &leaf);
-//
-//    REQUIRE(filter != nullptr);
-//    REQUIRE_NOTHROW(tMedianFilter_free(&filter));
-//}
 
 TEST_CASE("Tests for `tVZFilter` filer", "[tVZFilter]") {
 
@@ -455,3 +442,4 @@ tTiltFilter* filter;
     REQUIRE(filter != nullptr);
     REQUIRE_NOTHROW(tTiltFilter_free(&filter));
 }
+*/

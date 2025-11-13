@@ -15,7 +15,6 @@ extern "C" {
     
 #include "leaf-math.h"
 #include "leaf-mempool.h"
-#include "leaf-tables.h"
 #include "leaf-filters.h"
 #include "leaf-distortion.h"
     
@@ -34,12 +33,12 @@ extern "C" {
      @brief Wavetable cycle/sine wave oscillator
      @{
 
-     @fn void    tCycle_init(tCycle** const osc, LEAF* const leaf)
+     @fn void    tCycle_init(tCycle* const osc, LEAF* const leaf)
      @brief Initialize a tCycle to the default mempool of a LEAF instance.
      @param osc A pointer to the tCycle to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tCycle_initToPool(tCycle** const osc, tMempool** const mempool)
+     @fn void    tCycle_init                 (tMempool** const mempool)
      @brief Initialize a tCycle to a specified mempool.
      @param osc A pointer to the tCycle to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -53,7 +52,7 @@ extern "C" {
      @param osc A pointer to the relevant tCycle.
      @return The ticked sample as a float from -1 to 1.
 
-     @fn void    tCycle_setFreq      (tCycle* const osc, float freq)
+     @fn void    tCycle_setFreq      (tCycle* const osc, tCycle** const osc, float freq)
      @brief Set the frequency of a tCycle oscillator.
      @param osc A pointer to the relevant tCycle.
      @param freq The frequency to set the oscillator to.
@@ -73,8 +72,8 @@ extern "C" {
     } tCycle;
 
     // Memory handlers for `tCycle`
-    void    tCycle_init          (tCycle** const osc, LEAF* const leaf);
-    void    tCycle_initToPool    (tCycle** const osc, tMempool** const mempool);
+    void    tCycle_create               (tMempool** const mempool, tCycle** const);
+    void    tCycle_init                 (LEAF* const leaf, tCycle* const osc);
     void    tCycle_free          (tCycle** const osc);
 
     // Tick function for `tCycle`
@@ -93,12 +92,12 @@ extern "C" {
      @brief Anti-aliased wavetable triangle wave oscillator.
      @{
      
-     @fn void    tTriangle_init(tTriangle** const osc, LEAF* const leaf)
+     @fn void    tTriangle_init(tTriangle* const osc, LEAF* const leaf)
      @brief Initialize a tTriangle to the default mempool of a LEAF instance.
      @param osc A pointer to the tTriangle to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tTriangle_initToPool(tTriangle** const osc, tMempool** const mempool)
+     @fn void    tTriangle_init                 (tMempool** const mempool)
      @brief Initialize a tTriangle to a specified mempool.
      @param osc A pointer to the tTriangle to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -112,7 +111,7 @@ extern "C" {
      @param osc A pointer to the relevant tTriangle.
      @return The ticked sample as a float from -1 to 1.
      
-     @fn void    tTriangle_setFreq      (tTriangle* const osc, float freq)
+     @fn void    tTriangle_setFreq      (tTriangle* const osc, tTriangle** const osc, float freq)
      @brief Set the frequency of a tTriangle oscillator.
      @param osc A pointer to the relevant tTriangle.
      @param freq The frequency to set the oscillator to.
@@ -134,8 +133,8 @@ extern "C" {
     } tTriangle;
 
     // Memory handlers for `tTriangle`
-    void    tTriangle_init          (tTriangle** const osc, LEAF* const leaf);
-    void    tTriangle_initToPool    (tTriangle** const osc, tMempool** const mempool);
+    void    tTriangle_create               (tMempool** const mempool, tTriangle** const);
+    void    tTriangle_init                 (LEAF* const leaf, tTriangle* const osc);
     void    tTriangle_free          (tTriangle** const osc);
 
     // Tick function for `tTriangle`
@@ -154,12 +153,12 @@ extern "C" {
      @brief Anti-aliased wavetable square wave oscillator.
      @{
      
-     @fn void    tSquare_init(tSquare** const osc, LEAF* const leaf)
+     @fn void    tSquare_init(tSquare* const osc, LEAF* const leaf)
      @brief Initialize a tSquare to the default mempool of a LEAF instance.
      @param osc A pointer to the tSquare to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSquare_initToPool(tSquare** const osc, tMempool** const mempool)
+     @fn void    tSquare_init                 (tMempool** const mempool)
      @brief Initialize a tSquare to a specified mempool.
      @param osc A pointer to the tSquare to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -173,7 +172,7 @@ extern "C" {
      @param osc A pointer to the relevant tSquare.
      @return The ticked sample as a float from -1 to 1.
      
-     @fn void    tSquare_setFreq      (tSquare* const osc, float freq)
+     @fn void    tSquare_setFreq      (tSquare* const osc, tSquare** const osc, float freq)
      @brief Set the frequency of a tSquare oscillator.
      @param osc A pointer to the relevant tSquare.
      @param freq The frequency to set the oscillator to.
@@ -195,8 +194,8 @@ extern "C" {
     } tSquare;
 
     // Memory handlers for `tSquare`
-    void    tSquare_init          (tSquare** const osc, LEAF* const leaf);
-    void    tSquare_initToPool    (tSquare** const osc, tMempool** const mempool);
+    void    tSquare_create               (tMempool** const mempool, tSquare** const);
+    void    tSquare_init                 (LEAF* const leaf, tSquare* const osc);
     void    tSquare_free          (tSquare** const osc);
 
     // Tick function for `tSquare`
@@ -218,12 +217,12 @@ extern "C" {
      @brief Anti-aliased wavetable saw wave oscillator.
      @{
      
-     @fn void    tSawtooth_init(tSawtooth** const osc, LEAF* const leaf)
+     @fn void    tSawtooth_init(tSawtooth* const osc, LEAF* const leaf)
      @brief Initialize a tSawtooth to the default mempool of a LEAF instance.
      @param osc A pointer to the tSawtooth to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSawtooth_initToPool(tSawtooth** const osc, tMempool** const mempool)
+     @fn void    tSawtooth_init                 (tMempool** const mempool)
      @brief Initialize a tSawtooth to a specified mempool.
      @param osc A pointer to the tSawtooth to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -237,7 +236,7 @@ extern "C" {
      @param osc A pointer to the relevant tSawtooth.
      @return The ticked sample as a float from -1 to 1.
      
-     @fn void    tSawtooth_setFreq      (tSawtooth* const osc, float freq)
+     @fn void    tSawtooth_setFreq      (tSawtooth* const osc, tSawtooth** const osc, float freq)
      @brief Set the frequency of a tSawtooth oscillator.
      @param osc A pointer to the relevant tSawtooth.
      @param freq The frequency to set the oscillator to.
@@ -259,8 +258,8 @@ extern "C" {
     } tSawtooth;
 
     // Memory handlers for `tSawtooth`
-    void    tSawtooth_init          (tSawtooth** const osc, LEAF* const leaf);
-    void    tSawtooth_initToPool    (tSawtooth** const osc, tMempool** const mempool);
+    void    tSawtooth_create               (tMempool** const mempool, tSawtooth** const);
+    void    tSawtooth_init                 (LEAF* const leaf, tSawtooth* const osc);
     void    tSawtooth_free          (tSawtooth** const osc);
 
     // Tick function for `tSawtooth`
@@ -279,12 +278,12 @@ extern "C" {
      @brief Triangle wave oscillator with polyBLEP anti-aliasing.
      @{
      
-     @fn void   tPBTriangle_init(tPBTriangle** const osc, LEAF* const leaf)
+     @fn void   tPBTriangle_init(tPBTriangle* const osc, LEAF* const leaf)
      @brief Initialize a tPBTriangle to the default mempool of a LEAF instance.
      @param osc A pointer to the tPBTriangle to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPBTriangle_initToPool(tPBTriangle** const osc, tMempool** const mempool)
+     @fn void    tPBTriangle_init                 (tMempool** const mempool)
      @brief Initialize a tPBTriangle to a specified mempool.
      @param osc A pointer to the tPBTriangle to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -297,7 +296,7 @@ extern "C" {
      @brief
      @param osc A pointer to the relevant tPBTriangle.
      
-     @fn void    tPBTriangle_setFreq       (tPBTriangle* const osc, float freq)
+     @fn void    tPBTriangle_setFreq       (tPBTriangle* const osc, tPBTriangle** const osc, float freq)
      @brief
      @param osc A pointer to the relevant tPBTriangle.
      
@@ -311,7 +310,7 @@ extern "C" {
     {
         tMempool* mempool;
         uint32_t phase;
-        tCycle* sine;
+        tCycle sine;
         int32_t inc;
         float freq;
         float shape;
@@ -321,8 +320,8 @@ extern "C" {
     } tPBSineTriangle;
 
     // Memory handlers for `tPBSineTriangle`
-    void    tPBSineTriangle_init          (tPBSineTriangle** const osc, LEAF* const leaf);
-    void    tPBSineTriangle_initToPool    (tPBSineTriangle** const osc, tMempool** const mempool);
+    void    tPBSineTriangle_create               (tMempool** const mempool, tPBSineTriangle** const);
+    void    tPBSineTriangle_init                 (LEAF* const leaf, tPBSineTriangle* const osc);
     void    tPBSineTriangle_free          (tPBSineTriangle** const osc);
 
 
@@ -358,8 +357,8 @@ extern "C" {
     } tPBTriangle;
 
     // Memory handlers for `tPBTriangle`
-    void    tPBTriangle_init          (tPBTriangle** const osc, LEAF* const leaf);
-    void    tPBTriangle_initToPool    (tPBTriangle** const osc, tMempool** const mempool);
+    void    tPBTriangle_create               (tMempool** const mempool, tPBTriangle** const);
+    void    tPBTriangle_init                 (LEAF* const leaf, tPBTriangle* const osc);
     void    tPBTriangle_free          (tPBTriangle** const osc);
     
 #ifdef ITCMRAM
@@ -384,12 +383,12 @@ extern "C" {
      @brief Pulse wave oscillator with polyBLEP anti-aliasing.
      @{
      
-     @fn void    tPBPulse_init(tPBPulse** const osc, LEAF* const leaf)
+     @fn void    tPBPulse_init(tPBPulse* const osc, LEAF* const leaf)
      @brief Initialize a tPBPulse to the default mempool of a LEAF instance.
      @param osc A pointer to the tPBPulse to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPBPulse_initToPool(tPBPulse** const osc, tMempool** const)
+     @fn void    tPBPulse_init                 (tMempool** const)
      @brief Initialize a tPBPulse to a specified mempool.
      @param osc A pointer to the tPBPulse to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -402,7 +401,7 @@ extern "C" {
      @brief
      @param osc A pointer to the relevant tPBPulse.
      
-     @fn void    tPBPulse_setFreq     (tPBPulse* const osc, float freq)
+     @fn void    tPBPulse_setFreq     (tPBPulse* const osc, tPBPulse** const osc, float freq)
      @brief
      @param osc A pointer to the relevant tPBPulse.
      
@@ -425,8 +424,8 @@ extern "C" {
     } tPBPulse;
 
     // Memory handlers for `tPBPulse`
-    void    tPBPulse_init          (tPBPulse** const osc, LEAF* const leaf);
-    void    tPBPulse_initToPool    (tPBPulse** const osc, tMempool** const);
+    void    tPBPulse_create               (tMempool** const mempool, tPBPulse** const);
+    void    tPBPulse_init                 (LEAF* const leaf, tPBPulse* const osc);
     void    tPBPulse_free          (tPBPulse** const osc);
     
 #ifdef ITCMRAM
@@ -452,12 +451,12 @@ extern "C" {
      @brief Saw wave oscillator with polyBLEP anti-aliasing.
      @{
      
-     @fn void    tPBSaw_init(tPBSaw** const osc, LEAF* const leaf)
+     @fn void    tPBSaw_init(tPBSaw* const osc, LEAF* const leaf)
      @brief Initialize a tPBSaw to the default mempool of a LEAF instance.
      @param osc A pointer to the tPBSaw to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPBSaw_initToPool(tPBSaw** const osc, tMempool** const mempool)
+     @fn void    tPBSaw_init                 (tMempool** const mempool)
      @brief Initialize a tPBSaw to a specified mempool.
      @param osc A pointer to the tPBSaw to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -470,7 +469,7 @@ extern "C" {
      @brief
      @param osc A pointer to the relevant tPBSaw.
      
-     @fn void    tPBSaw_setFreq       (tPBSaw* const osc, float freq)
+     @fn void    tPBSaw_setFreq       (tPBSaw* const osc, tPBSaw** const osc, float freq)
      @brief
      @param osc A pointer to the relevant tPBSaw.
      ￼￼￼
@@ -489,8 +488,8 @@ extern "C" {
     } tPBSaw;
 
     // Memory handlers for `tPBSaw`
-    void    tPBSaw_init          (tPBSaw** const osc, LEAF* const leaf);
-    void    tPBSaw_initToPool    (tPBSaw** const osc, tMempool** const mempool);
+    void    tPBSaw_create               (tMempool** const mempool, tPBSaw** const);
+    void    tPBSaw_init                 (LEAF* const leaf, tPBSaw* const osc);
     void    tPBSaw_free          (tPBSaw** const osc);
     
 #ifdef ITCMRAM
@@ -525,8 +524,8 @@ typedef struct tPBSawSquare
 } tPBSawSquare;
 
     // Memory handlers for `tPBSawSquare`
-    void    tPBSawSquare_init          (tPBSawSquare** const osc, LEAF* const leaf);
-    void    tPBSawSquare_initToPool    (tPBSawSquare** const osc, tMempool** const mempool);
+    void    tPBSawSquare_create               (tMempool** const mempool, tPBSawSquare** const);
+    void    tPBSawSquare_init                 (LEAF* const leaf, tPBSawSquare* const osc);
     void    tPBSawSquare_free          (tPBSawSquare** const osc);
 
 #ifdef ITCMRAM
@@ -556,13 +555,13 @@ typedef struct tPBSawSquare
         float invSampleRateOS;
         uint8_t OSratio;
         uint32_t invSampleRateTimesTwoTo32OS;
-        tSVF** aaFilters;
+        tSVF* aaFilters;
         uint8_t filterOrder;
     } tSawOS;
 
     // Memory handlers for `tSawOS`
-    void    tSawOS_init          (tSawOS** const osc, uint8_t OS_ratio, uint8_t filterOrder, LEAF* const leaf);
-    void    tSawOS_initToPool    (tSawOS** const osc, uint8_t OS_ratio, uint8_t filterOrder, tMempool** const mp);
+    void    tSawOS_create               (tMempool** const mempool, tSawOS** const);
+    void    tSawOS_init                 (LEAF* const leaf, tSawOS* const osc, uint8_t OS_ratio, uint8_t filterOrder);
     void    tSawOS_free          (tSawOS** const osc);
 
     // Tick function for `tSawOS`
@@ -581,12 +580,12 @@ typedef struct tPBSawSquare
      @brief Aliasing phasor.
      @{
      
-     @fn void    tPhasor_init(tPhasor** const osc, LEAF* const leaf)
+     @fn void    tPhasor_init(tPhasor* const osc, LEAF* const leaf)
      @brief Initialize a tPhasor to the default mempool of a LEAF instance.
      @param osc A pointer to the tPhasor to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tPhasor_initToPool(tPhasor** const osc, tMempool** const)
+     @fn void    tPhasor_init                 (tMempool** const)
      @brief Initialize a tPhasor to a specified mempool.
      @param osc A pointer to the tPhasor to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -599,7 +598,7 @@ typedef struct tPBSawSquare
      @brief
      @param osc A pointer to the relevant tPhasor.
      
-     @fn void    tPhasor_setFreq     (tPhasor* const osc, float freq)
+     @fn void    tPhasor_setFreq     (tPhasor* const osc, tPhasor** const osc, float freq)
      @brief
      @param osc A pointer to the relevant tPhasor.
      ￼￼￼
@@ -617,8 +616,8 @@ typedef struct tPBSawSquare
     } tPhasor;
 
     // Memory handlers for `tPhasor`
-    void    tPhasor_init          (tPhasor** const osc, LEAF* const leaf);
-    void    tPhasor_initToPool    (tPhasor** const osc, tMempool** const);
+    void    tPhasor_create               (tMempool** const mempool, tPhasor** const);
+    void    tPhasor_init                 (LEAF* const leaf, tPhasor* const osc);
     void    tPhasor_free          (tPhasor** const osc);
 
     // Tick function for `tPhasor`
@@ -636,12 +635,12 @@ typedef struct tPBSawSquare
      @brief Noise generator, capable of producing white or pink noise.
      @{
      
-     @fn void    tNoise_init(tNoise** const noise, NoiseType type, LEAF* const leaf)
+     @fn void    tNoise_init(tNoise* const noise, NoiseType type, LEAF* const leaf)
      @brief Initialize a tNoise to the default mempool of a LEAF instance.
      @param noise A pointer to the tNoise to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tNoise_initToPool(tNoise** const noise, NoiseType type, tMempool** const)
+     @fn void    tNoise_init                 (tMempool** const)
      @brief Initialize a tNoise to a specified mempool.
      @param noise A pointer to the tNoise to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -669,17 +668,18 @@ typedef struct tPBSawSquare
      /*!￼￼￼ @} */
 
     
-    typedef struct tNoise
+    typedef struct tNoise tNoise;
+    struct tNoise
     {
         tMempool* mempool;
         NoiseType type;
         float pinkb0, pinkb1, pinkb2;
-        float(*rand)(void);
-    } tNoise;
+        float   (*rand)(void);
+    };
 
     // Memory handlers for `tNoise`
-    void    tNoise_init         (tNoise** const noise, NoiseType type, LEAF* const leaf);
-    void    tNoise_initToPool   (tNoise** const noise, NoiseType type, tMempool** const);
+    void    tNoise_create               (tMempool** const mempool, tNoise** const);
+    void    tNoise_init                 (LEAF* const leaf, tNoise* const noise, NoiseType type);
     void    tNoise_free         (tNoise** const noise);
 
     // Tick function for `tNoise`
@@ -693,12 +693,12 @@ typedef struct tPBSawSquare
      @brief Model of a neuron, adapted to act as an oscillator.
      @{
      
-     @fn void    tNeuron_init(tNeuron** const neuron, LEAF* const leaf)
+     @fn void    tNeuron_init(tNeuron* const neuron, LEAF* const leaf)
      @brief Initialize a tNeuron to the default mempool of a LEAF instance.
      @param neuron A pointer to the tNeuron to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tNeuron_initToPool(tNeuron** const neuron, tMempool** const mempool)
+     @fn void    tNeuron_init                 (tMempool** const mempool)
      @brief Initialize a tNeuron to a specified mempool.
      @param neuron A pointer to the tNeuron to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -716,7 +716,7 @@ typedef struct tPBSawSquare
      @param neuron A pointer to the relevant tNeuron.
      @return The ticked sample as a float from -1 to 1.
      
-     @fn void    tNeuron_setMode     (tNeuron* const neuron, NeuronMode mode)
+     @fn void    tNeuron_setMode     (tNeuron* const neuron, tNeuron** const neuron, NeuronMode mode)
      @brief Set the tNeuron shaping mode.
      @param neuron A pointer to the relevant tNeuron.
      @param mode The mode to set the tNeuron to.
@@ -782,7 +782,7 @@ typedef struct tPBSawSquare
     {
         tMempool* mempool;
         
-        tPoleZero* f;
+        tPoleZero f;
         
         NeuronMode mode;
         
@@ -798,8 +798,8 @@ typedef struct tPBSawSquare
     } tNeuron;
 
     // Memory handlers for `tNeuron`
-    void    tNeuron_init          (tNeuron** const neuron, LEAF* const leaf);
-    void    tNeuron_initToPool    (tNeuron** const neuron, tMempool** const mempool);
+    void    tNeuron_create               (tMempool** const mempool, tNeuron** const);
+    void    tNeuron_init                 (LEAF* const leaf, tNeuron* const neuron);
     void    tNeuron_free          (tNeuron** const neuron);
 
     // Tick function for `tNeuron`
@@ -832,11 +832,11 @@ typedef struct tPBSawSquare
      @brief Pulse wave oscillator with minBLEP anti-aliasing.
      @{
      
-     @fn void tMBPulse_init(tMBPulse** const osc, LEAF* const leaf)
+     @fn void tMBPulse_init(tMBPulse* const osc, LEAF* const leaf)
      @brief Initialize a tMBPulse to the default mempool of a LEAF instance.
      @param osc A pointer to the tMBPulse to initialize.
      
-     @fn void tMBPulse_initToPool(tMBPulse** const osc, tMempool** const mempool)
+     @fn void    tMBPulse_init                 (tMempool** const mempool)
      @brief Initialize a tMBPulse to a specified mempool.
      @param osc A pointer to the tMBPulse to initialize.
      
@@ -848,7 +848,7 @@ typedef struct tPBSawSquare
      @brief
      @param osc A pointer to the relevant tMBPulse.
      
-     @fn void tMBPulse_setFreq(tMBPulse* const osc, float f)
+     @fn void tMBPulse_setFreq(tMBPulse* const osc, tMBPulse** const osc, float f)
      @brief
      @param osc A pointer to the relevant tMBPulse.
      
@@ -891,8 +891,8 @@ typedef struct tPBSawSquare
     } tMBPulse;
 
     // Memory handlers for `tMBPulse`
-    void    tMBPulse_init                   (tMBPulse** const osc, LEAF* const leaf);
-    void    tMBPulse_initToPool             (tMBPulse** const osc, tMempool** const mempool);
+    void    tMBPulse_create               (tMempool** const mempool, tMBPulse** const);
+    void    tMBPulse_init                 (LEAF* const leaf, tMBPulse* const osc);
     void    tMBPulse_free                   (tMBPulse** const osc);
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPulse_place_step_dd_noBuffer(tMBPulse* const osc, int index, float phase, float inv_w, float scale);
@@ -917,11 +917,11 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPul
      @brief Triangle wave oscillator with minBLEP anti-aliasing.
      @{
      
-     @fn void tMBTriangle_init(tMBTriangle** const osc, LEAF* const leaf)
+     @fn void tMBTriangle_init(tMBTriangle* const osc, LEAF* const leaf)
      @brief Initialize a tMBTriangle to the default mempool of a LEAF instance.
      @param osc A pointer to the tMBTriangle to initialize.
      
-     @fn void tMBTriangle_initToPool(tMBTriangle** const osc, tMempool** const mempool)
+     @fn void    tMBTriangle_init                 (tMempool** const mempool)
      @brief Initialize a tMBTriangle to a specified mempool.
      @param osc A pointer to the tMBTriangle to initialize.
      
@@ -933,7 +933,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPul
      @brief
      @param osc A pointer to the relevant tMBTriangle.
      
-     @fn void tMBTriangle_setFreq(tMBTriangle* const osc, float f)
+     @fn void tMBTriangle_setFreq(tMBTriangle* const osc, tMBTriangle** const osc, float f)
      @brief
      @param osc A pointer to the relevant tMBTriangle.
      
@@ -977,8 +977,8 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBPul
     } tMBTriangle;
 
     // Memory handlers for `tMBTriangle`
-    void    tMBTriangle_init              (tMBTriangle** const osc, LEAF* const leaf);
-    void    tMBTriangle_initToPool        (tMBTriangle** const osc, tMempool** const mempool);
+    void    tMBTriangle_create               (tMempool** const mempool, tMBTriangle** const);
+    void    tMBTriangle_init                 (LEAF* const leaf, tMBTriangle* const osc);
     void    tMBTriangle_free              (tMBTriangle** const osc);
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTriangle_place_dd_noBuffer(tMBTriangle* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
@@ -1030,8 +1030,8 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBTri
     } tMBSineTri;
 
     // Memory handlers for `tMBSineTri`
-    void    tMBSineTri_init              (tMBSineTri** const osc, LEAF* const leaf);
-    void    tMBSineTri_initToPool        (tMBSineTri** const osc, tMempool** const mempool);
+    void    tMBSineTri_create               (tMempool** const mempool, tMBSineTri** const);
+    void    tMBSineTri_init                 (LEAF* const leaf, tMBSineTri* const osc);
     void    tMBSineTri_free              (tMBSineTri** const osc);
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSineTri_place_dd_noBuffer(tMBSineTri* const osc, int index, float phase, float inv_w, float scale, float stepOrSlope, float w);
@@ -1059,11 +1059,11 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
      @brief Saw wave oscillator with minBLEP anti-aliasing.
      @{
      
-     @fn void tMBSaw_init(tMBSaw** const osc, LEAF* const leaf)
+     @fn void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf)
      @brief Initialize a tMBSaw to the default mempool of a LEAF instance.
      @param osc A pointer to the tMBSaw to initialize.
      
-     @fn void tMBSaw_initToPool(tMBSaw** const osc, tMempool** const mempool)
+     @fn void    tMBSaw_init                 (tMempool** const mempool)
      @brief Initialize a tMBSaw to a specified mempool.
      @param osc A pointer to the tMBSaw to initialize.
      
@@ -1076,7 +1076,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
      @param osc A pointer to the relevant tMBSaw.
      @return The ticked sample.
      
-     @fn void tMBSaw_setFreq(tMBSaw* const osc, float f)
+     @fn void tMBSaw_setFreq(tMBSaw* const osc, tMBSaw** const osc, float f)
      @brief Set the frequency of the oscillator.
      @param osc A pointer to the relevant tMBSaw.
      @param freq The new frequency.
@@ -1115,8 +1115,8 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
     } tMBSaw;
 
     // Memory handlers for `tMBSaw`
-    void    tMBSaw_init                   (tMBSaw** const osc, LEAF* const leaf);
-    void    tMBSaw_initToPool             (tMBSaw** const osc, tMempool** const mempool);
+    void    tMBSaw_create               (tMempool** const mempool, tMBSaw** const);
+    void    tMBSaw_init                 (LEAF* const leaf, tMBSaw* const osc);
     void    tMBSaw_free                   (tMBSaw** const osc);
 
     void    tMBSaw_place_step_dd_noBuffer (tMBSaw* const osc, int index, float phase, float w, float scale);
@@ -1139,11 +1139,11 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
      @brief Saw wave mixed with Pulse wave oscillator with minBLEP anti-aliasing.
      @{
 
-     @fn void tMBSaw_init(tMBSaw** const osc, LEAF* const leaf)
+     @fn void tMBSaw_init(tMBSaw* const osc, LEAF* const leaf)
      @brief Initialize a tMBSaw to the default mempool of a LEAF instance.
      @param osc A pointer to the tMBSaw to initialize.
 
-     @fn void tMBSaw_initToPool(tMBSaw** const osc, tMempool** const mempool)
+     @fn void    tMBSaw_init                 (tMempool** const mempool)
      @brief Initialize a tMBSaw to a specified mempool.
      @param osc A pointer to the tMBSaw to initialize.
 
@@ -1156,7 +1156,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
      @param osc A pointer to the relevant tMBSaw.
      @return The ticked sample.
 
-     @fn void tMBSaw_setFreq(tMBSaw* const osc, float f)
+     @fn void tMBSaw_setFreq(tMBSaw* const osc, tMBSaw** const osc, float f)
      @brief Set the frequency of the oscillator.
      @param osc A pointer to the relevant tMBSaw.
      @param freq The new frequency.
@@ -1200,8 +1200,8 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSin
     } tMBSawPulse;
 
     // Memory handlers for `tMBSawPulse`
-    void    tMBSawPulse_init                   (tMBSawPulse** const osc, LEAF* const leaf);
-    void    tMBSawPulse_initToPool             (tMBSawPulse** const osc, tMempool** const mempool);
+    void    tMBSawPulse_create               (tMempool** const mempool, tMBSawPulse** const);
+    void    tMBSawPulse_init                 (LEAF* const leaf, tMBSawPulse* const osc);
     void    tMBSawPulse_free                   (tMBSawPulse** const osc);
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSawPulse_place_step_dd_noBuffer(tMBSawPulse* const osc, int index, float phase, float inv_w, float scale);
@@ -1228,14 +1228,14 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief Simple aliasing wavetable oscillator.
      @{
      
-     @fn void    tTable_init(tTable** const osc, float* table, int size, LEAF* const leaf)
+     @fn void    tTable_init(tTable* const osc, float* table, int size, LEAF* const leaf)
      @brief Initialize a tTable to the default mempool of a LEAF instance.
      @param osc A pointer to the tTable to initialize.
      @param table A pointer to the wavetable data.
      @param size The number of samples in the wavetable.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tTable_initToPool(tTable** const osc, float* table, int size, tMempool** const mempool)
+     @fn void    tTable_init                 (tMempool** const mempool)
      @brief Initialize a tTable to a specified mempool.
      @param osc A pointer to the tTable to initialize.
      @param table A pointer to the wavetable data.
@@ -1251,7 +1251,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @param osc A pointer to the relevant tTable.
      @return The ticked sample as a float from -1 to 1.
      
-     @fn void    tTable_setFreq      (tTable* const osc, float freq)
+     @fn void    tTable_setFreq      (tTable* const osc, tTable** const osc, float* table, int size, float freq)
      @brief Set the frequency of a tTable oscillator.
      @param osc A pointer to the relevant tTable.
      @param freq The frequency to set the oscillator to.
@@ -1270,8 +1270,8 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     } tTable;
 
     // Memory handlers for `tTable`
-    void    tTable_init          (tTable** const osc, float* table, int size, LEAF* const leaf);
-    void    tTable_initToPool    (tTable** const osc, float* table, int size, tMempool** const mempool);
+    void    tTable_create               (tMempool** const mempool, tTable** const);
+    void    tTable_init                 (LEAF* const leaf, tTable* const osc, float* table, int size);
     void    tTable_free          (tTable** const osc);
 
     // Tick function for `tTable`
@@ -1289,7 +1289,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief Anti-aliased wavetable generator.
      @{
      
-     @fn void    tWaveTable_init(tWaveTable** const osc, float* table, int size, float maxFreq, LEAF* const leaf)
+     @fn void    tWaveTable_init(tWaveTable* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
      @brief Initialize a tWaveTable to the default mempool of a LEAF instance.
      @param osc A pointer to the tWaveTable to initialize.
      @param table A pointer to the wavetable data.
@@ -1297,7 +1297,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tWaveTable_initToPool(tWaveTable** const osc, float* table, int size, float maxFreq, tMempool** const mempool)
+     @fn void    tWaveTable_init                 (tMempool** const mempool)
      @brief Initialize a tWaveTable to a specified mempool.
      @param osc A pointer to the tWaveTable to initialize.
      @param table A pointer to the wavetable data.
@@ -1313,29 +1313,15 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     
 #define LEAF_NUM_WAVETABLE_FILTER_PASSES 5
     
-    typedef struct tWaveTable
-    {
-        tMempool* mempool;
-        
-        float* baseTable;
-        float** tables;
-        int size;
-        int sizeMask;
-        int numTables;
-        float maxFreq;
-        float baseFreq, invBaseFreq;
-        tButterworth* bl;
-        float sampleRate;
-    } tWaveTable;
+    typedef struct tWaveTable tWaveTable;
 
     // Memory handlers for `tWaveTable`
-    void    tWaveTable_init          (tWaveTable** const osc, float* table, int size, float maxFreq, LEAF* const leaf);
-    void    tWaveTable_initToPool    (tWaveTable** const osc, float* table, int size, float maxFreq,
-                                      tMempool** const mempool);
+    void    tWaveTable_create               (tMempool** const, tWaveTable** const osc);
+    void    tWaveTable_init                 (LEAF* const leaf, tWaveTable* const osc, float* table, int size, float maxFreq);
     void    tWaveTable_free          (tWaveTable** const osc);
 
     // Setter functions for `tWaveTable`
-    void    tWaveTable_setSampleRate (tWaveTable* const osc, float sr);
+    void    tWaveTable_setSampleRate (LEAF* const leaf,tWaveTable* const osc, float sr);
     
     //==============================================================================
     
@@ -1345,14 +1331,14 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief Set of anti-aliased wavetable oscillators that can be faded between.
      @{
      
-     @fn void    tWaveOsc_init(tWaveOsc** const osc, const float** tables, int n, int size, float maxFreq, LEAF* const leaf)
+     @fn void    tWaveOsc_init(tWaveOsc* const osc, const float** tables, int n, int size, float maxFreq, LEAF* const leaf)
      @brief Initialize a tWaveOsc to the default mempool of a LEAF instance.
      @param osc A pointer to the tWaveOsc to initialize.
      @param tables An array of pointers to wavetable data.
      @param n The number of wavetables.
      @param leaf A pointer to the leaf instance.
      
-     @fn void  tWaveOsc_initToPool(tWaveOsc** const osc, const float** tables, int n, int size, float maxFreq, tMempool** const mempool)
+     @fn void    tWaveOsc_init                 (tMempool** const mempool)
      @brief Initialize a tWaveOsc to a specified mempool.
      @param osc A pointer to the tWaveTable to initialize.
      @param tables An array of pointers to wavetable data.
@@ -1370,7 +1356,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @param osc A pointer to the relevant tWaveOsc.
      @return The ticked sample as a float from -1 to 1.
      
-     @fn void    tWaveOsc_setFreq      (tWaveOsc* const osc, float freq)
+     @fn void    tWaveOsc_setFreq      (tWaveOsc* const osc, tWaveOsc** const osc, const float** tables, int n, int size, float maxFreq, float freq)
      @brief Set the frequency of a tWaveOsc oscillator.
      @param osc A pointer to the relevant tWaveOsc.
      @param freq The frequency to set the oscillator to.
@@ -1409,8 +1395,8 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
        } tWaveOsc;
 
     // Memory handlers for `tWaveOsc`
-    void    tWaveOsc_init            (tWaveOsc** const cy, tWaveTable** tables, int numTables, LEAF* const leaf);
-    void    tWaveOsc_initToPool      (tWaveOsc** const cy, tWaveTable** tables, int numTables, tMempool** const mp);
+    void    tWaveOsc_create               (tMempool** const mempool, tWaveOsc** const);
+    void    tWaveOsc_init                 (LEAF* const leaf, tWaveOsc* const cy, tWaveTable** tables, int numTables);
     void    tWaveOsc_free            (tWaveOsc** const osc);
 
     // Tick function for `tWaveOsc`
@@ -1431,7 +1417,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief A more space-efficient anti-aliased wavetable generator than tWaveTable but with slightly worse fidelity.
      @{
      
-     @fn void    tWaveTableS_init(tWaveTableS** const osc, float* table, int size, float maxFreq, LEAF* const leaf)
+     @fn void    tWaveTableS_init(tWaveTableS* const osc, float* table, int size, float maxFreq, LEAF* const leaf)
      @brief Initialize a tWaveTableS to the default mempool of a LEAF instance.
      @param osc A pointer to the tWaveTableS to initialize.
      @param table A pointer to the wavetable data.
@@ -1439,7 +1425,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @param maxFreq The maximum expected frequency of the oscillator. The higher this is, the more memory will be needed.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tWaveTableS_initToPool(tWaveTableS** const osc, float* table, int size, float maxFreq, tMempool** const mempool)
+     @fn void    tWaveTableS_init                 (tMempool** const mempool)
      @brief Initialize a tWaveTableS to a specified mempool.
      @param osc A pointer to the tWaveTableS to initialize.
      @param table A pointer to the wavetable data.
@@ -1453,28 +1439,11 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      
      @} */
     
-    typedef struct tWaveTableS
-    {
-        tMempool* mempool;
-        
-        float* baseTable;
-        float** tables;
-        int numTables;
-        int* sizes;
-        int* sizeMasks;
-        float maxFreq;
-        float baseFreq, invBaseFreq;
-        tButterworth* bl;
-        float dsBuffer[2];
-        tOversampler* ds;
-        float sampleRate;
-    } tWaveTableS;
+    typedef struct tWaveTableS tWaveTableS;
 
     // Memory handlers for `tWaveTableS`
-    void    tWaveTableS_init          (tWaveTableS** const osc, float* table, int size, float maxFreq,
-                                       LEAF* const leaf);
-    void    tWaveTableS_initToPool    (tWaveTableS** const osc, float* table, int size, float maxFreq,
-                                       tMempool** const mempool);
+    void    tWaveTableS_create         (tMempool** const,tWaveTableS** const osc);
+    void    tWaveTableS_init                (LEAF* const leaf, tWaveTableS* const osc, float* table, int size, float maxFreq);
     void    tWaveTableS_free          (tWaveTableS** const osc);
 
     // Setter functions for `tWaveTableS`
@@ -1488,14 +1457,14 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief Set of anti-aliased wavetable oscillators that can be faded between.
      @{
      
-     @fn void    tWaveOscS_init(tWaveOsc** const osc, const float** tables, int n, int size, float maxFreq, LEAF* const leaf)
+     @fn void    tWaveOscS_init(tWaveOsc* const osc, const float** tables, int n, int size, float maxFreq, LEAF* const leaf)
      @brief Initialize a tWaveOscS to the default mempool of a LEAF instance.
      @param osc A pointer to the tWaveOscS to initialize.
      @param tables An array of pointers to wavetable data.
      @param n The number of wavetables.
      @param leaf A pointer to the leaf instance.
      
-     @fn void  tWaveOscS_initToPool(tWaveOsc** const osc, const float** tables, int n, int size, float maxFreq, tMempool** const mempool)
+     @fn void    tWaveOscS_init                 (tMempool** const mempool)
      @brief Initialize a tWaveOscS to a specified mempool.
      @param osc A pointer to the tWaveTableS to initialize.
      @param tables An array of pointers to wavetable data.
@@ -1513,7 +1482,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @param osc A pointer to the relevant tWaveOscS.
      @return The ticked sample as a float from -1 to 1.
      
-     @fn void    tWaveOscS_setFreq      (tWaveOsc* const osc, float freq)
+     @fn void    tWaveOscS_setFreq      (tWaveOsc* const osc, tWaveOsc** const osc, const float** tables, int n, int size, float maxFreq, float freq)
      @brief Set the frequency of a tWaveOscS oscillator.
      @param osc A pointer to the relevant tWaveOscS.
      @param freq The frequency to set the oscillator to.
@@ -1527,9 +1496,9 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     typedef struct tWaveOscS
     {
         tMempool* mempool;
-        
-        //tWaveTableS* tables;
 
+        //tWaveTableS* tables;
+        //this is passed in
         tWaveTableS** tables;
 
         int numTables;
@@ -1556,9 +1525,8 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     } tWaveOscS;
 
     // Memory handlers for `tWaveOscS`
-    void 	tWaveOscS_init            (tWaveOscS** const cy, tWaveTableS** tables, int numTables, LEAF* const leaf);
-    void    tWaveOscS_initToPool      (tWaveOscS** const osc, tWaveTableS** tables, int numTables,
-                                       tMempool** const mempool);
+    void    tWaveOscS_create               (tMempool** const mempool, tWaveOscS** const);
+    void    tWaveOscS_init                 (LEAF* const leaf, tWaveOscS* const osc, tWaveTableS** tables, int numTables);
     void    tWaveOscS_free            (tWaveOscS** const osc);
 
     // Tick function for `tWaveOscS`
@@ -1581,12 +1549,12 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief Aliasing phasor.
      @{
      
-     @fn void    tIntPhasor_init(tIntPhasor** const osc, LEAF* const leaf)
+     @fn void    tIntPhasor_init(tIntPhasor* const osc, LEAF* const leaf)
      @brief Initialize a tIntPhasor to the default mempool of a LEAF instance.
      @param osc A pointer to the tIntPhasor to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tIntPhasor_initToPool(tIntPhasor** const osc, tMempool** const)
+     @fn void    tIntPhasor_init                 (tMempool** const)
      @brief Initialize a tIntPhasor to a specified mempool.
      @param osc A pointer to the tIntPhasor to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1599,7 +1567,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief
      @param osc A pointer to the relevant tIntPhasor.
      
-     @fn void    tIntPhasor_setFreq     (tIntPhasor* const osc, float freq)
+     @fn void    tIntPhasor_setFreq     (tIntPhasor* const osc, tIntPhasor** const osc, float freq)
      @brief
      @param osc A pointer to the relevant tIntPhasor.
      ￼￼￼
@@ -1618,8 +1586,8 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     } tIntPhasor;
 
     // Memory handlers for `tIntPhasor`
-    void    tIntPhasor_init          (tIntPhasor** const osc, LEAF* const leaf);
-    void    tIntPhasor_initToPool    (tIntPhasor** const osc, tMempool** const);
+    void    tIntPhasor_create               (tMempool** const mempool, tIntPhasor** const);
+    void    tIntPhasor_init                 (LEAF* const leaf, tIntPhasor* const osc);
     void    tIntPhasor_free          (tIntPhasor** const osc);
 
     // Tick function for `tIntPhasor`
@@ -1638,12 +1606,12 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief Aliasing phasor.
      @{
      
-     @fn void    tSquareLFO_init(tSquareLFO** const osc, LEAF* const leaf)
+     @fn void    tSquareLFO_init(tSquareLFO* const osc, LEAF* const leaf)
      @brief Initialize a tSquareLFO to the default mempool of a LEAF instance.
      @param osc A pointer to the tSquareLFO to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSquareLFO_initToPool(tSquareLFO** const osc, tMempool** const)
+     @fn void    tSquareLFO_init                 (tMempool** const)
      @brief Initialize a tSquareLFO to a specified mempool.
      @param osc A pointer to the tSquareLFO to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1656,7 +1624,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief
      @param osc A pointer to the relevant tSquareLFO.
      
-     @fn void    tSquareLFO_setFreq     (tSquareLFO* const osc, float freq)
+     @fn void    tSquareLFO_setFreq     (tSquareLFO* const osc, tSquareLFO** const osc, float freq)
      @brief
      @param osc A pointer to the relevant tSquareLFO.
      ￼￼￼
@@ -1667,13 +1635,13 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
 
         tMempool* mempool;
         float pulsewidth;
-        tIntPhasor* phasor;
-        tIntPhasor* invPhasor;
+        tIntPhasor phasor;
+        tIntPhasor invPhasor;
     } tSquareLFO;
 
     // Memory handlers for `tSquareLFO`
-    void    tSquareLFO_init          (tSquareLFO** const osc, LEAF* const leaf);
-    void    tSquareLFO_initToPool    (tSquareLFO** const osc, tMempool** const);
+    void    tSquareLFO_create               (tMempool** const mempool, tSquareLFO** const);
+    void    tSquareLFO_init                 (LEAF* const leaf, tSquareLFO* const osc);
     void    tSquareLFO_free          (tSquareLFO** const osc);
 
     // Tick function for `tSquareLFO`
@@ -1689,13 +1657,13 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     {
         tMempool* mempool;
         float shape;
-        tIntPhasor*  saw;
-        tSquareLFO*  square;
+        tIntPhasor  saw;
+        tSquareLFO  square;
     } tSawSquareLFO;
 
     // Memory handlers for `tSawSquareLFO`
-    void    tSawSquareLFO_init          (tSawSquareLFO** const osc, LEAF* const leaf);
-    void    tSawSquareLFO_initToPool    (tSawSquareLFO** const osc, tMempool** const);
+    void    tSawSquareLFO_create               (tMempool** const mempool, tSawSquareLFO** const);
+    void    tSawSquareLFO_init                 (LEAF* const leaf, tSawSquareLFO* const osc);
     void    tSawSquareLFO_free          (tSawSquareLFO** const osc);
 
     // Tick function for `tSawSquareLFO`
@@ -1714,12 +1682,12 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief Aliasing phasor.
      @{
      
-     @fn void    tTriLFO_init(tTriLFO** const osc, LEAF* const leaf)
+     @fn void    tTriLFO_init(tTriLFO* const osc, LEAF* const leaf)
      @brief Initialize a tTriLFO to the default mempool of a LEAF instance.
      @param osc A pointer to the tTriLFO to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tTriLFO_initToPool(tTriLFO** const osc, tMempool** const)
+     @fn void    tTriLFO_init                 (tMempool** const)
      @brief Initialize a tTriLFO to a specified mempool.
      @param osc A pointer to the tTriLFO to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -1732,7 +1700,7 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
      @brief
      @param osc A pointer to the relevant tTriLFO.
      
-     @fn void    tTriLFO_setFreq     (tTriLFO* const osc, float freq)
+     @fn void    tTriLFO_setFreq     (tTriLFO* const osc, tTriLFO** const osc, float freq)
      @brief
      @param osc A pointer to the relevant tTriLFO.
      ￼￼￼
@@ -1750,8 +1718,8 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     } tTriLFO;
 
     // Memory handlers for `tTriLFO`
-    void    tTriLFO_init          (tTriLFO** const osc, LEAF* const leaf);
-    void    tTriLFO_initToPool    (tTriLFO** const osc, tMempool** const);
+    void    tTriLFO_create               (tMempool** const mempool, tTriLFO** const);
+    void    tTriLFO_init                 (LEAF* const leaf, tTriLFO* const osc);
     void    tTriLFO_free          (tTriLFO** const osc);
 
     // Tick function for `tTriLFO`
@@ -1766,13 +1734,13 @@ void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tMBSaw
     {
         tMempool* mempool;
         float shape;
-        tTriLFO*  tri;
-        tCycle*  sine;
+        tTriLFO  tri;
+        tCycle  sine;
     } tSineTriLFO;
 
     // Memory handlers for `tSineTriLFO`
-    void    tSineTriLFO_init          (tSineTriLFO** const osc, LEAF* const leaf);
-    void    tSineTriLFO_initToPool    (tSineTriLFO** const osc, tMempool** const);
+    void    tSineTriLFO_create               (tMempool** const mempool, tSineTriLFO** const);
+    void    tSineTriLFO_init                 (LEAF* const leaf, tSineTriLFO* const osc);
     void    tSineTriLFO_free          (tSineTriLFO** const osc);
 
     // Tick function for `tSineTriLFO`
@@ -1800,8 +1768,8 @@ typedef struct tDampedOscillator
 	} tDampedOscillator;
 
     // Memory handlers for `tDampedOscillator`
-	void    tDampedOscillator_init          (tDampedOscillator** const osc, LEAF* const leaf);
-	void    tDampedOscillator_initToPool    (tDampedOscillator** const osc, tMempool** const mempool);
+	void    tDampedOscillator_create               (tMempool** const mempool, tDampedOscillator** const);
+	void    tDampedOscillator_init                 (LEAF* const leaf, tDampedOscillator* const osc);
 	void    tDampedOscillator_free          (tDampedOscillator** const osc);
 
     // Tick function for `tDampedOscillator`
@@ -1830,8 +1798,8 @@ typedef struct tDampedOscillator
     } tPlutaQuadOsc;
 
     // Memory handlers for `tDampedOscillator`
-    void    tPlutaQuadOsc_init          (tPlutaQuadOsc** const osc,  uint32_t oversamplingRatio, LEAF* const leaf);
-    void    tPlutaQuadOsc_initToPool    (tPlutaQuadOsc** const cy, uint32_t oversamplingRatio, tMempool** const mp);
+    void    tPlutaQuadOsc_create               (tMempool** const mempool, tPlutaQuadOsc** const);
+    void    tPlutaQuadOsc_init                 (LEAF* const leaf, tPlutaQuadOsc* const cy, uint32_t oversamplingRatio);
     void    tPlutaQuadOsc_free          (tPlutaQuadOsc** const osc);
 
     // Tick function for `tDampedOscillator`

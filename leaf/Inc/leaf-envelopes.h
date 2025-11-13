@@ -19,11 +19,7 @@ extern "C" {
     
 #include "leaf-math.h"
 #include "leaf-mempool.h"
-#include "leaf-filters.h"
-#include "leaf-delay.h"
-#include "leaf-analysis.h"
-#include "leaf-envelopes.h"
-    
+
     /*!
      * @internal
      * Header.
@@ -40,12 +36,12 @@ extern "C" {
      @brief Basic attack-decay envelope.
      @{
      
-     @fn void    tEnvelope_init(tEnvelope** const, float attack, float decay, int loop, LEAF* const leaf)
+     @fn void    tEnvelope_init(tEnvelope* const, float attack, float decay, int loop, LEAF* const leaf)
      @brief Initialize a tEnvelope to the default mempool of a LEAF instance.
      @param envelope A pointer to the tEnvelope to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tEnvelope_initToPool(tEnvelope** const, float attack, float decay, int loop, tMempool** const)
+     @fn void    tEnvelope_init                 (tMempool** const)
      @brief Initialize a tEnvelope to a specified mempool.
      @param envelope A pointer to the tEnvelope to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -58,7 +54,7 @@ extern "C" {
      @brief
      @param envelope A pointer to the relevant tEnvelope.
      
-     @fn void    tEnvelope_setAttack     (tEnvelope* const, float attack)
+     @fn void    tEnvelope_setAttack     (tEnvelope* const, tEnvelope** const, float attack, float decay, int loop, float attack)
      @brief
      @param envelope A pointer to the relevant tEnvelope.
      
@@ -99,8 +95,8 @@ extern "C" {
         
     } tEnvelope;
 
-    void    tEnvelope_init          (tEnvelope** const, float attack, float decay, int loop, LEAF* const leaf);
-    void    tEnvelope_initToPool    (tEnvelope** const, float attack, float decay, int loop, tMempool** const);
+    void    tEnvelope_create               (tMempool** const mempool, tEnvelope** const);
+    void    tEnvelope_init                 (LEAF* const leaf, tEnvelope* const, float attack, float decay, int loop);
     void    tEnvelope_free          (tEnvelope** const);
     
     float  tEnvelope_tick          (tEnvelope* const);
@@ -119,12 +115,12 @@ extern "C" {
      @brief Exponential curve smoother.
      @{
      
-     @fn void    tExpSmooth_init(tExpSmooth** const, float val, float factor, LEAF* const leaf)
+     @fn void    tExpSmooth_init(tExpSmooth* const, float val, float factor, LEAF* const leaf)
      @brief Initialize a tExpSmooth to the default mempool of a LEAF instance.
      @param smooth A pointer to the tExpSmooth to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tExpSmooth_initToPool(tExpSmooth** const, float val, float factor, tMempool** const)
+     @fn void    tExpSmooth_init                 (tMempool** const)
      @brief Initialize a tExpSmooth to a specified mempool.
      @param smooth A pointer to the tExpSmooth to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -141,7 +137,7 @@ extern "C" {
      @brief
      @param smooth A pointer to the relevant tExpSmooth.
      
-     @fn void    tExpSmooth_setFactor    (tExpSmooth* const, float factor)
+     @fn void    tExpSmooth_setFactor    (tExpSmooth* const, tExpSmooth** const, float val, float factor, float factor)
      @brief
      @param smooth A pointer to the relevant tExpSmooth.
      
@@ -168,8 +164,8 @@ extern "C" {
         //float invSampleRate;
     } tExpSmooth;
 
-    void    tExpSmooth_init         (tExpSmooth** const, float val, float factor, LEAF* const leaf);
-    void    tExpSmooth_initToPool   (tExpSmooth** const, float val, float factor, tMempool** const);
+    void    tExpSmooth_create               (tMempool** const mempool, tExpSmooth** const);
+    void    tExpSmooth_init                 (LEAF* const leaf, tExpSmooth* const, float val, float factor);
     void    tExpSmooth_free         (tExpSmooth** const);
     
 
@@ -202,12 +198,12 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief
      @{
      
-     @fn void    tADSR_init(tADSR** const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
+     @fn void    tADSR_init(tADSR* const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf)
      @brief Initialize a tADSR to the default mempool of a LEAF instance.
      @param adsr A pointer to the tADSR to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tADSR_initToPool(tADSR** const adsrenv, float attack, float decay, float sustain, float release, tMempool** const mp)
+     @fn void    tADSR_init                 (tMempool** const mp)
      @brief Initialize a tADSR to a specified mempool.
      @param adsr A pointer to the tADSR to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -220,7 +216,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief
      @param adsr A pointer to the relevant tADSR.
      
-     @fn void    tADSR_setAttack     (tADSR* const, float attack)
+     @fn void    tADSR_setAttack     (tADSR* const, tADSR** const adsrenv, float attack, float decay, float sustain, float release, float attack)
      @brief
      @param adsr A pointer to the relevant tADSR.
      
@@ -277,8 +273,8 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
         float invSampleRate;
     } tADSR;
 
-    void    tADSR_init    (tADSR** const adsrenv, float attack, float decay, float sustain, float release, LEAF* const leaf);
-    void    tADSR_initToPool    (tADSR** const adsrenv, float attack, float decay, float sustain, float release, tMempool** const mp);
+    void    tADSR_create               (tMempool** const mempool, tADSR** const);
+    void    tADSR_init                 (LEAF* const leaf, tADSR* const adsrenv, float attack, float decay, float sustain, float release);
     void    tADSR_free          (tADSR** const);
     
     float   tADSR_tick          (tADSR* const);
@@ -299,12 +295,12 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief
      @{
      
-     @fn void    tADSRT_init(tADSRT** const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf)
+     @fn void    tADSRT_init(tADSRT* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf)
      @brief Initialize a tADSRT to the default mempool of a LEAF instance.
      @param adsr A pointer to the tADSRT to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tADSRT_initToPool(tADSRT** const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool** const)
+     @fn void    tADSRT_init                 (tMempool** const)
      @brief Initialize a tADSRT to a specified mempool.
      @param adsr A pointer to the tADSRT to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -321,7 +317,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief
      @param adsr A pointer to the relevant tADSRT.
      
-     @fn void    tADSRT_setAttack     (tADSRT* const, float attack)
+     @fn void    tADSRT_setAttack     (tADSRT* const, tADSRT** const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, float attack)
      @brief
      @param adsr A pointer to the relevant tADSRT.
      
@@ -377,11 +373,10 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
         float invSampleRate;
     } tADSRT;
 
-    void    tADSRT_init          (tADSRT** const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf);
-    void    tADSRT_initToPool    (tADSRT** const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, tMempool** const);
+    void    tADSRT_create               (tMempool** const mempool, tADSRT** const);
+    void    tADSRT_init                 (LEAF* const leaf, tADSRT* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize);
     void    tADSRT_free          (tADSRT** const);
 
-    void tADSRT_set(tADSRT* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf);
     float   tADSRT_tick          (tADSRT* const);
     float   tADSRT_tickNoInterp  (tADSRT* const adsrenv);
     void    tADSRT_setAttack     (tADSRT* const, float attack);
@@ -402,12 +397,12 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief
      @{
      
-     @fn void    tADSRS_init(tADSRS** const, float attack, float decay, float sustain, float release, LEAF* const leaf)
+     @fn void    tADSRS_init(tADSRS* const, float attack, float decay, float sustain, float release, LEAF* const leaf)
      @brief Initialize a tADSRS to the default mempool of a LEAF instance.
      @param adsr A pointer to the tADSRS to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tADSRS_initToPool(tADSRS** const, float attack, float decay, float sustain, float release, tMempool** const)
+     @fn void    tADSRS_init                 (tMempool** const)
      @brief Initialize a tADSRS to a specified mempool.
      @param adsr A pointer to the tADSRS to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -420,7 +415,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief
      @param adsr A pointer to the relevant tADSRS.
      
-     @fn void    tADSRS_setAttack     (tADSRS* const, float attack)
+     @fn void    tADSRS_setAttack     (tADSRS* const, tADSRS** const, float attack, float decay, float sustain, float release, float attack)
      @brief
      @param adsr A pointer to the relevant tADSRS.
      
@@ -490,8 +485,8 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
         float invSampleRate;
     } tADSRS;
 
-    void    tADSRS_init          (tADSRS** const, float attack, float decay, float sustain, float release, LEAF* const leaf);
-    void    tADSRS_initToPool    (tADSRS** const, float attack, float decay, float sustain, float release, tMempool** const);
+    void    tADSRS_create               (tMempool** const mempool, tADSRS** const);
+    void    tADSRS_init                 (LEAF* const leaf, tADSRS* const, float attack, float decay, float sustain, float release);
     void    tADSRS_free          (tADSRS** const);
     
     float   tADSRS_tick          (tADSRS* const);
@@ -512,12 +507,12 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief Value ramp.
      @{
      
-     @fn void    tRamp_init(tRamp** const, float time, int samplesPerTick, LEAF* const leaf)
+     @fn void    tRamp_init(tRamp* const, float time, int samplesPerTick, LEAF* const leaf)
      @brief Initialize a tRamp to the default mempool of a LEAF instance.
      @param ramp A pointer to the tRamp to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tRamp_initToPool(tRamp** const, float time, int samplesPerTick, tMempool** const)
+     @fn void    tRamp_init                 (tMempool** const)
      @brief Initialize a tRamp to a specified mempool.
      @param ramp A pointer to the tRamp to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -534,7 +529,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief
      @param ramp A pointer to the relevant tRamp.
      
-     @fn void    tRamp_setTime       (tRamp* const, float time)
+     @fn void    tRamp_setTime       (tRamp* const, tRamp** const, float time, int samplesPerTick, float time)
      @brief
      @param ramp A pointer to the relevant tRamp.
      
@@ -561,8 +556,8 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
         int samples_per_tick;
     } tRamp;
 
-    void    tRamp_init          (tRamp** const, float time, int samplesPerTick, LEAF* const leaf);
-    void    tRamp_initToPool    (tRamp** const, float time, int samplesPerTick, tMempool** const);
+    void    tRamp_create               (tMempool** const mempool, tRamp** const);
+    void    tRamp_init                 (LEAF* const leaf, tRamp* const, float time, int samplesPerTick);
     void    tRamp_free          (tRamp** const);
     
     float   tRamp_tick          (tRamp* const);
@@ -578,12 +573,12 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief Value ramp with variable rate depending on direction.
      @{
      
-     @fn void    tRampUpDown_init(tRampUpDown** const, float upTime, float downTime, int samplesPerTick, LEAF* const leaf)
+     @fn void    tRampUpDown_init(tRampUpDown* const, float upTime, float downTime, int samplesPerTick, LEAF* const leaf)
      @brief Initialize a tRampUpDown to the default mempool of a LEAF instance.
      @param ramp A pointer to the tRampUpDown to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tRampUpDown_initToPool(tRampUpDown** const, float upTime, float downTime, int samplesPerTick, tMempool** const)
+     @fn void    tRampUpDown_init                 (tMempool** const)
      @brief Initialize a tRampUpDown to a specified mempool.
      @param ramp A pointer to the tRampUpDown to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -600,7 +595,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief
      @param ramp A pointer to the relevant tRampUpDown.
      
-     @fn void    tRampUpDown_setUpTime       (tRampUpDown* const, float upTime)
+     @fn void    tRampUpDown_setUpTime       (tRampUpDown* const, tRampUpDown** const, float upTime, float downTime, int samplesPerTick, float upTime)
      @brief
      @param ramp A pointer to the relevant tRampUpDown.
      
@@ -632,8 +627,8 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
         int samples_per_tick;
     } tRampUpDown;
 
-    void    tRampUpDown_init          (tRampUpDown** const, float upTime, float downTime, int samplesPerTick, LEAF* const leaf);
-    void    tRampUpDown_initToPool    (tRampUpDown** const, float upTime, float downTime, int samplesPerTick, tMempool** const);
+    void    tRampUpDown_create               (tMempool** const mempool, tRampUpDown** const);
+    void    tRampUpDown_init                 (LEAF* const leaf, tRampUpDown* const, float upTime, float downTime, int samplesPerTick);
     void    tRampUpDown_free          (tRampUpDown** const);
     
     float   tRampUpDown_tick          (tRampUpDown* const);
@@ -650,12 +645,12 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief Based on Max/MSP's slide~
      @{
      
-     @fn void    tSlide_init(tSlide** const, float upSlide, float downSlide, LEAF* const leaf)
+     @fn void    tSlide_init(tSlide* const, float upSlide, float downSlide, LEAF* const leaf)
      @brief Initialize a tSlide to the default mempool of a LEAF instance.
      @param slide A pointer to the tSlide to initialize.
      @param leaf A pointer to the leaf instance.
      
-     @fn void    tSlide_initToPool(tSlide** const, float upSlide, float downSlide, tMempool** const)
+     @fn void    tSlide_init                 (tMempool** const)
      @brief Initialize a tSlide to a specified mempool.
      @param slide A pointer to the tSlide to initialize.
      @param mempool A pointer to the tMempool to use.
@@ -664,7 +659,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
      @brief Free a tSlide from its mempool.
      @param slide A pointer to the tSlide to free.
      
-     @fn float   tSlide_tick         (tSlide* const, float in)
+     @fn float   tSlide_tick         (tSlide* const, tSlide** const, float upSlide, float downSlide, float in)
      @brief
      @param slide A pointer to the relevant tSlide.
      
@@ -697,8 +692,8 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
         float dest;
     } tSlide;
 
-    void    tSlide_init          (tSlide** const, float upSlide, float downSlide, LEAF* const leaf);
-    void    tSlide_initToPool    (tSlide** const, float upSlide, float downSlide, tMempool** const);
+    void    tSlide_create               (tMempool** const mempool, tSlide** const);
+    void    tSlide_init                 (LEAF* const leaf, tSlide* const, float upSlide, float downSlide);
     void    tSlide_free          (tSlide** const);
     
     float   tSlide_tick         (tSlide* const, float in);

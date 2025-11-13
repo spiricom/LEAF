@@ -54,7 +54,9 @@
 #include ".\Inc\leaf-vocal.h"
 
 #else
-
+#include "./Inc/leaf-global.h"
+#include "./Inc/leaf-math.h"
+/*
 #include "./Inc/leaf-global.h"
 #include "./Inc/leaf-math.h"
 #include "./Inc/leaf-mempool.h"
@@ -74,7 +76,7 @@
 #include "./Inc/leaf-physical.h"
 #include "./Inc/leaf-electrical.h"
 #include "./Inc/leaf-vocal.h"
-
+*/
 #endif
 
 /*! @mainpage LEAF
