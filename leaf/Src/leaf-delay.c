@@ -31,23 +31,7 @@ struct tDelay {
 
 };
 
-struct tLinearDelay{
-    tMempool* mempool;
 
-    float gain;
-    float* buff;
-
-    float lastOut, lastIn;
-
-    uint32_t inPoint, outPoint;
-
-    uint32_t maxDelay;
-
-    float delay;
-
-    float alpha, omAlpha;
-
-};
 
 struct tHermiteDelay{
     tMempool* mempool;
@@ -65,24 +49,7 @@ struct tHermiteDelay{
     float alpha, omAlpha;
 };
 
-struct tLagrangeDelay{
-    tMempool* mempool;
 
-    float* buff;
-    uint32_t bufferMask;
-    float lastOut, lastIn;
-
-    uint32_t inPoint, outPoint;
-
-    uint32_t maxDelay;
-    float delay;
-
-    //coefficients for lagrange interpolation (calculated when delay length changes)
-    float h0;
-    float h1;
-    float h2;
-    float h3;
-};
 
 struct tAllpassDelay
 {

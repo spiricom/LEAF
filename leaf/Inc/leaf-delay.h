@@ -208,7 +208,23 @@ extern "C" {
      @} */
     
     typedef struct tLinearDelay tLinearDelay;
+struct tLinearDelay{
+    tMempool* mempool;
 
+    float gain;
+    float* buff;
+
+    float lastOut, lastIn;
+
+    uint32_t inPoint, outPoint;
+
+    uint32_t maxDelay;
+
+    float delay;
+
+    float alpha, omAlpha;
+
+};
 
     void    tLinearDelay_create               (tMempool** const mempool, tLinearDelay** const);
     void    tLinearDelay_init                 (LEAF* const leaf, tLinearDelay* const, float delay, uint32_t maxDelay);
@@ -457,7 +473,24 @@ extern "C" {
 
     typedef struct tLagrangeDelay tLagrangeDelay;
 
+    struct tLagrangeDelay{
+        tMempool* mempool;
 
+        float* buff;
+        uint32_t bufferMask;
+        float lastOut, lastIn;
+
+        uint32_t inPoint, outPoint;
+
+        uint32_t maxDelay;
+        float delay;
+
+        //coefficients for lagrange interpolation (calculated when delay length changes)
+        float h0;
+        float h1;
+        float h2;
+        float h3;
+    };
     void    tLagrangeDelay_create               (tMempool** const mempool, tLagrangeDelay** const);
     void    tLagrangeDelay_init                 (LEAF* const leaf, tLagrangeDelay* const dl, float delay, uint32_t maxDelay);
     void    tLagrangeDelay_free               (tLagrangeDelay** const dl);

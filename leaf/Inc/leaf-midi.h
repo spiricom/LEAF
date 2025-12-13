@@ -251,10 +251,10 @@ extern "C" {
 
         tMempool* mempool;
         
-        tStack* stack;
-        tStack* orderStack;
+        tStack stack;
+        tStack orderStack;
         
-        tRamp** ramps;
+        tRamp* ramps;
         float* rampVals;
         int* firstReceived;
         float glideTime;
@@ -275,7 +275,7 @@ extern "C" {
         int lastVoiceToChange;
         
         float pitchBend;
-        tRamp* pitchBendRamp;
+        tRamp pitchBendRamp;
         
         int currentNote;
         int currentVoice;
@@ -397,7 +397,7 @@ extern "C" {
     {
         tMempool* mempool;
         
-        tStack*  stack;
+        tStack  stack;
 
         int numVoices;
         int maxNumVoices;

@@ -25,7 +25,7 @@ void tStack_create(tMempool** const mp, tStack** const stack)
     ALLOC_FROM_POOL(tStack, stack, mp);
 }
 
-void tStack_init(LEAF* const leaf, tStack* const stack)
+void tStack_init(LEAF* const leaf, tStack* const ns)
 {
 
 ns->ordered = 0;
@@ -242,7 +242,7 @@ void tPoly_create(tMempool** const mp, tPoly** const polyh)
     ALLOC_FROM_POOL(tPoly, polyh, mp);
 }
 
-void tPoly_init(LEAF* const leaf, tPoly* const polyh, int maxNumVoices)
+void tPoly_init(LEAF* const leaf, tPoly* const poly, int maxNumVoices)
 {
 
 poly->numVoices = maxNumVoices;
@@ -264,25 +264,25 @@ poly->numVoices = maxNumVoices;
     
     poly->glideTime = 5.0f;
     
-    poly->ramps = (tRamp*) mpool_alloc(sizeof(tRamp) * poly->maxNumVoices, m);
-    poly->rampVals = (float*) mpool_alloc(sizeof(float) * poly->maxNumVoices, m);
-    poly->firstReceived = (int*) mpool_alloc(sizeof(int) * poly->maxNumVoices, m);
-    poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, m);
+    poly->ramps = (tRamp*) mpool_alloc(sizeof(tRamp) * poly->maxNumVoices, poly->mempool);
+    poly->rampVals = (float*) mpool_alloc(sizeof(float) * poly->maxNumVoices, poly->mempool);
+    poly->firstReceived = (int*) mpool_alloc(sizeof(int) * poly->maxNumVoices, poly->mempool);
+    poly->voices = (int**) mpool_alloc(sizeof(int*) * poly->maxNumVoices, poly->mempool);
     
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
-        poly->voices[i] = (int*) mpool_alloc(sizeof(int) * 2, m);
+        poly->voices[i] = (int*) mpool_alloc(sizeof(int) * 2, poly->mempool);
         poly->voices[i][0] = -1;
         poly->firstReceived[i] = 0;
         
-        tRamp_initToPool(&poly->ramps[i], poly->glideTime, 1, mp);
+        tRamp_init(leaf,&poly->ramps[i], poly->glideTime, 1);
     }
     
     poly->pitchBend = 0.0f;
     
-    tRamp_initToPool(&poly->pitchBendRamp, 1.0f, 1, mp);
-    tStack_initToPool(&poly->stack, mp);
-    tStack_initToPool(&poly->orderStack, mp);
+    tRamp_init(leaf,&poly->pitchBendRamp, 1.0f, 1);
+    tStack_init(leaf,&poly->stack);
+    tStack_init(leaf,&poly->orderStack);
     
     poly->pitchGlideIsActive = 0;
 }
@@ -291,15 +291,7 @@ void    tPoly_free  (tPoly** const polyh)
 {
     tPoly* poly = *polyh;
     
-    for (int i = 0; i < poly->maxNumVoices; i++)
-    {
-        tRamp_free(&poly->ramps[i]);
-        mpool_free((char*)poly->voices[i], poly->mempool);
-    }
-    tRamp_free(&poly->pitchBendRamp);
-    tStack_free(&poly->stack);
-    tStack_free(&poly->orderStack);
-    
+
     mpool_free((char*)poly->voices, poly->mempool);
     mpool_free((char*)poly->ramps, poly->mempool);
     mpool_free((char*)poly->rampVals, poly->mempool);
@@ -318,29 +310,29 @@ void tPoly_tickPitchGlide(tPoly* poly)
 {
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
-        tRamp_tick(poly->ramps[i]);
+        tRamp_tick(&poly->ramps[i]);
     }
 }
 
 void tPoly_tickPitchBend(tPoly* poly)
 {
-    tRamp_tick(poly->pitchBendRamp);
+    tRamp_tick(&poly->pitchBendRamp);
 }
 
 void tPoly_setPitchBend(tPoly* const poly, float pitchBend)
 {
     poly->pitchBend = pitchBend;
-    tRamp_setDest(poly->pitchBendRamp, poly->pitchBend);
+    tRamp_setDest(&poly->pitchBendRamp, poly->pitchBend);
 }
 
 int tPoly_noteOn(tPoly* const poly, int note, uint8_t vel)
 {
     // if not in keymap or already on stack, dont do anything. else, add that note.
-    if (tStack_contains(poly->stack, note) >= 0) return -1;
+    if (tStack_contains(&poly->stack, note) >= 0) return -1;
     else
     {
         tPoly_orderedAddToStack(poly, note);
-        tStack_add(poly->stack, note);
+        tStack_add(&poly->stack, note);
         
         int alteredVoice = -1;
         int found = 0;
@@ -350,7 +342,7 @@ int tPoly_noteOn(tPoly* const poly, int note, uint8_t vel)
             {
                 if (!poly->firstReceived[i] || !poly->pitchGlideIsActive)
                 {
-                    tRamp_setVal(poly->ramps[i], note);
+                    tRamp_setVal(&poly->ramps[i], note);
                     poly->firstReceived[i] = 1;
                 }
                 
@@ -362,7 +354,7 @@ int tPoly_noteOn(tPoly* const poly, int note, uint8_t vel)
                 poly->notes[note][0] = vel;
                 poly->notes[note][1] = i;
                 
-                tRamp_setDest(poly->ramps[i], poly->voices[i][0]);
+                tRamp_setDest(&poly->ramps[i], poly->voices[i][0]);
                 
                 alteredVoice = i;
                 break;
@@ -372,9 +364,9 @@ int tPoly_noteOn(tPoly* const poly, int note, uint8_t vel)
         if (!found) //steal
         {
             int whichVoice, whichNote;
-            for (int j = tStack_getSize(poly->stack) - 1; j >= 0; j--)
+            for (int j = tStack_getSize(&poly->stack) - 1; j >= 0; j--)
             {
-                whichNote = tStack_get(poly->stack, j);
+                whichNote = tStack_get(&poly->stack, j);
                 whichVoice = poly->notes[whichNote][1];
                 if (whichVoice >= 0)
                 {
@@ -388,13 +380,13 @@ int tPoly_noteOn(tPoly* const poly, int note, uint8_t vel)
                     
                     if (poly->pitchGlideIsActive)
                     {
-                    	tRamp_setTime(poly->ramps[whichVoice], poly->glideTime);
+                    	tRamp_setTime(&poly->ramps[whichVoice], poly->glideTime);
                     }
                     else
                     {
-                    	tRamp_setVal(poly->ramps[whichVoice], note);
+                    	tRamp_setVal(&poly->ramps[whichVoice], note);
                     }
-                    tRamp_setDest(poly->ramps[whichVoice], poly->voices[whichVoice][0]);
+                    tRamp_setDest(&poly->ramps[whichVoice], poly->voices[whichVoice][0]);
                     
                     alteredVoice = whichVoice;
                     
@@ -411,8 +403,8 @@ int16_t noteToTest = -1;
 
 int tPoly_noteOff(tPoly* const poly, uint8_t note)
 {
-    tStack_remove(poly->stack, note);
-    tStack_remove(poly->orderStack, note);
+    tStack_remove(&poly->stack, note);
+    tStack_remove(&poly->orderStack, note);
     poly->notes[note][0] = 0;
     poly->notes[note][1] = -1;
     
@@ -442,22 +434,22 @@ int tPoly_noteOff(tPoly* const poly, uint8_t note)
     //grab old notes off the stack if there are notes waiting to replace the free voice
     if (deactivatedVoice >= 0)
     {
-        for (int j = 0; j < tStack_getSize(poly->stack); ++j)
+        for (int j = 0; j < tStack_getSize(&poly->stack); ++j)
         {
-            noteToTest = tStack_get(poly->stack, j);
+            noteToTest = tStack_get(&poly->stack, j);
             
             if (poly->notes[noteToTest][1] < 0) //if there is a stolen note waiting (marked inactive but on the stack)
             {
                 poly->voices[deactivatedVoice][0] = noteToTest; //set the newly free voice to use the old stolen note
                 if (poly->pitchGlideIsActive)
                 {
-                	tRamp_setTime(poly->ramps[deactivatedVoice], poly->glideTime);
+                	tRamp_setTime(&poly->ramps[deactivatedVoice], poly->glideTime);
                 }
                 else
                 {
-                	tRamp_setVal(poly->ramps[deactivatedVoice], noteToTest);
+                	tRamp_setVal(&poly->ramps[deactivatedVoice], noteToTest);
                 }
-                tRamp_setDest(poly->ramps[deactivatedVoice], poly->voices[deactivatedVoice][0]);
+                tRamp_setDest(&poly->ramps[deactivatedVoice], poly->voices[deactivatedVoice][0]);
                 poly->voices[deactivatedVoice][1] = poly->notes[noteToTest][0]; // set the velocity of the voice to be the velocity of that note
                 poly->notes[noteToTest][1] = deactivatedVoice; //mark that it is no longer stolen and is now active
                 return -1;
@@ -472,7 +464,7 @@ void tPoly_orderedAddToStack(tPoly* const poly, uint8_t noteVal)
     uint8_t j;
     int myPitch, thisPitch, nextPitch;
     
-    tStack* ns = poly->orderStack;
+    tStack* ns = &poly->orderStack;
     
     int whereToInsert = 0;
     
@@ -520,18 +512,18 @@ void tPoly_setPitchGlideTime(tPoly* const poly, float t)
     poly->glideTime = t;
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
-        tRamp_setTime(poly->ramps[i], poly->glideTime);
+        tRamp_setTime(&poly->ramps[i], poly->glideTime);
     }
 }
 
 void tPoly_setBendGlideTime(tPoly* const poly, float t)
 {
-    tRamp_setTime(poly->pitchBendRamp, t);
+    tRamp_setTime(&poly->pitchBendRamp, t);
 }
 
 void tPoly_setBendSamplesPerTick(tPoly* const poly, float t)
 {
-	 poly->pitchBendRamp->samples_per_tick =  t;
+	 poly->pitchBendRamp.samples_per_tick =  t;
 }
 
 int tPoly_getNumVoices(tPoly* const poly)
@@ -541,12 +533,12 @@ int tPoly_getNumVoices(tPoly* const poly)
 
 int tPoly_getNumActiveVoices(tPoly* const poly)
 {
-    return LEAF_clip(0, tStack_getSize(poly->stack), poly->numVoices);
+    return LEAF_clip(0, tStack_getSize(&poly->stack), poly->numVoices);
 }
 
 float tPoly_getPitch(tPoly* const poly, uint8_t voice)
 {
-    return tRamp_sample(poly->ramps[voice]) + tRamp_sample(poly->pitchBendRamp);
+    return tRamp_sample(&poly->ramps[voice]) + tRamp_sample(&poly->pitchBendRamp);
 }
 
 int tPoly_getKey(tPoly* const poly, uint8_t voice)
@@ -568,9 +560,9 @@ void tPoly_setSampleRate(tPoly* const poly, float sr)
 {
     for (int i = 0; i < poly->maxNumVoices; i++)
     {
-        tRamp_setSampleRate(poly->ramps[i], sr);
+        tRamp_setSampleRate(&poly->ramps[i], sr);
     }
-    tRamp_setSampleRate(poly->pitchBendRamp, sr);
+    tRamp_setSampleRate(&poly->pitchBendRamp, sr);
 }
 
 
@@ -583,10 +575,10 @@ void tSimplePoly_create(tMempool** const mp, tSimplePoly** const polyh)
     ALLOC_FROM_POOL(tSimplePoly, polyh, mp);
 }
 
-void tSimplePoly_init(LEAF* const leaf, tSimplePoly* const polyh, int maxNumVoices)
+void tSimplePoly_init(LEAF* const leaf, tSimplePoly* const poly, int maxNumVoices)
 {
 
-poly->numVoices = maxNumVoices;
+    poly->numVoices = maxNumVoices;
     poly->maxNumVoices = maxNumVoices;
 
     for (int i = 0; i < 128; i++)
@@ -597,14 +589,14 @@ poly->numVoices = maxNumVoices;
 }
     poly->stealing_on = 1;
     poly->recover_stolen = 1;
-    poly->voices = (int**) mpool_calloc(sizeof(int*) * poly->maxNumVoices, m);
+    poly->voices = (int**) mpool_calloc(sizeof(int*) * poly->maxNumVoices, poly->mempool);
 
     for (int i = 0; i < poly->maxNumVoices; ++i)
     {
-        poly->voices[i] = (int*) mpool_calloc(sizeof(int) * 3, m);
+        poly->voices[i] = (int*) mpool_calloc(sizeof(int) * 3, poly->mempool);
         poly->voices[i][0] = -1;
     }
-    tStack_initToPool(&poly->stack, mp);
+    tStack_init(leaf,&poly->stack);
 
 }
 
@@ -616,7 +608,7 @@ void    tSimplePoly_free  (tSimplePoly** const polyh)
     {
         mpool_free((char*)poly->voices[i], poly->mempool);
     }
-    tStack_free(&poly->stack);
+    // tStack_free(&poly->stack);
     mpool_free((char*)poly->voices, poly->mempool);
     mpool_free((char*)poly, poly->mempool);
 }
@@ -625,7 +617,7 @@ int tSimplePoly_noteOn(tSimplePoly* const poly, int note, uint8_t vel)
 {
     int whichVoice, whichNote, oldNote, alteredVoice;
     // if not in keymap or already on stack, dont do anything. else, add that note.
-    if (tStack_contains(poly->stack, note) >= 0) return -1;
+    if (tStack_contains(&poly->stack, note) >= 0) return -1;
     else
     {
         alteredVoice = -1;
@@ -644,7 +636,7 @@ int tSimplePoly_noteOn(tSimplePoly* const poly, int note, uint8_t vel)
                 poly->voices[i][2] = note; // voices[i][2] is the output midi note, (avoiding the -1 when a voice is inactive)
 
                 alteredVoice = i;
-                tStack_add(poly->stack, note);
+                tStack_add(&poly->stack, note);
                 break;
             }
         }
@@ -665,16 +657,16 @@ int tSimplePoly_noteOn(tSimplePoly* const poly, int note, uint8_t vel)
                     poly->voices[i][2] = note; // voices[i][2] is the output midi note, (avoiding the -1 when a voice is inactive)
 
                     alteredVoice = i;
-                    tStack_add(poly->stack, note);
+                    tStack_add(&poly->stack, note);
                     break;
                 }
             }
         }
         if ((!found) && (poly->stealing_on)) //steal
         {
-            for (int j = tStack_getSize(poly->stack) - 1; j >= 0; j--)
+            for (int j = tStack_getSize(&poly->stack) - 1; j >= 0; j--)
             {
-                whichNote = tStack_get(poly->stack, j);
+                whichNote = tStack_get(&poly->stack, j);
                 whichVoice = poly->notes[whichNote][0];
                 if (whichVoice >= 0)
                 {
@@ -688,7 +680,7 @@ int tSimplePoly_noteOn(tSimplePoly* const poly, int note, uint8_t vel)
                     poly->voices[whichVoice][2] = note;
 
                     alteredVoice = whichVoice;
-                    tStack_add(poly->stack, note);
+                    tStack_add(&poly->stack, note);
                     break;
                 }
             }
@@ -702,7 +694,7 @@ int tSimplePoly_noteOff(tSimplePoly* const poly, uint8_t note)
 {
     int16_t noteToTest = -1;
 
-    tStack_remove(poly->stack, note);
+    tStack_remove(&poly->stack, note);
     poly->notes[note][0] = -1;
 
     int deactivatedVoice = -1;
@@ -722,9 +714,9 @@ int tSimplePoly_noteOff(tSimplePoly* const poly, uint8_t note)
         //grab old notes off the stack if there are notes waiting to replace the free voice
         if (deactivatedVoice >= 0)
         {
-            for (int j = 0; j < tStack_getSize(poly->stack); ++j)
+            for (int j = 0; j < tStack_getSize(&poly->stack); ++j)
             {
-                noteToTest = tStack_get(poly->stack, j);
+                noteToTest = tStack_get(&poly->stack, j);
 
                 if (poly->notes[noteToTest][0] == -3) //if there is a stolen note waiting (marked inactive but on the stack)
                 {
@@ -750,9 +742,9 @@ void tSimplePoly_deactivateVoice(tSimplePoly* const poly, uint8_t voice)
         if (poly->recover_stolen)
         {
             //grab old notes off the stack if there are notes waiting to replace the free voice
-            for (int j = 0; j < tStack_getSize(poly->stack); ++j)
+            for (int j = 0; j < tStack_getSize(&poly->stack); ++j)
             {
-                noteToTest = tStack_get(poly->stack, j); //note to check if it is waiting to be recovered
+                noteToTest = tStack_get(&poly->stack, j); //note to check if it is waiting to be recovered
 
                 if (poly->notes[noteToTest][0] == -3) //if there is a stolen note waiting (marked inactive but on the stack)
                 {
@@ -787,7 +779,7 @@ int tSimplePoly_markPendingNoteOff(tSimplePoly* const poly, uint8_t note)
 {
     int deactivatedVoice = -1;
 
-    if (tStack_remove(poly->stack, note))
+    if (tStack_remove(&poly->stack, note))
     {
         poly->notes[note][0] = -2;
         
@@ -807,22 +799,23 @@ int tSimplePoly_markPendingNoteOff(tSimplePoly* const poly, uint8_t note)
 
 int tSimplePoly_allNotesOff(tSimplePoly* const poly)
 {
-    for (int i = 0; i < poly->stack->size; i++)
+    for (int i = 0; i < poly->stack.size; i++)
     {
-        int note = tStack_get(poly->stack, i);
+        int note = tStack_get(&poly->stack, i);
         poly->notes[note][0] = -1;
         int deactivatedVoice = -1;
-        for (int i=0 ; i<poly->maxNumVoices; i++)
+        for (int j=0 ; i<poly->maxNumVoices; j++)
         {
-            if (poly->voices[i][0] == note)
+            if (poly->voices[j][0] == note)
             {
-                poly->voices[i][0] = -1;
-                poly->voices[i][1] = 0;
+                poly->voices[j][0] = -1;
+                poly->voices[j][1] = 0;
                 deactivatedVoice = i;
                 break;
             }
         }
     }
+    return 1;
 }
 void tSimplePoly_setNumVoices(tSimplePoly* const poly, uint8_t numVoices)
 {
@@ -838,7 +831,7 @@ int tSimplePoly_getNumVoices(tSimplePoly* const poly)
 
 int tSimplePoly_getNumActiveVoices(tSimplePoly* const poly)
 {
-    return LEAF_clip(0, tStack_getSize(poly->stack), poly->numVoices);
+    return LEAF_clip(0, tStack_getSize(&poly->stack), poly->numVoices);
 }
 
 

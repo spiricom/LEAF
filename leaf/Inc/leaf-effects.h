@@ -18,8 +18,7 @@ extern "C" {
 #include "leaf-mempool.h"
 #include "leaf-dynamics.h"
 #include "leaf-analysis.h"
-#include "leaf-envelopes.h"
-    
+#include "leaf-filters.h"
     
     
     //==============================================================================
@@ -456,8 +455,8 @@ extern "C" {
     {
         tMempool* mempool;
         
-        tAttackDetection*  ad;
-        tHighpass*  hp;
+        tAttackDetection  ad;
+        tHighpass  hp;
         
         int loopSize;
         uint16_t timeindex;              // current reference time, write index
@@ -668,7 +667,7 @@ extern "C" {
     {
         tMempool* mempool;
         
-        tDualPitchDetector** dp;
+        tDualPitchDetector* dp;
         float minInputFreq, maxInputFreq;
         
         tPitchShift** ps;
@@ -773,10 +772,10 @@ extern "C" {
         unsigned int cbi;
         float shiftFactor;
         float intensity, invIntensity;
-        tHighpass* hp;
-        tHighpass* hp2;
-        tFeedbackLeveler* fbl1;
-        tFeedbackLeveler* fbl2;
+        tHighpass hp;
+        tHighpass hp2;
+        tFeedbackLeveler fbl1;
+        tFeedbackLeveler fbl2;
         float sampleRate;
         float invSampleRate;
     } tFormantShifter;

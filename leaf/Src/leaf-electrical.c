@@ -47,15 +47,43 @@ static float get_reflected_wave_for_ideal      (tWDF* const n, float input, floa
 static float get_reflected_wave_for_diode      (tWDF* const n, float input, float incident_wave);
 static float get_reflected_wave_for_diode_pair (tWDF* const n, float input, float incident_wave);
 
-static void wdf_create(tMempool** const mp, wdf** const wdf)
+static void wdf_create(tMempool** const mp, tWDF** const wdf)
 {
-    ALLOC_FROM_POOL(wdf, wdf, mp);
+    ALLOC_FROM_POOL(tWDF, wdf, mp);
 }
+static void wdf_init(tWDF* const r, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
+{
+    LEAF* leaf = r->mempool->leaf;
+r->type = type;
+r->child_left = rL;
+r->child_right = rR;
+r->incident_wave_up = 0.0f;
+r->incident_wave_left = 0.0f;
+r->incident_wave_right = 0.0f;
+r->reflected_wave_up = 0.0f;
+r->reflected_wave_left = 0.0f;
+r->reflected_wave_right = 0.0f;
+r->sample_rate = leaf->sampleRate;
+r->value = value;
+
+tWDF* child;
+if (r->child_left != NULL) child = r->child_left;
+else child = r->child_right;
+
+    if (r->type == Resistor)
+    {
+        r->port_resistance_up = r->value;
+        r->port_conductance_up = 1.0f / r->value;
+
+        r->get_port_resistance = &get_port_resistance_for_resistor;
+        r->get_reflected_wave_up = &get_reflected_wave_for_resistor;
+        r->set_incident_wave = &set_incident_wave_for_leaf;
+    }
     else if (r->type == Capacitor)
     {
         r->port_conductance_up = r->sample_rate * 2.0f * r->value;
         r->port_resistance_up = 1.0f / r->port_conductance_up; //based on trapezoidal discretization
-        
+
         r->get_port_resistance = &get_port_resistance_for_capacitor;
         r->get_reflected_wave_up = &get_reflected_wave_for_capacitor;
         r->set_incident_wave = &set_incident_wave_for_leaf;
@@ -64,7 +92,7 @@ static void wdf_create(tMempool** const mp, wdf** const wdf)
     {
         r->port_resistance_up = r->sample_rate * 2.0f * r->value; //based on trapezoidal discretization
         r->port_conductance_up = 1.0f / r->port_resistance_up;
-        
+
         r->get_port_resistance = &get_port_resistance_for_inductor;
         r->get_reflected_wave_up = &get_reflected_wave_for_capacitor; // same as capacitor
         r->set_incident_wave = &set_incident_wave_for_leaf_inverted;
@@ -73,7 +101,7 @@ static void wdf_create(tMempool** const mp, wdf** const wdf)
     {
         r->port_resistance_up = r->value;
         r->port_conductance_up = 1.0f / r->port_resistance_up;
-        
+
         r->get_port_resistance = &get_port_resistance_for_resistive;
         r->get_reflected_wave_up = &get_reflected_wave_for_resistive;
         r->set_incident_wave = &set_incident_wave_for_leaf;
@@ -82,7 +110,7 @@ static void wdf_create(tMempool** const mp, wdf** const wdf)
     {
         r->port_resistance_up = tWDF_getPortResistance(r->child_left);
         r->port_conductance_up = 1.0f / r->port_resistance_up;
-        
+
         r->get_port_resistance = &get_port_resistance_for_inverter;
         r->get_reflected_wave_up = &get_reflected_wave_for_inverter;
         r->set_incident_wave = &set_incident_wave_for_inverter;
@@ -96,7 +124,7 @@ static void wdf_create(tMempool** const mp, wdf** const wdf)
         r->port_conductance_left = 1.0f / r->port_resistance_left;
         r->port_conductance_right = 1.0f / r->port_resistance_right;
         r->gamma_zero = 1.0f / (r->port_resistance_right + r->port_resistance_left);
-        
+
         r->get_port_resistance = &get_port_resistance_for_series;
         r->get_reflected_wave_up = &get_reflected_wave_for_series;
         r->set_incident_wave = &set_incident_wave_for_series;
@@ -110,7 +138,7 @@ static void wdf_create(tMempool** const mp, wdf** const wdf)
         r->port_conductance_left = 1.0f / r->port_resistance_left;
         r->port_conductance_right = 1.0f / r->port_resistance_right;
         r->gamma_zero = 1.0f / (r->port_resistance_right + r->port_resistance_left);
-        
+
         r->get_port_resistance = &get_port_resistance_for_parallel;
         r->get_reflected_wave_up = &get_reflected_wave_for_parallel;
         r->set_incident_wave = &set_incident_wave_for_parallel;
@@ -119,7 +147,7 @@ static void wdf_create(tMempool** const mp, wdf** const wdf)
     {
         r->port_resistance_up = tWDF_getPortResistance(child);
         r->port_conductance_up = 1.0f / r->port_resistance_up;
-        
+
         r->get_reflected_wave_down = &get_reflected_wave_for_ideal;
         r->get_port_resistance = &get_port_resistance_for_root;
     }
@@ -127,7 +155,7 @@ static void wdf_create(tMempool** const mp, wdf** const wdf)
     {
         r->port_resistance_up = tWDF_getPortResistance(child);
         r->port_conductance_up = 1.0f / r->port_resistance_up;
-        
+
         r->get_reflected_wave_down = &get_reflected_wave_for_diode;
         r->get_port_resistance = &get_port_resistance_for_root;
     }
@@ -135,7 +163,7 @@ static void wdf_create(tMempool** const mp, wdf** const wdf)
     {
         r->port_resistance_up = tWDF_getPortResistance(child);
         r->port_conductance_up = 1.0f / r->port_resistance_up;
-        
+
         r->get_reflected_wave_down = &get_reflected_wave_for_diode_pair;
         r->get_port_resistance = &get_port_resistance_for_root;
     }
@@ -148,9 +176,9 @@ void tWDF_create(tMempool** const mp, tWDF** const wdf)
 
 void tWDF_init(LEAF* const leaf, tWDF* const wdf, WDFComponentType type, float value, tWDF* const rL, tWDF* const rR)
 {
-
-    tMempool* m = *mp;
-    *wdf = (tWDF*) mpool_alloc(sizeof(tWDF), m);
+    //
+    // tMempool* m = *mp;
+    // *wdf = (tWDF*) mpool_alloc(sizeof(tWDF), m);
     
     wdf_init(wdf, type, value, rL, rR);
 
@@ -161,6 +189,7 @@ void    tWDF_free (tWDF** const wdf)
     tWDF* r = *wdf;
     
     mpool_free((char*)r, r->mempool);
+    r = NULL;
 }
 
 float tWDF_tick(tWDF* const r, float sample, tWDF* const outputPoint, uint8_t paramsChanged)

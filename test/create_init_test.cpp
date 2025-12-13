@@ -10,12 +10,16 @@
 #include "leaf-dynamics.h"
 #include "leaf-envelopes.h"
 #include "leaf-oscillators.h"
+#include "leaf-effects.h"
+#include "leaf-electrical.h"
+#include "leaf-instruments.h"
+#include "leaf-midi.h"
 static float myrand() { return (float) rand() / RAND_MAX; }
 
 #define LEAF_SETUP()                     \
     LEAF leaf;                           \
-    char leafMemory[65535];              \
-    LEAF_init(&leaf, 44100.f, leafMemory, 65535, &myrand)
+    char leafMemory[131070];              \
+    LEAF_init(&leaf, 44100.f, leafMemory, 131070, &myrand)
 
 /*==============================================================================
    tEnvelopeFollower
@@ -1383,4 +1387,291 @@ TEST_CASE("tPlutaQuadOsc create/init/free", "[leaf-filters][create-init][tPlutaQ
     REQUIRE(osc != nullptr);
     REQUIRE_NOTHROW(tPlutaQuadOsc_init(&leaf, osc, 4)); // small oversampling ratio
     REQUIRE_NOTHROW(tPlutaQuadOsc_free(&osc));
+}
+
+
+//==============================================================================
+// leaf-effects create / init / free tests
+//==============================================================================
+
+// tTalkbox
+TEST_CASE("tTalkbox create/init/free", "[leaf-effects][create-init][tTalkbox]")
+{
+    LEAF_SETUP();
+
+    tTalkbox* fx = nullptr;
+    REQUIRE_NOTHROW(tTalkbox_create(&leaf.mempool, &fx));
+    REQUIRE(fx != nullptr);
+    REQUIRE_NOTHROW(tTalkbox_init(&leaf, fx, 1024));
+    REQUIRE_NOTHROW(tTalkbox_free(&fx));
+}
+
+// tTalkboxfloat
+TEST_CASE("tTalkboxfloat create/init/free", "[leaf-effects][create-init][tTalkboxfloat]")
+{
+    LEAF_SETUP();
+
+    tTalkboxfloat* fx = nullptr;
+    REQUIRE_NOTHROW(tTalkboxfloat_create(&leaf.mempool, &fx));
+    REQUIRE(fx != nullptr);
+    REQUIRE_NOTHROW(tTalkboxfloat_init(&leaf, fx, 1024));
+    REQUIRE_NOTHROW(tTalkboxfloat_free(&fx));
+}
+
+// tVocoder
+TEST_CASE("tVocoder create/init/free", "[leaf-effects][create-init][tVocoder]")
+{
+    LEAF_SETUP();
+
+    tVocoder* fx = nullptr;
+    REQUIRE_NOTHROW(tVocoder_create(&leaf.mempool, &fx));
+    REQUIRE(fx != nullptr);
+    REQUIRE_NOTHROW(tVocoder_init(&leaf, fx));
+    REQUIRE_NOTHROW(tVocoder_free(&fx));
+}
+
+// tRosenbergGlottalPulse
+TEST_CASE("tRosenbergGlottalPulse create/init/free", "[leaf-effects][create-init][tRosenbergGlottalPulse]")
+{
+    LEAF_SETUP();
+
+    tRosenbergGlottalPulse* fx = nullptr;
+    REQUIRE_NOTHROW(tRosenbergGlottalPulse_create(&leaf.mempool, &fx));
+    REQUIRE(fx != nullptr);
+    REQUIRE_NOTHROW(tRosenbergGlottalPulse_init(&leaf, fx));
+    REQUIRE_NOTHROW(tRosenbergGlottalPulse_free(&fx));
+}
+
+// tSOLAD
+TEST_CASE("tSOLAD create/init/free", "[leaf-effects][create-init][tSOLAD]")
+{
+    LEAF_SETUP();
+
+    tSOLAD* fx = nullptr;
+    REQUIRE_NOTHROW(tSOLAD_create(&leaf.mempool, &fx));
+    REQUIRE(fx != nullptr);
+    REQUIRE_NOTHROW(tSOLAD_init(&leaf, fx, 4096));
+    REQUIRE_NOTHROW(tSOLAD_free(&fx));
+}
+
+// tPitchShift
+TEST_CASE("tPitchShift create/init/free", "[leaf-effects][create-init][tPitchShift]")
+{
+    LEAF_SETUP();
+
+    constexpr int bufSize = 1024;
+    float inBuffer[bufSize] = { 0.0f };
+
+    tDualPitchDetector* pd = nullptr;
+    REQUIRE_NOTHROW(tDualPitchDetector_create(&leaf.mempool, &pd));
+    REQUIRE(pd != nullptr);
+
+    REQUIRE_NOTHROW(tDualPitchDetector_init(&leaf, pd, 50.0f, 2000.0f, inBuffer, bufSize));
+
+
+    tPitchShift* fx = nullptr;
+    REQUIRE_NOTHROW(tPitchShift_create(&leaf.mempool, &fx));
+    REQUIRE(fx != nullptr);
+    REQUIRE_NOTHROW(tPitchShift_init(&leaf, fx, pd, 1024));
+    REQUIRE_NOTHROW(tPitchShift_free(&fx));
+
+    REQUIRE_NOTHROW(tDualPitchDetector_free(&pd));
+}
+
+// tSimpleRetune
+TEST_CASE("tSimpleRetune create/init/free", "[leaf-effects][create-init][tSimpleRetune]")
+{
+    LEAF_SETUP();
+
+    tSimpleRetune* fx = nullptr;
+    REQUIRE_NOTHROW(tSimpleRetune_create(&leaf.mempool, &fx));
+    REQUIRE(fx != nullptr);
+    REQUIRE_NOTHROW(tSimpleRetune_init(&leaf, fx, 4, 50.0f, 2000.0f, 1024));
+    REQUIRE_NOTHROW(tSimpleRetune_free(&fx));
+}
+
+// tRetune
+TEST_CASE("tRetune create/init/free", "[leaf-effects][create-init][tRetune]")
+{
+    LEAF_SETUP();
+
+    tRetune* fx = nullptr;
+    REQUIRE_NOTHROW(tRetune_create(&leaf.mempool, &fx));
+    REQUIRE(fx != nullptr);
+    REQUIRE_NOTHROW(tRetune_init(&leaf, fx, 2, 50.0f, 2000.0f, 128));
+    REQUIRE_NOTHROW(tRetune_free(&fx));
+}
+
+// tFormantShifter
+TEST_CASE("tFormantShifter create/init/free", "[leaf-effects][create-init][tFormantShifter]")
+{
+    LEAF_SETUP();
+
+    tFormantShifter* fx = nullptr;
+    REQUIRE_NOTHROW(tFormantShifter_create(&leaf.mempool, &fx));
+    REQUIRE(fx != nullptr);
+    REQUIRE_NOTHROW(tFormantShifter_init(&leaf, fx, 32));
+    REQUIRE_NOTHROW(tFormantShifter_free(&fx));
+}
+
+//==============================================================================
+// leaf-electrical: create / init / free only (REQUIRE_NOTHROW)
+//==============================================================================
+
+TEST_CASE("leaf-electrical: tWDF create/init/free", "[leaf][electrical]")
+{
+LEAF_SETUP();
+    tWDF* wdf = nullptr;
+
+
+    REQUIRE_NOTHROW(tWDF_create(&leaf.mempool, &wdf));
+    REQUIRE(wdf != nullptr);
+
+    // children can be null for leaf components (Resistor/Capacitor/etc),
+    // so just pass nullptrs here.
+    REQUIRE_NOTHROW(tWDF_init(&leaf, wdf, Resistor, 1000.0f, nullptr, nullptr));
+
+    REQUIRE_NOTHROW(tWDF_free(&wdf));
+}
+//==============================================================================
+// leaf-instruments: create / init / free only (REQUIRE_NOTHROW)
+//==============================================================================
+
+/*==============================================================================
+   t808Cowbell
+==============================================================================*/
+
+TEST_CASE("t808Cowbell create/init/free", "[leaf-instruments][create-init][t808Cowbell]") {
+    LEAF_SETUP();
+
+    t808Cowbell* inst = nullptr;
+    REQUIRE_NOTHROW(t808Cowbell_create(&leaf.mempool, &inst));
+    REQUIRE(inst != nullptr);
+    REQUIRE_NOTHROW(t808Cowbell_init(&leaf, inst, /*useStick=*/1));
+    REQUIRE_NOTHROW(t808Cowbell_free(&inst));
+}
+
+/*==============================================================================
+   t808Hihat
+==============================================================================*/
+
+TEST_CASE("t808Hihat create/init/free", "[leaf-instruments][create-init][t808Hihat]") {
+    LEAF_SETUP();
+
+    t808Hihat* inst = nullptr;
+    REQUIRE_NOTHROW(t808Hihat_create(&leaf.mempool, &inst));
+    REQUIRE(inst != nullptr);
+    REQUIRE_NOTHROW(t808Hihat_init(&leaf, inst));
+    REQUIRE_NOTHROW(t808Hihat_free(&inst));
+}
+
+/*==============================================================================
+   t808Snare
+==============================================================================*/
+
+TEST_CASE("t808Snare create/init/free", "[leaf-instruments][create-init][t808Snare]") {
+    LEAF_SETUP();
+
+    t808Snare* inst = nullptr;
+    REQUIRE_NOTHROW(t808Snare_create(&leaf.mempool, &inst));
+    REQUIRE(inst != nullptr);
+    REQUIRE_NOTHROW(t808Snare_init(&leaf, inst));
+    REQUIRE_NOTHROW(t808Snare_free(&inst));
+}
+
+/*==============================================================================
+   t808SnareSmall
+==============================================================================*/
+
+TEST_CASE("t808SnareSmall create/init/free", "[leaf-instruments][create-init][t808SnareSmall]") {
+    LEAF_SETUP();
+
+    t808SnareSmall* inst = nullptr;
+    REQUIRE_NOTHROW(t808SnareSmall_create(&leaf.mempool, &inst));
+    REQUIRE(inst != nullptr);
+    REQUIRE_NOTHROW(t808SnareSmall_init(&leaf, inst));
+    REQUIRE_NOTHROW(t808SnareSmall_free(&inst));
+}
+
+/*==============================================================================
+   t808Kick
+==============================================================================*/
+
+TEST_CASE("t808Kick create/init/free", "[leaf-instruments][create-init][t808Kick]") {
+    LEAF_SETUP();
+
+    t808Kick* inst = nullptr;
+    REQUIRE_NOTHROW(t808Kick_create(&leaf.mempool, &inst));
+    REQUIRE(inst != nullptr);
+    REQUIRE_NOTHROW(t808Kick_init(&leaf, inst));
+    REQUIRE_NOTHROW(t808Kick_free(&inst));
+}
+
+/*==============================================================================
+   t808KickSmall
+==============================================================================*/
+
+TEST_CASE("t808KickSmall create/init/free", "[leaf-instruments][create-init][t808KickSmall]") {
+    LEAF_SETUP();
+
+    t808KickSmall* inst = nullptr;
+    REQUIRE_NOTHROW(t808KickSmall_create(&leaf.mempool, &inst));
+    REQUIRE(inst != nullptr);
+    REQUIRE_NOTHROW(t808KickSmall_init(&leaf, inst));
+    REQUIRE_NOTHROW(t808KickSmall_free(&inst));
+}
+//==============================================================================
+// leaf-midi: create / init / free only (REQUIRE_NOTHROW)
+// (Assumes your common includes + LEAF_SETUP() macro are already present.)
+//==============================================================================
+
+/*==============================================================================
+   tStack
+==============================================================================*/
+
+TEST_CASE("tStack create/init/free", "[leaf-midi][create-init][tStack]")
+{
+    LEAF_SETUP();
+
+    tStack* s = nullptr;
+    REQUIRE_NOTHROW(tStack_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+
+    REQUIRE_NOTHROW(tStack_init(&leaf, s));
+
+    REQUIRE_NOTHROW(tStack_free(&s));
+}
+
+/*==============================================================================
+   tPoly
+==============================================================================*/
+
+TEST_CASE("tPoly create/init/free", "[leaf-midi][create-init][tPoly]")
+{
+    LEAF_SETUP();
+
+    tPoly* poly = nullptr;
+    REQUIRE_NOTHROW(tPoly_create(&leaf.mempool, &poly));
+    REQUIRE(poly != nullptr);
+
+    REQUIRE_NOTHROW(tPoly_init(&leaf, poly, /*maxNumVoices=*/8));
+
+    REQUIRE_NOTHROW(tPoly_free(&poly));
+}
+
+/*==============================================================================
+   tSimplePoly
+==============================================================================*/
+
+TEST_CASE("tSimplePoly create/init/free", "[leaf-midi][create-init][tSimplePoly]")
+{
+    LEAF_SETUP();
+
+    tSimplePoly* poly = nullptr;
+    REQUIRE_NOTHROW(tSimplePoly_create(&leaf.mempool, &poly));
+    REQUIRE(poly != nullptr);
+
+    REQUIRE_NOTHROW(tSimplePoly_init(&leaf, poly, /*maxNumVoices=*/8));
+
+    REQUIRE_NOTHROW(tSimplePoly_free(&poly));
 }

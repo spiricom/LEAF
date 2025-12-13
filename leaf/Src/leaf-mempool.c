@@ -49,6 +49,7 @@
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 
 #if LEAF_DEBUG
 #include "../../TestPlugin/JuceLibraryCode/JuceHeader.h"
@@ -97,20 +98,23 @@ char* mpool_alloc(size_t asize, tMempool* pool)
 #if LEAF_DEBUG
     DBG("alloc " + String(asize));
 #endif
-#if LEAF_USE_DYNAMIC_ALLOCATION
-    char* temp = (char*) malloc(asize);
-    if (temp == NULL)
+// #if LEAF_USE_DYNAMIC_ALLOCATION
+    if(pool == NULL)
     {
-        // allocation failed, exit from the program
-        fprintf(stderr, "Out of memory.\n");
-        exit(1);
+        char* temp = (char*) malloc(asize);
+        if (temp == NULL)
+        {
+            // allocation failed, exit from the program
+            // fprintf(stderr, "Out of memory.\n");
+            exit(1);
+        }
+        if (pool->leaf->clearOnAllocation > 0)
+        {
+            memset(temp, 0, asize);
+        }
+        return temp;
     }
-    if (pool->leaf->clearOnAllocation > 0)
-    {
-        memset(temp, 0, asize);
-    }
-    return temp;
-#else
+// #else
     // If the head is NULL, the mempool is full
     if (pool->head == NULL)
     {
@@ -191,7 +195,7 @@ char* mpool_alloc(size_t asize, tMempool* pool)
     
     // Return the pool of the allocated node;
     return node_to_alloc->pool;
-#endif
+// #endif
 }
 
 
@@ -204,17 +208,19 @@ char* mpool_calloc(size_t asize, tMempool* pool)
 #if LEAF_DEBUG
     DBG("calloc " + String(asize));
 #endif
-#if LEAF_USE_DYNAMIC_ALLOCATION
-    char* ret = (char*) malloc(asize);
-    if (ret == NULL)
+    if(pool == NULL)
     {
-        // allocation failed, exit from the program
-        fprintf(stderr, "Out of memory.\n");
-        exit(1);
+        char* ret = (char*) malloc(asize);
+        if (ret == NULL)
+        {
+            // allocation failed, exit from the program
+            // fprintf(stderr, "Out of memory.\n");
+            exit(1);
+        }
+        memset(ret, 0, asize);
+        return ret;
     }
-    memset(ret, 0, asize);
-    return ret;
-#else
+// #else
     // If the head is NULL, the mempool is full
     if (pool->head == NULL)
     {
@@ -290,7 +296,7 @@ char* mpool_calloc(size_t asize, tMempool* pool)
     for (int i = 0; i < node_to_alloc->size; i++) node_to_alloc->pool[i] = 0;
     // Return the pool of the allocated node;
     return node_to_alloc->pool;
-#endif
+// #endif
 }
 
 char* leaf_alloc(LEAF* const leaf, size_t size)

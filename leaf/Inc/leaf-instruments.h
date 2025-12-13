@@ -88,14 +88,14 @@ extern "C" {
     typedef struct t808Cowbell
     {
         tMempool* mempool;
-        tSquare* p[2];
-        tNoise*  stick;
-        tSVF*  bandpassOsc;
-        tSVF*  bandpassStick;
-        tEnvelope*  envGain;
-        tEnvelope*  envStick;
-        tEnvelope*  envFilter;
-        tHighpass*  highpass;
+        tSquare p[2];
+        tNoise  stick;
+        tSVF  bandpassOsc;
+        tSVF  bandpassStick;
+        tEnvelope  envGain;
+        tEnvelope  envStick;
+        tEnvelope  envFilter;
+        tHighpass  highpass;
         float oscMix;
         float filterCutoff;
         uint8_t useStick;
@@ -193,15 +193,15 @@ extern "C" {
 
         tMempool* mempool;
         // 6 Square waves
-        tSquare* p[6];
-        tNoise*  n;
-        tSVF*  bandpassOsc;
-        tSVF*  bandpassStick;
-        tEnvelope*  envGain;
-        tEnvelope*  envStick;
-        tEnvelope*  noiseFMGain;
-        tHighpass*  highpass;
-        tNoise*  stick;
+        tSquare p[6];
+        tNoise  n;
+        tSVF  bandpassOsc;
+        tSVF  bandpassStick;
+        tEnvelope  envGain;
+        tEnvelope  envStick;
+        tEnvelope  noiseFMGain;
+        tHighpass  highpass;
+        tNoise  stick;
         
         float freq;
         float stretch;
@@ -297,15 +297,15 @@ extern "C" {
 
         tMempool* mempool;
         // Tone 1, Tone 2, Noise
-        tTriangle* tone[2]; // Tri (not yet antialiased or wavetabled)
-        tNoise*  noiseOsc;
-        tSVF* toneLowpass[2];
-        tSVF*  noiseLowpass; // Lowpass from SVF filter
-        tEnvelope*  toneEnvOsc[2];
-        tEnvelope*  toneEnvGain[2];
-        tEnvelope*  noiseEnvGain;
-        tEnvelope*  toneEnvFilter[2];
-        tEnvelope*  noiseEnvFilter;
+        tTriangle tone[2]; // Tri (not yet antialiased or wavetabled)
+        tNoise  noiseOsc;
+        tSVF toneLowpass[2];
+        tSVF  noiseLowpass; // Lowpass from SVF filter
+        tEnvelope  toneEnvOsc[2];
+        tEnvelope  toneEnvGain[2];
+        tEnvelope  noiseEnvGain;
+        tEnvelope  toneEnvFilter[2];
+        tEnvelope  noiseEnvFilter;
         
         float toneGain[2];
         float noiseGain;
@@ -404,15 +404,15 @@ extern "C" {
 
         tMempool* mempool;
         // Tone 1, Tone 2, Noise
-        tPBTriangle*  tone[2]; // Tri
-        tNoise*  noiseOsc;
-        tSVF*  toneLowpass[2];
-        tSVF*  noiseLowpass; // Lowpass from SVF filter
-        tADSRS*  toneEnvOsc[2];
-        tADSRS*  toneEnvGain[2];
-        tADSRS*  noiseEnvGain;
-        tADSRS*  toneEnvFilter[2];
-        tADSRS*  noiseEnvFilter;
+        tPBTriangle  tone[2]; // Tri
+        tNoise  noiseOsc;
+        tSVF  toneLowpass[2];
+        tSVF  noiseLowpass; // Lowpass from SVF filter
+        tADSRS  toneEnvOsc[2];
+        tADSRS  toneEnvGain[2];
+        tADSRS  noiseEnvGain;
+        tADSRS  toneEnvFilter[2];
+        tADSRS  noiseEnvFilter;
         
         float toneGain[2];
         float noiseGain;
@@ -509,14 +509,14 @@ extern "C" {
 
         tMempool* mempool;
         
-        tCycle*  tone; // Tri
-        tNoise*  noiseOsc;
-        tSVF*  toneLowpass;
-        tEnvelope*  toneEnvOscChirp;
-        tEnvelope*  toneEnvOscSigh;
-        tEnvelope*  toneEnvGain;
-        tEnvelope*  noiseEnvGain;
-        tEnvelope*  toneEnvFilter;
+        tCycle  tone; // Tri
+        tNoise  noiseOsc;
+        tSVF  toneLowpass;
+        tEnvelope  toneEnvOscChirp;
+        tEnvelope  toneEnvOscSigh;
+        tEnvelope  toneEnvGain;
+        tEnvelope  noiseEnvGain;
+        tEnvelope  toneEnvFilter;
         
         float toneGain;
         float noiseGain;
@@ -614,14 +614,14 @@ extern "C" {
 
         tMempool* mempool;
         
-        tCycle*  tone; // Tri
-        tNoise*  noiseOsc;
-        tSVF*  toneLowpass;
-        tADSRS*  toneEnvOscChirp;
-        tADSRS*  toneEnvOscSigh;
-        tADSRS*  toneEnvGain;
-        tADSRS*  noiseEnvGain;
-        tADSRS*  toneEnvFilter;
+        tCycle  tone; // Tri
+        tNoise  noiseOsc;
+        tSVF  toneLowpass;
+        tADSRS  toneEnvOscChirp;
+        tADSRS  toneEnvOscSigh;
+        tADSRS  toneEnvGain;
+        tADSRS  noiseEnvGain;
+        tADSRS toneEnvFilter;
         
         float toneGain;
         float noiseGain;

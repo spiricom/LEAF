@@ -98,9 +98,9 @@ float tPickupNonLinearity_tick          (tPickupNonLinearity* const p, float in)
         tMempool* mempool;
         
         tAllpassDelay*     delayLine; // Allpass or Linear??  big difference...
-        tOneZero*    loopFilter;
-        tOnePole*    pickFilter;
-        tNoise*      noise;
+        tOneZero    loopFilter;
+        tOnePole    pickFilter;
+        tNoise      noise;
         
         float lastOut;
         float loopGain;
@@ -121,7 +121,7 @@ float tPickupNonLinearity_tick          (tPickupNonLinearity* const p, float in)
     void    tPluck_setFrequency  (tPluck* const, float frequency );
     void    tPluck_controlChange (tPluck* const, int number, float value);
     float  tPluck_getLastOut    (tPluck* const);
-    void    tPluck_setSampleRate (tPluck* const, float sr);
+    void    tPluck_setSampleRate (LEAF* const leaf, tPluck* const, float sr);
     
     //==============================================================================
     
@@ -202,9 +202,9 @@ float tPickupNonLinearity_tick          (tPickupNonLinearity* const p, float in)
         
         tAllpassDelay*  delayLine;
         tLinearDelay* combDelay;
-        tOneZero* filter;
-        tNoise*   noise;
-        tBiQuad*  biquad[4];
+        tOneZero filter;
+        tNoise   noise;
+        tBiQuad  biquad[4];
         
         uint32_t length;
         float loopGain;
@@ -235,6 +235,7 @@ float tPickupNonLinearity_tick          (tPickupNonLinearity* const p, float in)
     void    tKarplusStrong_setPickupPosition  (tKarplusStrong* const, float position );
     void    tKarplusStrong_setBaseLoopGain    (tKarplusStrong* const, float aGain );
     float  tKarplusStrong_getLastOut         (tKarplusStrong* const);
+    void tKarplusStrong_setSampleRate (LEAF * const leaf, tKarplusStrong* const p, float sr);
     
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
     
@@ -310,14 +311,14 @@ float tPickupNonLinearity_tick          (tPickupNonLinearity* const p, float in)
         int levMode;
         float curr;
         tLinearDelay* delayLine;
-        tOnePole* bridgeFilter;
-        tHighpass* DCblocker;
-        tFeedbackLeveler* fbLev;
-        tExpSmooth* wlSmooth;
+        tOnePole bridgeFilter;
+        tHighpass DCblocker;
+        tFeedbackLeveler fbLev;
+        tExpSmooth wlSmooth;
         float sampleRate;
     } tSimpleLivingString;
 
-    void    tSimpleLivingString_init                (tSimpleLivingString* const, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf);
+    void    tSimpleLivingString_create            (tMempool** const mempool, tSimpleLivingString** const);
     void    tSimpleLivingString_init                 (LEAF* const leaf, tSimpleLivingString* const, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode);
     void    tSimpleLivingString_free                (tSimpleLivingString** const);
     
@@ -349,16 +350,15 @@ float tPickupNonLinearity_tick          (tPickupNonLinearity* const p, float in)
         int levMode;
         float curr;
         tHermiteDelay*  delayLine;
-        tTwoZero*  bridgeFilter;
-        tHighpass*  DCblocker;
-        tFeedbackLeveler*  fbLev;
-        tExpSmooth*  wlSmooth;
+        tTwoZero   bridgeFilter;
+        tHighpass  DCblocker;
+        tFeedbackLeveler  fbLev;
+        tExpSmooth  wlSmooth;
         float sampleRate;
     } tSimpleLivingString2;
 
-    void    tSimpleLivingString2_init                (tSimpleLivingString2* const, float freq, float brightness,
-                                                     float decay, float targetLev, float levSmoothFactor,
-                                                     float levStrength, int levMode, LEAF* const leaf);
+    void    tSimpleLivingString2_create                (tMempool** const mempool,tSimpleLivingString2** const);
+
     void    tSimpleLivingString2_init                 (LEAF* const leaf, tSimpleLivingString2* const, float freq, float brightness, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode);
     void    tSimpleLivingString2_free                (tSimpleLivingString2** const);
 
@@ -394,14 +394,14 @@ typedef struct tSimpleLivingString3
     int maxLength;
     tLinearDelay*  delayLineU;
     tLinearDelay*  delayLineL;
-    tOnePole*  bridgeFilter;
-    tBiQuad*  bridgeFilter2;
+    tOnePole  bridgeFilter;
+    tBiQuad  bridgeFilter2;
     float temp1;
     float temp2;
     float pickupPoint;
-    tHighpass*  DCblocker;
-    tFeedbackLeveler*  fbLev;
-    tExpSmooth*  wlSmooth;
+    tHighpass  DCblocker;
+    tFeedbackLeveler  fbLev;
+    tExpSmooth  wlSmooth;
     int oversampling;
     float sampleRate;
     float rippleGain;
@@ -409,9 +409,7 @@ typedef struct tSimpleLivingString3
     float invOnePlusr;
 } tSimpleLivingString3;
 
-void    tSimpleLivingString3_init               (tSimpleLivingString3* const, int oversampling, float freq, float dam,
-                                                 float decay, float targetLev, float levSmoothF, float levStrength,
-                                                 int levMode, LEAF* const leaf);
+void    tSimpleLivingString3_create                 (tMempool** const mempool,tSimpleLivingString3** const);
 void    tSimpleLivingString3_init                 (LEAF* const leaf, tSimpleLivingString3* const pl, int oversampling, float freq, float dam, float decay, float targetLev, float levSmoothF, float levStrength, int levMode);
 void    tSimpleLivingString3_free               (tSimpleLivingString3** const);
 
@@ -447,24 +445,22 @@ typedef struct tSimpleLivingString4
     int maxLength;
     tLinearDelay*  delayLineU;
     tLinearDelay*  delayLineL;
-    tOnePole*  bridgeFilter;
-    tBiQuad*  bridgeFilter2;
+    tOnePole  bridgeFilter;
+    tBiQuad  bridgeFilter2;
     float temp1;
     float temp2;
     float pickupPoint;
     float pluckPosition;
-    tHighpass*  DCblocker;
-    tFeedbackLeveler*  fbLev;
-    tExpSmooth*  wlSmooth;
+    tHighpass  DCblocker;
+    tFeedbackLeveler  fbLev;
+    tExpSmooth  wlSmooth;
     int oversampling;
     float sampleRate;
     float rippleGain;
     float rippleDelay;
 } tSimpleLivingString4;
 
-void    tSimpleLivingString4_init               (tSimpleLivingString4* const, int oversampling, float freq, float dampFreq,
-                                                 float decay, float targetLev, float levSmoothFactor,float levStrength,
-                                                 int levMode, LEAF* const leaf);
+void    tSimpleLivingString4_create          (tMempool** const mempool,tSimpleLivingString4** const);
 void    tSimpleLivingString4_init                 (LEAF* const leaf, tSimpleLivingString4* const pl, int oversampling, float freq, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode);
 void    tSimpleLivingString4_free               (tSimpleLivingString4** const);
 
@@ -504,17 +500,17 @@ typedef struct tSimpleLivingString5
     float prepIndex;
     float prepPos;
     tLagrangeDelay* delLF,*delUF,*delUB,*delLB;    // delay for lower/upper/forward/backward part of the waveguide model
-    tOnePole* bridgeFilter, *nutFilter, *prepFilterU, *prepFilterL;
+    tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
     float temp1;
     float temp2;
     float pickupPoint;
     float pluckPosition;
-    tHighpass*  DCblocker;
-    tHighpass*  DCblocker2;
-    tFeedbackLeveler*  fbLev;
-    tFeedbackLeveler*  fbLev2;
+    tHighpass  DCblocker;
+    tHighpass  DCblocker2;
+    tFeedbackLeveler  fbLev;
+    tFeedbackLeveler  fbLev2;
 
-    tExpSmooth *wlSmooth, *prepPosSmooth, *prepIndexSmooth, *pluckPosSmooth, *pickupPointSmooth;
+    tExpSmooth wlSmooth, prepPosSmooth, prepIndexSmooth, pluckPosSmooth, pickupPointSmooth;
     int oversampling;
     float sampleRate;
     float rippleGain;
@@ -523,9 +519,7 @@ typedef struct tSimpleLivingString5
     float fb;
 } tSimpleLivingString5;
 
-void    tSimpleLivingString5_init               (tSimpleLivingString5* const, int oversampling, float freq, float dampFreq,
-                                                 float decay, float prepPos, float prepIndex, float pluckPos, float targetLev,
-                                                 float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf);
+void    tSimpleLivingString5_create            (tMempool** const mempool,tSimpleLivingString5** const);
 void    tSimpleLivingString5_init                 (LEAF* const leaf, tSimpleLivingString5* const pl, int oversampling, float freq, float dampFreq, float decay, float prepPos, float prepIndex, float pluckPos, float targetLev, float levSmoothFactor, float levStrength, int levMode);
 void    tSimpleLivingString5_free               (tSimpleLivingString5** const);
 
@@ -636,14 +630,14 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
         int levMode;
         float curr;
         tLinearDelay* delLF,*delUF,*delUB,*delLB;    // delay for lower/upper/forward/backward part of the waveguide model
-        tOnePole* bridgeFilter, *nutFilter,* prepFilterU, *prepFilterL;
-        tHighpass* DCblockerL, *DCblockerU;
-        tFeedbackLeveler* fbLevU, *fbLevL;
-        tExpSmooth* wlSmooth, *ppSmooth;
+        tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
+        tHighpass DCblockerL, DCblockerU;
+        tFeedbackLeveler fbLevU, fbLevL;
+        tExpSmooth wlSmooth, ppSmooth;
         float sampleRate;
     } tLivingString;
 
-    void    tLivingString_init                  (tLivingString* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf);
+    void    tLivingString_create                 (tMempool** const mempool,tLivingString** const);
     void    tLivingString_init                 (LEAF* const leaf, tLivingString* const, float freq, float pickPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode);
     void    tLivingString_free                  (tLivingString** const);
     
@@ -754,14 +748,14 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
         float brightness;
         float curr;
         tHermiteDelay* delLF,*delUF,*delUB,*delLB;    // delay for lower/upper/forward/backward part of the waveguide model
-        tTwoZero* bridgeFilter, *nutFilter, *prepFilterU, *prepFilterL;
-        tHighpass* DCblockerL, *DCblockerU;
-        tFeedbackLeveler* fbLevU, *fbLevL;
-        tExpSmooth* wlSmooth, *ppSmooth, *prpSmooth, *puSmooth;
+        tTwoZero bridgeFilter, nutFilter, prepFilterU, prepFilterL;
+        tHighpass DCblockerL, DCblockerU;
+        tFeedbackLeveler fbLevU, fbLevL;
+        tExpSmooth wlSmooth, ppSmooth, prpSmooth, puSmooth;
         float sampleRate;
     } tLivingString2;
 
-    void    tLivingString2_init               (tLivingString2* const, float freq, float pickPos, float prepPos, float pickupPos, float prepIndex, float brightness, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf);
+    void    tLivingString2_create                (tMempool** const mempool,tLivingString2** const);
     void    tLivingString2_init                 (LEAF* const leaf, tLivingString2* const, float freq, float pickPos, float prepPos, float pickupPos, float prepIndex, float brightness, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode);
     void    tLivingString2_free               (tLivingString2** const);
     
@@ -874,14 +868,14 @@ void    tSimpleLivingString5_setFFAmount        (tSimpleLivingString5* const pl,
         int levMode;
         float curr;
         tLinearDelay* delLF,*delUF, *delMF, *delMB, *delUB,*delLB;    // delay for lower/upper/forward/backward part of the waveguide model
-        tOnePole* bridgeFilter, *nutFilter, *prepFilterU, *prepFilterL;
-        tHighpass* DCblockerL, *DCblockerU;
-        tFeedbackLeveler* fbLevU, *fbLevL;
-        tExpSmooth* wlSmooth,* pickPosSmooth, *prepPosSmooth;
+        tOnePole bridgeFilter, nutFilter, prepFilterU, prepFilterL;
+        tHighpass DCblockerL, DCblockerU;
+        tFeedbackLeveler fbLevU, fbLevL;
+        tExpSmooth wlSmooth, pickPosSmooth, prepPosSmooth;
         float sampleRate;
     } tComplexLivingString;
 
-    void    tComplexLivingString_init                  (tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode, LEAF* const leaf);
+    void    tComplexLivingString_create            (tMempool** const mempool,tComplexLivingString** const);
     void    tComplexLivingString_init                 (LEAF* const leaf, tComplexLivingString* const, float freq, float pickPos, float prepPos, float prepIndex, float dampFreq, float decay, float targetLev, float levSmoothFactor, float levStrength, int levMode);
     void    tComplexLivingString_free                  (tComplexLivingString** const);
     
@@ -934,15 +928,15 @@ typedef struct tBowed
     tLinearDelay*  bridgeDelay;
 
     // one pole filter
-    tCookOnePole*  reflFilt;
+    tCookOnePole  reflFilt;
 
-    tBowTable*  bowTabl;
+    tBowTable  bowTabl;
 
     // stuff
     float maxVelocity, baseDelay, betaRatio;
     float sampleRate;
     float invSampleRate;
-    tSVF*  lowpass;
+    tSVF  lowpass;
     float output;
 } tBowed;
 
@@ -970,11 +964,11 @@ typedef struct tTString
     // delay lines
     tLagrangeDelay*  delay;
     tLagrangeDelay*  delayP;
-    tHighpass*  dcBlock;
-    tHighpass*  dcBlockP;
+    tHighpass  dcBlock;
+    tHighpass  dcBlockP;
     // one pole filter
-    tCookOnePole*  reflFilt;
-    tCookOnePole*  reflFiltP;
+    tCookOnePole  reflFilt;
+    tCookOnePole  reflFiltP;
     float baseDelay;
     float sampleRate;
     float invSampleRate;
@@ -982,16 +976,16 @@ typedef struct tTString
     float output;
     float outputP;
     float tensionGain;
-    tSlide*  slide;
-    tExpSmooth*  tensionSmoother;
-    tExpSmooth*  pitchSmoother;
+    tSlide  slide;
+    tExpSmooth  tensionSmoother;
+    tExpSmooth  pitchSmoother;
     tThiranAllpassSOCascade*  allpass;
     tThiranAllpassSOCascade*  allpassP;
     float allpassDelay;
     float allpassDelayP;
     float freq;
-    tSVF*  lowpassP;
-    tSVF*  highpassP;
+    tSVF  lowpassP;
+    tSVF  highpassP;
     float filterFreq;
     float decayCoeff;
     float muteCoeff;
@@ -1006,24 +1000,24 @@ typedef struct tTString
     float pickupPos;
 
     float tensionAmount;
-    tCycle*  tensionModOsc;
+    tCycle  tensionModOsc;
     float phantomGain;
-    tCycle*  pickupModOsc;
+    tCycle  pickupModOsc;
     float pickupModOscFreq;
     float pickupModOscAmp;
-    tSVF*  pickupFilter;
-    tSVF*  pickupFilter2;
+    tSVF  pickupFilter;
+    tSVF  pickupFilter2;
     float slideAmount;
     float absSlideAmount;
     float smoothedSlideAmount;
-    tNoise*  noise;
+    tNoise  noise;
     float slideNoise;
     float slideGain;
     uint32_t wound;
-    tExpSmooth*  barPulse;
+    tExpSmooth  barPulse;
     float barPulseInc;
     uint32_t barPulsePhasor;
-    tSVF*  barResonator;
+    tSVF  barResonator;
     float barPosition;
     float prevBarPosition;
     float openStringLength;
@@ -1031,12 +1025,12 @@ typedef struct tTString
     float lastBump;
     float timeSinceLastBump;
     uint32_t sampleCount;
-    tSlide*  barSmooth;
-    tHighpass*  barHP;
-    tSVF* barLP;
-    tSlide* barPulseSlide;
-    tExpSmooth* barSmooth2;
-    tExpSmooth* barSmoothVol;
+    tSlide  barSmooth;
+    tHighpass barHP;
+    tSVF barLP;
+    tSlide barPulseSlide;
+    tExpSmooth barSmooth2;
+    tExpSmooth barSmoothVol;
     float prevBarPosSmoothVol;
     float prevBumpSmoothed;
     float prevBarPosSmoothed;
@@ -1051,8 +1045,8 @@ typedef struct tTString
     float inharmonicMult;
     uint32_t maxDelay;
     uint32_t tensionJumps;
-    tFeedbackLeveler* feedback;
-    tFeedbackLeveler* feedbackP;
+    tFeedbackLeveler feedback;
+    tFeedbackLeveler feedbackP;
     float feedbackNoise;
     float feedbackNoiseLevel;
     float quarterSampleRate;
@@ -1060,12 +1054,12 @@ typedef struct tTString
     uint32_t wavelength;
     float pluckRatio;
     float pickup_Ratio;
-    tExpSmooth* pickNoise;
-    tNoise* pickNoiseSource;
+    tExpSmooth pickNoise;
+    tNoise pickNoiseSource;
     float pluckPoint_forInput;
-    tSVF* peakFilt;
+    tSVF peakFilt;
     float pickupAmount;
-    tPickupNonLinearity* p;
+    tPickupNonLinearity p;
 } tTString;
 
 void    tTString_create               (tMempool** const mempool, tTString** const);
@@ -1169,7 +1163,7 @@ typedef struct tStiffString
     {
         tMempool* mempool;
         int numModes;
-        tCycle **oscs; // array of oscillators
+        tCycle *oscs; // array of oscillators
         float *amplitudes;
         float *outputWeights;
         float freqHz;        // the frequency of the whole string, determining delay length
@@ -1224,13 +1218,13 @@ typedef struct tStiffString
         float angle;
         float vcaoutx;
         float vcaouty;
-        tHighpass* hip1;
-        tHighpass* hip2;
+        tHighpass hip1;
+        tHighpass hip2;
         float rotGain;
         tLagrangeDelay* rotDelayx;
         tLagrangeDelay* rotDelayy;
-        tOnePole* filtx;
-        tOnePole* filty;
+        tOnePole filtx;
+        tOnePole filty;
         float feedbackFactorx;
         float feedbackFactory;
     } tStereoRotation;
