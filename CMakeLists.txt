@@ -46,9 +46,9 @@ SET(PUBLIC_SOURCES_FILES
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-instruments.c"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-midi.c"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-physical.c"
-#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-reverb.c"
-#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-sampling.c"
-#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-vocal.c"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-reverb.c"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-sampling.c"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-vocal.c"
 )
 
 SET(PRIVATE_SOURCES_FILES
@@ -56,7 +56,7 @@ SET(PRIVATE_SOURCES_FILES
 )
 
 SET(PUBLIC_HEADERS_FILES
-#        "${LIBRARY_BASE_PATH}/leaf/leaf-config.h"
+        "${LIBRARY_BASE_PATH}/leaf/leaf-config.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-math.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-mempool.h"
@@ -74,10 +74,10 @@ SET(PUBLIC_HEADERS_FILES
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-instruments.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-midi.h"
         "${LIBRARY_BASE_PATH}/leaf/Src/leaf-physical.h"
-#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-reverb.h"
-#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-sampling.h"
-#        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-vocal.h"
-#        "${LIBRARY_BASE_PATH}/leaf/leaf.h"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-reverb.h"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-sampling.h"
+        "${LIBRARY_BASE_PATH}/leaf/Src/leaf-vocal.h"
+        "${LIBRARY_BASE_PATH}/leaf/leaf.h"
 
 )
 

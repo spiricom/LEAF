@@ -8,6 +8,12 @@
 #ifndef LEAF_VOCAL_H_INCLUDED
 #define LEAF_VOCAL_H_INCLUDED
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
 #include "leaf-math.h"
 #include "leaf-mempool.h"
 #include "leaf-filters.h"
@@ -41,7 +47,7 @@ typedef struct glottis
 } glottis;
 
 void    glottis_create               (tMempool** const mempool, glottis** const);
-void    glottis_init                 (LEAF* const leaf, glottis**glo);
+void    glottis_init                 (LEAF* const leaf, glottis* glo);
 
 float  glottis_compute        (glottis* glo);
 void    glottis_setup_waveform (glottis* glo);
@@ -133,9 +139,9 @@ typedef struct tract
 	    float  block_time;
 	    float diameterScale;
 
-	    tSVF* fricativeNoiseFilt[2];
-	    tSVF* aspirationNoiseFilt;
-	    tNoise* whiteNoise;
+	    tSVF fricativeNoiseFilt[2];
+	    tSVF aspirationNoiseFilt;
+	    tNoise whiteNoise;
 
 	    float turbuluencePointPosition[2];
 	    float turbuluencePointDiameter[2];
@@ -166,8 +172,8 @@ float  move_towards                       (float current, float target, float am
 typedef struct tVoc
 {
     tMempool* mempool;
-    glottis*  glot; /*The Glottis*/
-    tract*  tr; /*The Vocal Tract */
+    glottis  glot; /*The Glottis*/
+    tract  tr; /*The Vocal Tract */
     int doubleCompute;
     //float*  buf;
     int counter;
@@ -203,5 +209,9 @@ void    tVoc_setTurbulenceNoiseGain         (tVoc* const voc, float gain);
 void    tVoc_setAspirationNoiseGain         (tVoc* const voc, float gain);
 void    tVoc_setAspirationNoiseFilterFreq   (tVoc* const voc, float Q);
 void    tVoc_setAspirationNoiseFilterQ      (tVoc* const voc, float freq);
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* INC_LEAF_VOCAL_H_ */

@@ -15,11 +15,11 @@
 #include "leaf-instruments.h"
 #include "leaf-midi.h"
 static float myrand() { return (float) rand() / RAND_MAX; }
-
+#define TEST_SIZE 1048560
 #define LEAF_SETUP()                     \
     LEAF leaf;                           \
-    char leafMemory[131070];              \
-    LEAF_init(&leaf, 44100.f, leafMemory, 131070, &myrand)
+    char leafMemory[TEST_SIZE];              \
+    LEAF_init(&leaf, 44100.f, leafMemory, TEST_SIZE, &myrand)
 
 /*==============================================================================
    tEnvelopeFollower
@@ -1674,4 +1674,555 @@ TEST_CASE("tSimplePoly create/init/free", "[leaf-midi][create-init][tSimplePoly]
     REQUIRE_NOTHROW(tSimplePoly_init(&leaf, poly, /*maxNumVoices=*/8));
 
     REQUIRE_NOTHROW(tSimplePoly_free(&poly));
+}
+//==============================================================================
+// leaf-physical: create / init / free tests
+// (Drop this after your existing tests; make sure you include leaf-physical.h)
+//==============================================================================
+
+#include "leaf-physical.h"
+
+/*==============================================================================
+   tPickupNonLinearity
+==============================================================================*/
+
+TEST_CASE("tPickupNonLinearity create/init/free", "[leaf-physical][create-init][tPickupNonLinearity]")
+{
+    LEAF_SETUP();
+
+    tPickupNonLinearity* p = nullptr;
+    REQUIRE_NOTHROW(tPickupNonLinearity_create(&leaf.mempool, &p));
+    REQUIRE(p != nullptr);
+    REQUIRE_NOTHROW(tPickupNonLinearity_init(&leaf, p));
+    REQUIRE_NOTHROW(tPickupNonLinearity_free(&p));
+}
+
+/*==============================================================================
+   tPluck
+==============================================================================*/
+
+TEST_CASE("tPluck create/init/free", "[leaf-physical][create-init][tPluck]")
+{
+    LEAF_SETUP();
+
+    tPluck* p = nullptr;
+    REQUIRE_NOTHROW(tPluck_create(&leaf.mempool, &p));
+    REQUIRE(p != nullptr);
+    REQUIRE_NOTHROW(tPluck_init(&leaf, p, /*lowestFrequency=*/50.0f));
+    REQUIRE_NOTHROW(tPluck_free(&p));
+}
+
+/*==============================================================================
+   tKarplusStrong
+==============================================================================*/
+
+TEST_CASE("tKarplusStrong create/init/free", "[leaf-physical][create-init][tKarplusStrong]")
+{
+    LEAF_SETUP();
+
+    tKarplusStrong* ks = nullptr;
+    REQUIRE_NOTHROW(tKarplusStrong_create(&leaf.mempool, &ks));
+    REQUIRE(ks != nullptr);
+    REQUIRE_NOTHROW(tKarplusStrong_init(&leaf, ks, /*lowestFrequency=*/5000.0f));
+    REQUIRE_NOTHROW(tKarplusStrong_free(&ks));
+}
+
+/*==============================================================================
+   tSimpleLivingString
+==============================================================================*/
+
+TEST_CASE("tSimpleLivingString create/init/free", "[leaf-physical][create-init][tSimpleLivingString]")
+{
+    LEAF_SETUP();
+
+    tSimpleLivingString* s = nullptr;
+    REQUIRE_NOTHROW(tSimpleLivingString_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+
+    REQUIRE_NOTHROW(tSimpleLivingString_init(&leaf, s,
+                                             /*freq=*/110.0f,
+                                             /*dampFreq=*/2000.0f,
+                                             /*decay=*/0.995f,
+                                             /*targetLev=*/0.5f,
+                                             /*levSmoothFactor=*/0.01f,
+                                             /*levStrength=*/0.5f,
+                                             /*levMode=*/0));
+    REQUIRE_NOTHROW(tSimpleLivingString_free(&s));
+}
+
+/*==============================================================================
+   tSimpleLivingString2
+==============================================================================*/
+
+TEST_CASE("tSimpleLivingString2 create/init/free", "[leaf-physical][create-init][tSimpleLivingString2]")
+{
+    LEAF_SETUP();
+
+    tSimpleLivingString2* s = nullptr;
+    REQUIRE_NOTHROW(tSimpleLivingString2_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+
+    REQUIRE_NOTHROW(tSimpleLivingString2_init(&leaf, s,
+                                              /*freq=*/110.0f,
+                                              /*brightness=*/0.5f,
+                                              /*decay=*/0.995f,
+                                              /*targetLev=*/0.5f,
+                                              /*levSmoothFactor=*/0.01f,
+                                              /*levStrength=*/0.5f,
+                                              /*levMode=*/0));
+    REQUIRE_NOTHROW(tSimpleLivingString2_free(&s));
+}
+
+/*==============================================================================
+   tSimpleLivingString3
+==============================================================================*/
+
+TEST_CASE("tSimpleLivingString3 create/init/free", "[leaf-physical][create-init][tSimpleLivingString3]")
+{
+    LEAF_SETUP();
+
+    tSimpleLivingString3* s = nullptr;
+    REQUIRE_NOTHROW(tSimpleLivingString3_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+
+    REQUIRE_NOTHROW(tSimpleLivingString3_init(&leaf, s,
+                                              /*oversampling=*/1,
+                                              /*freq=*/110.0f,
+                                              /*dam=*/2000.0f,
+                                              /*decay=*/0.995f,
+                                              /*targetLev=*/0.5f,
+                                              /*levSmoothF=*/0.01f,
+                                              /*levStrength=*/0.5f,
+                                              /*levMode=*/0));
+    REQUIRE_NOTHROW(tSimpleLivingString3_free(&s));
+}
+
+/*==============================================================================
+   tSimpleLivingString4
+==============================================================================*/
+
+TEST_CASE("tSimpleLivingString4 create/init/free", "[leaf-physical][create-init][tSimpleLivingString4]")
+{
+    LEAF_SETUP();
+
+    tSimpleLivingString4* s = nullptr;
+    REQUIRE_NOTHROW(tSimpleLivingString4_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+
+    REQUIRE_NOTHROW(tSimpleLivingString4_init(&leaf, s,
+                                              /*oversampling=*/1,
+                                              /*freq=*/110.0f,
+                                              /*dampFreq=*/2000.0f,
+                                              /*decay=*/0.995f,
+                                              /*targetLev=*/0.5f,
+                                              /*levSmoothFactor=*/0.01f,
+                                              /*levStrength=*/0.5f,
+                                              /*levMode=*/0));
+    REQUIRE_NOTHROW(tSimpleLivingString4_free(&s));
+}
+
+/*==============================================================================
+   tSimpleLivingString5
+==============================================================================*/
+
+TEST_CASE("tSimpleLivingString5 create/init/free", "[leaf-physical][create-init][tSimpleLivingString5]")
+{
+    LEAF_SETUP();
+
+    tSimpleLivingString5* s = nullptr;
+    REQUIRE_NOTHROW(tSimpleLivingString5_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+
+    REQUIRE_NOTHROW(tSimpleLivingString5_init(&leaf, s,
+                                              /*oversampling=*/1,
+                                              /*freq=*/110.0f,
+                                              /*dampFreq=*/2000.0f,
+                                              /*decay=*/0.995f,
+                                              /*prepPos=*/0.5f,
+                                              /*prepIndex=*/0.5f,
+                                              /*pluckPos=*/0.2f,
+                                              /*targetLev=*/0.5f,
+                                              /*levSmoothFactor=*/0.01f,
+                                              /*levStrength=*/0.5f,
+                                              /*levMode=*/0));
+    REQUIRE_NOTHROW(tSimpleLivingString5_free(&s));
+}
+
+/*==============================================================================
+   tLivingString
+==============================================================================*/
+
+TEST_CASE("tLivingString create/init/free", "[leaf-physical][create-init][tLivingString]")
+{
+    LEAF_SETUP();
+
+    tLivingString* s = nullptr;
+    REQUIRE_NOTHROW(tLivingString_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+
+    REQUIRE_NOTHROW(tLivingString_init(&leaf, s,
+                                       /*freq=*/110.0f,
+                                       /*pickPos=*/0.2f,
+                                       /*prepIndex=*/0.5f,
+                                       /*dampFreq=*/2000.0f,
+                                       /*decay=*/0.995f,
+                                       /*targetLev=*/0.5f,
+                                       /*levSmoothFactor=*/0.01f,
+                                       /*levStrength=*/0.5f,
+                                       /*levMode=*/0));
+    REQUIRE_NOTHROW(tLivingString_free(&s));
+}
+
+/*==============================================================================
+   tLivingString2
+==============================================================================*/
+
+TEST_CASE("tLivingString2 create/init/free", "[leaf-physical][create-init][tLivingString2]")
+{
+    LEAF_SETUP();
+
+    tLivingString2* s = nullptr;
+    REQUIRE_NOTHROW(tLivingString2_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+
+    REQUIRE_NOTHROW(tLivingString2_init(&leaf, s,
+                                        /*freq=*/110.0f,
+                                        /*pickPos=*/0.2f,
+                                        /*prepPos=*/0.5f,
+                                        /*pickupPos=*/0.8f,
+                                        /*prepIndex=*/0.5f,
+                                        /*brightness=*/0.5f,
+                                        /*decay=*/0.5f,
+                                        /*targetLev=*/0.5f,
+                                        /*levSmoothFactor=*/0.01f,
+                                        /*levStrength=*/0.5f,
+                                        /*levMode=*/0));
+    REQUIRE_NOTHROW(tLivingString2_free(&s));
+}
+
+/*==============================================================================
+   tComplexLivingString
+==============================================================================*/
+
+TEST_CASE("tComplexLivingString create/init/free", "[leaf-physical][create-init][tComplexLivingString]")
+{
+    LEAF_SETUP();
+
+    tComplexLivingString* s = nullptr;
+    REQUIRE_NOTHROW(tComplexLivingString_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+
+    REQUIRE_NOTHROW(tComplexLivingString_init(&leaf, s,
+                                              /*freq=*/110.0f,
+                                              /*pickPos=*/0.2f,
+                                              /*prepPos=*/0.5f,
+                                              /*prepIndex=*/0.5f,
+                                              /*dampFreq=*/2000.0f,
+                                              /*decay=*/0.995f,
+                                              /*targetLev=*/0.5f,
+                                              /*levSmoothFactor=*/0.01f,
+                                              /*levStrength=*/0.5f,
+                                              /*levMode=*/0));
+    REQUIRE_NOTHROW(tComplexLivingString_free(&s));
+}
+
+/*==============================================================================
+   tBowTable
+==============================================================================*/
+
+TEST_CASE("tBowTable create/init/free", "[leaf-physical][create-init][tBowTable]")
+{
+    LEAF_SETUP();
+
+    tBowTable* bt = nullptr;
+    REQUIRE_NOTHROW(tBowTable_create(&leaf.mempool, &bt));
+    REQUIRE(bt != nullptr);
+    REQUIRE_NOTHROW(tBowTable_init(&leaf, bt));
+    REQUIRE_NOTHROW(tBowTable_free(&bt));
+}
+
+/*==============================================================================
+   tBowed
+==============================================================================*/
+
+TEST_CASE("tBowed create/init/free", "[leaf-physical][create-init][tBowed]")
+{
+    LEAF_SETUP();
+
+    tBowed* b = nullptr;
+    REQUIRE_NOTHROW(tBowed_create(&leaf.mempool, &b));
+    REQUIRE(b != nullptr);
+    REQUIRE_NOTHROW(tBowed_init(&leaf, b, /*oversampling=*/1));
+    REQUIRE_NOTHROW(tBowed_free(&b));
+}
+
+/*==============================================================================
+   tTString
+==============================================================================*/
+
+TEST_CASE("tTString create/init/free", "[leaf-physical][create-init][tTString]")
+{
+    LEAF_SETUP();
+
+    tTString* s = nullptr;
+    REQUIRE_NOTHROW(tTString_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+    REQUIRE_NOTHROW(tTString_init(&leaf, s, /*oversampling=*/1, /*lowestFreq=*/50.0f));
+    REQUIRE_NOTHROW(tTString_free(&s));
+}
+
+/*==============================================================================
+   tReedTable
+==============================================================================*/
+
+TEST_CASE("tReedTable create/init/free", "[leaf-physical][create-init][tReedTable]")
+{
+    LEAF_SETUP();
+
+    tReedTable* r = nullptr;
+    REQUIRE_NOTHROW(tReedTable_create(&leaf.mempool, &r));
+    REQUIRE(r != nullptr);
+    REQUIRE_NOTHROW(tReedTable_init(&leaf, r, /*offset=*/0.5f, /*slope=*/0.5f));
+    REQUIRE_NOTHROW(tReedTable_free(&r));
+}
+
+/*==============================================================================
+   tStiffString
+==============================================================================*/
+
+TEST_CASE("tStiffString create/init/free", "[leaf-physical][create-init][tStiffString]")
+{
+    LEAF_SETUP();
+
+    tStiffString* s = nullptr;
+    REQUIRE_NOTHROW(tStiffString_create(&leaf.mempool, &s));
+    REQUIRE(s != nullptr);
+    REQUIRE_NOTHROW(tStiffString_init(&leaf, s, /*numModes=*/8));
+    REQUIRE_NOTHROW(tStiffString_free(&s));
+}
+
+/*==============================================================================
+   tStereoRotation
+   NOTE: header snippet shows no free() declaration.
+   If a free function exists in your implementation, add it here.
+==============================================================================*/
+
+TEST_CASE("tStereoRotation create/init", "[leaf-physical][create-init][tStereoRotation]")
+{
+    LEAF_SETUP();
+
+    tStereoRotation* r = nullptr;
+    REQUIRE_NOTHROW(tStereoRotation_create(&leaf.mempool, &r));
+    REQUIRE(r != nullptr);
+    REQUIRE_NOTHROW(tStereoRotation_init(&leaf, r));
+
+    // If you have a tStereoRotation_free(), uncomment:
+    // REQUIRE_NOTHROW(tStereoRotation_free(&r));
+}
+#include "leaf-reverb.h"
+
+/*==============================================================================
+   tPRCReverb
+==============================================================================*/
+
+TEST_CASE("tPRCReverb create/init/free", "[leaf-reverb][create-init][tPRCReverb]")
+{
+    LEAF_SETUP();
+
+    tPRCReverb* rev = nullptr;
+    REQUIRE_NOTHROW(tPRCReverb_create(&leaf.mempool, &rev));
+    REQUIRE(rev != nullptr);
+
+    REQUIRE_NOTHROW(tPRCReverb_init(&leaf, rev, /*t60=*/1.5f));
+
+    REQUIRE_NOTHROW(tPRCReverb_free(&rev));
+}
+
+/*==============================================================================
+   tNReverb
+==============================================================================*/
+
+TEST_CASE("tNReverb create/init/free", "[leaf-reverb][create-init][tNReverb]")
+{
+    LEAF_SETUP();
+
+    tNReverb* rev = nullptr;
+    REQUIRE_NOTHROW(tNReverb_create(&leaf.mempool, &rev));
+    REQUIRE(rev != nullptr);
+
+    REQUIRE_NOTHROW(tNReverb_init(&leaf, rev, /*t60=*/1.5f));
+
+    REQUIRE_NOTHROW(tNReverb_free(&rev));
+}
+
+/*==============================================================================
+   tDattorroReverb
+==============================================================================*/
+
+TEST_CASE("tDattorroReverb create/init/free", "[leaf-reverb][create-init][tDattorroReverb]")
+{
+    LEAF_SETUP();
+
+    tDattorroReverb* rev = nullptr;
+    REQUIRE_NOTHROW(tDattorroReverb_create(&leaf.mempool, &rev));
+    REQUIRE(rev != nullptr);
+
+    REQUIRE_NOTHROW(tDattorroReverb_init(&leaf, rev));
+
+    REQUIRE_NOTHROW(tDattorroReverb_free(&rev));
+}
+
+//==============================================================================
+// leaf-sampling: create / init / free tests
+// (Drop this after your existing tests; make sure you include leaf-sampling.h)
+//==============================================================================
+
+#include "leaf-sampling.h"
+
+/*==============================================================================
+   tBuffer
+==============================================================================*/
+
+TEST_CASE("tBuffer create/init/free", "[leaf-sampling][create-init][tBuffer]")
+{
+    LEAF_SETUP();
+
+    tBuffer* buf = nullptr;
+    REQUIRE_NOTHROW(tBuffer_create(&leaf.mempool, &buf));
+    REQUIRE(buf != nullptr);
+
+    REQUIRE_NOTHROW(tBuffer_init(&leaf, buf, /*length=*/2048));
+
+    REQUIRE_NOTHROW(tBuffer_free(&buf));
+}
+
+/*==============================================================================
+   tSampler
+==============================================================================*/
+
+TEST_CASE("tSampler create/init/free", "[leaf-sampling][create-init][tSampler]")
+{
+    LEAF_SETUP();
+
+    tBuffer* buf = nullptr;
+    REQUIRE_NOTHROW(tBuffer_create(&leaf.mempool, &buf));
+    REQUIRE(buf != nullptr);
+    REQUIRE_NOTHROW(tBuffer_init(&leaf, buf, /*length=*/2048));
+
+    tSampler* sp = nullptr;
+    REQUIRE_NOTHROW(tSampler_create(&leaf.mempool, &sp));
+    REQUIRE(sp != nullptr);
+
+    REQUIRE_NOTHROW(tSampler_init(&leaf, sp, buf));
+
+    REQUIRE_NOTHROW(tSampler_free(&sp));
+    REQUIRE_NOTHROW(tBuffer_free(&buf));
+}
+
+/*==============================================================================
+   tAutoSampler
+==============================================================================*/
+
+TEST_CASE("tAutoSampler create/init/free", "[leaf-sampling][create-init][tAutoSampler]")
+{
+    LEAF_SETUP();
+
+    tBuffer* buf = nullptr;
+    REQUIRE_NOTHROW(tBuffer_create(&leaf.mempool, &buf));
+    REQUIRE(buf != nullptr);
+    REQUIRE_NOTHROW(tBuffer_init(&leaf, buf, /*length=*/2048));
+
+    tAutoSampler* as = nullptr;
+    REQUIRE_NOTHROW(tAutoSampler_create(&leaf.mempool, &as));
+    REQUIRE(as != nullptr);
+
+    REQUIRE_NOTHROW(tAutoSampler_init(&leaf, as, buf));
+
+    REQUIRE_NOTHROW(tAutoSampler_free(&as));
+    REQUIRE_NOTHROW(tBuffer_free(&buf));
+}
+
+/*==============================================================================
+   tMBSampler
+==============================================================================*/
+
+TEST_CASE("tMBSampler create/init/free", "[leaf-sampling][create-init][tMBSampler]")
+{
+    LEAF_SETUP();
+
+    tBuffer* buf = nullptr;
+    REQUIRE_NOTHROW(tBuffer_create(&leaf.mempool, &buf));
+    REQUIRE(buf != nullptr);
+    REQUIRE_NOTHROW(tBuffer_init(&leaf, buf, /*length=*/2048));
+
+    tMBSampler* mb = nullptr;
+    REQUIRE_NOTHROW(tMBSampler_create(&leaf.mempool, &mb));
+    REQUIRE(mb != nullptr);
+
+    REQUIRE_NOTHROW(tMBSampler_init(&leaf, mb, buf));
+
+    REQUIRE_NOTHROW(tMBSampler_free(&mb));
+    REQUIRE_NOTHROW(tBuffer_free(&buf));
+}
+//==============================================================================
+// leaf-vocal: create / init / free tests
+// (Drop this after your existing tests; make sure you include leaf-vocal.h)
+//==============================================================================
+
+#include "leaf-vocal.h"
+
+/*==============================================================================
+   glottis
+==============================================================================*/
+
+TEST_CASE("glottis create/init", "[leaf-vocal][create-init][glottis]")
+{
+    LEAF_SETUP();
+
+    glottis* glo = nullptr;
+    REQUIRE_NOTHROW(glottis_create(&leaf.mempool, &glo));
+    REQUIRE(glo != nullptr);
+
+    REQUIRE_NOTHROW(glottis_init(&leaf, glo));
+
+    // NOTE: header doesn't declare glottis_free(); leaving allocated to mempool lifetime
+    // (If you add a free function later, mirror the pattern used elsewhere.)
+}
+
+/*==============================================================================
+   tract
+==============================================================================*/
+
+TEST_CASE("tract create/init", "[leaf-vocal][create-init][tract]")
+{
+    LEAF_SETUP();
+
+    tract* tr = nullptr;
+    REQUIRE_NOTHROW(tract_create(&leaf.mempool, &tr));
+    REQUIRE(tr != nullptr);
+
+    REQUIRE_NOTHROW(tract_init(&leaf, tr,
+                              /*numTractSections=*/44,
+                              /*maxNumTractSections=*/88));
+
+    // NOTE: header doesn't declare tract_free(); leaving allocated to mempool lifetime
+}
+
+/*==============================================================================
+   tVoc
+==============================================================================*/
+
+TEST_CASE("tVoc create/init/free", "[leaf-vocal][create-init][tVoc]")
+{
+    LEAF_SETUP();
+
+    tVoc* voc = nullptr;
+    REQUIRE_NOTHROW(tVoc_create(&leaf.mempool, &voc));
+    REQUIRE(voc != nullptr);
+
+    REQUIRE_NOTHROW(tVoc_init(&leaf, voc,
+                             /*numTractSections=*/44,
+                             /*maxNumTractSections=*/88));
+
+    REQUIRE_NOTHROW(tVoc_free(&voc));
 }

@@ -129,22 +129,7 @@ extern "C"
         RecordModeNil
     } RecordMode;
 
-    typedef struct tBuffer
-    {
-
-        tMempool* mempool;
-
-        float *buff;
-
-        uint32_t idx;
-        uint32_t bufferLength;
-        uint32_t recordedLength;
-        uint32_t channels;
-        uint32_t sampleRate;
-        RecordMode mode;
-
-        int active;
-    } tBuffer;
+    typedef struct tBuffer tBuffer;
 
     void    tBuffer_create               (tMempool** const mempool, tBuffer** const);
     void    tBuffer_init                 (LEAF* const leaf, tBuffer* const sb, uint32_t length);
@@ -252,7 +237,7 @@ extern "C"
         float rateFactor;
         uint32_t channels;
 
-        tRamp* gain;
+        tRamp gain;
 
         float idx;
         float inc;
@@ -280,7 +265,7 @@ extern "C"
     } tSampler;
 
     void    tSampler_create               (tMempool** const mempool, tSampler** const);
-    void    tSampler_init                 (LEAF* const leaf, tSampler* const sp, tBuffer* const b, LEAF *const leaf);
+    void    tSampler_init                 (LEAF* const leaf, tSampler* const sp, tBuffer* const b);
     void    tSampler_free               (tSampler**const);
 
     float  tSampler_tick               (tSampler* const);
@@ -363,7 +348,7 @@ extern "C"
 
         tMempool* mempool;
         tSampler* sampler;
-        tEnvelopeFollower* ef;
+        tEnvelopeFollower ef;
         uint32_t windowSize;
         float threshold;
         float previousPower;
@@ -373,7 +358,7 @@ extern "C"
     } tAutoSampler;
 
     void    tAutoSampler_create               (tMempool** const mempool, tAutoSampler** const);
-    void    tAutoSampler_init                 (LEAF* const leaf, tAutoSampler* const as, tBuffer* const b, LEAF *const leaf);
+    void    tAutoSampler_init                 (LEAF* const leaf, tAutoSampler* const as, tBuffer* const b);
     void    tAutoSampler_free               (tAutoSampler**const);
 
     float  AutoSampler_tick                (tAutoSampler* const, float input);
@@ -462,7 +447,7 @@ extern "C"
         PlayMode mode;
         int active;
 
-        tExpSmooth*  gain;
+        tExpSmooth  gain;
 
         float out;
         float last, beforeLast;
