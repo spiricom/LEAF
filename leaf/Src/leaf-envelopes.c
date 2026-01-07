@@ -733,7 +733,48 @@ void tADSRT_setRelease (tADSRT* const adsr, float release)
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setLeakFactor(tADSRT* const adsrenv, float leakFactor)
 #else
+void tADSRT_set(tADSRT* const adsr, float attack, float decay, float sustain,
+                  float release, float *expBuffer, int bufferSize, LEAF *const leaf)
+{
+    adsr->exp_buff = expBuffer;
+    adsr->buff_size = bufferSize;
+    adsr->buff_sizeMinusOne = bufferSize - 1;
 
+    adsr->sampleRate = leaf->sampleRate;
+    adsr->bufferSizeDividedBySampleRateInMs = adsr->buff_size / (adsr->sampleRate * 0.001f);
+
+    if (attack < 0.0f)
+        attack = 0.0f;
+
+    if (decay < 0.0f)
+        decay = 0.0f;
+
+    if (sustain > 1.0f)
+        sustain = 1.0f;
+    if (sustain < 0.0f)
+        sustain = 0.0f;
+
+    if (release < 0.0f)
+        release = 0.0f;
+
+    adsr->next = 0.0f;
+
+    adsr->whichStage = env_idle;
+
+    adsr->sustain = sustain;
+
+    adsr->attack = attack;
+    adsr->decay = decay;
+    adsr->release = release;
+    adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / attack;
+    adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / decay;
+    adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / release;
+    adsr->rampInc = adsr->bufferSizeDividedBySampleRateInMs / 8.0f;
+
+    adsr->baseLeakFactor = 1.0f;
+    adsr->leakFactor = 1.0f;
+    adsr->invSampleRate = leaf->invSampleRate;
+}
 void tADSRT_setLeakFactor (tADSRT* const adsr, float leakFactor)
 #endif
 {
@@ -1007,7 +1048,7 @@ void tRamp_init(LEAF* const leaf, tRamp* const ramp, float time, int samples_per
 
     if (time < ramp->minimum_time) {
         ramp->time = ramp->minimum_time;
-    
+
 } else {
         ramp->time = time;
     }
@@ -1091,7 +1132,7 @@ void tRampUpDown_init(LEAF* const leaf, tRampUpDown* const ramp, float upTime, f
 
     if (upTime < ramp->minimum_time) {
         ramp->upTime = ramp->minimum_time;
-    
+
 } else {
         ramp->upTime = upTime;
     }
@@ -1274,7 +1315,7 @@ void tSlide_init(LEAF* const leaf, tSlide* const s, float upSlide, float downSli
     s->dest = 0.0f;
     if (upSlide < 1.0f) {
         upSlide = 1.0f;
-    
+
 }
 
     if (downSlide < 1.0f) {
