@@ -41,7 +41,7 @@ void tStack_create(tMempool** const mp, tStack** const stack)
 void tStack_init(LEAF* const leaf, tStack* const ns)
 {
 
-ns->ordered = 0;
+    ns->ordered = 0;
     ns->size = 0;
     ns->pos = 0;
     ns->capacity = STACK_SIZE;
@@ -257,8 +257,8 @@ void tPoly_create(tMempool** const mp, tPoly** const polyh)
 
 void tPoly_init(LEAF* const leaf, tPoly* const poly, int maxNumVoices)
 {
-
-poly->numVoices = maxNumVoices;
+    tMempool* mempool = poly->mempool;
+    poly->numVoices = maxNumVoices;
     poly->maxNumVoices = maxNumVoices;
     poly->lastVoiceToChange = 0;
 

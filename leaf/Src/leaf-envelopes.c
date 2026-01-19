@@ -208,22 +208,22 @@ void tADSR_init(LEAF* const leaf, tADSR* const adsr, float attack, float decay, 
     adsr->inc_buff = __leaf_table_attack_decay_inc;
     adsr->buff_size = sizeof(__leaf_table_exp_decay);
 
-    if (attack > 8192.0f)
-        attack = 8192.0f;
     if (attack < 0.0f)
         attack = 0.0f;
-    adsr->attack = attack;
 
-    if (decay > 8192.0f)
-        decay = 8192.0f;
     if (decay < 0.0f)
         decay = 0.0f;
-    adsr->decay = decay;
 
     if (sustain > 1.0f)
         sustain = 1.0f;
     if (sustain < 0.0f)
         sustain = 0.0f;
+
+    if (release < 0.0f)
+        release = 0.0f;
+
+    adsr->next = 0.0f;
+
 
     if (release > 8192.0f)
         release = 8192.0f;
