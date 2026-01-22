@@ -3,24 +3,24 @@
 
 /**
  In short, mpool is distributed under so called "BSD license",
- 
+
  Copyright (c) 2009-2010 Tatsuhiko Kubo <cubicdaiya@gmail.com>
  All rights reserved.
- 
+
  Redistribution and use in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
- 
+
  * Redistributions of source code must retain the above copyright notice,
  this list of conditions and the following disclaimer.
- 
+
  * Redistributions in binary form must reproduce the above copyright notice,
  this list of conditions and the following disclaimer in the documentation
  and/or other materials provided with the distribution.
- 
+
  * Neither the name of the authors nor the names of its contributors
  may be used to endorse or promote products derived from this software
  without specific prior written permission.
- 
+
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -68,7 +68,7 @@ static inline void delink_node(mpool_node_t* node);
 void mpool_create (char* memory, size_t size, tMempool* pool)
 {
     pool->leaf->header_size = mpool_align(sizeof(mpool_node_t));
-    
+
     pool->mpool = (char*)memory;
     pool->usize  = 0;
     if (size < pool->leaf->header_size)
@@ -76,7 +76,7 @@ void mpool_create (char* memory, size_t size, tMempool* pool)
         size = pool->leaf->header_size;
     }
     pool->msize  = size;
-    
+
     pool->head = create_node(pool->mpool, NULL, NULL, pool->msize - pool->leaf->header_size, pool->leaf->header_size);
 }
 
@@ -128,16 +128,16 @@ char* mpool_alloc(size_t asize, tMempool* pool)
         }
         return NULL;
     }
-    
+
     // Should we alloc the first block large enough or check all blocks and pick the one closest in size?
     size_t size_to_alloc = mpool_align(asize);
     mpool_node_t* node_to_alloc = pool->head;
-    
+
     // Traverse the free list for a large enough block
     while (node_to_alloc->size < size_to_alloc)
     {
         node_to_alloc = node_to_alloc->next;
-        
+
         // If we reach the end of the free list, there
         // are no blocks large enough, return NULL
         if (node_to_alloc == NULL)
@@ -153,7 +153,7 @@ char* mpool_alloc(size_t asize, tMempool* pool)
             return NULL;
         }
     }
-    
+
     // Create a new node after the node to be allocated if there is enough space
     mpool_node_t* new_node;
     size_t leftover = node_to_alloc->size - size_to_alloc;
@@ -171,28 +171,37 @@ char* mpool_alloc(size_t asize, tMempool* pool)
     {
         // Add any leftover space to the allocated node to avoid fragmentation
         node_to_alloc->size += leftover;
-        
+
         new_node = node_to_alloc->next;
     }
-    
+
+
+
+    // Remove the allocated node from the free list
+    delink_node(node_to_alloc);
+
+    pool->usize += pool->leaf->header_size + node_to_alloc->size;
     // Update the head if we are allocating the first node of the free list
     // The head will be NULL if there is no space left
     if (pool->head == node_to_alloc)
     {
         pool->head = new_node;
+    } else {
+        mpool_node_t* endnode = pool->head;
+        while(endnode->next != NULL){
+            endnode = endnode->next;
+        }
+        endnode->next = new_node;
     }
-    
-    // Remove the allocated node from the free list
-    delink_node(node_to_alloc);
-    
-    pool->usize += pool->leaf->header_size + node_to_alloc->size;
-    
+
+
+
     if (pool->leaf->clearOnAllocation > 0)
     {
         char* new_pool = (char*)node_to_alloc->pool;
         for (int i = 0; i < node_to_alloc->size; i++) new_pool[i] = 0;
     }
-    
+
     // Return the pool of the allocated node;
     return node_to_alloc->pool;
 // #endif
@@ -234,16 +243,16 @@ char* mpool_calloc(size_t asize, tMempool* pool)
         }
         return NULL;
     }
-    
+
     // Should we alloc the first block large enough or check all blocks and pick the one closest in size?
     size_t size_to_alloc = mpool_align(asize);
     mpool_node_t* node_to_alloc = pool->head;
-    
+
     // Traverse the free list for a large enough block
     while (node_to_alloc->size < size_to_alloc)
     {
         node_to_alloc = node_to_alloc->next;
-        
+
         // If we reach the end of the free list, there
         // are no blocks large enough, return NULL
         if (node_to_alloc == NULL)
@@ -259,7 +268,7 @@ char* mpool_calloc(size_t asize, tMempool* pool)
             return NULL;
         }
     }
-    
+
     // Create a new node after the node to be allocated if there is enough space
     mpool_node_t* new_node;
     size_t leftover = node_to_alloc->size - size_to_alloc;
@@ -277,20 +286,20 @@ char* mpool_calloc(size_t asize, tMempool* pool)
     {
         // Add any leftover space to the allocated node to avoid fragmentation
         node_to_alloc->size += leftover;
-        
+
         new_node = node_to_alloc->next;
     }
-    
+
     // Update the head if we are allocating the first node of the free list
     // The head will be NULL if there is no space left
     if (pool->head == node_to_alloc)
     {
         pool->head = new_node;
     }
-    
+
     // Remove the allocated node from the free list
     delink_node(node_to_alloc);
-    
+
     pool->usize += pool->leaf->header_size + node_to_alloc->size;
     // Format the new pool
     for (int i = 0; i < node_to_alloc->size; i++) node_to_alloc->pool[i] = 0;
@@ -325,9 +334,9 @@ void mpool_free(char* ptr, tMempool* pool)
     //if (ptr < pool->mpool || ptr >= pool->mpool + pool->msize)
     // Get the node at the freed space
     mpool_node_t* freed_node = (mpool_node_t*) (ptr - pool->leaf->header_size);
-    
+
     pool->usize -= pool->leaf->header_size + freed_node->size;
-    
+
     // Check each node in the list against the newly freed one to see if it's adjacent in memory
     mpool_node_t* other_node = pool->head;
     mpool_node_t* next_node;
@@ -350,13 +359,13 @@ void mpool_free(char* ptr, tMempool* pool)
             // Delink the merged node
             delink_node(other_node);
         }
-        
+
         // Check if a node is directly before the freed node
         else if (((long) other_node) + (pool->leaf->header_size + other_node->size) == (long) freed_node)
         {
             // Increase the merging node's size
             other_node->size += pool->leaf->header_size + freed_node->size;
-            
+
             if (other_node != pool->head)
             {
                 // Delink the merging node
@@ -374,15 +383,15 @@ void mpool_free(char* ptr, tMempool* pool)
                 freed_node = other_node;
             }
         }
-        
+
         other_node = next_node;
     }
-    
+
     // Ensure the freed node is attached to the head
     freed_node->next = pool->head;
     if (pool->head != NULL) pool->head->prev = freed_node;
     pool->head = freed_node;
-    
+
     // Format the freed pool
     //    char* freed_pool = (char*)freed_node->pool;
     //    for (int i = 0; i < freed_node->size; i++) freed_pool[i] = 0;
@@ -417,7 +426,7 @@ size_t leaf_pool_get_used(LEAF* const leaf)
 char* leaf_pool_get_pool(LEAF* const leaf)
 {
     char* buff = leaf->_internal_mempool.mpool;
-    
+
     return buff;
 }
 
@@ -452,7 +461,7 @@ static inline void delink_node(mpool_node_t* node)
         // Close the link
         node->prev->next = node->next;
     }
-    
+
     node->next = NULL;
     node->prev = NULL;
 }
