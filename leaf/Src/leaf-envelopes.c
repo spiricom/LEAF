@@ -741,7 +741,7 @@ void tADSRT_set(tADSRT* const adsr, float attack, float decay, float sustain,
     adsr->buff_sizeMinusOne = bufferSize - 1;
 
     adsr->sampleRate = leaf->sampleRate;
-    adsr->bufferSizeDividedBySampleRateInMs = adsr->buff_size / (adsr->sampleRate * 0.001f);
+    adsr->bufferSizeDividedBySampleRateInMs = (float)adsr->buff_size / (adsr->sampleRate * 0.001f);
 
     if (attack < 0.0f)
         attack = 0.0f;
