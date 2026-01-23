@@ -731,10 +731,12 @@ void tADSRT_setRelease (tADSRT* const adsr, float release)
 
 // 0.999999 is slow leak, 0.9 is fast leak
 #ifdef ITCMRAM
-void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setLeakFactor(tADSRT* const adsrenv, float leakFactor)
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_set(tADSRT* const adsr, float attack, float decay, float sustain,
+                  float release, float *expBuffer, int bufferSize, LEAF *const leaf)
 #else
 void tADSRT_set(tADSRT* const adsr, float attack, float decay, float sustain,
                   float release, float *expBuffer, int bufferSize, LEAF *const leaf)
+#endif
 {
     adsr->exp_buff = expBuffer;
     adsr->buff_size = bufferSize;
@@ -775,11 +777,25 @@ void tADSRT_set(tADSRT* const adsr, float attack, float decay, float sustain,
     adsr->leakFactor = 1.0f;
     adsr->invSampleRate = leaf->invSampleRate;
 }
+
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setLeakFactor(tADSRT* const adsr, float leakFactor)
+#else
 void tADSRT_setLeakFactor (tADSRT* const adsr, float leakFactor)
 #endif
 {
     adsr->baseLeakFactor = leakFactor;
     adsr->leakFactor = powf(leakFactor, 44100.0f * adsr->invSampleRate);;
+}
+
+
+#ifdef ITCMRAM
+void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSRT_setShape(tADSRT* const adsr, float shape)
+#else
+void tADSRT_setShape (tADSRT* const adsr, float shape)
+#endif
+{
+    adsr->shape = shape;
 }
 
 #ifdef ITCMRAM
@@ -832,7 +848,7 @@ void tADSRT_clear (tADSRT* const adsr)
 }
 
 #ifdef ITCMRAM
-float  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))   tADSRT_tick(tADSRT* const adsrenv)
+float  __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32)))   tADSRT_tick(tADSRT* const adsr)
 #else
 
 float tADSRT_tick (tADSRT* const adsr)
@@ -895,14 +911,19 @@ float tADSRT_tick (tADSRT* const adsr)
             } else {
                 uint32_t intPart = (uint32_t) adsr->decayPhase;
                 float floatPart = adsr->decayPhase - intPart;
-                float secondValue;
+                float secondValue_exp;
+                float secondValue_inv;
                 if (adsr->decayPhase + 1.0f > adsr->buff_sizeMinusOne) {
-                    secondValue = 0.0f;
+                    secondValue_exp = 0.0f;
+                    secondValue_inv = 1.0f;
                 } else {
-                    secondValue = adsr->exp_buff[(uint32_t) ((adsr->decayPhase) + 1)];
+                    secondValue_exp = adsr->exp_buff[(uint32_t) ((adsr->decayPhase) + 1)];
+                    secondValue_inv = adsr->exp_buff[(uint32_t) (adsr->buff_sizeMinusOne - (adsr->decayPhase) - 1)];
                 }
-                float interpValue = (LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue, floatPart));
-                adsr->next = (adsr->gain * (adsr->sustain + (interpValue * (1.0f - adsr->sustain)))) *
+                float interpValue = (LEAF_interpolation_linear(adsr->exp_buff[intPart], secondValue_exp, floatPart));
+                float shapeInvert = 1.0f - (LEAF_interpolation_linear(adsr->exp_buff[adsr->buff_sizeMinusOne - intPart], secondValue_inv, floatPart));
+                float finalInterpValue = LEAF_interpolation_linear(interpValue, shapeInvert, adsr->shape);
+                adsr->next = (adsr->gain * (adsr->sustain + (finalInterpValue * (1.0f - adsr->sustain)))) *
                              adsr->leakFactor; // do interpolation !
             }
 
@@ -911,7 +932,8 @@ float tADSRT_tick (tADSRT* const adsr)
             break;
 
         case env_sustain:
-            adsr->next = adsr->sustain * adsr->gain * (adsr->leakFactor * adsr->sustainWithLeak);
+            adsr->sustainWithLeak *= adsr->leakFactor;
+            adsr->next = adsr->sustain * adsr->gain * adsr->sustainWithLeak;
             break;
 
         case env_release:
