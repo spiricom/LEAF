@@ -810,7 +810,7 @@ int tSimplePoly_markPendingNoteOff(tSimplePoly* const poly, uint8_t note)
     return deactivatedVoice;
 }
 
-void tSimplePoly_allNotesOff(tSimplePoly* const poly)
+int tSimplePoly_allNotesOff(tSimplePoly* const poly)
 {
     for (int i = 0; i < poly->stack.size; i++)
     {
