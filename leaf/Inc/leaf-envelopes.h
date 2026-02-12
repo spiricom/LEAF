@@ -361,7 +361,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
 
         float attack, decay, release;
         float attackInc, decayInc, releaseInc, rampInc;
-
+        float shape;
         uint32_t whichStage;
 
         float sustain, gain, rampPeak, releasePeak;
@@ -384,6 +384,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
     void    tADSRT_setDecay      (tADSRT* const, float decay);
     void    tADSRT_setSustain    (tADSRT* const, float sustain);
     void    tADSRT_setRelease    (tADSRT* const, float release);
+    void    tADSRT_setShape   (tADSRT* const, float shape);
     void    tADSRT_setLeakFactor (tADSRT* const, float leakFactor);
     void    tADSRT_on            (tADSRT* const, float velocity);
     void    tADSRT_off           (tADSRT* const);

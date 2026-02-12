@@ -1,24 +1,24 @@
 /*==============================================================================
- 
+
  In short, mpool is distributed under so called "BSD license",
- 
+
  Copyright (c) 2009-2010 Tatsuhiko Kubo <cubicdaiya@gmail.com>
  All rights reserved.
- 
+
  Redistribution and use in source and binary forms, with or without modification,
  are permitted provided that the following conditions are met:
- 
+
  * Redistributions of source code must retain the above copyright notice,
  this list of conditions and the following disclaimer.
- 
+
  * Redistributions in binary form must reproduce the above copyright notice,
  this list of conditions and the following disclaimer in the documentation
  and/or other materials provided with the distribution.
- 
+
  * Neither the name of the authors nor the names of its contributors
  may be used to endorse or promote products derived from this software
  without specific prior written permission.
- 
+
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -30,28 +30,30 @@
  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
+
  written by C99 style
  ==============================================================================*/
 
 #ifndef LEAF_MPOOL_H_INCLUDED
 #define LEAF_MPOOL_H_INCLUDED
+#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
+
 #endif
 
-    //==============================================================================
+//==============================================================================
 #define ALLOC_FROM_POOL(TYPE, PTRPTR, MP) do {                                \
-    tMempool* __m = ((MP) ? *(MP) : NULL);                                    \
-    TYPE* __e;                                                                \
-    if (__m) {                                                                \
-        __e = *(PTRPTR) = (TYPE*) mpool_alloc(sizeof(TYPE), __m);             \
-        __e->mempool = __m;                                                   \
-    } else {                                                                  \
-        __e = *(PTRPTR) = (TYPE*) malloc(sizeof(TYPE));                       \
-        __e->mempool = NULL;                                                  \
-    }                                                                         \
+tMempool* __m = ((MP) ? *(MP) : NULL);                                    \
+TYPE* __e = __m                                                         \
+? (TYPE*) mpool_alloc(sizeof(TYPE), __m)                             \
+: (TYPE*) malloc(sizeof(TYPE));                                      \
+\
+assert(__e != NULL);                                                    \
+\
+*(PTRPTR) = __e;                                                         \
+__e->mempool = __m;                                                      \
 } while (0)
 
 #define LEAF_AUX_ALLOC(TYPE, COUNT, MPOOL) \
@@ -61,106 +63,107 @@ extern "C" {
 
 #include <stddef.h>
 
-    //==============================================================================
+//==============================================================================
 
 #define MPOOL_ALIGN_SIZE (8)
 
-    typedef struct LEAF LEAF;
+typedef struct LEAF LEAF;
 
-    typedef enum LEAFErrorType
-    {
-        LEAFMempoolOverrun = 0,
-        LEAFMempoolFragmentation,
-        LEAFInvalidFree,
-        LEAFErrorNil
-    } LEAFErrorType;
+typedef enum LEAFErrorType {
+    LEAFMempoolOverrun = 0,
+    LEAFMempoolFragmentation,
+    LEAFInvalidFree,
+    LEAFErrorNil
+} LEAFErrorType;
 
-    /*!
-     * @defgroup tmempool tMempool
-     * @ingroup mempool
-     * @brief Memory pool for the allocation of LEAF objects.
-     * @{
-     */
+/*!
+ * @defgroup tmempool tMempool
+ * @ingroup mempool
+ * @brief Memory pool for the allocation of LEAF objects.
+ * @{
+ */
 
-    // node of free list
-    typedef struct mpool_node_t {
-        char                *pool;     // memory pool field
-        struct mpool_node_t *next;     // next node pointer
-        struct mpool_node_t *prev;     // prev node pointer
-        size_t size;
-    } mpool_node_t;
+// node of free list
+typedef struct mpool_node_t {
+    char *pool; // memory pool field
+    struct mpool_node_t *next; // next node pointer
+    struct mpool_node_t *prev; // prev node pointer
+    size_t size;
+} mpool_node_t;
 
-    typedef struct tMempool tMempool;
+typedef struct tMempool tMempool;
 
-    struct tMempool
-    {
-        tMempool*      mempool;
-        LEAF*         leaf;
-        char*         mpool;       // start of the mpool
-        size_t        usize;       // used size of the pool
-        size_t        msize;       // max size of the pool
-        mpool_node_t* head;        // first node of memory pool free list
+struct tMempool {
+    tMempool *mempool;
+    LEAF *leaf;
+    char *mpool; // start of the mpool
+    size_t usize; // used size of the pool
+    size_t msize; // max size of the pool
+    mpool_node_t *head; // first node of memory pool free list
+};
 
-    };
-
-    //! Initialize a tMempool for a given memory location and size to the default mempool of a LEAF instance.
-    /*!
-     @param pool A pointer to the tMempool to initialize.
-     @param memory A pointer to the chunk of memory to be used as a mempool.
-     @param size The size of the chunk of memory to be used as a mempool.
-     @param leaf A pointer to the leaf instance.
-     */
-    void    tMempool_init           (tMempool** const pool, char* memory, size_t size, LEAF* const leaf);
+//! Initialize a tMempool for a given memory location and size to the default mempool of a LEAF instance.
+/*!
+ @param pool A pointer to the tMempool to initialize.
+ @param memory A pointer to the chunk of memory to be used as a mempool.
+ @param size The size of the chunk of memory to be used as a mempool.
+ @param leaf A pointer to the leaf instance.
+ */
+void tMempool_init(tMempool **const pool, char *memory, size_t size, LEAF *const leaf);
 
 
-    //! Free a tMempool from its mempool.
-    /*!
-     @param pool A pointer to the tMempool to free.
-     */
-    void    tMempool_free           (tMempool** const pool);
+//! Free a tMempool from its mempool.
+/*!
+ @param pool A pointer to the tMempool to free.
+ */
+void tMempool_free(tMempool **const pool);
 
 
-    //! Initialize a tMempool for a given memory location and size to a specified mempool.
-    /*!
-     @param pool A pointer to the tMempool to initialize.
-     @param memory A pointer to the chunk of memory to be used as a mempool.
-     @param size The size of the chuck of memory to be used as a mempool.
-     @param poolTo A pointer to the tMempool to which this tMempool should be initialized.
-     */
-    void    tMempool_initToPool     (tMempool** const mp, char* memory, size_t size, tMempool** const mem);
+//! Initialize a tMempool for a given memory location and size to a specified mempool.
+/*!
+ @param pool A pointer to the tMempool to initialize.
+ @param memory A pointer to the chunk of memory to be used as a mempool.
+ @param size The size of the chuck of memory to be used as a mempool.
+ @param poolTo A pointer to the tMempool to which this tMempool should be initialized.
+ */
+void tMempool_initToPool(tMempool **const mp, char *memory, size_t size, tMempool **const mem);
 
-    /*!￼￼￼
-     @} */
-    //==============================================================================
+/*!￼￼￼
+ @} */
+//==============================================================================
 
-    //    typedef struct mpool_t {
-    //        char*         mpool;       // start of the mpool
-    //        size_t        usize;       // used size of the pool
-    //        size_t        msize;       // max size of the pool
-    //        mpool_node_t* head;        // first node of memory pool free list
-    //    } mpool_t;
+//    typedef struct mpool_t {
+//        char*         mpool;       // start of the mpool
+//        size_t        usize;       // used size of the pool
+//        size_t        msize;       // max size of the pool
+//        mpool_node_t* head;        // first node of memory pool free list
+//    } mpool_t;
 
-    void mpool_create (char* memory, size_t size, tMempool* pool);
+void mpool_create(char *memory, size_t size, tMempool *pool);
 
-    char* mpool_alloc(size_t size, tMempool* pool);
-    char* mpool_calloc(size_t asize, tMempool* pool);
+char *mpool_alloc(size_t size, tMempool *pool);
 
-    void mpool_free(char* ptr, tMempool* pool);
+char *mpool_calloc(size_t asize, tMempool *pool);
 
-    size_t mpool_get_size(tMempool* pool);
-    size_t mpool_get_used(tMempool* pool);
+void mpool_free(char *ptr, tMempool *pool);
 
-    void    leaf_pool_init(LEAF* const leaf, char* memory, size_t size);
+size_t mpool_get_size(tMempool *pool);
 
-    char* leaf_alloc(LEAF* const leaf, size_t size);
-    char* leaf_calloc(LEAF* const leaf, size_t size);
+size_t mpool_get_used(tMempool *pool);
 
-    void leaf_free(LEAF* const leaf, char* ptr);
+void leaf_pool_init(LEAF *const leaf, char *memory, size_t size);
 
-    size_t leaf_pool_get_size(LEAF* const leaf);
-    size_t leaf_pool_get_used(LEAF* const leaf);
+char *leaf_alloc(LEAF *const leaf, size_t size);
 
-    char* leaf_pool_get_pool(LEAF* const leaf);
+char *leaf_calloc(LEAF *const leaf, size_t size);
+
+void leaf_free(LEAF *const leaf, char *ptr);
+
+size_t leaf_pool_get_size(LEAF *const leaf);
+
+size_t leaf_pool_get_used(LEAF *const leaf);
+
+char *leaf_pool_get_pool(LEAF *const leaf);
 
 #ifdef __cplusplus
 }
@@ -169,6 +172,3 @@ extern "C" {
 #endif // LEAF_MPOOL_H
 
 //==============================================================================
-
-
-
