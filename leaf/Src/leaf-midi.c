@@ -810,7 +810,7 @@ int tSimplePoly_markPendingNoteOff(tSimplePoly* const poly, uint8_t note)
     return deactivatedVoice;
 }
 
-int tSimplePoly_allNotesOff(tSimplePoly* const poly)
+void tSimplePoly_allNotesOff(tSimplePoly* const poly)
 {
     for (int i = 0; i < poly->stack.size; i++)
     {
@@ -830,6 +830,7 @@ int tSimplePoly_allNotesOff(tSimplePoly* const poly)
     }
     return 1;
 }
+
 void tSimplePoly_setNumVoices(tSimplePoly* const poly, uint8_t numVoices)
 {
     poly->numVoices = (numVoices > poly->maxNumVoices) ? poly->maxNumVoices : numVoices;
