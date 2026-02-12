@@ -119,7 +119,10 @@ extern "C" {
     float      tDelay_addTo        (tDelay* const, float value, uint32_t tapDelay);
     float      tDelay_getLastOut   (tDelay* const);
     float      tDelay_getLastIn    (tDelay* const);
-    
+    void        tDelay_setGain (tDelay* const d, float gain);
+    float       tDelay_getGain (tDelay* const d);
+
+
     //==============================================================================
     
     /*!
@@ -243,7 +246,9 @@ struct tLinearDelay{
     float  tLinearDelay_addTo              (tLinearDelay* const, float value, uint32_t tapDelay);
     float  tLinearDelay_getLastOut         (tLinearDelay* const);
     float  tLinearDelay_getLastIn          (tLinearDelay* const);
-    
+    void tLinearDelay_setGain (tLinearDelay* const d, float gain);
+    float tLinearDelay_getGain (tLinearDelay* const d);
+
     
     
     //==============================================================================
@@ -604,7 +609,10 @@ struct tLinearDelay{
     float  tAllpassDelay_addTo       (tAllpassDelay* const, float value, uint32_t tapDelay);
     float  tAllpassDelay_getLastOut  (tAllpassDelay* const);
     float  tAllpassDelay_getLastIn   (tAllpassDelay* const);
-    
+    void tAllpassDelay_setGain (tAllpassDelay* const d, float gain);
+    float tAllpassDelay_getGain (tAllpassDelay* const d);
+
+
     //==============================================================================
     
     /*!
@@ -704,7 +712,9 @@ struct tLinearDelay{
     void    tTapeDelay_incrementInPoint (tTapeDelay* const dl);
     float  tTapeDelay_getLastOut       (tTapeDelay* const);
     float  tTapeDelay_getLastIn        (tTapeDelay* const);
-    
+    void tTapeDelay_setGain (tTapeDelay* const d, float gain);
+    float tTapeDelay_getGain (tTapeDelay* const d);
+
     //==============================================================================
     
     /*!
