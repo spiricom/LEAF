@@ -38,7 +38,39 @@ extern "C" {
      @defgroup tenvelope tEnvelope
      @ingroup envelopes
      @brief Basic attack-decay envelope.
-     @{
+
+    The envelope produces a one shot or looping ramp.
+     When triggered, it centers the attack phase, rising exponentially toward 'velocity' at the configured attack time
+     When it reaches its peak, it transitions to hte decay phase, falling toward zero at the decay time
+     If 'loop' is non zero, it repeats attack & decay indefinitely, otherwise it stops after decay
+
+    Example
+     @code{.c}
+     // initialize
+     tEnvelope* env = NULL;
+     tEnvelope_init(&env,
+                    0.05f,   //attack time in seconds
+                    0.2f,    //decay time in seconds
+                    0,       //set loop boolean (false)
+                    leaf);
+
+     // trigger the envelope with full velocity (1.0)
+     tEnvelope_on(env, 1.0f);
+
+     //audio loop
+     for (int i = 0; i < numSamples; ++i) {
+         float envVal = tEnvelope_tick(env);
+         outputSamples[i] = envVal * inputSamples[i];
+     }
+
+     //tweak parameters
+     tEnvelope_setAttack(env, 0.1f);
+     tEnvelope_setDecay(env, 0.5f);
+     tEnvelope_loop(env, 1);          //enable continuous looping
+
+     //when done
+     tEnvelope_free(&env);
+     @endcode
      
      @fn void    tEnvelope_init(tEnvelope** const, Lfloat attack, Lfloat decay, int loop, LEAF* const leaf)
      @brief Initialize a tEnvelope to the default mempool of a LEAF instance.

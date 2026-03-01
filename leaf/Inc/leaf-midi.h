@@ -36,7 +36,50 @@ extern "C" {
      @defgroup tstack tStack
      @ingroup midi
      @brief A basic stack of integers with a fixed capacity of 128, used by tPoly to keep track of MIDI notes.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tStack* noteStack = NULL;
+    tStack_init(&noteStack, leaf);
+
+    //limit capacity if needed (128 by default)
+    tStack_setCapacity(noteStack, 32);
+
+    //note on handler
+    void noteOn(uint8_t note)
+    {
+    tStack_addIfNotAlreadyThere(noteStack, note);
+    }
+
+    //note off handler
+    void noteOff(uint8_t note)
+    {
+    tStack_remove(noteStack, note);
+    }
+
+    //retrieve newest note for mono priority logic
+    int current = tStack_first(noteStack);   //eturns -1 if empty
+
+    //iterate through stack in order of arrival
+    int n;
+    while ((n = tStack_next(noteStack)) != -1) {
+    ...
+    }
+
+    //direct indexed access
+    int size = tStack_getSize(noteStack);
+    for (int i = 0; i < size; ++i) {
+    int val = tStack_get(noteStack, i);
+    ...
+    }
+
+    //clear all held notes
+    tStack_clear(noteStack);
+
+    //when done
+    tStack_free(&noteStack);
+    @endcode
      
      @fn void    tStack_init(tStack** const stack, LEAF* const leaf)
      @brief Initialize a tStack to the default mempool of a LEAF instance.
@@ -314,7 +357,48 @@ extern "C" {
      @defgroup tsimplepoly tSimplePoly
      @ingroup midi
      @brief Polyphony handler.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    tPoly* poly = NULL;
+    tPoly_init(&poly,
+               8,             //maximum number of voices
+               leaf);
+
+    // Enable voices at runtime
+    tPoly_setNumVoices(poly,
+                       4);   // amout of voices
+
+    //tweak parameters
+    tPoly_setPitchGlideActive(poly,
+                              1);        //portimento 1 = on, 0 = off
+    tPoly_setPitchGlideTime(poly,
+                            200.0f);     //glide glide (ms)
+    tPoly_setPitchBend(poly,
+                       2.0f);           //pitch send (semitones)
+    tPoly_setBendGlideTime(poly,
+                           50.0f);       //pitch bend time (ms)
+
+    //audio loop
+    int voice = tPoly_noteOn(poly,
+                            midiNote,    // MIDI note number (0–127)
+                            velocity);   // MIDI velocity (0–127)
+    int freedVoice = tPoly_noteOff(poly,
+                                   midiNote);
+    tPoly_tickPitch(poly);         // advances glide and bend each sample
+    for (int v = 0; v < tPoly_getNumVoices(poly); ++v) {
+        if (tPoly_isOn(poly, v)) {
+            Lfloat pitch = tPoly_getPitch(poly, v);
+            int key     = tPoly_getKey(poly, v);
+            int vel     = tPoly_getVelocity(poly, v);
+            // key, vel: as above
+        }
+    }
+
+    //when done
+    tPoly_free(&poly);
+    @endcode
      
      @fn void    tSimplePoly_init(tSimplePoly** const poly, int maxNumVoices, LEAF* const leaf)
      @brief Initialize a tSimplePoly to the default mempool of a LEAF instance.

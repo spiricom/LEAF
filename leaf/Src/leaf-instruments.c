@@ -67,7 +67,7 @@ void        t808Cowbell_free    (t808Cowbell** const cowbellInst)
     tHighpass_free(&cowbell->highpass);
     tNoise_free(&cowbell->stick);
     tEnvelope_free(&cowbell->envStick);
-    mpool_free((char*)cowbell, cowbell->mempool);
+    mpool_free((char*)cowbell, cowbell->mempool)t ;
 }
 
 void t808Cowbell_on(t808Cowbell* const cowbell, Lfloat vel)

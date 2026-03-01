@@ -35,7 +35,34 @@ extern "C" {
      @defgroup t808cowbell t808Cowbell
      @ingroup instruments
      @brief 808 drum machine cowbell.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    t808Cowbell* cb = NULL;
+    t808Cowbell_init(&cb,
+                     1,     //toggle stick noise
+                     leaf);
+
+    //set trigger velocity threshold
+    t808Cowbell_on(cb, 0.8f);
+
+    //tweak parameters
+    t808Cowbell_setFreq(cb, 1200.0f);          //bell pitch
+    t808Cowbell_setDecay(cb, 0.5f);           //decay time (0–1)
+    t808Cowbell_setHighpassFreq(cb, 800.0f);  //remove lows
+    t808Cowbell_setBandpassFreq(cb, 2400.0f);
+    t808Cowbell_setOscMix(cb, 0.7f);          //balance square osc vs. stick
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float out = t808Cowbell_tick(cb);
+        outputSamples[i] = out;
+    }
+
+    //when done
+    t808Cowbell_free(&cb);
+    @endcode
      
      @fn void    t808Cowbell_init(t808Cowbell** const, int useStick, LEAF* const leaf)
      @brief Initialize a t808Cowbell to the default mempool of a LEAF instance.
@@ -122,7 +149,37 @@ extern "C" {
      @defgroup t808hihat t808Hihat
      @ingroup instruments
      @brief 808 drum machine hihat.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    t808Hihat* hh = NULL;
+    t808Hihat_init(&hh,
+                   leaf);
+
+    //set trigger velocity threshold
+    t808Hihat_on(hh, 0.9f);
+
+    //tweak parameters
+    t808Hihat_setOscFreq(hh, 8000.0f);          //oscillator pitch
+    t808Hihat_setStretch(hh, 0.5f);            //spread of the six squares
+    t808Hihat_setFM(hh, 0.3f);                 //noise‑modulated frequency
+    t808Hihat_setOscNoiseMix(hh, 0.7f);        //balance osc vs. noise
+    t808Hihat_setHighpassFreq(hh, 1000.0f);    //remove lows
+    t808Hihat_setOscBandpassFreq(hh, 6000.0f);
+    t808Hihat_setOscBandpassQ(hh, 1.2f);
+    t808Hihat_setStickBandPassFreq(hh, 3000.0f);
+    t808Hihat_setStickBandPassQ(hh, 0.8f);
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float out = t808Hihat_tick(hh);
+        outputSamples[i] = out;
+    }
+
+    //when done
+    t808Hihat_free(&hh);
+    @endcode
      
      @fn void    t808Hihat_init(t808Hihat** const, LEAF* const leaf)
      @brief Initialize a t808Hihat to the default mempool of a LEAF instance.
@@ -234,7 +291,36 @@ extern "C" {
      @defgroup t808snare t808Snare
      @ingroup instruments
      @brief 808 drum machine snare.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    t808Snare* sn = NULL;
+    t808Snare_init(&sn,
+                   leaf);
+
+    //set trigger velocity threshold
+    t808Snare_on(sn, 0.8f);
+
+    //tweak parameters
+    t808Snare_setTone1Freq(sn, 180.0f);         //pitch of lower tone
+    t808Snare_setTone1Decay(sn, 0.15f);        //decay time of lower tone
+    t808Snare_setTone2Freq(sn, 330.0f);         //pitch of upper tone
+    t808Snare_setTone2Decay(sn, 0.10f);        //decay time of upper tone
+    t808Snare_setNoiseDecay(sn, 0.12f);        //decay time of noise component
+    t808Snare_setToneNoiseMix(sn, 0.6f);       //balance between tone and noise
+    t808Snare_setNoiseFilterFreq(sn, 8000.0f); //noise filter cutoff
+    t808Snare_setNoiseFilterQ(sn, 1.0f);       //noise filter resonance
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float out = t808Snare_tick(sn);
+        outputSamples[i] = out;
+    }
+
+    //when done
+    t808Snare_free(&sn);
+    @endcode
      
      @fn void    t808Snare_init(t808Snare** const, LEAF* const leaf)
      @brief Initialize a t808Snare to the default mempool of a LEAF instance.
@@ -341,7 +427,36 @@ extern "C" {
      @defgroup t808SnareSmall t808SnareSmall
      @ingroup instruments
      @brief 808 drum machine snare.
-     @{
+
+    Example
+    @code{.c}
+    //initilize
+    t808SnareSmall* sn = NULL;
+    t808SnareSmall_init(&sn,
+                        leaf);
+
+    //set trigger velocity
+    t808SnareSmall_on(sn, 0.9f);
+
+    //tweak parameters
+    t808SnareSmall_setTone1Freq(sn, 200.0f);    //lower tone pitch (Hz)
+    t808SnareSmall_setTone1Decay(sn, 0.12f);    //lower tone decay (s)
+    t808SnareSmall_setTone2Freq(sn, 330.0f);    //upper tone pitch (Hz)
+    t808SnareSmall_setTone2Decay(sn, 0.09f);    //upper tone decay (s)
+    t808SnareSmall_setNoiseDecay(sn, 0.10f);    //noise decay time (s)
+    t808SnareSmall_setToneNoiseMix(sn, 0.7f);   //tone/noise balance: 0.0 (all tone)–1.0 (all noise)
+    t808SnareSmall_setNoiseFilterFreq(sn, 8000.0f); //noise filter cutoff (Hz)
+    t808SnareSmall_setNoiseFilterQ(sn, 0.8f);       //noise filter resonance (Q)
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float sample = t808SnareSmall_tick(sn);
+        output[i] = sample;
+    }
+
+    //when done
+    t808SnareSmall_free(&sn);
+    @endcode
      
      @fn void    t808SnareSmall_init(t808SnareSmall** const, LEAF* const leaf)
      @brief Initialize a t808SnareSmall to the default mempool of a LEAF instance.
@@ -446,7 +561,36 @@ extern "C" {
      @defgroup t808kick t808Kick
      @ingroup instruments
      @brief 808 drum machine kick.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    t808Kick* kick = NULL;
+    t808Kick_init(&kick,
+                  leaf);
+
+    //set trigger velocity
+    t808Kick_on(kick, 0.8f);
+
+    //tweak parameters
+    t808Kick_setToneFreq(kick, 60.0f);     //fundamental pitch
+    t808Kick_setToneDecay(kick, 0.35f);    //tone decay time
+    t808Kick_setNoiseDecay(kick, 0.08f);   //noise decay time
+    t808Kick_setToneNoiseMix(kick, 0.6f);  //tone/noise balance: 0.0 (all tone)–1.0 (all noise)
+    t808Kick_setNoiseFilterFreq(kick, 8000.0f); //noise filter cutoff
+    t808Kick_setNoiseFilterQ(kick, 0.7f);       //noise filter resonance (Q)
+    t808Kick_setSighAmount(kick, 40.0f);  //sigh sweep depth
+    t808Kick_setChirpAmount(kick, 0.25f); //chirp rate
+
+    //audio loop
+    for (int i = 0; i < numSamples; ++i) {
+        float out = t808Kick_tick(kick);
+        output[i] = out;
+    }
+
+    //when done
+    t808Kick_free(&kick);
+    @endcode
      
      @fn void    t808Kick_init(t808Kick** const, LEAF* const leaf)
      @brief Initialize a t808Kick to the default mempool of a LEAF instance.
@@ -551,7 +695,37 @@ extern "C" {
      @defgroup t808KickSmall t808KickSmall
      @ingroup instruments
      @brief 808 drum machine kick.
-     @{
+
+    Example
+    @code{.c}
+    //initialize
+    t808KickSmall* kick = NULL;
+    t808KickSmall_init(&kick, leaf);
+
+    //tweak trigger
+    t808KickSmall_on(kick, 0.9f);
+
+    //tweak parameters
+    t808KickSmall_setToneFreq   //(hz)
+    t808KickSmall_setToneDecay  //(s)
+    t808KickSmall_setNoiseDecay //(s)
+    t808KickSmall_setToneNoiseMix(kick, 0.5f);   //0.0=tone only, 1.0=noise only
+    t808KickSmall_setNoiseFilterFreq(kick, 7000.0f); //(Hz)
+    t808KickSmall_setNoiseFilterQ   (kick, 0.8f);
+
+    //pitch sweeps
+    t808KickSmall_setSighAmount (kick, 30.0f);  //Hz drop over decay
+    t808KickSmall_setChirpAmount(kick, 0.2f);   //ratio offset
+
+    //audio loop
+    for (int n = 0; n < numSamples; ++n) {
+        float y = t808KickSmall_tick(kick);
+        out[n] = y;
+    }
+
+    //when done
+    t808KickSmall_free(&kick);
+    @endcode
      
      @fn void    t808KickSmall_init(t808KickSmall** const, LEAF* const leaf)
      @brief Initialize a t808KickSmall to the default mempool of a LEAF instance.
