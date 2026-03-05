@@ -804,12 +804,14 @@ void tSimpleLivingString3_init(LEAF* const leaf, tSimpleLivingString3* const p,
     p->sampleRate = leaf->sampleRate * oversampling;
     p->curr = 0.0f;
     p->maxLength = 2400 * oversampling;
+    p->freq = freq;
 
     tExpSmooth_init(leaf, &p->wlSmooth, p->sampleRate / freq / 2.0f, 0.01f);
 
     tLinearDelay_create(&p->mempool, &p->delayLineU);
     tLinearDelay_create(&p->mempool, &p->delayLineL);
-
+    p->userDecay = decay;
+    tSimpleLivingString3_setDecay(p, decay);
     tSimpleLivingString3_setFreq(p, freq);
 
     tLinearDelay_init(leaf, p->delayLineU, p->waveLengthInSamples, p->maxLength);
@@ -838,7 +840,7 @@ void tSimpleLivingString3_init(LEAF* const leaf, tSimpleLivingString3* const p,
     tHighpass_setSampleRate(&p->DCblocker, p->sampleRate);
     tHighpass_setFreq(&p->DCblocker, 13);
 
-    p->userDecay = decay;
+
 
     tFeedbackLeveler_init(leaf, &p->fbLev, targetLev, levSmoothFactor, levStrength, levMode);
     p->levMode = levMode;
@@ -853,9 +855,6 @@ void tSimpleLivingString3_init(LEAF* const leaf, tSimpleLivingString3* const p,
 
     p->waveLengthInSamples = waveLength * 0.5f;
     tExpSmooth_setDest(&p->wlSmooth, p->waveLengthInSamples);
-
-    float temp = ((p->userDecay * 0.01f) + 0.01f) * 6.9078f;
-    p->decay = expf(-6.91f * ((1.0f / p->freq) / temp));
 
     p->pickupPoint = 0.9f;
     p->prevDelayLength = p->waveLengthInSamples;
