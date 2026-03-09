@@ -722,6 +722,30 @@ void    tExpSmooth_setDest      (tExpSmooth const, Lfloat dest);
     void    tSlide_setDownSlide    (tSlide const sl, Lfloat downSlide);
     void    tSlide_setDest        (tSlide const sl, Lfloat dest);
     
+
+    //a dynamic smoother from a 2014 paper by Andy Simper (Dynamic Smoothing Using Self Modulating Filter). A cool idea! Works great for smoothing noisy knobs without messing up fast changes. Does include a branch, though, so probably not as efficient as tExpSmooth
+        typedef struct _tDynamicSmoother
+        {
+            tMempool mempool;
+            Lfloat dest;
+            Lfloat low1;
+            Lfloat low2;
+            Lfloat inz;
+            Lfloat basefreq;
+            Lfloat sensitivity;
+            Lfloat wc;
+        } _tDynamicSmoother;
+
+        typedef _tDynamicSmoother* tDynamicSmoother;
+
+        void    tDynamicSmoother_init          (tDynamicSmoother* const, LEAF* const leaf);
+        void    tDynamicSmoother_initToPool    (tDynamicSmoother* const, tMempool* const);
+        void    tDynamicSmoother_free          (tDynamicSmoother* const);
+
+        Lfloat   tDynamicSmoother_tick         (tDynamicSmoother const, Lfloat in);
+        Lfloat   tDynamicSmoother_tickNoInput         (tDynamicSmoother const s);
+        void   tDynamicSmoother_setDest         (tDynamicSmoother const s, Lfloat dest);
+        void   tDynamicSmoother_setValAndDest         (tDynamicSmoother const s, Lfloat dest);
 #ifdef __cplusplus
 }
 #endif

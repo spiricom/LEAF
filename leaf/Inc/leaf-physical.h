@@ -1310,6 +1310,44 @@ typedef struct _tStiffString
     void    tStereoRotation_setGain                   (tStereoRotation const r, float gain);
 
 
+
+ typedef struct _tPattiString
+    {
+        tMempool mempool;
+        Lfloat decay;
+        Lfloat Fout;
+        Lfloat Bout;
+        tOnePole bridgeFilter;
+        Lfloat pickupPos;
+        tLagrangeDelay forwardDelay;
+        tLagrangeDelay backwardDelay;
+
+        Lfloat waveLengthInSamples;
+        tFIR pickupFIR;
+        Lfloat sampleRate;
+        Lfloat freq;
+        Lfloat* FIRcoeffs;
+        uint32_t maxLength;
+        uint32_t pickupWidth;
+        Lfloat openStringLength;
+        Lfloat openStringFreq;
+        Lfloat FIRgain;
+        
+    } _tPattiString;
+
+    typedef _tPattiString* tPattiString;
+
+    void    tPattiString_init                     (tPattiString* const, LEAF* const leaf);
+    void    tPattiString_initToPool                     (tPattiString* const rr, tMempool* const mp);
+Lfloat    tPattiString_tick                    (tPattiString const p, float samples);
+   
+    void    tPattiString_setPickupPos           (tPattiString const ps, float pos);
+    void tPattiString_setFullStringFreq (tPattiString const ps, float freq);
+    void   tPattiString_pluck(tPattiString const p, Lfloat input, Lfloat position);
+void tPattiString_setPickupWidth(tPattiString const p, Lfloat ratio);
+
+
+
 #ifdef __cplusplus
 }
 #endif

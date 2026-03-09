@@ -3707,8 +3707,8 @@ void    tSquareLFO_initToPool   (tSquareLFO* const cy, tMempool* const mp)
 void    tSquareLFO_free (tSquareLFO* const cy)
 {
     _tSquareLFO* c = *cy;
-    tIntPhasor_free(c->phasor);
-    tIntPhasor_free(c->invPhasor);
+    tIntPhasor_free(&c->phasor);
+    tIntPhasor_free(&c->invPhasor);
     mpool_free((char*)c, c->mempool);
 }
 

@@ -3889,3 +3889,138 @@ void    tStereoRotation_setGain                   (tStereoRotation const r, floa
 {
     r->rotGain = gain;
 }
+//patti string
+
+void    tPattiString_init                    (tPattiString* const ps, LEAF* const leaf)
+{
+    tPattiString_initToPool                     (ps, &leaf->mempool);
+
+
+}
+void    tPattiString_initToPool              (tPattiString* const psps, tMempool* const mp)
+{
+    _tMempool *m = *mp;
+    _tPattiString *ps = *psps = (_tPattiString *) mpool_alloc(sizeof(_tPattiString), m);
+    ps->mempool = m;
+    LEAF *leaf = ps->mempool->leaf;
+    ps->sampleRate = leaf->sampleRate;
+
+    //bridge filter initialization
+    tOnePole_initToPool(&ps->bridgeFilter, 9000.0f, mp);
+    int maxLength = 1000;
+    ps->maxLength = maxLength;
+
+    //lagrange init
+    Lfloat freq = 220;
+    ps->freq = freq;
+    Lfloat waveLength = (ps->sampleRate/freq);
+    if (waveLength<4.8) waveLength=4.8f;
+    else if (waveLength>maxLength*2) waveLength=maxLength*2;
+    ps->waveLengthInSamples =  waveLength * 0.5f;
+    tLagrangeDelay_initToPool(&ps->forwardDelay, ps->waveLengthInSamples, maxLength, mp);
+    tLagrangeDelay_initToPool(&ps->backwardDelay, ps->waveLengthInSamples, maxLength, mp);
+    Lfloat userDecay = 5.0f;
+    Lfloat temp = ((userDecay * 0.01f) + 0.01f) * 6.9078f;
+    ps->decay = exp(-6.91 * ((1.0 / ps->freq)  / temp));
+    ps->decay = .995f;
+    tPattiString_setFullStringFreq (ps, 100.f);
+    tPattiString_setPickupPos(ps, 0.9f);
+
+    //FIR init
+    Lfloat pickupToScaleRatio = 1.f/24.f; // 1.25in / 24in
+    ps->FIRcoeffs = (float *)mpool_alloc(sizeof(float) * 256, m);
+    tFIR_initToPool(&ps->pickupFIR, ps->FIRcoeffs, 256, mp); // not a very dynamic object
+    tPattiString_setPickupWidth(ps, pickupToScaleRatio);
+
+
+    //p->decay=powf(0.001f,1.0f/(p->freq*p->userDecay));
+
+}
+//Fout and Bout
+Lfloat    tPattiString_tick                    (tPattiString const p, float samples)
+{
+    p->Fout = tOnePole_tick(p->bridgeFilter,tLagrangeDelay_tickOut(p->forwardDelay) * (p->decay));
+    p->Fout = LEAF_clip(-1.0f, p->Fout, 1.0f);
+    //p->Uout = tLinearDelay_tickOut(p->delayLineU) * p->decay;
+    p->Bout = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelay), 1.0f);
+
+    tLagrangeDelay_tickIn(p->forwardDelay, (-1.0f * p->Bout)); // is this what has the amplitudes in it? should we reduce this?
+    tLagrangeDelay_tickIn(p->backwardDelay, -1.0f * p->Fout);
+    Lfloat UPickupSamplePosFloat = (p->waveLengthInSamples - p->pickupPos);
+
+    //pickup
+    int32_t pickupUInt = (uint32_t)UPickupSamplePosFloat;
+    Lfloat alphaU = UPickupSamplePosFloat - (float)pickupUInt;
+
+    Lfloat temp1 = tLagrangeDelay_tapOutInterpolated(p->forwardDelay, pickupUInt, alphaU);
+    Lfloat BPickupSamplePosFloat = (p->pickupPos);
+
+
+    int32_t pickupBInt = (uint32_t)BPickupSamplePosFloat;
+    Lfloat alphaB = BPickupSamplePosFloat - (float)pickupBInt;
+    Lfloat temp2 = tLagrangeDelay_tapOutInterpolated(p->backwardDelay, pickupBInt, alphaB);
+    Lfloat temp3 = (temp1 + temp2) * 0.5f;
+    temp3 = (tFIR_tick(p->pickupFIR, temp3))* p->FIRgain;
+   return temp3;
+    //return p->Fout;
+    // tLinearDelay_addTo (p->forwardDelay, p->Lout * p->rippleGain, p->rippleDelay*wl);ripple delay for touch harmonics
+}
+// 0 being the bridge, 1 being the neck, position is 0-1
+void    tPattiString_setPickupPos           (tPattiString const ps, float pos)
+{
+    ps->pickupPos = pos * (ps->openStringLength * 0.5f); // pickup pos in samples
+}
+void tPattiString_setFullStringFreq (tPattiString const ps, float freq) {
+    ps->openStringFreq = freq;
+    ps->openStringLength = (ps->sampleRate/ freq);
+}
+void   tPattiString_pluck(tPattiString const p, Lfloat input, Lfloat position)
+{
+    input = input * 0.5f;
+    int length = p->waveLengthInSamples;
+    int pluckPoint = (int)((length * position) + 0.5f); //adding 0.5 to crop 'accurately' by rounding
+    if (pluckPoint < 1)
+    {
+        pluckPoint = 1;
+    }
+    else if (pluckPoint > (length-1))
+    {
+        pluckPoint = length-1;
+    }
+    uint32_t remainder = length-pluckPoint;
+
+    for (uint32_t i = 0; i < length; i++)
+    {
+        Lfloat val = 0.0f;
+        if (i <= pluckPoint)
+        {
+            val = input * ((Lfloat)i/(Lfloat)pluckPoint); // /2 to gain stage
+        }
+        else
+        {
+            val = input * (1.0f - (((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder)); // /2 for gain staging
+
+        }
+        int fBufWritePoint = (i+p->forwardDelay->outPoint) % p->forwardDelay->maxDelay;
+        p->forwardDelay->buff[fBufWritePoint] = val;
+        int bBufWritePoint = (p->backwardDelay->inPoint - i) % p->backwardDelay->maxDelay;
+        p->backwardDelay->buff[bBufWritePoint] = val;
+
+    }
+
+}
+
+void tPattiString_setPickupWidth(tPattiString const p, Lfloat ratio)
+{
+    //implementing a Hamming window to create a low-pass FIR for the pickup
+    // it may not be normalized correctly, because with different pickup sizes, the volume is also affected
+    p->pickupWidth =(uint32_t) ((ratio * p->openStringLength) + 0.5f + 1.f); //setting up another sample to include 0
+    tFIR_changeNumTaps(p->pickupFIR, p->pickupWidth);
+    Lfloat hammingRatio = 25.f/46.f;
+    Lfloat sum = 0.0f;
+    for (uint32_t i = 0; i < p->pickupWidth; ++i)
+    {
+        sum += p->FIRcoeffs[i] = hammingRatio - (1.f - hammingRatio) * cosf((2.0f * PI * (float)i)/ ((float) p->pickupWidth));
+    }
+    p->FIRgain = 1.0f / sum;
+}

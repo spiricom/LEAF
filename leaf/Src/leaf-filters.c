@@ -1758,6 +1758,11 @@ Lfloat tFIR_tick (tFIR const fir, Lfloat input)
     return y;
 }
 
+void tFIR_changeNumTaps (tFIR const fir, uint32_t newNumTaps)
+{
+    fir->numTaps = newNumTaps;
+}
+
 
 /******************************************************************************/
 /*                               Median Filter                                */

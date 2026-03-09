@@ -1153,7 +1153,7 @@ extern "C" {
         tMempool mempool;
         Lfloat* past;
         Lfloat* coeff;
-        int numTaps;
+        uint32_t numTaps;
     } _tFIR;
     
     typedef _tFIR* tFIR;
@@ -1165,6 +1165,7 @@ extern "C" {
 
     // Tick function for `tFIR`
     Lfloat  tFIR_tick           (tFIR const, Lfloat input);
+    void tFIR_changeNumTaps (tFIR const fir, uint32_t newNumTaps);
     
     
     //==============================================================================

@@ -689,7 +689,7 @@ extern "C" {
     Lfloat  tZeroCrossingCollector_getPeak       (tZeroCrossingCollector const zc);
     int     tZeroCrossingCollector_isReset       (tZeroCrossingCollector const zc);
     
-    tZeroCrossingInfo const tZeroCrossingCollector_getCrossing   (tZeroCrossingCollector const zc, int index);
+    tZeroCrossingInfo       tZeroCrossingCollector_getCrossing   (tZeroCrossingCollector const zc, int index);
     void                    tZeroCrossingCollector_setHysteresis (tZeroCrossingCollector const zc, Lfloat hysteresis);
     
     //==============================================================================

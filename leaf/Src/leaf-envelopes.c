@@ -866,7 +866,7 @@ Lfloat tADSRT_tick (tADSRT const adsr)
             // If decay done, sustain.
             if (adsr->decayPhase > adsr->buff_sizeMinusOne) {
                 adsr->whichStage = env_sustain;
-                adsr->next = adsr->gain * adsr->sustain;
+                //adsr->next = adsr->gain * adsr->sustain;
                 adsr->sustainWithLeak = 1.0f;
             } else {
                 uint32_t intPart = (uint32_t) adsr->decayPhase;
@@ -955,7 +955,7 @@ Lfloat tADSRT_tickNoInterp (tADSRT const adsr)
             // If decay done, sustain.
             if (adsr->decayPhase > adsr->buff_sizeMinusOne) {
                 adsr->whichStage = env_sustain;
-                adsr->next = adsr->gain * adsr->sustain;
+                //adsr->next = adsr->gain * adsr->sustain; //this causes a bug where leaking sustain jumps back on entry to release phase.
                 adsr->sustainWithLeak = 1.0f;
             } else {
                 adsr->next = (adsr->gain * (adsr->sustain +
@@ -1373,5 +1373,77 @@ Lfloat tSlide_tick (tSlide const s, Lfloat in)
     s->prevIn = in;
     s->prevOut = s->currentOut;
     return s->currentOut;
+}
+
+
+void    tDynamicSmoother_init          (tDynamicSmoother* const ds, LEAF* const leaf)
+{
+	tDynamicSmoother_initToPool(ds, &leaf->mempool);
+}
+void    tDynamicSmoother_initToPool    (tDynamicSmoother* const ds, tMempool* const mp)
+{
+		_tMempool *m = *mp;
+	    _tDynamicSmoother *s = *ds = (_tDynamicSmoother *) mpool_alloc(sizeof(_tDynamicSmoother), m);
+	    s->mempool = m;
+	    s->low1 = 0.0f;
+	    s->low2 = 0.0f;
+	    s->inz = 0.0f;
+	    s->basefreq = 2.0f;
+	    s->sensitivity = 2.0f;
+	    s->dest = 0.0f;
+	    s->wc = s->basefreq * s->mempool->leaf->invSampleRate;
+
+}
+void    tDynamicSmoother_free          (tDynamicSmoother* const ds)
+{
+    _tDynamicSmoother *s = *ds;
+    mpool_free((char *) s, s->mempool);
+}
+
+Lfloat   tDynamicSmoother_tick         (tDynamicSmoother const s, Lfloat in)
+{
+		Lfloat low1z = s->low1;
+		Lfloat low2z = s->low2;
+		Lfloat bandz = low1z - low2z;
+		Lfloat wd = s->wc + s->sensitivity * fabsf(bandz);
+		Lfloat g = wd * (5.9948827f + wd * (-11.969296f + wd * 15.959062f));
+		if (g < 1.0f)
+		{
+			g = 1.0f;
+		}
+		s->low1 = low1z + g * (0.5f * (in  + s->inz) - low1z);
+		s->low2 = low2z + g * (0.5f * (s->low1 + low1z) - low2z);
+		s->inz = in;
+		return s->low2;
+}
+
+Lfloat   tDynamicSmoother_tickNoInput         (tDynamicSmoother const s)
+{
+		Lfloat low1z = s->low1;
+		Lfloat low2z = s->low2;
+		Lfloat bandz = low1z - low2z;
+		Lfloat wd = s->wc + s->sensitivity * fabsf(bandz);
+		Lfloat g = wd * (5.9948827f + wd * (-11.969296f + wd * 15.959062f));
+		if (g < 1.0f)
+		{
+			g = 1.0f;
+		}
+		s->low1 = low1z + g * (0.5f * (s->dest  + s->inz) - low1z);
+		s->low2 = low2z + g * (0.5f * (s->low1 + low1z) - low2z);
+		s->inz = s->dest;
+		return s->low2;
+}
+
+void   tDynamicSmoother_setDest         (tDynamicSmoother const s, Lfloat dest)
+{
+		s->dest = dest;
+}
+
+void   tDynamicSmoother_setValAndDest         (tDynamicSmoother const s, Lfloat dest)
+{
+		s->dest = dest;
+		s->low1 = dest;
+		s->low2 = dest;
+		s->inz = dest;
 }
 
