@@ -1310,7 +1310,92 @@ typedef struct _tStiffString
     void    tStereoRotation_setGain                   (tStereoRotation const r, float gain);
 
 
+    //==============================================================================
+    // string plucking, simplest string that still has the real model, pickup model to be added
+    typedef struct _tPattiString
+    {
+        tMempool mempool;
+        Lfloat sampleRate;
+        Lfloat freq;
+        tLagrangeDelay forwardDelayh; // diff for h and v
+        tLagrangeDelay backwardDelayh;
 
+        tLagrangeDelay forwardDelayv; // diff for h and v
+        tLagrangeDelay backwardDelayv;
+
+        Lfloat dampFreq;    // frequency for the bridge LP filter, in Hz
+        Lfloat decayV;
+        Lfloat decayH;
+        tOnePole bridgeFilterh; // diff for h and v
+        tOnePole bridgeFilterv;
+
+        Lfloat Fouth; // indep for h and v
+        Lfloat Bouth;
+        Lfloat Foutv;
+        Lfloat Boutv;
+
+        Lfloat pickupPos;
+        Lfloat openStringFreq; // full string length
+        Lfloat openStringLength;
+        Lfloat detuneAmount; // adjustment between both
+
+        Lfloat waveLengthInSamples;
+        uint32_t pickupWidth; // pickup width in samples
+        Lfloat inversePickupGainComp; // as a result of the FIR filter used for the pickup width, this stores the inverse of the sum of all the coefficients
+        Lfloat maxLength;
+        tFIR pickupFIRh; // indep for h and v
+        tFIR pickupFIRv;
+        tBiQuad pickupBiquad;
+        Lfloat pickupFilterAmount;
+        Lfloat oneMinusPickupFilterAmount;
+        Lfloat* LIRcoeffs;
+        Lfloat nonlinearityAmount;
+        Lfloat oneMinusNonlinearityAmount;
+        Lfloat verticalGain;
+        Lfloat horizontalGain;
+        Lfloat userDecay;
+        Lfloat prevPUFilterOut;
+        Lfloat prevPUFilterOut2;
+        Lfloat brightness;
+        Lfloat Vprev1;
+        Lfloat Vprev2;
+        Lfloat Hprev1;
+        Lfloat Hprev2;
+        Lfloat muted;
+        tPoleZero testFilt;
+        tHighpass hpH;
+        tHighpass hpV;
+        Lfloat nonLinScaleV;
+        Lfloat nonLinScaleVComp;
+        Lfloat nonLinScaleH;
+        Lfloat nonLinScaleHComp;
+        Lfloat nonLinScaleHOffset;
+        tSVF_LP alternatePUFilt;
+        Lfloat pickupMixAmount;
+        tSVF_LP alternatePUFilt2;
+        Lfloat pluckPosition;
+    } _tPattiString;
+
+    typedef _tPattiString* tPattiString;
+    void tPattiString_init (tPattiString* const, LEAF* const leaf);
+    void tPattiString_initToPool (tPattiString* const psps, tMempool* const mp);
+    void tPattiString_setPickupPos (tPattiString const ps, float pos);
+    void tPattiString_setPluckPos (tPattiString const ps, float pos);
+    void tPattiString_setPickupFilterAmount           (tPattiString const ps, float amount);
+    void tPattiString_setFreq (tPattiString const ps, float freq);
+    void tPattiString_setFullStringFreq (tPattiString const ps, float freq);
+    Lfloat tPattiString_tick (tPattiString const ps, float samples);
+    void tPattiString_pluck (tPattiString const p, Lfloat input);
+    void tPattiString_setPickupWidth(tPattiString const p, Lfloat ratio);
+    void    tPattiString_setNonlinearityAmount           (tPattiString const ps, float amount);
+    void    tPattiString_setVerticalGain          (tPattiString const ps, float gain);
+    void    tPattiString_setHorizontalGain          (tPattiString const ps, float gain);
+    void tPattiString_setDecay (tPattiString const ps, float decay);
+    void tPattiString_setBrightness (tPattiString const ps, float brightness);
+    void tPattiString_setNonlinearScalingV (tPattiString const ps, float scaling);
+    void tPattiString_setNonlinearScalingH (tPattiString const ps, float scaling);
+    void tPattiString_mute (tPattiString const ps);
+#if 0
  typedef struct _tPattiString
     {
         tMempool mempool;
@@ -1346,7 +1431,7 @@ Lfloat    tPattiString_tick                    (tPattiString const p, float samp
     void   tPattiString_pluck(tPattiString const p, Lfloat input, Lfloat position);
 void tPattiString_setPickupWidth(tPattiString const p, Lfloat ratio);
 
-
+#endif
 
 #ifdef __cplusplus
 }

@@ -3889,7 +3889,380 @@ void    tStereoRotation_setGain                   (tStereoRotation const r, floa
 {
     r->rotGain = gain;
 }
+
+
 //patti string
+void    tPattiString_init                    (tPattiString* const ps, LEAF* const leaf)
+{
+    tPattiString_initToPool                     (ps, &leaf->mempool);
+
+
+}
+void    tPattiString_initToPool              (tPattiString* const psps, tMempool* const mp)
+{
+    _tMempool *m = *mp;
+    _tPattiString *ps = *psps = (_tPattiString *) mpool_alloc(sizeof(_tPattiString), m);
+    ps->mempool = m;
+    LEAF *leaf = ps->mempool->leaf;
+    ps->sampleRate = leaf->sampleRate;
+
+    //bridge filter initialization
+    tOnePole_initToPool(&ps->bridgeFilterh, (9000.0f + ps->detuneAmount), mp);
+    tOnePole_initToPool(&ps->bridgeFilterv, (9000.0f - ps->detuneAmount), mp);
+    //tOnePole_initToPool(&ps->bridgeFilterh, 9000.0f, mp); // v
+    int maxLength = 1000;
+    ps->maxLength = maxLength;
+
+    //lagrange init
+    Lfloat freq = 220;
+    ps->freq = freq;
+    Lfloat waveLength = (ps->sampleRate/freq);
+    if (waveLength<4.8) waveLength=4.8f;
+    else if (waveLength>maxLength*2) waveLength=maxLength*2;
+    ps->waveLengthInSamples =  waveLength * 0.5f;
+    tLagrangeDelay_initToPool(&ps->forwardDelayh, ps->waveLengthInSamples, maxLength, mp);
+    tLagrangeDelay_initToPool(&ps->backwardDelayh, ps->waveLengthInSamples, maxLength, mp);
+
+    tLagrangeDelay_initToPool(&ps->forwardDelayv, ps->waveLengthInSamples, maxLength, mp); // v
+    tLagrangeDelay_initToPool(&ps->backwardDelayv, ps->waveLengthInSamples, maxLength, mp);
+
+
+    //ps->decay = exp(-6.91f * ((1.0f / ps->freq)  / temp)); // not changing this for h and v
+    //ps->decay = .995f; // in the future, you won't use one pole + this decay, and only use the new arbitpole
+
+    ps->userDecay = 5.0f;
+
+    Lfloat temp = ((ps->userDecay) + 0.001f) * 6.9078f;
+
+    ps->decayV = exp(-6.91f * ((1.0f / ps->freq)  / temp));
+    ps->decayH = exp(-6.91f * ((1.0f / ps->freq)  / (temp * 5.0f)));
+
+    tPattiString_setFullStringFreq (ps, 100.f);
+    tPattiString_setPickupPos(ps, 0.9f);
+
+    //FIR init
+    Lfloat pickupToScaleRatio = 1.f/24.f; // 1.25in / 24in
+    ps->LIRcoeffs = (float *)mpool_alloc(sizeof(float) * 256, m);
+    tFIR_initToPool(&ps->pickupFIRh, ps->LIRcoeffs, 256, mp); // not a very dynamic object
+    tFIR_initToPool(&ps->pickupFIRv, ps->LIRcoeffs, 256, mp);
+    tPattiString_setPickupWidth(ps, pickupToScaleRatio);
+    tPattiString_setPluckPos(ps, 0.9f);
+    tBiQuad_initToPool(&ps->pickupBiquad, mp);
+    tBiQuad_setCoefficients (ps->pickupBiquad, 0.021591f, 0.043183f, 0.021591f, -1.670326f, 0.756692f);
+    ps->pickupFilterAmount = 1.0f;
+    ps->oneMinusPickupFilterAmount = 0.0f;
+    ps->nonlinearityAmount = 1.0;
+    ps->oneMinusNonlinearityAmount = 0.0f;
+    ps->verticalGain = 0.5f;
+    ps->horizontalGain = 0.2f;
+    ps->prevPUFilterOut = 0.0f;
+    ps->brightness = 1.0f;
+    ps->muted = 0.0f;
+    tPoleZero_initToPool(&ps->testFilt, mp);
+    tPoleZero_setCoefficients(ps->testFilt, 0.125f,-0.0750f, -0.95f);
+    tHighpass_initToPool(&ps->hpH,6.0f, mp);
+    tHighpass_initToPool(&ps->hpV,6.0f, mp);
+    tPattiString_setNonlinearScalingV(ps, 1.0f);
+    tPattiString_setNonlinearScalingH(ps, 1.0f);
+    tSVF_LP_initToPool(&ps->alternatePUFilt, 8000.0f, .707f, mp);
+    tSVF_LP_initToPool(&ps->alternatePUFilt2, 2100.0f, 0.95f, mp);
+    ps->pickupMixAmount = 0.5f;
+    //p->decay=powf(0.001f,1.0f/(p->freq*p->userDecay));kjnll
+
+}
+//Fout and Bout
+Lfloat    tPattiString_tick                    (tPattiString const p, float samples)
+{
+    //p->Fouth = tOnePole_tick(p->bridgeFilterh,tLagrangeDelay_tickOut(p->forwardDelayh) * (p->decayH));
+
+	Lfloat b0 = p->decayH * (1.0f-p->brightness) * 0.25f;
+	Lfloat b2 = b0;
+	Lfloat b1 = p->decayH * (1.0f+p->brightness) * 0.5f;
+
+	Lfloat Hcur = tLagrangeDelay_tickOut(p->forwardDelayh);
+
+	p->Fouth = (Hcur * b0) + (p->Hprev1 * b1) + (p->Hprev2 * b2);
+	p->Hprev2 = p->Hprev1;
+	p->Hprev1 = Hcur;
+
+    p->Fouth = LEAF_clip(-1.0f, tHighpass_tick(p->hpH, p->Fouth), 1.0f);
+    //p->Uout = tLinearDelay_tickOut(p->delayLineU) * p->decay;
+    p->Bouth = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelayh), 1.0f);
+    // now for vertical
+    //p->Foutv = tOnePole_tick(p->bridgeFilterv,tLagrangeDelay_tickOut(p->forwardDelayv) * (p->decayV));
+
+	b0 = p->decayV * (1.0f-p->brightness) * 0.25f;
+	b2 = b0;
+	b1 = p->decayV * (1.0f+p->brightness) * 0.5f;
+
+	Lfloat Vcur = tLagrangeDelay_tickOut(p->forwardDelayv);
+
+	p->Foutv = (Vcur * b0) + (p->Vprev1 * b1) + (p->Vprev2 * b2);
+	p->Vprev2 = p->Vprev1;
+	p->Vprev1 = Vcur;
+
+
+    p->Foutv = LEAF_clip(-1.0f, tHighpass_tick(p->hpV, p->Foutv), 1.0f);
+    //p->Uout = tLinearDelay_tickOut(p->delayLineU) * p->decay;
+    p->Boutv = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelayv), 1.0f);
+
+#if 0
+    p->Fouth = tPoleZero_tick(p->testFilt, tLagrangeDelay_tickOut(p->forwardDelayh));
+    p->Bouth = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelayh)*0.99f, 1.0f);
+#endif
+    tLagrangeDelay_tickIn(p->forwardDelayh, (-1.0f * p->Bouth));
+    tLagrangeDelay_tickIn(p->backwardDelayh, -1.0f * p->Fouth);
+    Lfloat UPickupSamplePosFloat = (p->waveLengthInSamples - p->pickupPos);
+    //and now for v
+    tLagrangeDelay_tickIn(p->forwardDelayv, (-1.0f * p->Boutv));
+    tLagrangeDelay_tickIn(p->backwardDelayv, -1.0f * p->Foutv);
+
+
+    //pickup effects for horizontal and vertical strings
+    int32_t pickupUInt = (uint32_t)UPickupSamplePosFloat;
+    Lfloat alphaU = UPickupSamplePosFloat - (float)pickupUInt;
+
+    Lfloat temp1h = tLagrangeDelay_tapOutInterpolated(p->forwardDelayh, pickupUInt, alphaU);
+    Lfloat temp1v = tLagrangeDelay_tapOutInterpolated(p->forwardDelayv, pickupUInt, alphaU);
+    Lfloat BPickupSamplePosFloat = (p->pickupPos);
+
+
+    int32_t pickupBInt = (uint32_t)BPickupSamplePosFloat;
+    Lfloat alphaB = BPickupSamplePosFloat - (float)pickupBInt;
+
+    Lfloat temp2h = tLagrangeDelay_tapOutInterpolated(p->backwardDelayh, pickupBInt, alphaB);
+    Lfloat temp2v = tLagrangeDelay_tapOutInterpolated(p->backwardDelayv, pickupBInt, alphaB);
+
+    Lfloat temp3h = (temp1h + temp2h) * 0.5f;
+    Lfloat temp3v = (temp1v + temp2v) * 0.5f;
+    //return temp3h;
+
+
+    temp3h = tFIR_tick (p->pickupFIRh, temp3h);
+    temp3v = tFIR_tick (p->pickupFIRv, temp3v);
+    // fix the gain w pickupgaincomp
+    temp3h = temp3h * p->inversePickupGainComp;
+    temp3v = temp3v * p->inversePickupGainComp;
+
+
+    //implement the nonlinearities of the pickup [M. Mustonen, Experimental Verification of Pickup Nonlinearity, 2014]
+    //Lfloat nonlinH = expf( -1.0f * powf(temp3h, 2)); // horizontal signal modelling was unclear, we used a gaussian curve for it -- this is an approximation
+    //temp3h = temp3h;
+    /*
+    Lfloat nonlinV = temp3v * 1.25f + 10.0f; // scaling + treating the displacement as solely vertical, adding offset for the 10mm resting displacement
+    nonlinV = expf( -1.0f * 0.3f * temp3v); // 0.3 was from their own experimental calculations of the vertical displacement
+    //temp3v = temp3v;
+*/
+
+
+    //JS - I did some work in Desmos to see how we could adjust these nonlinearities to allow us to change parameters and also get the amplitude back to what it was before the nonlinearity
+    //now there are two user variables (nonLinScaleH and nonLinScaleV) that relate to how hard you are driving the nonlinearity (not sure what physical parameter this connects to... maybe distance from pickup?)
+    Lfloat nonLinH = expf( -1.0f * powf((temp3h * p->nonLinScaleH), 2.0f)); // horizontal signal modelling was unclear, we used a gaussian curve for it -- this is an approximation
+    nonLinH = (nonLinH - p->nonLinScaleHOffset) * p->nonLinScaleHComp;
+
+    Lfloat nonLinV = -1.0f * (temp3v * p->nonLinScaleV + 1.0f);
+    nonLinV = (expf(nonLinV) * p->nonLinScaleVComp) - 1.0f;
+
+
+    temp3h = (temp3h * p->oneMinusNonlinearityAmount) + (nonLinH * -1.0f * p->nonlinearityAmount);
+    temp3v = (temp3v * p->oneMinusNonlinearityAmount) + (nonLinV * -1.0f * p->nonlinearityAmount);
+
+    Lfloat temp3av = (temp3h * p->horizontalGain) + (temp3v * p->verticalGain);
+
+
+    Lfloat temp3av3 = (temp3av * p->pickupFilterAmount) + (tSVF_LP_tick(p->alternatePUFilt2, temp3av) * p->oneMinusPickupFilterAmount);
+    //turn into velocity by taking the difference between current out and last out
+
+
+    Lfloat temp3av2 = (temp3av * p->pickupFilterAmount) + (tSVF_LP_tick(p->alternatePUFilt, temp3av) * p->oneMinusPickupFilterAmount);
+
+    Lfloat pickupMix = (temp3av3 * p->pickupMixAmount) + (temp3av2 * (1.0f - p->pickupMixAmount));
+    //turn into velocity by taking the difference between current out and last out
+    Lfloat output = pickupMix - p->prevPUFilterOut;
+    p->prevPUFilterOut = output;
+
+   return output;
+
+    //return p->Fout;
+    // tLinearDelay_addTo (p->forwardDelay, p->Lout * p->rippleGain, p->rippleDelay*wl);ripple delay for touch harmonics
+}
+// 0 being the bridge, 1 being the neck, position is 0-1
+void    tPattiString_setPickupPos           (tPattiString const ps, float pos)
+{
+    ps->pickupPos = (ps->openStringLength * 0.5f) - (pos * (ps->openStringLength * 0.5f)); // pickup pos in samples
+}
+
+
+void    tPattiString_setPickupFilterAmount           (tPattiString const ps, float amount)
+{
+    ps->pickupFilterAmount = amount;
+    ps->oneMinusPickupFilterAmount = 1.0f - amount;
+}
+
+void    tPattiString_setNonlinearityAmount           (tPattiString const ps, float amount)
+{
+    ps->nonlinearityAmount = amount;
+    ps->oneMinusNonlinearityAmount = 1.0f - amount;
+}
+
+void    tPattiString_setVerticalGain          (tPattiString const ps, float gain)
+{
+    ps->verticalGain = gain;
+}
+
+void    tPattiString_setHorizontalGain          (tPattiString const ps, float gain)
+{
+    ps->horizontalGain = gain;
+}
+
+void tPattiString_setFullStringFreq (tPattiString const ps, float freq)
+{
+    ps->openStringFreq = freq;
+    ps->openStringLength = (ps->sampleRate/ freq);
+}
+
+void tPattiString_setFreq (tPattiString const ps, float freq)
+{
+	ps->freq = freq;
+	Lfloat waveLength = (ps->sampleRate/freq);
+	if (waveLength<4.8) waveLength=4.8f;
+	else if (waveLength>ps->maxLength*2) waveLength=ps->maxLength*2;
+	ps->waveLengthInSamples =  waveLength * 0.5f;
+	tLagrangeDelay_setDelay(ps->forwardDelayh, ps->waveLengthInSamples);
+	tLagrangeDelay_setDelay(ps->backwardDelayh, ps->waveLengthInSamples);
+
+	tLagrangeDelay_setDelay(ps->forwardDelayv, ps->waveLengthInSamples); // v
+	tLagrangeDelay_setDelay(ps->backwardDelayv , ps->waveLengthInSamples);
+
+	if (!ps->muted)
+	{
+		Lfloat temp = ((ps->userDecay) + 0.001f) * 6.9078f;
+
+
+		ps->decayV = exp(-6.91f * ((1.0f / ps->freq)  / temp));
+		ps->decayH = exp(-6.91f * ((1.0f / ps->freq)  / (temp * 1.1f)));
+		//ps->decay = .9995f; // in the future, you won't use one pole + this decay, and only use the new arbitpole
+	}
+}
+
+void tPattiString_setDecay (tPattiString const ps, float decay) {
+
+	ps->userDecay = decay;
+    if (!ps->muted)
+    {
+		Lfloat temp = ((ps->userDecay) + 0.001f) * 6.9078f;
+
+
+		ps->decayV = exp(-6.91f * ((1.0f / ps->freq)  / temp));
+		ps->decayH = exp(-6.91f * ((1.0f / ps->freq)  / (temp * 1.1f)));
+			//ps->decay = .9995f; // in the future, you won't use one pole + this decay, and only use the new arbitpole
+    }
+}
+
+//zero to one brightness control
+void tPattiString_setBrightness (tPattiString const ps, float brightness) {
+
+	ps->brightness = brightness;
+
+}
+
+//zero to one brightness control
+void tPattiString_setNonlinearScalingV (tPattiString const ps, float scaling) {
+
+	ps->nonLinScaleV = scaling;
+	ps->nonLinScaleVComp = 1.0f / (expf(-1.0f * (-1.0f * scaling + 1.0f)) / 2.0f);
+}
+
+//zero to one brightness control
+void tPattiString_setNonlinearScalingH (tPattiString const ps, float scaling) {
+
+	ps->nonLinScaleH = scaling;
+	//figure out the lower bound (upper bound is 1)
+	Lfloat lowbound = expf(-1.0f * powf(scaling, 2.0f));
+	//calculate the gain compensation to get it back to -1 to 1 scaling
+	Lfloat range = (1.0f - lowbound);
+	ps->nonLinScaleHComp = 2.0f / range;
+	//calculate offset to center back around zero
+	ps->nonLinScaleHOffset = 1.0f - (range * 0.5f);
+}
+
+//zero to one brightness control
+void tPattiString_mute (tPattiString const ps) {
+
+	ps->userDecay = 0.0008f;
+	//Lfloat temp = ((ps->userDecay) + 0.0001f) * 6.9078f;
+	ps->decayV = 0.8f;
+	ps->decayH = 0.8f;
+	ps->muted = 1;
+}
+
+void   tPattiString_pluck(tPattiString const p, Lfloat input)
+{
+    input = input * 0.5f;
+    p->muted = 0;
+    int length = p->waveLengthInSamples;
+    int pluckPoint = (int)((length * p->pluckPosition) + 0.5f); //adding 0.5 to crop 'accurately' by rounding
+    if (pluckPoint < 1)
+    {
+        pluckPoint = 1;
+    }
+    else if (pluckPoint > (length-1))
+    {
+        pluckPoint = length-1;
+    }
+    uint32_t remainder = length-pluckPoint;
+
+    for (uint32_t i = 0; i < length; i++)
+    {
+        Lfloat val = 0.0f;
+
+        if (i <= pluckPoint)
+        {
+            val = input * ((Lfloat)i/(Lfloat)pluckPoint); // /2 to gain stage
+        }
+        else
+        {
+            val = input * (1.0f - (((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder)); // /2 for gain staging
+
+        }
+        int fBufWritePoint = (i+p->forwardDelayh->outPoint) % p->forwardDelayh->maxDelay;
+        p->forwardDelayh->buff[fBufWritePoint] = val;
+        p->forwardDelayv->buff[fBufWritePoint] = val;
+        int bBufWritePoint = (p->backwardDelayh->inPoint - i) % p->backwardDelayh->maxDelay;
+        p->backwardDelayh->buff[bBufWritePoint] = val;
+        p->backwardDelayv->buff[bBufWritePoint] = val;
+
+
+    }
+
+}
+
+void tPattiString_setPickupWidth(tPattiString const p, Lfloat ratio)
+{
+    //implementing a Hamming window to create a low-pass FIR for the pickup
+    // it may not be normalized correctly, because with different pickup sizes, the volume is also affected
+    p->pickupWidth =(uint32_t) ((ratio * p->openStringLength) + 0.5f + 1.f); //setting up another sample to include 0
+    tFIR_changeNumTaps(p->pickupFIRh, p->pickupWidth);
+    tFIR_changeNumTaps(p->pickupFIRv, p->pickupWidth);
+    Lfloat hammingRatio = 25.f/46.f;
+    Lfloat pickupGainComp = 0.f;
+    for (uint32_t i = 0; i < p->pickupWidth; ++i)
+    {
+        p->LIRcoeffs[i] = hammingRatio - (1.f - hammingRatio) * cosf((2.0f * PI * (float)i)/ ((float) p->pickupWidth));
+        // keep a sum of the LIR coeffs to set as a gain value, 1 / sum of LIR = gain
+        pickupGainComp = pickupGainComp + p->LIRcoeffs[i];
+    }
+    p->inversePickupGainComp = 1.0f / pickupGainComp;
+}
+
+
+void tPattiString_setPluckPos(tPattiString const p, Lfloat pos)
+{
+	p->pluckPosition = (p->openStringLength * 0.5f) - (pos * (p->openStringLength * 0.5f)); // pluck pos in samples
+}
+
+
+#if 0
 
 void    tPattiString_init                    (tPattiString* const ps, LEAF* const leaf)
 {
@@ -4024,3 +4397,4 @@ void tPattiString_setPickupWidth(tPattiString const p, Lfloat ratio)
     }
     p->FIRgain = 1.0f / sum;
 }
+#endif
