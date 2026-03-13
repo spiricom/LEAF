@@ -1374,6 +1374,8 @@ typedef struct _tStiffString
         Lfloat pickupMixAmount;
         tSVF_LP alternatePUFilt2;
         Lfloat pluckPosition;
+        uint32_t oversample;
+        Lfloat pluckShape;
     } _tPattiString;
 
     typedef _tPattiString* tPattiString;

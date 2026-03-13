@@ -3904,13 +3904,15 @@ void    tPattiString_initToPool              (tPattiString* const psps, tMempool
     _tPattiString *ps = *psps = (_tPattiString *) mpool_alloc(sizeof(_tPattiString), m);
     ps->mempool = m;
     LEAF *leaf = ps->mempool->leaf;
-    ps->sampleRate = leaf->sampleRate;
+
+    ps->oversample = 2;
+    ps->sampleRate = leaf->sampleRate * (Lfloat)ps->oversample;
 
     //bridge filter initialization
     tOnePole_initToPool(&ps->bridgeFilterh, (9000.0f + ps->detuneAmount), mp);
     tOnePole_initToPool(&ps->bridgeFilterv, (9000.0f - ps->detuneAmount), mp);
     //tOnePole_initToPool(&ps->bridgeFilterh, 9000.0f, mp); // v
-    int maxLength = 1000;
+    int maxLength = 8000;
     ps->maxLength = maxLength;
 
     //lagrange init
@@ -3922,7 +3924,6 @@ void    tPattiString_initToPool              (tPattiString* const psps, tMempool
     ps->waveLengthInSamples =  waveLength * 0.5f;
     tLagrangeDelay_initToPool(&ps->forwardDelayh, ps->waveLengthInSamples, maxLength, mp);
     tLagrangeDelay_initToPool(&ps->backwardDelayh, ps->waveLengthInSamples, maxLength, mp);
-
     tLagrangeDelay_initToPool(&ps->forwardDelayv, ps->waveLengthInSamples, maxLength, mp); // v
     tLagrangeDelay_initToPool(&ps->backwardDelayv, ps->waveLengthInSamples, maxLength, mp);
 
@@ -3943,12 +3944,12 @@ void    tPattiString_initToPool              (tPattiString* const psps, tMempool
     //FIR init
     Lfloat pickupToScaleRatio = 1.f/24.f; // 1.25in / 24in
     ps->LIRcoeffs = (float *)mpool_alloc(sizeof(float) * 256, m);
-    tFIR_initToPool(&ps->pickupFIRh, ps->LIRcoeffs, 256, mp); // not a very dynamic object
-    tFIR_initToPool(&ps->pickupFIRv, ps->LIRcoeffs, 256, mp);
+    tFIR_initToPool(&ps->pickupFIRh, ps->LIRcoeffs, 512, mp); // not a very dynamic object
+    tFIR_initToPool(&ps->pickupFIRv, ps->LIRcoeffs, 512, mp);
     tPattiString_setPickupWidth(ps, pickupToScaleRatio);
     tPattiString_setPluckPos(ps, 0.9f);
-    tBiQuad_initToPool(&ps->pickupBiquad, mp);
-    tBiQuad_setCoefficients (ps->pickupBiquad, 0.021591f, 0.043183f, 0.021591f, -1.670326f, 0.756692f);
+    //tBiQuad_initToPool(&ps->pickupBiquad, mp);
+    //tBiQuad_setCoefficients (ps->pickupBiquad, 0.021591f, 0.043183f, 0.021591f, -1.670326f, 0.756692f);
     ps->pickupFilterAmount = 1.0f;
     ps->oneMinusPickupFilterAmount = 0.0f;
     ps->nonlinearityAmount = 1.0;
@@ -3958,15 +3959,24 @@ void    tPattiString_initToPool              (tPattiString* const psps, tMempool
     ps->prevPUFilterOut = 0.0f;
     ps->brightness = 1.0f;
     ps->muted = 0.0f;
-    tPoleZero_initToPool(&ps->testFilt, mp);
-    tPoleZero_setCoefficients(ps->testFilt, 0.125f,-0.0750f, -0.95f);
+    //tPoleZero_initToPool(&ps->testFilt, mp);
+    //tPoleZero_setCoefficients(ps->testFilt, 0.125f,-0.0750f, -0.95f);
     tHighpass_initToPool(&ps->hpH,6.0f, mp);
+    tHighpass_setSampleRate(ps->hpH, ps->sampleRate);
+    tHighpass_setFreq(ps->hpH, 6.0f);
     tHighpass_initToPool(&ps->hpV,6.0f, mp);
+    tHighpass_setSampleRate(ps->hpV, ps->sampleRate);
+    tHighpass_setFreq(ps->hpV, 6.0f);
     tPattiString_setNonlinearScalingV(ps, 1.0f);
     tPattiString_setNonlinearScalingH(ps, 1.0f);
     tSVF_LP_initToPool(&ps->alternatePUFilt, 8000.0f, .707f, mp);
-    tSVF_LP_initToPool(&ps->alternatePUFilt2, 2100.0f, 0.95f, mp);
+    tSVF_LP_setSampleRate(ps->alternatePUFilt, ps->sampleRate);
+    tSVF_LP_setFreq(ps->alternatePUFilt, 8000.0f);
+    tSVF_LP_initToPool(&ps->alternatePUFilt2, 2100.0f, 0.9f, mp);
+    tSVF_LP_setSampleRate(ps->alternatePUFilt2, ps->sampleRate);
+    tSVF_LP_setFreq(ps->alternatePUFilt2, 2100.0f);
     ps->pickupMixAmount = 0.5f;
+    ps->pluckShape = 0.0f;
     //p->decay=powf(0.001f,1.0f/(p->freq*p->userDecay));kjnll
 
 }
@@ -3974,113 +3984,122 @@ void    tPattiString_initToPool              (tPattiString* const psps, tMempool
 Lfloat    tPattiString_tick                    (tPattiString const p, float samples)
 {
     //p->Fouth = tOnePole_tick(p->bridgeFilterh,tLagrangeDelay_tickOut(p->forwardDelayh) * (p->decayH));
-
-	Lfloat b0 = p->decayH * (1.0f-p->brightness) * 0.25f;
-	Lfloat b2 = b0;
-	Lfloat b1 = p->decayH * (1.0f+p->brightness) * 0.5f;
-
-	Lfloat Hcur = tLagrangeDelay_tickOut(p->forwardDelayh);
-
-	p->Fouth = (Hcur * b0) + (p->Hprev1 * b1) + (p->Hprev2 * b2);
-	p->Hprev2 = p->Hprev1;
-	p->Hprev1 = Hcur;
-
-    p->Fouth = LEAF_clip(-1.0f, tHighpass_tick(p->hpH, p->Fouth), 1.0f);
-    //p->Uout = tLinearDelay_tickOut(p->delayLineU) * p->decay;
-    p->Bouth = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelayh), 1.0f);
-    // now for vertical
-    //p->Foutv = tOnePole_tick(p->bridgeFilterv,tLagrangeDelay_tickOut(p->forwardDelayv) * (p->decayV));
-
-	b0 = p->decayV * (1.0f-p->brightness) * 0.25f;
-	b2 = b0;
-	b1 = p->decayV * (1.0f+p->brightness) * 0.5f;
-
-	Lfloat Vcur = tLagrangeDelay_tickOut(p->forwardDelayv);
-
-	p->Foutv = (Vcur * b0) + (p->Vprev1 * b1) + (p->Vprev2 * b2);
-	p->Vprev2 = p->Vprev1;
-	p->Vprev1 = Vcur;
+	Lfloat output = 0.0f;
+	for (int i = 0; i < p->oversample; i++)
+	{
 
 
-    p->Foutv = LEAF_clip(-1.0f, tHighpass_tick(p->hpV, p->Foutv), 1.0f);
-    //p->Uout = tLinearDelay_tickOut(p->delayLineU) * p->decay;
-    p->Boutv = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelayv), 1.0f);
+		Lfloat b0 = p->decayH * (1.0f-p->brightness) * 0.25f;
+		Lfloat b2 = b0;
+		Lfloat b1 = p->decayH * (1.0f+p->brightness) * 0.5f;
 
-#if 0
-    p->Fouth = tPoleZero_tick(p->testFilt, tLagrangeDelay_tickOut(p->forwardDelayh));
-    p->Bouth = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelayh)*0.99f, 1.0f);
-#endif
-    tLagrangeDelay_tickIn(p->forwardDelayh, (-1.0f * p->Bouth));
-    tLagrangeDelay_tickIn(p->backwardDelayh, -1.0f * p->Fouth);
-    Lfloat UPickupSamplePosFloat = (p->waveLengthInSamples - p->pickupPos);
-    //and now for v
-    tLagrangeDelay_tickIn(p->forwardDelayv, (-1.0f * p->Boutv));
-    tLagrangeDelay_tickIn(p->backwardDelayv, -1.0f * p->Foutv);
+		Lfloat Hcur = tLagrangeDelay_tickOut(p->forwardDelayh);
 
+		p->Fouth = (Hcur * b0) + (p->Hprev1 * b1) + (p->Hprev2 * b2);
+		p->Hprev2 = p->Hprev1;
+		p->Hprev1 = Hcur;
 
-    //pickup effects for horizontal and vertical strings
-    int32_t pickupUInt = (uint32_t)UPickupSamplePosFloat;
-    Lfloat alphaU = UPickupSamplePosFloat - (float)pickupUInt;
+		p->Fouth = LEAF_clip(-1.0f, tHighpass_tick(p->hpH, p->Fouth), 1.0f);
+		//p->Uout = tLinearDelay_tickOut(p->delayLineU) * p->decay;
+		p->Bouth = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelayh), 1.0f);
+		// now for vertical
+		//p->Foutv = tOnePole_tick(p->bridgeFilterv,tLagrangeDelay_tickOut(p->forwardDelayv) * (p->decayV));
 
-    Lfloat temp1h = tLagrangeDelay_tapOutInterpolated(p->forwardDelayh, pickupUInt, alphaU);
-    Lfloat temp1v = tLagrangeDelay_tapOutInterpolated(p->forwardDelayv, pickupUInt, alphaU);
-    Lfloat BPickupSamplePosFloat = (p->pickupPos);
+		b0 = p->decayV * (1.0f-p->brightness) * 0.25f;
+		b2 = b0;
+		b1 = p->decayV * (1.0f+p->brightness) * 0.5f;
 
+		Lfloat Vcur = tLagrangeDelay_tickOut(p->forwardDelayv);
 
-    int32_t pickupBInt = (uint32_t)BPickupSamplePosFloat;
-    Lfloat alphaB = BPickupSamplePosFloat - (float)pickupBInt;
-
-    Lfloat temp2h = tLagrangeDelay_tapOutInterpolated(p->backwardDelayh, pickupBInt, alphaB);
-    Lfloat temp2v = tLagrangeDelay_tapOutInterpolated(p->backwardDelayv, pickupBInt, alphaB);
-
-    Lfloat temp3h = (temp1h + temp2h) * 0.5f;
-    Lfloat temp3v = (temp1v + temp2v) * 0.5f;
-    //return temp3h;
+		p->Foutv = (Vcur * b0) + (p->Vprev1 * b1) + (p->Vprev2 * b2);
+		p->Vprev2 = p->Vprev1;
+		p->Vprev1 = Vcur;
 
 
-    temp3h = tFIR_tick (p->pickupFIRh, temp3h);
-    temp3v = tFIR_tick (p->pickupFIRv, temp3v);
-    // fix the gain w pickupgaincomp
-    temp3h = temp3h * p->inversePickupGainComp;
-    temp3v = temp3v * p->inversePickupGainComp;
+		p->Foutv = LEAF_clip(-1.0f, tHighpass_tick(p->hpV, p->Foutv), 1.0f);
+		//p->Uout = tLinearDelay_tickOut(p->delayLineU) * p->decay;
+		p->Boutv = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelayv), 1.0f);
+
+	#if 0
+		p->Fouth = tPoleZero_tick(p->testFilt, tLagrangeDelay_tickOut(p->forwardDelayh));
+		p->Bouth = LEAF_clip(-1.0f, tLagrangeDelay_tickOut(p->backwardDelayh)*0.99f, 1.0f);
+	#endif
 
 
-    //implement the nonlinearities of the pickup [M. Mustonen, Experimental Verification of Pickup Nonlinearity, 2014]
-    //Lfloat nonlinH = expf( -1.0f * powf(temp3h, 2)); // horizontal signal modelling was unclear, we used a gaussian curve for it -- this is an approximation
-    //temp3h = temp3h;
-    /*
-    Lfloat nonlinV = temp3v * 1.25f + 10.0f; // scaling + treating the displacement as solely vertical, adding offset for the 10mm resting displacement
-    nonlinV = expf( -1.0f * 0.3f * temp3v); // 0.3 was from their own experimental calculations of the vertical displacement
-    //temp3v = temp3v;
-*/
+		tLagrangeDelay_tickIn(p->forwardDelayh, (-1.0f * p->Bouth));
+		tLagrangeDelay_tickIn(p->backwardDelayh, (-1.0f * p->Fouth));
+
+		Lfloat UPickupSamplePosFloat = (p->waveLengthInSamples - p->pickupPos);
+		//and now for v
+		tLagrangeDelay_tickIn(p->forwardDelayv, (-1.0f * p->Boutv));
+		tLagrangeDelay_tickIn(p->backwardDelayv, (-1.0f * p->Foutv));
 
 
-    //JS - I did some work in Desmos to see how we could adjust these nonlinearities to allow us to change parameters and also get the amplitude back to what it was before the nonlinearity
-    //now there are two user variables (nonLinScaleH and nonLinScaleV) that relate to how hard you are driving the nonlinearity (not sure what physical parameter this connects to... maybe distance from pickup?)
-    Lfloat nonLinH = expf( -1.0f * powf((temp3h * p->nonLinScaleH), 2.0f)); // horizontal signal modelling was unclear, we used a gaussian curve for it -- this is an approximation
-    nonLinH = (nonLinH - p->nonLinScaleHOffset) * p->nonLinScaleHComp;
+		//pickup effects for horizontal and vertical strings
+		int32_t pickupUInt = (uint32_t)UPickupSamplePosFloat;
+		Lfloat alphaU = UPickupSamplePosFloat - (float)pickupUInt;
 
-    Lfloat nonLinV = -1.0f * (temp3v * p->nonLinScaleV + 1.0f);
-    nonLinV = (expf(nonLinV) * p->nonLinScaleVComp) - 1.0f;
-
-
-    temp3h = (temp3h * p->oneMinusNonlinearityAmount) + (nonLinH * -1.0f * p->nonlinearityAmount);
-    temp3v = (temp3v * p->oneMinusNonlinearityAmount) + (nonLinV * -1.0f * p->nonlinearityAmount);
-
-    Lfloat temp3av = (temp3h * p->horizontalGain) + (temp3v * p->verticalGain);
+		Lfloat temp1h = tLagrangeDelay_tapOutInterpolated(p->forwardDelayh, pickupUInt, alphaU);
+		Lfloat temp1v = tLagrangeDelay_tapOutInterpolated(p->forwardDelayv, pickupUInt, alphaU);
 
 
-    Lfloat temp3av3 = (temp3av * p->pickupFilterAmount) + (tSVF_LP_tick(p->alternatePUFilt2, temp3av) * p->oneMinusPickupFilterAmount);
-    //turn into velocity by taking the difference between current out and last out
+		Lfloat BPickupSamplePosFloat = (p->pickupPos);
 
 
-    Lfloat temp3av2 = (temp3av * p->pickupFilterAmount) + (tSVF_LP_tick(p->alternatePUFilt, temp3av) * p->oneMinusPickupFilterAmount);
+		int32_t pickupBInt = (uint32_t)BPickupSamplePosFloat;
+		Lfloat alphaB = BPickupSamplePosFloat - (float)pickupBInt;
 
-    Lfloat pickupMix = (temp3av3 * p->pickupMixAmount) + (temp3av2 * (1.0f - p->pickupMixAmount));
-    //turn into velocity by taking the difference between current out and last out
-    Lfloat output = pickupMix - p->prevPUFilterOut;
-    p->prevPUFilterOut = output;
+		Lfloat temp2h = tLagrangeDelay_tapOutInterpolated(p->backwardDelayh, pickupBInt, alphaB);
+		Lfloat temp2v = tLagrangeDelay_tapOutInterpolated(p->backwardDelayv, pickupBInt, alphaB);
 
+		Lfloat temp3h = (temp1h + temp2h) * 0.5f;
+		Lfloat temp3v = (temp1v + temp2v) * 0.5f;
+		//return temp3h;
+
+
+		temp3h = tFIR_tick (p->pickupFIRh, temp3h);
+		temp3v = tFIR_tick (p->pickupFIRv, temp3v);
+		// fix the gain w pickupgaincomp
+		temp3h = temp3h * p->inversePickupGainComp;
+		temp3v = temp3v * p->inversePickupGainComp;
+
+
+		//implement the nonlinearities of the pickup [M. Mustonen, Experimental Verification of Pickup Nonlinearity, 2014]
+		//Lfloat nonlinH = expf( -1.0f * powf(temp3h, 2)); // horizontal signal modelling was unclear, we used a gaussian curve for it -- this is an approximation
+		//temp3h = temp3h;
+		/*
+		Lfloat nonlinV = temp3v * 1.25f + 10.0f; // scaling + treating the displacement as solely vertical, adding offset for the 10mm resting displacement
+		nonlinV = expf( -1.0f * 0.3f * temp3v); // 0.3 was from their own experimental calculations of the vertical displacement
+		//temp3v = temp3v;
+	*/
+
+
+		//JS - I did some work in Desmos to see how we could adjust these nonlinearities to allow us to change parameters and also get the amplitude back to what it was before the nonlinearity
+		//now there are two user variables (nonLinScaleH and nonLinScaleV) that relate to how hard you are driving the nonlinearity (not sure what physical parameter this connects to... maybe distance from pickup?)
+		Lfloat nonLinH = expf( -1.0f * powf((temp3h * p->nonLinScaleH), 2.0f)); // horizontal signal modelling was unclear, we used a gaussian curve for it -- this is an approximation
+		nonLinH = (nonLinH - p->nonLinScaleHOffset) * p->nonLinScaleHComp;
+
+		Lfloat nonLinV = -1.0f * (temp3v * p->nonLinScaleV + 1.0f);
+		nonLinV = (expf(nonLinV) * p->nonLinScaleVComp) - 1.0f;
+
+
+		temp3h = (temp3h * p->oneMinusNonlinearityAmount) + (nonLinH * -1.0f * p->nonlinearityAmount);
+		temp3v = (temp3v * p->oneMinusNonlinearityAmount) + (nonLinV * -1.0f * p->nonlinearityAmount);
+
+		Lfloat temp3av = (temp3h * p->horizontalGain) + (temp3v * p->verticalGain);
+		//Lfloat temp3av = (temp3v * p->verticalGain);
+
+		Lfloat temp3av3 = (temp3av * p->pickupFilterAmount) + (tSVF_LP_tick(p->alternatePUFilt2, temp3av) * p->oneMinusPickupFilterAmount);
+		//turn into velocity by taking the difference between current out and last out
+
+
+		Lfloat temp3av2 = (temp3av * p->pickupFilterAmount) + (tSVF_LP_tick(p->alternatePUFilt, temp3av) * p->oneMinusPickupFilterAmount);
+
+		Lfloat pickupMix = (temp3av3 * p->pickupMixAmount) + (temp3av2 * (1.0f - p->pickupMixAmount));
+		//turn into velocity by taking the difference between current out and last out
+		output = pickupMix - p->prevPUFilterOut;
+		p->prevPUFilterOut = pickupMix;
+	}
    return output;
 
     //return p->Fout;
@@ -4212,17 +4231,20 @@ void   tPattiString_pluck(tPattiString const p, Lfloat input)
     }
     uint32_t remainder = length-pluckPoint;
 
+    //Lfloat exponent = powf(2.0f, 6.0f*p->pluckShape);
     for (uint32_t i = 0; i < length; i++)
     {
         Lfloat val = 0.0f;
 
         if (i <= pluckPoint)
         {
-            val = input * ((Lfloat)i/(Lfloat)pluckPoint); // /2 to gain stage
+            //val = powf(input * ((Lfloat)i/(Lfloat)pluckPoint), exponent);
+        	val = input * ((Lfloat)i/(Lfloat)pluckPoint);
         }
         else
         {
-            val = input * (1.0f - (((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder)); // /2 for gain staging
+            //val = powf(input * (1.0f - (((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder)), exponent);
+        	val = input * (1.0f - (((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder));
 
         }
         int fBufWritePoint = (i+p->forwardDelayh->outPoint) % p->forwardDelayh->maxDelay;
@@ -4248,7 +4270,8 @@ void tPattiString_setPickupWidth(tPattiString const p, Lfloat ratio)
     Lfloat pickupGainComp = 0.f;
     for (uint32_t i = 0; i < p->pickupWidth; ++i)
     {
-        p->LIRcoeffs[i] = hammingRatio - (1.f - hammingRatio) * cosf((2.0f * PI * (float)i)/ ((float) p->pickupWidth));
+    	p->LIRcoeffs[i] = 1.0f; //rectangular window test, should be more extreme than our hamming window
+    	//p->LIRcoeffs[i] = hammingRatio - (1.f - hammingRatio) * cosf((2.0f * PI * (float)i)/ ((float) p->pickupWidth));
         // keep a sum of the LIR coeffs to set as a gain value, 1 / sum of LIR = gain
         pickupGainComp = pickupGainComp + p->LIRcoeffs[i];
     }
@@ -4260,6 +4283,7 @@ void tPattiString_setPluckPos(tPattiString const p, Lfloat pos)
 {
 	p->pluckPosition = (p->openStringLength * 0.5f) - (pos * (p->openStringLength * 0.5f)); // pluck pos in samples
 }
+
 
 
 #if 0
