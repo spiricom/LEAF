@@ -4215,12 +4215,13 @@ void tPattiString_mute (tPattiString const ps) {
 	ps->muted = 1;
 }
 
+volatile Lfloat theCurveTest[100];
 void   tPattiString_pluck(tPattiString const p, Lfloat input)
 {
     input = input * 0.5f;
     p->muted = 0;
     int length = p->waveLengthInSamples;
-    int pluckPoint = (int)((length * p->pluckPosition) + 0.5f); //adding 0.5 to crop 'accurately' by rounding
+    volatile int pluckPoint = (int)((p->pluckPosition) + 0.5f); //adding 0.5 to crop 'accurately' by rounding
     if (pluckPoint < 1)
     {
         pluckPoint = 1;
@@ -4229,7 +4230,7 @@ void   tPattiString_pluck(tPattiString const p, Lfloat input)
     {
         pluckPoint = length-1;
     }
-    uint32_t remainder = length-pluckPoint;
+    volatile uint32_t remainder = length-pluckPoint;
 
     //Lfloat exponent = powf(2.0f, 6.0f*p->pluckShape);
     for (uint32_t i = 0; i < length; i++)
@@ -4239,17 +4240,26 @@ void   tPattiString_pluck(tPattiString const p, Lfloat input)
         if (i <= pluckPoint)
         {
             //val = powf(input * ((Lfloat)i/(Lfloat)pluckPoint), exponent);
-        	val = input * ((Lfloat)i/(Lfloat)pluckPoint);
+
+        	val = input * (1.0f - powf(1.0f - ((Lfloat)i/(Lfloat)pluckPoint), p->pluckShape));
+        	//val = input * ((Lfloat)i/(Lfloat)pluckPoint);
         }
         else
         {
             //val = powf(input * (1.0f - (((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder)), exponent);
-        	val = input * (1.0f - (((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder));
+        	Lfloat OneToZero = ((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder;
+        	val = input * (1.0f - powf(OneToZero, p->pluckShape));
+        	//val = input * (1.0f - (((Lfloat)i-(Lfloat)pluckPoint)/(Lfloat)remainder));
 
+        }
+        if (i < 100)
+        {
+        	theCurveTest[i] = val;
         }
         int fBufWritePoint = (i+p->forwardDelayh->outPoint) % p->forwardDelayh->maxDelay;
         p->forwardDelayh->buff[fBufWritePoint] = val;
         p->forwardDelayv->buff[fBufWritePoint] = val;
+
         int bBufWritePoint = (p->backwardDelayh->inPoint - i) % p->backwardDelayh->maxDelay;
         p->backwardDelayh->buff[bBufWritePoint] = val;
         p->backwardDelayv->buff[bBufWritePoint] = val;
