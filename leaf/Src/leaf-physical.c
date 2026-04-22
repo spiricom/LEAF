@@ -3980,6 +3980,32 @@ void    tPattiString_initToPool              (tPattiString* const psps, tMempool
     //p->decay=powf(0.001f,1.0f/(p->freq*p->userDecay));kjnll
 
 }
+
+
+void tPattiString_free (tPattiString* const pm)
+{
+	_tPattiString* ps = *pm;
+
+    tSVF_LP_free(&ps->alternatePUFilt2);
+    tSVF_LP_free(&ps->alternatePUFilt);
+
+    tHighpass_free(&ps->hpV);
+    tHighpass_free(&ps->hpH);
+
+    tFIR_free(&ps->pickupFIRv);
+    tFIR_free(&ps->pickupFIRh);
+
+    tLagrangeDelay_free(&ps->backwardDelayv);
+    tLagrangeDelay_free(&ps->forwardDelayv);
+    tLagrangeDelay_free(&ps->backwardDelayh);
+    tLagrangeDelay_free(&ps->forwardDelayh);
+
+    tOnePole_free(&ps->bridgeFilterv);
+    tOnePole_free(&ps->bridgeFilterh);
+
+    mpool_free((char*)ps, ps->mempool);
+}
+
 //Fout and Bout
 Lfloat    tPattiString_tick                    (tPattiString const p, float samples)
 {

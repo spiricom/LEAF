@@ -1380,6 +1380,7 @@ typedef struct _tStiffString
 
     typedef _tPattiString* tPattiString;
     void tPattiString_init (tPattiString* const, LEAF* const leaf);
+    void tPattiString_free (tPattiString* const);
     void tPattiString_initToPool (tPattiString* const psps, tMempool* const mp);
     void tPattiString_setPickupPos (tPattiString const ps, float pos);
     void tPattiString_setPluckPos (tPattiString const ps, float pos);
