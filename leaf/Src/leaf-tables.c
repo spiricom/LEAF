@@ -14,6 +14,23 @@
 
 #include "stdlib.h"
 
+void tLookupTable_init(tLookupTable* const tLookupTable, float start, float end, float center, int size, LEAF* const leaf)
+{
+    tLookupTable_initToPool(tLookupTable, start, end, center, size, &leaf->mempool);
+}
+
+void tLookupTable_initToPool(tLookupTable* const tLookupTable, float start, float end, float center, int size, tMempool* const mempool)
+{
+    _tMempool* m = *mempool;
+    _tLookupTable* t = *tLookupTable = (_tLookupTable*) mpool_alloc(sizeof(_tLookupTable), m);
+    t->table = (float*) mpool_alloc(sizeof(float) * size, m);
+    t->tableSize = size;
+    t->mempool = m;
+    LEAF_generate_table_skew_non_sym(t->table, start, end, center, size);
+}
+
+
+
 #if LEAF_INCLUDE_OVERSAMPLER_TABLES
 const Lfloat __leaf_table_fir2XLow[32] = { 0.001067048115027622,    -0.004557728776555209,    -0.016711590887520535,    -0.021065500881657994,    -0.003828695019946828,    0.01865935152799254,    0.012036365576553658,    -0.02064070362810112,    -0.02682399333687091,    0.017862623081258543,    0.0492716766870816,    -0.004310232755957251,    -0.08571879958189704,    -0.03828300159135686,    0.18420501161808442,    0.4054061613074031,    0.4054061613074031,    0.18420501161808442,    -0.03828300159135686,    -0.08571879958189704,    -0.004310232755957251,    0.0492716766870816,    0.017862623081258543,    -0.02682399333687091,    -0.02064070362810112,    0.012036365576553658,    0.01865935152799254,    -0.003828695019946828,    -0.021065500881657994,    -0.016711590887520535,    -0.004557728776555209,    0.001067048115027622
     

@@ -22,7 +22,9 @@ extern "C" {
 #else
 #include "../leaf-config.h"
 #endif
-    
+
+
+ typedef struct _tLookupTable* tLookupTable;
     /*!
      * @ingroup leaf
      * @brief Struct for an instance of LEAF.
@@ -33,7 +35,6 @@ extern "C" {
         ///@{ 
         Lfloat   sampleRate; //!< The current audio sample rate. Set with LEAF_setSampleRate().
         Lfloat   invSampleRate; //!< The inverse of the current sample rate.
-        int     blockSize; //!< The audio block size.
         Lfloat   twoPiTimesInvSampleRate; //!<  Two-pi times the inverse of the current sample rate.
         Lfloat   (*random)(void); //!< A pointer to the random() function provided on initialization.
         int     clearOnAllocation; //!< A flag that determines whether memory allocated from the LEAF memory pool will be cleared.
@@ -44,9 +45,13 @@ extern "C" {
         int     errorState[LEAFErrorNil]; //!< An array of flags that indicate which errors have occurred.
         unsigned int allocCount; //!< A count of LEAF memory allocations.
         unsigned int freeCount; //!< A count of LEAF memory frees.
+        unsigned int uuid;
+        tLookupTable lfoRateTable;
+        tLookupTable envTimeTable;
+        tLookupTable resTable;
+
         ///@}
     };
-    
     //==============================================================================
     
 #ifdef __cplusplus

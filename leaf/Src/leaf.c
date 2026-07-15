@@ -41,6 +41,10 @@ void LEAF_init(LEAF* const leaf, Lfloat sr, char* memory, size_t memorysize, Lfl
     leaf->allocCount = 0;
     
     leaf->freeCount = 0;
+    leaf->uuid = 0;
+    leaf->lfoRateTable = NULL;
+    leaf->envTimeTable = NULL;
+    leaf->resTable = NULL;
 }
 
 void LEAF_setSampleRate(LEAF* const leaf, Lfloat sampleRate)
@@ -70,4 +74,9 @@ void LEAF_internalErrorCallback(LEAF* const leaf, LEAFErrorType whichone)
 void LEAF_setErrorCallback(LEAF* const leaf, void (*callback)(LEAF* const, LEAFErrorType))
 {
     leaf->errorCallback = callback;
+}
+
+unsigned int getNextUuid(LEAF* leaf)
+{
+    return ++leaf->uuid;
 }

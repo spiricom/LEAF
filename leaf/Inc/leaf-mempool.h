@@ -87,6 +87,7 @@ extern "C" {
         size_t        usize;       // used size of the pool
         size_t        msize;       // max size of the pool
         mpool_node_t* head;        // first node of memory pool free list
+
     };
     
     //! Initialize a tMempool for a given memory location and size to the default mempool of a LEAF instance.
@@ -117,7 +118,8 @@ extern "C" {
 
     /*!￼￼￼
      @} */
-    
+
+
     //==============================================================================
 
     //    typedef struct mpool_t {

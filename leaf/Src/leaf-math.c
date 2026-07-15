@@ -20,8 +20,6 @@
 
 #define EXPONENTIAL_TABLE_SIZE 65536
 
-
-
 void LEAF_generate_sine(Lfloat* buffer, int size)
 {
     Lfloat phase;
@@ -117,8 +115,6 @@ void LEAF_generate_exp(Lfloat* buffer, Lfloat base, Lfloat start, Lfloat end, Lf
         x += increment;
     }
 }
-
-//
 
 
 void LEAF_generate_table_skew_non_sym_double(Lfloat* buffer, Lfloat start, Lfloat end, Lfloat center, int size)
@@ -216,7 +212,7 @@ void LEAF_generate_ftom(Lfloat* buffer, Lfloat startFreq, Lfloat endFreq, int si
 }
 
 //not sure that this works
-Lfloat fast_sinf2(Lfloat x)
+float fast_sinf2(Lfloat x)
 {
     Lfloat invert = 1.0f;
     Lfloat out;
@@ -267,7 +263,7 @@ void place_step_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat sca
 #ifdef ITCMRAM
 void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) place_slope_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat slope_delta)
 #else
-void place_slope_dd(Lfloat *buffer, int index, Lfloat phase, Lfloat w, Lfloat slope_delta)
+void place_slope_dd(Lfloat *buffer, int index, float phase, float w, Lfloat slope_delta)
 #endif
 {
     Lfloat r;

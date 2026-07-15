@@ -1,4 +1,7 @@
 .DS_Store
+*.idea
+cmake-build*/
+*/idea/
 *.app
 *.a
 *.appex
@@ -12,3 +15,5 @@
 */JuceLibraryCode
 */builds
 */build
+*/.idea
+*/cmake-build-debug

@@ -107,15 +107,16 @@ extern "C" {
     void    t808Cowbell_initToPool      (t808Cowbell* const, int useStick, tMempool* const);
     void    t808Cowbell_free            (t808Cowbell* const);
     
-    Lfloat   t808Cowbell_tick            (t808Cowbell* const);
-    void    t808Cowbell_on              (t808Cowbell* const, Lfloat vel);
-    void    t808Cowbell_setDecay        (t808Cowbell* const, Lfloat decay);
-    void    t808Cowbell_setHighpassFreq (t808Cowbell* const, Lfloat freq);
-    void    t808Cowbell_setBandpassFreq (t808Cowbell* const, Lfloat freq);
-    void    t808Cowbell_setFreq         (t808Cowbell* const, Lfloat freq);
-    void    t808Cowbell_setOscMix       (t808Cowbell* const, Lfloat oscMix);
-    void    t808Cowbell_setStick        (t808Cowbell* const, int useStick);
-    void    t808Cowbell_setSampleRate   (t808Cowbell* const, Lfloat sr);
+    Lfloat  t808Cowbell_tick            (t808Cowbell const);
+
+    void    t808Cowbell_on              (t808Cowbell const, Lfloat vel);
+    void    t808Cowbell_setDecay        (t808Cowbell const, Lfloat decay);
+    void    t808Cowbell_setHighpassFreq (t808Cowbell const, Lfloat freq);
+    void    t808Cowbell_setBandpassFreq (t808Cowbell const, Lfloat freq);
+    void    t808Cowbell_setFreq         (t808Cowbell const, Lfloat freq);
+    void    t808Cowbell_setOscMix       (t808Cowbell const, Lfloat oscMix);
+    void    t808Cowbell_setStick        (t808Cowbell const, int useStick);
+    void    t808Cowbell_setSampleRate   (t808Cowbell const, Lfloat sr);
     
     //==============================================================================
     
@@ -216,19 +217,20 @@ extern "C" {
     void    t808Hihat_initToPool            (t808Hihat* const, tMempool* const);
     void    t808Hihat_free                  (t808Hihat* const);
     
-    Lfloat   t808Hihat_tick                  (t808Hihat* const);
-    void    t808Hihat_on                    (t808Hihat* const, Lfloat vel);
-    void    t808Hihat_setOscNoiseMix        (t808Hihat* const, Lfloat oscNoiseMix);
-    void    t808Hihat_setDecay              (t808Hihat* const, Lfloat decay);
-    void    t808Hihat_setHighpassFreq       (t808Hihat* const, Lfloat freq);
-    void    t808Hihat_setOscBandpassFreq    (t808Hihat* const, Lfloat freq);
-    void    t808Hihat_setOscBandpassQ       (t808Hihat* const hihat, Lfloat Q);
-    void    t808Hihat_setStickBandPassFreq  (t808Hihat* const, Lfloat freq);
-    void    t808Hihat_setStickBandPassQ     (t808Hihat* const hihat, Lfloat Q);
-    void    t808Hihat_setOscFreq            (t808Hihat* const, Lfloat freq);
-    void    t808Hihat_setStretch            (t808Hihat* const hihat, Lfloat stretch);
-    void    t808Hihat_setFM                 (t808Hihat* const hihat, Lfloat FM_amount);
-    void    t808Hihat_setSampleRate         (t808Hihat* const, Lfloat sr);
+    Lfloat  t808Hihat_tick                  (t808Hihat const);
+
+    void    t808Hihat_on                    (t808Hihat const, Lfloat vel);
+    void    t808Hihat_setOscNoiseMix        (t808Hihat const, Lfloat oscNoiseMix);
+    void    t808Hihat_setDecay              (t808Hihat const, Lfloat decay);
+    void    t808Hihat_setHighpassFreq       (t808Hihat const, Lfloat freq);
+    void    t808Hihat_setOscBandpassFreq    (t808Hihat const, Lfloat freq);
+    void    t808Hihat_setOscBandpassQ       (t808Hihat const hihat, Lfloat Q);
+    void    t808Hihat_setStickBandPassFreq  (t808Hihat const, Lfloat freq);
+    void    t808Hihat_setStickBandPassQ     (t808Hihat const hihat, Lfloat Q);
+    void    t808Hihat_setOscFreq            (t808Hihat const, Lfloat freq);
+    void    t808Hihat_setStretch            (t808Hihat const hihat, Lfloat stretch);
+    void    t808Hihat_setFM                 (t808Hihat const hihat, Lfloat FM_amount);
+    void    t808Hihat_setSampleRate         (t808Hihat const, Lfloat sr);
     
     //==============================================================================
     
@@ -325,17 +327,18 @@ extern "C" {
     void    t808Snare_initToPool            (t808Snare* const, tMempool* const);
     void    t808Snare_free                  (t808Snare* const);
     
-    Lfloat   t808Snare_tick                  (t808Snare* const);
-    void    t808Snare_on                    (t808Snare* const, Lfloat vel);
-    void    t808Snare_setTone1Freq          (t808Snare* const, Lfloat freq);
-    void    t808Snare_setTone2Freq          (t808Snare* const, Lfloat freq);
-    void    t808Snare_setTone1Decay         (t808Snare* const, Lfloat decay);
-    void    t808Snare_setTone2Decay         (t808Snare* const, Lfloat decay);
-    void    t808Snare_setNoiseDecay         (t808Snare* const, Lfloat decay);
-    void    t808Snare_setToneNoiseMix       (t808Snare* const, Lfloat toneNoiseMix);
-    void    t808Snare_setNoiseFilterFreq    (t808Snare* const, Lfloat noiseFilterFreq);
-    void    t808Snare_setNoiseFilterQ       (t808Snare* const, Lfloat noiseFilterQ);
-    void    t808Snare_setSampleRate         (t808Snare* const, Lfloat sr);
+    Lfloat  t808Snare_tick                  (t808Snare const);
+
+    void    t808Snare_on                    (t808Snare const, Lfloat vel);
+    void    t808Snare_setTone1Freq          (t808Snare const, Lfloat freq);
+    void    t808Snare_setTone2Freq          (t808Snare const, Lfloat freq);
+    void    t808Snare_setTone1Decay         (t808Snare const, Lfloat decay);
+    void    t808Snare_setTone2Decay         (t808Snare const, Lfloat decay);
+    void    t808Snare_setNoiseDecay         (t808Snare const, Lfloat decay);
+    void    t808Snare_setToneNoiseMix       (t808Snare const, Lfloat toneNoiseMix);
+    void    t808Snare_setNoiseFilterFreq    (t808Snare const, Lfloat noiseFilterFreq);
+    void    t808Snare_setNoiseFilterQ       (t808Snare const, Lfloat noiseFilterQ);
+    void    t808Snare_setSampleRate         (t808Snare const, Lfloat sr);
     
     //==============================================================================
      //==============================================================================
@@ -433,17 +436,18 @@ extern "C" {
     void    t808SnareSmall_initToPool            (t808SnareSmall* const, tMempool* const);
     void    t808SnareSmall_free                  (t808SnareSmall* const);
     
-    Lfloat   t808SnareSmall_tick                  (t808SnareSmall* const);
-    void    t808SnareSmall_on                    (t808SnareSmall* const, Lfloat vel);
-    void    t808SnareSmall_setTone1Freq          (t808SnareSmall* const, Lfloat freq);
-    void    t808SnareSmall_setTone2Freq          (t808SnareSmall* const, Lfloat freq);
-    void    t808SnareSmall_setTone1Decay         (t808SnareSmall* const, Lfloat decay);
-    void    t808SnareSmall_setTone2Decay         (t808SnareSmall* const, Lfloat decay);
-    void    t808SnareSmall_setNoiseDecay         (t808SnareSmall* const, Lfloat decay);
-    void    t808SnareSmall_setToneNoiseMix       (t808SnareSmall* const, Lfloat toneNoiseMix);
-    void    t808SnareSmall_setNoiseFilterFreq    (t808SnareSmall* const, Lfloat noiseFilterFreq);
-    void    t808SnareSmall_setNoiseFilterQ       (t808SnareSmall* const, Lfloat noiseFilterQ);
-    void    t808SnareSmall_setSampleRate         (t808SnareSmall* const, Lfloat sr);
+    Lfloat  t808SnareSmall_tick                  (t808SnareSmall const);
+
+    void    t808SnareSmall_on                    (t808SnareSmall const, Lfloat vel);
+    void    t808SnareSmall_setTone1Freq          (t808SnareSmall const, Lfloat freq);
+    void    t808SnareSmall_setTone2Freq          (t808SnareSmall const, Lfloat freq);
+    void    t808SnareSmall_setTone1Decay         (t808SnareSmall const, Lfloat decay);
+    void    t808SnareSmall_setTone2Decay         (t808SnareSmall const, Lfloat decay);
+    void    t808SnareSmall_setNoiseDecay         (t808SnareSmall const, Lfloat decay);
+    void    t808SnareSmall_setToneNoiseMix       (t808SnareSmall const, Lfloat toneNoiseMix);
+    void    t808SnareSmall_setNoiseFilterFreq    (t808SnareSmall const, Lfloat noiseFilterFreq);
+    void    t808SnareSmall_setNoiseFilterQ       (t808SnareSmall const, Lfloat noiseFilterQ);
+    void    t808SnareSmall_setSampleRate         (t808SnareSmall const, Lfloat sr);
     
     //==============================================================================
     /*!
@@ -537,17 +541,18 @@ extern "C" {
     void    t808Kick_initToPool         (t808Kick* const, tMempool* const);
     void    t808Kick_free               (t808Kick* const);
     
-    Lfloat   t808Kick_tick               (t808Kick* const);
-    void    t808Kick_on                 (t808Kick* const, Lfloat vel);
-    void    t808Kick_setToneFreq        (t808Kick* const, Lfloat freq);
-    void    t808Kick_setToneDecay       (t808Kick* const, Lfloat decay);
-    void    t808Kick_setNoiseDecay      (t808Kick* const, Lfloat decay);
-    void    t808Kick_setSighAmount      (t808Kick* const, Lfloat sigh);
-    void    t808Kick_setChirpAmount     (t808Kick* const, Lfloat chirp);
-    void    t808Kick_setToneNoiseMix    (t808Kick* const, Lfloat toneNoiseMix);
-    void    t808Kick_setNoiseFilterFreq (t808Kick* const, Lfloat noiseFilterFreq);
-    void    t808Kick_setNoiseFilterQ    (t808Kick* const, Lfloat noiseFilterQ);
-    void    t808kick_setSampleRate      (t808Kick* const, Lfloat sr);
+    Lfloat  t808Kick_tick               (t808Kick const);
+
+    void    t808Kick_on                 (t808Kick const, Lfloat vel);
+    void    t808Kick_setToneFreq        (t808Kick const, Lfloat freq);
+    void    t808Kick_setToneDecay       (t808Kick const, Lfloat decay);
+    void    t808Kick_setNoiseDecay      (t808Kick const, Lfloat decay);
+    void    t808Kick_setSighAmount      (t808Kick const, Lfloat sigh);
+    void    t808Kick_setChirpAmount     (t808Kick const, Lfloat chirp);
+    void    t808Kick_setToneNoiseMix    (t808Kick const, Lfloat toneNoiseMix);
+    void    t808Kick_setNoiseFilterFreq (t808Kick const, Lfloat noiseFilterFreq);
+    void    t808Kick_setNoiseFilterQ    (t808Kick const, Lfloat noiseFilterQ);
+    void    t808kick_setSampleRate      (t808Kick const, Lfloat sr);
     
     //==============================================================================
 
@@ -643,17 +648,18 @@ extern "C" {
     void    t808KickSmall_initToPool         (t808KickSmall* const, tMempool* const);
     void    t808KickSmall_free               (t808KickSmall* const);
     
-    Lfloat   t808KickSmall_tick               (t808KickSmall* const);
-    void    t808KickSmall_on                 (t808KickSmall* const, Lfloat vel);
-    void    t808KickSmall_setToneFreq        (t808KickSmall* const, Lfloat freq);
-    void    t808KickSmall_setToneDecay       (t808KickSmall* const, Lfloat decay);
-    void    t808KickSmall_setNoiseDecay      (t808KickSmall* const, Lfloat decay);
-    void    t808KickSmall_setSighAmount      (t808KickSmall* const, Lfloat sigh);
-    void    t808KickSmall_setChirpAmount     (t808KickSmall* const, Lfloat chirp);
-    void    t808KickSmall_setToneNoiseMix    (t808KickSmall* const, Lfloat toneNoiseMix);
-    void    t808KickSmall_setNoiseFilterFreq (t808KickSmall* const, Lfloat noiseFilterFreq);
-    void    t808KickSmall_setNoiseFilterQ    (t808KickSmall* const, Lfloat noiseFilterQ);
-    void    t808KickSmall_setSampleRate      (t808KickSmall* const, Lfloat sr);
+    Lfloat  t808KickSmall_tick               (t808KickSmall const);
+
+    void    t808KickSmall_on                 (t808KickSmall const, Lfloat vel);
+    void    t808KickSmall_setToneFreq        (t808KickSmall const, Lfloat freq);
+    void    t808KickSmall_setToneDecay       (t808KickSmall const, Lfloat decay);
+    void    t808KickSmall_setNoiseDecay      (t808KickSmall const, Lfloat decay);
+    void    t808KickSmall_setSighAmount      (t808KickSmall const, Lfloat sigh);
+    void    t808KickSmall_setChirpAmount     (t808KickSmall const, Lfloat chirp);
+    void    t808KickSmall_setToneNoiseMix    (t808KickSmall const, Lfloat toneNoiseMix);
+    void    t808KickSmall_setNoiseFilterFreq (t808KickSmall const, Lfloat noiseFilterFreq);
+    void    t808KickSmall_setNoiseFilterQ    (t808KickSmall const, Lfloat noiseFilterQ);
+    void    t808KickSmall_setSampleRate      (t808KickSmall const, Lfloat sr);
     
     //==============================================================================
     
