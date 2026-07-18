@@ -967,6 +967,76 @@ float   tNoise_tick(tNoise* const n)
 }
 
 //=================================================================================
+/* Perlin Noise */
+void tPerlinNoise_create(tMempool** const mp, tPerlinNoise** const ns)
+{
+    ALLOC_FROM_POOL(tPerlinNoise, ns, mp);
+}
+
+void tPerlinNoise_init(LEAF* const leaf, tPerlinNoise* const n, float rate, float energy)
+{
+    n->rateMs = rate;
+    n->energy = energy;
+    n->buffSize = rate/1000*leaf->sampleRate;
+    n->interper = LEAF_interpolate_hermite;
+    n->rand = leaf->random;
+    n->x1 = 0.f;
+    n->m1 = 0.f;
+    n->x2 = (n->rand() * 2.0f) - 1.0f;
+    n->m2 = (n->rand() * 2.0f) - 1.0f;
+    n->counter = 0;
+    n->scaler = 1.f;
+}
+
+void    tPerlinNoise_free (tPerlinNoise** const ns)
+{
+    tPerlinNoise* n = *ns;
+
+    mpool_free((char*)n, n->mempool);
+}
+
+float   tPerlinNoise_tick(tPerlinNoise* const n)
+{
+    if (n->counter < n->buffSize)
+    {
+        n->currX = n->interper((n->x2) - 2.f*(n->m1), (n->x1), (n->x2), -2.f*(n->m2) - (n->x1), (n->counter)/(float)n->buffSize);
+    } else
+    {
+        n->counter = 0;
+        n->x1 = n->x2;
+        n->m1 = n->m2;
+        n->x2 = ((n->rand() * 2.0f) - 1.0f) * n->energy;
+        n->m2 = ((n->rand() * 2.0f) - 1.0f) * n->energy*2.f;
+        n->currX = n->interper((n->x2) - 2.f*(n->m1), (n->x1), (n->x2), -2.f*(n->m2) - (n->x1), n->counter/(float)n->buffSize);
+    }
+    n->counter++;
+    return n->currX;
+
+}
+
+void    tPerlinNoise_setRate(LEAF* const leaf, tPerlinNoise* const n, float rate)
+{
+    n->rateMs = rate;
+    n->buffSize = rate/1000.f*leaf->sampleRate;
+    //n->m1 = 3.f*(-0.5f*(n->x2) - 2.f*(n->m1)+1.5f*(n->x1)-1.5f*(n->x2)+0.5f*(-2.f*(n->m2) - (n->x1)))*(n->counter/(float)n->buffSize)*(n->counter/(float)n->buffSize) + 2.f*((n->x2) - 2.f*(n->m1)-2.5f*(n->x1)+2.f*(n->x2)-0.5f*(-2.f*(n->m2) - (n->x1)))*(n->counter/(float)n->buffSize) + -0.5f*((n->x2) - 2.f*(n->m1)) + 0.5f*(n->x2);
+    n->m1 = 0.f;
+    n->x1 = n->currX;
+    n->x2 = ((n->rand() * 2.0f) - 1.0f) * n->energy;
+    n->m2 = ((n->rand() * 2.0f) - 1.0f) * n->energy*2.f;
+    n->counter = 0;
+}
+
+void    tPerlinNoise_setEnergy(LEAF* const leaf, tPerlinNoise* const n, float energy)
+{
+    n->energy = energy;
+    n->m1 = 0.f;
+    n->x1 = n->currX;
+    n->x2 = ((n->rand() * 2.0f) - 1.0f) * n->energy;
+    n->m2 = ((n->rand() * 2.0f) - 1.0f) * n->energy*2.f;
+    n->counter = 0;
+}
+
+//=================================================================================
 /* Neuron */
 
 void tNeuron_create(tMempool** const mp, tNeuron** const nr)
