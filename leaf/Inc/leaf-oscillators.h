@@ -686,6 +686,66 @@ typedef struct tPBSawSquare
     float  tNoise_tick         (tNoise* const noise);
     
     //==============================================================================
+
+    /*!
+     @defgroup tperlinnoise tPerlinNoise
+     @ingroup oscillators
+     @brief Perlin noise generator, capable of producing different resolutions of Perlin noise.
+     @{
+
+     @fn void    tPerlinNoise_init(tPerlinNoise* const perlinNoise, InterpOrder order, LEAF* const leaf)
+     @brief Initialize a tPerlinNoise to the default mempool of a LEAF instance.
+     @param perlinNoise A pointer to the tPerlinNoise to initialize.
+     @param leaf A pointer to the leaf instance.
+
+     @fn void    tPerlinNoise_init                 (tMempool** const)
+     @brief Initialize a tPerlinNoise to a specified mempool.
+     @param perlinNoise A pointer to the tPerlinNoise to initialize.
+     @param mempool A pointer to the tMempool to use.
+
+     @fn void    tPerlinNoise_free(tPerlinNoise** const perlinNoise)
+     @brief Free a tPerlinNoise from its mempool.
+     @param perlinNoise A pointer to the tNoise to free.
+
+     @fn float   tPerlinNoise_tick         (tPerlinNoise* const perlinNoise)
+     @brief
+     @param perlinNoise A pointer to the relevant tPerlinNoise.
+     */
+
+    typedef struct tPerlinNoise tPerlinNoise;
+    struct tPerlinNoise
+    {
+        tMempool* mempool;
+
+        float rateMs;
+        float energy;
+
+        int counter;
+        int buffSize;
+        float x1;
+        float x2;
+        float m1;
+        float m2;
+        float currX;
+        float scaler;
+
+        float   (*rand)(void);
+        float   (*interper)(float, float, float, float, float);
+    };
+
+    // Memory handlers for `tPerlinNoise`
+    void    tPerlinNoise_create               (tMempool** const mempool, tPerlinNoise** const);
+    void    tPerlinNoise_init                 (LEAF* const leaf, tPerlinNoise* const perlinNoise, float rateMs, float energy);
+    void    tPerlinNoise_free         (tPerlinNoise** const perlinNoise);
+
+    // Tick function for `tPerlinNoise`
+    float  tPerlinNoise_tick        (tPerlinNoise* const perlinNoise);
+
+    // Setter functions for `tPerlinNoise`
+    void    tPerlinNoise_setRate    (LEAF* const leaf, tPerlinNoise* const perlinNoise, float rate);
+    void    tPerlinNoise_setEnergy  (LEAF* const leaf, tPerlinNoise* const perlinNoise, float energy);
+
+//==============================================================================
     
     /*!
      @defgroup tneuron tNeuron
