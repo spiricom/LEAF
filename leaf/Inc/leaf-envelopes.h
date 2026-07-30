@@ -704,6 +704,67 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
     void    tSlide_setDownSlide    (tSlide* const sl, float downSlide);
     void    tSlide_setDest        (tSlide* const sl, float dest);
 
+
+    /*!
+     @defgroup tsloperamp tSlopeRamp
+     @ingroup envelopes
+     @brief Ramp envelope built around a slope argument instead of a time argument
+     @{
+
+     @fn void    tSlopeRamp_init(LEAF* const leaf, tSlopeRamp* const, float slope)
+     @brief Initialize a tSlopeRamp to the default mempool of a LEAF instance.
+     @param slopeRamp A pointer to the tSlopeRamp to initialize.
+     @param leaf A pointer to the leaf instance.
+
+     @fn void    tSlopeRamp_init                 (tMempool** const)
+     @brief Initialize a tSlopeRamp to a specified mempool.
+     @param slopeRamp A pointer to the tSlopeRamp to initialize.
+     @param mempool A pointer to the tMempool to use.
+
+     @fn void    tSlopeRamp_free(tSlopeRamp** const)
+     @brief Free a tSlopeRamp from its mempool.
+     @param slopeRamp A pointer to the tSlopeRamp to free.
+
+     @fn float   tSlopeRamp_tick         (tSlopeRamp* const, tSlopeRamp** const, float in)
+     @brief
+     @param slopeRamp A pointer to the relevant tSlopeRamp.
+
+     @fn float   tSlopeRamp_tickNoInput    (tSlopeRamp* const sr)
+     @brief
+     @param slopeRamp A pointer to the relevant tSlopeRamp.
+
+     @fn void    tSlopeRamp_setVal        (tSlopeRamp* const sr, float val)
+     @brief
+     @param slopeRamp A pointer to the relevant tSlopeRamp.
+
+     @fn void    tSlopeRamp_setDest        (tSlopeRamp* const sr, float dest)
+     @brief
+     @param slopeRamp A pointer to the relevant tSlopeRamp.
+
+     @fn void    tSlopeRamp_setSlope        (tSlopeRamp* const sr, float slope)
+     @brief
+     @param slopeRamp A pointer to the relevant tSlopeRamp.
+
+     @} */
+
+    typedef struct tSlopeRamp
+    {
+        tMempool* mempool;
+
+        float curr;
+        float dest;
+        float slope;
+    } tSlopeRamp;
+
+    void    tSlopeRamp_create               (tMempool** const mempool, tSlopeRamp** const);
+    void    tSlopeRamp_init                 (LEAF* const leaf, tSlopeRamp* const, float slope, float val);
+    void    tSlopeRamp_free          (tSlopeRamp** const);
+
+    float   tSlopeRamp_tick         (tSlopeRamp* const);
+    void    tSlopeRamp_setVal        (tSlopeRamp* const sr, float val);
+    void    tSlopeRamp_setDest        (tSlopeRamp* const sr, float dest);
+    void    tSlopeRamp_setSlope       (tSlopeRamp* const sr, float slope);
+
 #ifdef __cplusplus
 }
 #endif

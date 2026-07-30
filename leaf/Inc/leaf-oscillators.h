@@ -743,7 +743,7 @@ typedef struct tPBSawSquare
 
     // Setter functions for `tPerlinNoise`
     void    tPerlinNoise_setRate    (LEAF* const leaf, tPerlinNoise* const perlinNoise, float rate);
-    void    tPerlinNoise_setEnergy  (LEAF* const leaf, tPerlinNoise* const perlinNoise, float energy);
+    void    tPerlinNoise_setEnergy  (tPerlinNoise* const perlinNoise, float energy);
 
 //==============================================================================
     

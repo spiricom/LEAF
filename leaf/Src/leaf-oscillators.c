@@ -1026,7 +1026,7 @@ void    tPerlinNoise_setRate(LEAF* const leaf, tPerlinNoise* const n, float rate
     n->counter = 0;
 }
 
-void    tPerlinNoise_setEnergy(LEAF* const leaf, tPerlinNoise* const n, float energy)
+void    tPerlinNoise_setEnergy(tPerlinNoise* const n, float energy)
 {
     n->energy = energy;
     n->m1 = 0.f;
