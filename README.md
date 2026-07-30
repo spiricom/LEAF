@@ -1,102 +1,185 @@
-# LEAF
-LEAF (Lightweight Embedded Audio Framework) is a C library for audio synthesis and processing created by Jeff Snyder, Mike Mulshine, and Matt Wang at Princeton University's New Instrument Research Lab. It was originally called OOPS when we started writing it in 2017, so you may see references to it under that name as well. 
+# LEAF — fork contributions (Sean Xue)
 
-The library consists of a set of high-level audio synthesis components (Oscillators, Filters, Envelopes, Delays, Reverbs, and other Utilities).
+This is a fork of [spiricom/LEAF](https://github.com/spiricom/LEAF), the Lightweight Embedded
+Audio Framework out of Princeton's New Instrument Research Lab. Upstream's own README (library
+overview, naming conventions, embedded/JUCE setup) is preserved as
+[README-upstream.md](README-upstream.md) and still applies — this file only covers what I changed
+in the fork.
 
-Our primary use case is embedded audio computing on 32-bit ARM microcontrollers that can run "bare-metal" (without an OS), such as the STM32f4, STM32f7, and STM32H7. The code, however, is general enough to be used in many other situations as well. We have included a JUCE VST/AU generating template to test the library (2), and the python script we use to generate wavetables. 
+Fork: [anytroops/LEAF](https://github.com/anytroops/LEAF) · Work done May–July 2025.
 
-Many of these algorithms are sourced from other projects, especially the STK (Sound Toolkit) library and various discussions on the music-DSP mailing list. We also owe a lot to open source computer programming languages, such as C-sound, ChucK, PureData, and Supercollider. 
+There are two separate workstreams:
 
-Other interesting projects to check out that similarly target embedded applicatons are: TeensyAudio (C++), Hoxton Owl (C++), Axoloti (C), and Mutable Instruments (C++). 
+1. **API modernization** — replacing LEAF's hidden-pointer typedef convention with explicit
+   pointer types across the whole library. *Merged into `master`.*
+2. **Usage documentation** — adding runnable Doxygen examples to the public headers, 66 objects
+   so far. *Lives on the `seanRenaming` branch.*
 
-Some notes about LEAF:
+---
 
-(1) LEAF has no dependencies on any other code, except for the standard math.h functions like sinf().
+## 1. API modernization: explicit pointers instead of hidden ones
 
-(2) Use of standard malloc and calloc are avoided, and a custom memory pool implementation is included instead. This allows dynamic memory allocation/deallocation within a fixed block size, with more control over where the memory is located (very useful for embedded systems). 
+### The problem
 
-(3) The included JUCE template is intended to simplify using LEAF for audio software development aimed at computers or mobile devices. features an easily reconfigurable UI and simple block and tick setup to test the library components. Of course, if you intend to use the provided JUCE plugin project, you need to get JUCE and the Projucer ( https://www.juce.com/get-juce ). Check out the first tutorial to get started - it's fun and easy! 
+Every LEAF object used a two-typedef pattern where the public type name was secretly a pointer:
 
-(4) if you are looking to add LEAF to a System Workbench (SW4STM32) project (the free IDE for developing STM32 embedded firmware) then follow this guide to include LEAF: https://docs.google.com/document/d/1LtMFigQvnIOkRCSL-UVge4GM91woTmVkidlzzgtCjdE/edit?usp=sharing   If you don't want to deal with using leaf as a git submodule, you can also just drop the .c and .h files from LEAF's Src and Inc folders into your own Src and Inc folders, that will work as well - it'll just be a little harder to update things to newer versions of LEAF later on.
+```c
+typedef struct _tCompressor { ... } _tCompressor;
+typedef _tCompressor* tCompressor;          // tCompressor IS a pointer
 
-
-
-///
-<h2>
-LEAF conventions:
-</h2>
-We call the psuedo-objects in LEAF "objects" because it's simpler to say, even though technically they are just structs with associated functions. 
-
-Objects types start with a lowercase t: like tCycle, tSawtooth, tRamp, tEnvelopeFollower
-
-All function names start with the object type name, followed by an underscore, then the function name in camel-case: like tCycle_setFreq(), tRamp_setDest().
-
-The first input parameter of all LEAF functions associated with an object type is the object instance it is operating on. 
-
-LEAF assumes a global sample rate (passed into LEAF when the library itself is initialized). You can change this sample rate whenever you want, and all objects that use the global sample rate will see the change.
-
-All LEAF objects operate on single-precision float input and output data. There are sometimes double-precision operations inside LEAF objects, but only when the precision is deemed to actually be necessary for the operation. Float literal notation (like 0.12f instead of 0.12) is used to force computation using single precision when it would otherwise be ambigious, to make LEAF more efficient for processors that have a single-precision FPU, or where the FPU computes single-precision faster than double-precision.
-
-Audio inputs and outputs are assumed to be between -1.0 and 1.0
-
-Internally, LEAF objects that the user defines globally (by writing something like "tCycle mySine") are actually just pointers. The structs for the data of the LEAF object is created in the mempool when the init function is called on that pointer (as in tCycle_init(&mySine)). For instance, when you create a tCycle, you are actually just creating a pointer, and when you call tCycle_init() on that tCycle, you are then creating a struct that has real data inside the mempool. This is done to make the footprint of the LEAF objects very small outside of their designated mempools, so that a large number of LEAF object pointers can exist globally even if only a few complete objects can exist in memory at a single time. 
-
-All LEAF objects must have an init() function and a free() function -- these will create the objects inside the default mempool, as well as an initToPool() and freeFromPool() function -- these will create the objects inside a user-defined specific mempool that is not the default. 
-
-LEAF objects assume that they will be "ticked" once per sample, and generally take single sample input and produce single sample output. The alternative would be to have the user pass in an array and have the objects operate on the full array, which could have performance advantages if SIMD instructions are available on the processor, but would have disadvantages in flexibility of use. If an audio object requires some kind of buffer to operate on (such as a pitch detector) it will collect samples in its sample-by-sample tick function and store them in its own internal buffer. 
-
-
-////
-
-
-
-<h2>Example of using LEAF:</h2>
-
-
-```
-//in your user code, create an instance of a master leaf object. This exists so that in the case of a plugin environment or other situation with shared resources, you can still have separate instances of the LEAF library that won't conflict.
-LEAF leaf
-
-//then create instances of whatever LEAF objects you want
-tCycle mySine;
-
-
-//also, create a memory pool array where you can store the data for the LEAF objects. It should be an array of chars. Note that you can also define multiple mempool objects in different memory locations in you want to, and initialize different LEAF objects in different places. However, LEAF needs at least one mempool, so the one you pass into the LEAF_init function is considered the default location for any LEAF-related memory, unless you specifically put something elsewhere by using an initToPool() function instead of init(). LEAF object store a pointer to which mempool they are in, so if you initToPool it will remember where you put it and the free() function will free it from the correct location.
-
-#define MEM_SIZE 500000
-char myMemory[MEM_SIZE];
-
-
-//we'll assume your code has some kind of audio buffer that is transmitting samples to an audio codec or an operating system's audio driver. In this example, let's define this here.
-
-#define AUDIO_BUFFER_SIZE 128
-float audioBuffer[AUDIO_BUFFER_SIZE];
-
-
-//then initialize the whole LEAF library (this only needs to be done once, it sets global parameters like the default mempool and the sample rate)
-//the parameters are: master leaf instance, sample rate, audio buffer size in samples, name of mempool array, size of mempool array, and address of a function to generate a random number. In this case, there is a function called randomNumber that exists elsewhere in the user code that generates a random floating point number from 0.0 to 1.0. We ask the user to pass in a random number function because LEAF has no dependencies, and users developing on embedded systems may want to use a hardware RNG, for instance.
-
-LEAF_init(&leaf, 48000, AUDIO_BUFFER_SIZE, myMemory, MEM_SIZE, &randomNumber);
-
-
-//now initialize the object you want to use, in this case the sine wave oscillator you created above. You need to also pass in the instance of the master leaf object (only needed for initializing objects).
-
-tCycle_init(&mySine, &leaf);
-
-
-//set the frequency of the oscillator (defaults to zero). In a real use case, you'd probably want to be updating this to new values in the audio frame based on knob positions or midi data or other inputs, but here we'll assume it stays fixed.
-
-tCycle_setFreq(&mySine, 440.0);
-
-
-//now, in your audio callback (a function that will be called every audio frame, to compute the samples needed to fill the audio buffer) tick the LEAF audio object to generate or process audio samples. 
-
-void audioFrame()
-{
-  for (int i = 0; i < AUDIO_BUFFER_SIZE; i++)
-  {
-    audioBuffer[i] = tCycle_tick(&mySine);
-  }
-}
+void   tCompressor_init (tCompressor* const comp, LEAF* const leaf);   // really tCompressor**
+Lfloat tCompressor_tick (tCompressor const c, Lfloat in);              // really tCompressor*
 ```
 
+This reads badly in two directions. `tCompressor* const` in `_init` looks like "pointer to object"
+but is actually pointer-to-pointer, while `tCompressor const c` in `_tick` looks like a by-value
+struct but is actually the pointer. Callers can't tell the ownership story from the signature, IDE
+navigation lands on the wrong type, and the `_t`-prefixed struct names collide with the reserved
+identifier convention.
+
+### The change
+
+Collapse to a single struct type and make every level of indirection visible at the call site:
+
+```c
+typedef struct tCompressor { ... } tCompressor;   // a struct, and it says so
+
+void   tCompressor_init (tCompressor** const comp, LEAF* const leaf);  // takes the handle to fill
+Lfloat tCompressor_tick (tCompressor*  const c,    Lfloat in);         // takes the object
+```
+
+Rules applied uniformly:
+
+| Function class | Before | After |
+| --- | --- | --- |
+| `_init`, `_initToPool`, `_free` | `tFoo* const` | `tFoo** const` |
+| `_tick`, setters, getters | `tFoo const` | `tFoo* const` |
+| struct tag / typedef | `_tFoo` + `tFoo` alias | `tFoo` only |
+
+Call sites change from `tFoo x; tFoo_init(&x, ...)` to `tFoo* x = NULL; tFoo_init(&x, ...)` —
+the null-initialized handle is now explicit, which is also why every example in section 2 starts
+that way.
+
+### Scope
+
+- **33 files** across `leaf/Inc/` and `leaf/Src/` — every module except the pure-header ones
+  (`leaf-math`, `leaf-tables`, `leaf-mempool`).
+- ~4,400 lines added / ~5,100 removed; the net reduction is the deleted alias typedefs plus a
+  stale `leaf-midi copy.h` that was carrying a divergent duplicate of the MIDI API.
+- Commits: `239db70`, `93d1e9a` (bulk conversion), `d53a4c1` (follow-ups).
+- Cleaned up by Davis Polito in `d2aa5aa` and merged; `master` now carries the new API.
+
+`d53a4c1` also fixed real bugs the conversion surfaced — several dereferences had been written as
+`&*ptr`, a no-op that silently kept the old pointer level and would have handed `_free` and the
+zero-crossing period math the wrong address once the types changed:
+
+```c
+- tTriLFO* c = &*cy;    // still the handle, not the object
++ tTriLFO* c = *cy;
+```
+
+---
+
+## 2. Usage documentation for the public headers
+
+Upstream headers document *signatures* — every function has an `@fn` / `@brief` / `@param` block,
+so the generated Doxygen tells you what arguments exist but never how the object is meant to be
+driven. Nothing showed the init → tick → free lifecycle, the mempool handshake, or which setters
+matter in an audio loop.
+
+I added a prose explanation of the algorithm plus a compiling `@code{.c}` example to each object's
+`@defgroup` block, following the object's actual usage pattern:
+
+```c
+/*!
+ @defgroup tzerocrossingcounter tZeroCrossingCounter
+ @ingroup analysis
+ @brief Count the amount of zero crossings within a window of the input audio data
+
+The zero crossing counter keeps a circular buffer of the most recent samples, up to 'maxWindowSize'.
+On each tick it:
+1. Inserts the new sample into the buffer, overwriting the current oldest sample
+2. Checks if the new sample and what it replaced have zero crossing
+3. Updates internal counter
+4. Returns the count normalized by window size, from [0.0 to 1.0]
+Higher counts indicate rapid sign changes
+Lower counts indicate steady signals
+
+Example
+@code{.c}
+//initialize
+tZeroCrossingCounter* zc = NULL;
+tZeroCrossingCounter_init(&zc,
+                          1024,     //max window size
+                          leaf);
+
+//audio loop
+float r = tZeroCrossingCounter_tick(zc, inputSample);   //fraction of zero crossings in last window
+
+//changing window size
+tZeroCrossingCounter_setWindowSize(zc, 512);
+
+//when done
+tZeroCrossingCounter_free(&zc);
+@endcode
+*/
+```
+
+Each example shows the null handle, the constructor with every argument annotated inline, the
+per-sample or per-block call in context, the setters worth reaching for, and the teardown.
+Where an object has a block-processing path (`tEnvPD`) or multiple tick variants, both are shown.
+
+### Coverage — 66 objects across 12 modules
+
+| Module | Objects documented |
+| --- | --- |
+| `leaf-filters.h` (16) | tAllpassSO, tThiranAllpassSOCascade, tOnePole, tTwoPole, tOneZero, tTwoZero, tPoleZero, tBiQuad, tSVF, tEfficientSVF, tHighpass, tButterworth, tFIR, tMedianFilter, tVZFilter, tDiodeFilter |
+| `leaf-effects.h` (9) | tTalkbox, tTalkboxLfloat, tVocoder, tRosenbergGlottalPulse, tSOLAD, tPitchShift, tSimpleRetune, tRetune, tFormantShifter |
+| `leaf-analysis.h` (8) | tEnvelopeFollower, tZeroCrossingCounter, tPowerFollower, tEnvPD, tAttackDetection, tSNAC, tPeriodDetection, tDualPitchDetector |
+| `leaf-oscillators.h` (8) | tCycle, tSawtooth, tPBTriangle, tPBPulse, tPBSaw, tPhasor, tNoise, tNeuron |
+| `leaf-delay.h` (6) | tDelay, tLinearDelay, tHermiteDelay, tAllpassDelay, tTapeDelay, tRingBuffer |
+| `leaf-instruments.h` (6) | t808Cowbell, t808Hihat, t808Snare, t808SnareSmall, t808Kick, t808KickSmall |
+| `leaf-distortion.h` (5) | tSampleReducer, tOversampler, tWavefolder, tLockhartWavefolder, tCrusher |
+| `leaf-dynamics.h` (3) | tCompressor, tFeedbackLeveler, tThreshold |
+| `leaf-midi.h` (2) | tStack, tSimplePoly |
+| `leaf-envelopes.h` (1) | tEnvelope |
+| `leaf-electrical.h` (1) | tWDF |
+| `leaf-physical.h` (1) | tPluck *(uncommitted in the working tree)* |
+
+Roughly 2,000 lines of documentation across 11 headers, one commit per module
+(`9706116` … `f726a36`, July 15–29 2025).
+
+**Not yet covered:** `leaf-reverb.h`, `leaf-sampling.h`, `leaf-vocal.h`, and the rest of
+`leaf-physical.h` (the string/brass/bowed models) — plus `leaf-math`, `leaf-tables`, `leaf-global`
+and `leaf-mempool`, which are utility headers rather than object modules.
+
+---
+
+## Branch map
+
+| Branch | Contents |
+| --- | --- |
+| `master` | Upstream + the merged API modernization. Head `d53a4c1`. |
+| `seanRenaming` | `master` + the 10 documentation commits. Head `f726a36`. **This is the branch with the full body of work.** |
+| `Sean_merge` | Not mine — upstream fixes (warning cleanup, mempool free guards, `allNotesOff` on tSimplePoly) merged forward by Davis Polito. |
+
+Documentation work is unmerged, so `seanRenaming` is what to read or open a PR from.
+
+## Building and regenerating docs
+
+```bash
+cmake -B build && cmake --build build
+```
+
+```bash
+doxygen Doxyfile
+```
+
+Doxygen output lands in `docs/`; `EXAMPLE_PATH` is `Examples/`, and the inline `@code{.c}` blocks
+above render into each object's group page.
+
+## Related
+
+[anytroops/LEAF-Example1](https://github.com/anytroops/LEAF-Example1) — a JUCE/Pamplejuce plugin
+built against this fork, used to verify the converted API works from a real host. `c8ec183` gets a
+LEAF oscillator producing sound through the plugin processor.
