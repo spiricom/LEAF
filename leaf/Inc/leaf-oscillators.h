@@ -729,6 +729,8 @@ typedef struct tPBSawSquare
         float currX;
         float scaler;
 
+        float invSr;
+
         float   (*rand)(void);
         float   (*interper)(float, float, float, float, float);
     };
@@ -742,8 +744,9 @@ typedef struct tPBSawSquare
     float  tPerlinNoise_tick        (tPerlinNoise* const perlinNoise);
 
     // Setter functions for `tPerlinNoise`
-    void    tPerlinNoise_setRate    (LEAF* const leaf, tPerlinNoise* const perlinNoise, float rate);
+    void    tPerlinNoise_setRate    (tPerlinNoise* const perlinNoise, float rate);
     void    tPerlinNoise_setEnergy  (tPerlinNoise* const perlinNoise, float energy);
+    void    tPerlinNoise_setSampleRate (tPerlinNoise* const perlinNoise, float sr);
 
 //==============================================================================
     
