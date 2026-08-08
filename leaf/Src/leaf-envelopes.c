@@ -1402,3 +1402,60 @@ float tSlide_tick (tSlide* const s, float in)
     return s->currentOut;
 }
 
+//tSlopeRamp uses slope as its primary argument instead of time. Useful for consistent parameter smoothing
+////
+
+void tSlopeRamp_create(tMempool** const mp, tSlopeRamp** const sr)
+{
+    ALLOC_FROM_POOL(tSlopeRamp, sr, mp);
+}
+
+// slope is (quantity) per ms
+void tSlopeRamp_init(LEAF* const leaf, tSlopeRamp* const sr, float slope, float val)
+{
+    sr->curr, sr->dest = val;
+    sr->slope = slope * 1000.f / leaf->sampleRate;
+}
+
+void tSlopeRamp_free (tSlopeRamp** const sr)
+{
+    tSlopeRamp *s = *sr;
+    mpool_free((char *) s, s->mempool);
+}
+
+void tSlopeRamp_setVal (tSlopeRamp* const sr, float val)
+{
+    sr->curr = val;
+}
+
+void tSlopeRamp_setDest (tSlopeRamp* const sr, float dest)
+{
+    sr->dest = dest;
+}
+
+void tSlopeRamp_setSlope (tSlopeRamp* const sr, float slope)
+{
+    sr->slope = slope * 1000.f / sr->mempool->leaf->sampleRate;
+}
+
+float tSlopeRamp_tick (tSlopeRamp* const sr)
+{
+    float const temp = sr->dest - sr->curr;
+    if (temp == 0)
+    {
+        return sr->curr;
+    }
+    if (fabsf(temp) < sr->slope)
+    {
+        sr->curr = sr->dest;
+    } else if (temp > 0)
+    {
+        sr->curr += sr->slope;
+    } else
+    {
+        sr->curr -= sr->slope;
+    }
+
+    return sr->curr;
+}
+

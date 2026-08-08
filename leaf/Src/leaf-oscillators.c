@@ -977,6 +977,7 @@ void tPerlinNoise_init(LEAF* const leaf, tPerlinNoise* const n, float rate, floa
 {
     n->rateMs = rate;
     n->energy = energy;
+    n->invSr = leaf->invSampleRate;
     n->buffSize = rate/1000*leaf->sampleRate;
     n->interper = LEAF_interpolate_hermite;
     n->rand = leaf->random;
@@ -1014,10 +1015,10 @@ float   tPerlinNoise_tick(tPerlinNoise* const n)
 
 }
 
-void    tPerlinNoise_setRate(LEAF* const leaf, tPerlinNoise* const n, float rate)
+void    tPerlinNoise_setRate(tPerlinNoise* const n, float rate)
 {
     n->rateMs = rate;
-    n->buffSize = rate/1000.f*leaf->sampleRate;
+    n->buffSize = rate*n->invSr;
     //n->m1 = 3.f*(-0.5f*(n->x2) - 2.f*(n->m1)+1.5f*(n->x1)-1.5f*(n->x2)+0.5f*(-2.f*(n->m2) - (n->x1)))*(n->counter/(float)n->buffSize)*(n->counter/(float)n->buffSize) + 2.f*((n->x2) - 2.f*(n->m1)-2.5f*(n->x1)+2.f*(n->x2)-0.5f*(-2.f*(n->m2) - (n->x1)))*(n->counter/(float)n->buffSize) + -0.5f*((n->x2) - 2.f*(n->m1)) + 0.5f*(n->x2);
     n->m1 = 0.f;
     n->x1 = n->currX;
@@ -1026,7 +1027,7 @@ void    tPerlinNoise_setRate(LEAF* const leaf, tPerlinNoise* const n, float rate
     n->counter = 0;
 }
 
-void    tPerlinNoise_setEnergy(LEAF* const leaf, tPerlinNoise* const n, float energy)
+void    tPerlinNoise_setEnergy(tPerlinNoise* const n, float energy)
 {
     n->energy = energy;
     n->m1 = 0.f;
@@ -1034,6 +1035,12 @@ void    tPerlinNoise_setEnergy(LEAF* const leaf, tPerlinNoise* const n, float en
     n->x2 = ((n->rand() * 2.0f) - 1.0f) * n->energy;
     n->m2 = ((n->rand() * 2.0f) - 1.0f) * n->energy*2.f;
     n->counter = 0;
+}
+
+void    tPerlinNoise_setSampleRate(tPerlinNoise* const n, float sr)
+{
+    n->invSr = 1.f/sr;
+    tPerlinNoise_setRate(n, n->rateMs);
 }
 
 //=================================================================================
