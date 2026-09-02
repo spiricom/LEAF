@@ -75,7 +75,7 @@
 #define float poly_float
 
 #else
-#define float float
+//#define float float
 #endif
 
 //==============================================================================
