@@ -262,7 +262,7 @@ void tADSR_init(LEAF* const leaf, tADSR* const adsr, float attack, float decay, 
 
     adsr->baseLeakFactor = 1.0f;
     adsr->leakFactor = 1.0f;
-    adsr->invSampleRate = adsr->mempool->leaf->invSampleRate;
+    adsr->invSampleRate = leaf->invSampleRate;
 
 }
 
@@ -329,6 +329,56 @@ void tADSR_setRelease (tADSR* const adsr, float release)
 
     adsr->releaseInc = adsr->inc_buff[releaseIndex] * (44100.f * adsr->invSampleRate);
 }
+
+// #ifdef ITCMRAM
+// void __attribute__ ((section(".itcmram"))) __attribute__ ((aligned (32))) tADSR_set(tADSR* const adsr, float attack, float decay, float sustain,
+//                   float release, float *expBuffer, int bufferSize, LEAF *const leaf)
+// #else
+// void tADSR_set(tADSR* const adsr, float attack, float decay, float sustain,
+//                   float release, float *expBuffer, int bufferSize, LEAF *const leaf)
+// #endif
+// {
+//     adsr->exp_buff = expBuffer;
+//     adsr->buff_size = bufferSize;
+//
+//     adsr->invSampleRate = leaf->invSampleRate;
+//     //adsr->bufferSizeDividedBySampleRateInMs = (float)adsr->buff_size / (adsr->sampleRate * 0.001f);
+//
+//     if (attack < 0.0f)
+//         attack = 0.0f;
+//
+//     if (decay < 0.0f)
+//         decay = 0.0f;
+//
+//     if (sustain > 1.0f)
+//         sustain = 1.0f;
+//     if (sustain < 0.0f)
+//         sustain = 0.0f;
+//
+//     if (release < 0.0f)
+//         release = 0.0f;
+//
+//     adsr->next = 0.0f;
+//
+//     //adsr->whichStage = env_idle;
+//
+//     adsr->sustain = sustain;
+//
+//     adsr->attack = attack;
+//     adsr->decay = decay;
+//     adsr->release = release;
+//     //adsr->attackInc = adsr->bufferSizeDividedBySampleRateInMs / attack;
+//     tADSR_setAttack(adsr, adsr->attack);
+//     //adsr->decayInc = adsr->bufferSizeDividedBySampleRateInMs / decay;
+//     tADSR_setDecay(adsr, adsr->decay);
+//     //adsr->releaseInc = adsr->bufferSizeDividedBySampleRateInMs / release;
+//     tADSR_setRelease(adsr, adsr->release);
+//     //adsr->rampInc = adsr->bufferSizeDividedBySampleRateInMs / 8.0f;
+//
+//     adsr->baseLeakFactor = 1.0f;
+//     adsr->leakFactor = 1.0f;
+//     adsr->invSampleRate = leaf->invSampleRate;
+// }
 
 // 0.999999 is slow leak, 0.9 is fast leak
 void tADSR_setLeakFactor (tADSR* const adsr, float leakFactor)

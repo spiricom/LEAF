@@ -276,6 +276,7 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
     void    tADSR_create               (tMempool** const mempool, tADSR** const);
     void    tADSR_init                 (LEAF* const leaf, tADSR* const adsrenv, float attack, float decay, float sustain, float release);
     void    tADSR_free          (tADSR** const);
+    //void    tADSR_set(tADSR* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf);
 
     float   tADSR_tick          (tADSR* const);
     void    tADSR_setAttack     (tADSR* const, float attack);
