@@ -276,7 +276,6 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
     void    tADSR_create               (tMempool** const mempool, tADSR** const);
     void    tADSR_init                 (LEAF* const leaf, tADSR* const adsrenv, float attack, float decay, float sustain, float release);
     void    tADSR_free          (tADSR** const);
-    //void    tADSR_set(tADSR* const, float attack, float decay, float sustain, float release, float* expBuffer, int bufferSize, LEAF* const leaf);
 
     float   tADSR_tick          (tADSR* const);
     void    tADSR_setAttack     (tADSR* const, float attack);
@@ -287,6 +286,87 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
     void    tADSR_on            (tADSR* const, float velocity);
     void    tADSR_off           (tADSR* const);
     void    tADSR_setSampleRate (tADSR* const, float sr);
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+
+    /*!
+     @defgroup tad tAD
+     @ingroup envelopes
+     @brief
+     @{
+
+     @fn void    tAD_init(tAD* const adenv, float attack, float decay, LEAF* const leaf)
+     @brief Initialize a tAD to the default mempool of a LEAF instance.
+     @param ad A pointer to the tAD to initialize.
+     @param leaf A pointer to the leaf instance.
+
+     @fn void    tAD_init                 (tMempool** const mp)
+     @brief Initialize a tAD to a specified mempool.
+     @param ad A pointer to the tAD to initialize.
+     @param mempool A pointer to the tMempool to use.
+
+     @fn void    tAD_free(tAD** const)
+     @brief Free a tAD from its mempool.
+     @param ad A pointer to the tAD to free.
+
+     @fn float   tAD_tick          (tAD* const)
+     @brief
+     @param ad A pointer to the relevant tAD.
+
+     @fn void    tAD_setAttack     (tAD* const, float attack, float decay)
+     @brief
+     @param ad A pointer to the relevant tAD.
+
+     @fn void    tAD_setDecay      (tAD* const, float decay)
+     @brief
+     @param ad A pointer to the relevant tAD.
+
+     @fn void    tAD_on            (tAD* const, float velocity)
+     @brief
+     @param ad A pointer to the relevant tAD.
+
+     @fn void    tAD_off           (tAD* const)
+     @brief
+     @param ad A pointer to the relevant tAD.
+
+     @} */
+
+    /* AD */
+    typedef struct tAD
+    {
+
+        tMempool* mempool;
+
+        const float *exp_buff;
+        const float *inc_buff;
+        uint32_t buff_size;
+
+        float next;
+
+        float attack, decay;
+
+        float attackInc, decayInc, rampInc;
+
+        int inAttack, inDecay, inRamp;
+
+        float gain, rampPeak;
+
+        float attackPhase, decayPhase, rampPhase;
+
+        float invSampleRate;
+    } tAD;
+
+    void    tAD_create               (tMempool** const mempool, tAD** const);
+    void    tAD_init                 (LEAF* const leaf, tAD* const adenv, float attack, float decay);
+    void    tAD_free            (tAD** const);
+
+    float   tAD_tick          (tAD* const);
+    void    tAD_setAttack     (tAD* const, float attack);
+    void    tAD_setDecay      (tAD* const, float decay);
+
+    void    tAD_on            (tAD* const, float velocity);
+    void    tAD_off           (tAD* const);
+    void    tAD_setSampleRate (tAD* const, float sr);
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
