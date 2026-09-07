@@ -556,16 +556,6 @@ void tAD_on (tAD* const ad, float velocity)
     ad->gain = velocity;
 }
 
-void tAD_off (tAD* const ad)
-{
-    if (ad->inDecay) return;
-
-    ad->inAttack = 0;
-    ad->inDecay = 0;
-
-    //ad->decayPeak = ad->next;
-}
-
 float tAD_tick(tAD* const ad)
 {
     if (ad->inRamp) {
@@ -605,11 +595,12 @@ float tAD_tick(tAD* const ad)
             ad->inDecay = 0;
             ad->next = 0.f;
         }
-        // else {
-        //     adsr->next = (adsr->gain *
-        //                   (adsr->sustain + ((adsr->exp_buff[(uint32_t) adsr->decayPhase]) * (1.0f - adsr->sustain)))) *
-        //                  adsr->leakFactor; // do interpolation !
-        // }
+        else {
+            // ad->next = (ad->gain *
+            //               (ad->sustain + ((ad->exp_buff[(uint32_t) ad->decayPhase]) * (1.0f - ad->sustain)))) *
+            //              ad->leakFactor; // do interpolation !
+            ad->next = (ad->gain * (ad->exp_buff[(uint32_t) ad->decayPhase])); // do interpolation !
+        }
 
         // Increment ADSR decay.
         ad->decayPhase += ad->decayInc;

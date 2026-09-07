@@ -365,7 +365,6 @@ void    tExpSmooth_setDest      (tExpSmooth* const, float dest);
     void    tAD_setDecay      (tAD* const, float decay);
 
     void    tAD_on            (tAD* const, float velocity);
-    void    tAD_off           (tAD* const);
     void    tAD_setSampleRate (tAD* const, float sr);
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
