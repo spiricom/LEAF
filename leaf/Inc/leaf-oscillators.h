@@ -729,6 +729,7 @@ typedef struct tPBSawSquare
         float currX;
         float scaler;
 
+        float sr;
         float invSr;
 
         float   (*rand)(void);
