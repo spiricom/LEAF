@@ -330,7 +330,6 @@ void tADSR_setRelease (tADSR* const adsr, float release)
     adsr->releaseInc = adsr->inc_buff[releaseIndex] * (44100.f * adsr->invSampleRate);
 }
 
-
 // 0.999999 is slow leak, 0.9 is fast leak
 void tADSR_setLeakFactor (tADSR* const adsr, float leakFactor)
 {
