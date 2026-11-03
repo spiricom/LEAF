@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/josnyder/dev/ElectroSynth/third_party/leaf_modules/LEAF/_deps/catch2-subbuild/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

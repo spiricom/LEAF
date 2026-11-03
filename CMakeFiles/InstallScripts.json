@@ -1,0 +1,10 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/josnyder/dev/ElectroSynth/third_party/leaf_modules/LEAF/cmake_install.cmake",
+		"/Users/josnyder/dev/ElectroSynth/third_party/leaf_modules/LEAF/test/cmake_install.cmake",
+		"/Users/josnyder/dev/ElectroSynth/third_party/leaf_modules/LEAF/_deps/catch2-build/cmake_install.cmake",
+		"/Users/josnyder/dev/ElectroSynth/third_party/leaf_modules/LEAF/_deps/catch2-build/src/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

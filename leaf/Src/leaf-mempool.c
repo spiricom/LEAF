@@ -54,7 +54,7 @@
 #if LEAF_DEBUG
 #include "../../TestPlugin/JuceLibraryCode/JuceHeader.h"
 #endif
-
+#define LEAF_USE_DYNAMIC_ALLOCATION 1
 /**
  * private function
  */
@@ -98,9 +98,8 @@ char* mpool_alloc(size_t asize, tMempool* pool)
 #if LEAF_DEBUG
     DBG("alloc " + String(asize));
 #endif
-// #if LEAF_USE_DYNAMIC_ALLOCATION
-    if(pool == NULL)
-    {
+ #if LEAF_USE_DYNAMIC_ALLOCATION
+
         char* temp = (char*) malloc(asize);
         if (temp == NULL)
         {
@@ -113,8 +112,8 @@ char* mpool_alloc(size_t asize, tMempool* pool)
             memset(temp, 0, asize);
         }
         return temp;
-    }
-// #else
+
+ #else
     // If the head is NULL, the mempool is full
     if (pool->head == NULL)
     {
@@ -204,7 +203,7 @@ char* mpool_alloc(size_t asize, tMempool* pool)
 
     // Return the pool of the allocated node;
     return node_to_alloc->pool;
-// #endif
+ #endif
 }
 
 
@@ -217,8 +216,9 @@ char* mpool_calloc(size_t asize, tMempool* pool)
 #if LEAF_DEBUG
     DBG("calloc " + String(asize));
 #endif
-    if(pool == NULL)
-    {
+
+    #if LEAF_USE_DYNAMIC_ALLOCATION
+
         char* ret = (char*) malloc(asize);
         if (ret == NULL)
         {
@@ -228,8 +228,8 @@ char* mpool_calloc(size_t asize, tMempool* pool)
         }
         memset(ret, 0, asize);
         return ret;
-    }
-// #else
+
+ #else
     // If the head is NULL, the mempool is full
     if (pool->head == NULL)
     {
@@ -305,7 +305,7 @@ char* mpool_calloc(size_t asize, tMempool* pool)
     for (int i = 0; i < node_to_alloc->size; i++) node_to_alloc->pool[i] = 0;
     // Return the pool of the allocated node;
     return node_to_alloc->pool;
-// #endif
+ #endif
 }
 
 char* leaf_alloc(LEAF* const leaf, size_t size)
