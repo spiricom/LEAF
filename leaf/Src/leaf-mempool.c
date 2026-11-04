@@ -54,7 +54,6 @@
 #if LEAF_DEBUG
 #include "../../TestPlugin/JuceLibraryCode/JuceHeader.h"
 #endif
-#define LEAF_USE_DYNAMIC_ALLOCATION 1
 /**
  * private function
  */
