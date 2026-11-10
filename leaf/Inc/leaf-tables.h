@@ -128,6 +128,11 @@ void    tLookupTable_init                 (LEAF* const leaf, tLookupTable* const
     extern const float_value_delta step_dd_table[];
     extern const  float             slope_dd_table[];
     
+
+    float LEAF_interpolateTableLookupFunction (float input, tLookupTable* theTable);
+
+
+
     /*! @} */
     
     //==============================================================================

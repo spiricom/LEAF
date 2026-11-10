@@ -3247,7 +3247,7 @@ float tDiodeFilter_tickEfficient (tDiodeFilter* const f, float in)
 
 void tDiodeFilter_setFreq (tDiodeFilter* const f, float cutoff)
 {
-    f->cutoff = LEAF_clip(40.0f, cutoff, 18000.0f);
+    f->cutoff = LEAF_clip(40.0f, cutoff, 11000.0f);
     f->f = tanf(TWO_PI * f->cutoff * f->invSampleRate);
 }
 

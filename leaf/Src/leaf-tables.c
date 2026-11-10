@@ -28,7 +28,15 @@ void tLookupTable_init(LEAF* const leaf, tLookupTable* const t, float start, flo
 
 }
 
-
+float LEAF_interpolateTableLookupFunction (float input, tLookupTable* theTable)
+{
+	float tableSizeMinusOne = theTable->tableSize - 1.0f;
+	input *= tableSizeMinusOne;
+	int inputInt = (int)input;
+	float inputFloat = input - (float)inputInt;
+	int nextPos = LEAF_clip(0.0f, inputInt + 1.0f, tableSizeMinusOne);
+	return (theTable->table[inputInt] * (1.0f - inputFloat)) + (theTable->table[nextPos] * inputFloat);
+}
 
 #if LEAF_INCLUDE_OVERSAMPLER_TABLES
 const float __leaf_table_fir2XLow[32] = { 0.001067048115027622,    -0.004557728776555209,    -0.016711590887520535,    -0.021065500881657994,    -0.003828695019946828,    0.01865935152799254,    0.012036365576553658,    -0.02064070362810112,    -0.02682399333687091,    0.017862623081258543,    0.0492716766870816,    -0.004310232755957251,    -0.08571879958189704,    -0.03828300159135686,    0.18420501161808442,    0.4054061613074031,    0.4054061613074031,    0.18420501161808442,    -0.03828300159135686,    -0.08571879958189704,    -0.004310232755957251,    0.0492716766870816,    0.017862623081258543,    -0.02682399333687091,    -0.02064070362810112,    0.012036365576553658,    0.01865935152799254,    -0.003828695019946828,    -0.021065500881657994,    -0.016711590887520535,    -0.004557728776555209,    0.001067048115027622
