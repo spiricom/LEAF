@@ -46,8 +46,16 @@ extern "C" {
         unsigned int freeCount; //!< A count of LEAF memory frees.
         unsigned int uuid;
         tLookupTable* lfoRateTable;
+        tLookupTable* mtofTable;
+        tLookupTable* ftomTable;
         tLookupTable* envTimeTable;
         tLookupTable* resTable;
+        tLookupTable* glideTimeTable;
+        tLookupTable* gainAmpTable;
+        tLookupTable* decayExpBuffer;
+        tLookupTable* filtFreqTable;
+
+
 
         ///@}
     };

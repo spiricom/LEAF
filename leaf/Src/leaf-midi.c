@@ -33,6 +33,7 @@ struct tSimplePoly
 
     int notes[128][2];
 };
+
 void tStack_create(tMempool** const mp, tStack** const stack)
 {
     ALLOC_FROM_POOL(tStack, stack, mp);
