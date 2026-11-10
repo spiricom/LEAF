@@ -3186,6 +3186,11 @@ float tDiodeFilter_tick (tDiodeFilter* const f, float in)
     return tanhf(y3 * f->r);
 }
 
+#ifdef TEST_NANS
+volatile uint8_t nanTest = 0;
+volatile uint8_t infTest = 0;
+volatile uint8_t stupid = 0;
+#endif
 float tDiodeFilter_tickEfficient (tDiodeFilter* const f, float in)
 {
     // the input x[n+1] is given by 'in', and x[n] by zi
@@ -3194,11 +3199,50 @@ float tDiodeFilter_tickEfficient (tDiodeFilter* const f, float in)
 
     // evaluate the non-linear factors
     float t0 = f->f * tanhXdX((ih - f->r * f->s3) * f->g0inv) * f->g0inv;
+    #ifdef TEST_NANS
+    nanTest = isnan(t0);
+    infTest = isinf(t0);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     float t1 = f->f * tanhXdX((f->s1 - f->s0) * f->g1inv) * f->g1inv;
+    #ifdef TEST_NANS
+    nanTest = isnan(t1);
+    infTest = isinf(t1);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     float t2 = f->f * tanhXdX((f->s2 - f->s1) * f->g1inv) * f->g1inv;
+    #ifdef TEST_NANS
+    nanTest = isnan(t2);
+    infTest = isinf(t2);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     float t3 = f->f * tanhXdX((f->s3 - f->s2) * f->g1inv) * f->g1inv;
+    #ifdef TEST_NANS
+    nanTest = isnan(t3);
+    infTest = isinf(t3);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     float t4 = f->f * tanhXdX((f->s3) * f->g2inv) * f->g2inv;
-
+    #ifdef TEST_NANS
+    nanTest = isnan(t4);
+    infTest = isinf(t4);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     // This formula gives the result for y3 thanks to MATLAB
     float y3 = (f->s2 + f->s3 + t2 * (f->s1 + f->s2 + f->s3 + t1 * (f->s0 + f->s1 + f->s2 + f->s3 + t0 * in)) +
                  t1 * (2.0f * f->s2 + 2.0f * f->s3)) * t3 + f->s3 + 2.0f * f->s3 * t1 +
@@ -3207,21 +3251,36 @@ float tDiodeFilter_tickEfficient (tDiodeFilter* const f, float in)
     float tempy3denom =
             (t4 + t1 * (2.0f * t4 + 4.0f) + t2 * (t4 + t1 * (t4 + f->r * t0 + 4.0f) + 3.0f) + 2.0f) * t3 + t4 +
             t1 * (2.0f * t4 + 2.0f) + t2 * (2.0f * t4 + t1 * (3.0f * t4 + 3.0f) + 2.0f) + 1.0f;
-
-    if (tempy3denom < 0.000001f) {
-        tempy3denom = 0.000001f;
+    #ifdef TEST_NANS
+    nanTest = isnan(tempy3denom);
+    infTest = isinf(tempy3denom);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
+    if (tempy3denom < 0.0001f) {
+        tempy3denom = 0.0001f;
     }
 
     y3 = y3 / tempy3denom;
+    #ifdef TEST_NANS
+    nanTest = isnan(y3);
+    infTest = isinf(y3);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
 
-    if (t1 < 0.000001f) {
-        t1 = 0.000001f;
+    #endif
+    if (t1 < 0.001f) {
+        t1 = 0.001f;
     }
-    if (t2 < 0.000001f) {
-        t2 = 0.000001f;
+    if (t2 < 0.001f) {
+        t2 = 0.001f;
     }
-    if (t3 < 0.000001f) {
-        t3 = 0.000001f;
+    if (t3 < 0.001f) {
+        t3 = 0.001f;
     }
 
     // Other outputs
@@ -3229,25 +3288,99 @@ float tDiodeFilter_tickEfficient (tDiodeFilter* const f, float in)
     float y1 = (f->s2 - (1 + t3 + t2) * y2 + t3 * y3) / (-t2);
     float y0 = (f->s1 - (1 + t2 + t1) * y1 + t2 * y2) / (-t1);
     float xx = (in - f->r * y3);
-
+#ifdef TEST_NANS
+    nanTest = isnan(y2);
+    infTest = isinf(y2);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    nanTest = isnan(y1);
+    infTest = isinf(y1);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    nanTest = isnan(y0);
+    infTest = isinf(y0);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    nanTest = isnan(xx);
+    infTest = isinf(xx);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     // update state
     f->s0 += 2.0f * (t0 * xx + t1 * (y1 - y0));
     f->s1 += 2.0f * (t2 * (y2 - y1) - t1 * (y1 - y0));
     f->s2 += 2.0f * (t3 * (y3 - y2) - t2 * (y2 - y1));
     f->s3 += 2.0f * (-t4 * (y3) - t3 * (y3 - y2));
-
+    #ifdef TEST_NANS
+    nanTest = isnan(f->s0);
+    infTest = isinf(f->s0);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     f->s0 = 1000.0f * fast_tanh(f->s0 * 0.001f);
+    #ifdef TEST_NANS
+    nanTest = isnan(f->s0);
+    infTest = isinf(f->s0);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     f->s1 = 1000.0f * fast_tanh(f->s1 * 0.001f);
+    #ifdef TEST_NANS
+    nanTest = isnan(f->s1);
+    infTest = isinf(f->s1);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     f->s2 = 1000.0f * fast_tanh(f->s2 * 0.001f);
+    #ifdef TEST_NANS
+    nanTest = isnan(f->s2);
+    infTest = isinf(f->s2);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     f->s3 = 1000.0f * fast_tanh(f->s3 * 0.001f);
-
+    #ifdef TEST_NANS
+    nanTest = isnan(f->s3);
+    infTest = isinf(f->s3);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
     f->zi = in;
-    return fast_tanh5(y3 * f->r);
+    float realOut = fast_tanh5(y3 * f->r);
+    #ifdef TEST_NANS
+    nanTest = isnan(realOut);
+    infTest = isinf(realOut);
+    if (nanTest | infTest)
+    {
+        stupid = 1;
+    }
+    #endif
+    return realOut;
 }
 
 void tDiodeFilter_setFreq (tDiodeFilter* const f, float cutoff)
 {
-    f->cutoff = LEAF_clip(40.0f, cutoff, 11000.0f);
+
+    f->cutoff = LEAF_clip(40.0f, cutoff, 10000.0f); //diode filter gives nans with freq above 10000.0f (at 44100 SR)
+
     f->f = tanf(TWO_PI * f->cutoff * f->invSampleRate);
 }
 
