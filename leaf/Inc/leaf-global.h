@@ -54,6 +54,7 @@ extern "C" {
         tLookupTable* gainAmpTable;
         tLookupTable* decayExpBuffer;
         tLookupTable* filtFreqTable;
+        tLookupTable* delayTimeTable;
 
 
 
