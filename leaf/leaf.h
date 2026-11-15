@@ -149,9 +149,9 @@ extern "C" {
      @param sampleRate The default sample rate for object initialized to this LEAF instance.
      @param memory A pointer to the memory that will make up the default mempool of a LEAF instance.
      @param memorySize The size of the memory that will make up the default mempool of a LEAF instance.
-     @param random A pointer to a random number function. Should return a float >= 0 and < 1.
+
      */
-    void        LEAF_init(LEAF* const leaf, float sampleRate, char* memory, size_t memorySize, float(*random)(void));
+    void        LEAF_init(LEAF* const leaf, float sampleRate, char* memory, size_t memorySize);
     
     //! Set the sample rate of LEAF.
     /*!
@@ -172,6 +172,9 @@ extern "C" {
     void        LEAF_defaultErrorCallback(LEAF* const leaf, LEAFErrorType errorType);
     
     void        LEAF_internalErrorCallback(LEAF* const leaf, LEAFErrorType whichone);
+
+    float LEAF_defaultRandomNumber(void);
+
 
     unsigned int getNextUuid(LEAF*  leaf);
 

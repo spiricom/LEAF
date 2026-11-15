@@ -21,6 +21,7 @@ extern "C" {
 #include "..\leaf-config.h"
 #else
 #include "../leaf-config.h"
+#include "stdint.h"
 #endif
     typedef struct tLookupTable tLookupTable;
 

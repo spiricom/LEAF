@@ -18,7 +18,7 @@
 
 #endif
 
-void LEAF_init(LEAF* const leaf, float sr, char* memory, size_t memorysize, float(*random)(void))
+void LEAF_init(LEAF* const leaf, float sr, char* memory, size_t memorysize)
 {
     leaf->_internal_mempool.leaf = leaf;
     leaf_pool_init(leaf, memory, memorysize);
@@ -29,7 +29,7 @@ void LEAF_init(LEAF* const leaf, float sr, char* memory, size_t memorysize, floa
 
     leaf->twoPiTimesInvSampleRate = leaf->invSampleRate * TWO_PI;
 
-    leaf->random = random;
+    leaf->random = LEAF_defaultRandomNumber;
 
     leaf->clearOnAllocation = 0;
 
@@ -45,6 +45,7 @@ void LEAF_init(LEAF* const leaf, float sr, char* memory, size_t memorysize, floa
     leaf->lfoRateTable = NULL;
     leaf->envTimeTable = NULL;
     leaf->resTable = NULL;
+
 }
 
 void LEAF_setSampleRate(LEAF* const leaf, float sampleRate)
@@ -57,6 +58,12 @@ void LEAF_setSampleRate(LEAF* const leaf, float sampleRate)
 float LEAF_getSampleRate(LEAF* const leaf)
 {
     return leaf->sampleRate;
+}
+
+static uint32_t _leaf_lcg_state = 1664525u;
+float LEAF_defaultRandomNumber(void) {
+    _leaf_lcg_state = _leaf_lcg_state * 1664525u + 1013904223u;
+    return (_leaf_lcg_state >> 8) * 0.00000006f;
 }
 
 void LEAF_defaultErrorCallback(LEAF* const leaf, LEAFErrorType whichone)
