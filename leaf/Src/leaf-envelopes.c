@@ -516,7 +516,7 @@ void tAD_setAttack (tAD* const ad, float attack)
     } else {
         attackIndex = ((int32_t) (8192.0f * 8.0f)) - 1;
     }
-
+    attackIndex = LEAF_clip(0, attackIndex, 65535);
     ad->attackInc = ad->inc_buff[attackIndex] * (44100.f * ad->invSampleRate);
 }
 
@@ -533,7 +533,7 @@ void tAD_setDecay (tAD* const ad, float decay)
     } else {
         decayIndex = ((int32_t) (8192.0f * 8.0f)) - 1;
     }
-
+    decayIndex = LEAF_clip(0, decayIndex, 65535);
     ad->decayInc = ad->inc_buff[decayIndex] * (44100.f * ad->invSampleRate);
 }
 
