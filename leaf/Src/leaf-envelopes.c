@@ -285,7 +285,7 @@ void tADSR_setAttack (tADSR* const adsr, float attack)
     } else {
         attackIndex = ((int32_t) (8192.0f * 8.0f)) - 1;
     }
-
+    attackIndex = LEAF_clip(0, attackIndex, 65535);
     adsr->attackInc = adsr->inc_buff[attackIndex] * (44100.f * adsr->invSampleRate);
 }
 
@@ -302,7 +302,7 @@ void tADSR_setDecay (tADSR* const adsr, float decay)
     } else {
         decayIndex = ((int32_t) (8192.0f * 8.0f)) - 1;
     }
-
+    decayIndex = LEAF_clip(0, decayIndex, 65535);
     adsr->decayInc = adsr->inc_buff[decayIndex] * (44100.f * adsr->invSampleRate);
 }
 
@@ -326,7 +326,7 @@ void tADSR_setRelease (tADSR* const adsr, float release)
     } else {
         releaseIndex = ((int32_t) (8192.0f * 8.0f)) - 1;
     }
-
+    releaseIndex = LEAF_clip(0, releaseIndex, 65535);
     adsr->releaseInc = adsr->inc_buff[releaseIndex] * (44100.f * adsr->invSampleRate);
 }
 
