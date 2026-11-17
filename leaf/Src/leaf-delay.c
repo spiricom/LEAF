@@ -231,7 +231,7 @@ void tLinearDelay_create(tMempool** const mp, tLinearDelay** const dl)
 void tLinearDelay_init(LEAF* const leaf, tLinearDelay* const d, float delay, uint32_t maxDelay)
 {
 
-d->maxDelay = maxDelay;
+    d->maxDelay = maxDelay;
 
     if (delay > maxDelay)   d->delay = maxDelay;
     else if (delay < 0.0f)  d->delay = 0.0f;

@@ -810,6 +810,8 @@ void tSimpleLivingString3_init(LEAF* const leaf, tSimpleLivingString3* const p,
 
     tLinearDelay_create(&p->mempool, &p->delayLineU);
     tLinearDelay_create(&p->mempool, &p->delayLineL);
+    p->delayLineU->mempool = p->mempool;
+    p->delayLineL->mempool = p->mempool;
     p->userDecay = decay;
     tSimpleLivingString3_setDecay(p, decay);
     tSimpleLivingString3_setFreq(p, freq);
